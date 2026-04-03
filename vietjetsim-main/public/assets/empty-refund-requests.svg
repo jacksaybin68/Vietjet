@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400">
+  <defs>
+    <style><![CDATA[
+.float-doc {
+        animation: floatDoc 5s ease-in-out infinite;
+      }
+      .float-coin-1 {
+        animation: floatCoin1 6s ease-in-out infinite;
+        transform-origin: center;
+        transform-box: fill-box;
+      }
+      .float-coin-2 {
+        animation: floatCoin2 7s ease-in-out infinite reverse;
+        transform-origin: center;
+        transform-box: fill-box;
+      }
+      .twinkle {
+        animation: twinkleStar 4s ease-in-out infinite;
+        transform-origin: center;
+        transform-box: fill-box;
+      }
+      .twinkle-delay {
+        animation: twinkleStar 4s ease-in-out infinite 2s;
+        transform-origin: center;
+        transform-box: fill-box;
+      }
+      .pulse-badge {
+        animation: pulseBadge 3s ease-in-out infinite;
+        transform-origin: center;
+        transform-box: fill-box;
+      }
+
+      @keyframes floatDoc {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-12px); }
+      }
+      @keyframes floatCoin1 {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-10px) rotate(12deg); }
+      }
+      @keyframes floatCoin2 {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-8px) rotate(-15deg); }
+      }
+      @keyframes twinkleStar {
+        0%, 100% { transform: scale(0.8); opacity: 0.4; }
+        50% { transform: scale(1.1); opacity: 1; }
+      }
+      @keyframes pulseBadge {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+      }
+]]></style>
+
+    <!-- Shadows for depth -->
+    <filter id="doc-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#1A2948" flood-opacity="0.08" />
+    </filter>
+    <filter id="badge-shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#16a34a" flood-opacity="0.25" />
+    </filter>
+    
+    <!-- Gradients for subtle premium feel -->
+    <linearGradient id="coin-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD659" />
+      <stop offset="100%" stop-color="#FFC72C" />
+    </linearGradient>
+  </defs>
+
+  <!-- Base Background -->
+  <rect width="100%" height="100%" fill="#FFFFFF" />
+
+  <!-- Dashed Empty Inbox Container -->
+  <rect x="40" y="40" width="420" height="320" rx="28" fill="none" stroke="#E5E7EB" stroke-width="3" stroke-dasharray="12 12" stroke-linecap="round" />
+
+  <!-- Soft Center Circle -->
+  <circle cx="250" cy="200" r="130" fill="#F9FAFB" />
+
+  <!-- Atmospheric Dots -->
+  <g fill="#E5E7EB">
+    <circle cx="100" cy="100" r="3" />
+    <circle cx="400" cy="120" r="4" />
+    <circle cx="120" cy="300" r="2.5" />
+    <circle cx="380" cy="280" r="3" />
+    <circle cx="250" cy="70" r="2" />
+  </g>
+
+  <!-- Background Floating Elements -->
+  <g class="float-coin-2">
+    <!-- Banknote Top Right -->
+    <g transform="translate(365, 105) rotate(18)">
+      <rect x="-26" y="-16" width="52" height="32" rx="6" fill="url(#coin-grad)" />
+      <circle cx="0" cy="0" r="8" fill="#FFFFFF" opacity="0.4" />
+      <line x1="-16" y1="0" x2="-12" y2="0" stroke="#FFFFFF" stroke-width="2.5" opacity="0.5" stroke-linecap="round"/>
+      <line x1="12" y1="0" x2="16" y2="0" stroke="#FFFFFF" stroke-width="2.5" opacity="0.5" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <g class="float-coin-1">
+    <!-- Large Coin Bottom Left -->
+    <g transform="translate(125, 265)">
+      <circle cx="0" cy="0" r="18" fill="url(#coin-grad)" />
+      <circle cx="0" cy="0" r="11" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.5" />
+    </g>
+  </g>
+
+  <g class="float-coin-2">
+    <!-- Small Coin Top Left -->
+    <g transform="translate(155, 115)">
+      <circle cx="0" cy="0" r="10" fill="url(#coin-grad)" />
+      <circle cx="0" cy="0" r="5" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.5" />
+    </g>
+  </g>
+
+  <g class="float-coin-1">
+    <!-- Small Coin Bottom Right -->
+    <g transform="translate(375, 245)">
+      <circle cx="0" cy="0" r="12" fill="url(#coin-grad)" />
+      <circle cx="0" cy="0" r="6" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.5" />
+    </g>
+  </g>
+
+  <!-- Red Sparkles / Stars -->
+  <path class="twinkle" d="M 80 80 Q 95 80 95 65 Q 95 80 110 80 Q 95 80 95 95 Q 95 80 80 80" fill="#D0021B" />
+  <path class="twinkle-delay" d="M 400 310 Q 412 310 412 298 Q 412 310 424 310 Q 412 310 412 322 Q 412 310 400 310" fill="#D0021B" />
+  <path class="twinkle" d="M 385 75 Q 392 75 392 68 Q 392 75 399 75 Q 392 75 392 82 Q 392 75 385 75" fill="#D0021B" />
+  <path class="twinkle-delay" d="M 95 285 Q 101 285 101 279 Q 101 285 107 285 Q 101 285 101 291 Q 101 285 95 285" fill="#D0021B" />
+
+  <!-- Primary Subject: Document -->
+  <g class="float-doc">
+    <!-- Document Base -->
+    <rect x="175" y="95" width="150" height="210" rx="16" fill="#FFFFFF" stroke="#1A2948" stroke-width="4" filter="url(#doc-shadow)" />
+
+    <!-- Document Header Line -->
+    <line x1="205" y1="135" x2="295" y2="135" stroke="#1A2948" stroke-width="4" stroke-linecap="round" />
+
+    <!-- Banknote Icon inside Document -->
+    <g transform="translate(250, 185)">
+      <rect x="-36" y="-24" width="72" height="48" rx="8" fill="#F9FAFB" stroke="#1A2948" stroke-width="4" />
+      <circle cx="0" cy="0" r="10" fill="none" stroke="#1A2948" stroke-width="4" />
+      <!-- Banknote Corner Details -->
+      <path d="M -26 -14 L -16 -14" stroke="#1A2948" stroke-width="3" stroke-linecap="round" />
+      <path d="M 16 -14 L 26 -14" stroke="#1A2948" stroke-width="3" stroke-linecap="round" />
+      <path d="M -26 14 L -16 14" stroke="#1A2948" stroke-width="3" stroke-linecap="round" />
+      <path d="M 16 14 L 26 14" stroke="#1A2948" stroke-width="3" stroke-linecap="round" />
+    </g>
+
+    <!-- Document Text Lines (Placeholder for content) -->
+    <line x1="205" y1="245" x2="295" y2="245" stroke="#E5E7EB" stroke-width="4" stroke-linecap="round" />
+    <line x1="205" y1="265" x2="265" y2="265" stroke="#E5E7EB" stroke-width="4" stroke-linecap="round" />
+
+    <!-- Green Checkmark Badge -->
+    <g transform="translate(325, 285)" class="pulse-badge">
+      <circle cx="0" cy="0" r="24" fill="#16a34a" stroke="#FFFFFF" stroke-width="4" filter="url(#badge-shadow)" />
+      <path d="M -10 1 L -3 8 L 11 -6" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+    </g>
+  </g>
+</svg>

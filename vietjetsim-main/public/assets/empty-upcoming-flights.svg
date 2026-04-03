@@ -1,0 +1,198 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="plane-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF1A35" />
+      <stop offset="100%" stop-color="#D0021B" />
+    </linearGradient>
+    
+    <linearGradient id="trail-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E5E7EB" stop-opacity="1" />
+      <stop offset="100%" stop-color="#E5E7EB" stop-opacity="0" />
+    </linearGradient>
+
+    <radialGradient id="fade-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="40%" stop-color="#FFFFFF" stop-opacity="1" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+
+    <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
+      <stop offset="70%" stop-color="#FFFFFF" stop-opacity="0" />
+      <stop offset="100%" stop-color="#1A2948" stop-opacity="0.04" />
+    </radialGradient>
+
+    <!-- Filters -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="15" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    
+    <filter id="shadow-blur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" />
+    </filter>
+
+    <!-- Masks -->
+    <mask id="runway-mask" maskUnits="userSpaceOnUse">
+      <circle cx="400" cy="300" r="230" fill="url(#fade-grad)" />
+    </mask>
+
+    <!-- Patterns -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#E5E7EB" stroke-width="1" opacity="0.4" />
+    </pattern>
+
+    <!-- Reusable Shapes -->
+    <path id="plane-shape" d="M 0 -100 C 15 -100, 20 -80, 20 -50 L 20 0 L 120 50 C 125 52, 125 68, 120 70 L 20 70 L 20 100 L 50 120 C 52 121, 52 124, 50 125 L 10 125 L 0 130 L -10 125 L -50 125 C -52 124, -52 121, -50 120 L -20 100 L -20 70 L -120 70 C -125 68, -125 52, -120 50 L -20 0 L -20 -50 C -20 -80, -15 -100, 0 -100 Z" />
+    
+    <path id="sparkle" d="M 0 -10 C 1 -4, 4 -1, 10 0 C 4 1, 1 4, 0 10 C -1 4, -4 1, -10 0 C -4 -1, -1 -4, 0 -10 Z" fill="#FFC72C" />
+    
+    <g id="cloud" fill="#F3F4F6">
+      <rect x="0" y="20" width="90" height="36" rx="18" />
+      <circle cx="28" cy="20" r="20" />
+      <circle cx="62" cy="24" r="16" />
+    </g>
+  </defs>
+
+  <style><![CDATA[
+@keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-16px); }
+    }
+    @keyframes shadow-pulse {
+      0%, 100% { transform: scale(1); opacity: 0.15; }
+      50% { transform: scale(0.85); opacity: 0.08; }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+    @keyframes cloud-drift-1 {
+      0%, 100% { transform: translate(100px, 140px); }
+      50% { transform: translate(115px, 140px); }
+    }
+    @keyframes cloud-drift-2 {
+      0%, 100% { transform: translate(580px, 400px) scale(0.85); }
+      50% { transform: translate(565px, 400px) scale(0.85); }
+    }
+    @keyframes cloud-drift-3 {
+      0%, 100% { transform: translate(610px, 120px) scale(0.7); }
+      50% { transform: translate(620px, 120px) scale(0.7); }
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; transform: scale(0.7) rotate(0deg); }
+      50% { opacity: 1; transform: scale(1.1) rotate(45deg); }
+    }
+    @keyframes dash-flow {
+      to { stroke-dashoffset: -48; }
+    }
+
+    .airplane-float { animation: float 5s ease-in-out infinite; }
+    .shadow-anim { animation: shadow-pulse 5s ease-in-out infinite; transform-origin: 400px 350px; }
+    .calendar-pulse { animation: pulse 4s ease-in-out infinite; transform-origin: 137px 450px; }
+    
+    .cloud-1 { animation: cloud-drift-1 9s ease-in-out infinite; }
+    .cloud-2 { animation: cloud-drift-2 11s ease-in-out infinite; }
+    .cloud-3 { animation: cloud-drift-3 13s ease-in-out infinite; }
+    
+    .twinkle-1 { animation: twinkle 3s ease-in-out infinite; }
+    .twinkle-2 { animation: twinkle 4s ease-in-out infinite 1s; }
+    .twinkle-3 { animation: twinkle 3.5s ease-in-out infinite 2s; }
+    .twinkle-4 { animation: twinkle 4.5s ease-in-out infinite 0.5s; }
+    
+    .runway-dash { animation: dash-flow 2s linear infinite; }
+]]></style>
+
+  <!-- Base Background -->
+  <rect width="100%" height="100%" fill="#FFFFFF" />
+
+  <!-- Background Circle & Grid -->
+  <circle cx="400" cy="300" r="240" fill="#F9FAFB" />
+  <circle cx="400" cy="300" r="240" fill="url(#grid)" />
+  <circle cx="400" cy="300" r="240" fill="none" stroke="#F3F4F6" stroke-width="2" />
+
+  <!-- Isometric Runway -->
+  <g mask="url(#runway-mask)">
+    <g transform="translate(400, 350) scale(1, 0.577) rotate(45)">
+      <!-- Runway Base -->
+      <rect x="-50" y="-500" width="100" height="1000" fill="#FFFFFF" opacity="0.6" />
+      <!-- Edge Lines -->
+      <line x1="-40" y1="-500" x2="-40" y2="500" stroke="#F3F4F6" stroke-width="2" />
+      <line x1="40" y1="-500" x2="40" y2="500" stroke="#F3F4F6" stroke-width="2" />
+      <!-- Center Dashed Line -->
+      <line x1="0" y1="-500" x2="0" y2="500" stroke="#E5E7EB" stroke-width="6" stroke-dasharray="24 24" class="runway-dash" />
+      <!-- Airplane Trail -->
+      <line x1="0" y1="120" x2="0" y2="400" stroke="url(#trail-grad)" stroke-width="6" stroke-dasharray="12 12" stroke-linecap="round" />
+    </g>
+  </g>
+
+  <!-- Clouds -->
+  <g class="cloud-1"><use href="#cloud" /></g>
+  <g class="cloud-2"><use href="#cloud" /></g>
+  <g class="cloud-3"><use href="#cloud" /></g>
+
+  <!-- Sparkles -->
+  <g class="twinkle-1" style="transform-origin: 220px 180px;"><use href="#sparkle" x="220" y="180" transform="scale(0.9)" /></g>
+  <g class="twinkle-2" style="transform-origin: 620px 260px;"><use href="#sparkle" x="620" y="260" transform="scale(1.2)" /></g>
+  <g class="twinkle-3" style="transform-origin: 320px 480px;"><use href="#sparkle" x="320" y="480" transform="scale(0.8)" /></g>
+  <g class="twinkle-4" style="transform-origin: 520px 140px;"><use href="#sparkle" x="520" y="140" transform="scale(1)" /></g>
+  
+  <!-- Simple Dots -->
+  <circle cx="260" cy="140" r="3" fill="#FFC72C" opacity="0.6" />
+  <circle cx="650" cy="380" r="4" fill="#FFC72C" opacity="0.5" />
+  <circle cx="180" cy="360" r="2.5" fill="#FFC72C" opacity="0.7" />
+
+  <!-- Isometric Calendar (Bottom Left) -->
+  <g class="calendar-pulse">
+    <!-- Calendar Floor Shadow -->
+    <path d="M 120 500 L 170 475 L 155 467.5 L 105 492.5 Z" fill="#1A2948" opacity="0.08" filter="url(#shadow-blur)" />
+    
+    <!-- Left Face (Thickness) -->
+    <path d="M 120 500 L 105 492.5 L 105 432.5 L 120 440 Z" fill="#E5E7EB" />
+    <path d="M 120 460 L 105 452.5 L 105 432.5 L 120 440 Z" fill="#111B30" /> <!-- Header Left -->
+    
+    <!-- Top Face -->
+    <path d="M 120 440 L 105 432.5 L 155 407.5 L 170 415 Z" fill="#F3F4F6" />
+    
+    <!-- Front Face -->
+    <path d="M 120 500 L 170 475 L 170 415 L 120 440 Z" fill="#FFFFFF" />
+    <path d="M 120 460 L 170 435 L 170 415 L 120 440 Z" fill="#1A2948" /> <!-- Header Front -->
+    
+    <!-- Empty Date Indication -->
+    <path d="M 135 482.5 L 155 472.5 L 155 462.5 L 135 472.5 Z" fill="none" stroke="#E5E7EB" stroke-width="2" stroke-dasharray="3 3" />
+    <line x1="140" y1="470" x2="150" y2="465" stroke="#E5E7EB" stroke-width="2" stroke-linecap="round" />
+    
+    <!-- Calendar Rings -->
+    <path d="M 135 435 L 135 420" fill="none" stroke="#1A2948" stroke-width="3.5" stroke-linecap="round" />
+    <path d="M 155 425 L 155 410" fill="none" stroke="#1A2948" stroke-width="3.5" stroke-linecap="round" />
+  </g>
+
+  <!-- Airplane Shadow -->
+  <g class="shadow-anim">
+    <g transform="translate(400, 350) scale(1, 0.577) rotate(45)">
+      <use href="#plane-shape" fill="#1A2948" filter="url(#shadow-blur)" />
+    </g>
+  </g>
+
+  <!-- Floating Airplane -->
+  <g class="airplane-float">
+    <!-- Subtle Glow -->
+    <circle cx="400" cy="280" r="70" fill="#D0021B" opacity="0.15" filter="url(#glow)" />
+    
+    <!-- 3D Extrusion (Dark Red) -->
+    <g transform="translate(400, 286) scale(1, 0.577) rotate(45)">
+      <use href="#plane-shape" fill="#9B0010" />
+    </g>
+    
+    <!-- Main Airplane Surface -->
+    <g transform="translate(400, 280) scale(1, 0.577) rotate(45)">
+      <use href="#plane-shape" fill="url(#plane-grad)" />
+      <!-- Cockpit Window -->
+      <path d="M 0 -85 C 8 -85, 12 -75, 12 -65 L -12 -65 C -12 -75, -8 -85, 0 -85 Z" fill="#FFFFFF" opacity="0.85" />
+      <!-- Subtle Center Highlight -->
+      <path d="M 0 -95 L 0 125" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.2" />
+    </g>
+  </g>
+
+  <!-- Vignette Overlay -->
+  <rect width="100%" height="100%" fill="url(#vignette)" pointer-events="none" />
+</svg>

@@ -1,0 +1,10 @@
+---
+description: Luôn trả lời bằng tiếng Việt
+alwaysApply: true
+---
+
+# Ngôn ngữ trả lời
+
+- **LUÔN LUÔN trả lời bằng tiếng Việt (Tiếng Việt)** cho tất cả các câu hỏi và hướng dẫn của người dùng.
+- Không bao giờ trả lời bằng tiếng Anh hoặc bất kỳ ngôn ngữ nào khác khi người dùng yêu cầu bằng tiếng Việt.
+- Sử dụng tiếng Việt cho cả code comments, documentation và giao tiếp.

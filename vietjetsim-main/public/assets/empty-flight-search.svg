@@ -1,0 +1,103 @@
+<svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <style><![CDATA[
+@keyframes rock {
+                0%, 100% { transform: rotate(-5deg); }
+                50% { transform: rotate(5deg); }
+            }
+            @keyframes pulse {
+                0%, 100% { opacity: 1; transform: scale(1); }
+                50% { opacity: 0.4; transform: scale(0.92); }
+            }
+            @keyframes float {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-8px); }
+            }
+            .glass-group {
+                transform-origin: 270px 180px;
+                animation: rock 2.5s ease-in-out infinite;
+            }
+            .pulse-mark {
+                animation: pulse 2s ease-in-out infinite;
+                transform-origin: 0px 0px;
+            }
+            .cloud {
+                animation: float 4s ease-in-out infinite;
+            }
+            .cloud-delayed {
+                animation: float 4s ease-in-out infinite;
+                animation-delay: -2s;
+            }
+]]></style>
+
+        <!-- Reusable Cloud Shape -->
+        <path id="cloud-shape" d="M 30,50 A 15,15 0 0,1 30,20 A 20,20 0 0,1 65,10 A 20,20 0 0,1 65,50 Z" 
+              fill="#ffffff" stroke="#D1D5DB" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+
+        <!-- Lens Clip Path for Inner Elements -->
+        <clipPath id="lens-clip">
+            <circle cx="270" cy="180" r="96" />
+        </clipPath>
+    </defs>
+
+    <!-- Background Atmosphere (Clouds & Particles) -->
+    <g class="cloud">
+        <use href="#cloud-shape" transform="translate(70, 60) scale(0.8)" />
+        <use href="#cloud-shape" transform="translate(420, 80) scale(1.1)" />
+        <circle cx="400" cy="140" r="4" fill="#D1D5DB" />
+        <path d="M 480 160 L 480 170 M 475 165 L 485 165" stroke="#D1D5DB" stroke-width="3" stroke-linecap="round" />
+    </g>
+    
+    <g class="cloud-delayed">
+        <use href="#cloud-shape" transform="translate(110, 250) scale(0.6)" />
+        <use href="#cloud-shape" transform="translate(450, 240) scale(0.7)" />
+        <circle cx="140" cy="180" r="5" fill="#D1D5DB" />
+        <path d="M 100 300 L 100 310 M 95 305 L 105 305" stroke="#D1D5DB" stroke-width="3" stroke-linecap="round" />
+    </g>
+
+    <!-- Magnifying Glass Handle (Rotates) -->
+    <g class="glass-group">
+        <g transform="translate(270, 180) rotate(45)">
+            <!-- Connector -->
+            <line x1="90" y1="0" x2="120" y2="0" stroke="#1A2948" stroke-width="16" stroke-linecap="round"/>
+            <!-- Handle Base -->
+            <rect x="115" y="-16" width="70" height="32" rx="16" fill="#F3F4F6" stroke="#1A2948" stroke-width="8"/>
+            <!-- Handle Accent -->
+            <rect x="127" y="-6" width="46" height="12" rx="6" fill="#EC2029" stroke="#1A2948" stroke-width="4"/>
+        </g>
+    </g>
+
+    <!-- Lens Background (Static to hide background clouds) -->
+    <circle cx="270" cy="180" r="100" fill="#F3F4F6" />
+
+    <!-- Lens Contents (Static, Clipped to Lens) -->
+    <g clip-path="url(#lens-clip)">
+        <!-- Inner Clouds -->
+        <g class="cloud-delayed">
+            <use href="#cloud-shape" transform="translate(170, 100) scale(0.5)" />
+        </g>
+        <g class="cloud">
+            <use href="#cloud-shape" transform="translate(240, 220) scale(0.4)" />
+        </g>
+
+        <!-- Flight Path -->
+        <circle cx="180" cy="195" r="6" fill="#D1D5DB" />
+        <path d="M 180 195 Q 230 160 290 185" fill="none" stroke="#D1D5DB" stroke-width="6" stroke-dasharray="12 12" stroke-linecap="round"/>
+
+        <!-- Question Mark -->
+        <g transform="translate(310, 185)">
+            <g class="pulse-mark">
+                <path d="M -6, -18 C -6, -30 12, -30 12, -18 C 12, -6 -2, -6 -2, 6" fill="none" stroke="#1A2948" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="-2" cy="18" r="3.5" fill="#1A2948" />
+            </g>
+        </g>
+    </g>
+
+    <!-- Lens Border & Glare (Rotates) -->
+    <g class="glass-group">
+        <!-- Main Outline -->
+        <circle cx="270" cy="180" r="100" fill="none" stroke="#1A2948" stroke-width="8"/>
+        <!-- Inner Glare -->
+        <path d="M 213.5 123.5 A 80 80 0 0 1 256.2 101.2" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity="0.7"/>
+    </g>
+</svg>

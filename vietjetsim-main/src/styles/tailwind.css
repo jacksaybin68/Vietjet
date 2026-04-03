@@ -1,0 +1,1579 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=KoHo:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #ec2029;
+  --primary-dark: #c41017;
+  --primary-light: #ff4d53;
+  --accent: #ffd400;
+  --accent-dark: #e6bf00;
+  --accent-secondary: #fbb612;
+  --background: #ffffff;
+  --surface: #fafafa;
+  --surface-2: #f5f5f5;
+  --foreground: #333333;
+  --foreground-muted: #6d6e71;
+  --foreground-subtle: #939598;
+  --border: #e8e8e8;
+  --dark-bg: #1a2948;
+  --dark-surface: #0f1e3a;
+  --dark-border: rgba(255, 255, 255, 0.1);
+  --vj-navy: #1a2948;
+  --vj-sky: #e8f4fd;
+  --vj-red: #ec2029;
+  --vj-red-dark: #6f0000;
+  --vj-yellow: #ffd400;
+  --vj-yellow-2: #fbb612;
+  --vj-orange: #f9a51a;
+  --vj-text: #333333;
+  --vj-text-gray: #6d6e71;
+  --vj-text-muted: #939598;
+  --vj-font: 'KoHo', 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'KoHo', 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--foreground);
+  background: var(--background);
+  font-size: 14px;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+/* Headings use Be Vietnam Pro for stronger brand presence */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Be Vietnam Pro', 'KoHo', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Keyframe Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes slideInBlur {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0px);
+  }
+}
+
+@keyframes scrollBlur {
+  0% {
+    filter: blur(0px) brightness(1);
+    transform: scale(1);
+  }
+  100% {
+    filter: blur(20px) brightness(0.35);
+    transform: scale(1.05);
+  }
+}
+
+@keyframes rotateBadge {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes floatUp {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseRed {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(236, 32, 41, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(236, 32, 41, 0);
+  }
+}
+
+@keyframes toastProgress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes bannerSlide {
+  0% {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes vjFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(2deg);
+  }
+}
+
+/* Page Transition Keyframes */
+@keyframes pageEnterForward {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes pageExitForward {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0px);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-32px);
+    filter: blur(4px);
+  }
+}
+
+@keyframes pageEnterBack {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes pageExitBack {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0px);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(32px);
+    filter: blur(4px);
+  }
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0px);
+  }
+}
+
+@keyframes pageFadeOut {
+  from {
+    opacity: 1;
+    filter: blur(0px);
+  }
+  to {
+    opacity: 0;
+    filter: blur(3px);
+  }
+}
+
+/* Modal Animations */
+@keyframes modalBackdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalBackdropOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes modalPanelIn {
+  from {
+    opacity: 0;
+    transform: scale(0.88) translateY(20px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes modalPanelOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0px);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px);
+    filter: blur(4px);
+  }
+}
+
+/* Page Transition Classes */
+.page-transition {
+  min-height: 100vh;
+}
+
+.page-enter-forward {
+  animation: pageEnterForward 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.page-exit-forward {
+  animation: pageExitForward 0.22s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+.page-enter-back {
+  animation: pageEnterBack 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.page-exit-back {
+  animation: pageExitBack 0.22s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+.page-enter-fade {
+  animation: pageFadeIn 0.28s ease both;
+}
+
+.page-exit-fade {
+  animation: pageFadeOut 0.22s ease both;
+}
+
+/* Modal animation classes */
+.modal-backdrop-enter {
+  animation: modalBackdropIn 0.2s ease both;
+}
+
+.modal-backdrop-exit {
+  animation: modalBackdropOut 0.2s ease both;
+}
+
+.modal-panel-enter {
+  animation: modalPanelIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.modal-panel-exit {
+  animation: modalPanelOut 0.18s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+/* Utility Classes */
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-in-blur {
+  animation: slideInBlur 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in-slide {
+  animation: fadeInSlide 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-float {
+  animation: floatUp 3s ease-in-out infinite;
+}
+
+.animate-vj-float {
+  animation: vjFloat 4s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: rotateBadge 12s linear infinite;
+}
+
+.animate-pulse-red {
+  animation: pulseRed 2s ease-in-out infinite;
+}
+
+/* Scroll-linked hero blur */
+.hero-bg-scroll {
+  animation: scrollBlur linear both;
+  animation-timeline: scroll();
+  animation-range: 0px 700px;
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  filter: blur(4px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0px);
+}
+
+/* Scroll reveal variants */
+.reveal-up {
+  opacity: 0;
+  transform: translateY(32px);
+  filter: blur(4px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.6s ease;
+}
+.reveal-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0px);
+}
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-32px);
+  filter: blur(4px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.6s ease;
+}
+.reveal-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+  filter: blur(0px);
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(32px);
+  filter: blur(4px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.6s ease;
+}
+.reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+  filter: blur(0px);
+}
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.93);
+  filter: blur(3px);
+  transition:
+    opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.55s ease;
+}
+.reveal-scale.visible {
+  opacity: 1;
+  transform: scale(1);
+  filter: blur(0px);
+}
+
+/* Stagger delays */
+.delay-100 {
+  transition-delay: 100ms;
+}
+.delay-150 {
+  transition-delay: 150ms;
+}
+.delay-200 {
+  transition-delay: 200ms;
+}
+.delay-250 {
+  transition-delay: 250ms;
+}
+.delay-300 {
+  transition-delay: 300ms;
+}
+.delay-350 {
+  transition-delay: 350ms;
+}
+.delay-400 {
+  transition-delay: 400ms;
+}
+.delay-450 {
+  transition-delay: 450ms;
+}
+.delay-500 {
+  transition-delay: 500ms;
+}
+.delay-600 {
+  transition-delay: 600ms;
+}
+.delay-700 {
+  transition-delay: 700ms;
+}
+
+/* Glass morphism */
+.glass {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Shimmer loading */
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Noise texture overlay */
+.noise-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d6d3d1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #939598;
+}
+
+/* No scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Seat map styles */
+.seat {
+  transition: all 0.15s ease;
+}
+.seat:hover:not(.seat-occupied) {
+  transform: scale(1.1);
+}
+.seat-available {
+  background: #e7e5e4;
+  border: 1.5px solid #d6d3d1;
+}
+.seat-selected {
+  background: #ec2029;
+  border: 1.5px solid #c41017;
+  color: white;
+}
+.seat-occupied {
+  background: #f5f5f4;
+  border: 1.5px solid #e7e5e4;
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+.seat-business {
+  background: #fef3c7;
+  border: 1.5px solid #ffd400;
+}
+.seat-business.seat-selected {
+  background: #ffd400;
+  border-color: #e6bf00;
+  color: #1a2948;
+}
+
+/* Form focus styles */
+.form-input {
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+  font-family: 'KoHo', 'Be Vietnam Pro', sans-serif;
+  font-weight: 500;
+  color: #333333;
+}
+.form-input:focus {
+  outline: none;
+  border-color: #ec2029;
+  box-shadow:
+    0 0 0 3px rgba(236, 32, 41, 0.14),
+    0 1px 4px rgba(236, 32, 41, 0.08);
+  background-color: #fff;
+}
+
+/* Validation checkmark */
+.form-input-valid {
+  border-color: #16a34a !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2316a34a'%3E%3Cpath fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px 16px;
+  padding-right: 36px !important;
+}
+.form-input-valid:focus {
+  border-color: #16a34a !important;
+  box-shadow:
+    0 0 0 3px rgba(22, 163, 74, 0.14),
+    0 1px 4px rgba(22, 163, 74, 0.08) !important;
+}
+
+/* Floating label container */
+.form-field-float {
+  position: relative;
+}
+.form-field-float .form-label-float {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #939598;
+  pointer-events: none;
+  transition:
+    top 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    font-size 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.18s ease,
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  background: transparent;
+  padding: 0 2px;
+  line-height: 1;
+  z-index: 1;
+  font-family: 'KoHo', sans-serif;
+  font-weight: 500;
+}
+/* Lift label when input is focused or has value */
+.form-field-float .form-input:focus ~ .form-label-float,
+.form-field-float .form-input:not(:placeholder-shown) ~ .form-label-float,
+.form-field-float.has-value .form-label-float {
+  top: 0;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: #ec2029;
+  background: white;
+  padding: 0 4px;
+  font-weight: 600;
+}
+/* Lift label when input has left icon padding */
+.form-field-float .form-label-float.has-icon {
+  left: 40px;
+}
+.form-field-float .form-input:focus ~ .form-label-float.has-icon,
+.form-field-float .form-input:not(:placeholder-shown) ~ .form-label-float.has-icon {
+  left: 12px;
+}
+
+/* Checkmark animation */
+@keyframes checkmarkDraw {
+  from {
+    stroke-dashoffset: 30;
+    opacity: 0;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+.form-checkmark-animate {
+  animation: checkmarkDraw 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Tab active */
+.tab-active {
+  color: #ec2029;
+  border-bottom: 2px solid #ec2029;
+}
+
+/* VietJet Button Styles */
+.vj-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-weight: 700;
+  border-radius: 6px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  font-family: 'KoHo', 'Be Vietnam Pro', sans-serif;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.vj-btn-primary {
+  background: #ec2029;
+  color: white;
+  box-shadow: 0 2px 8px rgba(236, 32, 41, 0.28);
+}
+.vj-btn-primary:hover {
+  background: #d0021b;
+  box-shadow: 0 6px 20px rgba(236, 32, 41, 0.45);
+  transform: translateY(-2px) scale(1.02);
+}
+.vj-btn-primary:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 8px rgba(236, 32, 41, 0.28);
+}
+
+.vj-btn-accent {
+  background: linear-gradient(
+    26.73deg,
+    rgb(249, 165, 26) 13.7%,
+    rgb(251, 182, 18) 29.8%,
+    rgb(255, 221, 0) 66.81%
+  );
+  color: #1a2948;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(255, 212, 0, 0.32);
+}
+.vj-btn-accent:hover {
+  box-shadow: 0 6px 20px rgba(255, 212, 0, 0.5);
+  transform: translateY(-2px) scale(1.02);
+  filter: brightness(1.05);
+}
+.vj-btn-accent:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 8px rgba(255, 212, 0, 0.32);
+}
+
+.vj-btn-outline {
+  background: transparent;
+  color: #ec2029;
+  border: 1.5px solid #ec2029;
+}
+.vj-btn-outline:hover {
+  background: #ec2029;
+  color: white;
+  box-shadow: 0 4px 16px rgba(236, 32, 41, 0.3);
+  transform: translateY(-1px) scale(1.01);
+}
+.vj-btn-outline:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.vj-btn-sm {
+  padding: 7px 16px;
+  font-size: 12px;
+  border-radius: 5px;
+}
+.vj-btn-md {
+  padding: 10px 22px;
+  font-size: 14px;
+}
+.vj-btn-lg {
+  padding: 13px 28px;
+  font-size: 15px;
+  font-weight: 800;
+}
+.vj-btn-xs {
+  padding: 5px 12px;
+  font-size: 11px;
+  border-radius: 4px;
+}
+
+/* VietJet Card Hover */
+.card-hover {
+  transition:
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s ease;
+}
+.card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.16);
+}
+
+/* VietJet Card Hover with Red Accent */
+.card-hover-red {
+  transition:
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+  border: 1.5px solid transparent;
+}
+.card-hover-red:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 48px rgba(236, 32, 41, 0.18);
+  border-color: #ec2029;
+}
+
+/* VietJet Card Hover with Yellow Accent */
+.card-hover-yellow {
+  transition:
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+  border: 1.5px solid transparent;
+}
+.card-hover-yellow:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 48px rgba(255, 212, 0, 0.28);
+  border-color: #ffd400;
+}
+
+/* VietJet Card Hover with Blue Accent (User Dashboard) */
+.card-hover-blue {
+  transition:
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+  border: 1.5px solid transparent;
+}
+.card-hover-blue:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 48px rgba(59, 130, 246, 0.18);
+  border-color: #3b82f6;
+}
+
+/* VietJet Service Icon */
+.vj-service-icon {
+  transition: transform 0.2s ease;
+}
+.vj-service-icon:hover {
+  transform: translateY(-3px);
+}
+
+/* VietJet Sticky Search Bar */
+.vj-sticky-search {
+  background: #ec2029;
+  border-bottom: 2px solid #c41017;
+}
+
+/* VietJet Price Badge */
+.vj-price-badge {
+  background: #ffd400;
+  color: #1a2948;
+  clip-path: polygon(0 0, 100% 0, 100% 75%, 50% 100%, 0 75%);
+  font-weight: 800;
+}
+
+/* VietJet Section Label */
+.vj-section-label {
+  background: #ec2029;
+  color: white;
+  font-style: italic;
+  font-weight: 800;
+  padding: 3px 14px 3px 10px;
+  clip-path: polygon(0 0, 100% 0, 94% 100%, 0 100%);
+  display: inline-block;
+  font-family: 'Be Vietnam Pro', 'KoHo', sans-serif;
+  letter-spacing: 0.01em;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+/* VietJet Destination Card */
+.vj-dest-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.vj-dest-card img {
+  transition: transform 0.5s ease;
+}
+.vj-dest-card:hover img {
+  transform: scale(1.08);
+}
+.vj-dest-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, transparent 50%);
+}
+
+/* VietJet Hot Deal Card */
+.vj-deal-card {
+  border-radius: 10px;
+  overflow: hidden;
+  background: white;
+  border: 1px solid #eeeeee;
+  transition:
+    box-shadow 0.25s ease,
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.25s ease;
+}
+.vj-deal-card:hover {
+  box-shadow: 0 16px 40px rgba(236, 32, 41, 0.18);
+  transform: translateY(-6px);
+  border-color: rgba(236, 32, 41, 0.3);
+}
+
+/* VietJet Nav Active */
+.vj-nav-active {
+  color: #ec2029;
+  border-bottom: 2px solid #ec2029;
+}
+
+/* VietJet Banner Ribbon */
+.vj-ribbon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #ec2029;
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  font-style: italic;
+  padding: 4px 16px 4px 10px;
+  clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
+  z-index: 10;
+  font-family: 'Be Vietnam Pro', 'KoHo', sans-serif;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* Gradient backgrounds */
+.bg-gradient-red {
+  background: linear-gradient(135deg, #ec2029 0%, #c41017 50%, #8b0d12 100%);
+}
+
+.bg-gradient-vj {
+  background: linear-gradient(135deg, #ec2029 0%, #1a2948 100%);
+}
+
+.bg-vj-sky {
+  background: linear-gradient(180deg, #e8f4fd 0%, #f0f8ff 50%, #ffffff 100%);
+}
+
+/* Sidebar link */
+.sidebar-link {
+  transition: all 0.15s ease;
+  font-family: 'KoHo', 'Be Vietnam Pro', sans-serif;
+  font-weight: 600;
+}
+.sidebar-link.active {
+  background: white;
+  color: #ec2029;
+  font-weight: 700;
+}
+.sidebar-link:not(.active):hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+/* Badge styles */
+.badge-success {
+  background: #dcfce7;
+  color: #16a34a;
+  border-radius: 9999px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'KoHo', sans-serif;
+}
+.badge-error {
+  background: #fee2e2;
+  color: #dc2626;
+  border-radius: 9999px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'KoHo', sans-serif;
+}
+.badge-info {
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-radius: 9999px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'KoHo', sans-serif;
+}
+.badge-warning {
+  background: #fef9c3;
+  color: #ca8a04;
+  border-radius: 9999px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'KoHo', sans-serif;
+}
+.badge-dot::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* Primary 50 background */
+.bg-primary-50 {
+  background-color: #fff1f1;
+}
+
+/* Navy text color */
+.text-navy-DEFAULT {
+  color: #1a2948;
+}
+
+/* ─── Skeleton Loader ─────────────────────────────────────────────────────── */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+@keyframes skeleton-shimmer-red {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+.skeleton-pulse {
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+.skeleton-base {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e4e4e4 50%, #f0f0f0 75%);
+  background-size: 800px 100%;
+}
+
+.skeleton-accent {
+  background: linear-gradient(
+    90deg,
+    #fde8ea 0%,
+    #fbbfc3 30%,
+    #fde8ea 60%,
+    #fff1f2 80%,
+    #fde8ea 100%
+  );
+  background-size: 800px 100%;
+}
+
+.skeleton-accent-bar {
+  background: linear-gradient(
+    90deg,
+    #d0021b 0%,
+    #ff4d6a 40%,
+    #ffc72c 60%,
+    #ff4d6a 80%,
+    #d0021b 100%
+  );
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 2s ease-in-out infinite;
+  height: 4px;
+  width: 100%;
+}
+
+.skeleton-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-card-shine 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes skeleton-card-shine {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-row {
+  position: relative;
+}
+
+.skeleton-row::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-card-shine 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* VietJet Let's Go Button */
+.vj-btn-letsgo {
+  background: linear-gradient(
+    26.73deg,
+    rgb(249, 165, 26) 13.7%,
+    rgb(251, 182, 18) 29.8%,
+    rgb(255, 221, 0) 66.81%
+  );
+  color: #1a2948;
+  font-weight: 800;
+  box-shadow:
+    rgba(0, 0, 0, 0.18) 0px 3px 6px -2px,
+    rgba(0, 0, 0, 0.1) 0px 2px 4px 0px;
+  border-radius: 8px;
+  font-family: 'KoHo', 'Be Vietnam Pro', sans-serif;
+  letter-spacing: 0.02em;
+}
+.vj-btn-letsgo:hover {
+  box-shadow: 0 6px 20px rgba(255, 212, 0, 0.5);
+  transform: translateY(-1px) scale(1.02);
+  filter: brightness(1.04);
+}
+.vj-btn-letsgo:active {
+  transform: scale(0.98);
+}
+
+/* VietJet Tab Active - red gradient */
+.vj-tab-active-red {
+  background: linear-gradient(20.12deg, rgba(217, 26, 33, 0.9) 19.6%, rgba(111, 0, 0, 0.9) 93.86%);
+  color: #fff;
+  border-radius: 5px 5px 0 0;
+}
+
+/* VietJet Tab Active - yellow gradient */
+.vj-tab-active-yellow {
+  background: linear-gradient(135deg, rgb(255, 221, 0) 39.58%, rgb(233, 159, 36) 100%);
+  color: #000;
+  border-radius: 5px 5px 0 0;
+}
+
+/* VietJet Search Panel */
+.vj-search-panel {
+  background: #fff;
+  border-radius: 0 0 6px 6px;
+  box-shadow: rgba(0, 0, 0, 0.25) 4px 8px 10px -6px;
+}
+
+/* VietJet Input Field */
+.vj-input-field {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  transition: border-color 0.15s ease;
+  font-family: 'KoHo', sans-serif;
+  font-weight: 500;
+  color: #333333;
+}
+.vj-input-field:focus-within {
+  border-color: #ec2029;
+  box-shadow: 0 0 0 3px rgba(236, 32, 41, 0.08);
+}
+
+/* VietJet Typography helpers */
+.vj-heading {
+  font-family: 'Be Vietnam Pro', 'KoHo', sans-serif;
+  font-weight: 900;
+  color: #333333;
+  letter-spacing: -0.01em;
+}
+
+.vj-subheading {
+  font-family: 'KoHo', 'Be Vietnam Pro', sans-serif;
+  font-weight: 700;
+  color: #333333;
+}
+
+.vj-body {
+  font-family: 'KoHo', sans-serif;
+  font-weight: 500;
+  color: #333333;
+  font-size: 14px;
+}
+
+.vj-caption {
+  font-family: 'KoHo', sans-serif;
+  font-weight: 500;
+  color: #6d6e71;
+  font-size: 12px;
+}
+
+.vj-label {
+  font-family: 'KoHo', sans-serif;
+  font-weight: 600;
+  color: #6d6e71;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Price text — VietJet red bold */
+.vj-price {
+  font-family: 'Be Vietnam Pro', 'KoHo', sans-serif;
+  font-weight: 900;
+  color: #ec2029;
+}
+
+/* VietJet italic brand text */
+.vj-brand-italic {
+  font-family: 'Be Vietnam Pro', 'KoHo', sans-serif;
+  font-style: italic;
+  font-weight: 900;
+  color: #ec2029;
+}
+
+/* ─── Font utility classes (replace inline fontFamily) ─── */
+.font-koho {
+  font-family: 'KoHo', sans-serif;
+}
+.font-koho-medium {
+  font-family: 'KoHo', sans-serif;
+  font-weight: 500;
+}
+.font-koho-bold {
+  font-family: 'KoHo', sans-serif;
+  font-weight: 700;
+}
+.font-koho-semibold {
+  font-family: 'KoHo', sans-serif;
+  font-weight: 600;
+}
+.font-heading-900 {
+  font-family: 'Be Vietnam Pro', 'KoHo', sans-serif;
+  font-weight: 900;
+}
+.font-heading-800 {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-weight: 800;
+}
+.font-heading-700 {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-weight: 700;
+}
+.font-body {
+  font-family: 'KoHo', 'Be Vietnam Pro', sans-serif;
+}
+.font-body-vj {
+  font-family: 'KoHo', sans-serif;
+  color: #333333;
+}
+
+/* ─── Color utility classes ─── */
+.text-navy {
+  color: #1a2948;
+}
+.text-navy-light {
+  color: #253660;
+}
+.text-vj-gray {
+  color: #6d6e71;
+}
+.text-vj-muted {
+  color: #939598;
+}
+.text-vj-text {
+  color: #333333;
+}
+.text-gold {
+  color: #ffc72c;
+}
+.text-gray-400 {
+  color: #9ca3af;
+}
+.bg-primary-solid {
+  background-color: #ec2029;
+}
+.bg-navy-solid {
+  background-color: #1a2948;
+}
+.bg-gold {
+  background-color: #ffc72c;
+}
+.bg-red-dark {
+  background-color: #d0021b;
+}
+.bg-white-10 {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.bg-white-20 {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+.text-white-60 {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ─── Shadow utility classes ─── */
+.shadow-vj-card {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+.shadow-vj-card-md {
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* ─── Gradient utility classes ─── */
+.bg-gradient-red-pink {
+  background: linear-gradient(90deg, #ec2029 0%, #ff4d6a 100%);
+}
+
+/* ─── Admin Dashboard Dark Theme ─── */
+.admin-sidebar {
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+  border-right: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.admin-nav-item {
+  transition: all 0.2s ease;
+}
+
+.admin-nav-item:hover:not(.active) {
+  background: rgba(148, 163, 184, 0.05);
+  color: #e2e8f0;
+}
+
+.admin-nav-item.active {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.admin-header {
+  background: linear-gradient(90deg, #1e293b 0%, #0f172a 100%);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.admin-content {
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+}
+
+.admin-card {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.admin-card:hover {
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15);
+  transform: translateY(-2px);
+}
+
+.admin-stat-card {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.admin-stat-card:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
+  transform: translateY(-3px);
+}
+
+/* Admin Badge Colors */
+.admin-badge-success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-badge-warning {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-badge-error {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-badge-info {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ─── User Dashboard Warm Theme ─── */
+.user-sidebar {
+  background: white;
+  border: 1px solid #fde68a;
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.12), 0 4px 12px rgba(251, 191, 36, 0.08);
+}
+
+.user-sidebar-header {
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+  border-radius: 24px 24px 0 0;
+}
+
+.user-nav-item {
+  transition: all 0.2s ease;
+  border-radius: 16px;
+}
+
+.user-nav-item:hover:not(.active) {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.user-nav-item.active {
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  color: white;
+}
+
+.user-content-bg {
+  background: linear-gradient(180deg, #fefce8 0%, #fffbeb 50%, #fef9c3 100%);
+}
+
+.user-card {
+  background: white;
+  border: 1px solid #fde68a;
+  border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.user-card:hover {
+  border-color: #fbbf24;
+  box-shadow: 0 12px 40px rgba(245, 158, 11, 0.15);
+  transform: translateY(-4px);
+}
+
+.user-card-accent {
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #fcd34d 100%);
+  height: 8px;
+  width: 100%;
+}
+
+.user-btn-primary {
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+  color: white;
+  border-radius: 16px;
+  padding: 12px 24px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+}
+
+.user-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+}
+
+.user-btn-primary:active {
+  transform: translateY(0);
+}
+
+.user-btn-secondary {
+  background: white;
+  color: #92400e;
+  border: 2px solid #fde68a;
+  border-radius: 16px;
+  padding: 12px 24px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.user-btn-secondary:hover {
+  background: #fef3c7;
+  border-color: #fbbf24;
+}
+
+/* User Badge Colors */
+.user-badge-success {
+  background: #dcfce7;
+  color: #16a34a;
+  border-radius: 9999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.user-badge-warning {
+  background: #fef3c7;
+  color: #d97706;
+  border-radius: 9999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.user-badge-error {
+  background: #fee2e2;
+  color: #dc2626;
+  border-radius: 9999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.user-badge-info {
+  background: #dbeafe;
+  color: #2563eb;
+  border-radius: 9999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}

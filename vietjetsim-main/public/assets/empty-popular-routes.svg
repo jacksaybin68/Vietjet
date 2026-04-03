@@ -1,0 +1,215 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <defs>
+    <!-- Soft Drop Shadows -->
+    <filter id="plane-shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="25" stdDeviation="15" flood-color="#1A2948" flood-opacity="0.15"/>
+    </filter>
+    <filter id="pin-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.102   0 0 0 0 0.161   0 0 0 0 0.282  0 0 0 0.2 0"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Gradients -->
+    <linearGradient id="wing-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FF3B44"/>
+      <stop offset="100%" stop-color="#EC2029"/>
+    </linearGradient>
+    <radialGradient id="vignette" cx="50%" cy="50%" r="75%">
+      <stop offset="60%" stop-color="#1A2948" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#1A2948" stop-opacity="0.06"/>
+    </radialGradient>
+
+    <!-- Reusable Cloud Symbol -->
+    <g id="cloud">
+      <rect x="-40" y="-15" width="80" height="30" rx="15" fill="#E5E7EB"/>
+      <circle cx="-15" cy="-20" r="20" fill="#E5E7EB"/>
+      <circle cx="15" cy="-10" r="15" fill="#E5E7EB"/>
+    </g>
+
+    <!-- Reusable Pin Symbol -->
+    <g id="pin-marker">
+      <ellipse cx="0" cy="0" rx="12" ry="4" fill="#1A2948" opacity="0.15" filter="url(#pin-shadow)"/>
+      <path d="M 0 0 C 14 -14, 20 -24, 20 -34 A 20 20 0 1 0 -20 -34 C -20 -24, -14 -14, 0 0 Z" fill="#EC2029"/>
+      <circle cx="0" cy="-34" r="7" fill="#FFFFFF"/>
+      <circle cx="0" cy="-34" r="3" fill="#EC2029"/>
+    </g>
+  </defs>
+
+  <style><![CDATA[
+/* Airplane Bobbing Animation */
+    .plane-anim {
+      animation: bob 3s ease-in-out infinite;
+    }
+    @keyframes bob {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(6px); }
+    }
+
+    /* Route Dots Pulse Animation */
+    .route {
+      stroke-dasharray: 8 10;
+      stroke-linecap: round;
+      animation: pulse-route 1.5s ease-in-out infinite;
+    }
+    .route-1 { animation-delay: 0s; }
+    .route-2 { animation-delay: 0.5s; }
+    .route-3 { animation-delay: 1s; }
+    @keyframes pulse-route {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    /* Pin Scaling Animation */
+    .pin-anim {
+      animation: scale-pin 3s ease-in-out infinite;
+    }
+    .pin-1 { animation-delay: 0s; transform-origin: 220px 360px; }
+    .pin-2 { animation-delay: 1s; transform-origin: 420px 410px; }
+    .pin-3 { animation-delay: 2s; transform-origin: 620px 360px; }
+    @keyframes scale-pin {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.12); }
+    }
+
+    /* Pin Pulse Ring Animation */
+    .pulse-ring {
+      animation: ring-pulse 3s ease-out infinite;
+    }
+    .pin-1 .pulse-ring { animation-delay: 0s; }
+    .pin-2 .pulse-ring { animation-delay: 1s; }
+    .pin-3 .pulse-ring { animation-delay: 2s; }
+    @keyframes ring-pulse {
+      0% { transform: scale(0.5); opacity: 0.6; }
+      100% { transform: scale(2.5); opacity: 0; }
+    }
+
+    /* Cloud Float Animation */
+    .cloud-anim {
+      animation: float-cloud 8s ease-in-out infinite alternate;
+    }
+    .cloud-1 { animation-delay: 0s; }
+    .cloud-2 { animation-delay: -2s; }
+    .cloud-3 { animation-delay: -4s; }
+    .cloud-4 { animation-delay: -6s; }
+    @keyframes float-cloud {
+      0% { transform: translateX(-10px); }
+      100% { transform: translateX(10px); }
+    }
+]]></style>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#F7F7F7"/>
+
+  <!-- Minimalist Map Grid (Globe Projection) -->
+  <g stroke="#1A2948" stroke-width="1" fill="none" opacity="0.04">
+    <path d="M 0 100 Q 400 200 800 100" />
+    <path d="M 0 250 Q 400 350 800 250" />
+    <path d="M 0 400 Q 400 500 800 400" />
+    <path d="M 200 0 Q 300 250 200 500" />
+    <path d="M 400 0 L 400 500" />
+    <path d="M 600 0 Q 500 250 600 500" />
+  </g>
+
+  <!-- Abstract Soft Landmasses -->
+  <g fill="#FFFFFF" opacity="0.6">
+    <path d="M -100 100 C 100 100, 200 200, 150 350 C 100 500, 200 600, -100 600 Z" />
+    <path d="M 900 50 C 700 100, 600 250, 750 400 C 850 500, 800 600, 900 600 Z" />
+  </g>
+
+  <!-- Background Atmosphere: Clouds & Particles -->
+  <g opacity="0.85">
+    <g transform="translate(140, 160) scale(0.7)" class="cloud-anim cloud-1"><use href="#cloud"/></g>
+    <g transform="translate(680, 130) scale(0.9)" class="cloud-anim cloud-2"><use href="#cloud"/></g>
+    <g transform="translate(320, 90) scale(0.5)" class="cloud-anim cloud-3"><use href="#cloud"/></g>
+    <g transform="translate(560, 250) scale(0.6)" class="cloud-anim cloud-4"><use href="#cloud"/></g>
+    <g transform="translate(750, 380) scale(0.8)" class="cloud-anim cloud-1"><use href="#cloud"/></g>
+    <g transform="translate(90, 420) scale(0.6)" class="cloud-anim cloud-2"><use href="#cloud"/></g>
+    
+    <!-- Floating Particles -->
+    <circle cx="250" cy="120" r="3" fill="#E5E7EB"/>
+    <circle cx="620" cy="220" r="4" fill="#E5E7EB"/>
+    <circle cx="380" cy="460" r="2" fill="#E5E7EB"/>
+    <circle cx="480" cy="80" r="5" fill="#E5E7EB" opacity="0.6"/>
+  </g>
+
+  <!-- Dotted Route Lines -->
+  <g fill="none" stroke="#E5E7EB" stroke-width="5">
+    <path d="M 220 360 Q 320 280 420 410" class="route route-1"/>
+    <path d="M 420 410 Q 520 280 620 360" class="route route-2"/>
+    <path d="M 220 360 Q 420 150 620 360" class="route route-3"/>
+  </g>
+
+  <!-- Destination Pins -->
+  <g class="pin-anim pin-1">
+    <g transform="translate(220, 360)">
+      <circle class="pulse-ring" cx="0" cy="0" r="12" fill="#EC2029"/>
+      <use href="#pin-marker"/>
+    </g>
+  </g>
+  
+  <g class="pin-anim pin-2">
+    <g transform="translate(420, 410)">
+      <circle class="pulse-ring" cx="0" cy="0" r="12" fill="#EC2029"/>
+      <use href="#pin-marker"/>
+    </g>
+  </g>
+  
+  <g class="pin-anim pin-3">
+    <g transform="translate(620, 360)">
+      <circle class="pulse-ring" cx="0" cy="0" r="12" fill="#EC2029"/>
+      <use href="#pin-marker"/>
+    </g>
+  </g>
+
+  <!-- Primary Subject: Airplane -->
+  <g class="plane-anim">
+    <g transform="translate(400, 200)" filter="url(#plane-shadow)">
+      
+      <!-- Back Horizontal Stabilizer -->
+      <path d="M -105 -5 L -90 -5 L -100 -20 L -110 -20 Z" fill="#B91920"/>
+      
+      <!-- Back Main Wing -->
+      <path d="M -10 -5 L 30 -5 L -10 -50 L -30 -50 Z" fill="#B91920"/>
+      
+      <!-- Back Engine -->
+      <rect x="-10" y="-25" width="28" height="12" rx="6" fill="#0F182B"/>
+
+      <!-- Fuselage Top Half (White) -->
+      <path d="M -120 0 C -120 -18, -80 -22, 0 -22 C 80 -22, 130 -15, 140 0 Z" fill="#FFFFFF"/>
+      
+      <!-- Fuselage Bottom Half (Dark Navy) -->
+      <path d="M -120 0 C -120 12, -80 18, 0 18 C 80 18, 130 15, 140 0 Z" fill="#1A2948"/>
+
+      <!-- Tail Fin (Dark Navy with Red Accent) -->
+      <path d="M -95 -18 L -65 -18 L -90 -65 L -110 -65 Z" fill="#1A2948"/>
+      <polygon points="-90,-65 -80,-65 -65,-35 -75,-35" fill="#EC2029"/>
+
+      <!-- Cockpit Window -->
+      <path d="M 105 -10 Q 120 -10 130 -3 L 105 -3 Z" fill="#1A2948"/>
+
+      <!-- Passenger Windows -->
+      <path d="M -50 -6 L 50 -6" stroke="#1A2948" stroke-width="3" stroke-dasharray="0 10" stroke-linecap="round"/>
+
+      <!-- Front Horizontal Stabilizer -->
+      <path d="M -105 5 L -85 5 L -100 25 L -115 25 Z" fill="url(#wing-grad)"/>
+
+      <!-- Front Main Wing -->
+      <path d="M -10 5 L 40 5 L -10 70 L -40 70 Z" fill="url(#wing-grad)"/>
+      
+      <!-- Wing Root Shadow -->
+      <path d="M -10 5 L 40 5 L 35 10 L -15 10 Z" fill="rgba(0,0,0,0.2)"/>
+
+      <!-- Front Engine -->
+      <rect x="0" y="15" width="35" height="14" rx="7" fill="#FFFFFF"/>
+      <ellipse cx="35" cy="22" rx="3" ry="7" fill="#1A2948"/>
+      
+    </g>
+  </g>
+
+  <!-- Foreground Overlay: Subtle Vignette -->
+  <rect width="100%" height="100%" fill="url(#vignette)" pointer-events="none"/>
+</svg>
