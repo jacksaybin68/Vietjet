@@ -16,6 +16,11 @@ import AdminRBACPanel from './AdminRBACPanel';
 import NotificationDropdown from './NotificationDropdown';
 import UserMenuDropdown from './UserMenuDropdown';
 import GlobalSearch from './GlobalSearch';
+import AirportsTab from './AirportsTab';
+import AnnouncementsTab from './AnnouncementsTab';
+import SystemSettingsTab from './SystemSettingsTab';
+import AuditLogsTab from './AuditLogsTab';
+import TransactionsTab from './TransactionsTab';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/components/ui/Toast';
@@ -35,7 +40,8 @@ export type AdminTab =
   | 'airports'
   | 'announcements'
   | 'settings'
-  | 'audit_logs';
+  | 'audit_logs'
+  | 'transactions';
 
 const NAV_ITEMS: {
   id: AdminTab;
@@ -54,7 +60,8 @@ const NAV_ITEMS: {
     | 'BuildingOfficeIcon'
     | 'MegaphoneIcon'
     | 'CogIcon'
-    | 'ClipboardDocumentListIcon';
+    | 'ClipboardDocumentListIcon'
+    | 'CurrencyDollarIcon';
   category?: 'management' | 'support' | 'system';
 }[] = [
   { id: 'overview', label: 'Tổng quan', icon: 'HomeIcon', category: 'management' },
@@ -62,6 +69,7 @@ const NAV_ITEMS: {
   { id: 'users', label: 'Người dùng', icon: 'UsersIcon', category: 'management' },
   { id: 'bookings', label: 'Đặt vé', icon: 'TicketIcon', category: 'management' },
   { id: 'airports', label: 'Sân bay', icon: 'BuildingOfficeIcon', category: 'management' },
+  { id: 'transactions', label: 'Giao dịch', icon: 'CurrencyDollarIcon', category: 'management' },
   { id: 'revenue', label: 'Doanh thu', icon: 'ChartBarIcon', category: 'management' },
   { id: 'refunds', label: 'Hoàn tiền', icon: 'BanknotesIcon', category: 'management' },
   { id: 'chat', label: 'Chat hỗ trợ', icon: 'ChatBubbleLeftRightIcon', category: 'support' },
@@ -94,6 +102,7 @@ const TAB_LABELS: Record<AdminTab, string> = {
   announcements: 'Thông báo',
   settings: 'Cài đặt hệ thống',
   audit_logs: 'Nhật ký hoạt động',
+  transactions: 'Lịch sử giao dịch',
 };
 
 export default function AdminDashboardClient() {
@@ -537,52 +546,31 @@ export default function AdminDashboardClient() {
             </ErrorBoundary>
           )}
 
-          {/* Placeholder for new tabs - will be implemented */}
+          {/* Integrated Management Tabs */}
           {activeTab === 'airports' && (
             <ErrorBoundary inline variant="api">
-              <div className="bg-white rounded-2xl p-12 text-center">
-                <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Icon name="BuildingOfficeIcon" size={32} className="text-indigo-600" />
-                </div>
-                <h3 className="text-lg font-bold text-stone-900 mb-2">Sân bay</h3>
-                <p className="text-sm text-stone-500">Tính năng đang được phát triển</p>
-              </div>
+              <AirportsTab onToast={toast} />
             </ErrorBoundary>
           )}
-
           {activeTab === 'announcements' && (
             <ErrorBoundary inline variant="api">
-              <div className="bg-white rounded-2xl p-12 text-center">
-                <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Icon name="MegaphoneIcon" size={32} className="text-indigo-600" />
-                </div>
-                <h3 className="text-lg font-bold text-stone-900 mb-2">Thông báo</h3>
-                <p className="text-sm text-stone-500">Tính năng đang được phát triển</p>
-              </div>
+              <AnnouncementsTab onToast={toast} />
             </ErrorBoundary>
           )}
-
           {activeTab === 'settings' && (
             <ErrorBoundary inline variant="api">
-              <div className="bg-white rounded-2xl p-12 text-center">
-                <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Icon name="CogIcon" size={32} className="text-indigo-600" />
-                </div>
-                <h3 className="text-lg font-bold text-stone-900 mb-2">Cài đặt hệ thống</h3>
-                <p className="text-sm text-stone-500">Tính năng đang được phát triển</p>
-              </div>
+              <SystemSettingsTab onToast={toast} />
+            </ErrorBoundary>
+          )}
+          {activeTab === 'audit_logs' && (
+            <ErrorBoundary inline variant="api">
+              <AuditLogsTab onToast={toast} />
             </ErrorBoundary>
           )}
 
-          {activeTab === 'audit_logs' && (
+          {activeTab === 'transactions' && (
             <ErrorBoundary inline variant="api">
-              <div className="bg-white rounded-2xl p-12 text-center">
-                <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Icon name="ClipboardDocumentListIcon" size={32} className="text-indigo-600" />
-                </div>
-                <h3 className="text-lg font-bold text-stone-900 mb-2">Nhật ký hoạt động</h3>
-                <p className="text-sm text-stone-500">Tính năng đang được phát triển</p>
-              </div>
+              <TransactionsTab onToast={toast} />
             </ErrorBoundary>
           )}
           </div>
