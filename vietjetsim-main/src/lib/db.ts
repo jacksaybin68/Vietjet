@@ -1,5 +1,6 @@
 // VietjetSim Database Layer
 import { sql } from '@/lib/neon';
+export { sql };
 import type { Permission } from '@/lib/rbac';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -52,6 +53,8 @@ export interface BookingRecord {
   flight_id: string;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded';
   total_price: number;
+  discount_code_id?: string | null;
+  discount_amount?: number;
   created_at: string;
   updated_at: string;
 }
@@ -82,6 +85,8 @@ export interface BookingDetail {
   flight_id: string;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded';
   total_price: number;
+  discount_code_id?: string | null;
+  discount_amount?: number;
   created_at: string;
   updated_at: string;
   flight: Pick<
@@ -111,6 +116,23 @@ export interface RefundRecord {
   status: 'pending' | 'approved' | 'rejected' | 'processed';
   bank_info: any;
   admin_note: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DiscountCodeRecord {
+  id: string;
+  code: string;
+  type: 'percentage' | 'fixed';
+  value: number;
+  min_booking_amount: number;
+  max_discount_amount: number | null;
+  start_date: string;
+  end_date: string;
+  usage_limit: number | null;
+  usage_per_user_limit: number | null;
+  used_count: number;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -696,6 +718,8 @@ export async function createPaymentAndConfirmBooking(payment: {
   booking_id: string;
   method: string;
   amount: number;
+  discount_code_id?: string;
+  discount_amount?: number;
 }): Promise<{ payment: PaymentRecord; booking: BookingRecord }> {
   await sql.transaction([
     sql`
@@ -704,9 +728,16 @@ export async function createPaymentAndConfirmBooking(payment: {
     `,
     sql`
       UPDATE bookings
-      SET status = 'confirmed', updated_at = NOW()
+      SET status = 'confirmed', 
+          discount_code_id = ${payment.discount_code_id || null},
+          discount_amount = ${payment.discount_amount || 0},
+          updated_at = NOW()
       WHERE id = ${payment.booking_id}
     `,
+    // Increment used_count if a discount was applied
+    ...(payment.discount_code_id 
+      ? [sql`UPDATE discount_codes SET used_count = used_count + 1 WHERE id = ${payment.discount_code_id}`] 
+      : [])
   ]);
 
   // Re-fetch both records (transaction guarantees consistency)
@@ -1454,4 +1485,120 @@ export async function setConfigValue(
     RETURNING *
   `;
   return (res as SystemConfigRecord[])[0];
+}
+
+// ─── Discount Code Queries ──────────────────────────────────────────────────
+
+export async function getAllDiscountCodes(params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  activeOnly?: boolean;
+}): Promise<{ discounts: DiscountCodeRecord[]; total: number }> {
+  const page = params?.page || 1;
+  const limit = params?.limit || 50;
+  const offset = (page - 1) * limit;
+
+  let whereClause = 'WHERE 1=1';
+  const values: any[] = [];
+
+  if (params?.search) {
+    values.push(`%${params.search}%`);
+    whereClause += ` AND code ILIKE $${values.length}`;
+  }
+
+  if (params?.activeOnly) {
+    whereClause += ` AND is_active = true AND start_date <= NOW() AND end_date >= NOW()`;
+  }
+
+  const queryParams = [...values, limit, offset];
+  const discountsQuery = `
+    SELECT * FROM discount_codes
+    ${whereClause}
+    ORDER BY created_at DESC
+    LIMIT $${values.length + 1} OFFSET $${values.length + 2}
+  `;
+
+  const countQuery = `SELECT COUNT(*) as total FROM discount_codes ${whereClause}`;
+
+  const discounts = await sql.query(discountsQuery, queryParams);
+  const countResult = await sql.query(countQuery, values);
+  const total = parseInt((countResult as any).rows[0].total, 10);
+
+  return { discounts: (discounts as any).rows as DiscountCodeRecord[], total };
+}
+
+export async function getDiscountCodeByCode(code: string): Promise<DiscountCodeRecord | null> {
+  const results = await sql`
+    SELECT * FROM discount_codes WHERE code = ${code.toUpperCase()}
+  `;
+  return (results as DiscountCodeRecord[])[0] || null;
+}
+
+export async function getDiscountCodeById(id: string): Promise<DiscountCodeRecord | null> {
+  const results = await sql`
+    SELECT * FROM discount_codes WHERE id = ${id}
+  `;
+  return (results as DiscountCodeRecord[])[0] || null;
+}
+
+export async function createDiscountCode(data: Omit<DiscountCodeRecord, 'id' | 'used_count' | 'created_at' | 'updated_at'>): Promise<DiscountCodeRecord> {
+  const results = await sql`
+    INSERT INTO discount_codes (
+      code, type, value, min_booking_amount, max_discount_amount, 
+      start_date, end_date, usage_limit, usage_per_user_limit, is_active
+    )
+    VALUES (
+      ${data.code.toUpperCase()}, ${data.type}, ${data.value}, ${data.min_booking_amount}, ${data.max_discount_amount},
+      ${data.start_date}, ${data.end_date}, ${data.usage_limit}, ${data.usage_per_user_limit}, ${data.is_active}
+    )
+    RETURNING *
+  `;
+  return (results as DiscountCodeRecord[])[0];
+}
+
+export async function updateDiscountCode(id: string, updates: Partial<DiscountCodeRecord>): Promise<DiscountCodeRecord> {
+  const ALLOWED_COLUMNS = [
+    'code', 'type', 'value', 'min_booking_amount', 'max_discount_amount',
+    'start_date', 'end_date', 'usage_limit', 'usage_per_user_limit', 'is_active'
+  ] as const;
+  
+  const setClauses: string[] = [];
+  const values: any[] = [];
+
+  for (const col of ALLOWED_COLUMNS) {
+    if (updates[col] !== undefined) {
+      let val = updates[col];
+      if (col === 'code' && typeof val === 'string') val = val.toUpperCase();
+      setClauses.push(`${col} = $${setClauses.length + 1}`);
+      values.push(val);
+    }
+  }
+
+  if (setClauses.length === 0) throw new Error('No fields to update');
+
+  setClauses.push(`updated_at = NOW()`);
+  values.push(id);
+
+  const query = `
+    UPDATE discount_codes
+    SET ${setClauses.join(', ')}
+    WHERE id = $${values.length}
+    RETURNING *
+  `;
+
+  const results = await sql.query(query, values);
+  return (results as any).rows[0] as DiscountCodeRecord;
+}
+
+export async function deleteDiscountCode(id: string): Promise<void> {
+  await sql`DELETE FROM discount_codes WHERE id = ${id}`;
+}
+
+export async function incrementDiscountUsedCount(id: string): Promise<void> {
+  await sql`
+    UPDATE discount_codes
+    SET used_count = used_count + 1, updated_at = NOW()
+    WHERE id = ${id}
+  `;
 }

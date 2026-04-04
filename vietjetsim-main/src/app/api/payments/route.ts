@@ -22,10 +22,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { booking_id, method, amount } = body;
+    const { booking_id, method, amount, discount_code_id, discount_amount } = body;
 
     // Validation
-    if (!booking_id || !method || !amount) {
+    if (!booking_id || !method || amount === undefined) {
       return NextResponse.json(
         {
           error: 'Missing required fields',
@@ -35,9 +35,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (amount <= 0) {
+    if (amount < 0) {
       return NextResponse.json(
-        { error: 'Invalid amount', message: 'Amount must be greater than 0' },
+        { error: 'Invalid amount', message: 'Amount cannot be negative' },
         { status: 400 }
       );
     }
@@ -52,7 +52,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Create payment + confirm booking atomically (single transaction)
-    const result = await createPaymentAndConfirmBooking({ booking_id, method, amount });
+    const result = await createPaymentAndConfirmBooking({ 
+      booking_id, 
+      method, 
+      amount,
+      discount_code_id,
+      discount_amount: discount_amount || 0
+    });
 
     return NextResponse.json(
       {
