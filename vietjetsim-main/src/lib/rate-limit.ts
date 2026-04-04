@@ -129,3 +129,36 @@ export function getRateLimitHeaders(
     ...(entry ? { 'X-RateLimit-Reset': String(entry.resetAt) } : {}),
   };
 }
+
+// ─── Test Helpers ─────────────────────────────────────────────────────────────
+
+export function getClientIP(request: Request): string {
+  return (
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('x-real-ip') ||
+    'unknown'
+  );
+}
+
+export function createRateLimitKey(ip: string, method: string, pathname: string): string {
+  return `${ip}:${method}:${pathname}`;
+}
+
+// Legacy rate limiter (for backwards compatibility)
+export const legacyRateLimit = rateLimit;
+
+// Convenience rate limiters with predefined configs
+export const rateLimiter = {
+  auth: (request: Request) => rateLimit(request, RATE_LIMITS.auth),
+  strict: (request: Request) => rateLimit(request, RATE_LIMITS.strict),
+  api: (request: Request) => rateLimit(request, RATE_LIMITS.api),
+};
+
+// Expose store for testing
+export function _getStore(): Map<string, RateLimitEntry> {
+  return store;
+}
+
+export function _clearStore(): void {
+  store.clear();
+}

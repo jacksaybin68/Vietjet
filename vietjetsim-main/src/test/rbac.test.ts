@@ -7,6 +7,7 @@ import {
   isAdminRole,
   hasAnyPermission,
   hasAllPermissions,
+  AllRoles,
 } from '@/lib/rbac';
 
 describe('RBAC Module', () => {
@@ -155,7 +156,7 @@ describe('RBAC Module', () => {
 
   describe('Role Hierarchy', () => {
     it('should define correct role levels', () => {
-      const roleOrder = [
+      const roleOrder: AllRoles[] = [
         'super_admin',
         'admin_ops', // 'admin' maps to admin_ops
         'admin_finance',

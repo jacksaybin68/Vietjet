@@ -37,40 +37,64 @@ export async function GET(request: NextRequest) {
     const unreadOnly = searchParams.get('unread') === 'true';
     const offset = (page - 1) * limit;
 
-    let whereClause = 'WHERE user_id = $1';
-    const params: any[] = [payload.userId];
-    let paramIndex = 2;
+    let notifications;
+    let total = 0;
 
-    if (unreadOnly) {
-      whereClause += ` AND is_read = false`;
+    if (unreadOnly && type) {
+      notifications = await sql`
+        SELECT id, type, title, message, is_read, created_at
+        FROM notifications
+        WHERE user_id = ${payload.userId} AND is_read = false AND type = ${type}
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      const countResult = await sql`
+        SELECT COUNT(*) as total FROM notifications
+        WHERE user_id = ${payload.userId} AND is_read = false AND type = ${type}
+      `;
+      total = Number(countResult[0]?.total || 0);
+    } else if (unreadOnly) {
+      notifications = await sql`
+        SELECT id, type, title, message, is_read, created_at
+        FROM notifications
+        WHERE user_id = ${payload.userId} AND is_read = false
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      const countResult = await sql`
+        SELECT COUNT(*) as total FROM notifications
+        WHERE user_id = ${payload.userId} AND is_read = false
+      `;
+      total = Number(countResult[0]?.total || 0);
+    } else if (type) {
+      notifications = await sql`
+        SELECT id, type, title, message, is_read, created_at
+        FROM notifications
+        WHERE user_id = ${payload.userId} AND type = ${type}
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      const countResult = await sql`
+        SELECT COUNT(*) as total FROM notifications
+        WHERE user_id = ${payload.userId} AND type = ${type}
+      `;
+      total = Number(countResult[0]?.total || 0);
+    } else {
+      notifications = await sql`
+        SELECT id, type, title, message, is_read, created_at
+        FROM notifications
+        WHERE user_id = ${payload.userId}
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      const countResult = await sql`
+        SELECT COUNT(*) as total FROM notifications
+        WHERE user_id = ${payload.userId}
+      `;
+      total = Number(countResult[0]?.total || 0);
     }
-
-    if (type) {
-      whereClause += ` AND type = $${paramIndex++}`;
-      params.push(type);
-    }
-
-    params.push(limit, offset);
-
-    const notifications = await sql`
-      SELECT id, type, title, message, is_read, created_at
-      FROM notifications
-      ${sql.unsafe(whereClause)}
-      ORDER BY created_at DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `.params(...params);
 
     const unreadCount = await getUnreadNotificationCount(payload.userId);
-
-    // Get total count
-    let countWhere = whereClause;
-    const countParams = params.slice(0, paramIndex - 1);
-    const countResult = await sql`
-      SELECT COUNT(*) as total FROM notifications
-      ${sql.unsafe(countWhere)}
-    `.params(...countParams);
-
-    const total = Number(countResult[0]?.total || 0);
 
     return NextResponse.json({
       notifications,
@@ -80,82 +104,12 @@ export async function GET(request: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       },
-      unread_count: unreadCount,
+      unreadCount,
     });
   } catch (error) {
     console.error('Error fetching notifications:', error);
     return NextResponse.json(
       { error: 'Internal Server Error', message: 'Failed to fetch notifications' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function POST(request: NextRequest) {
-  try {
-    const token = request.cookies.get('access_token')?.value;
-
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized', message: 'No access token found' },
-        { status: 401 }
-      );
-    }
-
-    const payload = verifyAccessToken(token);
-
-    if (!payload) {
-      return NextResponse.json(
-        { error: 'Unauthorized', message: 'Invalid or expired token' },
-        { status: 401 }
-      );
-    }
-
-    const body = await request.json();
-    const { notificationId, markAll } = body;
-
-    if (markAll) {
-      await sql`
-        UPDATE notifications 
-        SET is_read = true 
-        WHERE user_id = ${payload.userId} AND is_read = false
-      `;
-      return NextResponse.json({
-        success: true,
-        message: 'All notifications marked as read',
-      });
-    }
-
-    if (!notificationId) {
-      return NextResponse.json(
-        { error: 'Bad Request', message: 'notificationId is required' },
-        { status: 400 }
-      );
-    }
-
-    // Verify ownership before updating
-    const result = await sql`
-      UPDATE notifications 
-      SET is_read = true 
-      WHERE id = ${notificationId} AND user_id = ${payload.userId}
-      RETURNING id
-    `;
-
-    if (result.length === 0) {
-      return NextResponse.json(
-        { error: 'Not Found', message: 'Notification not found' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: 'Notification marked as read',
-    });
-  } catch (error) {
-    console.error('Error updating notifications:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error', message: 'Failed to update notifications' },
       { status: 500 }
     );
   }

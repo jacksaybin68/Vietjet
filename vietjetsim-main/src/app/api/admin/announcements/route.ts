@@ -17,69 +17,148 @@ export async function GET(request: NextRequest) {
     const isActive = searchParams.get('is_active');
     const offset = (page - 1) * limit;
 
-    let whereConditions: string[] = [];
-    let params: any[] = [];
-    let paramIndex = 1;
+    // Build dynamic query based on filters
+    let announcements;
+    let total = 0;
 
-    if (search) {
-      whereConditions.push(`(
-        title ILIKE $${paramIndex} OR 
-        content ILIKE $${paramIndex}
-      )`);
-      params.push('%' + search + '%');
-      paramIndex++;
+    if (search && type && isActive) {
+      const result = await sql`
+        SELECT 
+          a.id, 
+          a.title, 
+          a.content, 
+          a.type, 
+          a.target_role, 
+          a.is_active,
+          a.start_date,
+          a.end_date,
+          a.created_at,
+          a.updated_at,
+          u.full_name as created_by_name
+        FROM announcements a
+        LEFT JOIN user_profiles u ON a.created_by = u.id
+        WHERE (a.title ILIKE ${'%' + search + '%'} OR a.content ILIKE ${'%' + search + '%'})
+          AND a.type = ${type}
+          AND a.is_active = ${isActive === 'true'}
+        ORDER BY a.created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      announcements = result;
+      
+      const countResult = await sql`
+        SELECT COUNT(*) as total FROM announcements a
+        WHERE (a.title ILIKE ${'%' + search + '%'} OR a.content ILIKE ${'%' + search + '%'})
+          AND a.type = ${type}
+          AND a.is_active = ${isActive === 'true'}
+      `;
+      total = Number(countResult[0]?.total || 0);
+    } else if (search && type) {
+      const result = await sql`
+        SELECT 
+          a.id, 
+          a.title, 
+          a.content, 
+          a.type, 
+          a.target_role, 
+          a.is_active,
+          a.start_date,
+          a.end_date,
+          a.created_at,
+          a.updated_at,
+          u.full_name as created_by_name
+        FROM announcements a
+        LEFT JOIN user_profiles u ON a.created_by = u.id
+        WHERE (a.title ILIKE ${'%' + search + '%'} OR a.content ILIKE ${'%' + search + '%'})
+          AND a.type = ${type}
+        ORDER BY a.created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      announcements = result;
+      
+      const countResult = await sql`
+        SELECT COUNT(*) as total FROM announcements a
+        WHERE (a.title ILIKE ${'%' + search + '%'} OR a.content ILIKE ${'%' + search + '%'})
+          AND a.type = ${type}
+      `;
+      total = Number(countResult[0]?.total || 0);
+    } else if (search) {
+      const result = await sql`
+        SELECT 
+          a.id, 
+          a.title, 
+          a.content, 
+          a.type, 
+          a.target_role, 
+          a.is_active,
+          a.start_date,
+          a.end_date,
+          a.created_at,
+          a.updated_at,
+          u.full_name as created_by_name
+        FROM announcements a
+        LEFT JOIN user_profiles u ON a.created_by = u.id
+        WHERE a.title ILIKE ${'%' + search + '%'} OR a.content ILIKE ${'%' + search + '%'}
+        ORDER BY a.created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      announcements = result;
+      
+      const countResult = await sql`
+        SELECT COUNT(*) as total FROM announcements a
+        WHERE a.title ILIKE ${'%' + search + '%'} OR a.content ILIKE ${'%' + search + '%'}
+      `;
+      total = Number(countResult[0]?.total || 0);
+    } else if (type) {
+      const result = await sql`
+        SELECT 
+          a.id, 
+          a.title, 
+          a.content, 
+          a.type, 
+          a.target_role, 
+          a.is_active,
+          a.start_date,
+          a.end_date,
+          a.created_at,
+          a.updated_at,
+          u.full_name as created_by_name
+        FROM announcements a
+        LEFT JOIN user_profiles u ON a.created_by = u.id
+        WHERE a.type = ${type}
+        ORDER BY a.created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      announcements = result;
+      
+      const countResult = await sql`
+        SELECT COUNT(*) as total FROM announcements a
+        WHERE a.type = ${type}
+      `;
+      total = Number(countResult[0]?.total || 0);
+    } else {
+      const result = await sql`
+        SELECT 
+          a.id, 
+          a.title, 
+          a.content, 
+          a.type, 
+          a.target_role, 
+          a.is_active,
+          a.start_date,
+          a.end_date,
+          a.created_at,
+          a.updated_at,
+          u.full_name as created_by_name
+        FROM announcements a
+        LEFT JOIN user_profiles u ON a.created_by = u.id
+        ORDER BY a.created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      announcements = result;
+      
+      const countResult = await sql`SELECT COUNT(*) as total FROM announcements a`;
+      total = Number(countResult[0]?.total || 0);
     }
-
-    if (type) {
-      whereConditions.push(`type = $${paramIndex}`);
-      params.push(type);
-      paramIndex++;
-    }
-
-    if (isActive !== null && isActive !== undefined) {
-      whereConditions.push(`is_active = $${paramIndex}`);
-      params.push(isActive === 'true');
-      paramIndex++;
-    }
-
-    const whereClause = whereConditions.length > 0 
-      ? 'WHERE ' + whereConditions.join(' AND ')
-      : '';
-
-    const announcementsQuery = sql`
-      SELECT 
-        a.id, 
-        a.title, 
-        a.content, 
-        a.type, 
-        a.target_role, 
-        a.is_active,
-        a.start_date,
-        a.end_date,
-        a.created_at,
-        a.updated_at,
-        u.full_name as created_by_name
-      FROM announcements a
-      LEFT JOIN user_profiles u ON a.created_by = u.id
-      ${whereClause ? sql.unsafe(whereClause) : sql``}
-      ORDER BY a.created_at DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `.params(...params);
-
-    // Build params for count query
-    const countParams = params.slice(0, whereConditions.filter(c => !c.includes('ILIKE') || search).length);
-    
-    const countQuery = sql`
-      SELECT COUNT(*) as total FROM announcements a
-      ${whereClause ? sql.unsafe(whereClause) : sql``}
-    `.params(...params);
-
-    const [announcements, countResult] = await Promise.all([
-      announcementsQuery,
-      countQuery
-    ]);
-    
-    const total = Number(countResult[0]?.total || 0);
 
     return NextResponse.json({
       announcements,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { findUserById, updateUserRole, deleteUser } from '@/lib/db';
 import { canManageRole } from '@/lib/rbac';
+import { sql } from '@/lib/neon';
 import type { AllRoles } from '@/lib/rbac';
 
 // ─── GET: Get specific user ──────────────────────────────────────────────────

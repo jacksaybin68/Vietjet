@@ -235,3 +235,29 @@ export function parseTokenPayload(token: string): JWTPayload | null {
     return null;
   }
 }
+
+// ─── Token from Request (for API routes) ─────────────────────────────────────
+
+export async function getToken(request: Request): Promise<JWTPayload | null> {
+  const authHeader = request.headers.get('Authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    return verifyAccessToken(token);
+  }
+
+  const cookieHeader = request.headers.get('Cookie');
+  if (cookieHeader) {
+    const cookies = Object.fromEntries(
+      cookieHeader.split('; ').map(c => {
+        const [key, ...value] = c.split('=');
+        return [key, value.join('=')];
+      })
+    );
+    const accessToken = cookies[ACCESS_TOKEN_COOKIE];
+    if (accessToken) {
+      return verifyAccessToken(accessToken);
+    }
+  }
+
+  return null;
+}

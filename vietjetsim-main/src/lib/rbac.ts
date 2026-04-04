@@ -462,3 +462,10 @@ export function canManageRole(actorRole: AllRoles, targetRole: AllRoles): boolea
   const targetLevel = getRoleInfo(targetRole).level;
   return actorLevel > targetLevel;
 }
+
+/**
+ * Check if a role is an admin role (not a regular user)
+ */
+export function isAdminRole(role: string): boolean {
+  return role !== 'user';
+}
