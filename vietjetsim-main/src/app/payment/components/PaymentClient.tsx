@@ -418,7 +418,9 @@ export default function PaymentClient() {
   >([]);
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
+  const [promoData, setPromoData] = useState<{ id: string; code: string; type: string; value: number; discountAmount: number } | null>(null);
   const [promoError, setPromoError] = useState('');
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
   const [loading, setLoading] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -474,15 +476,36 @@ export default function PaymentClient() {
     }
   }, []);
 
-  const discount = promoApplied && booking ? Math.round(booking.basePrice * 0.1) : 0;
-  const total = booking ? booking.basePrice + booking.tax + booking.seatFee - discount : 0;
+  const discountAmount = promoApplied && promoData ? promoData.discountAmount : 0;
+  const total = booking ? booking.basePrice + booking.tax + booking.seatFee - discountAmount : 0;
 
-  const applyPromo = () => {
+  const applyPromo = async () => {
+    if (!promoCode.trim()) return;
     setPromoError('');
-    if (promoCode.toUpperCase() === 'VJ2026') {
-      setPromoApplied(true);
-    } else {
-      setPromoError('Mã khuyến mãi không hợp lệ');
+    setIsApplyingPromo(true);
+    try {
+      const res = await fetch('/api/discounts/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          code: promoCode, 
+          bookingAmount: booking?.basePrice || 0 
+        }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setPromoApplied(true);
+        setPromoData(data.discount);
+        toast.success('Thành công', 'Đã áp dụng mã giảm giá');
+      } else {
+        setPromoApplied(false);
+        setPromoData(null);
+        setPromoError(data.message || 'Mã giảm giá không hợp lệ');
+      }
+    } catch (error) {
+      setPromoError('Có lỗi xảy ra khi kiểm tra mã giảm giá');
+    } finally {
+      setIsApplyingPromo(false);
     }
   };
 
@@ -522,6 +545,8 @@ export default function PaymentClient() {
           booking_id: booking.bookingId,
           method: paymentMethod,
           amount: total,
+          discount_code_id: promoData?.id || null,
+          discount_amount: discountAmount
         }),
       });
 
@@ -1311,16 +1336,22 @@ export default function PaymentClient() {
                     </div>
                     <button
                       onClick={applyPromo}
-                      disabled={promoApplied || !promoCode}
-                      className="px-3 py-2 bg-accent text-stone-900 font-bold rounded-lg text-xs hover:bg-accent-dark transition-colors disabled:opacity-50"
+                      disabled={promoApplied || !promoCode || isApplyingPromo}
+                      className="px-3 py-2 bg-accent text-stone-900 font-bold rounded-lg text-xs hover:bg-accent-dark transition-colors disabled:opacity-50 min-w-[80px] flex items-center justify-center"
                     >
-                      {promoApplied ? '✓' : 'Áp dụng'}
+                      {isApplyingPromo ? (
+                        <div className="w-4 h-4 border-2 border-stone-900/20 border-t-stone-900 rounded-full animate-spin" />
+                      ) : promoApplied ? (
+                        '✓'
+                      ) : (
+                        'Áp dụng'
+                      )}
                     </button>
                   </div>
                   {promoError && <p className="text-xs text-red-500 mt-1">{promoError}</p>}
-                  {promoApplied && (
+                  {promoApplied && promoData && (
                     <p className="text-xs text-green-600 mt-1 font-semibold">
-                      ✓ Giảm 10% đã được áp dụng!
+                      ✓ Đã áp dụng mã {promoData.code}
                     </p>
                   )}
                 </div>
@@ -1346,9 +1377,9 @@ export default function PaymentClient() {
                     </span>
                   </div>
                   {promoApplied && (
-                    <div className="flex justify-between text-green-600">
-                      <span>Giảm giá (10%)</span>
-                      <span className="font-semibold">-{discount.toLocaleString('vi-VN')}₫</span>
+                    <div className="flex justify-between text-green-600 font-medium">
+                      <span>Giảm giá {promoData?.type === 'percentage' ? `(${promoData.value}%)` : ''}</span>
+                      <span className="font-bold">-{discountAmount.toLocaleString('vi-VN')}₫</span>
                     </div>
                   )}
                   <div className="border-t border-stone-200 pt-2 flex justify-between font-bold text-stone-900">

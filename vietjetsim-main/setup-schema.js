@@ -81,6 +81,8 @@ async function setupSchema() {
         flight_id UUID NOT NULL REFERENCES flights(id) ON DELETE CASCADE,
         status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'completed', 'cancelled')),
         total_price DECIMAL(10, 2) NOT NULL DEFAULT 0,
+        discount_code_id UUID REFERENCES discount_codes(id),
+        discount_amount DECIMAL(10, 2) DEFAULT 0,
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
       )
@@ -203,9 +205,31 @@ async function setupSchema() {
         created_at TIMESTAMPTZ DEFAULT NOW()
       )
     `;
-    console.log('✅ Table: refresh_tokens');
+    // ─── Discount Codes ──────────────────────────────────────────────────────
+    await sql`
+      CREATE TABLE IF NOT EXISTS discount_codes (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        code VARCHAR(50) UNIQUE NOT NULL,
+        type VARCHAR(20) NOT NULL CHECK (type IN ('percentage', 'fixed')),
+        value DECIMAL(15, 2) NOT NULL,
+        min_booking_amount DECIMAL(15, 2) DEFAULT 0,
+        max_discount_amount DECIMAL(15, 2),
+        start_date TIMESTAMPTZ NOT NULL,
+        end_date TIMESTAMPTZ NOT NULL,
+        usage_limit INTEGER,
+        usage_per_user_limit INTEGER DEFAULT 1,
+        used_count INTEGER DEFAULT 0,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `;
+    console.log('✅ Table: discount_codes');
 
     // ─── Indexes for Performance ─────────────────────────────────────────────
+    await sql`CREATE INDEX IF NOT EXISTS idx_discount_codes_code ON discount_codes(code)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_discount_codes_active ON discount_codes(is_active)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_discount_codes_dates ON discount_codes(start_date, end_date)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_flights_from_to ON flights(from_code, to_code)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_flights_depart_time ON flights(depart_time)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_bookings_user_id ON bookings(user_id)`;
