@@ -6,14 +6,15 @@
  * Supabase credentials are not available.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface SupabaseClient {
   auth: {
-    getSession: () => Promise<{ data: { session: MockSession | null } }>;
-    getUser: () => Promise<{ data: { user: MockUser | null }; error: Error | null }>;
-    signUp: (options: SignUpOptions) => Promise<{ data: MockAuthData; error: Error | null }>;
-    signInWithPassword: (options: SignInOptions) => Promise<{ data: MockAuthData; error: Error | null }>;
+    getSession: () => Promise<{ data: { session: any | null }; error: Error | null }>;
+    getUser: () => Promise<{ data: { user: any | null }; error: Error | null }>;
+    signUp: (options: any) => Promise<{ data: { user: any; session: any }; error: Error | null }>;
+    signInWithPassword: (options: any) => Promise<{ data: { user: any; session: any }; error: Error | null }>;
     signOut: () => Promise<{ error: Error | null }>;
-    onAuthStateChange: (callback: (event: string, session: MockSession | null) => void) => {
+    onAuthStateChange: (callback: (event: string, session: any | null) => void) => {
       data: {
         subscription: {
           unsubscribe: () => void;
@@ -41,49 +42,12 @@ export interface SupabaseClient {
   };
 }
 
-interface MockSession {
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
-  expires_at: number;
-  user: MockUser;
-}
-
-interface MockUser {
-  id: string;
-  email: string;
-  email_confirmed_at?: string;
-  user_metadata?: {
-    full_name?: string;
-    avatar_url?: string;
-  };
-}
-
-interface SignUpOptions {
-  email: string;
-  password: string;
-  options?: {
-    data?: Record<string, any>;
-    emailRedirectTo?: string;
-  };
-}
-
-interface SignInOptions {
-  email: string;
-  password: string;
-}
-
-interface MockAuthData {
-  user: MockUser | null;
-  session: MockSession | null;
-  error: Error | null;
-}
-
 // Mock implementation
 const mockClient: SupabaseClient = {
   auth: {
     getSession: async () => ({
       data: { session: null },
+      error: null,
     }),
     getUser: async () => ({
       data: { user: null },

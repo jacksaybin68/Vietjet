@@ -1602,3 +1602,308 @@ export async function incrementDiscountUsedCount(id: string): Promise<void> {
     WHERE id = ${id}
   `;
 }
+
+// ─── Wallet Queries ──────────────────────────────────────────────────────────
+
+export interface WalletRecord {
+  id: string;
+  user_id: string;
+  balance: number;
+  currency: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WalletTransactionRecord {
+  id: string;
+  wallet_id: string;
+  type: 'topup' | 'withdraw' | 'payment' | 'refund' | 'bonus';
+  amount: number;
+  balance_before: number;
+  balance_after: number;
+  description: string | null;
+  reference_id: string | null;
+  payment_method_id: string | null;
+  status: 'pending' | 'completed' | 'failed' | 'cancelled';
+  created_at: string;
+}
+
+export interface SavedPaymentMethodRecord {
+  id: string;
+  user_id: string;
+  type: 'card' | 'bank';
+  card_brand: string | null;
+  last_four: string | null;
+  card_holder_name: string | null;
+  expiry_month: number | null;
+  expiry_year: number | null;
+  bank_id: string | null;
+  bank_name: string | null;
+  bank_code: string | null;
+  is_default: boolean;
+  is_active: boolean;
+  created_at: string;
+}
+
+export async function getOrCreateWallet(userId: string): Promise<WalletRecord> {
+  const existing = await sql`
+    SELECT * FROM user_wallets WHERE user_id = ${userId}
+  `;
+
+  if ((existing as WalletRecord[]).length > 0) {
+    return (existing as WalletRecord[])[0];
+  }
+
+  const result = await sql`
+    INSERT INTO user_wallets (user_id, balance, currency)
+    VALUES (${userId}, 0, 'VND')
+    RETURNING *
+  `;
+  return (result as WalletRecord[])[0];
+}
+
+export async function getWalletTransactions(
+  userId: string,
+  params?: { page?: number; limit?: number; type?: string }
+): Promise<{ transactions: WalletTransactionRecord[]; total: number }> {
+  const page = params?.page || 1;
+  const limit = params?.limit || 20;
+  const offset = (page - 1) * limit;
+
+  const wallet = await getOrCreateWallet(userId);
+
+  let query;
+  if (params?.type) {
+    query = sql`
+      SELECT * FROM wallet_transactions
+      WHERE wallet_id = ${wallet.id} AND type = ${params.type}
+      ORDER BY created_at DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `;
+  } else {
+    query = sql`
+      SELECT * FROM wallet_transactions
+      WHERE wallet_id = ${wallet.id}
+      ORDER BY created_at DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `;
+  }
+
+  const countResult = await sql`
+    SELECT COUNT(*) as total FROM wallet_transactions WHERE wallet_id = ${wallet.id}
+  `;
+
+  return {
+    transactions: query as WalletTransactionRecord[],
+    total: parseInt((countResult as any)[0].total, 10),
+  };
+}
+
+export async function topupWallet(
+  userId: string,
+  amount: number,
+  paymentMethodId: string,
+  description?: string
+): Promise<WalletTransactionRecord> {
+  const wallet = await getOrCreateWallet(userId);
+  const balanceBefore = parseFloat(String(wallet.balance));
+  const balanceAfter = balanceBefore + amount;
+
+  const result = await sql`
+    INSERT INTO wallet_transactions (
+      wallet_id, type, amount, balance_before, balance_after,
+      description, payment_method_id, status
+    )
+    VALUES (
+      ${wallet.id}, 'topup', ${amount}, ${balanceBefore}, ${balanceAfter},
+      ${description || 'Nạp tiền vào ví'}, ${paymentMethodId}, 'completed'
+    )
+    RETURNING *
+  `;
+
+  await sql`
+    UPDATE user_wallets SET balance = ${balanceAfter}, updated_at = NOW()
+    WHERE id = ${wallet.id}
+  `;
+
+  return (result as WalletTransactionRecord[])[0];
+}
+
+export async function getSavedPaymentMethods(userId: string): Promise<SavedPaymentMethodRecord[]> {
+  return (await sql`
+    SELECT * FROM saved_payment_methods
+    WHERE user_id = ${userId} AND is_active = true
+    ORDER BY is_default DESC, created_at DESC
+  `) as SavedPaymentMethodRecord[];
+}
+
+export async function addSavedPaymentMethod(method: {
+  user_id: string;
+  type: 'card' | 'bank';
+  card_brand?: string;
+  last_four?: string;
+  card_holder_name?: string;
+  expiry_month?: number;
+  expiry_year?: number;
+  bank_id?: string;
+  bank_name?: string;
+  bank_code?: string;
+}): Promise<SavedPaymentMethodRecord> {
+  const result = await sql`
+    INSERT INTO saved_payment_methods (
+      user_id, type, card_brand, last_four, card_holder_name,
+      expiry_month, expiry_year, bank_id, bank_name, bank_code
+    )
+    VALUES (
+      ${method.user_id}, ${method.type}, ${method.card_brand || null},
+      ${method.last_four || null}, ${method.card_holder_name || null},
+      ${method.expiry_month || null}, ${method.expiry_year || null},
+      ${method.bank_id || null}, ${method.bank_name || null}, ${method.bank_code || null}
+    )
+    RETURNING *
+  `;
+  return (result as SavedPaymentMethodRecord[])[0];
+}
+
+export async function deleteSavedPaymentMethod(id: string, userId: string): Promise<void> {
+  await sql`
+    UPDATE saved_payment_methods
+    SET is_active = false, updated_at = NOW()
+    WHERE id = ${id} AND user_id = ${userId}
+  `;
+}
+
+export async function setDefaultPaymentMethod(id: string, userId: string): Promise<void> {
+  await sql`
+    UPDATE saved_payment_methods SET is_default = false WHERE user_id = ${userId}
+  `;
+  await sql`
+    UPDATE saved_payment_methods SET is_default = true, updated_at = NOW()
+    WHERE id = ${id} AND user_id = ${userId}
+  `;
+}
+
+// ─── Loyalty Queries ─────────────────────────────────────────────────────────
+
+export interface LoyaltyProgramRecord {
+  id: string;
+  name: string;
+  description: string | null;
+  points_per_1000_vnd: number;
+  min_points_to_redeem: number;
+  points_expiry_months: number;
+  start_date: string;
+  end_date: string | null;
+  is_active: boolean;
+}
+
+export interface UserLoyaltyRecord {
+  id: string;
+  user_id: string;
+  program_id: string;
+  total_points: number;
+  available_points: number;
+  lifetime_points: number;
+  tier: string;
+  tier_qualified_at: string | null;
+  joined_at: string;
+}
+
+export interface LoyaltyTransactionRecord {
+  id: string;
+  user_loyalty_id: string;
+  booking_id: string | null;
+  points: number;
+  type: 'earn' | 'redeem' | 'expire' | 'bonus' | 'adjust';
+  description: string | null;
+  expires_at: string | null;
+  expired: boolean;
+  created_at: string;
+}
+
+export interface LoyaltyTierRecord {
+  id: string;
+  program_id: string;
+  name: string;
+  min_lifetime_points: number;
+  points_multiplier: number;
+  benefits: string | null;
+  tier_order: number;
+}
+
+export async function getOrEnrollLoyalty(userId: string): Promise<UserLoyaltyRecord> {
+  const activeProgram = await sql`
+    SELECT * FROM loyalty_programs WHERE is_active = true LIMIT 1
+  `;
+
+  if ((activeProgram as LoyaltyProgramRecord[]).length === 0) {
+    throw new Error('No active loyalty program found');
+  }
+
+  const program = (activeProgram as LoyaltyProgramRecord[])[0];
+
+  const existing = await sql`
+    SELECT * FROM user_loyalty WHERE user_id = ${userId}
+  `;
+
+  if ((existing as UserLoyaltyRecord[]).length > 0) {
+    return (existing as UserLoyaltyRecord[])[0];
+  }
+
+  const result = await sql`
+    INSERT INTO user_loyalty (user_id, program_id, tier)
+    VALUES (${userId}, ${program.id}, 'Bronze')
+    RETURNING *
+  `;
+  return (result as UserLoyaltyRecord[])[0];
+}
+
+export async function getUserLoyaltyWithProgram(userId: string): Promise<{
+  loyalty: UserLoyaltyRecord;
+  program: LoyaltyProgramRecord;
+  tiers: LoyaltyTierRecord[];
+} | null> {
+  const loyalty = await getOrEnrollLoyalty(userId);
+
+  const program = await sql`
+    SELECT * FROM loyalty_programs WHERE id = ${loyalty.program_id}
+  `;
+
+  const tiers = await sql`
+    SELECT * FROM loyalty_tiers WHERE program_id = ${loyalty.program_id}
+    ORDER BY tier_order ASC
+  `;
+
+  return {
+    loyalty,
+    program: (program as LoyaltyProgramRecord[])[0],
+    tiers: tiers as LoyaltyTierRecord[],
+  };
+}
+
+export async function getLoyaltyTransactions(
+  userId: string,
+  params?: { page?: number; limit?: number }
+): Promise<{ transactions: LoyaltyTransactionRecord[]; total: number }> {
+  const page = params?.page || 1;
+  const limit = params?.limit || 20;
+  const offset = (page - 1) * limit;
+
+  const loyalty = await getOrEnrollLoyalty(userId);
+
+  const transactions = await sql`
+    SELECT * FROM loyalty_transactions
+    WHERE user_loyalty_id = ${loyalty.id}
+    ORDER BY created_at DESC
+    LIMIT ${limit} OFFSET ${offset}
+  `;
+
+  const countResult = await sql`
+    SELECT COUNT(*) as total FROM loyalty_transactions WHERE user_loyalty_id = ${loyalty.id}
+  `;
+
+  return {
+    transactions: transactions as LoyaltyTransactionRecord[],
+    total: parseInt((countResult as any)[0].total, 10),
+  };
+}

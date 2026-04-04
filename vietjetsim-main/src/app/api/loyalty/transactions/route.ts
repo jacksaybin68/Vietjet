@@ -15,13 +15,13 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
-    const offset = parseInt(searchParams.get('offset') || '0');
 
     const loyalty = await getOrEnrollLoyalty(payload.userId);
-    const transactions = await getLoyaltyTransactions(loyalty.id, limit, offset);
+    const result = await getLoyaltyTransactions(payload.userId, { page, limit });
 
-    return NextResponse.json({ transactions });
+    return NextResponse.json({ transactions: result.transactions });
   } catch (error) {
     console.error('Error in GET /api/loyalty/transactions:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
