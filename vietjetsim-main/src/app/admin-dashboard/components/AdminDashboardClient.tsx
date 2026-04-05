@@ -212,10 +212,10 @@ export default function AdminDashboardClient() {
     }
 
     return Object.entries(groupedItems).map(([category, categoryItems]) => (
-      <div key={category} className="space-y-0.5">
+      <div key={category} className="space-y-1">
         {!sidebarCollapsed && (
-          <div className="px-3 pt-3 pb-1">
-            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+          <div className="px-4 pt-4 pb-1">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest opacity-60">
               {NAV_CATEGORIES.find(c => c.id === category)?.label || category}
             </span>
           </div>
@@ -224,29 +224,31 @@ export default function AdminDashboardClient() {
           <button
             key={item.id}
             onClick={() => setActiveTab(item.id)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all relative group ${
-              activeTab === item.id ? 'shadow-lg' : 'hover:bg-slate-800/50'
+            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all relative group overflow-hidden ${
+              activeTab === item.id 
+                ? 'text-white shadow-lg shadow-indigo-500/20' 
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
             } ${sidebarCollapsed ? 'justify-center' : ''}`}
             style={{
               background: activeTab === item.id
-                ? 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'
+                ? 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)'
                 : 'transparent',
-              color: activeTab === item.id ? 'white' : '#94a3b8',
             }}
             title={sidebarCollapsed ? item.label : undefined}
           >
             {activeTab === item.id && (
-              <span
-                className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full"
-                style={{ background: 'linear-gradient(180deg, #a855f7 0%, #6366f1 100%)' }}
-              />
+              <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
             )}
-            <Icon name={item.icon} size={18} className="flex-shrink-0" />
-            {!sidebarCollapsed && <span>{item.label}</span>}
+            <Icon 
+              name={item.icon} 
+              size={18} 
+              className={`flex-shrink-0 transition-transform duration-300 ${activeTab === item.id ? 'scale-110' : 'group-hover:scale-110'}`} 
+            />
+            {!sidebarCollapsed && <span className="relative z-10">{item.label}</span>}
             {sidebarCollapsed && (
               <span
-                className="absolute left-full ml-3 px-3 py-2 text-white text-xs font-medium rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50"
-                style={{ background: '#1e293b', boxShadow: '0 10px 40px rgba(0,0,0,0.3)' }}
+                className="absolute left-full ml-3 px-3 py-2 text-white text-xs font-bold rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 translate-x-[-10px] group-hover:translate-x-0 z-50"
+                style={{ background: 'rgba(30, 41, 59, 0.95)', backdropFilter: 'blur(8px)', boxShadow: '0 10px 40px rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)' }}
               >
                 {item.label}
               </span>
@@ -315,15 +317,15 @@ export default function AdminDashboardClient() {
                 {profile?.avatarUrl ? (
                   <img src={profile.avatarUrl} alt={profile.fullName} className="w-full h-full object-cover" />
                 ) : (
-                  getInitials(profile?.fullName || user?.email || 'Admin')
+                  <span className="drop-shadow-sm">{getInitials(profile?.fullName || user?.email || 'Admin')}</span>
                 )}
               </div>
-              <div>
-                <div className="text-xs font-semibold text-white truncate max-w-[140px]">
+              <div className="overflow-hidden">
+                <div className="text-xs font-bold text-white truncate max-w-[140px] tracking-tight">
                   {profile?.fullName || user?.email?.split('@')[0] || 'Admin'}
                 </div>
-                <div className="text-[11px] text-indigo-400 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <div className="text-[10px] text-indigo-400/90 font-bold flex items-center gap-1.5 mt-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse"></span>
                   {roleLabel}
                 </div>
               </div>
@@ -475,11 +477,11 @@ export default function AdminDashboardClient() {
             {/* Global Search Button */}
             <button
               onClick={() => setSearchOpen(true)}
-              className="relative w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
-              style={{ background: 'rgba(148, 163, 184, 0.1)' }}
+              className="relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 hover:bg-white/10 group active:scale-95"
+              style={{ background: 'rgba(148, 163, 184, 0.08)', border: '1px solid rgba(255,255,255,0.05)' }}
               title="Tìm kiếm (Ctrl+K)"
             >
-              <Icon name="MagnifyingGlassIcon" size={18} className="text-slate-400" />
+              <Icon name="MagnifyingGlassIcon" size={18} className="text-slate-400 group-hover:text-white transition-colors" />
             </button>
 
             {/* Notification Dropdown */}

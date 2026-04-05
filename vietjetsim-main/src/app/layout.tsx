@@ -3,7 +3,8 @@ import type { Metadata, Viewport } from 'next';
 import '../styles/tailwind.css';
 import PageTransition from '@/components/PageTransition';
 import { AuthProvider } from '@/contexts/AuthContext';
-
+import NextTopLoader from 'nextjs-toploader';
+import NavigationOptimizer from '@/components/NavigationOptimizer';
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -89,6 +90,8 @@ export default function RootLayout({
         `,
           }}
         />
+        <NextTopLoader color="#EC2029" showSpinner={false} />
+        <NavigationOptimizer />
         <AuthProvider>
           <PageTransition>{children}</PageTransition>
         </AuthProvider>

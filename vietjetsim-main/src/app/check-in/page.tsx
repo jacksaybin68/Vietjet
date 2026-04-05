@@ -45,7 +45,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
 
     setLoading(true);
     // Simulate API call
-    await new Promise((r) => setTimeout(r, 1500));
+    await new Promise((r) => setTimeout(r, 50));
 
     // Mock data for demo
     const mockData: CheckInData = {

@@ -36,6 +36,7 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingDiscount, setEditingDiscount] = useState<DiscountCode | null>(null);
+  const [viewingDiscount, setViewingDiscount] = useState<DiscountCode | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -104,17 +105,24 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
     }
   };
 
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="font-bold text-stone-900">Quản lý mã giảm giá</h2>
-          <p className="text-sm text-stone-400">{total} mã trong hệ thống</p>
+          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+            <Icon name="TagIcon" size={24} className="text-primary" />
+            Quản lý mã giảm giá
+          </h2>
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1 opacity-70">
+            {total} mã trong hệ thống
+          </p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-bold px-4 py-2.5 rounded-xl transition-all shadow-glow-red hover:shadow-none text-sm"
+          className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-[11px] font-black uppercase tracking-[0.2em] px-6 py-3.5 rounded-2xl transition-all shadow-lg active:scale-95"
         >
           <Icon name="PlusIcon" size={16} />
           Tạo mã mới
@@ -122,126 +130,141 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Icon
-            name="MagnifyingGlassIcon"
-            size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
-          />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(1);
-            }}
-            placeholder="Tìm theo tên mã giảm giá..."
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm form-input"
-          />
-        </div>
+      <div className="relative group">
+        <Icon
+          name="MagnifyingGlassIcon"
+          size={18}
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors"
+        />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setCurrentPage(1);
+          }}
+          placeholder="Tìm theo tên mã giảm giá..."
+          className="w-full pl-12 pr-4 py-3.5 bg-slate-800/40 border border-white/5 rounded-2xl text-sm font-semibold text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-all focus:bg-slate-800/60"
+        />
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
+      <div 
+        className="rounded-3xl border overflow-hidden transition-all duration-500"
+        style={{ 
+          background: 'rgba(30, 41, 59, 0.4)', 
+          backdropFilter: 'blur(16px)',
+          borderColor: 'rgba(255, 255, 255, 0.05)',
+          boxShadow: '0 20px 50px rgba(0,0,0,0.3)'
+        }}
+      >
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-stone-50 border-b border-stone-100">
-                <th className="px-4 py-3 text-xs font-bold text-stone-400 uppercase tracking-wider">Mã / Loại</th>
-                <th className="px-4 py-3 text-xs font-bold text-stone-400 uppercase tracking-wider">Giá trị</th>
-                <th className="px-4 py-3 text-xs font-bold text-stone-400 uppercase tracking-wider">Điều kiện</th>
-                <th className="px-4 py-3 text-xs font-bold text-stone-400 uppercase tracking-wider">Hiệu lực</th>
-                <th className="px-4 py-3 text-xs font-bold text-stone-400 uppercase tracking-wider text-center">Đã dùng</th>
-                <th className="px-4 py-3 text-xs font-bold text-stone-400 uppercase tracking-wider text-center">Trạng thái</th>
-                <th className="px-4 py-3 text-xs font-bold text-stone-400 uppercase tracking-wider text-center">Thao tác</th>
+              <tr className="bg-white/5 border-b border-white/5">
+                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Mã / Loại</th>
+                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Giá trị</th>
+                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Điều kiện</th>
+                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Hiệu lực</th>
+                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Sử dụng</th>
+                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Trạng thái</th>
+                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-stone-50">
+            <tbody className="divide-y divide-white/[0.03]">
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td colSpan={7} className="px-4 py-4">
-                      <div className="h-4 bg-stone-100 rounded w-full"></div>
+                    <td colSpan={7} className="px-6 py-6">
+                      <div className="h-6 bg-slate-800/50 rounded-xl w-full"></div>
                     </td>
                   </tr>
                 ))
               ) : discounts.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-10 text-center text-stone-400">
-                    Chưa có mã giảm giá nào.
+                  <td colSpan={7} className="px-6 py-24 text-center">
+                    <div className="flex flex-col items-center gap-4">
+                      <Icon name="InboxIcon" size={32} className="text-slate-600" />
+                      <p className="font-black text-slate-400 uppercase text-[10px] tracking-widest">Không có mã giảm giá</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 discounts.map((discount) => {
                   const isExpired = new Date(discount.end_date) < new Date();
                   const isFuture = new Date(discount.start_date) > new Date();
+                  const StatusIcon = discount.is_active ? 'CheckCircleIcon' : 'XCircleIcon';
                   
                   return (
-                    <tr key={discount.id} className="hover:bg-stone-50/50 transition-colors">
-                      <td className="px-4 py-4">
-                        <div className="font-bold text-stone-900">{discount.code}</div>
-                        <div className="text-[10px] text-stone-400 uppercase font-semibold">
+                    <tr 
+                      key={discount.id} 
+                      onClick={() => setViewingDiscount(discount)}
+                      className="hover:bg-white/[0.04] transition-all cursor-pointer group"
+                    >
+                      <td className="px-6 py-5">
+                        <div className="font-black text-slate-200 group-hover:text-primary transition-colors tracking-tight">{discount.code}</div>
+                        <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mt-1">
                           {discount.type === 'percentage' ? 'Phần trăm' : 'Cố định'}
                         </div>
                       </td>
-                      <td className="px-4 py-4">
-                        <div className="font-semibold text-primary">
+                      <td className="px-6 py-5">
+                        <div className="font-black text-white tabular-nums tracking-tighter text-base">
                           {discount.type === 'percentage' 
                             ? `${discount.value}%` 
                             : `${Number(discount.value).toLocaleString('vi-VN')}₫`}
                         </div>
                         {discount.type === 'percentage' && discount.max_discount_amount && (
-                          <div className="text-[10px] text-stone-400">
+                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">
                             Tối đa: {Number(discount.max_discount_amount).toLocaleString('vi-VN')}₫
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-4 text-xs text-stone-600">
-                        <div>Đơn từ: {Number(discount.min_booking_amount).toLocaleString('vi-VN')}₫</div>
+                      <td className="px-6 py-5">
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Đơn từ: {Number(discount.min_booking_amount).toLocaleString('vi-VN')}₫</div>
                         {discount.usage_per_user_limit && (
-                          <div className="text-[10px] text-stone-400">Max {discount.usage_per_user_limit} lần/người</div>
+                          <div className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em] mt-1.5 px-2 py-0.5 bg-white/5 rounded-md inline-block">Max {discount.usage_per_user_limit} lượt/người</div>
                         )}
                       </td>
-                      <td className="px-4 py-4 text-xs">
-                        <div className="text-stone-600">Từ: {new Date(discount.start_date).toLocaleDateString('vi-VN')}</div>
-                        <div className={`font-medium ${isExpired ? 'text-red-500' : 'text-stone-600'}`}>
-                          Đến: {new Date(discount.end_date).toLocaleDateString('vi-VN')}
+                      <td className="px-6 py-5">
+                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Đến {new Date(discount.end_date).toLocaleDateString('vi-VN')}</div>
+                        <div className={`text-[9px] font-black uppercase tracking-tighter mt-1 ${isExpired ? 'text-rose-500' : 'text-emerald-500'}`}>
+                          {isExpired ? 'Đã hết hạn' : 'Đang hiệu lực'}
                         </div>
                       </td>
-                      <td className="px-4 py-4 text-center">
-                        <div className="text-sm font-medium text-stone-900">{discount.used_count}</div>
+                      <td className="px-6 py-5 text-center">
+                        <div className="text-sm font-black text-slate-200 tabular-nums">{discount.used_count}</div>
                         {discount.usage_limit && (
-                          <div className="text-[10px] text-stone-400">/ {discount.usage_limit}</div>
+                          <div className="text-[10px] font-bold text-slate-500 tracking-widest mt-0.5">/ {discount.usage_limit}</div>
                         )}
                       </td>
-                      <td className="px-4 py-4 text-center">
+                      <td className="px-6 py-5 text-center" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => handleToggleStatus(discount)}
-                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all ${
-                            isExpired 
-                              ? 'bg-stone-100 text-stone-400 cursor-not-allowed' 
-                              : discount.is_active
-                                ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                                : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                          }`}
                           disabled={isExpired}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all ${
+                            isExpired 
+                              ? 'bg-slate-800 text-slate-600 border-slate-700 cursor-not-allowed opacity-50' 
+                              : discount.is_active
+                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'
+                                : 'bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20'
+                          }`}
                         >
-                          {isExpired ? 'Hết hạn' : discount.is_active ? 'Đang chạy' : 'Đã tắt'}
+                          <div className={`w-1.5 h-1.5 rounded-full ${isExpired ? 'bg-slate-600' : discount.is_active ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]' : 'bg-amber-400'}`} />
+                          {isExpired ? 'Hết hạn' : discount.is_active ? 'Active' : 'Paused'}
                         </button>
                       </td>
-                      <td className="px-4 py-4">
+                      <td className="px-6 py-5" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => setEditingDiscount(discount)}
-                            className="p-1.5 text-stone-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                            className="w-8 h-8 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 flex items-center justify-center transition-all active:scale-95"
                             title="Sửa"
                           >
                             <Icon name="PencilSquareIcon" size={16} />
                           </button>
                           <button
                             onClick={() => handleDelete(discount.id, discount.code)}
-                            className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                            className="w-8 h-8 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 flex items-center justify-center transition-all active:scale-95 disabled:opacity-50"
                             disabled={deletingId === discount.id}
                             title="Xóa"
                           >
@@ -257,18 +280,83 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
           </table>
         </div>
         
-        {/* Pagination placeholder - Real implementation would use the Pagination component */}
         {total > pageSize && (
-          <div className="px-4 py-3 border-t border-stone-50 bg-stone-50/30 flex items-center justify-between">
-             <div className="text-xs text-stone-400">
-               Hiển thị {(currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, total)} trong số {total}
-             </div>
-             {/* Pagination component would go here */}
+          <div className="px-6 py-5 border-t border-white/5 bg-white/[0.02] flex items-center justify-center">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
           </div>
         )}
       </div>
 
-      {/* Add/Edit Modal placeholder */}
+      {/* Modal Detail */}
+      {viewingDiscount && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+           <div 
+             className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-[40px] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-300"
+             style={{ background: 'linear-gradient(135deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 100%)' }}
+           >
+              <div className="px-8 py-8 border-b border-white/5 flex items-center justify-between">
+                 <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                       <Icon name="TagIcon" size={24} />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-black text-white uppercase tracking-tight">{viewingDiscount.code}</h3>
+                        <p className="text-[10px] font-black text-primary uppercase tracking-widest">{viewingDiscount.type === 'percentage' ? 'Chiết khấu Phần trăm' : 'Giảm giá Cố định'}</p>
+                    </div>
+                 </div>
+                 <button onClick={() => setViewingDiscount(null)} className="w-10 h-10 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-400 flex items-center justify-center transition-all border border-white/5">
+                    <Icon name="XMarkIcon" size={20} />
+                 </button>
+              </div>
+
+              <div className="p-8 space-y-8">
+                 <div className="flex items-center justify-between bg-slate-950/40 border border-white/5 rounded-3xl p-6 overflow-hidden relative group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
+                    <div>
+                        <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1">Giá trị ưu đãi</p>
+                        <p className="text-4xl font-black text-white tracking-tighter tabular-nums">
+                          {viewingDiscount.type === 'percentage' ? `${viewingDiscount.value}%` : `${Number(viewingDiscount.value).toLocaleString('vi-VN')}₫`}
+                        </p>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1">Lượt đã dùng</p>
+                        <p className="text-3xl font-black text-slate-200 tabular-nums">{viewingDiscount.used_count}<span className="text-sm text-slate-600"> / {viewingDiscount.usage_limit || '∞'}</span></p>
+                    </div>
+                 </div>
+
+                 <div className="grid grid-cols-2 gap-8">
+                    <div>
+                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">Đơn hàng tối thiểu</label>
+                       <p className="text-sm font-bold text-slate-300 tabular-nums">{Number(viewingDiscount.min_booking_amount).toLocaleString('vi-VN')}₫</p>
+                    </div>
+                    <div>
+                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">Giảm tối đa</label>
+                       <p className="text-sm font-bold text-slate-300 tabular-nums">{viewingDiscount.max_discount_amount ? `${Number(viewingDiscount.max_discount_amount).toLocaleString('vi-VN')}₫` : 'Không giới hạn'}</p>
+                    </div>
+                    <div>
+                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">Bắt đầu</label>
+                       <p className="text-xs font-bold text-slate-400">{new Date(viewingDiscount.start_date).toLocaleDateString('vi-VN')}</p>
+                    </div>
+                    <div>
+                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">Kết thúc</label>
+                       <p className="text-xs font-bold text-slate-400">{new Date(viewingDiscount.end_date).toLocaleDateString('vi-VN')}</p>
+                    </div>
+                 </div>
+              </div>
+
+              <div className="p-8 pt-0 flex gap-4">
+                 <button onClick={() => { setViewingDiscount(null); setEditingDiscount(viewingDiscount); }} className="flex-1 px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest border border-white/5 transition-all active:scale-95">Chỉnh sửa</button>
+                 <button onClick={() => setViewingDiscount(null)} className="flex-1 px-8 py-4 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-primary/20">Đóng</button>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {/* Modal Add/Edit */}
       {(showAddModal || editingDiscount) && (
         <DiscountModal
           discount={editingDiscount}
@@ -342,31 +430,31 @@ function DiscountModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-[fadeInUp_0.3s_ease-out]">
-        <div className="px-6 py-4 bg-stone-50 border-b border-stone-100 flex items-center justify-between">
-          <h3 className="font-bold text-stone-900">{discount ? 'Chỉnh sửa mã' : 'Thêm mã mới'}</h3>
-          <button onClick={onClose} className="text-stone-400 hover:text-stone-600 transition-colors">
+    <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[110] flex items-center justify-center p-4 animate-in fade-in duration-300">
+      <div className="w-full max-w-xl bg-slate-900 border border-white/10 rounded-[40px] shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="px-8 py-8 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
+          <h3 className="text-lg font-black text-white uppercase tracking-tight">{discount ? 'Chỉnh sửa mã' : 'Thêm mã ưu đãi mới'}</h3>
+          <button onClick={onClose} className="w-10 h-10 bg-white/5 hover:bg-white/10 text-slate-400 rounded-2xl flex items-center justify-center transition-all border border-white/5">
             <Icon name="XMarkIcon" size={20} />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="p-8 space-y-8">
+          <div className="grid grid-cols-2 gap-6">
             <div className="col-span-2">
-              <label className="block text-xs font-bold text-stone-500 uppercase mb-1.5 ml-1">Mã giảm giá</label>
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Mã giảm giá</label>
               <input
                 required
                 type="text"
-                placeholder="Ví dụ: SUMMER2024"
-                className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm font-bold placeholder:font-normal uppercase"
+                placeholder="Ví dụ: SUMMERCARE"
+                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-black text-white placeholder-slate-700 uppercase tracking-widest focus:outline-none focus:border-primary/50 transition-all focus:bg-white/10"
                 value={formData.code}
                 onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-stone-500 uppercase mb-1.5 ml-1">Loại</label>
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Loại ưu đãi</label>
               <select
-                className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold"
+                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold text-slate-200 focus:outline-none focus:border-primary/50 appearance-none bg-transparent"
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value as 'percentage' | 'fixed' })}
               >
@@ -375,100 +463,91 @@ function DiscountModal({
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold text-stone-500 uppercase mb-1.5 ml-1">Giá trị</label>
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Giá trị</label>
               <input
                 required
                 type="number"
-                className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm font-bold"
+                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-black text-white focus:outline-none focus:border-primary/50 focus:bg-white/10"
                 value={formData.value}
                 onChange={(e) => setFormData({ ...formData, value: e.target.value })}
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-stone-500 uppercase mb-1.5 ml-1">Đơn từ (₫)</label>
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Đơn hàng từ (vnđ)</label>
               <input
                 type="number"
-                className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm"
+                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold text-white focus:outline-none focus:border-primary/50 focus:bg-white/10"
                 value={formData.min_booking_amount}
                 onChange={(e) => setFormData({ ...formData, min_booking_amount: e.target.value })}
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-stone-500 uppercase mb-1.5 ml-1">Giảm tối đa (₫)</label>
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Giảm tối đa (vnđ)</label>
               <input
                 disabled={formData.type === 'fixed'}
                 type="number"
-                className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm disabled:opacity-50"
+                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold text-white focus:outline-none focus:border-primary/50 disabled:opacity-30 focus:bg-white/10"
                 value={formData.max_discount_amount}
                 onChange={(e) => setFormData({ ...formData, max_discount_amount: e.target.value })}
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-stone-500 uppercase mb-1.5 ml-1">Ngày bắt đầu</label>
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Ngày bắt đầu</label>
               <input
                 required
                 type="date"
-                className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm"
+                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-black text-slate-200 focus:outline-none focus:border-primary/50 appearance-none bg-transparent"
                 value={formData.start_date}
                 onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-stone-500 uppercase mb-1.5 ml-1">Ngày kết thúc</label>
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Ngày hết hạn</label>
               <input
                 required
                 type="date"
-                className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm"
+                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-black text-slate-200 focus:outline-none focus:border-primary/50 appearance-none bg-transparent"
                 value={formData.end_date}
                 onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-stone-500 uppercase mb-1.5 ml-1">Tổng lượt dùng</label>
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Tổng lượt dùng</label>
               <input
                 type="number"
                 placeholder="Bỏ trống = ∞"
-                className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm"
+                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-black text-white focus:outline-none focus:border-primary/50 placeholder-slate-700 focus:bg-white/10"
                 value={formData.usage_limit}
                 onChange={(e) => setFormData({ ...formData, usage_limit: e.target.value })}
               />
             </div>
-            <div>
-              <label className="block text-xs font-bold text-stone-500 uppercase mb-1.5 ml-1">Mỗi người dùng</label>
-              <input
-                type="number"
-                className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm"
-                value={formData.usage_per_user_limit}
-                onChange={(e) => setFormData({ ...formData, usage_per_user_limit: e.target.value })}
-              />
-            </div>
           </div>
           
-          <div className="flex items-center gap-2 pt-2">
+          <div className="flex items-center gap-3 p-4 bg-white/5 border border-white/5 rounded-2xl">
             <input
               type="checkbox"
               id="is_active"
               checked={formData.is_active}
               onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-              className="w-4 h-4 text-primary rounded border-stone-300"
+              className="w-5 h-5 accent-emerald-500 rounded border-white/10 bg-transparent cursor-pointer"
             />
-            <label htmlFor="is_active" className="text-sm font-semibold text-stone-700">Kích hoạt mã ngay</label>
+            <label htmlFor="is_active" className="text-xs font-black text-slate-400 uppercase tracking-widest cursor-pointer">Kích hoạt mã ngay lập tức</label>
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-4 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-bold rounded-xl transition-all"
+              className="flex-1 py-5 bg-white/5 hover:bg-white/10 text-white font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all border border-white/5"
             >
-              Hủy
+              Hủy bỏ
             </button>
             <button
               disabled={isSaving}
               type="submit"
-              className="flex-2 bg-primary hover:bg-primary-dark text-white font-bold py-3 px-8 rounded-xl transition-all shadow-glow-red hover:shadow-none disabled:opacity-50"
+              className="flex-[2] bg-primary hover:bg-primary-dark text-white font-black text-[10px] uppercase tracking-widest py-5 rounded-2xl transition-all shadow-lg active:scale-95 shadow-primary/20 disabled:opacity-50"
             >
-              {isSaving ? 'Đang lưu...' : discount ? 'Cập nhật' : 'Tạo mã'}
+              {isSaving ? 'Đang khởi tạo...' : discount ? 'Lưu thay đổi' : 'Khởi tạo mã'}
             </button>
           </div>
         </form>

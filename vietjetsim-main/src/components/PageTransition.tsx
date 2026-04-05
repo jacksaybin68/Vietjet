@@ -8,14 +8,20 @@ const ROUTE_ORDER: Record<string, number> = {
   '/homepage': 0,
   '/': 0,
   '/flight-booking': 1,
-  '/payment': 2,
-  '/confirmation': 3,
+  '/booking': 2,
+  '/payment': 3,
+  '/confirmation': 4,
+  '/user-dashboard': 5,
+  '/admin-dashboard': 5,
 };
 
 function getRouteIndex(path: string): number {
+  // Get the base route (e.g. /flight-booking/results -> /flight-booking)
+  const baseRoute = path === '/' ? '/' : `/${path.split('/')[1]}`;
+
   // Match by prefix for nested routes
   for (const [route, idx] of Object.entries(ROUTE_ORDER)) {
-    if (path === route || path.startsWith(route + '/')) return idx;
+    if (baseRoute === route) return idx;
   }
   return -1;
 }
@@ -67,14 +73,18 @@ export default function PageTransition({ children }: PageTransitionProps) {
 
     setStage(exitStage);
 
-    const exitDuration = 220;
+    // Optimized timing for premium feel
+    const exitDuration = 150;
     const timeout = setTimeout(() => {
       prevPathname.current = pathname;
       setDisplayChildren(children);
       setStage(enterStage);
 
+      // Scroll to top on page change
+      window.scrollTo({ top: 0, behavior: 'instant' });
+
       // Reset to idle after enter animation completes
-      const enterTimeout = setTimeout(() => setStage('idle'), 300);
+      const enterTimeout = setTimeout(() => setStage('idle'), 250);
       return () => clearTimeout(enterTimeout);
     }, exitDuration);
 
@@ -91,5 +101,9 @@ export default function PageTransition({ children }: PageTransitionProps) {
     'exit-fade': 'page-exit-fade',
   };
 
-  return <div className={`page-transition ${stageClass[stage]}`}>{displayChildren}</div>;
+  return (
+    <div className={`page-transition-wrapper ${stageClass[stage]}`}>
+      <div className="page-transition-content">{displayChildren}</div>
+    </div>
+  );
 }

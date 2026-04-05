@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/AppIcon';
@@ -87,11 +87,11 @@ export default function FlightBookingClient() {
 
   return (
     <div
-      className="pt-[72px] pb-12 min-h-screen bg-gray-50 font-body"
+      className="pt-[128px] pb-12 min-h-screen bg-gray-50 font-body"
     >
       {/* VietJet-style sticky step bar */}
       <div
-        className="sticky top-[72px] z-30"
+        className="sticky top-[128px] z-30"
         style={{
           background: 'linear-gradient(20.12deg, rgba(217,26,33,1) 19.6%, rgba(111,0,0,1) 93.86%)',
         }}

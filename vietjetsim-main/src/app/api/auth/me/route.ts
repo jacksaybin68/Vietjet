@@ -7,8 +7,8 @@ export async function GET(request: NextRequest) {
 
     if (!token) {
       return NextResponse.json(
-        { error: 'Unauthorized', message: 'No access token found' },
-        { status: 401 }
+        { user: null, message: 'No session found' },
+        { status: 200 }
       );
     }
 
@@ -16,8 +16,8 @@ export async function GET(request: NextRequest) {
 
     if (!payload) {
       return NextResponse.json(
-        { error: 'Unauthorized', message: 'Invalid or expired token' },
-        { status: 401 }
+        { user: null, message: 'Invalid or expired session' },
+        { status: 200 }
       );
     }
 

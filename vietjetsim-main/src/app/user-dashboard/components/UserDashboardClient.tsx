@@ -406,7 +406,7 @@ export default function UserDashboardClient() {
   const retryProfile = () => {
     setProfileError(false);
     setProfileLoading(true);
-    setTimeout(() => setProfileLoading(false), 1400);
+    setTimeout(() => setProfileLoading(false), 50);
   };
 
   const fetchHistoryBookings = useCallback(async () => {
@@ -626,7 +626,7 @@ export default function UserDashboardClient() {
 
   const toast = useToast();
   return (
-    <div className="pt-20 pb-12 min-h-screen" style={{
+    <div className="pt-[140px] pb-12 min-h-screen" style={{
       background: 'linear-gradient(180deg, #fefce8 0%, #fffbeb 50%, #fef9c3 100%)'
     }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -748,7 +748,7 @@ export default function UserDashboardClient() {
             className={`hidden lg:flex flex-col flex-shrink-0 transition-all duration-300 ${sidebarCollapsed ? 'w-20' : 'w-64'}`}
           >
             <div
-              className="bg-white border border-amber-100 rounded-3xl overflow-hidden sticky top-[100px]"
+              className="bg-white border border-amber-100 rounded-3xl overflow-hidden sticky top-[140px]"
               style={{ boxShadow: '0 8px 32px rgba(245, 158, 11, 0.12), 0 4px 12px rgba(251, 191, 36, 0.08)' }}
             >
               {/* Sidebar header */}

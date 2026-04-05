@@ -197,6 +197,7 @@ export default function StatsSection() {
               {/* Sub-desc */}
               <div
                 className="text-[10px] font-medium font-koho"
+                style={{ color: 'rgba(255,212,0,0.7)' }}
               >
                 {stat.desc}
               </div>

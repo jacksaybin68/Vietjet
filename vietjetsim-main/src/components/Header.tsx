@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import AppLogo from '@/components/ui/AppLogo';
 import Icon from '@/components/ui/AppIcon';
+import { useAuth } from '@/contexts/AuthContext';
 
 const MAIN_NAV = [
   { label: 'CHUYẾN BAY CỦA TÔI', href: '/user-dashboard' },
@@ -105,6 +106,7 @@ export default function Header() {
     '[THÔNG BÁO] Giao thông từ Denpasar ngày 18/03/2026 (Lễ Im lặng Ogoh - Ogoh) có thể ùn tắc. Quý khách lưu ý thời gian di chuyển phù hợp...'
   );
   const pathname = usePathname();
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -112,7 +114,8 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const isActive = (href: string) => pathname === href;
+  const isActive = (href: string) =>
+    href === '/homepage' ? pathname === href || pathname === '/' : pathname.startsWith(href);
 
   return (
     <>
@@ -169,53 +172,23 @@ export default function Header() {
           }}
         >
           <div className="max-w-[1400px] mx-auto px-4">
-            <div className="flex items-center h-11">
+            <div className="flex items-center h-14">
               {/* Left: Navigation links */}
               <div className="hidden lg:flex items-center gap-0">
-                {/* CHUYẾN BAY CỦA TÔI */}
-                <Link
-                  href="/user-dashboard"
-                  className="px-3 py-2 text-[11px] font-bold whitespace-nowrap transition-colors border-b-2 text-white/90 hover:text-yellow-300 border-transparent hover:border-yellow-300/50"
-                  style={{
-                    fontWeight: 700,
-                    letterSpacing: '0.03em'
-                  }}
-                >
-                  CHUYẾN BAY CỦA TÔI
-                </Link>
-                {/* DỊCH VỤ KHÁC — active */}
-                <Link
-                  href="/homepage"
-                  className="px-3 py-2 text-[11px] font-bold whitespace-nowrap transition-colors border-b-2 text-yellow-300 border-yellow-300"
-                  style={{
-                    fontWeight: 700,
-                    letterSpacing: '0.03em'
-                  }}
-                >
-                  DỊCH VỤ KHÁC
-                </Link>
-                {/* ONLINE CHECK-IN */}
-                <Link
-                  href="/flight-booking"
-                  className="px-3 py-2 text-[11px] font-bold whitespace-nowrap transition-colors border-b-2 text-white/90 hover:text-yellow-300 border-transparent hover:border-yellow-300/50"
-                  style={{
-                    fontWeight: 700,
-                    letterSpacing: '0.03em'
-                  }}
-                >
-                  ONLINE CHECK-IN
-                </Link>
-                {/* DỊCH VỤ CHUYẾN BAY */}
-                <Link
-                  href="/flight-booking"
-                  className="px-3 py-2 text-[11px] font-bold whitespace-nowrap transition-colors border-b-2 text-white/90 hover:text-yellow-300 border-transparent hover:border-yellow-300/50"
-                  style={{
-                    fontWeight: 700,
-                    letterSpacing: '0.03em'
-                  }}
-                >
-                  DỊCH VỤ CHUYẾN BAY
-                </Link>
+                {MAIN_NAV.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`px-4 h-full flex items-center text-[12px] font-bold whitespace-nowrap transition-all duration-200 border-b-2 ${
+                      isActive(item.href)
+                        ? 'text-yellow-300 border-yellow-300'
+                        : 'text-white/90 hover:text-yellow-300 border-transparent hover:border-yellow-300/50'
+                    }`}
+                    style={{ fontWeight: 700, letterSpacing: '0.04em' }}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
               </div>
 
               {/* Logo — centered with some margin */}
@@ -228,31 +201,54 @@ export default function Header() {
 
               {/* Utility links — desktop */}
               <div className="hidden lg:flex items-center gap-0">
-                {/* Sign up */}
-                <Link
-                  href="/sign-up-login"
-                  className="px-2 py-1 text-[11px] font-semibold text-white hover:text-yellow-300 transition-colors font-koho-semibold"
-                >
-                  Đăng ký
-                </Link>
-                <span className="text-white/30 text-xs mx-0.5">|</span>
-                {/* Sign in */}
-                <Link
-                  href="/sign-up-login"
-                  className="px-2 py-1 text-[11px] font-semibold text-white hover:text-yellow-300 transition-colors font-koho-semibold"
-                >
-                  Đăng nhập
-                </Link>
-                <span className="text-white/30 text-xs mx-1">|</span>
-                {/* Language */}
+                {user ? (
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1 bg-white/10 rounded-full pl-1 pr-3 py-1 border border-white/10 hover:bg-white/15 transition-all">
+                      <Link
+                        href="/user-dashboard"
+                        className="flex items-center gap-2 text-[11px] font-bold text-white group"
+                      >
+                        <span className="w-6 h-6 rounded-full bg-yellow-400 text-navy flex items-center justify-center text-[10px] font-black ring-2 ring-white/10 group-hover:scale-105 transition-transform flex-shrink-0">
+                          {user.fullName?.charAt(0)?.toUpperCase() || 'U'}
+                        </span>
+                        <span className="max-w-[120px] truncate font-koho-bold">
+                          {user.fullName || user.email}
+                        </span>
+                      </Link>
+                      <span className="text-white/20 text-[10px] mx-1 selection:hidden">|</span>
+                      <button
+                        onClick={() => signOut()}
+                        className="text-[10px] font-black text-white/70 hover:text-yellow-300 transition-colors uppercase tracking-tight"
+                      >
+                        Đăng xuất
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1 bg-white/10 rounded-full px-4 py-1.5 border border-white/10">
+                    <Link
+                      href="/sign-up-login"
+                      className="text-[11px] font-bold text-white hover:text-yellow-300 transition-colors"
+                    >
+                      Đăng ký
+                    </Link>
+                    <span className="text-white/30 text-[10px] mx-1">|</span>
+                    <Link
+                      href="/sign-up-login"
+                      className="text-[11px] font-bold text-white hover:text-yellow-300 transition-colors"
+                    >
+                      Đăng nhập
+                    </Link>
+                  </div>
+                )}
+                <span className="text-white/20 text-xs mx-3">|</span>
+                {/* Language Pillar */}
                 <button
-                  className="flex items-center gap-1 px-2 py-1 text-[11px] font-semibold text-white border border-white/30 rounded hover:border-white/70 hover:text-yellow-300 transition-colors font-koho-semibold"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black text-white bg-white/5 border border-white/20 rounded-full hover:bg-white/10 hover:border-white/40 transition-all uppercase tracking-wider"
                 >
-                  <span className="text-xs">🇻🇳</span>
+                  <span className="text-xs grayscale-[0.5] group-hover:grayscale-0 transition-all">🇻🇳</span>
                   <span>Tiếng Việt</span>
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-2.5 h-2.5">
-                    <path d="M7 10l5 5 5-5z" />
-                  </svg>
+                  <Icon name="ChevronDownIcon" size={12} className="text-white/60" />
                 </button>
               </div>
 
@@ -327,18 +323,39 @@ export default function Header() {
                 </Link>
               ))}
               <div className="pt-3 border-t border-gray-100 flex flex-col gap-2">
-                <Link
-                  href="/sign-up-login"
-                  onClick={() => setMobileOpen(false)}
-                  className="block px-3 py-2.5 text-sm font-bold text-white rounded-lg transition-colors text-center"
-                  style={{
-                    background:
-                      'linear-gradient(20.12deg, rgba(217,26,33,0.9) 19.6%, rgba(111,0,0,0.9) 93.86%)',
-                    fontWeight: 700
-                  }}
-                >
-                  Đăng nhập / Đăng ký
-                </Link>
+                {user ? (
+                  <>
+                    <Link
+                      href="/user-dashboard"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-red-50 text-sm font-bold text-[#EC2029]"
+                    >
+                      <span className="w-6 h-6 rounded-full bg-[#EC2029] text-white flex items-center justify-center text-xs font-black">
+                        {user.fullName?.charAt(0)?.toUpperCase() || 'U'}
+                      </span>
+                      {user.fullName || user.email}
+                    </Link>
+                    <button
+                      onClick={() => { signOut(); setMobileOpen(false); }}
+                      className="block px-3 py-2.5 text-sm font-bold text-gray-600 rounded-lg hover:bg-gray-100 transition-colors text-center"
+                    >
+                      Đăng xuất
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    href="/sign-up-login"
+                    onClick={() => setMobileOpen(false)}
+                    className="block px-3 py-2.5 text-sm font-bold text-white rounded-lg transition-colors text-center"
+                    style={{
+                      background:
+                        'linear-gradient(20.12deg, rgba(217,26,33,0.9) 19.6%, rgba(111,0,0,0.9) 93.86%)',
+                      fontWeight: 700
+                    }}
+                  >
+                    Đăng nhập / Đăng ký
+                  </Link>
+                )}
               </div>
             </div>
           </div>

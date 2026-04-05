@@ -24,7 +24,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
   const [isLoading, setIsLoading] = useState(true);
 
   React.useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 900);
+    const timer = setTimeout(() => setIsLoading(false), 50);
     return () => clearTimeout(timer);
   }, []);
 
@@ -237,7 +237,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
           {/* Booking Summary */}
           <div className="lg:col-span-1">
             <div
-              className="bg-white rounded-2xl border border-stone-200 overflow-hidden sticky top-36"
+              className="bg-white rounded-2xl border border-stone-200 overflow-hidden sticky top-[230px]"
               style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
             >
               {/* Yellow accent top bar for summary */}
