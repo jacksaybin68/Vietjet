@@ -36,17 +36,17 @@ interface RefundRequest {
 const STATUS_MAP: Record<RefundStatus, { label: string; cls: string; icon: string }> = {
   pending: {
     label: 'Chờ duyệt',
-    cls: 'bg-amber-50 text-amber-700 border border-amber-200',
+    cls: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
     icon: 'ClockIcon',
   },
   approved: {
     label: 'Đã duyệt',
-    cls: 'bg-green-50 text-green-700 border border-green-200',
+    cls: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
     icon: 'CheckCircleIcon',
   },
   rejected: {
     label: 'Từ chối',
-    cls: 'bg-red-50 text-red-700 border border-red-200',
+    cls: 'bg-rose-500/10 text-rose-400 border border-rose-500/20',
     icon: 'XCircleIcon',
   },
 };
@@ -61,7 +61,8 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedRequest, setSelectedRequest] = useState<RefundRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<RefundRequest|null>(null);
+  const [viewingRequest, setViewingRequest] = useState<RefundRequest|null>(null);
   const [modalAction, setModalAction] = useState<'approve' | 'reject' | null>(null);
   const [adminNote, setAdminNote] = useState('');
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -230,86 +231,64 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
     .reduce((s, r) => s + r.amount, 0);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="font-bold text-stone-900">Duyệt phiếu hoàn tiền</h2>
-          <p className="text-sm text-stone-400">{requests.length} yêu cầu hoàn tiền tổng cộng</p>
+          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+            <Icon name="BanknotesIcon" size={24} className="text-rose-400" />
+            Duyệt phiếu hoàn tiền
+          </h2>
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1 opacity-70">
+            {requests.length} yêu cầu hoàn tiền tổng cộng
+          </p>
         </div>
         <div className="flex items-center gap-2">
           {pendingCount > 0 && (
-            <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold px-3 py-1.5 rounded-xl">
-              <Icon name="ClockIcon" size={13} />
+            <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-2xl">
+              <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
               {pendingCount} chờ xử lý
             </div>
           )}
           <button
             onClick={loadRequests}
-            className="flex items-center gap-1.5 text-xs font-semibold text-stone-500 hover:text-primary border border-stone-200 hover:border-primary px-3 py-1.5 rounded-xl transition-all"
+            className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl transition-all"
             title="Tải lại"
           >
-            <Icon name="ArrowPathIcon" size={13} />
+            <Icon name="ArrowPathIcon" size={18} />
           </button>
         </div>
       </div>
-
-      {/* Error state */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-center gap-3">
-          <Icon name="ExclamationTriangleIcon" size={16} className="text-red-500 flex-shrink-0" />
-          <p className="text-sm text-red-700 flex-1">{error}</p>
-          <button
-            onClick={loadRequests}
-            className="text-xs font-semibold text-red-700 hover:text-red-900 underline"
-          >
-            Thử lại
-          </button>
-        </div>
-      )}
 
       {/* Summary cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-stone-100 text-stone-700 rounded-xl px-4 py-3 hover:-translate-y-1 hover:shadow-vj-sm transition-all duration-200 cursor-default">
-          <div className="text-2xl font-black">{requests.length}</div>
-          <div className="text-xs font-medium mt-0.5 opacity-70">Tổng yêu cầu</div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-slate-800/40 border border-white/5 rounded-3xl p-5 hover:border-white/10 transition-all group">
+          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 group-hover:text-slate-400 transition-colors">Tổng yêu cầu</p>
+          <p className="text-3xl font-black text-white tabular-nums tracking-tighter">{requests.length}</p>
         </div>
-        <div className="bg-amber-50 text-amber-700 rounded-xl px-4 py-3 hover:-translate-y-1 hover:shadow-vj-sm transition-all duration-200 cursor-default">
-          <div className="text-2xl font-black">{pendingCount}</div>
-          <div className="text-xs font-medium mt-0.5 opacity-70">Chờ duyệt</div>
+        <div className="bg-amber-500/5 border border-amber-500/10 rounded-3xl p-5 hover:border-amber-500/20 transition-all group">
+          <p className="text-[10px] font-black text-amber-500/70 uppercase tracking-widest mb-1">Đang chờ</p>
+          <p className="text-3xl font-black text-amber-400 tabular-nums tracking-tighter">{pendingCount}</p>
         </div>
-        <div className="bg-green-50 text-green-700 rounded-xl px-4 py-3 hover:-translate-y-1 hover:shadow-vj-sm transition-all duration-200 cursor-default">
-          <div className="text-2xl font-black">{approvedCount}</div>
-          <div className="text-xs font-medium mt-0.5 opacity-70">Đã duyệt</div>
+        <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-3xl p-5 hover:border-emerald-500/20 transition-all group">
+          <p className="text-[10px] font-black text-emerald-500/70 uppercase tracking-widest mb-1">Đã duyệt</p>
+          <p className="text-3xl font-black text-emerald-400 tabular-nums tracking-tighter">{approvedCount}</p>
         </div>
-        <div className="bg-red-50 text-red-700 rounded-xl px-4 py-3 hover:-translate-y-1 hover:shadow-vj-sm transition-all duration-200 cursor-default">
-          <div className="text-2xl font-black">{rejectedCount}</div>
-          <div className="text-xs font-medium mt-0.5 opacity-70">Từ chối</div>
+        <div className="bg-rose-500/5 border border-rose-500/10 rounded-3xl p-5 hover:border-rose-500/20 transition-all group overflow-hidden relative">
+          <div className="relative z-10">
+            <p className="text-[10px] font-black text-rose-500/70 uppercase tracking-widest mb-1">Đã hoàn tiền</p>
+            <p className="text-2xl font-black text-white tabular-nums tracking-tighter mt-1">{totalRefundAmount.toLocaleString('vi-VN')}₫</p>
+          </div>
+          <Icon name="CurrencyDollarIcon" size={64} className="absolute -right-4 -bottom-4 text-rose-500/5 rotate-12" />
         </div>
       </div>
 
-      {/* Total approved amount */}
-      {approvedCount > 0 && (
-        <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-center gap-3">
-          <div className="w-9 h-9 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-            <Icon name="BanknotesIcon" size={18} className="text-green-600" />
-          </div>
-          <div>
-            <div className="text-xs text-green-600 font-medium">Tổng tiền đã hoàn</div>
-            <div className="text-lg font-black text-green-700">
-              {totalRefundAmount.toLocaleString('vi-VN')}₫
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
+      <div className="flex flex-col lg:row gap-4">
+        <div className="relative flex-1 group">
           <Icon
             name="MagnifyingGlassIcon"
             size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-rose-400 transition-colors"
           />
           <input
             type="text"
@@ -319,35 +298,37 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
               setCurrentPage(1);
             }}
             placeholder="Tìm mã phiếu, mã đặt chỗ, tên khách hàng..."
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm form-input"
+            className="w-full pl-12 pr-4 py-3 bg-slate-800/40 border border-white/5 rounded-2xl text-sm font-semibold text-white placeholder-slate-600 focus:outline-none focus:border-rose-500/50 transition-all focus:bg-slate-800/60"
           />
         </div>
-        <select
-          value={filterStatus}
-          onChange={(e) => {
-            setFilterStatus(e.target.value as 'all' | RefundStatus);
-            setCurrentPage(1);
-          }}
-          className="px-3 py-2.5 bg-white border border-stone-200 rounded-xl text-sm form-input"
-        >
-          <option value="all">Tất cả trạng thái</option>
-          <option value="pending">Chờ duyệt</option>
-          <option value="approved">Đã duyệt</option>
-          <option value="rejected">Từ chối</option>
-        </select>
-        {(searchQuery || filterStatus !== 'all') && (
-          <button
-            onClick={() => {
-              setSearchQuery('');
-              setFilterStatus('all');
+        <div className="flex items-center gap-2">
+          <select
+            value={filterStatus}
+            onChange={(e) => {
+              setFilterStatus(e.target.value as 'all' | RefundStatus);
               setCurrentPage(1);
             }}
-            className="flex items-center gap-1.5 text-xs font-semibold text-stone-500 hover:text-red-500 transition-colors px-3 py-2.5 rounded-xl border border-stone-200 hover:border-red-200 hover:bg-red-50 whitespace-nowrap"
+            className="px-4 py-3 bg-slate-800/40 border border-white/5 rounded-2xl text-sm font-bold text-slate-300 focus:outline-none focus:border-rose-500/50 appearance-none cursor-pointer"
           >
-            <Icon name="XMarkIcon" size={13} />
-            Xoá bộ lọc
-          </button>
-        )}
+            <option value="all">Tất cả trạng thái</option>
+            <option value="pending">Chờ duyệt</option>
+            <option value="approved">Đã duyệt</option>
+            <option value="rejected">Từ chối</option>
+          </select>
+          {(searchQuery || filterStatus !== 'all') && (
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setFilterStatus('all');
+                setCurrentPage(1);
+              }}
+              className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-rose-400 transition-all px-4 py-3 rounded-2xl border border-white/5 hover:border-rose-500/20"
+            >
+              <Icon name="XMarkIcon" size={14} />
+              Xoá bộ lọc
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Table */}
@@ -578,141 +559,208 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
         )}
       </div>
 
-      {/* Approve / Reject Modal */}
+      {/* Approve / Reject Confirmation Modal */}
       {selectedRequest && modalAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={closeModal} />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md animate-[fadeInUp_0.25s_ease-out]">
-            {/* Modal header */}
-            <div
-              className={`px-6 py-4 rounded-t-2xl flex items-center gap-3 ${modalAction === 'approve' ? 'bg-green-50 border-b border-green-100' : 'bg-red-50 border-b border-red-100'}`}
-            >
-              <div
-                className={`w-10 h-10 rounded-xl flex items-center justify-center ${modalAction === 'approve' ? 'bg-green-100' : 'bg-red-100'}`}
-              >
-                <Icon
-                  name={modalAction === 'approve' ? 'CheckCircleIcon' : 'XCircleIcon'}
-                  size={22}
-                  className={modalAction === 'approve' ? 'text-green-600' : 'text-red-600'}
-                />
-              </div>
-              <div>
-                <h3
-                  className={`font-bold text-base ${modalAction === 'approve' ? 'text-green-800' : 'text-red-800'}`}
+        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[110] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="w-full max-w-md bg-slate-900 border border-white/10 rounded-[40px] shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300">
+             {/* Header */}
+             <div className={`px-8 py-8 border-b border-white/5 flex items-center gap-4 ${modalAction === 'approve' ? 'bg-emerald-500/5' : 'bg-rose-500/5'}`}>
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-lg ${modalAction === 'approve' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>
+                  <Icon name={modalAction === 'approve' ? 'CheckCircleIcon' : 'XCircleIcon'} size={24} />
+                </div>
+                <div>
+                   <h3 className="text-lg font-black text-white tracking-tight">{modalAction === 'approve' ? 'Duyệt hoàn tiền' : 'Từ chối hoàn tiền'}</h3>
+                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-0.5">#{selectedRequest.id.slice(0, 8)} • {selectedRequest.userName}</p>
+                </div>
+             </div>
+
+             <div className="p-8 space-y-6">
+                <div>
+                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest opacity-60 mb-2">Lời nhắn Admin</p>
+                   <textarea 
+                      value={adminNote}
+                      onChange={(e) => setAdminNote(e.target.value)}
+                      placeholder={modalAction === 'approve' ? "Ví dụ: Đã đủ điều kiện. Chấp thuận hoàn trả." : "Ví dụ: Không đúng chính sách hoàn tiền."}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm font-bold text-white placeholder-slate-600 focus:outline-none focus:border-white/20 h-24 resize-none transition-all"
+                   />
+                </div>
+                
+                <div className="p-4 bg-white/5 rounded-2xl border border-white/5 flex gap-3 items-center">
+                   <Icon name="InformationCircleIcon" size={18} className="text-slate-400 shrink-0" />
+                   <p className="text-[11px] font-bold text-slate-400 leading-relaxed uppercase tracking-wider">
+                     {modalAction === 'approve' ? 'Số tiền sẽ được chuyển trả về tài khoản đã cung cấp.' : 'Quyết định này sẽ được gửi tới khách hàng.'}
+                   </p>
+                </div>
+             </div>
+
+             <div className="p-8 flex gap-3 border-t border-white/5">
+                <button onClick={closeModal} className="flex-1 px-6 py-4 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">Huỷ bỏ</button>
+                <button 
+                   onClick={handleConfirm}
+                   disabled={processingId !== null}
+                   className={`flex-1 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 text-white ${modalAction === 'approve' ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20' : 'bg-rose-600 hover:bg-rose-500 shadow-rose-500/20'}`}
                 >
-                  {modalAction === 'approve' ? 'Duyệt phiếu hoàn tiền' : 'Từ chối phiếu hoàn tiền'}
-                </h3>
-                <p className="text-xs text-stone-500">
-                  {selectedRequest.userName} · #{selectedRequest.bookingId}
-                </p>
-              </div>
-            </div>
+                   {processingId ? 'Đang xử lý...' : 'Xác nhận ngay'}
+                </button>
+             </div>
+          </div>
+        </div>
+      )}
 
-            {/* Modal body */}
-            <div className="px-6 py-4 space-y-4">
-              {/* Refund info */}
-              <div className="bg-stone-50 rounded-xl p-4 space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-stone-500">Mã đặt chỗ</span>
-                  <span className="font-mono font-bold text-sm text-stone-900">
-                    {selectedRequest.bookingId}
-                  </span>
+      {/* Comprehensive Detail View Modal */}
+      {viewingRequest && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div 
+            className="w-full max-w-2xl bg-slate-900 border border-white/10 rounded-[40px] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-300"
+            style={{ 
+              background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.98) 0%, rgba(15, 23, 42, 0.98) 100%)',
+              boxShadow: '0 25px 70px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(99, 102, 241, 0.1)'
+            }}
+          >
+            {/* Modal Header */}
+            <div className="px-8 py-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+              <div className="flex items-center gap-5">
+                <div className="w-14 h-14 bg-rose-500/10 rounded-2xl flex items-center justify-center border border-rose-500/20 shadow-lg shadow-rose-500/10">
+                  <Icon name="BanknotesIcon" size={28} className="text-rose-400" />
                 </div>
-                {selectedRequest.flightNo && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-stone-500">Chuyến bay</span>
-                    <span className="text-sm font-semibold text-stone-700">
-                      {selectedRequest.flightNo} · {selectedRequest.route}
+                <div>
+                  <h3 className="text-2xl font-black text-white tracking-tight">Chi tiết yêu cầu</h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Phiếu: <span className="text-rose-400 font-mono tracking-normal">#{viewingRequest.id.slice(0, 8)}</span></span>
+                    <span className="text-slate-700 px-1">•</span>
+                    <span className={`text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider ${STATUS_MAP[viewingRequest.status].cls}`}>
+                      {STATUS_MAP[viewingRequest.status].label}
                     </span>
                   </div>
-                )}
-                {selectedRequest.amount > 0 && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-stone-500">Số tiền hoàn</span>
-                    <span className="font-black text-base text-primary">
-                      {selectedRequest.amount.toLocaleString('vi-VN')}₫
-                    </span>
-                  </div>
-                )}
-                {selectedRequest.bankName && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-stone-500">Ngân hàng</span>
-                    <span className="text-sm text-stone-700">
-                      {selectedRequest.bankName} · {selectedRequest.accountNumber}
-                    </span>
-                  </div>
-                )}
-                <div className="pt-2 border-t border-stone-200">
-                  <span className="text-xs text-stone-500 block mb-1">Lý do khách hàng</span>
-                  <p className="text-sm text-stone-700 italic">
-                    &ldquo;{selectedRequest.reason}&rdquo;
-                  </p>
-                  {selectedRequest.note && (
-                    <p className="text-xs text-stone-500 mt-1">{selectedRequest.note}</p>
-                  )}
                 </div>
               </div>
-
-              {/* Admin note */}
-              <div>
-                <label className="text-xs font-semibold text-stone-600 block mb-1.5">
-                  Ghi chú của Admin <span className="text-stone-400 font-normal">(tuỳ chọn)</span>
-                </label>
-                <textarea
-                  value={adminNote}
-                  onChange={(e) => setAdminNote(e.target.value)}
-                  placeholder={
-                    modalAction === 'approve'
-                      ? 'Ví dụ: Đã xác minh, chấp thuận hoàn tiền theo chính sách.'
-                      : 'Ví dụ: Không đủ điều kiện hoàn tiền theo điều khoản vé.'
-                  }
-                  rows={3}
-                  className="w-full px-3 py-2.5 bg-white border border-stone-200 rounded-xl text-sm resize-none focus:outline-none focus:border-primary transition-colors"
-                />
-              </div>
-
-              {/* Warning */}
-              <div
-                className={`flex items-start gap-2 text-xs rounded-xl px-3 py-2.5 ${modalAction === 'approve' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'}`}
+              <button 
+                onClick={() => setViewingRequest(null)}
+                className="w-12 h-12 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-2xl flex items-center justify-center transition-all active:scale-90 border border-white/5"
               >
-                <Icon name="InformationCircleIcon" size={14} className="flex-shrink-0 mt-0.5" />
-                <span>
-                  {modalAction === 'approve'
-                    ? 'Sau khi duyệt, hệ thống sẽ gửi thông báo và xử lý hoàn tiền về tài khoản khách hàng trong 3–5 ngày làm việc.'
-                    : 'Sau khi từ chối, khách hàng sẽ nhận được thông báo về quyết định này.'}
-                </span>
-              </div>
+                <Icon name="XMarkIcon" size={24} />
+              </button>
             </div>
 
-            {/* Modal footer */}
-            <div className="px-6 py-4 border-t border-stone-100 flex items-center justify-end gap-3">
-              <button
-                onClick={closeModal}
-                className="px-4 py-2 text-sm font-semibold text-stone-600 border border-stone-200 rounded-xl hover:bg-stone-50 transition-all"
-              >
-                Huỷ
-              </button>
-              <button
-                onClick={handleConfirm}
-                disabled={processingId !== null}
-                className={`flex items-center gap-2 px-5 py-2 text-sm font-bold text-white rounded-xl transition-all disabled:opacity-60 ${
-                  modalAction === 'approve'
-                    ? 'bg-green-600 hover:bg-green-700 shadow-sm'
-                    : 'bg-red-600 hover:bg-red-700 shadow-sm'
-                }`}
-              >
-                {processingId ? (
+            <div className="p-8 pb-4">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  {/* Left Column: Customer & Case */}
+                  <div className="space-y-8">
+                     <section>
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">Thông tin khách hàng</label>
+                        <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-5 flex items-center gap-4">
+                           <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 font-black text-lg border border-white/10">
+                              {viewingRequest.userName.charAt(0)}
+                           </div>
+                           <div>
+                              <p className="text-sm font-bold text-white">{viewingRequest.userName}</p>
+                              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">{viewingRequest.userEmail}</p>
+                           </div>
+                        </div>
+                     </section>
+
+                     <section>
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">Nội dung hoàn tiền</label>
+                        <div className="space-y-4">
+                           <div className="bg-slate-800/40 p-4 rounded-2xl border border-white/5">
+                              <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5">Lý do chính thức</p>
+                              <p className="text-xs font-bold text-slate-300 leading-relaxed italic">&ldquo;{viewingRequest.reason}&rdquo;</p>
+                              {viewingRequest.note && (
+                                <p className="text-[11px] text-slate-500 mt-3 border-t border-white/5 pt-3 leading-relaxed">{viewingRequest.note}</p>
+                              )}
+                           </div>
+                        </div>
+                     </section>
+                  </div>
+
+                  {/* Right Column: Financial & Flight */}
+                  <div className="space-y-8">
+                     <section>
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">Chuyến bay liên quan</label>
+                        <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-3xl p-5 flex items-center gap-4">
+                           <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
+                              <Icon name="PaperAirplaneIcon" size={18} />
+                           </div>
+                           <div>
+                              <p className="text-sm font-black text-slate-200">#{viewingRequest.bookingId} · {viewingRequest.flightNo}</p>
+                              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mt-0.5">{viewingRequest.route}</p>
+                           </div>
+                        </div>
+                     </section>
+
+                     <section>
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">Tài khoản nhận tiền</label>
+                        <div className="bg-slate-800/40 border border-white/5 rounded-3xl p-5 space-y-3">
+                           <div className="flex justify-between items-center">
+                              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ngân hàng</span>
+                              <span className="text-xs font-bold text-white">{viewingRequest.bankName}</span>
+                           </div>
+                           <div className="flex justify-between items-center">
+                              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Số tài khoản</span>
+                              <span className="text-sm font-mono font-bold text-rose-400 whitespace-nowrap">{viewingRequest.accountNumber}</span>
+                           </div>
+                           <div className="flex justify-between items-center">
+                              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Chủ tài khoản</span>
+                              <span className="text-xs font-bold text-white uppercase">{viewingRequest.accountHolder}</span>
+                           </div>
+                        </div>
+                     </section>
+                  </div>
+               </div>
+
+               {/* Refund Value Section */}
+               <div className="mt-8 bg-slate-950/40 border border-white/10 rounded-3xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl group-hover:scale-150 transition-all duration-1000" />
+                  <div className="relative z-10">
+                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1 text-center md:text-left">Giá trị hoàn trả</p>
+                     <p className="text-4xl font-black text-white tabular-nums tracking-tighter text-center md:text-left">
+                        {viewingRequest.amount.toLocaleString('vi-VN')}₫
+                     </p>
+                  </div>
+                  <div className="relative z-10 w-full md:w-auto h-[1px] md:h-12 md:w-[1px] bg-white/10" />
+                  <div className="relative z-10 flex flex-col items-center md:items-end">
+                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Ngày yêu cầu</p>
+                     <p className="text-sm font-bold text-slate-300">{viewingRequest.createdAt.split(',')[0]}</p>
+                     <p className="text-[10px] font-bold text-slate-600 mt-0.5">{viewingRequest.createdAt.split(',')[1]}</p>
+                  </div>
+               </div>
+            </div>
+
+            {/* Admin Note if processed */}
+            {viewingRequest.status !== 'pending' && viewingRequest.adminNote && (
+               <div className="px-8 pt-4">
+                  <div className="p-4 bg-white/5 border border-white/5 rounded-2xl">
+                     <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Ghi chú quản trị</p>
+                     <p className="text-xs font-bold text-slate-400 mt-1">&ldquo;{viewingRequest.adminNote}&rdquo;</p>
+                  </div>
+               </div>
+            )}
+
+            {/* Modal Actions */}
+            <div className="p-8 flex flex-col sm:flex-row gap-4">
+               {viewingRequest.status === 'pending' ? (
                   <>
-                    <Icon name="ArrowPathIcon" size={14} className="animate-spin" />
-                    Đang xử lý...
+                     <button 
+                        onClick={() => openModal(viewingRequest, 'approve')}
+                        className="flex-1 px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
+                     >
+                        Duyệt hoàn tiền
+                     </button>
+                     <button 
+                        onClick={() => openModal(viewingRequest, 'reject')}
+                        className="flex-1 px-8 py-4 bg-rose-600 hover:bg-rose-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-lg shadow-rose-500/20 active:scale-95"
+                     >
+                        Từ chối yêu cầu
+                     </button>
                   </>
-                ) : (
-                  <>
-                    <Icon name={modalAction === 'approve' ? 'CheckIcon' : 'XMarkIcon'} size={14} />
-                    {modalAction === 'approve' ? 'Xác nhận duyệt' : 'Xác nhận từ chối'}
-                  </>
-                )}
-              </button>
+               ) : (
+                  <button 
+                     onClick={() => setViewingRequest(null)}
+                     className="flex-1 px-8 py-4 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all"
+                  >
+                     Đóng cửa sổ
+                  </button>
+               )}
             </div>
           </div>
         </div>

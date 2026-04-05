@@ -546,7 +546,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
       {/* Sidebar Filters */}
       <aside className="lg:col-span-1">
         <div
-          className="bg-white rounded-xl border border-stone-200 sticky top-[108px] overflow-hidden"
+          className="bg-white rounded-xl border border-stone-200 sticky top-[230px] overflow-hidden"
           style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}
         >
           {/* Red accent top bar */}

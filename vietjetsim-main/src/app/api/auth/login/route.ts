@@ -20,14 +20,18 @@ export async function POST(request: NextRequest) {
       WHERE email = ${email}
     `;
 
+    console.log(`[AUTH] Login attempt for email: ${email}`);
     if (results.length === 0) {
+      console.warn(`[AUTH] Login failed: User not found in database for email: ${email}`);
       return NextResponse.json({ error: 'Email hoặc mật khẩu không đúng' }, { status: 401 });
     }
-
+ 
+    console.log(`[AUTH] User found, comparing password for: ${email}`);
     const userRecord = results[0];
     const isValidPassword = await comparePassword(password, userRecord.password_hash);
-
+ 
     if (!isValidPassword) {
+      console.warn(`[AUTH] Login failed: Invalid password for email: ${email}`);
       return NextResponse.json({ error: 'Email hoặc mật khẩu không đúng' }, { status: 401 });
     }
 

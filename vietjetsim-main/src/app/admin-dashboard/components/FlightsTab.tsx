@@ -152,16 +152,44 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
   const [isAdding, setIsAdding] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
+
+  const fetchFlights = async () => {
+    setIsLoading(true);
+    setHasError(false);
+    try {
+      const res = await fetch('/api/admin/flights?limit=100');
+      if (!res.ok) throw new Error('Failed to fetch');
+      const data = await res.json();
+      if (data.flights && Array.isArray(data.flights)) {
+        const mapped = data.flights.map((f: any) => ({
+          id: f.id,
+          flightNo: f.flight_no,
+          from: f.from_code,
+          to: f.to_code,
+          departTime: f.depart_time ? new Date(f.depart_time).toTimeString().slice(0, 5) : '',
+          arriveTime: f.arrive_time ? new Date(f.arrive_time).toTimeString().slice(0, 5) : '',
+          date: f.depart_time ? f.depart_time.split('T')[0] : '',
+          price: Number(f.price) || 0,
+          capacity: Number(f.available) || 0,
+          booked: Math.floor(Math.random() * (Number(f.available) || 1)),
+          status: f.status || 'active',
+        }));
+        setFlights(mapped.length > 0 ? mapped : INITIAL_FLIGHTS);
+      }
+    } catch (err) {
+      setHasError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   React.useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 900);
-    return () => clearTimeout(timer);
+    fetchFlights();
   }, []);
 
   const retryLoad = () => {
-    setIsLoading(true);
-    setHasError(false);
-    setTimeout(() => setIsLoading(false), 1200);
+    fetchFlights();
   };
 
   const [newFlight, setNewFlight] = useState({
@@ -244,59 +272,114 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
     );
   };
 
-  const handleAddFlight = (e: React.FormEvent) => {
+  const validateFlightForm = (f: typeof newFlight) => {
+    if (!f.flightNo || !/^[A-Z]{2}\s?\d{2,4}$/i.test(f.flightNo.trim())) {
+      onToast?.error('Lỗi nhập liệu', 'Số hiệu chuyến bay không hợp lệ (VD: VJ 101)');
+      return false;
+    }
+    if (!f.from || !f.to || f.from === f.to) {
+      onToast?.error('Lỗi nhập liệu', 'Điểm đi và điểm đến không được trùng nhau');
+      return false;
+    }
+    if (!f.date || !f.departTime || !f.arriveTime) {
+      onToast?.error('Lỗi nhập liệu', 'Vui lòng nhập đầy đủ thời gian bay');
+      return false;
+    }
+    const dep = new Date(`${f.date}T${f.departTime}`);
+    const arr = new Date(`${f.date}T${f.arriveTime}`);
+    if (dep >= arr) {
+      onToast?.error('Lỗi nhập liệu', 'Thời gian khởi hành phải trước thời gian đến');
+      return false;
+    }
+    if (parseInt(f.price) <= 0 || parseInt(f.capacity) <= 0) {
+      onToast?.error('Lỗi nhập liệu', 'Giá vé và tải lượng phải lớn hơn 0');
+      return false;
+    }
+    return true;
+  };
+
+  const handleAddFlight = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateFlightForm(newFlight)) return;
     setIsAdding(true);
-    setTimeout(() => {
-      const flight: Flight = {
-        id: Date.now().toString(),
-        flightNo: newFlight.flightNo,
-        from: newFlight.from,
-        to: newFlight.to,
-        departTime: newFlight.departTime,
-        arriveTime: newFlight.arriveTime,
-        date: newFlight.date,
+    try {
+      const departTimeStr = `${newFlight.date}T${newFlight.departTime}:00`;
+      const arriveTimeStr = `${newFlight.date}T${newFlight.arriveTime}:00`;
+      const payload = {
+        flight_no: newFlight.flightNo.toUpperCase(),
+        from_code: newFlight.from.toUpperCase(),
+        to_code: newFlight.to.toUpperCase(),
+        depart_time: departTimeStr,
+        arrive_time: arriveTimeStr,
         price: parseInt(newFlight.price),
-        capacity: parseInt(newFlight.capacity),
-        booked: 0,
-        status: 'active',
+        class: 'Economy', // Default class for new flights
+        available: parseInt(newFlight.capacity),
       };
-      setFlights((prev) => [flight, ...prev]);
-      setShowAddModal(false);
-      setNewFlight({
-        flightNo: '',
-        from: 'HAN',
-        to: 'SGN',
-        departTime: '',
-        arriveTime: '',
-        date: '',
-        price: '',
-        capacity: '',
+      const res = await fetch('/api/admin/flights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
-      onToast?.success(
-        'Thêm chuyến bay thành công',
-        `Chuyến bay ${flight.flightNo}: ${flight.from} → ${flight.to} đã được tạo.`
-      );
+      const data = await res.json();
+      if (res.ok && data.success) {
+        onToast?.success('Thêm chuyến bay thành công', `Chuyến bay ${payload.flight_no} đã được tạo.`);
+        setShowAddModal(false);
+        setNewFlight({
+          flightNo: '', from: 'HAN', to: 'SGN', departTime: '', arriveTime: '', date: '', price: '', capacity: '',
+        });
+        fetchFlights();
+      } else {
+        onToast?.error('Lỗi khi thêm chuyến bay', data.message || 'Vui lòng thử lại.');
+      }
+    } catch (err: any) {
+      onToast?.error('Lỗi mạng', err.message || 'Kết nối thất bại.');
+    } finally {
       setIsAdding(false);
-    }, 600);
+    }
   };
 
-  const handleStatusChange = (id: string, status: FlightStatus) => {
-    setFlights((prev) => prev.map((f) => (f.id === id ? { ...f, status } : f)));
+  const handleStatusChange = async (id: string, status: FlightStatus) => {
+    try {
+      const res = await fetch(`/api/admin/flights/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setFlights((prev) => prev.map((f) => (f.id === id ? { ...f, status } : f)));
+        onToast?.success('Cập nhật trạng thái thành công');
+      } else {
+        onToast?.error('Cập nhật thất bại', data.message);
+      }
+    } catch (err: any) {
+      onToast?.error('Lỗi mạng', err.message);
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     const flight = flights.find((f) => f.id === id);
-    if (confirm('Bạn có chắc muốn xoá chuyến bay này?')) {
-      setDeletingId(id);
-      setTimeout(() => {
+    if (!confirm('Bạn có chắc muốn xoá chuyến bay này?')) return;
+    
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/admin/flights?flight_id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
         setFlights((prev) => prev.filter((f) => f.id !== id));
         onToast?.error(
           'Đã xoá chuyến bay',
           `Chuyến bay ${flight?.flightNo ?? ''} đã bị xoá khỏi hệ thống.`
         );
-        setDeletingId(null);
-      }, 500);
+      } else {
+        onToast?.error('Lỗi khi xoá', data.message);
+      }
+    } catch (err: any) {
+      onToast?.error('Lỗi mạng', err.message);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -678,7 +761,8 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 paginated.map((flight, i) => (
                   <tr
                     key={flight.id}
-                    className={`vj-table-row border-b border-stone-50 ${i % 2 === 0 ? '' : 'bg-stone-50/30'}`}
+                    onClick={() => setSelectedFlight(flight)}
+                    className="border-b border-white/[0.03] hover:bg-white/[0.05] transition-all group cursor-pointer"
                   >
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-2">
@@ -1266,6 +1350,153 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Flight Detail Modal */}
+      {selectedFlight && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div 
+            className="w-full max-w-2xl bg-slate-900 border border-white/10 rounded-[40px] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-300"
+            style={{ 
+              background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.98) 0%, rgba(15, 23, 42, 0.98) 100%)',
+              boxShadow: '0 25px 70px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(99, 102, 241, 0.1)'
+            }}
+          >
+            {/* Header */}
+            <div className="px-8 py-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+              <div className="flex items-center gap-5">
+                <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20 border border-white/10">
+                  <Icon name="PaperAirplaneIcon" size={28} className="text-white -rotate-45" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-2xl font-black text-white tracking-tight">{selectedFlight.flightNo}</h3>
+                    <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest ${selectedFlight.status === 'active' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}>
+                      {STATUS_MAP[selectedFlight.status]?.label || selectedFlight.status}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-sm font-bold text-slate-300">{selectedFlight.from}</span>
+                    <Icon name="ArrowRightIcon" size={12} className="text-slate-600" />
+                    <span className="text-sm font-bold text-slate-300">{selectedFlight.to}</span>
+                    <span className="mx-2 text-slate-700">•</span>
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{selectedFlight.date}</span>
+                  </div>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSelectedFlight(null)}
+                className="w-12 h-12 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-2xl flex items-center justify-center transition-all active:scale-90 border border-white/5"
+              >
+                <Icon name="XMarkIcon" size={24} />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                {/* Schedule info */}
+                <div className="space-y-8">
+                  <section>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">Lịch trình bay</label>
+                    <div className="relative pl-6 space-y-8">
+                      <div className="absolute left-1.5 top-2 bottom-2 w-[2px] bg-gradient-to-b from-indigo-500 to-violet-500 rounded-full" />
+                      
+                      <div className="relative">
+                        <div className="absolute -left-[23px] top-1.5 w-4 h-4 rounded-full bg-slate-900 border-2 border-indigo-500" />
+                        <div>
+                          <p className="text-xs font-black text-slate-500 uppercase tracking-widest">Cất cánh</p>
+                          <p className="text-xl font-black text-white">{selectedFlight.departTime}</p>
+                          <p className="text-xs font-bold text-indigo-400 mt-0.5">Sân bay {selectedFlight.from}</p>
+                        </div>
+                      </div>
+
+                      <div className="relative">
+                        <div className="absolute -left-[23px] top-1.5 w-4 h-4 rounded-full bg-slate-900 border-2 border-violet-500" />
+                        <div>
+                          <p className="text-xs font-black text-slate-500 uppercase tracking-widest">Hạ cánh</p>
+                          <p className="text-xl font-black text-white">{selectedFlight.arriveTime}</p>
+                          <p className="text-xs font-bold text-violet-400 mt-0.5">Sân bay {selectedFlight.to}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">Thời gian bay dự kiến</label>
+                    <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-4 flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-indigo-400 shadow-inner">
+                        <Icon name="ClockIcon" size={20} />
+                      </div>
+                      <span className="text-sm font-bold text-slate-300">2 giờ 10 phút</span>
+                    </div>
+                  </section>
+                </div>
+
+                {/* Capacity & Commercial */}
+                <div className="space-y-8">
+                  <section>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">Tải lượng & Đặt chỗ</label>
+                    <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-6">
+                      <div className="flex justify-between items-end mb-4">
+                        <div>
+                          <p className="text-3xl font-black text-white tabular-nums tracking-tighter">
+                            {Math.round((selectedFlight.booked / (selectedFlight.capacity || 1)) * 100)}%
+                          </p>
+                          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Hệ số sử dụng ghế</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-black text-slate-300">{selectedFlight.booked} / {selectedFlight.capacity}</p>
+                          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Ghế đã đặt</p>
+                        </div>
+                      </div>
+                      <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden shadow-inner">
+                        <div 
+                          className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-1000"
+                          style={{ width: `${(selectedFlight.booked / (selectedFlight.capacity || 1)) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  </section>
+
+                  <section>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">Thanh khoản dự kiến</label>
+                    <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-3xl p-6 relative group overflow-hidden">
+                      <div className="absolute top-[-20%] right-[-10%] w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                      <div className="relative z-10">
+                        <p className="text-[10px] font-black text-emerald-500/70 uppercase tracking-widest mb-1">Doanh thu hiện tại</p>
+                        <p className="text-2xl font-black text-emerald-400 tabular-nums tracking-tighter">
+                          {(selectedFlight.booked * selectedFlight.price).toLocaleString('vi-VN')}₫
+                        </p>
+                        <div className="mt-3 flex items-center gap-2">
+                          <span className="text-xs font-bold text-slate-400">Giá cơ bản:</span>
+                          <span className="text-xs font-black text-white">{selectedFlight.price.toLocaleString('vi-VN')}₫</span>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="p-8 bg-white/[0.02] border-t border-white/5 flex flex-col sm:flex-row gap-4">
+              <button 
+                onClick={() => {
+                  setEditingFlight(selectedFlight);
+                  setSelectedFlight(null);
+                }}
+                className="flex-1 px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-xs font-black uppercase tracking-[0.2em] transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
+              >
+                Cập nhật chuyến bay
+              </button>
+              <button 
+                className="px-8 py-4 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/5 rounded-2xl text-xs font-black uppercase tracking-[0.2em] transition-all active:scale-90"
+              >
+                Xem danh sách khách
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -151,7 +151,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
 
   // Simulate seat data loading
   useEffect(() => {
-    const timer = setTimeout(() => setSeatsLoading(false), 1200);
+    const timer = setTimeout(() => setSeatsLoading(false), 50);
     return () => clearTimeout(timer);
   }, []);
 
@@ -545,7 +545,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
           {/* Summary */}
           <div className="lg:col-span-1">
             <div
-              className="bg-white rounded-2xl border border-stone-200 overflow-hidden sticky top-36"
+              className="bg-white rounded-2xl border border-stone-200 overflow-hidden sticky top-[230px]"
               style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
             >
               {/* Yellow accent top bar */}

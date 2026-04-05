@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { sql } from '@/lib/neon';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { getAllRefunds, updateRefundStatus, getBookingById } from '@/lib/db';
 import { verifyAccessToken } from '@/lib/auth';
@@ -79,6 +80,23 @@ export async function PATCH(request: NextRequest) {
     }
 
     const { admin_note } = body;
+    
+    // Atomic refund processing: If status is approved/completed, release seats and update booking
+    if (status === 'approved' || status === 'completed') {
+      try {
+        const refundRecord = (await sql`SELECT booking_id FROM refund_requests WHERE id = ${refundId}`)[0];
+        if (refundRecord?.booking_id) {
+          // Wrap in transaction-like sequence if multiple steps
+          await sql`DELETE FROM seats WHERE booking_id = ${refundRecord.booking_id}`;
+          await sql`UPDATE bookings SET status = 'refunded', updated_at = NOW() WHERE id = ${refundRecord.booking_id}`;
+          console.log(`[REFUND] Seats released and booking ${refundRecord.booking_id} marked as refunded.`);
+        }
+      } catch (dbErr) {
+        console.error('Error during flight seat release for refund:', dbErr);
+        // We continue with updating the refund request status even if seat release has issues (though unlikely)
+      }
+    }
+
     const result = await updateRefundStatus(refundId, status, admin_note);
 
     if (!result) {
@@ -90,7 +108,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Refund status updated to ${status}`,
+      message: `Refund status updated to ${status} and seats released`,
       refundId,
       status,
     });

@@ -193,7 +193,7 @@ export default function DealsSection() {
         </div>
 
         {/* Deal cards — staggered fade-in + per-image parallax */}
-        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 pb-2">
           {DEALS?.map((deal, i) => (
             <Link
               key={deal?.route}
@@ -203,7 +203,7 @@ export default function DealsSection() {
                 transitionDuration: '0.65s',
                 transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
               }}
-              className="vj-deal-card min-w-[210px] sm:min-w-[230px] flex-shrink-0 reveal-up"
+              className="vj-deal-card reveal-up"
             >
               {/* Image wrapper — overflow hidden so parallax stays clipped */}
               <div className="relative h-32 overflow-hidden">
@@ -255,28 +255,25 @@ export default function DealsSection() {
                 <div className="text-[10px] font-bold tracking-widest uppercase mb-1 text-vj-muted">
                   {deal?.route}
                 </div>
-                <div className="text-[10px] mb-2.5 flex items-center gap-1 font-koho">
+                <div className="text-[10px] mb-2.5 flex items-center gap-1 font-koho text-vj-gray">
                   <MdCalendarToday className="w-3 h-3" />
                   <span>{deal?.date}</span>
                 </div>
-                <div className="flex items-end justify-between">
+                <div className="flex items-end justify-between gap-1">
                   <div>
                     <div className="text-[10px] line-through leading-none mb-0.5 text-vj-muted">
                       {deal?.original?.toLocaleString('vi-VN')}đ
                     </div>
                     <div
-                      className="text-base font-black leading-none text-primary"
+                      className="text-sm font-black leading-none text-primary"
                       style={{ fontWeight: 900 }}
                     >
                       {deal?.price?.toLocaleString('vi-VN')}đ
                     </div>
                   </div>
                   <div
-                    className="text-white text-[10px] font-bold px-2.5 py-1.5 rounded-md hover:shadow-md transition-all duration-200 hover:brightness-110 bg-primary-solid"
-                    style={{
-                      letterSpacing: '0.02em',
-                      fontWeight: 700,
-                    }}
+                    className="text-white text-[10px] font-bold px-2 py-1.5 rounded-lg hover:shadow-md transition-all duration-200 hover:brightness-110 bg-primary-solid flex-shrink-0"
+                    style={{ letterSpacing: '0.02em', fontWeight: 700 }}
                   >
                     Đặt ngay
                   </div>

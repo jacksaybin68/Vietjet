@@ -212,13 +212,13 @@ export default function Footer() {
             </div>
 
             {/* Social links */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {SOCIALS?.map((social) => (
                 <Link
                   key={social?.name}
                   href={social?.href}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white transition-all duration-200 hover:scale-110"
-                  style={{ background: 'rgba(255,255,255,0.12)' }}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-white transition-all duration-200 hover:scale-110 hover:bg-[#EC2029]"
+                  style={{ background: 'rgba(255,255,255,0.14)' }}
                   aria-label={social?.name}
                 >
                   <social.Icon className="w-4 h-4" />
@@ -228,20 +228,22 @@ export default function Footer() {
 
             {/* App store badges */}
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 cursor-pointer transition-colors bg-white-10">
+              <div className="flex items-center gap-1.5 rounded-lg px-3 py-2 cursor-pointer transition-all hover:bg-white/20 border border-white/20 hover:border-white/40"
+                style={{ background: 'rgba(255,255,255,0.08)' }}>
                 <FaApple className="w-5 h-5 text-white" />
                 <div>
-                  <div className="text-[9px] leading-none text-vj-muted">Tải trên</div>
-                  <div className="text-white text-xs font-bold leading-none font-koho-bold">
+                  <div className="text-[9px] leading-none" style={{ color: 'rgba(255,255,255,0.6)' }}>Tải trên</div>
+                  <div className="text-white text-xs font-bold leading-tight font-koho-bold">
                     App Store
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 cursor-pointer transition-colors bg-white-10">
+              <div className="flex items-center gap-1.5 rounded-lg px-3 py-2 cursor-pointer transition-all hover:bg-white/20 border border-white/20 hover:border-white/40"
+                style={{ background: 'rgba(255,255,255,0.08)' }}>
                 <FaGooglePlay className="w-5 h-5 text-white" />
                 <div>
-                  <div className="text-[9px] leading-none text-vj-muted">Tải trên</div>
-                  <div className="text-white text-xs font-bold leading-none font-koho-bold">
+                  <div className="text-[9px] leading-none" style={{ color: 'rgba(255,255,255,0.6)' }}>Tải trên</div>
+                  <div className="text-white text-xs font-bold leading-tight font-koho-bold">
                     Google Play
                   </div>
                 </div>

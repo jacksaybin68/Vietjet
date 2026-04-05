@@ -1,4 +1,3 @@
-'use client';
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -7,7 +6,7 @@ import { PaymentSkeleton } from '@/components/ui/SkeletonLoader';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/components/ui/Toast';
 
-type PaymentMethod = 'card' | 'bank' | 'ewallet';
+type PaymentMethod = 'card' | 'bank' | 'ewallet' | 'wallet';
 
 interface BankInfo {
   id: string;
@@ -162,7 +161,7 @@ function ConfettiCanvas() {
       const elapsed = (Date.now() - startTimeRef.current) / 1000;
 
       particlesRef.current = particlesRef.current
-        .map((p) => ({
+        .map((p: Particle) => ({
           ...p,
           x: p.x + p.vx,
           y: p.y + p.vy,
@@ -170,9 +169,9 @@ function ConfettiCanvas() {
           rotation: p.rotation + p.rotationSpeed,
           opacity: elapsed > 2.5 ? Math.max(0, 1 - (elapsed - 2.5) / 1.5) : 1,
         }))
-        .filter((p) => p.y < canvas.height + 50);
+        .filter((p: Particle) => p.y < canvas.height + 50);
 
-      particlesRef.current.forEach((p) => {
+      particlesRef.current.forEach((p: Particle) => {
         ctx.save();
         ctx.globalAlpha = p.opacity;
         ctx.translate(p.x, p.y);
@@ -225,9 +224,8 @@ function SuccessToast({ onDismiss }: { onDismiss: () => void }) {
 
   return (
     <div
-      className={`fixed top-6 right-6 z-[60] flex items-center gap-3 bg-white border border-green-200 rounded-2xl px-5 py-4 transition-all duration-400 ${
-        visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-      }`}
+      className={`fixed top-6 right-6 z-[60] flex items-center gap-3 bg-white border border-green-200 rounded-2xl px-5 py-4 transition-all duration-400 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+        }`}
       style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.08)' }}
     >
       <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -430,9 +428,37 @@ export default function PaymentClient() {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const router = useRouter();
   const toast = useToast();
+  const [bankConfig, setBankConfig] = useState({
+    admin_bank_name: 'Vietcombank',
+    admin_bank_account_holder: 'CONG TY VIETJET SIM',
+    admin_bank_account_number: '1234 5678 9012',
+  });
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [isWalletLoading, setIsWalletLoading] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setPageLoading(false), 900);
+    fetch('/api/public/bank-config')
+      .then(res => res.json())
+      .then(data => {
+        if (data.bankConfig) setBankConfig(data.bankConfig);
+      })
+      .catch(err => console.error('Failed to load bank config:', err));
+    
+    // Fetch wallet balance
+    setIsWalletLoading(true);
+    fetch('/api/wallet')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.wallet) {
+          setWalletBalance(parseFloat(data.wallet.balance));
+        }
+      })
+      .catch(err => console.error('Failed to load wallet balance:', err))
+      .finally(() => setIsWalletLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setPageLoading(false), 50);
     return () => clearTimeout(timer);
   }, []);
 
@@ -487,9 +513,9 @@ export default function PaymentClient() {
       const res = await fetch('/api/discounts/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          code: promoCode, 
-          bookingAmount: booking?.basePrice || 0 
+        body: JSON.stringify({
+          code: promoCode,
+          bookingAmount: booking?.basePrice || 0
         }),
       });
       const data = await res.json();
@@ -525,6 +551,14 @@ export default function PaymentClient() {
       }
       if (!bankAccountHolder || bankAccountHolder.trim().length < 2) {
         setPaymentError('Vui lòng nhập tên chủ tài khoản');
+        setShowErrorModal(true);
+        return;
+      }
+    }
+
+    if (paymentMethod === 'wallet') {
+      if (walletBalance === null || walletBalance < total) {
+        setPaymentError('Số dư ví không đủ để thanh toán. Vui lòng nạp thêm tiền hoặc chọn phương thức khác.');
         setShowErrorModal(true);
         return;
       }
@@ -651,7 +685,7 @@ export default function PaymentClient() {
         <ConfettiCanvas />
         <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
 
-        <div className="pt-24 pb-12 min-h-screen flex items-center justify-center">
+        <div className="pt-[128px] pb-12 min-h-screen flex items-center justify-center">
           <div className="max-w-lg w-full mx-auto px-4">
             {/* Success state */}
             <div
@@ -691,11 +725,10 @@ export default function PaymentClient() {
                     <button
                       onClick={handleCopyBookingCode}
                       title="Sao chép mã đặt chỗ"
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
-                        copied
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${copied
                           ? 'bg-green-100 text-green-700 border border-green-300'
                           : 'bg-stone-100 text-stone-600 border border-stone-200 hover:bg-primary-50 hover:text-primary hover:border-primary'
-                      }`}
+                        }`}
                     >
                       {copied ? (
                         <>
@@ -752,7 +785,7 @@ export default function PaymentClient() {
                 </div>
 
                 {/* Passenger */}
-                {booking?.passengers.map((p, i) => (
+                {booking?.passengers.map((p: { name: string; seat: string }, i: number) => (
                   <div
                     key={i}
                     className="flex items-center justify-between py-3 border-b border-stone-100"
@@ -899,7 +932,7 @@ export default function PaymentClient() {
 
   return (
     <>
-      <div className="pt-[72px] pb-12">
+      <div className="pt-[128px] pb-12">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <h1 className="text-2xl font-bold text-stone-900 mb-6">Thanh toán</h1>
 
@@ -917,21 +950,21 @@ export default function PaymentClient() {
                     [
                       ['card', 'Thẻ tín dụng', 'CreditCardIcon'],
                       ['bank', 'Ngân hàng', 'BuildingLibraryIcon'],
-                      ['ewallet', 'Ví điện tử', 'DevicePhoneMobileIcon'],
+                      ['wallet', 'Số dư Ví', 'WalletIcon'],
+                      ['ewallet', 'Ví MoMo/VNPay', 'DevicePhoneMobileIcon'],
                     ] as [
                       PaymentMethod,
                       string,
-                      'CreditCardIcon' | 'BuildingLibraryIcon' | 'DevicePhoneMobileIcon',
+                      'CreditCardIcon' | 'BuildingLibraryIcon' | 'DevicePhoneMobileIcon' | 'WalletIcon',
                     ][]
                   ).map(([val, label, icon]) => (
                     <button
                       key={val}
                       onClick={() => setPaymentMethod(val)}
-                      className={`flex flex-col items-center gap-2 py-4 rounded-xl border-2 transition-all text-sm font-semibold ${
-                        paymentMethod === val
+                      className={`flex flex-col items-center gap-2 py-4 rounded-xl border-2 transition-all text-sm font-semibold ${paymentMethod === val
                           ? 'border-primary bg-primary-50 text-primary'
                           : 'border-stone-200 text-stone-600 hover:border-stone-300'
-                      }`}
+                        }`}
                     >
                       <Icon name={icon} size={22} />
                       <span className="text-xs">{label}</span>
@@ -1046,7 +1079,7 @@ export default function PaymentClient() {
                             Tài khoản đã lưu
                           </label>
                           <div className="space-y-2">
-                            {savedAccounts.map((acc, idx) => {
+                            {savedAccounts.map((acc: { bankId: string; accountNumber: string; accountHolder: string }, idx: number) => {
                               const bank = BANKS.find((b) => b.id === acc.bankId);
                               return (
                                 <button
@@ -1093,11 +1126,10 @@ export default function PaymentClient() {
                             key={bank.id}
                             type="button"
                             onClick={() => setSelectedBank(bank)}
-                            className={`relative py-3 px-3 border rounded-xl text-sm font-semibold transition-all flex flex-col items-center gap-1.5 ${
-                              selectedBank?.id === bank.id
+                            className={`relative py-3 px-3 border rounded-xl text-sm font-semibold transition-all flex flex-col items-center gap-1.5 ${selectedBank?.id === bank.id
                                 ? 'border-2 shadow-md'
                                 : 'bg-stone-50 hover:bg-primary-50 hover:border-primary border-stone-200 text-stone-700'
-                            }`}
+                              }`}
                             style={
                               selectedBank?.id === bank.id
                                 ? { borderColor: bank.color, backgroundColor: `${bank.color}08` }
@@ -1179,17 +1211,65 @@ export default function PaymentClient() {
                           Hướng dẫn chuyển khoản
                         </div>
                         <div className="space-y-1">
-                          <div>
-                            Ngân hàng VietjetSim: <span className="font-semibold">Vietcombank</span>
+                          <div className="flex justify-between">
+                            <span className="text-blue-600/70">Ngân hàng:</span>
+                            <span className="font-semibold">{bankConfig.admin_bank_name}</span>
                           </div>
-                          <div>
-                            Số tài khoản:{' '}
-                            <span className="font-mono font-bold">1234 5678 9012</span>
+                          <div className="flex justify-between">
+                            <span className="text-blue-600/70">Chủ tài khoản:</span>
+                            <span className="font-semibold">{bankConfig.admin_bank_account_holder}</span>
                           </div>
-                          <div>
-                            Nội dung CK: <span className="font-bold">{bookingCode}</span>
+                          <div className="flex justify-between">
+                            <span className="text-blue-600/70">Số tài khoản:</span>
+                            <span className="font-mono font-bold text-blue-900">{bankConfig.admin_bank_account_number}</span>
+                          </div>
+                          <div className="flex justify-between py-1 px-2 mt-1 bg-blue-100 rounded-lg">
+                            <span className="text-blue-700 font-bold">Nội dung CK:</span>
+                            <span className="font-bold text-primary">{bookingCode}</span>
                           </div>
                         </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Wallet Payment */}
+                  {paymentMethod === 'wallet' && (
+                    <div className="space-y-4">
+                      <div 
+                        className={`bg-white border rounded-2xl p-6 flex flex-col items-center gap-4 transition-all ${walletBalance !== null && walletBalance >= total ? 'border-emerald-200 bg-emerald-50/10' : 'border-stone-200'}`}
+                      >
+                        <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
+                          <Icon name="WalletIcon" size={32} className="text-primary" />
+                        </div>
+                        <div className="text-center">
+                          <h4 className="font-bold text-stone-900 mb-1">Thanh toán bằng ví tài khoản</h4>
+                          <p className="text-sm text-stone-500">Thanh toán nhanh chóng bằng số dư của bạn</p>
+                        </div>
+                        
+                        <div className="w-full border-t border-stone-100 pt-4 mt-2">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm text-stone-500">Số dư hiện tại:</span>
+                            <span className={`text-base font-black ${walletBalance === null ? 'animate-pulse text-stone-300' : (walletBalance >= total ? 'text-emerald-600' : 'text-red-500')}`}>
+                              {walletBalance !== null ? walletBalance.toLocaleString('vi-VN') + '₫' : '••••••₫'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-stone-500">Số tiền cần trả:</span>
+                            <span className="text-base font-black text-stone-900">
+                              {total.toLocaleString('vi-VN')}₫
+                            </span>
+                          </div>
+                        </div>
+
+                        {walletBalance !== null && walletBalance < total && (
+                          <Link 
+                            href="/user-dashboard"
+                            className="text-xs text-primary font-bold hover:underline flex items-center gap-1 mt-2"
+                          >
+                            <Icon name="PlusCircleIcon" size={14} />
+                            Nạp thêm tiền vào ví ngay
+                          </Link>
+                        )}
                       </div>
                     </div>
                   )}
@@ -1272,7 +1352,7 @@ export default function PaymentClient() {
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl border border-stone-200 p-5 sticky top-[72px]">
+              <div className="bg-white rounded-2xl border border-stone-200 p-5 sticky top-[140px]">
                 <h3 className="font-bold text-stone-900 mb-4">Chi tiết đơn hàng</h3>
 
                 {/* Flight summary */}
@@ -1302,7 +1382,7 @@ export default function PaymentClient() {
                 </div>
 
                 {/* Passenger list */}
-                {booking?.passengers.map((p, i) => (
+                {booking?.passengers.map((p: { name: string; seat: string }, i: number) => (
                   <div
                     key={i}
                     className="flex justify-between items-center py-2 text-sm border-b border-stone-100"

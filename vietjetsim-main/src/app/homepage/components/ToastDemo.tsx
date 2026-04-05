@@ -145,25 +145,7 @@ export default function ToastDemo() {
               Thông tin
             </button>
 
-            <button
-              onClick={() =>
-                toast?.promo(
-                  '🔥 Ưu đãi đặc biệt!',
-                  'Bay HAN → SGN chỉ từ 99.000đ — Hôm nay đến 23:59!',
-                  {
-                    duration: 8000,
-                    actions: [
-                      { label: 'Đặt vé ngay', onClick: () => {}, variant: 'accent' },
-                      { label: 'Xem tất cả', onClick: () => {}, variant: 'ghost' },
-                    ],
-                  }
-                )
-              }
-              className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#EC2029] to-[#FFD400] text-white text-sm font-semibold hover:opacity-90 transition-all duration-150 active:scale-95 font-['KoHo',sans-serif] flex items-center gap-2"
-            >
-              <span className="w-2 h-2 rounded-full bg-white inline-block" />
-              Khuyến mãi
-            </button>
+
           </div>
 
           {/* Confirmation Modal Demo */}
@@ -218,24 +200,7 @@ export default function ToastDemo() {
                 Xóa đặt chỗ
               </button>
 
-              <button
-                onClick={() => openModal('admin')}
-                className="px-5 py-2.5 rounded-xl border-2 border-[#1A2948] text-[#1A2948] text-sm font-semibold hover:bg-[#1A2948] hover:text-white transition-all duration-150 active:scale-95 font-['KoHo',sans-serif] flex items-center gap-2"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                </svg>
-                Hành động quản trị
-              </button>
+
             </div>
           </div>
         </div>

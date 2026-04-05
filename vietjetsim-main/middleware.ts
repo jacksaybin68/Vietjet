@@ -2,7 +2,23 @@
 // JWT-based authentication middleware - replaces Supabase auth
 
 import { NextResponse, type NextRequest } from 'next/server';
-import { verifyAccessToken } from '@/lib/auth';
+// We use a simple base64 decoder in middleware.ts to avoid importing 'crypto' (Node.js) in Edge Runtime.
+// Actual signature verification happens in the backend API routes.
+function decodeJwt(token: string): any {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import type { JWTPayload } from '@/lib/auth';
 
@@ -41,7 +57,7 @@ export async function middleware(request: NextRequest) {
   let user: JWTPayload | null = null;
 
   if (accessToken) {
-    user = verifyAccessToken(accessToken);
+    user = decodeJwt(accessToken) as JWTPayload | null;
   }
 
   // Define public routes that don't require authentication

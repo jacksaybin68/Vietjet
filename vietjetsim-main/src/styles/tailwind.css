@@ -215,46 +215,20 @@ h6 {
 }
 
 /* Page Transition Keyframes */
-@keyframes pageEnterForward {
+@keyframes pEnterForward {
   from {
     opacity: 0;
-    transform: translateX(32px);
-    filter: blur(4px);
+    transform: translateX(40px);
+    filter: blur(8px) brightness(1.2);
   }
   to {
     opacity: 1;
     transform: translateX(0);
-    filter: blur(0px);
+    filter: blur(0px) brightness(1);
   }
 }
 
-@keyframes pageExitForward {
-  from {
-    opacity: 1;
-    transform: translateX(0);
-    filter: blur(0px);
-  }
-  to {
-    opacity: 0;
-    transform: translateX(-32px);
-    filter: blur(4px);
-  }
-}
-
-@keyframes pageEnterBack {
-  from {
-    opacity: 0;
-    transform: translateX(-32px);
-    filter: blur(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-    filter: blur(0px);
-  }
-}
-
-@keyframes pageExitBack {
+@keyframes pExitForward {
   from {
     opacity: 1;
     transform: translateX(0);
@@ -262,15 +236,41 @@ h6 {
   }
   to {
     opacity: 0;
-    transform: translateX(32px);
-    filter: blur(4px);
+    transform: translateX(-40px);
+    filter: blur(8px);
   }
 }
 
-@keyframes pageFadeIn {
+@keyframes pEnterBack {
   from {
     opacity: 0;
-    filter: blur(3px);
+    transform: translateX(-40px);
+    filter: blur(8px) brightness(1.2);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0px) brightness(1);
+  }
+}
+
+@keyframes pExitBack {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0px);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(40px);
+    filter: blur(8px);
+  }
+}
+
+@keyframes pFadeIn {
+  from {
+    opacity: 0;
+    filter: blur(8px);
   }
   to {
     opacity: 1;
@@ -278,89 +278,52 @@ h6 {
   }
 }
 
-@keyframes pageFadeOut {
+@keyframes pFadeOut {
   from {
     opacity: 1;
     filter: blur(0px);
   }
   to {
     opacity: 0;
-    filter: blur(3px);
+    filter: blur(8px);
   }
 }
 
-/* Modal Animations */
-@keyframes modalBackdropIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes modalBackdropOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes modalPanelIn {
-  from {
-    opacity: 0;
-    transform: scale(0.88) translateY(20px);
-    filter: blur(4px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    filter: blur(0px);
-  }
-}
-
-@keyframes modalPanelOut {
-  from {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    filter: blur(0px);
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.92) translateY(12px);
-    filter: blur(4px);
-  }
-}
-
-/* Page Transition Classes */
-.page-transition {
+/* Page Transition Wrapper & Classes */
+.page-transition-wrapper {
+  position: relative;
+  width: 100%;
+  overflow-x: hidden;
   min-height: 100vh;
 }
 
-.page-enter-forward {
-  animation: pageEnterForward 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+.page-transition-content {
+  width: 100%;
+  will-change: transform, opacity, filter;
 }
 
-.page-exit-forward {
-  animation: pageExitForward 0.22s cubic-bezier(0.4, 0, 1, 1) both;
+.page-enter-forward .page-transition-content {
+  animation: pEnterForward 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.page-enter-back {
-  animation: pageEnterBack 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+.page-exit-forward .page-transition-content {
+  animation: pExitForward 0.35s cubic-bezier(0.4, 0, 1, 1) both;
 }
 
-.page-exit-back {
-  animation: pageExitBack 0.22s cubic-bezier(0.4, 0, 1, 1) both;
+.page-enter-back .page-transition-content {
+  animation: pEnterBack 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.page-enter-fade {
-  animation: pageFadeIn 0.28s ease both;
+.page-exit-back .page-transition-content {
+  animation: pExitBack 0.35s cubic-bezier(0.4, 0, 1, 1) both;
 }
 
-.page-exit-fade {
-  animation: pageFadeOut 0.22s ease both;
+.page-enter-fade .page-transition-content {
+  animation: pFadeIn 0.45s ease both;
+}
+
+.page-exit-fade .page-transition-content {
+  animation: pFadeOut 0.35s ease both;
 }
 
 /* Modal animation classes */

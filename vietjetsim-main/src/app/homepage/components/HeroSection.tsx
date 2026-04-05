@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import AppImage from '@/components/ui/AppImage';
@@ -106,7 +106,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative pt-[72px]">
+    <section className="relative pt-[128px]">
       {/* Full-width banner */}
       <div className="relative w-full h-[400px] sm:h-[500px] lg:h-[600px] overflow-hidden">
         {BANNERS.map((banner, i) => (
@@ -120,7 +120,7 @@ export default function HeroSection() {
               src={banner.image}
               alt={banner.alt}
               fill
-              priority={i === 0}
+              priority={i === 0 || i === 1}
               className="object-cover object-center"
               sizes="100vw"
             />
@@ -529,10 +529,7 @@ export default function HeroSection() {
                 {/* Search button */}
                 <Link
                   href={`/flight-booking?from=${from}&to=${to}&depart=${departDate}&return=${returnDate}&pax=${passengers}`}
-                  onClick={() => {
-                  }}
-                  // #endregion
-                  className="block w-full py-3 sm:py-3.5 text-center font-black text-base rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98]"
+                  className="flex items-center justify-center gap-2 w-full py-3 sm:py-3.5 text-center font-black text-base rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98]"
                   style={{
                     background:
                       'linear-gradient(26.73deg, rgb(249,165,26) 13.7%, rgb(251,182,18) 29.8%, rgb(255,221,0) 66.81%)',
@@ -543,7 +540,8 @@ export default function HeroSection() {
                       'rgba(0,0,0,0.18) 0px 3px 6px -2px, rgba(0,0,0,0.10) 0px 2px 4px 0px'
                   }}
                 >
-                  Let&apos;s go
+                  <FaPlane className="w-4 h-4 flex-shrink-0" />
+                  Tìm chuyến bay
                 </Link>
               </div>
             </div>

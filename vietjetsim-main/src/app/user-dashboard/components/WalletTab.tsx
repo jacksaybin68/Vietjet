@@ -379,9 +379,9 @@ export default function WalletTab({ user }: WalletTabProps) {
       if (walletRes.ok && walletData.wallet) {
         setWallet(walletData.wallet);
       }
-      if (methodsRes.ok && methodsData.paymentMethods) {
+      if (methodsRes.ok && methodsData.methods) {
         setMethods(
-          methodsData.paymentMethods.map((m: any) => ({
+          methodsData.methods.map((m: any) => ({
             id: m.id,
             type: m.type,
             cardBrand: m.card_brand,
@@ -424,7 +424,7 @@ export default function WalletTab({ user }: WalletTabProps) {
         credentials: 'include',
         body: JSON.stringify({
           action: 'topup',
-          amount,
+          amount: amount,
           description: 'Nạp tiền vào ví VietjetSim',
         }),
       });

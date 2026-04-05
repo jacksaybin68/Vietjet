@@ -96,7 +96,7 @@ export default function OverviewTab({ onNavigate }: Props) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1200);
+    const timer = setTimeout(() => setIsLoading(false), 50);
     return () => clearTimeout(timer);
   }, []);
 
@@ -110,70 +110,81 @@ export default function OverviewTab({ onNavigate }: Props) {
           {STATS.map((stat) => (
             <div
               key={stat.label}
-              className="bg-white rounded-2xl border border-stone-200 p-5 card-hover"
-              style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
+              className="rounded-2xl border transition-all duration-300 p-5 group hover:translate-y-[-4px]"
+              style={{ 
+                background: 'rgba(30, 41, 59, 0.4)', 
+                backdropFilter: 'blur(12px)',
+                borderColor: 'rgba(255, 255, 255, 0.05)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.2)'
+              }}
             >
-              <div className="flex items-start justify-between mb-3">
+              <div className="flex items-start justify-between mb-4">
                 <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.color.split(' ')[0]}`}
-                  style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${stat.color.split(' ')[0].replace('bg-', 'bg-opacity-20 bg-')}`}
+                  style={{ 
+                    border: '1px solid rgba(255,255,255,0.05)',
+                    boxShadow: 'inset 0 0 12px rgba(255,255,255,0.05)'
+                  }}
                 >
-                  <Icon name={stat.icon} size={20} className={stat.color.split(' ')[1]} />
+                  <Icon name={stat.icon} size={24} className={stat.color.split(' ')[1]} />
                 </div>
-                <span
-                  className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                    stat.positive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500'
+                <div
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                    stat.positive ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
                   }`}
+                  style={{ border: stat.positive ? '1px solid rgba(16,185,129,0.2)' : '1px solid rgba(248,113,113,0.2)' }}
                 >
-                  {stat.change}
-                </span>
+                  {stat.positive ? '↑' : '↓'} {stat.change.replace('+', '').replace('-', '')}
+                </div>
               </div>
-              <div className="text-2xl font-black text-stone-900">{stat.value}</div>
-              <div className="text-xs text-stone-400 mt-0.5">{stat.label}</div>
+              <div className="text-2xl font-black text-white tracking-tight">{stat.value}</div>
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1 opacity-70">{stat.label}</div>
             </div>
           ))}
         </div>
       )}
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           {
             label: 'Thêm chuyến bay',
             icon: 'PlusCircleIcon' as const,
             tab: 'flights' as AdminTab,
-            color: 'bg-primary text-white',
-            shadow: '0 2px 8px rgba(237,28,36,0.22)',
+            color: 'from-indigo-600 to-indigo-700 text-white',
+            shadow: '0 4px 15px rgba(79,70,229,0.3)',
           },
           {
             label: 'Quản lý vé',
             icon: 'TicketIcon' as const,
             tab: 'bookings' as AdminTab,
-            color: 'bg-accent text-stone-900',
-            shadow: '0 2px 8px rgba(255,212,0,0.28)',
+            color: 'from-amber-400 to-amber-500 text-slate-900',
+            shadow: '0 4px 15px rgba(245,158,11,0.3)',
           },
           {
             label: 'Xem người dùng',
             icon: 'UsersIcon' as const,
             tab: 'users' as AdminTab,
-            color: 'bg-blue-600 text-white',
-            shadow: '0 2px 8px rgba(37,99,235,0.22)',
+            color: 'from-emerald-500 to-emerald-600 text-white',
+            shadow: '0 4px 15px rgba(16,185,129,0.3)',
           },
           {
             label: 'Báo cáo doanh thu',
             icon: 'ChartBarIcon' as const,
             tab: 'revenue' as AdminTab,
-            color: 'bg-green-600 text-white',
-            shadow: '0 2px 8px rgba(22,163,74,0.22)',
+            color: 'from-rose-500 to-rose-600 text-white',
+            shadow: '0 4px 15px rgba(225,29,72,0.3)',
           },
         ].map((action) => (
           <button
             key={action.label}
             onClick={() => onNavigate(action.tab)}
-            className={`${action.color} rounded-xl p-4 text-left font-semibold text-sm hover:opacity-90 transition-all flex items-center gap-2`}
+            className={`bg-gradient-to-br ${action.color} rounded-2xl p-5 text-left font-bold text-sm transition-all duration-300 hover:translate-y-[-2px] hover:brightness-110 active:scale-95 flex flex-col gap-3 group`}
             style={{ boxShadow: action.shadow }}
           >
-            <Icon name={action.icon} size={18} />
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-md group-hover:scale-110 transition-transform">
+              <Icon name={action.icon} size={20} />
+            </div>
             {action.label}
           </button>
         ))}
@@ -181,14 +192,22 @@ export default function OverviewTab({ onNavigate }: Props) {
 
       {/* Recent Bookings */}
       <div
-        className="bg-white rounded-2xl border border-stone-200 overflow-hidden"
-        style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
+        className="rounded-2xl border overflow-hidden"
+        style={{ 
+          background: 'rgba(30, 41, 59, 0.4)', 
+          backdropFilter: 'blur(12px)',
+          borderColor: 'rgba(255, 255, 255, 0.05)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.2)'
+        }}
       >
-        <div className="flex items-center justify-between p-5 border-b border-stone-100">
-          <h2 className="font-bold text-stone-900">Đặt vé gần đây</h2>
+        <div className="flex items-center justify-between p-6 border-b border-white/5">
+          <h2 className="font-bold text-white tracking-tight flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+            Đặt vé gần đây
+          </h2>
           <button
             onClick={() => onNavigate('bookings')}
-            className="text-xs font-semibold text-primary hover:text-primary-dark flex items-center gap-1 transition-colors"
+            className="text-xs font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 transition-all hover:gap-2 px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20"
           >
             Xem tất cả
             <Icon name="ArrowRightIcon" size={12} />
@@ -197,23 +216,23 @@ export default function OverviewTab({ onNavigate }: Props) {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-stone-50 border-b border-stone-100">
-                <th className="text-left text-xs font-bold text-stone-400 uppercase tracking-wider px-5 py-3">
+              <tr className="bg-white/5 border-b border-white/5">
+                <th className="text-left text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] px-6 py-4">
                   Mã đặt chỗ
                 </th>
-                <th className="text-left text-xs font-bold text-stone-400 uppercase tracking-wider px-5 py-3">
+                <th className="text-left text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] px-6 py-4">
                   Khách hàng
                 </th>
-                <th className="text-left text-xs font-bold text-stone-400 uppercase tracking-wider px-5 py-3 hidden sm:table-cell">
+                <th className="text-left text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] px-6 py-4 hidden sm:table-cell">
                   Hành trình
                 </th>
-                <th className="text-right text-xs font-bold text-stone-400 uppercase tracking-wider px-5 py-3">
+                <th className="text-right text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] px-6 py-4">
                   Giá trị
                 </th>
-                <th className="text-center text-xs font-bold text-stone-400 uppercase tracking-wider px-5 py-3">
+                <th className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] px-6 py-4">
                   Trạng thái
                 </th>
-                <th className="text-right text-xs font-bold text-stone-400 uppercase tracking-wider px-5 py-3 hidden md:table-cell">
+                <th className="text-right text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] px-6 py-4 hidden md:table-cell">
                   Thời gian
                 </th>
               </tr>
@@ -225,34 +244,34 @@ export default function OverviewTab({ onNavigate }: Props) {
                 RECENT_BOOKINGS.map((booking, i) => (
                   <tr
                     key={booking.id}
-                    className={`vj-table-row border-b border-stone-50 ${i % 2 === 0 ? '' : 'bg-stone-50/30'}`}
+                    className="vj-table-row border-b border-white/5 hover:bg-white/[0.02] transition-colors"
                   >
-                    <td className="px-5 py-3.5">
-                      <span className="font-mono font-bold text-sm text-stone-900">
+                    <td className="px-6 py-4">
+                      <span className="font-mono font-bold text-sm text-indigo-400">
                         {booking.id}
                       </span>
                     </td>
-                    <td className="px-5 py-3.5">
-                      <span className="text-sm font-medium text-stone-700">{booking.user}</span>
+                    <td className="px-6 py-4">
+                      <span className="text-sm font-semibold text-slate-200">{booking.user}</span>
                     </td>
-                    <td className="px-5 py-3.5 hidden sm:table-cell">
-                      <span className="text-sm text-stone-600 font-semibold">{booking.route}</span>
+                    <td className="px-6 py-4 hidden sm:table-cell">
+                      <span className="text-sm text-slate-400 font-medium">{booking.route}</span>
                     </td>
-                    <td className="px-5 py-3.5 text-right">
-                      <span className="font-bold text-stone-900 text-sm">
+                    <td className="px-6 py-4 text-right">
+                      <span className="font-bold text-white text-sm">
                         {booking.amount.toLocaleString('vi-VN')}₫
                       </span>
                     </td>
-                    <td className="px-5 py-3.5 text-center">
+                    <td className="px-6 py-4 text-center">
                       <span
-                        className={`text-xs font-bold px-2.5 py-1 rounded-full ${STATUS_MAP[booking.status].cls}`}
+                        className={`text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-wider ${STATUS_MAP[booking.status].cls.replace('badge-', 'bg-').replace('success', 'emerald-500/10 text-emerald-400').replace('warning', 'amber-500/10 text-amber-400').replace('error', 'rose-500/10 text-rose-400')}`}
+                        style={{ border: '1px solid currentColor' }}
                       >
-                        <span className="badge-dot" />
                         {STATUS_MAP[booking.status].label}
                       </span>
                     </td>
-                    <td className="px-5 py-3.5 text-right hidden md:table-cell">
-                      <span className="text-xs text-stone-400">{booking.time}</span>
+                    <td className="px-6 py-4 text-right hidden md:table-cell">
+                      <span className="text-xs text-slate-500 font-medium">{booking.time}</span>
                     </td>
                   </tr>
                 ))
