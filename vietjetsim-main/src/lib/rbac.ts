@@ -404,8 +404,8 @@ export function hasPermission(
 
   // Check system role definition
   const roleDef = SYSTEM_ROLES[resolvedRole];
-  if (roleDef) {
-    return roleDef.permissions.has(permission);
+  if (roleDef && roleDef.permissions.has(permission)) {
+    return true;
   }
 
   // Check custom/overridden permissions from DB
@@ -453,9 +453,10 @@ export function getRolePermissions(
   if (resolvedRole === 'user') return [];
 
   const roleDef = SYSTEM_ROLES[resolvedRole];
-  if (roleDef) return Array.from(roleDef.permissions);
+  const basePermissions = roleDef ? Array.from(roleDef.permissions) : [];
+  const custom = customPermissions && Array.isArray(customPermissions) ? customPermissions : [];
 
-  return customPermissions || [];
+  return Array.from(new Set([...basePermissions, ...custom]));
 }
 
 /**
@@ -487,6 +488,8 @@ export function getRoleInfo(role: AllRoles): {
  * A role can only manage roles at or below its own level.
  */
 export function canManageRole(actorRole: AllRoles, targetRole: AllRoles): boolean {
+  if (actorRole === 'super_admin') return true;
+
   const actorLevel = getRoleInfo(actorRole).level;
   const targetLevel = getRoleInfo(targetRole).level;
   return actorLevel > targetLevel;
