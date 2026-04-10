@@ -69,7 +69,7 @@ describe('Payment Database Module', () => {
   describe('getSavedPaymentMethods', () => {
     it('should fetch saved payment methods for a user', async () => {
       const mockMethods = [
-        { id: 'pm-1', user_id: 'user-1', provider: 'visa', last4: '4242' }
+        { id: 'pm-1', user_id: 'user-1', type: "card" as const, card_brand: 'visa', last_four: '4242' }
       ];
 
       (sql as any).mockResolvedValueOnce(mockMethods);
@@ -85,11 +85,11 @@ describe('Payment Database Module', () => {
     it('should add a new saved payment method', async () => {
       const newMethod = {
         user_id: 'user-1',
-        provider: 'visa',
-        last4: '4242',
+        type: "card" as const, card_brand: 'visa',
+        last_four: '4242',
         expiry_month: 12,
         expiry_year: 25,
-        cardholder_name: 'John Doe',
+        card_holder_name: 'John Doe',
         is_default: true
       };
 
