@@ -59,7 +59,7 @@ describe('Wallet Database Module', () => {
       (sql as any).mockResolvedValueOnce(mockTransactions); // fetch transactions
       (sql as any).mockResolvedValueOnce([{ total: '2' }]); // fetch count
 
-      const result = await getWalletTransactions('user-1', { limit: 10, offset: 0 });
+      const result = await getWalletTransactions('user-1', { page: 1, limit: 10 });
 
       expect(sql).toHaveBeenCalledTimes(3);
       // Depending on how db.ts processes it, ensure we match
@@ -77,7 +77,7 @@ describe('Wallet Database Module', () => {
       (sql as any).mockResolvedValueOnce(mockTransactions); // fetch transactions
       (sql as any).mockResolvedValueOnce([{ total: '1' }]); // fetch count
 
-      const result = await getWalletTransactions('user-1', { limit: 10, offset: 0, type: 'topup' });
+      const result = await getWalletTransactions('user-1', { page: 1, limit: 10, type: 'topup' });
 
       expect(sql).toHaveBeenCalledTimes(3);
       expect(result.transactions).toBeDefined();

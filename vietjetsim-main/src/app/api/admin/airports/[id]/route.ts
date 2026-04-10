@@ -6,13 +6,13 @@ import { verifyAdminRequest } from '@/lib/admin-auth';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'airport:manage');
     if (error) return response;
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { code, name, city, country } = body;
 
@@ -100,13 +100,13 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'airport:manage');
     if (error) return response;
 
-    const { id } = params;
+    const { id } = await params;
 
     // Check if airport is used by any flights
     const flightsUsingAirport = await sql`
