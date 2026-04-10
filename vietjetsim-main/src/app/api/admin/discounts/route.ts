@@ -30,10 +30,10 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching admin discounts:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error', message: error.message },
+      { error: 'Internal Server Error', message: (error instanceof Error ? error.message : "Unknown error") },
       { status: 500 }
     );
   }
@@ -88,17 +88,17 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error creating discount:', error);
     // Handle unique constraint error for 'code'
-    if (error.message?.includes('unique constraint') || error.code === '23505') {
+    if ((error instanceof Error ? error.message : "Unknown error")?.includes('unique constraint') || ((error as any).code) === '23505') {
       return NextResponse.json(
         { error: 'Conflict', message: 'Discount code already exists' },
         { status: 409 }
       );
     }
     return NextResponse.json(
-      { error: 'Internal Server Error', message: error.message },
+      { error: 'Internal Server Error', message: (error instanceof Error ? error.message : "Unknown error") },
       { status: 500 }
     );
   }
