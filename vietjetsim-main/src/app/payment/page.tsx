@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import Header from '@/components/Header';
 import PaymentClient from './components/PaymentClient';
 import Footer from '@/components/Footer';
@@ -9,7 +9,9 @@ export default function PaymentPage() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <ErrorBoundary variant="booking" retryLabel="Thử thanh toán lại">
-        <PaymentClient />
+        <Suspense fallback={<div>Loading payment...</div>}>
+          <PaymentClient />
+        </Suspense>
       </ErrorBoundary>
       <Footer />
     </div>
