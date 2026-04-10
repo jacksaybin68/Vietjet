@@ -10,7 +10,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       request as unknown as NextRequest,
       'user:role_change'
     );
-    if (error || !response) return response;
+    if (error) return response;
 
     let body: { newRole?: string } = {};
     try {

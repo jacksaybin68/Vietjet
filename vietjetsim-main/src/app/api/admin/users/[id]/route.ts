@@ -13,7 +13,7 @@ export async function GET(
 ) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'user:view');
-    if (error || !response) return response!;
+    if (error) return response;
 
     const { id } = params;
     const user = await findUserById(id);
@@ -43,7 +43,7 @@ export async function PATCH(
 ) {
   try {
     const { payload, error, response } = await verifyAdminRequest(request, 'user:role_change');
-    if (error || !response) return response!;
+    if (error) return response;
 
     const { id } = params;
     const body = await request.json();
@@ -133,7 +133,7 @@ export async function DELETE(
 ) {
   try {
     const { payload, error, response } = await verifyAdminRequest(request, 'user:delete');
-    if (error || !response) return response!;
+    if (error) return response;
 
     const { id } = params;
 

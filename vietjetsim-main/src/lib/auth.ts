@@ -261,3 +261,18 @@ export async function getToken(request: Request): Promise<JWTPayload | null> {
 
   return null;
 }
+
+export async function verifyAuthRequest(request: Request) {
+  const user = await getToken(request);
+  if (!user) {
+    return {
+      user: null,
+      error: 'Unauthorized',
+      response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),
+    };
+  }
+  return { user, error: null, response: null };
+}
+
+
+

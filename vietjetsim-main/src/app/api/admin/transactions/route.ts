@@ -5,7 +5,7 @@ import { verifyAdminRequest } from '@/lib/admin-auth';
 export async function GET(request: NextRequest) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'payment:view');
-    if (error || !response) return response!;
+    if (error) return response;
 
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');

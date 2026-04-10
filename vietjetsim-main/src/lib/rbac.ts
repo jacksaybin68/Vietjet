@@ -57,7 +57,14 @@ export type Permission =
   // ── RBAC Administration ───────
   | 'rbac:manage'
   | 'rbac:audit_log'
-  | 'admin:invite';
+  | 'admin:invite'
+  // ── Discount Management ────────
+  | 'discount:list'
+  | 'discount:view'
+  | 'discount:create'
+  | 'discount:edit'
+  | 'discount:delete'
+  | 'discount:status_change';
 
 /** Human-readable labels for each permission (Vietnamese) */
 export const PERMISSION_LABELS: Record<Permission, string> = {
@@ -110,6 +117,13 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   'rbac:manage': 'Quản lý phân quyền',
   'rbac:audit_log': 'Xem audit log hệ thống',
   'admin:invite': 'Mời admin mới',
+  // Discount Management
+  'discount:list': 'Xem danh sách mã giảm giá',
+  'discount:view': 'Xem chi tiết mã giảm giá',
+  'discount:create': 'Tạo mã giảm giá mới',
+  'discount:edit': 'Chỉnh sửa mã giảm giá',
+  'discount:delete': 'Xóa mã giảm giá',
+  'discount:status_change': 'Thay đổi trạng thái mã giảm giá',
 };
 
 /** Category grouping for UI display */
@@ -267,8 +281,23 @@ export const SYSTEM_ROLES: Record<SystemRoleName, RoleDefinition> = {
       'flight:price_edit',
       'booking:list',
       'booking:view',
+      'booking:create',
+      'booking:edit',
       'booking:cancel',
       'booking:status_change',
+      'payment:view',
+      'payment:process',
+      'refund:list',
+      'refund:approve',
+      'refund:reject',
+      'announcement:crud',
+      'airport:manage',
+      'discount:list',
+      'discount:create',
+      'discount:edit',
+      'discount:delete',
+      'system:config',
+      'content:manage',
       'analytics:view',
       'analytics:export',
       'report:generate',

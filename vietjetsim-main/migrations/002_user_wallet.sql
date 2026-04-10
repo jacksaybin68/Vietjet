@@ -5,7 +5,7 @@
 -- User Wallet
 CREATE TABLE IF NOT EXISTS user_wallets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   balance DECIMAL(12,2) DEFAULT 0.00 CHECK (balance >= 0),
   currency VARCHAR(3) DEFAULT 'VND',
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS user_wallets (
 -- Saved Payment Methods (Cards & Bank Accounts)
 CREATE TABLE IF NOT EXISTS saved_payment_methods (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   type VARCHAR(20) NOT NULL CHECK (type IN ('card', 'bank')),
   card_brand VARCHAR(50),
   last_four VARCHAR(4),

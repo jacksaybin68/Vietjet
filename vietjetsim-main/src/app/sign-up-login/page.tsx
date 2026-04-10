@@ -27,10 +27,15 @@ export default function SignUpLoginPage() {
     setLoading(true);
     setError('');
     try {
-      await signIn(email, password);
+      const data = await signIn(email, password);
       setSuccess('Đăng nhập thành công!');
       setTimeout(() => {
-        router.push('/user-dashboard');
+        const userRole = data?.user?.role || 'user';
+        if (userRole === 'admin' || userRole === 'super_admin' || userRole.startsWith('admin_')) {
+          router.push('/admin-dashboard');
+        } else {
+          router.push('/user-dashboard');
+        }
       }, 800);
     } catch (err: any) {
       setError(err.message || 'Email hoặc mật khẩu không đúng');

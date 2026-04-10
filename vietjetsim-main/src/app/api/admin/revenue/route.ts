@@ -5,7 +5,7 @@ import { getRevenueStats, getBookingStatusDistribution, getRecentActivity } from
 export async function GET(request: NextRequest) {
   try {
     const { payload, error, response } = await verifyAdminRequest(request, 'analytics:view');
-    if (error || !response) return response!;
+    if (error) return response;
 
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get('startDate') || undefined;

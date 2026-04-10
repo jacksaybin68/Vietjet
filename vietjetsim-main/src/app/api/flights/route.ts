@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const seatClass = searchParams.get('class');
 
     if (!fromCode || !toCode) {
-      return NextResponse.json({ error: 'Thiếu tham số bắt buộc: from, to' }, { status: 400 });
+      return NextResponse.json({ flights: [] });
     }
 
     const flights = await searchFlights({

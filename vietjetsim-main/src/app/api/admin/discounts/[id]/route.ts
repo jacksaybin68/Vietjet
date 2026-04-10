@@ -9,7 +9,7 @@ export async function GET(
 ) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'discount:view' as any);
-    if (error || !response) return response!;
+    if (error) return response;
 
     const { id } = await params;
     const discount = await getDiscountCodeById(id);
@@ -38,7 +38,7 @@ export async function PATCH(
 ) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'discount:update' as any);
-    if (error || !response) return response!;
+    if (error) return response;
 
     const { id } = await params;
     const body = await request.json();
@@ -73,7 +73,7 @@ export async function DELETE(
 ) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'discount:delete' as any);
-    if (error || !response) return response!;
+    if (error) return response;
 
     const { id } = await params;
     await deleteDiscountCode(id);
