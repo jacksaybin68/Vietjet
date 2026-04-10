@@ -392,11 +392,6 @@ export function hasPermission(
   permission: Permission,
   customPermissions?: Permission[] | null
 ): boolean {
-  // If custom permissions are provided, check those first (for ANY role, including user)
-  if (customPermissions && customPermissions.includes(permission)) {
-    return true;
-  }
-
   // Super admin has everything
   if (userRole === 'super_admin') return true;
 
@@ -404,13 +399,13 @@ export function hasPermission(
   const resolvedRole: SystemRoleName | 'user' =
     userRole === 'admin' ? 'admin_ops' : (userRole as SystemRoleName | 'user');
 
-  // Regular users have no admin permissions unless provided in customPermissions (checked above)
+  // Regular users have no admin permissions
   if (resolvedRole === 'user') return false;
 
   // Check system role definition
   const roleDef = SYSTEM_ROLES[resolvedRole];
-  if (roleDef) {
-    return roleDef.permissions.has(permission);
+  if (roleDef && roleDef.permissions.has(permission)) {
+    return true;
   }
 
   // Check custom/overridden permissions from DB
@@ -458,9 +453,10 @@ export function getRolePermissions(
   if (resolvedRole === 'user') return [];
 
   const roleDef = SYSTEM_ROLES[resolvedRole];
-  if (roleDef) return Array.from(roleDef.permissions);
+  const basePermissions = roleDef ? Array.from(roleDef.permissions) : [];
+  const custom = customPermissions && Array.isArray(customPermissions) ? customPermissions : [];
 
-  return customPermissions || [];
+  return Array.from(new Set([...basePermissions, ...custom]));
 }
 
 /**
@@ -492,6 +488,8 @@ export function getRoleInfo(role: AllRoles): {
  * A role can only manage roles at or below its own level.
  */
 export function canManageRole(actorRole: AllRoles, targetRole: AllRoles): boolean {
+  if (actorRole === 'super_admin') return true;
+
   const actorLevel = getRoleInfo(actorRole).level;
   const targetLevel = getRoleInfo(targetRole).level;
   return actorLevel > targetLevel;
@@ -501,5 +499,5 @@ export function canManageRole(actorRole: AllRoles, targetRole: AllRoles): boolea
  * Check if a role is an admin role (not a regular user)
  */
 export function isAdminRole(role: string): boolean {
-  return role !== 'user' && role !== 'guest';
+  return role !== 'user';
 }

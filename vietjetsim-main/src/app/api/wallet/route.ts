@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     const { user, error, response } = await verifyAuthRequest(request);
     if (error || !user) return response!;
 
-    const wallet = await getOrCreateWallet(user.id);
+    const wallet = await getOrCreateWallet(user.userId);
     return NextResponse.json({ success: true, wallet });
   } catch (error: any) {
     return NextResponse.json({ error: 'Internal Server Error', message: error.message }, { status: 500 });
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { action, amount, description, paymentMethodId } = body;
 
-    const wallet = await getOrCreateWallet(user.id);
+    const wallet = await getOrCreateWallet(user.userId);
 
     if (action === 'topup') {
       if (!amount || amount <= 0) {
