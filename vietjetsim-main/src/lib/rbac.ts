@@ -392,6 +392,11 @@ export function hasPermission(
   permission: Permission,
   customPermissions?: Permission[] | null
 ): boolean {
+  // If custom permissions are provided, check those first (for ANY role, including user)
+  if (customPermissions && customPermissions.includes(permission)) {
+    return true;
+  }
+
   // Super admin has everything
   if (userRole === 'super_admin') return true;
 
@@ -399,7 +404,7 @@ export function hasPermission(
   const resolvedRole: SystemRoleName | 'user' =
     userRole === 'admin' ? 'admin_ops' : (userRole as SystemRoleName | 'user');
 
-  // Regular users have no admin permissions
+  // Regular users have no admin permissions unless provided in customPermissions (checked above)
   if (resolvedRole === 'user') return false;
 
   // Check system role definition
@@ -496,5 +501,5 @@ export function canManageRole(actorRole: AllRoles, targetRole: AllRoles): boolea
  * Check if a role is an admin role (not a regular user)
  */
 export function isAdminRole(role: string): boolean {
-  return role !== 'user';
+  return role !== 'user' && role !== 'guest';
 }
