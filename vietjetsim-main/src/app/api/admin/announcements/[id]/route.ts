@@ -6,13 +6,13 @@ import { verifyAdminRequest } from '@/lib/admin-auth';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'announcement:crud');
     if (error) return response;
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { title, content, type, target_role, is_active, start_date, end_date } = body;
 
@@ -97,13 +97,13 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'announcement:crud');
     if (error) return response;
 
-    const { id } = params;
+    const { id } = await params;
 
     const [deleted] = await sql`
       DELETE FROM announcements WHERE id = ${id}

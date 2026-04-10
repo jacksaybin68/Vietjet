@@ -9,13 +9,13 @@ import type { AllRoles } from '@/lib/rbac';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'user:view');
     if (error) return response;
 
-    const { id } = params;
+    const { id } = await params;
     const user = await findUserById(id);
 
     if (!user) {
@@ -39,13 +39,13 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { payload, error, response } = await verifyAdminRequest(request, 'user:role_change');
     if (error) return response;
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { role, status } = body;
 
@@ -129,13 +129,13 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { payload, error, response } = await verifyAdminRequest(request, 'user:delete');
     if (error) return response;
 
-    const { id } = params;
+    const { id } = await params;
 
     // Prevent deletion of self
     if (id === payload.userId) {

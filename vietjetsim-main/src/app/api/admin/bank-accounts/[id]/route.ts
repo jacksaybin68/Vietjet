@@ -5,10 +5,10 @@ import { verifyAdminRequest } from '@/lib/admin-auth';
 // ─── PATCH: Update a bank account ───────────────────────────────────────────
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const { error, response } = await verifyAdminRequest(request, 'system:config' as any);
     if (error) return response;
 
@@ -48,10 +48,10 @@ export async function PATCH(
 // ─── DELETE: Delete a bank account ──────────────────────────────────────────
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const { error, response } = await verifyAdminRequest(request, 'system:config' as any);
     if (error) return response;
 
