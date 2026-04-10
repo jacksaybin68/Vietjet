@@ -46,6 +46,12 @@ if (!JWT_SECRET || !JWT_REFRESH_SECRET) {
 
 if (JWT_SECRET === 'dev-secret-key-do-not-use-in-production' ||
     JWT_REFRESH_SECRET === 'dev-refresh-secret-key-do-not-use-in-production') {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'CRITICAL SECURITY ERROR: Using default dummy JWT secrets in production is forbidden! ' +
+      'Please configure JWT_SECRET and JWT_REFRESH_SECRET environment variables.'
+    );
+  }
   console.warn(
     'WARNING: Using default JWT secret keys. This is ONLY acceptable for local development. ' +
     'NEVER deploy with default secrets!'
@@ -78,16 +84,16 @@ export async function comparePassword(password: string, hashedPassword: string):
 // ─── JWT Token Management ───────────────────────────────────────────────────
 
 export function signAccessToken(payload: JWTPayload): string {
-  return jwt.sign(payload, JWT_SECRET!, { expiresIn: ACCESS_TOKEN_EXPIRY });
+  return jwt.sign(payload, JWT_SECRET!, { expiresIn: ACCESS_TOKEN_EXPIRY, algorithm: 'HS256' });
 }
 
 export function signRefreshToken(payload: JWTPayload): string {
-  return jwt.sign(payload, JWT_REFRESH_SECRET!, { expiresIn: REFRESH_TOKEN_EXPIRY });
+  return jwt.sign(payload, JWT_REFRESH_SECRET!, { expiresIn: REFRESH_TOKEN_EXPIRY, algorithm: 'HS256' });
 }
 
 export function verifyAccessToken(token: string): JWTPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET!) as unknown as JWTPayload;
+    return jwt.verify(token, JWT_SECRET!, { algorithms: ['HS256'] }) as unknown as JWTPayload;
   } catch {
     return null;
   }
@@ -95,7 +101,7 @@ export function verifyAccessToken(token: string): JWTPayload | null {
 
 export function verifyRefreshToken(token: string): JWTPayload | null {
   try {
-    return jwt.verify(token, JWT_REFRESH_SECRET!) as unknown as JWTPayload;
+    return jwt.verify(token, JWT_REFRESH_SECRET!, { algorithms: ['HS256'] }) as unknown as JWTPayload;
   } catch {
     return null;
   }
@@ -248,8 +254,8 @@ export async function getToken(request: Request): Promise<JWTPayload | null> {
   const cookieHeader = request.headers.get('Cookie');
   if (cookieHeader) {
     const cookies = Object.fromEntries(
-      cookieHeader.split('; ').map(c => {
-        const [key, ...value] = c.split('=');
+      cookieHeader.split(';').map(c => {
+        const [key, ...value] = c.trim().split('=');
         return [key, value.join('=')];
       })
     );
