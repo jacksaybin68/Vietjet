@@ -26,6 +26,7 @@ interface WalletData {
   id: string;
   balance: number;
   currency: string;
+  account_number: string;
 }
 
 // ─── Card Brand Icons ─────────────────────────────────────────────────────────
@@ -534,11 +535,30 @@ export default function WalletTab({ user }: WalletTabProps) {
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4" />
 
         <div className="relative">
-          <div className="flex items-center gap-2 mb-4">
-            <Icon name="WalletIcon" size={20} className="text-white/70" />
-            <span className="text-sm text-white/70 font-[Be Vietnam Pro,sans-serif]">
-              Số dư ví
-            </span>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Icon name="WalletIcon" size={20} className="text-white/70" />
+              <span className="text-sm text-white/70 font-[Be Vietnam Pro,sans-serif]">
+                Số dư ví
+              </span>
+            </div>
+            
+            {/* Account Number Display */}
+            {wallet?.account_number && (
+              <div className="flex items-center gap-2 bg-black/20 rounded-lg px-3 py-1.5 backdrop-blur-sm group hover:bg-black/30 transition-colors cursor-pointer"
+                   onClick={() => {
+                     navigator.clipboard.writeText(wallet.account_number);
+                     toast.success('Đã sao chép', 'Số tài khoản đã được copy vào khay nhớ tạm.');
+                   }}
+                   title="Nhấn để copy"
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs text-white/60 font-[Be Vietnam Pro,sans-serif] uppercase tracking-wider">Số TK:</span>
+                  <span className="text-sm font-bold font-[KoHo,sans-serif] text-white tracking-widest">{wallet.account_number}</span>
+                </div>
+                <Icon name="DocumentDuplicateIcon" size={14} className="text-white/40 group-hover:text-white transition-colors" />
+              </div>
+            )}
           </div>
 
           <div className="text-4xl font-bold font-[KoHo,sans-serif] mb-6">

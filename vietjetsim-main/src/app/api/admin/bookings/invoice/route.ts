@@ -5,7 +5,7 @@ import { verifyAdminRequest } from '@/lib/admin-auth';
 export async function POST(request: NextRequest) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'payment:process');
-    if (error || !response) return response!;
+    if (error) return response;
 
     const body = await request.json();
     const { booking_id, amount, method, status } = body;

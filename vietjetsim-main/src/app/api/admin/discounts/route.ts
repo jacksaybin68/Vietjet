@@ -6,7 +6,7 @@ import { getAllDiscountCodes, createDiscountCode } from '@/lib/db';
 export async function GET(request: NextRequest) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'discount:list' as any);
-    if (error || !response) return response!;
+    if (error) return response;
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1', 10);
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'discount:create' as any);
-    if (error || !response) return response!;
+    if (error) return response;
 
     const body = await request.json();
     const {

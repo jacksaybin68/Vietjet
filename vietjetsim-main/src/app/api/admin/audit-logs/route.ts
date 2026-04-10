@@ -7,7 +7,7 @@ import { verifyAdminRequest } from '@/lib/admin-auth';
 export async function GET(request: NextRequest) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'rbac:audit_log');
-    if (error || !response) return response!;
+    if (error) return response;
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1', 10);

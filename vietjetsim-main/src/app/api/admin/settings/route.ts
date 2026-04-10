@@ -7,7 +7,7 @@ import { verifyAdminRequest } from '@/lib/admin-auth';
 export async function GET(request: NextRequest) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'system:config');
-    if (error || !response) return response!;
+    if (error) return response;
 
     const settings = await sql`
       SELECT id, key, value, description, updated_at
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'system:config');
-    if (error || !response) return response!;
+    if (error) return response;
 
     const body = await request.json();
     const { settings } = body;

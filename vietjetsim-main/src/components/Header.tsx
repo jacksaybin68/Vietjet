@@ -6,8 +6,9 @@ import AppLogo from '@/components/ui/AppLogo';
 import Icon from '@/components/ui/AppIcon';
 import { useAuth } from '@/contexts/AuthContext';
 
-const MAIN_NAV = [
-  { label: 'CHUYẾN BAY CỦA TÔI', href: '/user-dashboard' },
+// Main navigation items generator
+const getMainNav = (isAdmin: boolean) => [
+  { label: isAdmin ? 'ADMIN DASHBOARD' : 'CHUYẾN BAY CỦA TÔI', href: isAdmin ? '/admin-dashboard' : '/user-dashboard' },
   { label: 'ONLINE CHECK-IN', href: '/check-in' },
   { label: 'DỊCH VỤ CHUYẾN BAY', href: '/services' },
   { label: 'DỊCH VỤ KHÁC', href: '/homepage' },
@@ -106,7 +107,9 @@ export default function Header() {
     '[THÔNG BÁO] Giao thông từ Denpasar ngày 18/03/2026 (Lễ Im lặng Ogoh - Ogoh) có thể ùn tắc. Quý khách lưu ý thời gian di chuyển phù hợp...'
   );
   const pathname = usePathname();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
+  
+  const mainNavItems = getMainNav(isAdmin);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -175,7 +178,7 @@ export default function Header() {
             <div className="flex items-center h-14">
               {/* Left: Navigation links */}
               <div className="hidden lg:flex items-center gap-0">
-                {MAIN_NAV.map((item) => (
+                {mainNavItems.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
@@ -205,7 +208,7 @@ export default function Header() {
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1 bg-white/10 rounded-full pl-1 pr-3 py-1 border border-white/10 hover:bg-white/15 transition-all">
                       <Link
-                        href="/user-dashboard"
+                        href={isAdmin ? '/admin-dashboard' : '/user-dashboard'}
                         className="flex items-center gap-2 text-[11px] font-bold text-white group"
                       >
                         <span className="w-6 h-6 rounded-full bg-yellow-400 text-navy flex items-center justify-center text-[10px] font-black ring-2 ring-white/10 group-hover:scale-105 transition-transform flex-shrink-0">
@@ -312,7 +315,7 @@ export default function Header() {
                 ))}
               </div>
               {/* Main nav mobile */}
-              {MAIN_NAV.map((link) => (
+              {mainNavItems.map((link) => (
                 <Link
                   key={link.label}
                   href={link.href}
@@ -326,7 +329,7 @@ export default function Header() {
                 {user ? (
                   <>
                     <Link
-                      href="/user-dashboard"
+                      href={isAdmin ? '/admin-dashboard' : '/user-dashboard'}
                       onClick={() => setMobileOpen(false)}
                       className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-red-50 text-sm font-bold text-[#EC2029]"
                     >

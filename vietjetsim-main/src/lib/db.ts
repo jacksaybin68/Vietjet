@@ -233,7 +233,7 @@ export async function updateUserProfile(
   `;
 
   const results = await sql.query(query, values);
-  return (results as any).rows[0] as UserRecord;
+  return (results as any)[0] as UserRecord;
 }
 
 export async function getAllUsers(
@@ -382,9 +382,9 @@ export async function getAllFlights(params?: {
 
   const flights = await sql.query(flightsQuery, values);
   const countResult = await sql.query(countQuery, values.slice(0, -2));
-  const total = parseInt((countResult as any).rows[0].total, 10);
+  const total = parseInt((countResult as any)[0].total, 10);
 
-  return { flights: (flights as any).rows as FlightRecord[], total };
+  return { flights: (flights as any) as FlightRecord[], total };
 }
 
 export async function createFlight(flight: {
@@ -454,7 +454,7 @@ export async function updateFlight(
   `;
 
   const results = await sql.query(query, values);
-  return (results as any).rows[0] as FlightRecord;
+  return (results as any)[0] as FlightRecord;
 }
 
 export async function deleteFlight(flightId: string): Promise<void> {
@@ -689,9 +689,9 @@ export async function getAllBookings(params?: {
 
   const bookingsResult = await sql.query(bookingsQuery, [...filterValues, limit, offset]);
   const countResult = await sql.query(countQuery, filterValues);
-  const total = parseInt((countResult as any).rows[0].total, 10);
+  const total = parseInt((countResult as any)[0].total, 10);
 
-  return { bookings: (bookingsResult as any).rows as any[], total };
+  return { bookings: (bookingsResult as any) as any[], total };
 }
 
 // ─── Payment Queries ────────────────────────────────────────────────────────
@@ -894,9 +894,9 @@ export async function getAllRefunds(params?: {
 
   const refundsResult = await sql.query(refundsQuery, [...filterValues, limit, offset]);
   const countResult = await sql.query(countQuery, filterValues);
-  const total = parseInt((countResult as any).rows[0].total, 10);
+  const total = parseInt((countResult as any)[0].total, 10);
 
-  return { refunds: (refundsResult as any).rows as any[], total };
+  return { refunds: (refundsResult as any) as any[], total };
 }
 
 export async function updateRefundStatus(
@@ -1359,14 +1359,14 @@ export async function getAuditLogs(params?: {
     `SELECT COUNT(*) as total FROM audit_logs ${where}`,
     values.slice(0, -2)
   );
-  const total = parseInt((countRes as any).rows[0].total, 10);
+  const total = parseInt((countRes as any)[0].total, 10);
 
   const dataRes = await sql.query(
     `SELECT * FROM audit_logs ${where} ORDER BY created_at DESC LIMIT $${values.length - 1} OFFSET $${values.length}`,
     values
   );
 
-  return { logs: (dataRes as any).rows as AuditLogRecord[], total };
+  return { logs: (dataRes as any) as AuditLogRecord[], total };
 }
 
 // ─── Refresh Token Store (for rotation / revocation) ───────────────────────
@@ -1523,9 +1523,9 @@ export async function getAllDiscountCodes(params?: {
 
   const discounts = await sql.query(discountsQuery, queryParams);
   const countResult = await sql.query(countQuery, values);
-  const total = parseInt((countResult as any).rows[0].total, 10);
+  const total = parseInt((countResult as any)[0].total, 10);
 
-  return { discounts: (discounts as any).rows as DiscountCodeRecord[], total };
+  return { discounts: (discounts as any) as DiscountCodeRecord[], total };
 }
 
 export async function getDiscountCodeByCode(code: string): Promise<DiscountCodeRecord | null> {
@@ -1588,7 +1588,7 @@ export async function updateDiscountCode(id: string, updates: Partial<DiscountCo
   `;
 
   const results = await sql.query(query, values);
-  return (results as any).rows[0] as DiscountCodeRecord;
+  return (results as any)[0] as DiscountCodeRecord;
 }
 
 export async function deleteDiscountCode(id: string): Promise<void> {
@@ -1610,6 +1610,7 @@ export interface WalletRecord {
   user_id: string;
   balance: number;
   currency: string;
+  account_number: string;
   created_at: string;
   updated_at: string;
 }
@@ -1654,9 +1655,10 @@ export async function getOrCreateWallet(userId: string): Promise<WalletRecord> {
     return (existing as WalletRecord[])[0];
   }
 
+  const accNum = 'VJSIM' + Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
   const result = await sql`
-    INSERT INTO user_wallets (user_id, balance, currency)
-    VALUES (${userId}, 0, 'VND')
+    INSERT INTO user_wallets (user_id, balance, currency, account_number)
+    VALUES (${userId}, 0, 'VND', ${accNum})
     RETURNING *
   `;
   return (result as WalletRecord[])[0];

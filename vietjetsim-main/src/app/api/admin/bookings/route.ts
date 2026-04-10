@@ -8,13 +8,12 @@ import { verifyAccessToken } from '@/lib/auth';
 export async function GET(request: NextRequest) {
   try {
     const { payload, error, response } = await verifyAdminRequest(request, 'booking:list');
-    if (error || !response) return response!;
+    if (error) return response;
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '20', 10);
     const status = searchParams.get('status') || undefined;
-    const userId = searchParams.get('userId') || undefined;
 
     const { bookings, total } = await getAllBookings({ page, limit, status });
 
@@ -40,23 +39,8 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const token = request.cookies.get('access_token')?.value;
-
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized', message: 'No access token found' },
-        { status: 401 }
-      );
-    }
-
-    const payload = verifyAccessToken(token);
-
-    if (!payload || payload.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Forbidden', message: 'Admin access required' },
-        { status: 403 }
-      );
-    }
+    const { payload, error, response } = await verifyAdminRequest(request, 'booking:status_change');
+    if (error) return response;
 
     const body = await request.json();
     const { bookingId, status } = body;

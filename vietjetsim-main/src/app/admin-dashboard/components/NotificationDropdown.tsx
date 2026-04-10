@@ -312,7 +312,7 @@ export default function NotificationDropdown({ onNotificationCountChange }: Noti
               style={{ borderColor: 'rgba(148, 163, 184, 0.1)' }}
             >
               <Link
-                href="/user-dashboard?tab=notifications"
+                href="/admin-dashboard?tab=notifications"
                 onClick={() => setIsOpen(false)}
                 className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
               >

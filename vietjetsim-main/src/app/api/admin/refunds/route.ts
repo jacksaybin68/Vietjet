@@ -9,7 +9,7 @@ import { verifyAccessToken } from '@/lib/auth';
 export async function GET(request: NextRequest) {
   try {
     const { payload, error, response } = await verifyAdminRequest(request, 'refund:list');
-    if (error || !response) return response!;
+    if (error) return response;
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1', 10);
@@ -40,23 +40,8 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const token = request.cookies.get('access_token')?.value;
-
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized', message: 'No access token found' },
-        { status: 401 }
-      );
-    }
-
-    const payload = verifyAccessToken(token);
-
-    if (!payload || payload.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Forbidden', message: 'Admin access required' },
-        { status: 403 }
-      );
-    }
+    const { payload, error, response } = await verifyAdminRequest(request, 'refund:approve');
+    if (error) return response;
 
     const body = await request.json();
     const { refundId, status } = body;
@@ -84,16 +69,15 @@ export async function PATCH(request: NextRequest) {
     // Atomic refund processing: If status is approved/completed, release seats and update booking
     if (status === 'approved' || status === 'completed') {
       try {
-        const refundRecord = (await sql`SELECT booking_id FROM refund_requests WHERE id = ${refundId}`)[0];
+        const results = await sql`SELECT booking_id FROM refund_requests WHERE id = ${refundId}`;
+        const refundRecord = results[0];
         if (refundRecord?.booking_id) {
-          // Wrap in transaction-like sequence if multiple steps
           await sql`DELETE FROM seats WHERE booking_id = ${refundRecord.booking_id}`;
           await sql`UPDATE bookings SET status = 'refunded', updated_at = NOW() WHERE id = ${refundRecord.booking_id}`;
           console.log(`[REFUND] Seats released and booking ${refundRecord.booking_id} marked as refunded.`);
         }
       } catch (dbErr) {
         console.error('Error during flight seat release for refund:', dbErr);
-        // We continue with updating the refund request status even if seat release has issues (though unlikely)
       }
     }
 

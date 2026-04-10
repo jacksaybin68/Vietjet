@@ -1,5 +1,6 @@
+'use client';
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Icon from '@/components/ui/AppIcon';
 import { PaymentSkeleton } from '@/components/ui/SkeletonLoader';
@@ -422,17 +423,31 @@ export default function PaymentClient() {
   const [loading, setLoading] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [bookingCode] = useState(generateBookingCode());
+  const [bookingCode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('bookingId') || params.get('bookingCode') || generateBookingCode();
+    }
+    return generateBookingCode();
+  });
   const [pageLoading, setPageLoading] = useState(true);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const toast = useToast();
-  const [bankConfig, setBankConfig] = useState({
+  const [bankConfig, setBankConfig] = useState<{
+    admin_bank_name: string;
+    admin_bank_account_holder: string;
+    admin_bank_account_number: string;
+    bank_bin?: string;
+  }>({
     admin_bank_name: 'Vietcombank',
     admin_bank_account_holder: 'CONG TY VIETJET SIM',
     admin_bank_account_number: '1234 5678 9012',
   });
+  const [adminAccounts, setAdminAccounts] = useState<any[]>([]);
+  const [selectedAdminAccount, setSelectedAdminAccount] = useState<any>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [isWalletLoading, setIsWalletLoading] = useState(false);
 
@@ -441,6 +456,10 @@ export default function PaymentClient() {
       .then(res => res.json())
       .then(data => {
         if (data.bankConfig) setBankConfig(data.bankConfig);
+        if (data.accounts && data.accounts.length > 0) {
+          setAdminAccounts(data.accounts);
+          setSelectedAdminAccount(data.accounts[0]);
+        }
       })
       .catch(err => console.error('Failed to load bank config:', err));
     
@@ -1204,31 +1223,114 @@ export default function PaymentClient() {
                         </span>
                       </label>
 
-                      {/* Transfer Instructions */}
-                      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-700">
-                        <div className="font-semibold mb-1 flex items-center gap-1.5">
-                          <Icon name="InformationCircleIcon" size={16} />
-                          Hướng dẫn chuyển khoản
+                      {/* Transfer Instructions Redesign */}
+                      {selectedAdminAccount && (
+                        <div className="space-y-4">
+                          <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2">
+                            Thông tin chuyển khoản
+                          </label>
+                          
+                          {/* Account Tabs if multiple */}
+                          {adminAccounts.length > 1 && (
+                            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                              {adminAccounts.map((acc, idx) => (
+                                <button
+                                  key={acc.id}
+                                  type="button"
+                                  onClick={() => setSelectedAdminAccount(acc)}
+                                  className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
+                                    selectedAdminAccount.id === acc.id 
+                                      ? 'bg-primary text-white shadow-md shadow-primary/20' 
+                                      : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+                                  }`}
+                                >
+                                  {acc.admin_bank_name}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
+                          <div className="bg-white border-2 border-primary/20 rounded-3xl overflow-hidden shadow-xl shadow-stone-200/50">
+                            <div className="p-4 bg-gradient-to-br from-stone-50 to-white">
+                              <div className="flex justify-between items-start mb-4">
+                                <div>
+                                  <div className="text-xs font-bold text-stone-400 uppercase tracking-widest bg-stone-100 px-2 py-0.5 rounded inline-block mb-1">
+                                    Ngân hàng thụ hưởng
+                                  </div>
+                                  <h4 className="text-lg font-black text-stone-900">{selectedAdminAccount.admin_bank_name}</h4>
+                                </div>
+                                <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-stone-100 flex items-center justify-center p-1">
+                                  <div className="text-[10px] font-black text-primary">{selectedAdminAccount.admin_bank_name.substring(0, 3)}</div>
+                                </div>
+                              </div>
+
+                              {/* QR Code Section */}
+                              <div className="flex flex-col items-center justify-center py-4 bg-stone-50 rounded-2xl border border-stone-100 mb-4">
+                                <div className="relative group cursor-pointer">
+                                  <img 
+                                    src={`https://img.vietqr.io/image/${selectedAdminAccount.bank_bin || 'VCB'}-${selectedAdminAccount.admin_bank_account_number}-compact2.png?amount=${total}&addInfo=${encodeURIComponent(selectedAdminAccount.transfer_note_template?.replace('{code}', bookingCode) || bookingCode)}&accountName=${encodeURIComponent(selectedAdminAccount.admin_bank_account_holder)}`} 
+                                    alt="VietQR" 
+                                    className="w-48 h-48 object-contain rounded-lg transition-transform group-hover:scale-105"
+                                  />
+                                  <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-all rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                    <span className="bg-primary text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg">Quét để trả ngay</span>
+                                  </div>
+                                </div>
+                                <p className="text-[10px] text-stone-400 mt-2 font-medium">Sử dụng App Ngân hàng hoặc Ví để quét mã</p>
+                              </div>
+
+                              <div className="space-y-3">
+                                <div className="flex justify-between items-end">
+                                  <div>
+                                    <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block mb-0.5">Số tài khoản</label>
+                                    <p className="text-lg font-mono font-black text-stone-900 leading-none tracking-wider">{selectedAdminAccount.admin_bank_account_number}</p>
+                                  </div>
+                                  <button 
+                                    type="button"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(selectedAdminAccount.admin_bank_account_number);
+                                      toast.success('Đã chép', 'Số tài khoản đã được lưu vào bộ nhớ tạm');
+                                    }}
+                                    className="text-primary hover:bg-primary/5 p-2 rounded-lg transition-colors"
+                                  >
+                                    <Icon name="ClipboardDocumentIcon" size={18} />
+                                  </button>
+                                </div>
+
+                                <div className="flex justify-between items-center py-3 px-4 bg-primary/5 rounded-2xl border border-primary/10">
+                                  <div>
+                                    <label className="text-[10px] font-bold text-primary/60 uppercase tracking-widest block mb-0.5">Nội dung chuyển khoản</label>
+                                    <p className="text-base font-black text-primary leading-none tracking-widest">
+                                      {selectedAdminAccount.transfer_note_template?.replace('{code}', bookingCode) || bookingCode}
+                                    </p>
+                                  </div>
+                                  <button 
+                                    type="button"
+                                    onClick={() => {
+                                      const note = selectedAdminAccount.transfer_note_template?.replace('{code}', bookingCode) || bookingCode;
+                                      navigator.clipboard.writeText(note);
+                                      toast.success('Đã chép', 'Nội dung chuyển khoản đã được lưu vào bộ nhớ tạm');
+                                    }}
+                                    className="bg-primary text-white hover:bg-primary-dark w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-md shadow-primary/20"
+                                  >
+                                    <Icon name="ClipboardDocumentIcon" size={18} />
+                                  </button>
+                                </div>
+
+                                <div className="pt-2">
+                                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block mb-1">Chủ tài khoản</label>
+                                  <p className="text-sm font-bold text-stone-800">{selectedAdminAccount.admin_bank_account_holder.toUpperCase()}</p>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="bg-stone-900 p-3 flex items-center justify-center gap-2">
+                              <Icon name="ShieldCheckIcon" size={14} className="text-emerald-400" />
+                              <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">Giao dịch bảo mật VietQR</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="space-y-1">
-                          <div className="flex justify-between">
-                            <span className="text-blue-600/70">Ngân hàng:</span>
-                            <span className="font-semibold">{bankConfig.admin_bank_name}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-blue-600/70">Chủ tài khoản:</span>
-                            <span className="font-semibold">{bankConfig.admin_bank_account_holder}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-blue-600/70">Số tài khoản:</span>
-                            <span className="font-mono font-bold text-blue-900">{bankConfig.admin_bank_account_number}</span>
-                          </div>
-                          <div className="flex justify-between py-1 px-2 mt-1 bg-blue-100 rounded-lg">
-                            <span className="text-blue-700 font-bold">Nội dung CK:</span>
-                            <span className="font-bold text-primary">{bookingCode}</span>
-                          </div>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   )}
 

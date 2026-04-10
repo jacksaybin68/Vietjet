@@ -20,6 +20,7 @@ import GlobalSearch from './GlobalSearch';
 import AirportsTab from './AirportsTab';
 import AnnouncementsTab from './AnnouncementsTab';
 import SystemSettingsTab from './SystemSettingsTab';
+import BankAccountsTab from './BankAccountsTab';
 import AuditLogsTab from './AuditLogsTab';
 import TransactionsTab from './TransactionsTab';
 import { useAuth } from '@/contexts/AuthContext';
@@ -43,6 +44,7 @@ export type AdminTab =
   | 'settings'
   | 'audit_logs'
   | 'transactions'
+  | 'banks'
   | 'discounts';
 
 const NAV_ITEMS: {
@@ -73,6 +75,7 @@ const NAV_ITEMS: {
   { id: 'airports', label: 'Sân bay', icon: 'BuildingOfficeIcon', category: 'management' },
   { id: 'discounts', label: 'Mã giảm giá', icon: 'TicketIcon', category: 'management' },
   { id: 'transactions', label: 'Giao dịch', icon: 'CurrencyDollarIcon', category: 'management' },
+  { id: 'banks', label: 'Ngân hàng', icon: 'BanknotesIcon', category: 'management' },
   { id: 'revenue', label: 'Doanh thu', icon: 'ChartBarIcon', category: 'management' },
   { id: 'refunds', label: 'Hoàn tiền', icon: 'BanknotesIcon', category: 'management' },
   { id: 'chat', label: 'Chat hỗ trợ', icon: 'ChatBubbleLeftRightIcon', category: 'support' },
@@ -106,6 +109,7 @@ const TAB_LABELS: Record<AdminTab, string> = {
   settings: 'Cài đặt hệ thống',
   audit_logs: 'Nhật ký hoạt động',
   transactions: 'Lịch sử giao dịch',
+  banks: 'Quản lý tài khoản ngân hàng',
   discounts: 'Quản lý mã giảm giá',
 };
 
@@ -577,6 +581,12 @@ export default function AdminDashboardClient() {
           {activeTab === 'transactions' && (
             <ErrorBoundary inline variant="api">
               <TransactionsTab onToast={toast} />
+            </ErrorBoundary>
+          )}
+
+          {activeTab === 'banks' && (
+            <ErrorBoundary inline variant="api">
+              <BankAccountsTab onToast={toast} />
             </ErrorBoundary>
           )}
 
