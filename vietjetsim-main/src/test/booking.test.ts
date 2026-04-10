@@ -42,7 +42,7 @@ describe('Booking Database Module', () => {
         return Promise.resolve([]);
       });
 
-      const result = await getBookingsByUserId('user-1', { limit: 10, offset: 0 });
+      const result = await getBookingsByUserId('user-1', { page: 1, limit: 10 });
 
       expect(sql).toHaveBeenCalledTimes(2);
       expect(result.bookings).toBeDefined();
@@ -125,7 +125,7 @@ describe('Booking Database Module', () => {
         return Promise.resolve([]);
       });
 
-      const result = await getAllBookings({ limit: 10, offset: 0 });
+      const result = await getAllBookings({ page: 1, limit: 10 });
 
       expect(sql.query).toHaveBeenCalledTimes(2);
       expect(result.bookings).toBeDefined();
