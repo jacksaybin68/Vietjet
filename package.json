@@ -1,6 +1,8 @@
 {
   "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.1",
     "dotenv": "^17.4.0",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "vitest": "^4.1.4"
   }
 }
