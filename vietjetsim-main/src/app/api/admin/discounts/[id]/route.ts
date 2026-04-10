@@ -22,10 +22,10 @@ export async function GET(
     }
 
     return NextResponse.json({ discount });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching discount by ID:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error', message: error.message },
+      { error: 'Internal Server Error', message: (error instanceof Error ? error.message : "Unknown error") },
       { status: 500 }
     );
   }
@@ -57,10 +57,10 @@ export async function PATCH(
       message: 'Discount code updated successfully',
       discount: updatedDiscount,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error updating discount:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error', message: error.message },
+      { error: 'Internal Server Error', message: (error instanceof Error ? error.message : "Unknown error") },
       { status: 500 }
     );
   }
@@ -82,10 +82,10 @@ export async function DELETE(
       success: true,
       message: 'Discount code deleted successfully',
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error deleting discount:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error', message: error.message },
+      { error: 'Internal Server Error', message: (error instanceof Error ? error.message : "Unknown error") },
       { status: 500 }
     );
   }
