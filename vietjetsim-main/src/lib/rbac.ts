@@ -399,18 +399,21 @@ export function hasPermission(
   const resolvedRole: SystemRoleName | 'user' =
     userRole === 'admin' ? 'admin_ops' : (userRole as SystemRoleName | 'user');
 
-  // Regular users have no admin permissions
+  // Check custom/overridden permissions from DB FIRST
+  // This allows assigning specific individual permissions to any user including 'user' role
+  if (customPermissions && Array.isArray(customPermissions)) {
+    if (customPermissions.includes(permission)) {
+      return true;
+    }
+  }
+
+  // Regular users have no base admin permissions
   if (resolvedRole === 'user') return false;
 
   // Check system role definition
-  const roleDef = SYSTEM_ROLES[resolvedRole];
+  const roleDef = SYSTEM_ROLES[resolvedRole as SystemRoleName];
   if (roleDef && roleDef.permissions.has(permission)) {
     return true;
-  }
-
-  // Check custom/overridden permissions from DB
-  if (customPermissions && Array.isArray(customPermissions)) {
-    return customPermissions.includes(permission);
   }
 
   return false;
@@ -499,5 +502,12 @@ export function canManageRole(actorRole: AllRoles, targetRole: AllRoles): boolea
  * Check if a role is an admin role (not a regular user)
  */
 export function isAdminRole(role: string): boolean {
-  return role !== 'user';
+  return (
+    role === 'admin' ||
+    role === 'super_admin' ||
+    role === 'admin_ops' ||
+    role === 'admin_finance' ||
+    role === 'admin_support' ||
+    role === 'admin_content'
+  );
 }
