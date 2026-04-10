@@ -231,12 +231,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       changes,
       updatedAt: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('[FLIGHT-UPDATE-ERROR]', error);
     return NextResponse.json(
       {
         error: 'Internal Server Error',
-        message: error?.message || 'Đã xảy ra lỗi khi cập nhật thông tin chuyến bay.',
+        message: (error instanceof Error ? error.message : 'Đã xảy ra lỗi khi cập nhật thông tin chuyến bay.'),
       },
       { status: 500 }
     );

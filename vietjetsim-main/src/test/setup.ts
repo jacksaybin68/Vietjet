@@ -4,7 +4,9 @@ import { vi, beforeAll, afterAll } from 'vitest';
 // ─── Mock Environment Variables ──────────────────────────────────────────────
 
 // Set environment variables directly
-Object.defineProperty(process.env, 'NODE_ENV', { value: 'test', writable: true });
+if (process.env.NODE_ENV !== 'test') {
+  Object.defineProperty(process.env, 'NODE_ENV', { value: 'test', writable: true, configurable: true, enumerable: true });
+}
 process.env.JWT_SECRET = 'test-jwt-secret-key-at-least-32-characters-long-for-testing';
 process.env.JWT_REFRESH_SECRET = 'test-jwt-refresh-secret-key-at-least-32-characters-long-for-testing';
 

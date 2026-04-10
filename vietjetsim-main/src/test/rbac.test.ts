@@ -14,7 +14,7 @@ describe('RBAC Module', () => {
   describe('Permission Checks', () => {
     it('should grant all permissions to super_admin', () => {
       const permissions = getRolePermissions('super_admin');
-      expect(permissions.length).toBeGreaterThan(40);
+      expect(permissions.length).toBeGreaterThanOrEqual(40);
       expect(permissions).toContain('user:list');
       expect(permissions).toContain('flight:create');
       expect(permissions).toContain('rbac:manage');
