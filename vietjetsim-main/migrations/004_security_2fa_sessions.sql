@@ -5,7 +5,7 @@
 -- User 2FA Configuration
 CREATE TABLE IF NOT EXISTS user_2fa (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE UNIQUE,
+  user_id TEXT NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE UNIQUE,
   secret VARCHAR(64) NOT NULL,
   is_enabled BOOLEAN DEFAULT false,
   backup_codes TEXT[], -- Array of hashed backup codes (JSON)
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS user_2fa (
 -- User Sessions (for managing active logins)
 CREATE TABLE IF NOT EXISTS user_sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   device_name VARCHAR(100),
   device_type VARCHAR(50),
   browser VARCHAR(100),
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS user_sessions (
 -- Login History (for security audit)
 CREATE TABLE IF NOT EXISTS login_history (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   ip_address VARCHAR(45),
   user_agent TEXT,
   device_type VARCHAR(50),
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS login_history (
 -- Account Recovery Requests
 CREATE TABLE IF NOT EXISTS account_recovery (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   email VARCHAR(255),
   token VARCHAR(100) NOT NULL UNIQUE,
   token_expires_at TIMESTAMPTZ NOT NULL,
