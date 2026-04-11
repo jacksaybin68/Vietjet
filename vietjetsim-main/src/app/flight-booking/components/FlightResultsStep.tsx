@@ -3,6 +3,7 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Flight } from './FlightBookingClient';
 import Icon from '@/components/ui/AppIcon';
 import { FlightResultsSkeleton } from '@/components/ui/SkeletonLoader';
+import { getErrorMessage } from '@/lib/utils';
 
 // ─── Fallback mock data (used when API is unavailable) ──────────────────────
 
@@ -421,9 +422,10 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
         console.warn('[FlightResultsStep] API returned empty results, using fallback data');
         setFlights(FALLBACK_FLIGHTS);
       }
-    } catch (err: any) {
-      console.error('[FlightResultsStep] Fetch error:', err?.message || err);
-      setLoadError(err?.message || 'Không thể tải danh sách chuyến bay. Vui lòng thử lại.');
+    } catch (err: unknown) {
+      const errorMessage = getErrorMessage(err);
+      console.error('[FlightResultsStep] Fetch error:', errorMessage);
+      setLoadError(errorMessage || 'Không thể tải danh sách chuyến bay. Vui lòng thử lại.');
       // Fall back to mock data on error
       setFlights(FALLBACK_FLIGHTS);
       setShowErrorModal(true);
