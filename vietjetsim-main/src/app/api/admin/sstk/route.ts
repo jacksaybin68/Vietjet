@@ -11,6 +11,7 @@ import {
   deleteFlight,
   getSstkLogs,
   insertSstkLog,
+  archiveOldRefunds,
 } from '@/lib/db';
 
 // ─── Auth guard ──────────────────────────────────────────────────────────────
@@ -125,24 +126,12 @@ const TOOLS: Record<
 
   'archive-old-refunds': {
     label: 'Lưu trữ hoàn tiền cũ',
-    description: 'Đánh dấu các yêu cầu hoàn tiền đã completed > 90 ngày là archived',
+    description: 'Tự động lưu trữ (archive) các yêu cầu hoàn tiền đã xử lý/duyệt > 90 ngày',
     category: 'refund',
     execute: async (_params, _adminId) => {
-      const refundsResult = await getAllRefunds();
-      const refunds = refundsResult.refunds || [];
-      const now = new Date();
-      let archived = 0;
-      for (const r of refunds) {
-        if (r.status === 'processed' || r.status === 'approved') {
-          const updatedAt = new Date(r.updated_at || r.created_at);
-          const diffDays = (now.getTime() - updatedAt.getTime()) / (1000 * 60 * 60 * 24);
-          if (diffDays > 90) {
-            archived++;
-          }
-        }
-      }
+      const archivedCount = await archiveOldRefunds(90);
       return {
-        summary: `Tìm thấy ${archived} yêu cầu hoàn tiền đủ điều kiện lưu trữ`,
+        summary: `Đã lưu trữ ${archivedCount} yêu cầu hoàn tiền cũ (>90 ngày)`,
         status: 'success' as const,
       };
     },
