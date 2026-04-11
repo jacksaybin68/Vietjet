@@ -1,5 +1,4 @@
-// src/lib/dbCheck.ts
-import { Client } from '@neondatabase/serverless';
+import { sql } from './db';
 import dotenv from 'dotenv';
 
 // Load .env.local file if it exists (redundant if using dotenv -e, but good practice)
@@ -13,21 +12,14 @@ async function checkDbConnection() {
     process.exit(1);
   }
 
-  const client = new Client(databaseUrl);
-
   try {
-    await client.connect();
-    console.log('Successfully connected to NeonDB!');
-
-    // Optional: Run a simple query to further verify
-    const res = await client.query('SELECT 1;');
-    console.log('Query executed successfully:', res.rows);
-
-    await client.end();
-    console.log('Connection closed.');
+    // Run a simple query to verify using the sql template tag from db.ts
+    const res = await sql`SELECT 1 as connected;`;
+    console.log('Successfully connected to DB using src/lib/db.ts!');
+    console.log('Query executed successfully:', res);
     process.exit(0);
   } catch (error) {
-    console.error('Failed to connect to NeonDB:', error);
+    console.error('Failed to connect to DB via db.ts:', error);
     process.exit(1);
   }
 }

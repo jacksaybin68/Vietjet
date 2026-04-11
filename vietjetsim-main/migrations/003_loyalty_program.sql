@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS loyalty_programs (
 -- User Loyalty Enrollment
 CREATE TABLE IF NOT EXISTS user_loyalty (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE UNIQUE,
+  user_id TEXT NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE UNIQUE,
   program_id UUID NOT NULL REFERENCES loyalty_programs(id),
   total_points INTEGER DEFAULT 0 CHECK (total_points >= 0),
   available_points INTEGER DEFAULT 0 CHECK (available_points >= 0),

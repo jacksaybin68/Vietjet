@@ -162,3 +162,7 @@ CREATE TABLE IF NOT EXISTS user_wallets (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+ALTER TABLE bookings ADD CONSTRAINT fk_discount_code FOREIGN KEY (discount_code_id) REFERENCES discount_codes(id);
+
+ALTER TABLE wallet_transactions ADD CONSTRAINT fk_wallet FOREIGN KEY (wallet_id) REFERENCES user_wallets(id) ON DELETE CASCADE;
