@@ -113,7 +113,7 @@ export interface RefundRecord {
   booking_id: string;
   user_id: string;
   reason: string;
-  status: 'pending' | 'approved' | 'rejected' | 'processed';
+  status: 'pending' | 'approved' | 'rejected' | 'processed' | 'archived';
   bank_info: any;
   admin_note: string | null;
   created_at: string;
@@ -901,7 +901,7 @@ export async function getAllRefunds(params?: {
 
 export async function updateRefundStatus(
   refundId: string,
-  status: 'pending' | 'approved' | 'rejected' | 'processed',
+  status: 'pending' | 'approved' | 'rejected' | 'processed' | 'archived',
   admin_note?: string
 ): Promise<RefundRecord> {
   const results = await sql`
@@ -911,6 +911,27 @@ export async function updateRefundStatus(
     RETURNING *
   `;
   return (results as RefundRecord[])[0];
+}
+
+/**
+ * Bulk archive old refund requests that have been processed or approved.
+ * @param days Number of days since the last update (or creation) to consider for archival.
+ * @returns The number of records archived.
+ */
+export async function archiveOldRefunds(days: number = 90): Promise<number> {
+  const result = await sql`
+    UPDATE refund_requests
+    SET status = 'archived', updated_at = NOW()
+    WHERE (status = 'processed' OR status = 'approved')
+      AND (
+        (updated_at IS NOT NULL AND updated_at < NOW() - (CAST(${days} || ' days' AS INTERVAL)))
+        OR
+        (updated_at IS NULL AND created_at < NOW() - (CAST(${days} || ' days' AS INTERVAL)))
+      )
+    RETURNING id
+  `;
+
+  return Array.isArray(result) ? result.length : 0;
 }
 
 // ─── Chat Queries ───────────────────────────────────────────────────────────
