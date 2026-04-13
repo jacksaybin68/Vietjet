@@ -19,7 +19,7 @@ const FALLBACK_FLIGHTS: Flight[] = [
     duration: '2h 10m',
     price: 899000,
     class: 'economy',
-    airline: 'VietjetSim',
+    airline: 'Vietjet Air',
     flightNo: 'VJ 101',
     available: 42,
     stops: 0,
@@ -35,7 +35,7 @@ const FALLBACK_FLIGHTS: Flight[] = [
     duration: '2h 10m',
     price: 1299000,
     class: 'economy',
-    airline: 'VietjetSim',
+    airline: 'Vietjet Air',
     flightNo: 'VJ 103',
     available: 15,
     stops: 0,
@@ -51,7 +51,7 @@ const FALLBACK_FLIGHTS: Flight[] = [
     duration: '2h 10m',
     price: 749000,
     class: 'economy',
-    airline: 'VietjetSim',
+    airline: 'Vietjet Air',
     flightNo: 'VJ 105',
     available: 68,
     stops: 0,
@@ -67,7 +67,7 @@ const FALLBACK_FLIGHTS: Flight[] = [
     duration: '2h 10m',
     price: 2899000,
     class: 'business',
-    airline: 'VietjetSim',
+    airline: 'Vietjet Air',
     flightNo: 'VJ 107',
     available: 8,
     stops: 0,
@@ -83,7 +83,7 @@ const FALLBACK_FLIGHTS: Flight[] = [
     duration: '2h 10m',
     price: 599000,
     class: 'economy',
-    airline: 'VietjetSim',
+    airline: 'Vietjet Air',
     flightNo: 'VJ 109',
     available: 3,
     stops: 0,
@@ -99,7 +99,7 @@ const FALLBACK_FLIGHTS: Flight[] = [
     duration: '1h 15m',
     price: 499000,
     class: 'economy',
-    airline: 'VietjetSim',
+    airline: 'Vietjet Air',
     flightNo: 'VJ 201',
     available: 55,
     stops: 0,
@@ -115,7 +115,7 @@ const FALLBACK_FLIGHTS: Flight[] = [
     duration: '1h 20m',
     price: 449000,
     class: 'economy',
-    airline: 'VietjetSim',
+    airline: 'Vietjet Air',
     flightNo: 'VJ 301',
     available: 30,
     stops: 0,
@@ -196,8 +196,8 @@ function mapDbFlightToFlight(row: any): Flight {
 
   // Derive airline prefix from flight_no
   const fn = (row.flight_no || '').toUpperCase().replace(/\s+/g, '');
-  let airline = 'VietjetSim';
-  if (fn.startsWith('VJ')) airline = 'VietjetSim';
+  let airline = 'Vietjet Air';
+  if (fn.startsWith('VJ')) airline = 'Vietjet Air';
   else if (fn.startsWith('VN') || fn.startsWith('VNA')) airline = 'VietnamSim';
   else if (fn.startsWith('QH') || fn.startsWith('BL')) airline = 'BambooSim';
 
@@ -531,7 +531,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
   }, [filters, sortBy, searchQuery, flights]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+    <div className="flex flex-col lg:flex-row gap-4 relative items-start">
       {/* Search error modal */}
       {showErrorModal && loadError && (
         <SearchErrorModal
@@ -545,8 +545,8 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
         />
       )}
 
-      {/* Sidebar Filters */}
-      <aside className="lg:col-span-1">
+      {/* Flight List */}
+      <div className="flex-1 space-y-3 min-w-0">
         <div
           className="bg-white rounded-xl border border-stone-200 sticky top-[230px] overflow-hidden"
           style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}
@@ -779,22 +779,17 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
             </div>
           </div>
         </div>
-      </aside>
 
-      {/* Flight List */}
-      <div className="lg:col-span-3 space-y-2.5">
-        {/* Search Input */}
+        {/* Search Bar */}
         <div className="relative">
-          <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-            <Icon name="MagnifyingGlassIcon" size={16} className="text-stone-400" />
-          </div>
+          <Icon name="MagnifyingGlassIcon" size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
           <input
             id="search-input"
             name="search"
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Tìm theo số hiệu, hãng bay, thành phố đi / đến..."
+            placeholder="Tìm theo số hiệu, hãng bay..."
             className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-stone-200 bg-white text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all form-input"
           />
           {searchQuery && (
@@ -875,243 +870,81 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
         {/* Flight results */}
         {!isLoading &&
           !loadError &&
-          filtered.map((flight, idx) => (
+          filtered.map((flight, idx) => {
+            const basePrice = flight.price;
+            const fareClasses = [
+              { id: 'business', name: 'Business', price: basePrice + 1200000, color: 'bg-[#FBE5E6] text-[#B30000] border-transparent hover:border-[#B30000]', headerClass: 'bg-[#D1161B] text-white', priceColor: 'text-[#B30000]' },
+              { id: 'skyboss', name: 'SkyBOSS', price: basePrice + 800000, color: 'bg-[#E6F3FF] text-[#1A2948] border-transparent hover:border-[#1A2948]', headerClass: 'bg-[#1A2948] text-white', priceColor: 'text-[#1A2948]' },
+              { id: 'deluxe', name: 'Deluxe', price: basePrice + 300000, color: 'bg-[#F2F2F2] text-[#1A2948] border-transparent hover:border-gray-400', headerClass: 'bg-[#FFDD00] text-[#1A2948]', priceColor: 'text-[#1A2948]' },
+              { id: 'eco', name: 'Eco', price: basePrice, color: 'bg-white text-gray-600 border-gray-200 hover:border-[#D1161B] hover:text-[#D1161B]', headerClass: 'bg-[#E6E6E6] text-gray-800', priceColor: 'text-[#1A2948]' }
+            ];
+
+            return (
             <div
               key={flight.id}
-              style={{
-                transitionDelay: `${Math.min(idx * 50, 300)}ms`,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05)',
-              }}
-              className={`bg-white rounded-xl border transition-all duration-250 cursor-pointer hover:border-primary hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(236,32,41,0.12)] active:scale-[0.99] group relative overflow-hidden ${
-                flight.class === 'business'
-                  ? 'border-accent/50 bg-gradient-to-r from-amber-50/40 to-white'
-                  : 'border-stone-200'
-              } ${compareIds.includes(flight.id) ? 'ring-2 ring-primary border-primary' : ''}`}
-              onMouseEnter={() => setHoveredFlight(flight.id)}
-              onMouseLeave={() => setHoveredFlight(null)}
+              style={{ transitionDelay: `${Math.min(idx * 50, 300)}ms` }}
+              className={`bg-white rounded-xl border border-[#D1161B] transition-all hover:shadow-lg relative overflow-hidden flex flex-col xl:flex-row shadow-[0_2px_8px_rgba(209,22,27,0.15)]`}
             >
-              {/* Top accent bar */}
-              <div
-                className={`h-0.5 w-full ${flight.class === 'business' ? 'bg-gradient-to-r from-accent via-accent-dark to-accent' : 'bg-gradient-to-r from-primary/60 via-primary to-primary/60'}`}
-              />
-
-              {/* Fare Breakdown Tooltip */}
-              {hoveredFlight === flight.id &&
-                (() => {
-                  const fare = getFareBreakdown(flight.price, flight.class);
-                  const fareClass = FARE_CLASS_CONFIG[flight.class] || FARE_CLASS_CONFIG.economy;
-                  return (
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 w-72 pointer-events-none">
-                      <div className="bg-white rounded-2xl border border-stone-200 shadow-xl overflow-hidden">
-                        <div className="bg-gradient-to-r from-[#1A2948] to-[#0F1E3A] px-4 py-3 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Icon name="ReceiptPercentIcon" size={15} className="text-stone-300" />
-                            <span
-                              className="text-xs font-bold text-white uppercase tracking-wider font-koho"
-                            >
-                              Chi tiết giá vé
-                            </span>
-                          </div>
-                          <span
-                            className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${fareClass.bg} ${fareClass.color}`}
-                          >
-                            {fareClass.code} · {fareClass.label}
-                          </span>
+                {/* Left: Flight Info */}
+                <div className="w-full xl:w-[280px] shrink-0 p-4 border-b xl:border-b-0 border-[#fbe5e6] flex flex-col justify-between">
+                   <div className="flex items-center gap-2 mb-4">
+                     <span className="font-black text-[#1A2948] text-sm leading-none font-koho">{flight.flightNo}</span>
+                     <span className="text-[11px] text-stone-500 font-semibold uppercase">{flight.airline}</span>
+                   </div>
+                   <div className="flex items-center justify-between mb-4">
+                     {/* Dep */}
+                     <div className="text-center min-w-[50px]">
+                        <div className="text-xl font-black text-[#1A2948] leading-none font-koho">{flight.departTime}</div>
+                        <div className="text-xs font-bold text-stone-600 mt-1">{flight.from}</div>
+                     </div>
+                     {/* Line */}
+                     <div className="flex-1 flex flex-col items-center px-2">
+                        <div className="text-[10px] text-stone-400 font-semibold mb-1">{flight.duration}</div>
+                        <div className="w-full flex items-center justify-center">
+                           <div className="w-2 h-2 rounded-full border border-stone-300 shrink-0"></div>
+                           <div className="flex-1 border-t border-dashed border-stone-300 min-w-[20px]"></div>
+                           <Icon name="PaperAirplaneIcon" size={10} className="text-primary rotate-90 mx-1 shrink-0" />
+                           <div className="flex-1 border-t border-dashed border-stone-300 min-w-[20px]"></div>
+                           <div className="w-2 h-2 rounded-full border border-primary bg-primary shrink-0"></div>
                         </div>
-                        <div className="px-4 py-3 space-y-2">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-stone-500 flex items-center gap-1.5">
-                              <Icon name="TagIcon" size={13} className="text-stone-400" />
-                              Giá cơ bản
-                            </span>
-                            <span className="font-semibold text-stone-800">
-                              {fare.base.toLocaleString('vi-VN')}₫
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-stone-500 flex items-center gap-1.5">
-                              <Icon
-                                name="BuildingLibraryIcon"
-                                size={13}
-                                className="text-stone-400"
-                              />
-                              Thuế
-                            </span>
-                            <span className="font-semibold text-stone-800">
-                              +{fare.taxes.toLocaleString('vi-VN')}₫
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-stone-500 flex items-center gap-1.5">
-                              <Icon name="CreditCardIcon" size={13} className="text-stone-400" />
-                              Phí dịch vụ
-                            </span>
-                            <span className="font-semibold text-stone-800">
-                              +{fare.fees.toLocaleString('vi-VN')}₫
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-emerald-600 flex items-center gap-1.5">
-                              <Icon name="GiftIcon" size={13} className="text-emerald-500" />
-                              Giảm giá
-                            </span>
-                            <span className="font-semibold text-emerald-600">
-                              -{fare.discount.toLocaleString('vi-VN')}₫
-                            </span>
-                          </div>
-                          <div className="border-t border-stone-100 pt-2 flex items-center justify-between">
-                            <span className="text-sm font-bold text-stone-800">Tổng cộng</span>
-                            <span className="text-base font-black text-primary">
-                              {fare.total.toLocaleString('vi-VN')}₫
-                            </span>
-                          </div>
-                        </div>
-                        <div className="px-4 pb-3">
-                          <p className="text-[10px] text-stone-400 text-center">
-                            Giá đã bao gồm thuế & phí / hành khách
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex justify-center">
-                        <div className="w-3 h-3 bg-white border-b border-r border-stone-200 rotate-45 -mt-1.5 shadow-sm" />
-                      </div>
-                    </div>
-                  );
-                })()}
-
-              <div className="px-4 py-2.5">
-                {/* Row 1: airline icon + flight number + name + class badge | compare + seats badge */}
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${flight.class === 'business' ? 'bg-accent' : 'bg-gradient-red'}`}
-                    >
-                      <Icon
-                        name="PaperAirplaneIcon"
-                        size={11}
-                        className={flight.class === 'business' ? 'text-[#1A2948]' : 'text-white'}
-                      />
-                    </div>
-                    <span
-                      className="font-black text-[#1A2948] text-sm leading-none font-koho"
-                    >
-                      {flight.flightNo}
-                    </span>
-                    <span className="text-xs text-stone-400">{flight.airline}</span>
-                    {flight.class === 'business' && (
-                      <span className="text-[10px] font-black px-1.5 py-0.5 bg-accent text-[#1A2948] rounded-full border border-accent-dark">
-                        ✦ Thương gia
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleCompare(flight.id);
-                      }}
-                      className={`flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border transition-all ${
-                        compareIds.includes(flight.id)
-                          ? 'bg-primary text-white border-primary'
-                          : compareIds.length >= 3
-                            ? 'border-stone-200 text-stone-300 cursor-not-allowed'
-                            : 'border-stone-200 text-stone-400 hover:border-primary hover:text-primary'
-                      }`}
-                      disabled={!compareIds.includes(flight.id) && compareIds.length >= 3}
-                    >
-                      <Icon
-                        name={compareIds.includes(flight.id) ? 'CheckIcon' : 'ArrowsRightLeftIcon'}
-                        size={10}
-                      />
-                      {compareIds.includes(flight.id) ? 'Đã chọn' : 'So sánh'}
-                    </button>
-                    <span
-                      className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
-                        flight.available <= 5
-                          ? 'badge-error'
-                          : flight.available <= 15
-                            ? 'badge-warning'
-                            : 'badge-success'
-                      }`}
-                    >
-                      {flight.available <= 5
-                        ? `Còn ${flight.available} chỗ`
-                        : `${flight.available} chỗ trống`}
-                    </span>
-                  </div>
+                        <div className="text-[10px] text-primary font-bold mt-1 text-center whitespace-nowrap">{flight.stops === 0 ? 'Bay thẳng' : `${flight.stops} Điểm dừng`}</div>
+                     </div>
+                     {/* Arr */}
+                     <div className="text-center min-w-[50px]">
+                        <div className="text-xl font-black text-[#1A2948] leading-none font-koho">{flight.arriveTime}</div>
+                        <div className="text-xs font-bold text-stone-600 mt-1">{flight.to}</div>
+                     </div>
+                   </div>
+                   <button className="text-[11px] font-bold text-[#EC2029] hover:underline text-left inline-flex items-center gap-1">
+                     Chi tiết chuyến bay <Icon name="ChevronDownIcon" size={10} />
+                   </button>
                 </div>
 
-                {/* Row 2: depart → route line → arrive | divider | price + button */}
-                <div className="flex items-center gap-3">
-                  {/* Departure */}
-                  <div className="text-center min-w-[52px]">
-                    <div
-                      className="text-xl font-black text-[#1A2948] leading-none font-koho"
-                    >
-                      {flight.departTime}
+                {/* Right: Fare Classes */}
+                <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-1 p-2 bg-gray-50/50">
+                  {fareClasses.map(fc => (
+                    <div key={fc.id} className="flex flex-col relative rounded-lg overflow-hidden group">
+                       <div className={`text-center py-1.5 ${fc.headerClass}`}>
+                         <div className="text-[10px] font-black uppercase font-koho tracking-widest">{fc.name}</div>
+                       </div>
+                       <div className="bg-white flex flex-col justify-center items-center flex-1 p-3 border-x border-b border-gray-100 rounded-b-lg">
+                         <div className={`text-sm font-black ${fc.priceColor} font-koho mb-3 leading-none`}>
+                            {fc.price.toLocaleString('vi-VN')}₫
+                         </div>
+                         <button
+                           onClick={() => onSelect({ ...flight, price: fc.price, class: fc.id as any })}
+                           className={`w-[80%] py-1.5 rounded text-xs font-bold transition-all border ${fc.color}`}
+                         >
+                           Chọn
+                         </button>
+                       </div>
+                       {/* Overlay effect on hover */}
+                       <div className="absolute inset-0 border-2 border-transparent group-hover:border-[#EC2029] pointer-events-none rounded-lg transition-colors" />
                     </div>
-                    <div className="text-xs font-bold text-stone-600 mt-0.5">{flight.from}</div>
-                    <div className="text-[10px] text-stone-400">{flight.fromCity}</div>
-                  </div>
-
-                  {/* Route line */}
-                  <div className="flex-1 flex flex-col items-center gap-0.5">
-                    <div className="text-[10px] text-stone-400">{flight.duration}</div>
-                    <div className="w-full flex items-center gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full border-2 border-stone-300 shrink-0" />
-                      <div className="flex-1 h-px bg-stone-200 relative">
-                        <Icon
-                          name="PaperAirplaneIcon"
-                          size={10}
-                          className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-primary"
-                        />
-                      </div>
-                      <div className="w-1.5 h-1.5 rounded-full border-2 border-primary shrink-0" />
-                    </div>
-                    <div
-                      className={`text-[10px] font-medium ${flight.stops === 0 ? 'text-emerald-600' : 'text-amber-600'}`}
-                    >
-                      {flight.stops === 0 ? 'Bay thẳng' : `${flight.stops} điểm dừng`}
-                    </div>
-                  </div>
-
-                  {/* Arrival */}
-                  <div className="text-center min-w-[52px]">
-                    <div
-                      className="text-xl font-black text-[#1A2948] leading-none font-koho"
-                    >
-                      {flight.arriveTime}
-                    </div>
-                    <div className="text-xs font-bold text-stone-600 mt-0.5">{flight.to}</div>
-                    <div className="text-[10px] text-stone-400">{flight.toCity}</div>
-                  </div>
-
-                  {/* Divider */}
-                  <div className="w-px h-10 bg-stone-100 mx-1 shrink-0" />
-
-                  {/* Price + Button */}
-                  <div className="text-right shrink-0 min-w-[100px]">
-                    <div
-                      className={`text-lg font-black leading-none ${flight.class === 'business' ? 'text-accent-dark' : 'text-primary'} font-koho`}
-                    >
-                      {flight.price.toLocaleString('vi-VN')}₫
-                    </div>
-                    <div className="text-[10px] text-stone-400 mb-1.5">/ hành khách</div>
-                    <button
-                      onClick={() => onSelect(flight)}
-                      className={`vj-btn vj-btn-sm text-xs font-bold rounded-lg transition-all w-full ${
-                        flight.class === 'business'
-                          ? 'vj-btn-accent'
-                          : 'vj-btn-primary shadow-glow-red hover:shadow-none'
-                      }`}
-                    >
-                      Chọn
-                    </button>
-                  </div>
+                  ))}
                 </div>
-              </div>
             </div>
-          ))}
+          )})}
 
         {/* Enhanced empty state */}
         {!isLoading && filtered.length === 0 && (
@@ -1655,6 +1488,59 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
           </div>
         )}
       </div>
+
+      {/* Booking Summary Sidebar */}
+      <aside className="w-full lg:w-[280px] xl:w-[320px] shrink-0">
+        <div className="bg-white rounded-xl border border-[#EC2029]/20 sticky top-[160px] overflow-hidden shadow-sm" style={{ boxShadow: '0 4px 12px rgba(209,22,27,0.08)' }}>
+          {/* Top Bar */}
+          <div className="h-1 w-full bg-[#EC2029]" />
+          <div className="bg-[#1A2948] p-3 text-white flex items-center justify-center relative">
+            <h3 className="font-black font-koho text-sm tracking-wider uppercase">
+              Thông tin đặt chỗ
+            </h3>
+            <div className="absolute right-0 top-0 h-full overflow-hidden flex items-center pointer-events-none">
+               <div className="w-16 h-24 bg-white/5 rounded-full transform -translate-x-1/4 -translate-y-1/2rotate-45" />
+            </div>
+          </div>
+          
+          <div className="p-4 space-y-4">
+            <div className="border border-[#EC2029]/10 rounded-lg p-3 bg-[#EC2029]/5 border-l-4 border-l-[#EC2029]">
+              <div className="flex justify-between items-start mb-2">
+                 <span className="font-bold text-[#1A2948] font-koho text-sm uppercase">Chuyến đi</span>
+                 <button className="text-[10px] font-bold text-[#EC2029] hover:underline">Chi tiết</button>
+              </div>
+              <div className="text-xs text-gray-500 italic pb-1">Vui lòng chọn chuyến bay</div>
+            </div>
+
+            <div className="border border-gray-100 rounded-lg p-3 bg-gray-50/50">
+              <div className="flex justify-between items-start mb-2">
+                 <span className="font-bold text-gray-600 font-koho text-sm uppercase">Hành khách</span>
+              </div>
+              <div className="flex justify-between items-center text-xs text-gray-600 font-semibold border-b border-dashed border-gray-200 pb-2 mb-2">
+                 <span>Người lớn (x1)</span>
+                 <span>0₫</span>
+              </div>
+              <div className="flex justify-between items-center mt-2">
+                 <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Hành lý & Dịch vụ</span>
+                 <span className="text-xs font-semibold text-gray-400">Chưa chọn</span>
+              </div>
+            </div>
+
+            <div className="border-t-2 border-dashed border-gray-200 pt-3 relative">
+              <div className="absolute -left-5 top-1.5 w-3 h-3 bg-gray-50 rounded-full border-r border-[#EC2029]/20" />
+              <div className="absolute -right-5 top-1.5 w-3 h-3 bg-gray-50 rounded-full border-l border-[#EC2029]/20" />
+              <div className="flex justify-between items-center mb-1">
+                 <span className="font-black text-gray-600 font-koho text-[11px] tracking-widest uppercase">Tóm tắt</span>
+              </div>
+              <div className="flex justify-between items-end mt-2">
+                 <span className="text-xs text-gray-500 font-bold">Tổng tiền:</span>
+                 <span className="text-xl font-black text-[#EC2029] font-koho leading-none">0<span className="text-sm underline decoration-2 underline-offset-2 ml-0.5">đ</span></span>
+              </div>
+              <div className="text-right text-[10px] text-gray-400 italic mt-1">Đã bao gồm thuế, phí, phụ thu</div>
+            </div>
+          </div>
+        </div>
+      </aside>
     </div>
   );
 }

@@ -27,7 +27,7 @@ const METHOD_LABELS: Record<string, string> = {
   bank_transfer: 'Chuyển khoản',
   e_wallet: 'Ví điện tử',
   vietqr: 'VietQR',
-  wallet: 'Ví VietjetSim',
+  wallet: 'Ví Vietjet Air',
 };
 
 function formatCurrency(amount: number): string {

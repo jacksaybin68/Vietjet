@@ -436,7 +436,7 @@ export default function BookingsTab() {
             <div class="amount">${booking.amount.toLocaleString('vi-VN')} ₫</div>
           </div>
           <div class="footer">
-            Cảm ơn bạn đã sử dụng dịch vụ của VietjetSim. Liên hệ 1900 xxxx để được hỗ trợ.
+            Cảm ơn bạn đã sử dụng dịch vụ của Vietjet Air. Liên hệ 1900 xxxx để được hỗ trợ.
           </div>
           <script>window.print();</script>
         </body>

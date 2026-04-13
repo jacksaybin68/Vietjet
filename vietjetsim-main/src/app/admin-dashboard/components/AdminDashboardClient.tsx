@@ -80,7 +80,7 @@ const NAV_ITEMS: {
   { id: 'refunds', label: 'Hoàn tiền', icon: 'BanknotesIcon', category: 'management' },
   { id: 'chat', label: 'Chat hỗ trợ', icon: 'ChatBubbleLeftRightIcon', category: 'support' },
   { id: 'announcements', label: 'Thông báo', icon: 'MegaphoneIcon', category: 'support' },
-  { id: 'analytics', label: 'Analytics', icon: 'PresentationChartBarIcon', category: 'system' },
+  { id: 'analytics', label: 'Phân tích dữ liệu', icon: 'PresentationChartBarIcon', category: 'system' },
   { id: 'sstk', label: 'SSTK', icon: 'WrenchScrewdriverIcon', category: 'system' },
   { id: 'rbac', label: 'RBAC', icon: 'ShieldCheckIcon', category: 'system' },
   { id: 'settings', label: 'Cài đặt', icon: 'CogIcon', category: 'system' },
@@ -101,7 +101,7 @@ const TAB_LABELS: Record<AdminTab, string> = {
   bookings: 'Đặt vé',
   refunds: 'Hoàn tiền',
   chat: 'Chat hỗ trợ',
-  analytics: 'Analytics',
+  analytics: 'Phân tích dữ liệu',
   sstk: 'SSTK',
   rbac: 'Phân quyền RBAC',
   airports: 'Sân bay',
@@ -295,10 +295,10 @@ export default function AdminDashboardClient() {
                 className="font-bold text-white text-sm tracking-tight"
                 style={{ fontFamily: "'Inter', sans-serif" }}
               >
-                VietjetSim
+                Vietjet Air
               </span>
               <div className="text-[10px] text-indigo-400 font-medium tracking-wider uppercase">
-                Admin Panel
+                Bảng Quản Trị
               </div>
             </div>
           )}
@@ -394,8 +394,8 @@ export default function AdminDashboardClient() {
                   </svg>
                 </div>
                 <div>
-                  <div className="text-white font-bold text-sm">VietjetSim</div>
-                  <div className="text-[10px] text-indigo-400 font-medium tracking-wider uppercase">Admin Panel</div>
+                  <div className="text-white font-bold text-sm">Vietjet Air</div>
+                  <div className="text-[10px] text-indigo-400 font-medium tracking-wider uppercase">Bảng Quản Trị</div>
                 </div>
               </div>
               <button

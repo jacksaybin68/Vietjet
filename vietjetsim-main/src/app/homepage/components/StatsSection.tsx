@@ -151,7 +151,7 @@ export default function StatsSection() {
               fontWeight: 900
             }}
           >
-            Vì sao chọn <span style={{ color: '#FFD400' }}>VietjetSim</span>?
+            Vì sao chọn <span style={{ color: '#FFD400' }}>Vietjet Air</span>?
           </h2>
         </div>
 

@@ -46,22 +46,44 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Form */}
           <div className="lg:col-span-2">
-            {/* Section header */}
-            <div className="flex items-center gap-3 mb-5">
-              <div className="flex items-center gap-2">
-                <span className="inline-block w-1 h-6 bg-primary rounded-full" />
-                <h2
-                  className="font-black text-[#1A2948] text-lg font-koho"
-                >
-                  Thông tin hành khách
-                </h2>
+            <div className="flex flex-col gap-4 mb-6">
+              {/* SkyJoy Banner */}
+              <div className="bg-gradient-to-r from-red-600 to-red-500 rounded-xl p-4 flex items-center justify-between text-white shadow-md relative overflow-hidden">
+                <div className="flex items-center gap-4 relative z-10">
+                   <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center p-2 shrinks-0 shadow-sm">
+                      <img src="/assets/skyjoy-logo.png" alt="SkyJoy" onError={(e) => { e.currentTarget.src = 'https://skyjoy.vietjetair.com/wp-content/uploads/2023/04/Logo-SJ-Red.svg' }} className="w-full h-full object-contain" />
+                   </div>
+                   <div>
+                      <h3 className="font-bold text-lg font-koho leading-tight">Đăng nhập tài khoản SkyJoy</h3>
+                      <p className="text-sm opacity-90 text-red-50">Để hoàn tất thông tin nhanh hơn và tích lũy điểm SkyPoint</p>
+                   </div>
+                </div>
+                <button className="bg-white text-red-600 font-bold px-6 py-2 rounded-lg hover:bg-red-50 transition-colors shadow-sm relative z-10 whitespace-nowrap ml-4">
+                   Đăng nhập
+                </button>
+                {/* Decoration */}
+                <div className="absolute right-0 top-0 h-full w-48 opacity-20 pointer-events-none">
+                  <svg viewBox="0 0 100 100" className="w-full h-full text-white fill-current" preserveAspectRatio="none">
+                    <path d="M50 0 L100 0 L100 100 L0 100 Z" />
+                  </svg>
+                </div>
               </div>
-              <span className="text-xs font-semibold text-stone-400 bg-stone-100 px-2.5 py-1 rounded-full">
-                {passengerCount} hành khách
-              </span>
+
+              {/* Section header */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="inline-block w-1.5 h-6 bg-[#EC2029] rounded-full" />
+                  <h2 className="font-black text-[#1A2948] text-xl font-koho uppercase tracking-wide">
+                    Thông tin hành khách
+                  </h2>
+                </div>
+                <span className="text-xs font-bold text-white bg-[#1A2948] px-3 py-1 rounded-md">
+                  {passengerCount} Hành khách
+                </span>
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {passengers.map((p, i) => (
                 <div
                   key={i}

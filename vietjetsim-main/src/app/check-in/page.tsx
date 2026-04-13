@@ -109,7 +109,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                 Check-in Trực Tuyến
               </h1>
               <p className="text-xs text-stone-500 font-koho">
-                VietjetSim — Nhanh chóng & Tiện lợi
+                Vietjet Air — Nhanh chóng & Tiện lợi
               </p>
             </div>
           </div>
@@ -304,7 +304,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                   <button className="text-primary font-semibold hover:underline">
                     điều khoản check-in
                   </button>{' '}
-                  của VietjetSim.
+                  của Vietjet Air.
                 </span>
               </label>
             </div>

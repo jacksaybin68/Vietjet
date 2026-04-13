@@ -89,7 +89,7 @@ function RedeemModal({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ points: pts, description: 'Đổi điểm thưởng VietjetSim' }),
+        body: JSON.stringify({ points: pts, description: 'Đổi điểm thưởng Vietjet Air' }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -266,7 +266,7 @@ export default function LoyaltyTab() {
             Điểm thưởng
           </h2>
           <p className="text-sm text-stone-500 mt-1 font-[Be Vietnam Pro,sans-serif]">
-            Chương trình tích điểm VietjetSim Rewards
+            Chương trình tích điểm Vietjet Air Rewards
           </p>
         </div>
         <button

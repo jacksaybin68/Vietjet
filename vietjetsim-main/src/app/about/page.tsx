@@ -26,10 +26,10 @@ export default function AboutPage() {
           <h1
             className="text-4xl md:text-5xl font-extrabold mb-4 font-body"
           >
-            Về VietjetSim
+            Về Vietjet Air
           </h1>
           <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
-            Trình mô phỏng đặt vé máy bay hàng đầu Việt Nam, mang đến trải nghiệm đặt vé chân thực, hiện đại và trực quan.
+            Hệ thống đặt vé máy bay hàng đầu Việt Nam, mang đến trải nghiệm đặt vé chân thực, hiện đại và trực quan.
           </p>
           <Link
             href="/homepage"
@@ -53,11 +53,11 @@ export default function AboutPage() {
                 Sứ mệnh của chúng tôi
               </h2>
               <p className="text-[#333333] leading-relaxed mb-4">
-                VietjetSim được phát triển như một nền tảng mô phỏng toàn diện cho quy trình đặt vé máy bay nội địa và quốc tế.
-                Chúng tôi giúp người dùng làm quen với các bước đặt vé, chọn ghế, thanh toán và quản lý hành trình một cách trực quan nhất.
+                Vietjet Air được phát triển như một nền tảng toàn diện cho quy trình đặt vé máy bay nội địa và quốc tế.
+                Chúng tôi giúp người dùng thực hiện các bước đặt vé, chọn ghế, thanh toán và quản lý hành trình một cách trực quan nhất.
               </p>
               <p className="text-[#6D6E71] leading-relaxed">
-                Dù bạn là hành khách lần đầu đặt vé hay chuyên gia du lịch, VietjetSim cung cấp công cụ mạnh mẽ để trải nghiệm
+                Dù bạn là hành khách lần đầu đặt vé hay chuyên gia du lịch, Vietjet Air cung cấp công cụ mạnh mẽ để trải nghiệm
                 quy trình booking chuyên nghiệp, nhanh chóng và an toàn.
               </p>
             </div>

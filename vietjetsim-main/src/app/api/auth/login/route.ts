@@ -14,16 +14,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user in Neon PostgreSQL
+    // Identifier can be either email or phone number    
     const results = await sql`
       SELECT id, email, password_hash, full_name, role, phone, avatar_url, created_at, updated_at
       FROM user_profiles
-      WHERE email = ${email}
+      WHERE email = ${email} OR phone = ${email}
     `;
 
-    console.log(`[AUTH] Login attempt for email: ${email}`);
+    console.log(`[AUTH] Login attempt for identifier: ${email}`);
     if (results.length === 0) {
-      console.warn(`[AUTH] Login failed: User not found in database for email: ${email}`);
-      return NextResponse.json({ error: 'Email hoặc mật khẩu không đúng' }, { status: 401 });
+      console.warn(`[AUTH] Login failed: User not found in database for identifier: ${email}`);
+      return NextResponse.json({ error: 'Email/Số điện thoại hoặc mật khẩu không đúng' }, { status: 401 });
     }
  
     console.log(`[AUTH] User found, comparing password for: ${email}`);

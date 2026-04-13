@@ -13,21 +13,21 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:4028'),
-  title: 'VietjetSim — Đặt Vé Máy Bay Giá Rẻ',
+  title: 'Vietjet Air — Đặt Vé Máy Bay Giá Rẻ',
   description:
-    'Trình mô phỏng đặt vé máy bay Vietjet Air. Tìm kiếm, đặt chỗ, chọn ghế và thanh toán trực tuyến.',
+    'Hệ thống đặt vé máy bay Vietjet Air chính thức. Tìm kiếm, đặt chỗ, chọn ghế và thanh toán trực tuyến.',
   openGraph: {
-    title: 'VietjetSim — Đặt Vé Máy Bay Giá Rẻ',
+    title: 'Vietjet Air — Đặt Vé Máy Bay Giá Rẻ',
     description:
-      'Trình mô phỏng đặt vé máy bay Vietjet Air. Tìm kiếm, đặt chỗ, chọn ghế và thanh toán trực tuyến.',
+      'Hệ thống đặt vé máy bay Vietjet Air chính thức. Tìm kiếm, đặt chỗ, chọn ghế và thanh toán trực tuyến.',
     url: 'http://localhost:4028',
-    siteName: 'VietjetSim',
+    siteName: 'Vietjet Air',
     images: [
       {
-        url: 'https://placehold.co/1200x630/EC2029/FFFFFF?text=VietjetSim',
+        url: 'https://placehold.co/1200x630/EC2029/FFFFFF?text=Vietjet+Air',
         width: 1200,
         height: 630,
-        alt: 'VietjetSim Booking Interface',
+        alt: 'Vietjet Air Booking Interface',
       },
     ],
     locale: 'vi_VN',
@@ -35,10 +35,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'VietjetSim — Đặt Vé Máy Bay Giá Rẻ',
+    title: 'Vietjet Air — Đặt Vé Máy Bay Giá Rẻ',
     description:
-      'Trình mô phỏng đặt vé máy bay Vietjet Air. Tìm kiếm, đặt chỗ, chọn ghế và thanh toán trực tuyến.',
-    images: ['https://placehold.co/1200x630/EC2029/FFFFFF?text=VietjetSim'],
+      'Hệ thống đặt vé máy bay Vietjet Air chính thức. Tìm kiếm, đặt chỗ, chọn ghế và thanh toán trực tuyến.',
+    images: ['https://placehold.co/1200x630/EC2029/FFFFFF?text=Vietjet+Air'],
   },
   icons: {
     icon: [{ url: '/favicon.ico', type: 'image/x-icon' }],
@@ -68,9 +68,41 @@ export default function RootLayout({
         <script
           type="module"
           async
-          src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Fvietjetsim1812back.builtwithrocket.new&_be=https%3A%2F%2Fappanalytics.rocket.new&_v=0.1.17"
+          src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2FVietjet Air1812back.builtwithrocket.new&_be=https%3A%2F%2Fappanalytics.rocket.new&_v=0.1.17"
         />
         <script type="module" defer src="https://static.rocket.new/rocket-shot.js?v=0.0.2" />
+        
+        {/* JSON-LD Schema for SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "Airline",
+                  "@id": "https://vietjetair.com/#organization",
+                  "name": "Vietjet Air",
+                  "url": "https://vietjetair.com",
+                  "logo": "https://vietjetair.com/logo.png",
+                  "sameAs": [
+                    "https://www.facebook.com/vietjetvietnam",
+                    "https://twitter.com/vietjetvietnam"
+                  ]
+                },
+                {
+                  "@type": "WebSite",
+                  "@id": "https://vietjetair.com/#website",
+                  "url": "https://vietjetair.com",
+                  "name": "Vietjet Air — Đặt Vé Máy Bay Giá Rẻ",
+                  "publisher": {
+                    "@id": "https://vietjetair.com/#organization"
+                  }
+                }
+              ]
+            })
+          }}
+        />
       </head>
       <body>
         {/* Rocket Extension message handler - Suppress unknown message type warnings */}

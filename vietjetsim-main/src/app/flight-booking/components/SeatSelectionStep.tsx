@@ -277,6 +277,37 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
               </div>
             )}
 
+            {/* Extra Services */}
+            <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden mb-6" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+              <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
+              <div className="p-5 sm:p-6">
+                <h2 className="font-black text-[#1A2948] flex items-center gap-2 font-koho mb-4">
+                  <span className="inline-block w-1 h-5 bg-primary rounded-full" />
+                  Dịch vụ bổ sung
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {[
+                    { id: 'baggage', title: 'Hành lý', icon: 'BriefcaseIcon', price: 'Từ 150.000₫', color: 'bg-blue-50 text-blue-600', border: 'border-blue-100' },
+                    { id: 'meal', title: 'Suất ăn', icon: 'SparklesIcon', price: 'Từ 100.000₫', color: 'bg-orange-50 text-orange-600', border: 'border-orange-100' },
+                    { id: 'insurance', title: 'Bảo hiểm', icon: 'ShieldCheckIcon', price: '60.000₫', color: 'bg-emerald-50 text-emerald-600', border: 'border-emerald-100' }
+                  ].map(svc => (
+                    <div key={svc.id} className={`border ${svc.border} rounded-xl p-3 flex flex-col justify-between cursor-pointer hover:shadow-md transition-all`}>
+                       <div className="flex items-center gap-2 mb-2">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${svc.color}`}>
+                             <Icon name={svc.icon as any} size={16} />
+                          </div>
+                          <span className="font-bold text-[#1A2948] font-koho">{svc.title}</span>
+                       </div>
+                       <div className="mt-auto">
+                          <div className="text-[10px] text-gray-400">Giá ưu đãi</div>
+                          <div className="text-sm font-black text-[#EC2029] font-koho">{svc.price}</div>
+                       </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             <div
               className="bg-white rounded-2xl border border-stone-200 overflow-hidden"
               style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}

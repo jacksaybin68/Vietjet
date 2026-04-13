@@ -40,7 +40,7 @@ const INITIAL_USERS: User[] = [
   {
     id: '1',
     name: 'Nguyễn Văn An',
-    email: 'user@vietjetsim.vn',
+    email: 'user@Vietjet Air.vn',
     phone: '0901 234 567',
     role: 'user',
     status: 'active',
@@ -102,8 +102,8 @@ const INITIAL_USERS: User[] = [
   },
   {
     id: '7',
-    name: 'Admin VietjetSim',
-    email: 'admin@vietjetsim.vn',
+    name: 'Admin Vietjet Air',
+    email: 'admin@Vietjet Air.vn',
     phone: '0900 000 000',
     role: 'admin',
     status: 'active',
