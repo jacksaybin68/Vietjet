@@ -7,9 +7,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { email, password, full_name, phone } = body;
 
-    // Validation
-    if (!email || !password || !full_name) {
-      return NextResponse.json({ error: 'Email, mật khẩu và họ tên là bắt buộc' }, { status: 400 });
+    // Validation: Require password, full_name, and AT LEAST ONE of email or phone
+    if (!password || !full_name || (!email && !phone)) {
+      return NextResponse.json({ error: 'Mật khẩu, họ tên và (Email hoặc Số điện thoại) là bắt buộc' }, { status: 400 });
     }
 
     // M2: Strengthened password policy (8+ chars + complexity)
@@ -19,12 +19,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const existingUsers = await sql`
-      SELECT id FROM user_profiles WHERE email = ${email}
-    `;
-
-    if (existingUsers.length > 0) {
-      return NextResponse.json({ error: 'Email đã được đăng ký' }, { status: 409 });
+    let existingUsers: any[] = [];
+    if (email) {
+      existingUsers = await sql`SELECT id FROM user_profiles WHERE email = ${email}`;
+      if (existingUsers.length > 0) {
+        return NextResponse.json({ error: 'Email đã được đăng ký' }, { status: 409 });
+      }
+    }
+    
+    if (phone) {
+      existingUsers = await sql`SELECT id FROM user_profiles WHERE phone = ${phone}`;
+      if (existingUsers.length > 0) {
+        return NextResponse.json({ error: 'Số điện thoại đã được đăng ký' }, { status: 409 });
+      }
     }
 
     // Hash password
@@ -33,7 +40,7 @@ export async function POST(request: NextRequest) {
     // Create user in Neon PostgreSQL
     const newUser = await sql`
       INSERT INTO user_profiles (email, password_hash, full_name, role, phone)
-      VALUES (${email}, ${password_hash}, ${full_name}, 'user', ${phone || null})
+      VALUES (${email || null}, ${password_hash}, ${full_name}, 'user', ${phone || null})
       RETURNING id, email, full_name, role, phone, created_at, updated_at
     `;
 

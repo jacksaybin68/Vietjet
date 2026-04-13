@@ -536,7 +536,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
               {
                 key: 'site_name',
                 label: 'Tên website',
-                value: 'VietjetSim',
+                value: 'Vietjet Air',
                 desc: 'Hiển thị trên header/tab',
                 icon: 'GlobeAltIcon',
               },

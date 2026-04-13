@@ -426,7 +426,7 @@ export default function WalletTab({ user }: WalletTabProps) {
         body: JSON.stringify({
           action: 'topup',
           amount: amount,
-          description: 'Nạp tiền vào ví VietjetSim',
+          description: 'Nạp tiền vào ví Vietjet Air',
         }),
       });
 
@@ -516,7 +516,7 @@ export default function WalletTab({ user }: WalletTabProps) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[#1A2948]">
-            Ví VietjetSim
+            Ví Vietjet Air
           </h2>
           <p className="text-sm text-stone-500 mt-1 font-[Be Vietnam Pro,sans-serif]">
             Quản lý số dư và phương thức thanh toán

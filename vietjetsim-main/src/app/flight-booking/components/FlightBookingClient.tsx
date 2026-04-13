@@ -74,15 +74,60 @@ export default function FlightBookingClient() {
     );
   };
 
-  const handleSeatConfirm = (seats: string[]) => {
-    setBooking((b) => ({ ...b, selectedSeats: seats }));
-    sessionStorage.setItem('booking', JSON.stringify({ ...booking, selectedSeats: seats }));
-    toast.success(
-      'Chỗ ngồi đã được chọn!',
-      `Ghế ${seats.join(', ')} đã được giữ. Đang chuyển đến thanh toán...`,
-      { duration: 3000 }
-    );
-    setTimeout(() => router.push('/payment'), 800);
+  const handleSeatConfirm = async (seats: string[]) => {
+    try {
+      const flightId = booking.selectedFlight?.id;
+      const passengers = booking.passengers;
+      const basePrice = booking.selectedFlight?.price || 0;
+      
+      const passengerCount = passengers.length;
+      // Note: Tax and fee calculations simulate simple logic.
+      const taxAndFee = Math.round(basePrice * passengerCount * 0.15);
+      const seatsFee = 50000 * seats.length; // Approximate seat fees
+      const totalPrice = basePrice * passengerCount + taxAndFee + seatsFee;
+
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          flight_id: flightId,
+          total_price: totalPrice,
+          passengers: passengers
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to create booking');
+
+      const bookingId = data.booking.id;
+
+      setBooking((b) => ({ ...b, selectedSeats: seats }));
+      
+      sessionStorage.setItem('vjsim_booking', JSON.stringify({
+        bookingId: bookingId,
+        flightNo: booking.selectedFlight?.flightNo,
+        from: booking.selectedFlight?.from,
+        to: booking.selectedFlight?.to,
+        fromCity: booking.selectedFlight?.fromCity,
+        toCity: booking.selectedFlight?.toCity,
+        departTime: booking.selectedFlight?.departTime,
+        arriveTime: booking.selectedFlight?.arriveTime,
+        date: new Date().toLocaleDateString('vi-VN'),
+        passengers: passengers.map((p, i) => ({ name: p.name, seat: seats[i] })),
+        basePrice: basePrice * passengerCount,
+        tax: taxAndFee,
+        seatFee: seatsFee
+      }));
+
+      toast.success(
+        'Chỗ ngồi đã được chọn!',
+        `Ghế ${seats.join(', ')} đã được giữ. Mã ĐC: ${bookingId}. Đang chuyển đến thanh toán...`,
+        { duration: 3000 }
+      );
+      setTimeout(() => router.push(`/payment?bookingId=${bookingId}`), 800);
+    } catch (err: any) {
+      toast.error('Lỗi đặt chỗ', err.message || 'Không thể tạo booking');
+    }
   };
 
   return (

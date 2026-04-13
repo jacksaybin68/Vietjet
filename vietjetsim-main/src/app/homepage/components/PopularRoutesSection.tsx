@@ -336,7 +336,7 @@ export default function PopularRoutesSection() {
               className="text-base sm:text-lg lg:text-xl font-black tracking-tight text-vj-text"
               style={{ fontWeight: 900 }}
             >
-              Trải nghiệm bay cùng VietjetSim
+              Trải nghiệm bay cùng Vietjet Air
             </h2>
           </div>
 

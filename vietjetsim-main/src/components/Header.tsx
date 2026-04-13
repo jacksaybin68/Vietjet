@@ -8,8 +8,8 @@ import { useAuth } from '@/contexts/AuthContext';
 
 // Main navigation items generator
 const getMainNav = (isAdmin: boolean) => [
-  { label: isAdmin ? 'ADMIN DASHBOARD' : 'CHUYẾN BAY CỦA TÔI', href: isAdmin ? '/admin-dashboard' : '/user-dashboard' },
-  { label: 'ONLINE CHECK-IN', href: '/check-in' },
+  { label: isAdmin ? 'BẢNG QUẢN TRỊ' : 'CHUYẾN BAY CỦA TÔI', href: isAdmin ? '/admin-dashboard' : '/user-dashboard' },
+  { label: 'LÀM THỦ TỤC ONLINE', href: '/check-in' },
   { label: 'DỊCH VỤ CHUYẾN BAY', href: '/services' },
   { label: 'DỊCH VỤ KHÁC', href: '/homepage' },
 ];
@@ -129,11 +129,11 @@ export default function Header() {
       >
         {/* Tier 1: Announcement ticker bar */}
         {announcementVisible && (
-          <div className="bg-white border-b border-gray-200">
+          <div className="bg-[#F2F2F2] border-b border-gray-100">
             <div className="max-w-[1400px] mx-auto px-4">
               <div className="flex items-center h-8 gap-2">
-                <span className="text-sm flex-shrink-0 text-primary">
-                  🔔
+                <span className="text-sm flex-shrink-0 text-[#EC2029]">
+                  <Icon name="BellIcon" size={14} />
                 </span>
                 <p
                   className="text-[11px] text-[#333333] flex-1 min-w-0 truncate font-medium font-koho-medium"
@@ -141,23 +141,17 @@ export default function Header() {
                   {announcement}
                 </p>
                 <div className="flex items-center gap-0.5 flex-shrink-0 ml-1">
-                  <button className="w-5 h-5 flex items-center justify-center text-gray-500 hover:text-gray-800 transition-colors border border-gray-300 rounded-sm">
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
-                      <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                    </svg>
+                  <button className="p-0.5 text-gray-400 hover:text-gray-600">
+                    <Icon name="ChevronLeftIcon" size={12} />
                   </button>
-                  <button className="w-5 h-5 flex items-center justify-center text-gray-500 hover:text-gray-800 transition-colors border border-gray-300 rounded-sm">
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
-                      <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-                    </svg>
+                  <button className="p-0.5 text-gray-400 hover:text-gray-600">
+                    <Icon name="ChevronRightIcon" size={12} />
                   </button>
                   <button
                     onClick={() => setAnnouncementVisible(false)}
-                    className="w-5 h-5 flex items-center justify-center text-gray-500 hover:text-gray-800 transition-colors ml-0.5"
+                    className="p-0.5 text-gray-400 hover:text-gray-600 ml-1"
                   >
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
-                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-                    </svg>
+                    <Icon name="XMarkIcon" size={14} />
                   </button>
                 </div>
               </div>
@@ -165,110 +159,84 @@ export default function Header() {
           </div>
         )}
 
-        {/* Tier 2: Logo + utility links + main nav — VietJet RED bar */}
-        <div
-          className="border-b"
-          style={{
-            background:
-              'linear-gradient(20.12deg, rgba(217,26,33,1) 19.6%, rgba(111,0,0,1) 93.86%)',
-            borderColor: 'rgba(0,0,0,0.15)',
-          }}
-        >
+        {/* Tier 2: Main Header — White background with Red branding */}
+        <div className="bg-white">
           <div className="max-w-[1400px] mx-auto px-4">
-            <div className="flex items-center h-14">
-              {/* Left: Navigation links */}
-              <div className="hidden lg:flex items-center gap-0">
-                {mainNavItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`px-4 h-full flex items-center text-[12px] font-bold whitespace-nowrap transition-all duration-200 border-b-2 ${
-                      isActive(item.href)
-                        ? 'text-yellow-300 border-yellow-300'
-                        : 'text-white/90 hover:text-yellow-300 border-transparent hover:border-yellow-300/50'
-                    }`}
-                    style={{ fontWeight: 700, letterSpacing: '0.04em' }}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-
-              {/* Logo — centered with some margin */}
-              <Link href="/homepage" className="flex items-center flex-shrink-0 mx-auto lg:mx-0">
-                <AppLogo size={30} />
-              </Link>
-
-              {/* Spacer — pushes utility links to the right */}
-              <div className="flex-1 hidden lg:block" />
-
-              {/* Utility links — desktop */}
-              <div className="hidden lg:flex items-center gap-0">
+            <div className="flex flex-col">
+              {/* Utility row (Top-right) */}
+              <div className="flex justify-end items-center gap-4 py-2 border-b border-gray-50">
+                <Link href="/contact" className="flex items-center gap-1.5 text-[11px] font-semibold text-[#6D6E71] hover:text-[#EC2029] transition-colors">
+                  <Icon name="QuestionMarkCircleIcon" size={14} className="text-[#EC2029]" />
+                  Hỗ trợ
+                </Link>
                 {user ? (
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1 bg-white/10 rounded-full pl-1 pr-3 py-1 border border-white/10 hover:bg-white/15 transition-all">
-                      <Link
-                        href={isAdmin ? '/admin-dashboard' : '/user-dashboard'}
-                        className="flex items-center gap-2 text-[11px] font-bold text-white group"
-                      >
-                        <span className="w-6 h-6 rounded-full bg-yellow-400 text-navy flex items-center justify-center text-[10px] font-black ring-2 ring-white/10 group-hover:scale-105 transition-transform flex-shrink-0">
-                          {user.fullName?.charAt(0)?.toUpperCase() || 'U'}
-                        </span>
-                        <span className="max-w-[120px] truncate font-koho-bold">
-                          {user.fullName || user.email}
-                        </span>
-                      </Link>
-                      <span className="text-white/20 text-[10px] mx-1 selection:hidden">|</span>
-                      <button
-                        onClick={() => signOut()}
-                        className="text-[10px] font-black text-white/70 hover:text-yellow-300 transition-colors uppercase tracking-tight"
-                      >
-                        Đăng xuất
-                      </button>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <Link href={isAdmin ? '/admin-dashboard' : '/user-dashboard'} className="text-[11px] font-bold text-[#EC2029]">
+                      {user.fullName || user.email}
+                    </Link>
+                    <span className="text-gray-300 text-[10px]">|</span>
+                    <button onClick={() => signOut()} className="text-[11px] font-bold text-[#6D6E71] hover:text-[#EC2029]">
+                      Đăng xuất
+                    </button>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1 bg-white/10 rounded-full px-4 py-1.5 border border-white/10">
-                    <Link
-                      href="/sign-up-login"
-                      className="text-[11px] font-bold text-white hover:text-yellow-300 transition-colors"
-                    >
+                  <div className="flex items-center gap-2">
+                    <Link href="/sign-up-login" className="text-[11px] font-bold text-[#EC2029] hover:underline">
                       Đăng ký
                     </Link>
-                    <span className="text-white/30 text-[10px] mx-1">|</span>
-                    <Link
-                      href="/sign-up-login"
-                      className="text-[11px] font-bold text-white hover:text-yellow-300 transition-colors"
-                    >
+                    <span className="text-gray-300 text-[10px]">|</span>
+                    <Link href="/sign-up-login" className="text-[11px] font-bold text-[#EC2029] hover:underline">
                       Đăng nhập
                     </Link>
                   </div>
                 )}
-                <span className="text-white/20 text-xs mx-3">|</span>
-                {/* Language Pillar */}
-                <button
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black text-white bg-white/5 border border-white/20 rounded-full hover:bg-white/10 hover:border-white/40 transition-all uppercase tracking-wider"
-                >
-                  <span className="text-xs grayscale-[0.5] group-hover:grayscale-0 transition-all">🇻🇳</span>
-                  <span>Tiếng Việt</span>
-                  <Icon name="ChevronDownIcon" size={12} className="text-white/60" />
+                
+                <button className="flex items-center gap-1 text-[11px] font-bold text-[#6D6E71] border border-gray-200 rounded px-2 py-0.5 hover:bg-gray-50">
+                  Tiếng Việt
+                  <Icon name="ChevronDownIcon" size={10} />
                 </button>
               </div>
 
-              {/* Mobile menu button */}
-              <button
-                onClick={() => setMobileOpen(!mobileOpen)}
-                className="lg:hidden p-1.5 rounded text-white hover:bg-white/20 transition-colors ml-2"
-                aria-label="Toggle menu"
-              >
-                <Icon name={mobileOpen ? 'XMarkIcon' : 'Bars3Icon'} size={20} />
-              </button>
+              {/* Logo & Primary Nav row */}
+              <div className="flex items-center h-16">
+                <Link href="/homepage" className="flex items-center flex-shrink-0">
+                  <AppLogo size={140} color="#EC2029" />
+                </Link>
+                
+                <div className="flex-1" />
+
+                {/* Primary Nav */}
+                <div className="hidden lg:flex items-center gap-0 h-full">
+                  {mainNavItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`px-4 h-full flex items-center text-[12px] font-black whitespace-nowrap transition-all duration-200 uppercase tracking-tight ${
+                        isActive(item.href)
+                          ? 'text-[#EC2029]'
+                          : 'text-[#333333] hover:text-[#EC2029]'
+                      }`}
+                      style={{ letterSpacing: '0.02em' }}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+
+                {/* Mobile menu button */}
+                <button
+                  onClick={() => setMobileOpen(!mobileOpen)}
+                  className="lg:hidden p-1.5 rounded text-[#EC2029] hover:bg-red-50 transition-colors ml-4"
+                >
+                  <Icon name={mobileOpen ? 'XMarkIcon' : 'Bars3Icon'} size={24} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Tier 3: Service tabs row — white background, VietJet style */}
-        <div className="bg-white border-b border-gray-200">
+        {/* Tier 3: Service tabs row — Icons */}
+        <div className="border-t border-b border-gray-100" style={{ background: 'linear-gradient(to right, #F9A51A, #FBB612, #FFDD00)' }}>
           <div className="max-w-[1400px] mx-auto px-4">
             <div className="flex items-center overflow-x-auto no-scrollbar">
               {SERVICE_TABS.map((tab, i) => {
@@ -277,13 +245,13 @@ export default function Header() {
                   <Link
                     key={tab.label}
                     href={tab.href}
-                    className={`flex items-center gap-1.5 px-3 py-2.5 text-[11px] font-bold whitespace-nowrap border-b-2 transition-all flex-shrink-0 ${
+                    className={`flex items-center gap-2 px-6 py-2 text-[12px] font-black whitespace-nowrap transition-all flex-shrink-0 ${
                       isTabActive
-                        ? 'border-[#EC2029] text-[#EC2029]'
-                        : 'border-transparent text-[#6D6E71] hover:text-[#EC2029] hover:border-[#EC2029]/40'
-                    } font-body`}
+                        ? 'bg-[#FFDD00] text-[#EC2029]'
+                        : 'text-white hover:bg-white/10'
+                    }`}
                   >
-                    <span style={{ color: isTabActive ? '#EC2029' : '#939598' }}>{tab.svg}</span>
+                    <span className={isTabActive ? 'text-[#EC2029]' : 'text-white'}>{tab.svg}</span>
                     {tab.label}
                   </Link>
                 );
@@ -294,71 +262,36 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {mobileOpen && (
-          <div className="lg:hidden bg-white border-t border-gray-100 shadow-lg">
-            <div className="px-4 py-4 space-y-1">
-              {/* Service tabs mobile */}
-              <div className="grid grid-cols-4 gap-2 pb-3 border-b border-gray-100">
+          <div className="lg:hidden bg-white border-t border-gray-100 shadow-xl fixed inset-x-0 top-[112px] bottom-0 z-[60] overflow-y-auto">
+            <div className="px-4 py-6 space-y-6">
+              <div className="grid grid-cols-3 gap-4">
                 {SERVICE_TABS.map((tab) => (
                   <Link
                     key={tab.label}
                     href={tab.href}
                     onClick={() => setMobileOpen(false)}
-                    className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                    className="flex flex-col items-center gap-2 p-3 rounded-xl bg-gray-50 active:bg-red-50 transition-all border border-transparent active:border-red-100"
                   >
-                    <span className="text-primary">{tab.svg}</span>
-                    <span
-                      className="text-[10px] font-semibold text-center leading-tight font-koho"
-                    >
+                    <span className="text-[#EC2029]">{tab.svg}</span>
+                    <span className="text-[10px] font-black text-center text-[#333333] uppercase">
                       {tab.label}
                     </span>
                   </Link>
                 ))}
               </div>
-              {/* Main nav mobile */}
-              {mainNavItems.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="block px-3 py-2.5 text-sm font-semibold hover:bg-red-50 rounded-lg transition-colors text-vj-text"
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <div className="pt-3 border-t border-gray-100 flex flex-col gap-2">
-                {user ? (
-                  <>
-                    <Link
-                      href={isAdmin ? '/admin-dashboard' : '/user-dashboard'}
-                      onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-red-50 text-sm font-bold text-[#EC2029]"
-                    >
-                      <span className="w-6 h-6 rounded-full bg-[#EC2029] text-white flex items-center justify-center text-xs font-black">
-                        {user.fullName?.charAt(0)?.toUpperCase() || 'U'}
-                      </span>
-                      {user.fullName || user.email}
-                    </Link>
-                    <button
-                      onClick={() => { signOut(); setMobileOpen(false); }}
-                      className="block px-3 py-2.5 text-sm font-bold text-gray-600 rounded-lg hover:bg-gray-100 transition-colors text-center"
-                    >
-                      Đăng xuất
-                    </button>
-                  </>
-                ) : (
+              
+              <div className="space-y-1">
+                {mainNavItems.map((link) => (
                   <Link
-                    href="/sign-up-login"
+                    key={link.label}
+                    href={link.href}
                     onClick={() => setMobileOpen(false)}
-                    className="block px-3 py-2.5 text-sm font-bold text-white rounded-lg transition-colors text-center"
-                    style={{
-                      background:
-                        'linear-gradient(20.12deg, rgba(217,26,33,0.9) 19.6%, rgba(111,0,0,0.9) 93.86%)',
-                      fontWeight: 700
-                    }}
+                    className="flex justify-between items-center px-4 py-3.5 text-sm font-black text-[#333333] hover:bg-gray-50 rounded-xl"
                   >
-                    Đăng nhập / Đăng ký
+                    {link.label}
+                    <Icon name="ChevronRightIcon" size={14} className="text-gray-300" />
                   </Link>
-                )}
+                ))}
               </div>
             </div>
           </div>

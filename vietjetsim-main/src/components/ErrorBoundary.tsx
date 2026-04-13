@@ -323,7 +323,7 @@ export function ErrorFallback({
       role="alert"
       aria-live="assertive"
     >
-      {/* VietjetSim brand strip */}
+      {/* Vietjet Air brand strip */}
       <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#EC2029] via-[#FF4D53] to-[#FFD400]" />
 
       <div className="max-w-md w-full text-center">

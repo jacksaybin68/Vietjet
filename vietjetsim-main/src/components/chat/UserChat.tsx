@@ -338,7 +338,7 @@ export default function UserChat() {
               />
             </div>
             <div className="flex-1">
-              <div className="text-white font-bold text-sm">Hỗ trợ VietjetSim</div>
+              <div className="text-white font-bold text-sm">Hỗ trợ Vietjet Air</div>
               <div className="flex items-center gap-1.5">
                 <span
                   className={`w-2 h-2 rounded-full inline-block ${adminOnline ? 'bg-green-400' : 'bg-gray-400'}`}

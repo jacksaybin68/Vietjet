@@ -154,8 +154,8 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className="text-xs text-[#6D6E71] font-medium uppercase tracking-wide">Email</p>
-                    <a href="mailto:support@vietjetsim.vn" className="text-[#1A2948] font-semibold hover:text-[#EC2029] transition-colors">
-                      support@vietjetsim.vn
+                    <a href="mailto:support@vietjetair.com" className="text-[#1A2948] font-semibold hover:text-[#EC2029] transition-colors">
+                      support@vietjetair.com
                     </a>
                   </div>
                 </div>
@@ -213,7 +213,7 @@ export default function ContactPage() {
                 }}></div>
                 <div className="text-center z-10">
                   <Icon name="MapPinIcon" size={32} />
-                  <p className="text-sm font-bold text-[#1A2948] mt-2">Bản đồ VietjetSim</p>
+                  <p className="text-sm font-bold text-[#1A2948] mt-2">Bản đồ Vietjet Air</p>
                   <p className="text-xs text-[#6D6E71]">Tân Bình, TP. Hồ Chí Minh</p>
                 </div>
               </div>

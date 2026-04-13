@@ -44,7 +44,7 @@ const FOOTER_COLS = [
     ],
   },
   {
-    title: 'Về VietjetSim',
+    title: 'Về Vietjet Air',
     links: [
       { label: 'Hồ sơ công ty', href: '/about' },
       { label: 'Nhà đầu tư', href: '/about' },
@@ -185,11 +185,11 @@ export default function Footer() {
       {/* Bottom bar */}
       <div className="bg-navy-solid py-5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col items-center sm:flex-row sm:justify-between gap-5 sm:gap-4 text-center sm:text-left">
+            <div className="flex flex-col sm:flex-row items-center gap-3">
               <AppImage
                 src="/assets/images/app_logo.svg"
-                alt="VietjetSim Logo"
+                alt="Vietjet Air Logo"
                 width={40}
                 height={40}
                 className="rounded-md"
@@ -203,10 +203,10 @@ export default function Footer() {
                     fontWeight: 900,
                   }}
                 >
-                  VietjetSim
+                  Vietjet Air
                 </span>
                 <p className="text-[10px] mt-0.5 font-koho">
-                  &copy; 2026 VietjetSim. Tất cả quyền được bảo lưu.
+                  &copy; 2026 Vietjet Air. Tất cả quyền được bảo lưu.
                 </p>
               </div>
             </div>
@@ -227,7 +227,7 @@ export default function Footer() {
             </div>
 
             {/* App store badges */}
-            <div className="flex items-center gap-2">
+            <div className="flex flex-row items-center justify-center gap-2">
               <div className="flex items-center gap-1.5 rounded-lg px-3 py-2 cursor-pointer transition-all hover:bg-white/20 border border-white/20 hover:border-white/40"
                 style={{ background: 'rgba(255,255,255,0.08)' }}>
                 <FaApple className="w-5 h-5 text-white" />
