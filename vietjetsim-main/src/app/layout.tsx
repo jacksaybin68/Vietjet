@@ -71,36 +71,36 @@ export default function RootLayout({
           src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2FVietjet Air1812back.builtwithrocket.new&_be=https%3A%2F%2Fappanalytics.rocket.new&_v=0.1.17"
         />
         <script type="module" defer src="https://static.rocket.new/rocket-shot.js?v=0.0.2" />
-        
+
         {/* JSON-LD Schema for SEO */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@graph": [
+              '@context': 'https://schema.org',
+              '@graph': [
                 {
-                  "@type": "Airline",
-                  "@id": "https://vietjetair.com/#organization",
-                  "name": "Vietjet Air",
-                  "url": "https://vietjetair.com",
-                  "logo": "https://vietjetair.com/logo.png",
-                  "sameAs": [
-                    "https://www.facebook.com/vietjetvietnam",
-                    "https://twitter.com/vietjetvietnam"
-                  ]
+                  '@type': 'Airline',
+                  '@id': 'https://vietjetair.com/#organization',
+                  name: 'Vietjet Air',
+                  url: 'https://vietjetair.com',
+                  logo: 'https://vietjetair.com/logo.png',
+                  sameAs: [
+                    'https://www.facebook.com/vietjetvietnam',
+                    'https://twitter.com/vietjetvietnam',
+                  ],
                 },
                 {
-                  "@type": "WebSite",
-                  "@id": "https://vietjetair.com/#website",
-                  "url": "https://vietjetair.com",
-                  "name": "Vietjet Air — Đặt Vé Máy Bay Giá Rẻ",
-                  "publisher": {
-                    "@id": "https://vietjetair.com/#organization"
-                  }
-                }
-              ]
-            })
+                  '@type': 'WebSite',
+                  '@id': 'https://vietjetair.com/#website',
+                  url: 'https://vietjetair.com',
+                  name: 'Vietjet Air — Đặt Vé Máy Bay Giá Rẻ',
+                  publisher: {
+                    '@id': 'https://vietjetair.com/#organization',
+                  },
+                },
+              ],
+            }),
           }}
         />
       </head>

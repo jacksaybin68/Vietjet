@@ -139,7 +139,7 @@ export default function StatsSection() {
             className="text-[11px] font-bold uppercase tracking-[0.15em] mb-2"
             style={{
               color: 'rgba(255,255,255,0.6)',
-              fontWeight: 700
+              fontWeight: 700,
             }}
           >
             Tại sao chọn chúng tôi
@@ -148,7 +148,7 @@ export default function StatsSection() {
             className="text-xl sm:text-2xl font-black tracking-tight"
             style={{
               color: 'white',
-              fontWeight: 900
+              fontWeight: 900,
             }}
           >
             Vì sao chọn <span style={{ color: '#FFD400' }}>Vietjet Air</span>?
@@ -179,9 +179,7 @@ export default function StatsSection() {
                 </div>
               </div>
               {/* Value */}
-              <div
-                className="text-3xl sm:text-4xl font-black text-white mb-1 leading-none font-body"
-              >
+              <div className="text-3xl sm:text-4xl font-black text-white mb-1 leading-none font-body">
                 <CountUp target={stat.value} suffix={stat.suffix} active={active} />
               </div>
               {/* Label */}
@@ -189,7 +187,7 @@ export default function StatsSection() {
                 className="text-xs font-bold mb-0.5 tracking-tight"
                 style={{
                   color: 'rgba(255,255,255,0.85)',
-                  fontWeight: 700
+                  fontWeight: 700,
                 }}
               >
                 {stat.label}

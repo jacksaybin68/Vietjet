@@ -263,9 +263,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                           : 'text-primary'
                     }
                   />
-                  <span
-                    className="text-sm font-semibold font-koho"
-                  >
+                  <span className="text-sm font-semibold font-koho">
                     {timerUrgent ? '⚠️ Ghế sắp hết hạn giữ!' : 'Thời gian giữ chỗ còn lại'}
                   </span>
                 </div>
@@ -278,7 +276,10 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
             )}
 
             {/* Extra Services */}
-            <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden mb-6" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+            <div
+              className="bg-white rounded-2xl border border-stone-200 overflow-hidden mb-6"
+              style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
+            >
               <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
               <div className="p-5 sm:p-6">
                 <h2 className="font-black text-[#1A2948] flex items-center gap-2 font-koho mb-4">
@@ -287,21 +288,49 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {[
-                    { id: 'baggage', title: 'Hành lý', icon: 'BriefcaseIcon', price: 'Từ 150.000₫', color: 'bg-blue-50 text-blue-600', border: 'border-blue-100' },
-                    { id: 'meal', title: 'Suất ăn', icon: 'SparklesIcon', price: 'Từ 100.000₫', color: 'bg-orange-50 text-orange-600', border: 'border-orange-100' },
-                    { id: 'insurance', title: 'Bảo hiểm', icon: 'ShieldCheckIcon', price: '60.000₫', color: 'bg-emerald-50 text-emerald-600', border: 'border-emerald-100' }
-                  ].map(svc => (
-                    <div key={svc.id} className={`border ${svc.border} rounded-xl p-3 flex flex-col justify-between cursor-pointer hover:shadow-md transition-all`}>
-                       <div className="flex items-center gap-2 mb-2">
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${svc.color}`}>
-                             <Icon name={svc.icon as any} size={16} />
-                          </div>
-                          <span className="font-bold text-[#1A2948] font-koho">{svc.title}</span>
-                       </div>
-                       <div className="mt-auto">
-                          <div className="text-[10px] text-gray-400">Giá ưu đãi</div>
-                          <div className="text-sm font-black text-[#EC2029] font-koho">{svc.price}</div>
-                       </div>
+                    {
+                      id: 'baggage',
+                      title: 'Hành lý',
+                      icon: 'BriefcaseIcon',
+                      price: 'Từ 150.000₫',
+                      color: 'bg-blue-50 text-blue-600',
+                      border: 'border-blue-100',
+                    },
+                    {
+                      id: 'meal',
+                      title: 'Suất ăn',
+                      icon: 'SparklesIcon',
+                      price: 'Từ 100.000₫',
+                      color: 'bg-orange-50 text-orange-600',
+                      border: 'border-orange-100',
+                    },
+                    {
+                      id: 'insurance',
+                      title: 'Bảo hiểm',
+                      icon: 'ShieldCheckIcon',
+                      price: '60.000₫',
+                      color: 'bg-emerald-50 text-emerald-600',
+                      border: 'border-emerald-100',
+                    },
+                  ].map((svc) => (
+                    <div
+                      key={svc.id}
+                      className={`border ${svc.border} rounded-xl p-3 flex flex-col justify-between cursor-pointer hover:shadow-md transition-all`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <div
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center ${svc.color}`}
+                        >
+                          <Icon name={svc.icon as any} size={16} />
+                        </div>
+                        <span className="font-bold text-[#1A2948] font-koho">{svc.title}</span>
+                      </div>
+                      <div className="mt-auto">
+                        <div className="text-[10px] text-gray-400">Giá ưu đãi</div>
+                        <div className="text-sm font-black text-[#EC2029] font-koho">
+                          {svc.price}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -316,9 +345,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
               <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
               <div className="p-5 sm:p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <h2
-                    className="font-black text-[#1A2948] flex items-center gap-2 font-koho"
-                  >
+                  <h2 className="font-black text-[#1A2948] flex items-center gap-2 font-koho">
                     <span className="inline-block w-1 h-5 bg-primary rounded-full" />
                     Chọn chỗ ngồi
                   </h2>
@@ -341,9 +368,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
 
                 {/* Seat Type Legend */}
                 <div className="rounded-xl border border-stone-100 bg-stone-50 p-3 mb-5">
-                  <div
-                    className="text-xs font-bold text-[#1A2948] uppercase tracking-wide mb-2 font-koho"
-                  >
+                  <div className="text-xs font-bold text-[#1A2948] uppercase tracking-wide mb-2 font-koho">
                     Chú thích loại ghế
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
@@ -396,9 +421,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                   {/* Heatmap scale */}
                   {showHeatmap && (
                     <div className="mt-3 pt-3 border-t border-stone-200">
-                      <div
-                        className="text-xs font-bold text-[#1A2948] mb-1.5 font-koho"
-                      >
+                      <div className="text-xs font-bold text-[#1A2948] mb-1.5 font-koho">
                         Mức độ lấp đầy
                       </div>
                       <div className="flex items-center gap-1">
@@ -417,9 +440,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
 
                 {/* Airplane nose */}
                 <div className="text-center mb-4">
-                  <div
-                    className="inline-flex items-center gap-2 bg-[#1A2948]/5 text-[#1A2948] text-xs px-4 py-1.5 rounded-full border border-[#1A2948]/10 font-semibold font-koho"
-                  >
+                  <div className="inline-flex items-center gap-2 bg-[#1A2948]/5 text-[#1A2948] text-xs px-4 py-1.5 rounded-full border border-[#1A2948]/10 font-semibold font-koho">
                     <Icon name="PaperAirplaneIcon" size={12} className="text-primary" />
                     Mũi máy bay
                   </div>
@@ -488,9 +509,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                       >
                         <div className="bg-[#1A2948] text-white rounded-xl shadow-xl p-3 w-44 text-xs">
                           <div className="flex items-center justify-between mb-2">
-                            <span
-                              className="font-black text-sm font-koho"
-                            >
+                            <span className="font-black text-sm font-koho">
                               Ghế {tooltip.seatId}
                             </span>
                             <span
@@ -582,9 +601,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
               {/* Yellow accent top bar */}
               <div className="h-1 w-full bg-gradient-to-r from-accent/60 via-accent to-accent/60" />
               <div className="p-5">
-                <h3
-                  className="font-black text-[#1A2948] mb-4 flex items-center gap-2 font-koho"
-                >
+                <h3 className="font-black text-[#1A2948] mb-4 flex items-center gap-2 font-koho">
                   <Icon name="TicketIcon" size={16} className="text-primary" />
                   Chỗ đã chọn
                 </h3>
@@ -608,9 +625,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                               {i + 1}
                             </div>
                             <div>
-                              <div
-                                className="font-black text-[#1A2948] text-sm font-koho"
-                              >
+                              <div className="font-black text-[#1A2948] text-sm font-koho">
                                 Ghế {seat}
                               </div>
                               <div className="text-xs text-stone-500">
@@ -648,9 +663,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                       ₫
                     </span>
                   </div>
-                  <div
-                    className="flex justify-between font-black text-[#1A2948] pt-1 border-t border-stone-100 font-koho"
-                  >
+                  <div className="flex justify-between font-black text-[#1A2948] pt-1 border-t border-stone-100 font-koho">
                     <span>Tổng cộng</span>
                     <span className="text-primary">
                       {(

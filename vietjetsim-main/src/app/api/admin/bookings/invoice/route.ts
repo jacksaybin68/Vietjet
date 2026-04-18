@@ -35,12 +35,15 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      payment: payment[0]
+      payment: payment[0],
     });
   } catch (error) {
     console.error('Error creating admin invoice:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error', message: (error instanceof Error ? error.message : "Unknown error") },
+      {
+        error: 'Internal Server Error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

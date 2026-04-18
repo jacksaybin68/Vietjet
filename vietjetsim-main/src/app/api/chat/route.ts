@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/auth';
-import { getConversationMessages, sendChatMessage, getOrCreateConversation, getAllConversations } from '@/lib/db';
+import {
+  getConversationMessages,
+  sendChatMessage,
+  getOrCreateConversation,
+  getAllConversations,
+} from '@/lib/db';
 
 // ─── GET: Get messages for a conversation ────────────────────────────────────
 

@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
   try {
     const token = request.cookies.get('access_token')?.value;
     let userId: string | null = null;
-    
+
     if (token) {
       const payload = verifyAccessToken(token);
       if (payload) {
@@ -65,25 +65,25 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // If no userId from token (Guest Booking), fetch the first user from the database or create a guest fallback.
     // This allows Guest Booking to succeed and stores the booking against a default account.
     if (!userId) {
       try {
-         const firstUser = await sql`SELECT id FROM user_profiles LIMIT 1`;
-         if ((firstUser as any).length > 0) {
-            userId = (firstUser as any)[0].id;
-         } else {
-            return NextResponse.json({ error: 'No default user for guest booking' }, { status: 500 });
-         }
+        const firstUser = await sql`SELECT id FROM user_profiles LIMIT 1`;
+        if ((firstUser as any).length > 0) {
+          userId = (firstUser as any)[0].id;
+        } else {
+          return NextResponse.json({ error: 'No default user for guest booking' }, { status: 500 });
+        }
       } catch (err) {
-         console.error('Failed to assign guest to default user', err);
-         return NextResponse.json({ error: 'Guest booking failed' }, { status: 500 });
+        console.error('Failed to assign guest to default user', err);
+        return NextResponse.json({ error: 'Guest booking failed' }, { status: 500 });
       }
     }
 
     const booking = await createBooking(
-      { user_id: userId, flight_id, total_price },
+      { user_id: userId as string, flight_id, total_price },
       passengers
     );
 

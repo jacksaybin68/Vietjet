@@ -156,9 +156,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
             <Icon name="ShieldCheckIcon" size={22} className="text-primary" />
             Hệ thống Phân quyền RBAC
           </h2>
-          <p
-            className="text-sm mt-1 font-koho"
-          >
+          <p className="text-sm mt-1 font-koho">
             Quản lý chi tiết quyền hạn cho từng admin — Role-Based Access Control
           </p>
         </div>
@@ -235,9 +233,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                   >
                     Level {def.level}
                   </span>
-                  <span className="text-[10px] text-gray-400">
-                    {def.permissions.size} quyền
-                  </span>
+                  <span className="text-[10px] text-gray-400">{def.permissions.size} quyền</span>
                 </div>
               </div>
             ))}
@@ -249,9 +245,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
               className="px-4 py-3 border-b border-gray-100 flex items-center justify-between"
               style={{ background: 'linear-gradient(135deg, #1A2948 0%, #0F1E3A 100%)' }}
             >
-              <span
-                className="text-white font-bold text-sm font-koho"
-              >
+              <span className="text-white font-bold text-sm font-koho">
                 Ma trận Phân quyền Chi tiết
               </span>
               <span className="text-white/60 text-xs">
@@ -342,9 +336,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
             className="px-4 py-3 border-b border-gray-100 flex items-center justify-between"
             style={{ background: 'linear-gradient(135deg, #1A2948 0%, #0F1E3A 100%)' }}
           >
-            <span
-              className="text-white font-bold text-sm font-koho"
-            >
+            <span className="text-white font-bold text-sm font-koho">
               Danh sách Admin & Phân quyền
             </span>
             <span className="text-white/60 text-xs">{adminRoles.length} admin</span>
@@ -387,8 +379,8 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                         </div>
                         <div>
                           <div className="font-semibold text-sm text-navy">
-                              {ar.full_name || 'Unknown'}
-                            </div>
+                            {ar.full_name || 'Unknown'}
+                          </div>
                           <div className="text-xs text-gray-400">{ar.email}</div>
                         </div>
                       </div>
@@ -448,9 +440,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
             className="px-4 py-3 border-b border-gray-100 flex items-center justify-between"
             style={{ background: 'linear-gradient(135deg, #1A2948 0%, #0F1E3A 100%)' }}
           >
-            <span
-              className="text-white font-bold text-sm font-koho"
-            >
+            <span className="text-white font-bold text-sm font-koho">
               Audit Log — Lịch sử thao tác
             </span>
             <button
@@ -506,9 +496,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                           {log.status}
                         </span>
                       </div>
-                      <div
-                        className="flex items-center gap-3 mt-1 text-[10px] text-gray-400"
-                      >
+                      <div className="flex items-center gap-3 mt-1 text-[10px] text-gray-400">
                         <span className="font-semibold">{log.admin_email}</span>
                         <span>{new Date(log.created_at).toLocaleString('vi-VN')}</span>
                       </div>
@@ -524,11 +512,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
       {/* ═══════ TAB: CONFIG ══════ */}
       {activeTab === 'config' && (
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h3
-            className="font-bold text-base mb-4 font-koho"
-          >
-            Cấu hình hệ thống
-          </h3>
+          <h3 className="font-bold text-base mb-4 font-koho">Cấu hình hệ thống</h3>
 
           {/* Quick config cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -587,14 +571,8 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                   </div>
                   <span className="text-[10px] font-mono text-gray-400">{cfg.key}</span>
                 </div>
-                <div className="font-bold text-sm text-navy">
-                  {cfg.label}
-                </div>
-                <div
-                  className="text-lg font-black mt-1 font-koho"
-                >
-                  {cfg.value}
-                </div>
+                <div className="font-bold text-sm text-navy">{cfg.label}</div>
+                <div className="text-lg font-black mt-1 font-koho">{cfg.value}</div>
                 <div className="text-[10px] text-gray-400 mt-1">{cfg.desc}</div>
               </div>
             ))}
@@ -637,11 +615,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
               className="px-5 py-4 border-b border-gray-100"
               style={{ background: 'linear-gradient(135deg, #EC2029 0%, #B91C1C 100%)' }}
             >
-              <h3
-                className="text-white font-bold font-heading-sm"
-              >
-                Gán quyền cho Admin
-              </h3>
+              <h3 className="text-white font-bold font-heading-sm">Gán quyền cho Admin</h3>
               <p className="text-white/70 text-xs mt-0.5">Chọn role và nhập thông tin người dùng</p>
             </div>
 
@@ -754,7 +728,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                   disabled={!selectedUserEmail || isAssigning}
                   className="flex-1 text-white font-bold py-2.5 rounded-xl text-sm disabled:opacity-40 flex items-center justify-center gap-2"
                   style={{
-                    background: isAssigning ? '#9CA3AF' : '#EC2029'
+                    background: isAssigning ? '#9CA3AF' : '#EC2029',
                   }}
                 >
                   {isAssigning ? (

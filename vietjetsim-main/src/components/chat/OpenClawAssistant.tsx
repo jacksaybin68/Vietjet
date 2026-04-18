@@ -73,9 +73,12 @@ export default function OpenClawAssistant() {
       const response = await fetch('/api/openclaw/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           message: text,
-          history: messages.map(m => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.content }))
+          history: messages.map((m) => ({
+            role: m.sender === 'user' ? 'user' : 'assistant',
+            content: m.content,
+          })),
         }),
       });
 
@@ -153,25 +156,27 @@ export default function OpenClawAssistant() {
         >
           {/* AI Header */}
           <div className="bg-gradient-vj px-5 py-4 flex items-center gap-4 flex-shrink-0 relative overflow-hidden">
-             {/* Decorative element */}
+            {/* Decorative element */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl" />
-            
+
             <div className="relative w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20 backdrop-blur-sm">
               <Icon name="SparklesIcon" size={24} className="text-accent" />
               <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-primary-dark" />
             </div>
-            
+
             <div className="flex-1">
               <div className="text-white font-heading font-bold text-lg flex items-center gap-2">
                 OpenClaw Assistant
-                <span className="text-[10px] bg-accent/20 text-accent px-1.5 py-0.5 rounded border border-accent/30 font-medium">BETA AI</span>
+                <span className="text-[10px] bg-accent/20 text-accent px-1.5 py-0.5 rounded border border-accent/30 font-medium">
+                  BETA AI
+                </span>
               </div>
               <div className="text-white/70 text-xs flex items-center gap-1.5 mt-0.5">
                 <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
                 Đang trực tuyến (AI được cá nhân hóa)
               </div>
             </div>
-            
+
             <button
               onClick={() => setIsOpen(false)}
               className="w-10 h-10 bg-white/5 hover:bg-white/10 active:bg-white/20 rounded-xl flex items-center justify-center transition-colors border border-white/10"
@@ -195,16 +200,18 @@ export default function OpenClawAssistant() {
                       }`}
                     >
                       {/* Using dangerouslySetInnerHTML for markdown-ish content since I don't want to add a md lib unless asked */}
-                      <div className="whitespace-pre-wrap select-text">
-                        {msg.content}
-                      </div>
+                      <div className="whitespace-pre-wrap select-text">{msg.content}</div>
                     </div>
-                    <div className={`mt-1.5 flex items-center gap-2 opacity-60 ${IsAi ? 'justify-start' : 'justify-end'}`}>
-                       <span className="text-[10px] font-medium tracking-wider uppercase text-gray-400">
-                          {IsAi ? 'OpenClaw v1.2' : 'You'}
-                       </span>
-                       <span className="text-[10px] text-gray-400">•</span>
-                       <span className="text-[10px] text-gray-400">{formatTime(msg.created_at)}</span>
+                    <div
+                      className={`mt-1.5 flex items-center gap-2 opacity-60 ${IsAi ? 'justify-start' : 'justify-end'}`}
+                    >
+                      <span className="text-[10px] font-medium tracking-wider uppercase text-gray-400">
+                        {IsAi ? 'OpenClaw v1.2' : 'You'}
+                      </span>
+                      <span className="text-[10px] text-gray-400">•</span>
+                      <span className="text-[10px] text-gray-400">
+                        {formatTime(msg.created_at)}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -214,12 +221,14 @@ export default function OpenClawAssistant() {
             {/* AI Typing Indicator */}
             {isTyping && (
               <div className="flex flex-col items-start bg-white/50 backdrop-blur-sm self-start px-4 py-3 rounded-2xl border border-gray-100">
-                 <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce [animation-delay:-0.3s]" />
-                    <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce [animation-delay:-0.15s]" />
-                    <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" />
-                    <span className="text-xs text-gray-400 ml-2 font-medium">Assistant is thinking...</span>
-                 </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce [animation-delay:-0.3s]" />
+                  <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce [animation-delay:-0.15s]" />
+                  <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" />
+                  <span className="text-xs text-gray-400 ml-2 font-medium">
+                    Assistant is thinking...
+                  </span>
+                </div>
               </div>
             )}
 
@@ -256,7 +265,8 @@ export default function OpenClawAssistant() {
               </div>
             </div>
             <p className="mt-3 text-[10px] text-center text-gray-400">
-              Cung cấp bởi công nghệ <span className="text-navy font-bold">OpenClaw Engine</span> • Dữ liệu cập nhật 2026
+              Cung cấp bởi công nghệ <span className="text-navy font-bold">OpenClaw Engine</span> •
+              Dữ liệu cập nhật 2026
             </p>
           </div>
         </div>
@@ -271,11 +281,11 @@ export default function OpenClawAssistant() {
           background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #E5E7EB;
+          background: #e5e7eb;
           border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #D1D5DB;
+          background: #d1d5db;
         }
       `}</style>
     </>

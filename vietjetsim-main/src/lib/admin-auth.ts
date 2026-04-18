@@ -68,8 +68,11 @@ export async function verifyAdminRequest(
 
   // Step 2: Check user is admin or has a system role
   const userRole = payload.role as Parameters<typeof hasPermission>[0];
-  if (userRole !== 'admin' && userRole !== 'super_admin' &&
-      !['admin_ops', 'admin_finance', 'admin_support', 'admin_content'].includes(userRole)) {
+  if (
+    userRole !== 'admin' &&
+    userRole !== 'super_admin' &&
+    !['admin_ops', 'admin_finance', 'admin_support', 'admin_content'].includes(userRole)
+  ) {
     return {
       payload,
       error: 'Forbidden',

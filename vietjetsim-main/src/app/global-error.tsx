@@ -28,14 +28,12 @@ export default function GlobalError({
             </div>
 
             {/* Title */}
-            <h1 className="text-3xl font-bold text-[#1A2948] font-koho">
-              Đã xảy ra lỗi
-            </h1>
+            <h1 className="text-3xl font-bold text-[#1A2948] font-koho">Đã xảy ra lỗi</h1>
 
             {/* Description */}
             <p className="text-gray-600 text-base leading-relaxed font-heading-sm">
-              Rất tiếc, đã có sự cố xảy ra khi xử lý yêu cầu của bạn. Vui lòng thử
-              lại hoặc quay về trang chủ.
+              Rất tiếc, đã có sự cố xảy ra khi xử lý yêu cầu của bạn. Vui lòng thử lại hoặc quay về
+              trang chủ.
             </p>
 
             {/* Error Code */}

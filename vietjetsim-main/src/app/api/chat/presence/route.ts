@@ -22,7 +22,10 @@ export async function GET(request: NextRequest) {
     }
 
     const role = searchParams.get('role') as 'user' | 'admin' | null;
-    const presence = await getChatPresence(conversationId, role || payload.role as 'user' | 'admin');
+    const presence = await getChatPresence(
+      conversationId,
+      role || (payload.role as 'user' | 'admin')
+    );
     return NextResponse.json({ presence });
   } catch (error) {
     console.error('Error fetching chat presence:', error);

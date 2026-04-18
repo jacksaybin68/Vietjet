@@ -30,10 +30,7 @@ export async function POST(request: NextRequest) {
 
     if (!stored) {
       // Token not found in DB — possible forgery; clear cookies
-      const errResponse = NextResponse.json(
-        { error: 'Invalid refresh token' },
-        { status: 401 }
-      );
+      const errResponse = NextResponse.json({ error: 'Invalid refresh token' }, { status: 401 });
       clearAuthCookiesOnResponse(errResponse);
       return errResponse;
     }
@@ -57,12 +54,7 @@ export async function POST(request: NextRequest) {
     const newHash = hashToken(newRefreshToken);
 
     // Atomically rotate: mark old token used → insert new token under same family
-    const result = await rotateRefreshToken(
-      tokenHash,
-      newHash,
-      payload.userId,
-      stored.family_id
-    );
+    const result = await rotateRefreshToken(tokenHash, newHash, payload.userId, stored.family_id);
 
     if (!result.success) {
       if (result.reuseDetected) {

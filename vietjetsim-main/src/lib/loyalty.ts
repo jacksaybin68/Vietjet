@@ -20,12 +20,9 @@ export function calculateEarnedPoints(
  * Determine the user's current tier based on lifetime points.
  * Returns the highest qualifying tier.
  */
-export function determineTier(
-  lifetimePoints: number,
-  tiers: LoyaltyTierRecord[]
-): string {
+export function determineTier(lifetimePoints: number, tiers: LoyaltyTierRecord[]): string {
   const sorted = [...tiers].sort((a, b) => b.min_lifetime_points - a.min_lifetime_points);
-  const current = sorted.find(t => lifetimePoints >= t.min_lifetime_points);
+  const current = sorted.find((t) => lifetimePoints >= t.min_lifetime_points);
   return current?.name || 'Bronze';
 }
 
@@ -38,7 +35,7 @@ export function calculateTierProgress(
   tiers: LoyaltyTierRecord[]
 ): { nextTier: LoyaltyTierRecord | null; pointsNeeded: number; progressPercent: number } {
   const sorted = [...tiers].sort((a, b) => a.tier_order - b.tier_order);
-  const currentIndex = sorted.findIndex(t => t.name === currentTier);
+  const currentIndex = sorted.findIndex((t) => t.name === currentTier);
 
   if (currentIndex === -1 || currentIndex === sorted.length - 1) {
     return { nextTier: null, pointsNeeded: 0, progressPercent: 100 };
@@ -68,10 +65,7 @@ export function formatPoints(points: number): string {
  * Check if points are expired and mark them for cleanup.
  * Returns true if points should be expired.
  */
-export function shouldExpirePoints(
-  expiresAt: string | null,
-  expiryMonths: number
-): boolean {
+export function shouldExpirePoints(expiresAt: string | null, expiryMonths: number): boolean {
   if (!expiresAt) return false;
   const expiryDate = new Date(expiresAt);
   const now = new Date();

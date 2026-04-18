@@ -225,8 +225,9 @@ function SuccessToast({ onDismiss }: { onDismiss: () => void }) {
 
   return (
     <div
-      className={`fixed top-6 right-6 z-[60] flex items-center gap-3 bg-white border border-green-200 rounded-2xl px-5 py-4 transition-all duration-400 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-        }`}
+      className={`fixed top-6 right-6 z-[60] flex items-center gap-3 bg-white border border-green-200 rounded-2xl px-5 py-4 transition-all duration-400 ${
+        visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+      }`}
       style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.08)' }}
     >
       <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -327,9 +328,7 @@ function PaymentProcessingOverlay() {
           </div>
         </div>
         <div className="text-center">
-          <div
-            className="font-black text-[#1A2948] text-lg mb-1 font-koho"
-          >
+          <div className="font-black text-[#1A2948] text-lg mb-1 font-koho">
             Đang xử lý thanh toán
           </div>
           <div className="text-sm text-stone-500">Vui lòng không đóng trang này...</div>
@@ -375,11 +374,7 @@ function ErrorModal({ title, message, onRetry, onDismiss }: ErrorModalProps) {
           <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-5 border-4 border-red-100">
             <Icon name="ExclamationTriangleIcon" size={32} className="text-primary" />
           </div>
-          <h3
-            className="font-black text-[#1A2948] text-xl mb-2 font-koho"
-          >
-            {title}
-          </h3>
+          <h3 className="font-black text-[#1A2948] text-xl mb-2 font-koho">{title}</h3>
           <p className="text-sm text-stone-500 leading-relaxed mb-7">{message}</p>
           <div className="flex flex-col gap-3 w-full">
             <button
@@ -417,7 +412,13 @@ export default function PaymentClient() {
   >([]);
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
-  const [promoData, setPromoData] = useState<{ id: string; code: string; type: string; value: number; discountAmount: number } | null>(null);
+  const [promoData, setPromoData] = useState<{
+    id: string;
+    code: string;
+    type: string;
+    value: number;
+    discountAmount: number;
+  } | null>(null);
   const [promoError, setPromoError] = useState('');
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -453,26 +454,26 @@ export default function PaymentClient() {
 
   useEffect(() => {
     fetch('/api/public/bank-config')
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (data.bankConfig) setBankConfig(data.bankConfig);
         if (data.accounts && data.accounts.length > 0) {
           setAdminAccounts(data.accounts);
           setSelectedAdminAccount(data.accounts[0]);
         }
       })
-      .catch(err => console.error('Failed to load bank config:', err));
-    
+      .catch((err) => console.error('Failed to load bank config:', err));
+
     // Fetch wallet balance
     setIsWalletLoading(true);
     fetch('/api/wallet')
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (data.success && data.wallet) {
           setWalletBalance(parseFloat(data.wallet.balance));
         }
       })
-      .catch(err => console.error('Failed to load wallet balance:', err))
+      .catch((err) => console.error('Failed to load wallet balance:', err))
       .finally(() => setIsWalletLoading(false));
   }, []);
 
@@ -534,7 +535,7 @@ export default function PaymentClient() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           code: promoCode,
-          bookingAmount: booking?.basePrice || 0
+          bookingAmount: booking?.basePrice || 0,
         }),
       });
       const data = await res.json();
@@ -577,7 +578,9 @@ export default function PaymentClient() {
 
     if (paymentMethod === 'wallet') {
       if (walletBalance === null || walletBalance < total) {
-        setPaymentError('Số dư ví không đủ để thanh toán. Vui lòng nạp thêm tiền hoặc chọn phương thức khác.');
+        setPaymentError(
+          'Số dư ví không đủ để thanh toán. Vui lòng nạp thêm tiền hoặc chọn phương thức khác.'
+        );
         setShowErrorModal(true);
         return;
       }
@@ -599,7 +602,7 @@ export default function PaymentClient() {
           method: paymentMethod,
           amount: total,
           discount_code_id: promoData?.id || null,
-          discount_amount: discountAmount
+          discount_amount: discountAmount,
         }),
       });
 
@@ -744,10 +747,11 @@ export default function PaymentClient() {
                     <button
                       onClick={handleCopyBookingCode}
                       title="Sao chép mã đặt chỗ"
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${copied
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                        copied
                           ? 'bg-green-100 text-green-700 border border-green-300'
                           : 'bg-stone-100 text-stone-600 border border-stone-200 hover:bg-primary-50 hover:text-primary hover:border-primary'
-                        }`}
+                      }`}
                     >
                       {copied ? (
                         <>
@@ -974,16 +978,22 @@ export default function PaymentClient() {
                     ] as [
                       PaymentMethod,
                       string,
-                      'CreditCardIcon' | 'BuildingLibraryIcon' | 'DevicePhoneMobileIcon' | 'WalletIcon',
+                      (
+                        | 'CreditCardIcon'
+                        | 'BuildingLibraryIcon'
+                        | 'DevicePhoneMobileIcon'
+                        | 'WalletIcon'
+                      ),
                     ][]
                   ).map(([val, label, icon]) => (
                     <button
                       key={val}
                       onClick={() => setPaymentMethod(val)}
-                      className={`flex flex-col items-center gap-2 py-4 rounded-xl border-2 transition-all text-sm font-semibold ${paymentMethod === val
+                      className={`flex flex-col items-center gap-2 py-4 rounded-xl border-2 transition-all text-sm font-semibold ${
+                        paymentMethod === val
                           ? 'border-primary bg-primary-50 text-primary'
                           : 'border-stone-200 text-stone-600 hover:border-stone-300'
-                        }`}
+                      }`}
                     >
                       <Icon name={icon} size={22} />
                       <span className="text-xs">{label}</span>
@@ -1098,43 +1108,52 @@ export default function PaymentClient() {
                             Tài khoản đã lưu
                           </label>
                           <div className="space-y-2">
-                            {savedAccounts.map((acc: { bankId: string; accountNumber: string; accountHolder: string }, idx: number) => {
-                              const bank = BANKS.find((b) => b.id === acc.bankId);
-                              return (
-                                <button
-                                  key={idx}
-                                  type="button"
-                                  onClick={() => {
-                                    if (bank) setSelectedBank(bank);
-                                    setBankAccountNumber(acc.accountNumber);
-                                    setBankAccountHolder(acc.accountHolder);
-                                  }}
-                                  className="w-full flex items-center gap-3 p-3 bg-stone-50 hover:bg-primary-50 border border-stone-200 hover:border-primary rounded-xl transition-all text-left"
-                                >
-                                  {bank && (
-                                    <div
-                                      className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                                      style={{ backgroundColor: bank.color }}
-                                    >
-                                      {bank.code.substring(0, 2)}
+                            {savedAccounts.map(
+                              (
+                                acc: {
+                                  bankId: string;
+                                  accountNumber: string;
+                                  accountHolder: string;
+                                },
+                                idx: number
+                              ) => {
+                                const bank = BANKS.find((b) => b.id === acc.bankId);
+                                return (
+                                  <button
+                                    key={idx}
+                                    type="button"
+                                    onClick={() => {
+                                      if (bank) setSelectedBank(bank);
+                                      setBankAccountNumber(acc.accountNumber);
+                                      setBankAccountHolder(acc.accountHolder);
+                                    }}
+                                    className="w-full flex items-center gap-3 p-3 bg-stone-50 hover:bg-primary-50 border border-stone-200 hover:border-primary rounded-xl transition-all text-left"
+                                  >
+                                    {bank && (
+                                      <div
+                                        className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                                        style={{ backgroundColor: bank.color }}
+                                      >
+                                        {bank.code.substring(0, 2)}
+                                      </div>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                      <div className="text-sm font-semibold text-stone-800 truncate">
+                                        {acc.accountHolder}
+                                      </div>
+                                      <div className="text-xs text-stone-500 font-mono">
+                                        **** {acc.accountNumber.slice(-4)}
+                                      </div>
                                     </div>
-                                  )}
-                                  <div className="flex-1 min-w-0">
-                                    <div className="text-sm font-semibold text-stone-800 truncate">
-                                      {acc.accountHolder}
-                                    </div>
-                                    <div className="text-xs text-stone-500 font-mono">
-                                      **** {acc.accountNumber.slice(-4)}
-                                    </div>
-                                  </div>
-                                  <Icon
-                                    name="ArrowRightIcon"
-                                    size={16}
-                                    className="text-stone-400"
-                                  />
-                                </button>
-                              );
-                            })}
+                                    <Icon
+                                      name="ArrowRightIcon"
+                                      size={16}
+                                      className="text-stone-400"
+                                    />
+                                  </button>
+                                );
+                              }
+                            )}
                           </div>
                         </div>
                       )}
@@ -1145,10 +1164,11 @@ export default function PaymentClient() {
                             key={bank.id}
                             type="button"
                             onClick={() => setSelectedBank(bank)}
-                            className={`relative py-3 px-3 border rounded-xl text-sm font-semibold transition-all flex flex-col items-center gap-1.5 ${selectedBank?.id === bank.id
+                            className={`relative py-3 px-3 border rounded-xl text-sm font-semibold transition-all flex flex-col items-center gap-1.5 ${
+                              selectedBank?.id === bank.id
                                 ? 'border-2 shadow-md'
                                 : 'bg-stone-50 hover:bg-primary-50 hover:border-primary border-stone-200 text-stone-700'
-                              }`}
+                            }`}
                             style={
                               selectedBank?.id === bank.id
                                 ? { borderColor: bank.color, backgroundColor: `${bank.color}08` }
@@ -1229,7 +1249,7 @@ export default function PaymentClient() {
                           <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2">
                             Thông tin chuyển khoản
                           </label>
-                          
+
                           {/* Account Tabs if multiple */}
                           {adminAccounts.length > 1 && (
                             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
@@ -1239,8 +1259,8 @@ export default function PaymentClient() {
                                   type="button"
                                   onClick={() => setSelectedAdminAccount(acc)}
                                   className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
-                                    selectedAdminAccount.id === acc.id 
-                                      ? 'bg-primary text-white shadow-md shadow-primary/20' 
+                                    selectedAdminAccount.id === acc.id
+                                      ? 'bg-primary text-white shadow-md shadow-primary/20'
                                       : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
                                   }`}
                                 >
@@ -1257,39 +1277,56 @@ export default function PaymentClient() {
                                   <div className="text-xs font-bold text-stone-400 uppercase tracking-widest bg-stone-100 px-2 py-0.5 rounded inline-block mb-1">
                                     Ngân hàng thụ hưởng
                                   </div>
-                                  <h4 className="text-lg font-black text-stone-900">{selectedAdminAccount.admin_bank_name}</h4>
+                                  <h4 className="text-lg font-black text-stone-900">
+                                    {selectedAdminAccount.admin_bank_name}
+                                  </h4>
                                 </div>
                                 <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-stone-100 flex items-center justify-center p-1">
-                                  <div className="text-[10px] font-black text-primary">{selectedAdminAccount.admin_bank_name.substring(0, 3)}</div>
+                                  <div className="text-[10px] font-black text-primary">
+                                    {selectedAdminAccount.admin_bank_name.substring(0, 3)}
+                                  </div>
                                 </div>
                               </div>
 
                               {/* QR Code Section */}
                               <div className="flex flex-col items-center justify-center py-4 bg-stone-50 rounded-2xl border border-stone-100 mb-4">
                                 <div className="relative group cursor-pointer">
-                                  <img 
-                                    src={`https://img.vietqr.io/image/${selectedAdminAccount.bank_bin || 'VCB'}-${selectedAdminAccount.admin_bank_account_number}-compact2.png?amount=${total}&addInfo=${encodeURIComponent(selectedAdminAccount.transfer_note_template?.replace('{code}', bookingCode) || bookingCode)}&accountName=${encodeURIComponent(selectedAdminAccount.admin_bank_account_holder)}`} 
-                                    alt="VietQR" 
+                                  <img
+                                    src={`https://img.vietqr.io/image/${selectedAdminAccount.bank_bin || 'VCB'}-${selectedAdminAccount.admin_bank_account_number}-compact2.png?amount=${total}&addInfo=${encodeURIComponent(selectedAdminAccount.transfer_note_template?.replace('{code}', bookingCode) || bookingCode)}&accountName=${encodeURIComponent(selectedAdminAccount.admin_bank_account_holder)}`}
+                                    alt="VietQR"
                                     className="w-48 h-48 object-contain rounded-lg transition-transform group-hover:scale-105"
                                   />
                                   <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-all rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                    <span className="bg-primary text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg">Quét để trả ngay</span>
+                                    <span className="bg-primary text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg">
+                                      Quét để trả ngay
+                                    </span>
                                   </div>
                                 </div>
-                                <p className="text-[10px] text-stone-400 mt-2 font-medium">Sử dụng App Ngân hàng hoặc Ví để quét mã</p>
+                                <p className="text-[10px] text-stone-400 mt-2 font-medium">
+                                  Sử dụng App Ngân hàng hoặc Ví để quét mã
+                                </p>
                               </div>
 
                               <div className="space-y-3">
                                 <div className="flex justify-between items-end">
                                   <div>
-                                    <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block mb-0.5">Số tài khoản</label>
-                                    <p className="text-lg font-mono font-black text-stone-900 leading-none tracking-wider">{selectedAdminAccount.admin_bank_account_number}</p>
+                                    <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block mb-0.5">
+                                      Số tài khoản
+                                    </label>
+                                    <p className="text-lg font-mono font-black text-stone-900 leading-none tracking-wider">
+                                      {selectedAdminAccount.admin_bank_account_number}
+                                    </p>
                                   </div>
-                                  <button 
+                                  <button
                                     type="button"
                                     onClick={() => {
-                                      navigator.clipboard.writeText(selectedAdminAccount.admin_bank_account_number);
-                                      toast.success('Đã chép', 'Số tài khoản đã được lưu vào bộ nhớ tạm');
+                                      navigator.clipboard.writeText(
+                                        selectedAdminAccount.admin_bank_account_number
+                                      );
+                                      toast.success(
+                                        'Đã chép',
+                                        'Số tài khoản đã được lưu vào bộ nhớ tạm'
+                                      );
                                     }}
                                     className="text-primary hover:bg-primary/5 p-2 rounded-lg transition-colors"
                                   >
@@ -1299,17 +1336,29 @@ export default function PaymentClient() {
 
                                 <div className="flex justify-between items-center py-3 px-4 bg-primary/5 rounded-2xl border border-primary/10">
                                   <div>
-                                    <label className="text-[10px] font-bold text-primary/60 uppercase tracking-widest block mb-0.5">Nội dung chuyển khoản</label>
+                                    <label className="text-[10px] font-bold text-primary/60 uppercase tracking-widest block mb-0.5">
+                                      Nội dung chuyển khoản
+                                    </label>
                                     <p className="text-base font-black text-primary leading-none tracking-widest">
-                                      {selectedAdminAccount.transfer_note_template?.replace('{code}', bookingCode) || bookingCode}
+                                      {selectedAdminAccount.transfer_note_template?.replace(
+                                        '{code}',
+                                        bookingCode
+                                      ) || bookingCode}
                                     </p>
                                   </div>
-                                  <button 
+                                  <button
                                     type="button"
                                     onClick={() => {
-                                      const note = selectedAdminAccount.transfer_note_template?.replace('{code}', bookingCode) || bookingCode;
+                                      const note =
+                                        selectedAdminAccount.transfer_note_template?.replace(
+                                          '{code}',
+                                          bookingCode
+                                        ) || bookingCode;
                                       navigator.clipboard.writeText(note);
-                                      toast.success('Đã chép', 'Nội dung chuyển khoản đã được lưu vào bộ nhớ tạm');
+                                      toast.success(
+                                        'Đã chép',
+                                        'Nội dung chuyển khoản đã được lưu vào bộ nhớ tạm'
+                                      );
                                     }}
                                     className="bg-primary text-white hover:bg-primary-dark w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-md shadow-primary/20"
                                   >
@@ -1318,15 +1367,21 @@ export default function PaymentClient() {
                                 </div>
 
                                 <div className="pt-2">
-                                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block mb-1">Chủ tài khoản</label>
-                                  <p className="text-sm font-bold text-stone-800">{selectedAdminAccount.admin_bank_account_holder.toUpperCase()}</p>
+                                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block mb-1">
+                                    Chủ tài khoản
+                                  </label>
+                                  <p className="text-sm font-bold text-stone-800">
+                                    {selectedAdminAccount.admin_bank_account_holder.toUpperCase()}
+                                  </p>
                                 </div>
                               </div>
                             </div>
-                            
+
                             <div className="bg-stone-900 p-3 flex items-center justify-center gap-2">
                               <Icon name="ShieldCheckIcon" size={14} className="text-emerald-400" />
-                              <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">Giao dịch bảo mật VietQR</span>
+                              <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">
+                                Giao dịch bảo mật VietQR
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -1337,22 +1392,30 @@ export default function PaymentClient() {
                   {/* Wallet Payment */}
                   {paymentMethod === 'wallet' && (
                     <div className="space-y-4">
-                      <div 
+                      <div
                         className={`bg-white border rounded-2xl p-6 flex flex-col items-center gap-4 transition-all ${walletBalance !== null && walletBalance >= total ? 'border-emerald-200 bg-emerald-50/10' : 'border-stone-200'}`}
                       >
                         <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
                           <Icon name="WalletIcon" size={32} className="text-primary" />
                         </div>
                         <div className="text-center">
-                          <h4 className="font-bold text-stone-900 mb-1">Thanh toán bằng ví tài khoản</h4>
-                          <p className="text-sm text-stone-500">Thanh toán nhanh chóng bằng số dư của bạn</p>
+                          <h4 className="font-bold text-stone-900 mb-1">
+                            Thanh toán bằng ví tài khoản
+                          </h4>
+                          <p className="text-sm text-stone-500">
+                            Thanh toán nhanh chóng bằng số dư của bạn
+                          </p>
                         </div>
-                        
+
                         <div className="w-full border-t border-stone-100 pt-4 mt-2">
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-sm text-stone-500">Số dư hiện tại:</span>
-                            <span className={`text-base font-black ${walletBalance === null ? 'animate-pulse text-stone-300' : (walletBalance >= total ? 'text-emerald-600' : 'text-red-500')}`}>
-                              {walletBalance !== null ? walletBalance.toLocaleString('vi-VN') + '₫' : '••••••₫'}
+                            <span
+                              className={`text-base font-black ${walletBalance === null ? 'animate-pulse text-stone-300' : walletBalance >= total ? 'text-emerald-600' : 'text-red-500'}`}
+                            >
+                              {walletBalance !== null
+                                ? walletBalance.toLocaleString('vi-VN') + '₫'
+                                : '••••••₫'}
                             </span>
                           </div>
                           <div className="flex justify-between items-center">
@@ -1364,7 +1427,7 @@ export default function PaymentClient() {
                         </div>
 
                         {walletBalance !== null && walletBalance < total && (
-                          <Link 
+                          <Link
                             href="/user-dashboard"
                             className="text-xs text-primary font-bold hover:underline flex items-center gap-1 mt-2"
                           >
@@ -1560,7 +1623,9 @@ export default function PaymentClient() {
                   </div>
                   {promoApplied && (
                     <div className="flex justify-between text-green-600 font-medium">
-                      <span>Giảm giá {promoData?.type === 'percentage' ? `(${promoData.value}%)` : ''}</span>
+                      <span>
+                        Giảm giá {promoData?.type === 'percentage' ? `(${promoData.value}%)` : ''}
+                      </span>
                       <span className="font-bold">-{discountAmount.toLocaleString('vi-VN')}₫</span>
                     </div>
                   )}

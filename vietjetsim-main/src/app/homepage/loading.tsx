@@ -32,7 +32,7 @@ export default function Loading() {
 
       {/* Popular routes skeleton */}
       <PopularRoutesSkeleton />
-      
+
       {/* Deals skeleton */}
       <DealsSkeleton />
     </main>

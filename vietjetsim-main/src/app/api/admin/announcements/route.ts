@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
         LIMIT ${limit} OFFSET ${offset}
       `;
       announcements = result;
-      
+
       const countResult = await sql`
         SELECT COUNT(*) as total FROM announcements a
         WHERE (a.title ILIKE ${'%' + search + '%'} OR a.content ILIKE ${'%' + search + '%'})
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
         LIMIT ${limit} OFFSET ${offset}
       `;
       announcements = result;
-      
+
       const countResult = await sql`
         SELECT COUNT(*) as total FROM announcements a
         WHERE (a.title ILIKE ${'%' + search + '%'} OR a.content ILIKE ${'%' + search + '%'})
@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
         LIMIT ${limit} OFFSET ${offset}
       `;
       announcements = result;
-      
+
       const countResult = await sql`
         SELECT COUNT(*) as total FROM announcements a
         WHERE a.title ILIKE ${'%' + search + '%'} OR a.content ILIKE ${'%' + search + '%'}
@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
         LIMIT ${limit} OFFSET ${offset}
       `;
       announcements = result;
-      
+
       const countResult = await sql`
         SELECT COUNT(*) as total FROM announcements a
         WHERE a.type = ${type}
@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
         LIMIT ${limit} OFFSET ${offset}
       `;
       announcements = result;
-      
+
       const countResult = await sql`SELECT COUNT(*) as total FROM announcements a`;
       total = Number(countResult[0]?.total || 0);
     }
@@ -186,15 +186,15 @@ export async function POST(request: NextRequest) {
     if (error) return response;
 
     const body = await request.json();
-    const { 
-      title, 
-      content, 
-      type = 'info', 
+    const {
+      title,
+      content,
+      type = 'info',
       target_role = 'all',
       is_active = true,
       start_date,
       end_date,
-      created_by 
+      created_by,
     } = body;
 
     // Validation

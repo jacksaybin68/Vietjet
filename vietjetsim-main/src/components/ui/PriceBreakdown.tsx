@@ -31,10 +31,10 @@ export function PriceBreakdown({
   const grandTotal = Math.max(0, totalBeforeDiscount - discount);
 
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 ${className}`}>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-        Chi tiết giá vé
-      </h3>
+    <div
+      className={`bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 ${className}`}
+    >
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Chi tiết giá vé</h3>
 
       <div className="space-y-3">
         {/* Base Fare */}
@@ -42,9 +42,7 @@ export function PriceBreakdown({
           <span className="text-gray-600 dark:text-gray-400">
             Giá vé cơ bản
             {seatCount > 1 && (
-              <span className="text-gray-400 dark:text-gray-500">
-                {' '}({seatCount} ghế)
-              </span>
+              <span className="text-gray-400 dark:text-gray-500"> ({seatCount} ghế)</span>
             )}
           </span>
           <span className="text-gray-900 dark:text-white font-medium">
@@ -55,21 +53,15 @@ export function PriceBreakdown({
         {/* Taxes */}
         {taxes > 0 && (
           <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-600 dark:text-gray-400">
-              Thuế và phí sân bay
-            </span>
-            <span className="text-gray-900 dark:text-white">
-              {formatCurrency(taxes, currency)}
-            </span>
+            <span className="text-gray-600 dark:text-gray-400">Thuế và phí sân bay</span>
+            <span className="text-gray-900 dark:text-white">{formatCurrency(taxes, currency)}</span>
           </div>
         )}
 
         {/* Service Fee */}
         {serviceFee > 0 && (
           <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-600 dark:text-gray-400">
-              Phí dịch vụ
-            </span>
+            <span className="text-gray-600 dark:text-gray-400">Phí dịch vụ</span>
             <span className="text-gray-900 dark:text-white">
               {formatCurrency(serviceFee, currency)}
             </span>
@@ -79,9 +71,7 @@ export function PriceBreakdown({
         {/* Insurance */}
         {insuranceFee > 0 && (
           <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-600 dark:text-gray-400">
-              Phí bảo hiểm
-            </span>
+            <span className="text-gray-600 dark:text-gray-400">Phí bảo hiểm</span>
             <span className="text-gray-900 dark:text-white">
               {formatCurrency(insuranceFee, currency)}
             </span>
@@ -136,9 +126,7 @@ export function PriceBreakdown({
         {/* Grand Total */}
         <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
           <div className="flex justify-between items-center">
-            <span className="text-lg font-semibold text-gray-900 dark:text-white">
-              Tổng cộng
-            </span>
+            <span className="text-lg font-semibold text-gray-900 dark:text-white">Tổng cộng</span>
             <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
               {formatCurrency(grandTotal, currency)}
             </span>

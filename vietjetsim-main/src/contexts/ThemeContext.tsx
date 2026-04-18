@@ -42,17 +42,20 @@ export function ThemeProvider({
   }, []);
 
   // Update resolved theme and apply to document
-  const applyTheme = useCallback((newTheme: Theme) => {
-    const resolved = newTheme === 'system' ? getSystemTheme() : newTheme;
-    setResolvedTheme(resolved);
+  const applyTheme = useCallback(
+    (newTheme: Theme) => {
+      const resolved = newTheme === 'system' ? getSystemTheme() : newTheme;
+      setResolvedTheme(resolved);
 
-    // Apply to document
-    if (typeof document !== 'undefined') {
-      const root = document.documentElement;
-      root.classList.remove('light', 'dark');
-      root.classList.add(resolved);
-    }
-  }, [getSystemTheme]);
+      // Apply to document
+      if (typeof document !== 'undefined') {
+        const root = document.documentElement;
+        root.classList.remove('light', 'dark');
+        root.classList.add(resolved);
+      }
+    },
+    [getSystemTheme]
+  );
 
   // Initialize theme from storage or system preference
   useEffect(() => {
@@ -79,11 +82,14 @@ export function ThemeProvider({
   }, [theme, applyTheme]);
 
   // Set theme and persist to storage
-  const setTheme = useCallback((newTheme: Theme) => {
-    setThemeState(newTheme);
-    localStorage.setItem(storageKey, newTheme);
-    applyTheme(newTheme);
-  }, [storageKey, applyTheme]);
+  const setTheme = useCallback(
+    (newTheme: Theme) => {
+      setThemeState(newTheme);
+      localStorage.setItem(storageKey, newTheme);
+      applyTheme(newTheme);
+    },
+    [storageKey, applyTheme]
+  );
 
   // Toggle between light and dark
   const toggleTheme = useCallback(() => {
@@ -98,9 +104,5 @@ export function ThemeProvider({
     toggleTheme,
   };
 
-  return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

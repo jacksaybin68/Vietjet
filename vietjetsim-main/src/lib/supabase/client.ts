@@ -1,6 +1,6 @@
 /**
  * Mock Supabase Client for Development
- * 
+ *
  * This module provides a mock implementation of Supabase client
  * for use in development and testing environments where
  * Supabase credentials are not available.
@@ -12,7 +12,9 @@ export interface SupabaseClient {
     getSession: () => Promise<{ data: { session: any | null }; error: Error | null }>;
     getUser: () => Promise<{ data: { user: any | null }; error: Error | null }>;
     signUp: (options: any) => Promise<{ data: { user: any; session: any }; error: Error | null }>;
-    signInWithPassword: (options: any) => Promise<{ data: { user: any; session: any }; error: Error | null }>;
+    signInWithPassword: (
+      options: any
+    ) => Promise<{ data: { user: any; session: any }; error: Error | null }>;
     signOut: () => Promise<{ error: Error | null }>;
     onAuthStateChange: (callback: (event: string, session: any | null) => void) => {
       data: {
@@ -24,11 +26,17 @@ export interface SupabaseClient {
   };
   from: (table: string) => {
     select: (columns?: string) => {
-      eq: (column: string, value: any) => {
+      eq: (
+        column: string,
+        value: any
+      ) => {
         single: () => Promise<{ data: any; error: Error | null }>;
         limit: (n: number) => Promise<{ data: any[]; error: Error | null }>;
       };
-      order: (column: string, options?: { ascending: boolean }) => {
+      order: (
+        column: string,
+        options?: { ascending: boolean }
+      ) => {
         limit: (n: number) => Promise<{ data: any[]; error: Error | null }>;
       };
     };

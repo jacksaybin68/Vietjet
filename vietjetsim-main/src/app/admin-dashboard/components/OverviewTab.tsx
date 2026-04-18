@@ -111,34 +111,42 @@ export default function OverviewTab({ onNavigate }: Props) {
             <div
               key={stat.label}
               className="rounded-2xl border transition-all duration-300 p-5 group hover:translate-y-[-4px]"
-              style={{ 
-                background: 'rgba(30, 41, 59, 0.4)', 
+              style={{
+                background: 'rgba(30, 41, 59, 0.4)',
                 backdropFilter: 'blur(12px)',
                 borderColor: 'rgba(255, 255, 255, 0.05)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.2)'
+                boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
               }}
             >
               <div className="flex items-start justify-between mb-4">
                 <div
                   className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${stat.color.split(' ')[0].replace('bg-', 'bg-opacity-20 bg-')}`}
-                  style={{ 
+                  style={{
                     border: '1px solid rgba(255,255,255,0.05)',
-                    boxShadow: 'inset 0 0 12px rgba(255,255,255,0.05)'
+                    boxShadow: 'inset 0 0 12px rgba(255,255,255,0.05)',
                   }}
                 >
                   <Icon name={stat.icon} size={24} className={stat.color.split(' ')[1]} />
                 </div>
                 <div
                   className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
-                    stat.positive ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
+                    stat.positive
+                      ? 'bg-emerald-500/10 text-emerald-400'
+                      : 'bg-red-500/10 text-red-400'
                   }`}
-                  style={{ border: stat.positive ? '1px solid rgba(16,185,129,0.2)' : '1px solid rgba(248,113,113,0.2)' }}
+                  style={{
+                    border: stat.positive
+                      ? '1px solid rgba(16,185,129,0.2)'
+                      : '1px solid rgba(248,113,113,0.2)',
+                  }}
                 >
                   {stat.positive ? '↑' : '↓'} {stat.change.replace('+', '').replace('-', '')}
                 </div>
               </div>
               <div className="text-2xl font-black text-white tracking-tight">{stat.value}</div>
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1 opacity-70">{stat.label}</div>
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1 opacity-70">
+                {stat.label}
+              </div>
             </div>
           ))}
         </div>
@@ -193,11 +201,11 @@ export default function OverviewTab({ onNavigate }: Props) {
       {/* Recent Bookings */}
       <div
         className="rounded-2xl border overflow-hidden"
-        style={{ 
-          background: 'rgba(30, 41, 59, 0.4)', 
+        style={{
+          background: 'rgba(30, 41, 59, 0.4)',
           backdropFilter: 'blur(12px)',
           borderColor: 'rgba(255, 255, 255, 0.05)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.2)'
+          boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
         }}
       >
         <div className="flex items-center justify-between p-6 border-b border-white/5">

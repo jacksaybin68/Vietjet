@@ -65,7 +65,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const { admin_note } = body;
-    
+
     // Atomic refund processing: If status is approved/completed, release seats and update booking
     if (status === 'approved' || status === 'completed') {
       try {
@@ -74,7 +74,9 @@ export async function PATCH(request: NextRequest) {
         if (refundRecord?.booking_id) {
           await sql`DELETE FROM seats WHERE booking_id = ${refundRecord.booking_id}`;
           await sql`UPDATE bookings SET status = 'refunded', updated_at = NOW() WHERE id = ${refundRecord.booking_id}`;
-          console.log(`[REFUND] Seats released and booking ${refundRecord.booking_id} marked as refunded.`);
+          console.log(
+            `[REFUND] Seats released and booking ${refundRecord.booking_id} marked as refunded.`
+          );
         }
       } catch (dbErr) {
         console.error('Error during flight seat release for refund:', dbErr);

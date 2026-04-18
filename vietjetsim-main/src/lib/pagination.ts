@@ -31,21 +31,20 @@ export function parsePaginationParams(
   defaults: Partial<PaginationParams> = {}
 ): PaginationParams {
   const page = Math.max(1, parseInt(searchParams.get('page') || String(defaults.page || 1), 10));
-  const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || String(defaults.limit || 20), 10)));
-  
+  const limit = Math.min(
+    100,
+    Math.max(1, parseInt(searchParams.get('limit') || String(defaults.limit || 20), 10))
+  );
+
   return { page, limit };
 }
 
 /**
  * Calculate pagination metadata
  */
-export function getPaginationMeta(
-  page: number,
-  limit: number,
-  total: number
-): PaginationResult {
+export function getPaginationMeta(page: number, limit: number, total: number): PaginationResult {
   const totalPages = Math.ceil(total / limit);
-  
+
   return {
     page,
     limit,
@@ -89,7 +88,7 @@ export function parseSortParams<T extends string>(
 ): { field: T; direction: 'asc' | 'desc' } {
   const field = searchParams.get('sort') as T;
   const direction = searchParams.get('order') as 'asc' | 'desc' | null;
-  
+
   return {
     field: allowedFields.includes(field) ? field : defaultField,
     direction: direction === 'asc' || direction === 'desc' ? direction : defaultDirection,

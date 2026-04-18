@@ -10,7 +10,10 @@ export async function GET(request: NextRequest) {
     const wallet = await getOrCreateWallet(user.userId);
     return NextResponse.json({ success: true, wallet });
   } catch (error: any) {
-    return NextResponse.json({ error: 'Internal Server Error', message: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal Server Error', message: error.message },
+      { status: 500 }
+    );
   }
 }
 
@@ -26,7 +29,10 @@ export async function POST(request: NextRequest) {
 
     if (action === 'topup') {
       if (!amount || amount <= 0) {
-        return NextResponse.json({ error: 'Bad Request', message: 'Invalid amount' }, { status: 400 });
+        return NextResponse.json(
+          { error: 'Bad Request', message: 'Invalid amount' },
+          { status: 400 }
+        );
       }
 
       const balanceBefore = parseFloat(String(wallet.balance));
@@ -49,19 +55,22 @@ export async function POST(request: NextRequest) {
           UPDATE user_wallets 
           SET balance = ${balanceAfter}, updated_at = NOW()
           WHERE id = ${wallet.id}
-        `
+        `,
       ]);
 
-      return NextResponse.json({ 
-        success: true, 
+      return NextResponse.json({
+        success: true,
         wallet: { ...wallet, balance: balanceAfter },
-        transaction: results[0][0] 
+        transaction: results[0][0],
       });
     }
 
     return NextResponse.json({ error: 'Bad Request', message: 'Invalid action' }, { status: 400 });
   } catch (error: any) {
     console.error('Wallet API Error:', error);
-    return NextResponse.json({ error: 'Internal Server Error', message: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal Server Error', message: error.message },
+      { status: 500 }
+    );
   }
 }

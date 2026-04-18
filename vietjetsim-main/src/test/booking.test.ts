@@ -28,8 +28,22 @@ describe('Booking Database Module', () => {
   describe('getBookingsByUserId', () => {
     it('should fetch bookings with pagination for user', async () => {
       const mockBookings = [
-        { id: 'booking-1', user_id: 'user-1', status: 'confirmed', total_price: 1000, payments: [], passengers: [] },
-        { id: 'booking-2', user_id: 'user-1', status: 'pending', total_price: 500, payments: [], passengers: [] }
+        {
+          id: 'booking-1',
+          user_id: 'user-1',
+          status: 'confirmed',
+          total_price: 1000,
+          payments: [],
+          passengers: [],
+        },
+        {
+          id: 'booking-2',
+          user_id: 'user-1',
+          status: 'pending',
+          total_price: 500,
+          payments: [],
+          passengers: [],
+        },
       ];
 
       (sql as any).mockImplementation((strings: any) => {
@@ -53,7 +67,15 @@ describe('Booking Database Module', () => {
 
   describe('getBookingById', () => {
     it('should fetch single booking by ID', async () => {
-      const mockBooking = { id: 'booking-1', user_id: 'user-1', status: 'confirmed', total_price: 1000, payments: [], passengers: [], seats: [] };
+      const mockBooking = {
+        id: 'booking-1',
+        user_id: 'user-1',
+        status: 'confirmed',
+        total_price: 1000,
+        payments: [],
+        passengers: [],
+        seats: [],
+      };
 
       (sql as any).mockResolvedValueOnce([mockBooking]);
 
@@ -76,7 +98,12 @@ describe('Booking Database Module', () => {
 
   describe('createBooking', () => {
     it('should create booking and passengers', async () => {
-      const mockBookingRecord = { id: 'booking-1', user_id: 'user-1', flight_id: 'flight-1', total_price: 1000 };
+      const mockBookingRecord = {
+        id: 'booking-1',
+        user_id: 'user-1',
+        flight_id: 'flight-1',
+        total_price: 1000,
+      };
 
       (sql as any).transaction.mockResolvedValueOnce([]);
 
@@ -111,7 +138,7 @@ describe('Booking Database Module', () => {
     it('should fetch all bookings with pagination', async () => {
       const mockBookings = [
         { id: 'booking-1', status: 'confirmed', total_price: 1000 },
-        { id: 'booking-2', status: 'pending', total_price: 500 }
+        { id: 'booking-2', status: 'pending', total_price: 500 },
       ];
 
       // getAllBookings uses sql.query

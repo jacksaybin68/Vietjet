@@ -15,7 +15,14 @@ import {
 
 // Set up globals for test environment
 beforeAll(() => {
-  if (process.env.NODE_ENV !== 'test') { Object.defineProperty(process.env, 'NODE_ENV', { value: 'test', writable: true, configurable: true, enumerable: true }); }
+  if (process.env.NODE_ENV !== 'test') {
+    Object.defineProperty(process.env, 'NODE_ENV', {
+      value: 'test',
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    });
+  }
 });
 
 describe('Rate Limit Config', () => {
@@ -111,7 +118,7 @@ describe('Legacy Rate Limit Function', () => {
     const request = new Request('http://localhost/api/test-limited', {
       headers: { 'x-forwarded-for': '10.0.0.100' },
     });
-    
+
     // Make 5 requests (should all pass)
     for (let i = 0; i < 5; i++) {
       const result = rateLimit(request, RATE_LIMITS.auth);
@@ -124,13 +131,13 @@ describe('Legacy Rate Limit Function', () => {
     const request = new Request('http://localhost/api/test-custom', {
       headers: { 'x-forwarded-for': '10.0.0.200' },
     });
-    
+
     // With custom limit of 2
     for (let i = 0; i < 2; i++) {
       const result = rateLimit(request, { windowMs: 60_000, maxRequests: 2 });
       expect(result).toBeNull();
     }
-    
+
     // 3rd request should be blocked
     const result = rateLimit(request, { windowMs: 60_000, maxRequests: 2 });
     expect(result?.status).toBe(429);

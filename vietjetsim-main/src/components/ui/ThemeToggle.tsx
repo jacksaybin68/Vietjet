@@ -33,10 +33,7 @@ export function ThemeToggle() {
 
       {isOpen && (
         <>
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setIsOpen(false)}
-          />
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div className="absolute right-0 mt-2 w-40 py-2 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
             {options.map((option) => {
               const OptionIcon = option.icon;
@@ -48,9 +45,10 @@ export function ThemeToggle() {
                     setIsOpen(false);
                   }}
                   className={`w-full flex items-center gap-3 px-4 py-2 text-sm transition-colors
-                    ${theme === option.value
-                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                    ${
+                      theme === option.value
+                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                     }`}
                 >
                   <OptionIcon className="w-4 h-4" />

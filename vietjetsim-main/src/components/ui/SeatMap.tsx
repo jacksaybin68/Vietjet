@@ -47,13 +47,16 @@ export function SeatMap({
   const totalRows = ROWS_CONFIG[aircraftType];
 
   // Group seats by row
-  const seatsByRow = seats.reduce((acc, seat) => {
-    if (!acc[seat.row]) {
-      acc[seat.row] = [];
-    }
-    acc[seat.row].push(seat);
-    return acc;
-  }, {} as Record<number, Seat[]>);
+  const seatsByRow = seats.reduce(
+    (acc, seat) => {
+      if (!acc[seat.row]) {
+        acc[seat.row] = [];
+      }
+      acc[seat.row].push(seat);
+      return acc;
+    },
+    {} as Record<number, Seat[]>
+  );
 
   // Extra legroom rows (typically row 11 and last row)
   const extraLegroomRows = [11, totalRows];
@@ -118,9 +121,7 @@ export function SeatMap({
                 key={col}
                 className="flex-1 text-center text-sm font-medium text-gray-600 dark:text-gray-400"
               >
-                <span className={idx === 2 ? 'mr-8' : idx === 3 ? 'ml-8' : ''}>
-                  {col}
-                </span>
+                <span className={idx === 2 ? 'mr-8' : idx === 3 ? 'ml-8' : ''}>{col}</span>
               </div>
             ))}
             <div className="w-8" />
@@ -134,10 +135,7 @@ export function SeatMap({
             const isEmergency = emergencyExitRows.includes(row);
 
             return (
-              <div
-                key={row}
-                className="flex items-center mb-1"
-              >
+              <div key={row} className="flex items-center mb-1">
                 {/* Row Number */}
                 <div className="w-8 text-center text-xs text-gray-500 dark:text-gray-500">
                   {row}
@@ -232,7 +230,7 @@ export function generateSeatsForFlight(
         row,
         column,
         class: row <= 5 ? 'business' : 'economy',
-        price: row <= 5 ? 5000000 : 1500000 + (row * 20000),
+        price: row <= 5 ? 5000000 : 1500000 + row * 20000,
         isOccupied: existingBookings.includes(seatNumber),
         isSelected: false,
         isExtraLegroom: [11, totalRows].includes(row),

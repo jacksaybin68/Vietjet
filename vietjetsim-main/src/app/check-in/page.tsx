@@ -103,9 +103,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
               <Icon name="PaperAirplaneIcon" size={20} className="text-white" />
             </div>
             <div>
-              <h1
-                className="font-black text-lg text-[#1A2948] font-heading-sm"
-              >
+              <h1 className="font-black text-lg text-[#1A2948] font-heading-sm">
                 Check-in Trực Tuyến
               </h1>
               <p className="text-xs text-stone-500 font-koho">

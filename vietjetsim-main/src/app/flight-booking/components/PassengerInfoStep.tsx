@@ -50,20 +50,36 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
               {/* SkyJoy Banner */}
               <div className="bg-gradient-to-r from-red-600 to-red-500 rounded-xl p-4 flex items-center justify-between text-white shadow-md relative overflow-hidden">
                 <div className="flex items-center gap-4 relative z-10">
-                   <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center p-2 shrinks-0 shadow-sm">
-                      <img src="/assets/skyjoy-logo.png" alt="SkyJoy" onError={(e) => { e.currentTarget.src = 'https://skyjoy.vietjetair.com/wp-content/uploads/2023/04/Logo-SJ-Red.svg' }} className="w-full h-full object-contain" />
-                   </div>
-                   <div>
-                      <h3 className="font-bold text-lg font-koho leading-tight">Đăng nhập tài khoản SkyJoy</h3>
-                      <p className="text-sm opacity-90 text-red-50">Để hoàn tất thông tin nhanh hơn và tích lũy điểm SkyPoint</p>
-                   </div>
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center p-2 shrinks-0 shadow-sm">
+                    <img
+                      src="/assets/skyjoy-logo.png"
+                      alt="SkyJoy"
+                      onError={(e) => {
+                        e.currentTarget.src =
+                          'https://skyjoy.vietjetair.com/wp-content/uploads/2023/04/Logo-SJ-Red.svg';
+                      }}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg font-koho leading-tight">
+                      Đăng nhập tài khoản SkyJoy
+                    </h3>
+                    <p className="text-sm opacity-90 text-red-50">
+                      Để hoàn tất thông tin nhanh hơn và tích lũy điểm SkyPoint
+                    </p>
+                  </div>
                 </div>
                 <button className="bg-white text-red-600 font-bold px-6 py-2 rounded-lg hover:bg-red-50 transition-colors shadow-sm relative z-10 whitespace-nowrap ml-4">
-                   Đăng nhập
+                  Đăng nhập
                 </button>
                 {/* Decoration */}
                 <div className="absolute right-0 top-0 h-full w-48 opacity-20 pointer-events-none">
-                  <svg viewBox="0 0 100 100" className="w-full h-full text-white fill-current" preserveAspectRatio="none">
+                  <svg
+                    viewBox="0 0 100 100"
+                    className="w-full h-full text-white fill-current"
+                    preserveAspectRatio="none"
+                  >
                     <path d="M50 0 L100 0 L100 100 L0 100 Z" />
                   </svg>
                 </div>
@@ -93,9 +109,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
                   {/* Card top accent bar */}
                   <div className="h-1 w-full bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
                   <div className="p-6">
-                    <h3
-                      className="font-black text-[#1A2948] mb-5 flex items-center gap-2 font-koho"
-                    >
+                    <h3 className="font-black text-[#1A2948] mb-5 flex items-center gap-2 font-koho">
                       <div className="w-7 h-7 rounded-full bg-gradient-red text-white text-xs font-black flex items-center justify-center shadow-sm">
                         {i + 1}
                       </div>
@@ -105,9 +119,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {/* Gender */}
                       <div className="sm:col-span-2">
-                        <label
-                          className="block text-xs font-bold text-[#1A2948] uppercase tracking-wider mb-2 font-koho"
-                        >
+                        <label className="block text-xs font-bold text-[#1A2948] uppercase tracking-wider mb-2 font-koho">
                           Giới tính
                         </label>
                         <div className="flex gap-3">
@@ -140,9 +152,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
 
                       {/* Name */}
                       <div className="sm:col-span-2">
-                        <label
-                          className="block text-xs font-bold text-[#1A2948] uppercase tracking-wider mb-1.5 font-koho"
-                        >
+                        <label className="block text-xs font-bold text-[#1A2948] uppercase tracking-wider mb-1.5 font-koho">
                           Họ và tên{' '}
                           <span className="text-stone-400 font-normal normal-case">
                             (như CMND/Hộ chiếu)
@@ -159,19 +169,13 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
                             className={`w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold form-input uppercase tracking-wide ${p.name.trim().length >= 2 ? 'form-input-valid' : ''}`}
                             required
                           />
-                          <label
-                            className="form-label-float font-koho"
-                          >
-                            NGUYEN VAN A
-                          </label>
+                          <label className="form-label-float font-koho">NGUYEN VAN A</label>
                         </div>
                       </div>
 
                       {/* DOB */}
                       <div>
-                        <label
-                          className="block text-xs font-bold text-[#1A2948] uppercase tracking-wider mb-1.5 font-koho"
-                        >
+                        <label className="block text-xs font-bold text-[#1A2948] uppercase tracking-wider mb-1.5 font-koho">
                           Ngày sinh
                         </label>
                         <input
@@ -187,9 +191,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
 
                       {/* ID */}
                       <div>
-                        <label
-                          className="block text-xs font-bold text-[#1A2948] uppercase tracking-wider mb-1.5 font-koho"
-                        >
+                        <label className="block text-xs font-bold text-[#1A2948] uppercase tracking-wider mb-1.5 font-koho">
                           Số CMND/Hộ chiếu
                         </label>
                         <div className={`form-field-float ${p.idNumber ? 'has-value' : ''}`}>
@@ -265,9 +267,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
               {/* Yellow accent top bar for summary */}
               <div className="h-1 w-full bg-gradient-to-r from-accent/60 via-accent to-accent/60" />
               <div className="p-5">
-                <h3
-                  className="font-black text-[#1A2948] mb-4 flex items-center gap-2 font-koho"
-                >
+                <h3 className="font-black text-[#1A2948] mb-4 flex items-center gap-2 font-koho">
                   <Icon name="ClipboardDocumentListIcon" size={16} className="text-primary" />
                   Tóm tắt đặt chỗ
                 </h3>
@@ -276,17 +276,13 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
                     <div className="w-7 h-7 bg-gradient-red rounded-lg flex items-center justify-center shadow-sm">
                       <Icon name="PaperAirplaneIcon" size={12} className="text-white" />
                     </div>
-                    <span
-                      className="text-xs font-black text-primary font-koho"
-                    >
+                    <span className="text-xs font-black text-primary font-koho">
                       {flight.flightNo}
                     </span>
                   </div>
                   <div className="flex items-center gap-3 mb-2">
                     <div>
-                      <div
-                        className="text-xl font-black text-[#1A2948] font-koho"
-                      >
+                      <div className="text-xl font-black text-[#1A2948] font-koho">
                         {flight.departTime}
                       </div>
                       <div className="text-xs text-stone-500">
@@ -295,9 +291,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
                     </div>
                     <Icon name="ArrowRightIcon" size={14} className="text-primary flex-shrink-0" />
                     <div>
-                      <div
-                        className="text-xl font-black text-[#1A2948] font-koho"
-                      >
+                      <div className="text-xl font-black text-[#1A2948] font-koho">
                         {flight.arriveTime}
                       </div>
                       <div className="text-xs text-stone-500">
@@ -321,14 +315,8 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
                     </span>
                   </div>
                   <div className="border-t border-stone-100 pt-2 flex justify-between">
-                    <span
-                      className="font-black text-[#1A2948] font-koho"
-                    >
-                      Tổng cộng
-                    </span>
-                    <span
-                      className="font-black text-primary text-base font-koho"
-                    >
+                    <span className="font-black text-[#1A2948] font-koho">Tổng cộng</span>
+                    <span className="font-black text-primary text-base font-koho">
                       {Math.round(flight.price * passengerCount * 1.1).toLocaleString('vi-VN')}₫
                     </span>
                   </div>

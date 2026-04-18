@@ -7,10 +7,7 @@ import type { AllRoles } from '@/lib/rbac';
 
 // ─── GET: Get specific user ──────────────────────────────────────────────────
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'user:view');
     if (error) return response;
@@ -19,10 +16,7 @@ export async function GET(
     const user = await findUserById(id);
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Not Found', message: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Not Found', message: 'User not found' }, { status: 404 });
     }
 
     return NextResponse.json(user);
@@ -37,10 +31,7 @@ export async function GET(
 
 // ─── PATCH: Update user role or status ───────────────────────────────────────
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { payload, error, response } = await verifyAdminRequest(request, 'user:role_change');
     if (error) return response;
@@ -60,19 +51,19 @@ export async function PATCH(
     // Load target user to check RBAC level
     const targetUser = await findUserById(id);
     if (!targetUser) {
-      return NextResponse.json(
-        { error: 'Not Found', message: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Not Found', message: 'User not found' }, { status: 404 });
     }
 
     // RBAC: Check if actor can manage the target
     const actorRole = payload.role as AllRoles;
     const targetRole = targetUser.role as AllRoles;
-    
+
     if (!canManageRole(actorRole, targetRole)) {
       return NextResponse.json(
-        { error: 'Forbidden', message: 'Không có quyền thay đổi người dùng này (cùng cấp hoặc cao hơn)' },
+        {
+          error: 'Forbidden',
+          message: 'Không có quyền thay đổi người dùng này (cùng cấp hoặc cao hơn)',
+        },
         { status: 403 }
       );
     }
@@ -82,7 +73,13 @@ export async function PATCH(
     if (role) {
       // Logic for role update
       const validRoles = [
-        'user', 'admin', 'super_admin', 'admin_ops', 'admin_finance', 'admin_support', 'admin_content'
+        'user',
+        'admin',
+        'super_admin',
+        'admin_ops',
+        'admin_finance',
+        'admin_support',
+        'admin_content',
       ];
       if (!validRoles.includes(role)) {
         return NextResponse.json(
@@ -90,31 +87,34 @@ export async function PATCH(
           { status: 400 }
         );
       }
-      
+
       // Also check if actor can manage the NEW role (don't promote to higher level than themselves)
       if (!canManageRole(actorRole, role as AllRoles)) {
-         return NextResponse.json({ error: 'Forbidden', message: 'Không thể gán role cao hơn role hiện tại của bạn' }, { status: 403 });
+        return NextResponse.json(
+          { error: 'Forbidden', message: 'Không thể gán role cao hơn role hiện tại của bạn' },
+          { status: 403 }
+        );
       }
 
       updatedUser = await updateUserRole(id, role as any);
     }
 
     if (status) {
-       // Logic for status update (active/locked)
-       const results = await sql`
+      // Logic for status update (active/locked)
+      const results = await sql`
          UPDATE user_profiles 
          SET updated_at = NOW() -- Add status column if it exists or use role for now?
          -- Note: if user_profiles doesn't have 'status', we might need to add it via schema
          WHERE id = ${id}
          RETURNING *
        `;
-       updatedUser = (results as any[])[0];
+      updatedUser = (results as any[])[0];
     }
 
     return NextResponse.json({
       success: true,
       user: updatedUser,
-      message: 'User updated successfully'
+      message: 'User updated successfully',
     });
   } catch (error) {
     console.error('Error updating user:', error);
@@ -147,10 +147,7 @@ export async function DELETE(
 
     const user = await findUserById(id);
     if (!user) {
-      return NextResponse.json(
-        { error: 'Not Found', message: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Not Found', message: 'User not found' }, { status: 404 });
     }
 
     // RBAC: Check hierarchy
@@ -167,7 +164,7 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'User deleted successfully'
+      message: 'User deleted successfully',
     });
   } catch (error) {
     console.error('Error deleting user:', error);

@@ -23,13 +23,10 @@ export default function AboutPage() {
             <Icon name="InformationCircleIcon" size={16} />
             <span className="text-xs font-semibold tracking-wider uppercase">Giới thiệu</span>
           </div>
-          <h1
-            className="text-4xl md:text-5xl font-extrabold mb-4 font-body"
-          >
-            Về Vietjet Air
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 font-body">Về Vietjet Air</h1>
           <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
-            Hệ thống đặt vé máy bay hàng đầu Việt Nam, mang đến trải nghiệm đặt vé chân thực, hiện đại và trực quan.
+            Hệ thống đặt vé máy bay hàng đầu Việt Nam, mang đến trải nghiệm đặt vé chân thực, hiện
+            đại và trực quan.
           </p>
           <Link
             href="/homepage"
@@ -47,18 +44,18 @@ export default function AboutPage() {
         <div className="bg-white rounded-2xl shadow-vj-lg p-8 md:p-12 mb-12">
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div>
-              <h2
-                className="text-2xl font-bold text-[#1A2948] mb-4 font-heading-800"
-              >
+              <h2 className="text-2xl font-bold text-[#1A2948] mb-4 font-heading-800">
                 Sứ mệnh của chúng tôi
               </h2>
               <p className="text-[#333333] leading-relaxed mb-4">
-                Vietjet Air được phát triển như một nền tảng toàn diện cho quy trình đặt vé máy bay nội địa và quốc tế.
-                Chúng tôi giúp người dùng thực hiện các bước đặt vé, chọn ghế, thanh toán và quản lý hành trình một cách trực quan nhất.
+                Vietjet Air được phát triển như một nền tảng toàn diện cho quy trình đặt vé máy bay
+                nội địa và quốc tế. Chúng tôi giúp người dùng thực hiện các bước đặt vé, chọn ghế,
+                thanh toán và quản lý hành trình một cách trực quan nhất.
               </p>
               <p className="text-[#6D6E71] leading-relaxed">
-                Dù bạn là hành khách lần đầu đặt vé hay chuyên gia du lịch, Vietjet Air cung cấp công cụ mạnh mẽ để trải nghiệm
-                quy trình booking chuyên nghiệp, nhanh chóng và an toàn.
+                Dù bạn là hành khách lần đầu đặt vé hay chuyên gia du lịch, Vietjet Air cung cấp
+                công cụ mạnh mẽ để trải nghiệm quy trình booking chuyên nghiệp, nhanh chóng và an
+                toàn.
               </p>
             </div>
             <div className="bg-gradient-to-br from-red-50 to-yellow-50 rounded-xl p-6 border border-red-100">
@@ -84,9 +81,7 @@ export default function AboutPage() {
 
         {/* Tech Stack */}
         <div className="mb-12">
-          <h2
-            className="text-2xl font-bold text-[#1A2948] mb-8 text-center font-heading-800"
-          >
+          <h2 className="text-2xl font-bold text-[#1A2948] mb-8 text-center font-heading-800">
             Công nghệ sử dụng
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -117,13 +112,10 @@ export default function AboutPage() {
         {/* Team & Acknowledgments */}
         <div className="bg-[#1A2948] rounded-2xl p-8 md:p-12 text-white">
           <div className="text-center mb-10">
-            <h2
-              className="text-2xl font-bold mb-3 font-heading-800"
-            >
-              Đội ngũ phát triển
-            </h2>
+            <h2 className="text-2xl font-bold mb-3 font-heading-800">Đội ngũ phát triển</h2>
             <p className="text-white/70 max-w-xl mx-auto">
-              Được xây dựng bởi đội ngũ kỹ sư đam mê công nghệ và hàng không, mang đến giải pháp mô phỏng tiên tiến.
+              Được xây dựng bởi đội ngũ kỹ sư đam mê công nghệ và hàng không, mang đến giải pháp mô
+              phỏng tiên tiến.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
@@ -140,15 +132,19 @@ export default function AboutPage() {
                   {member.name.charAt(0)}
                 </div>
                 <h3 className="text-lg font-bold text-center mb-1">{member.name}</h3>
-                <p className="text-[#FFD400] text-sm font-semibold text-center mb-2">{member.role}</p>
+                <p className="text-[#FFD400] text-sm font-semibold text-center mb-2">
+                  {member.role}
+                </p>
                 <p className="text-white/60 text-xs text-center">{member.desc}</p>
               </div>
             ))}
           </div>
           <div className="mt-10 pt-6 border-t border-white/10 text-center">
             <p className="text-sm text-white/70">
-              Cảm ơn <span className="text-[#FFD400] font-semibold">Vietjet Air</span> vì cảm hứng thiết kế và{' '}
-              <span className="text-[#FFD400] font-semibold">cộng đồng mã nguồn mở</span> vì các công cụ tuyệt vời.
+              Cảm ơn <span className="text-[#FFD400] font-semibold">Vietjet Air</span> vì cảm hứng
+              thiết kế và{' '}
+              <span className="text-[#FFD400] font-semibold">cộng đồng mã nguồn mở</span> vì các
+              công cụ tuyệt vời.
             </p>
           </div>
         </div>

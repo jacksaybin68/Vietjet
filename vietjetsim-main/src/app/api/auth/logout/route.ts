@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAccessToken, clearAuthCookiesOnResponse, getAccessTokenFromCookies } from '@/lib/auth';
+import {
+  verifyAccessToken,
+  clearAuthCookiesOnResponse,
+  getAccessTokenFromCookies,
+} from '@/lib/auth';
 import { invalidateUserRefreshTokens } from '@/lib/db';
 
 export async function POST(request: NextRequest) {

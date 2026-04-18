@@ -52,12 +52,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Create payment + confirm booking atomically (single transaction)
-    const result = await createPaymentAndConfirmBooking({ 
-      booking_id, 
-      method, 
+    const result = await createPaymentAndConfirmBooking({
+      booking_id,
+      method,
       amount,
       discount_code_id,
-      discount_amount: discount_amount || 0
+      discount_amount: discount_amount || 0,
     });
 
     return NextResponse.json(

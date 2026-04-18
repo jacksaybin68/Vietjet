@@ -33,7 +33,10 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching admin discounts:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error', message: (error instanceof Error ? error.message : "Unknown error") },
+      {
+        error: 'Internal Server Error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
@@ -91,14 +94,20 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error creating discount:', error);
     // Handle unique constraint error for 'code'
-    if ((error instanceof Error ? error.message : "Unknown error")?.includes('unique constraint') || ((error as any).code) === '23505') {
+    if (
+      (error instanceof Error ? error.message : 'Unknown error')?.includes('unique constraint') ||
+      (error as any).code === '23505'
+    ) {
       return NextResponse.json(
         { error: 'Conflict', message: 'Discount code already exists' },
         { status: 409 }
       );
     }
     return NextResponse.json(
-      { error: 'Internal Server Error', message: (error instanceof Error ? error.message : "Unknown error") },
+      {
+        error: 'Internal Server Error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

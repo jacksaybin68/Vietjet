@@ -98,7 +98,8 @@ const TOOLS: Record<
 
   'promote-active-users': {
     label: 'Nâng cấp user hoạt động',
-    description: 'Tự động đánh dấu user có > 5 booking thành công là "loyalty user" (không thay đổi role admin)',
+    description:
+      'Tự động đánh dấu user có > 5 booking thành công là "loyalty user" (không thay đổi role admin)',
     category: 'user',
     execute: async (_params, _adminId) => {
       const usersResult = await getAllUsers(1, 1000);
@@ -116,11 +117,21 @@ const TOOLS: Record<
         if ((successBookingsByUser[u.id] || 0) >= 5 && u.role === 'user') {
           // Only log the action — do NOT change role to admin.
           // Role changes must go through the RBAC admin panel with explicit approval.
-          await insertSstkLog('promote-active-users', 'Promote Active Users', _adminId, JSON.stringify({ userId: u.id, completedBookings: successBookingsByUser[u.id] }), 'Đã đánh dấu user loyalty', 'success');
+          await insertSstkLog(
+            'promote-active-users',
+            'Promote Active Users',
+            _adminId,
+            JSON.stringify({ userId: u.id, completedBookings: successBookingsByUser[u.id] }),
+            'Đã đánh dấu user loyalty',
+            'success'
+          );
           marked++;
         }
       }
-      return { summary: `Đã đánh dấu ${marked} user đạt tiêu chí loyalty (>5 booking hoàn thành)`, status: 'success' as const };
+      return {
+        summary: `Đã đánh dấu ${marked} user đạt tiêu chí loyalty (>5 booking hoàn thành)`,
+        status: 'success' as const,
+      };
     },
   },
 
@@ -216,7 +227,7 @@ const TOOLS: Record<
 
 export async function GET(request: NextRequest) {
   const authResult = await getAdminId(request);
-  if (typeof authResult !== 'string') return authResult;
+  if (typeof authResult !== 'string') return authResult.error;
 
   const { searchParams } = new URL(request.url);
   const action = searchParams.get('action');
@@ -246,7 +257,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const authResult = await getAdminId(request);
-  if (typeof authResult !== 'string') return authResult;
+  if (typeof authResult !== 'string') return authResult.error;
 
   try {
     const body = await request.json();

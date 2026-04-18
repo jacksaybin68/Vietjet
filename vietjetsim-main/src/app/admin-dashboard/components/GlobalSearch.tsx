@@ -21,7 +21,9 @@ export default function GlobalSearch({ isOpen, onClose, onSelectResult }: Global
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [activeCategory, setActiveCategory] = useState<'all' | 'flight' | 'user' | 'booking'>('all');
+  const [activeCategory, setActiveCategory] = useState<'all' | 'flight' | 'user' | 'booking'>(
+    'all'
+  );
   const inputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -129,19 +131,18 @@ export default function GlobalSearch({ isOpen, onClose, onSelectResult }: Global
     };
   }, [query, searchAll]);
 
-  const filteredResults = activeCategory === 'all'
-    ? results
-    : results.filter(r => r.type === activeCategory);
+  const filteredResults =
+    activeCategory === 'all' ? results : results.filter((r) => r.type === activeCategory);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setSelectedIndex(prev => Math.min(prev + 1, filteredResults.length - 1));
+        setSelectedIndex((prev) => Math.min(prev + 1, filteredResults.length - 1));
         break;
       case 'ArrowUp':
         e.preventDefault();
-        setSelectedIndex(prev => Math.max(prev - 1, 0));
+        setSelectedIndex((prev) => Math.max(prev - 1, 0));
         break;
       case 'Enter':
         e.preventDefault();
@@ -185,7 +186,7 @@ export default function GlobalSearch({ isOpen, onClose, onSelectResult }: Global
 
   const getStatusBadge = (status?: string) => {
     if (!status) return null;
-    
+
     const statusMap: Record<string, { label: string; color: string }> = {
       active: { label: 'Hoạt động', color: 'bg-green-100 text-green-700' },
       confirmed: { label: 'Xác nhận', color: 'bg-green-100 text-green-700' },
@@ -208,9 +209,9 @@ export default function GlobalSearch({ isOpen, onClose, onSelectResult }: Global
 
   const categoryCounts = {
     all: results.length,
-    flight: results.filter(r => r.type === 'flight').length,
-    user: results.filter(r => r.type === 'user').length,
-    booking: results.filter(r => r.type === 'booking').length,
+    flight: results.filter((r) => r.type === 'flight').length,
+    user: results.filter((r) => r.type === 'user').length,
+    booking: results.filter((r) => r.type === 'booking').length,
   };
 
   if (!isOpen) return null;
@@ -218,10 +219,7 @@ export default function GlobalSearch({ isOpen, onClose, onSelectResult }: Global
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-20">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Search Modal */}
       <div
@@ -247,7 +245,10 @@ export default function GlobalSearch({ isOpen, onClose, onSelectResult }: Global
         `}</style>
 
         {/* Search Input */}
-        <div className="flex items-center gap-3 px-4 py-4 border-b" style={{ borderColor: 'rgba(148, 163, 184, 0.1)' }}>
+        <div
+          className="flex items-center gap-3 px-4 py-4 border-b"
+          style={{ borderColor: 'rgba(148, 163, 184, 0.1)' }}
+        >
           <Icon name="MagnifyingGlassIcon" size={20} className="text-slate-400" />
           <input
             ref={inputRef}
@@ -269,7 +270,10 @@ export default function GlobalSearch({ isOpen, onClose, onSelectResult }: Global
         </div>
 
         {/* Category Filters */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: 'rgba(148, 163, 184, 0.05)' }}>
+        <div
+          className="flex items-center gap-2 px-4 py-3 border-b"
+          style={{ borderColor: 'rgba(148, 163, 184, 0.05)' }}
+        >
           {[
             { id: 'all', label: 'Tất cả' },
             { id: 'flight', label: 'Chuyến bay' },
@@ -306,7 +310,10 @@ export default function GlobalSearch({ isOpen, onClose, onSelectResult }: Global
         <div className="max-h-96 overflow-y-auto">
           {query && filteredResults.length === 0 && !isLoading ? (
             <div className="flex flex-col items-center justify-center py-12 gap-3">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'rgba(148, 163, 184, 0.1)' }}>
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center"
+                style={{ background: 'rgba(148, 163, 184, 0.1)' }}
+              >
                 <Icon name="MagnifyingGlassIcon" size={28} className="text-slate-500" />
               </div>
               <div className="text-center">
@@ -316,7 +323,10 @@ export default function GlobalSearch({ isOpen, onClose, onSelectResult }: Global
             </div>
           ) : !query ? (
             <div className="flex flex-col items-center justify-center py-12 gap-3">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'rgba(148, 163, 184, 0.1)' }}>
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center"
+                style={{ background: 'rgba(148, 163, 184, 0.1)' }}
+              >
                 <Icon name="MagnifyingGlassIcon" size={28} className="text-slate-500" />
               </div>
               <div className="text-center">
@@ -334,7 +344,7 @@ export default function GlobalSearch({ isOpen, onClose, onSelectResult }: Global
               {filteredResults.map((result, index) => {
                 const typeConfig = getTypeColor(result.type);
                 const isSelected = index === selectedIndex;
-                
+
                 return (
                   <button
                     key={`${result.type}-${result.id}`}
@@ -344,20 +354,28 @@ export default function GlobalSearch({ isOpen, onClose, onSelectResult }: Global
                       isSelected ? 'bg-slate-800/70' : 'hover:bg-slate-800/30'
                     }`}
                   >
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${typeConfig.bg}`}>
+                    <div
+                      className={`w-9 h-9 rounded-lg flex items-center justify-center ${typeConfig.bg}`}
+                    >
                       <Icon name={getTypeIcon(result.type)} size={16} className={typeConfig.text} />
                     </div>
                     <div className="flex-1 min-w-0 text-left">
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-medium text-white truncate">{result.title}</p>
-                        <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${typeConfig.bg} ${typeConfig.text}`}>
+                        <span
+                          className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${typeConfig.bg} ${typeConfig.text}`}
+                        >
                           {typeConfig.label}
                         </span>
                         {getStatusBadge(result.status)}
                       </div>
                       <p className="text-xs text-slate-400 truncate mt-0.5">{result.subtitle}</p>
                     </div>
-                    <Icon name="ArrowRightIcon" size={14} className="text-slate-600 flex-shrink-0" />
+                    <Icon
+                      name="ArrowRightIcon"
+                      size={14}
+                      className="text-slate-600 flex-shrink-0"
+                    />
                   </button>
                 );
               })}
@@ -366,7 +384,10 @@ export default function GlobalSearch({ isOpen, onClose, onSelectResult }: Global
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-4 py-3 border-t text-xs text-slate-500" style={{ borderColor: 'rgba(148, 163, 184, 0.1)' }}>
+        <div
+          className="flex items-center justify-between px-4 py-3 border-t text-xs text-slate-500"
+          style={{ borderColor: 'rgba(148, 163, 184, 0.1)' }}
+        >
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">
               <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-[10px]">↑</kbd>

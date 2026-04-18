@@ -77,25 +77,33 @@ function PaymentDetailModal({ payment, onClose }: { payment: Payment; onClose: (
 
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">Mã giao dịch</span>
+              <span className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">
+                Mã giao dịch
+              </span>
               <span className="text-sm font-semibold text-[#1A2948] font-[Be Vietnam Pro,sans-serif]">
                 {payment.id.slice(0, 8).toUpperCase()}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">Mã đặt chỗ</span>
+              <span className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">
+                Mã đặt chỗ
+              </span>
               <span className="text-sm font-semibold text-[#1A2948] font-[Be Vietnam Pro,sans-serif]">
                 {payment.booking_id.slice(0, 8).toUpperCase()}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">Phương thức</span>
+              <span className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">
+                Phương thức
+              </span>
               <span className="text-sm font-semibold text-[#1A2948] font-[Be Vietnam Pro,sans-serif]">
                 {METHOD_LABELS[payment.method] || payment.method}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">Ngày thanh toán</span>
+              <span className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">
+                Ngày thanh toán
+              </span>
               <span className="text-sm font-semibold text-[#1A2948] font-[Be Vietnam Pro,sans-serif]">
                 {formatDate(payment.created_at)}
               </span>
@@ -275,7 +283,8 @@ export default function PaymentHistoryTab() {
                       </span>
                     </div>
                     <div className="text-xs text-stone-500 mt-0.5 font-[Be Vietnam Pro,sans-serif]">
-                      {METHOD_LABELS[payment.method] || payment.method} · {formatDate(payment.created_at)}
+                      {METHOD_LABELS[payment.method] || payment.method} ·{' '}
+                      {formatDate(payment.created_at)}
                     </div>
                   </div>
 
@@ -283,7 +292,11 @@ export default function PaymentHistoryTab() {
                     <div className="font-bold text-sm font-[KoHo,sans-serif] text-[#1A2948]">
                       {formatCurrency(payment.amount)}
                     </div>
-                    <Icon name="ChevronRightIcon" size={14} className="text-stone-400 ml-auto mt-1" />
+                    <Icon
+                      name="ChevronRightIcon"
+                      size={14}
+                      className="text-stone-400 ml-auto mt-1"
+                    />
                   </div>
                 </button>
               );
@@ -292,21 +305,14 @@ export default function PaymentHistoryTab() {
 
           {totalPages > 1 && (
             <div className="p-4 border-t border-stone-100">
-              <Pagination
-                currentPage={page}
-                totalPages={totalPages}
-                onPageChange={setPage}
-              />
+              <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
             </div>
           )}
         </div>
       )}
 
       {selectedPayment && (
-        <PaymentDetailModal
-          payment={selectedPayment}
-          onClose={() => setSelectedPayment(null)}
-        />
+        <PaymentDetailModal payment={selectedPayment} onClose={() => setSelectedPayment(null)} />
       )}
     </div>
   );

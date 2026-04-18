@@ -158,9 +158,7 @@ export default function ServicesPage() {
           <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Icon name="Squares2X2Icon" size={32} className="text-white" />
           </div>
-          <h1
-            className="text-3xl sm:text-4xl font-black text-white mb-2 font-heading-sm"
-          >
+          <h1 className="text-3xl sm:text-4xl font-black text-white mb-2 font-heading-sm">
             Dịch Vụ Chuyến Bay
           </h1>
           <p className="text-white/70 text-base sm:text-lg max-w-2xl mx-auto font-koho">
@@ -245,7 +243,12 @@ export default function ServicesPage() {
                 <ul className="space-y-2.5">
                   {selected.features.map((feature, i) => (
                     <li key={i} className="flex items-start gap-2.5 text-sm text-stone-700">
-                      <Icon name="CheckCircleIcon" size={18} className="flex-shrink-0 mt-0.5" style={{ color: selected.color }} />
+                      <Icon
+                        name="CheckCircleIcon"
+                        size={18}
+                        className="flex-shrink-0 mt-0.5"
+                        style={{ color: selected.color }}
+                      />
                       {feature}
                     </li>
                   ))}
@@ -312,9 +315,7 @@ export default function ServicesPage() {
 
         {/* Why Choose Section */}
         <div className="bg-white rounded-2xl border border-stone-200 p-6 sm:p-8 mb-10">
-          <h2
-            className="text-xl font-black text-center text-[#1A2948] mb-6 font-heading-sm"
-          >
+          <h2 className="text-xl font-black text-center text-[#1A2948] mb-6 font-heading-sm">
             Tại sao nên đặt dịch vụ trước?
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

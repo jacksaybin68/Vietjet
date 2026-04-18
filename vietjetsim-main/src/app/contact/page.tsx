@@ -13,7 +13,9 @@ export default function ContactPage() {
   });
   const [submitted, setSubmitted] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -42,13 +44,12 @@ export default function ContactPage() {
             <Icon name="EnvelopeIcon" size={16} />
             <span className="text-xs font-semibold tracking-wider uppercase">Liên hệ</span>
           </div>
-          <h1
-            className="text-4xl md:text-5xl font-extrabold mb-4 font-body"
-          >
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 font-body">
             Liên hệ với chúng tôi
           </h1>
           <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
-            Chúng tôi luôn sẵn sàng hỗ trợ bạn. Hãy gửi tin nhắn hoặc liên hệ trực tiếp qua các kênh bên dưới.
+            Chúng tôi luôn sẵn sàng hỗ trợ bạn. Hãy gửi tin nhắn hoặc liên hệ trực tiếp qua các kênh
+            bên dưới.
           </p>
           <Link
             href="/homepage"
@@ -65,22 +66,24 @@ export default function ContactPage() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Contact Form */}
           <div className="lg:col-span-2 bg-white rounded-2xl shadow-vj-lg p-8">
-            <h2
-              className="text-2xl font-bold text-[#1A2948] mb-6 font-heading-800"
-            >
+            <h2 className="text-2xl font-bold text-[#1A2948] mb-6 font-heading-800">
               Gửi tin nhắn cho chúng tôi
             </h2>
             {submitted ? (
               <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
                 <Icon name="CheckCircleIcon" size={48} />
                 <p className="text-green-700 font-bold text-lg mt-2">Gửi thành công!</p>
-                <p className="text-green-600">Chúng tôi sẽ phản hồi bạn trong thời gian sớm nhất.</p>
+                <p className="text-green-600">
+                  Chúng tôi sẽ phản hồi bạn trong thời gian sớm nhất.
+                </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid md:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-sm font-semibold text-[#333333] mb-2">Họ và tên *</label>
+                    <label className="block text-sm font-semibold text-[#333333] mb-2">
+                      Họ và tên *
+                    </label>
                     <input
                       type="text"
                       name="name"
@@ -92,7 +95,9 @@ export default function ContactPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-[#333333] mb-2">Email *</label>
+                    <label className="block text-sm font-semibold text-[#333333] mb-2">
+                      Email *
+                    </label>
                     <input
                       type="email"
                       name="email"
@@ -105,7 +110,9 @@ export default function ContactPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#333333] mb-2">Tiêu đề *</label>
+                  <label className="block text-sm font-semibold text-[#333333] mb-2">
+                    Tiêu đề *
+                  </label>
                   <input
                     type="text"
                     name="subject"
@@ -117,7 +124,9 @@ export default function ContactPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#333333] mb-2">Nội dung *</label>
+                  <label className="block text-sm font-semibold text-[#333333] mb-2">
+                    Nội dung *
+                  </label>
                   <textarea
                     name="message"
                     value={formData.message}
@@ -153,8 +162,13 @@ export default function ContactPage() {
                     <Icon name="EnvelopeIcon" size={20} />
                   </div>
                   <div>
-                    <p className="text-xs text-[#6D6E71] font-medium uppercase tracking-wide">Email</p>
-                    <a href="mailto:support@vietjetair.com" className="text-[#1A2948] font-semibold hover:text-[#EC2029] transition-colors">
+                    <p className="text-xs text-[#6D6E71] font-medium uppercase tracking-wide">
+                      Email
+                    </p>
+                    <a
+                      href="mailto:support@vietjetair.com"
+                      className="text-[#1A2948] font-semibold hover:text-[#EC2029] transition-colors"
+                    >
                       support@vietjetair.com
                     </a>
                   </div>
@@ -164,8 +178,13 @@ export default function ContactPage() {
                     <Icon name="PhoneIcon" size={20} />
                   </div>
                   <div>
-                    <p className="text-xs text-[#6D6E71] font-medium uppercase tracking-wide">Hotline</p>
-                    <a href="tel:19006886" className="text-[#1A2948] font-semibold hover:text-[#EC2029] transition-colors">
+                    <p className="text-xs text-[#6D6E71] font-medium uppercase tracking-wide">
+                      Hotline
+                    </p>
+                    <a
+                      href="tel:19006886"
+                      className="text-[#1A2948] font-semibold hover:text-[#EC2029] transition-colors"
+                    >
                       1900-6886
                     </a>
                   </div>
@@ -175,9 +194,12 @@ export default function ContactPage() {
                     <Icon name="MapPinIcon" size={20} />
                   </div>
                   <div>
-                    <p className="text-xs text-[#6D6E71] font-medium uppercase tracking-wide">Địa chỉ</p>
+                    <p className="text-xs text-[#6D6E71] font-medium uppercase tracking-wide">
+                      Địa chỉ
+                    </p>
                     <p className="text-[#1A2948] font-medium">
-                      Tòa nhà Vietjet, Số 1 Nguyễn Văn Trỗi, Phường 2, Quận Tân Bình, TP. Hồ Chí Minh
+                      Tòa nhà Vietjet, Số 1 Nguyễn Văn Trỗi, Phường 2, Quận Tân Bình, TP. Hồ Chí
+                      Minh
                     </p>
                   </div>
                 </div>
@@ -196,7 +218,10 @@ export default function ContactPage() {
                   { day: 'Thứ 7', hours: '08:00 - 18:00' },
                   { day: 'Chủ nhật & Lễ', hours: '09:00 - 17:00' },
                 ].map((item, i) => (
-                  <div key={i} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+                  <div
+                    key={i}
+                    className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0"
+                  >
                     <span className="text-sm text-[#333333] font-medium">{item.day}</span>
                     <span className="text-sm font-bold text-[#EC2029]">{item.hours}</span>
                   </div>
@@ -207,10 +232,13 @@ export default function ContactPage() {
             {/* Mock Map */}
             <div className="bg-white rounded-2xl shadow-vj-sm overflow-hidden">
               <div className="h-48 bg-gradient-to-br from-blue-100 to-gray-200 flex items-center justify-center relative">
-                <div className="absolute inset-0 opacity-30" style={{
-                  backgroundImage: 'radial-gradient(#1A2948 1px, transparent 1px)',
-                  backgroundSize: '20px 20px'
-                }}></div>
+                <div
+                  className="absolute inset-0 opacity-30"
+                  style={{
+                    backgroundImage: 'radial-gradient(#1A2948 1px, transparent 1px)',
+                    backgroundSize: '20px 20px',
+                  }}
+                ></div>
                 <div className="text-center z-10">
                   <Icon name="MapPinIcon" size={32} />
                   <p className="text-sm font-bold text-[#1A2948] mt-2">Bản đồ Vietjet Air</p>

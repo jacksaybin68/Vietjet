@@ -144,9 +144,7 @@ import { NextResponse } from 'next/server';
  */
 export function createCsrfResponse(json?: unknown): NextResponse {
   const token = generateCsrfToken();
-  const response = json
-    ? NextResponse.json(json)
-    : new NextResponse(null, { status: 204 });
+  const response = json ? NextResponse.json(json) : new NextResponse(null, { status: 204 });
 
   response.cookies.set(CSRF_COOKIE_NAME, token, CSRF_COOKIE_OPTIONS);
   return response;
@@ -199,10 +197,7 @@ export function getCsrfHeaders(): HeadersInit {
 /**
  * Fetch wrapper that automatically includes CSRF token
  */
-export async function csrfFetch(
-  url: string,
-  options: RequestInit = {}
-): Promise<Response> {
+export async function csrfFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const headers = getCsrfHeaders();
   return fetch(url, {
     ...options,

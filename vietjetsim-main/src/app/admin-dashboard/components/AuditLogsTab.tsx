@@ -47,41 +47,44 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
   const [availableActions, setAvailableActions] = useState<string[]>([]);
   const [expandedLog, setExpandedLog] = useState<string | null>(null);
 
-  const fetchLogs = useCallback(async (page = 1) => {
-    setIsLoading(true);
-    setHasError(false);
+  const fetchLogs = useCallback(
+    async (page = 1) => {
+      setIsLoading(true);
+      setHasError(false);
 
-    try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: PAGE_SIZE.toString(),
-      });
-      if (searchQuery) params.append('q', searchQuery);
-      if (actionFilter) params.append('action', actionFilter);
-      if (dateFrom) params.append('date_from', dateFrom);
-      if (dateTo) params.append('date_to', dateTo);
+      try {
+        const params = new URLSearchParams({
+          page: page.toString(),
+          limit: PAGE_SIZE.toString(),
+        });
+        if (searchQuery) params.append('q', searchQuery);
+        if (actionFilter) params.append('action', actionFilter);
+        if (dateFrom) params.append('date_from', dateFrom);
+        if (dateTo) params.append('date_to', dateTo);
 
-      const res = await fetch(`/api/admin/audit-logs?${params}`, {
-        credentials: 'include',
-      });
+        const res = await fetch(`/api/admin/audit-logs?${params}`, {
+          credentials: 'include',
+        });
 
-      if (res.ok) {
-        const data = await res.json();
-        setLogs(data.logs || []);
-        setTotalCount(data.pagination?.total || 0);
-        setCurrentPage(page);
-        if (data.filters?.actions) {
-          setAvailableActions(data.filters.actions);
+        if (res.ok) {
+          const data = await res.json();
+          setLogs(data.logs || []);
+          setTotalCount(data.pagination?.total || 0);
+          setCurrentPage(page);
+          if (data.filters?.actions) {
+            setAvailableActions(data.filters.actions);
+          }
+        } else {
+          setHasError(true);
         }
-      } else {
+      } catch {
         setHasError(true);
+      } finally {
+        setIsLoading(false);
       }
-    } catch {
-      setHasError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [searchQuery, actionFilter, dateFrom, dateTo]);
+    },
+    [searchQuery, actionFilter, dateFrom, dateTo]
+  );
 
   useEffect(() => {
     fetchLogs(1);
@@ -93,7 +96,7 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
 
   const handleExportCSV = () => {
     const headers = ['Thời gian', 'Hành động', 'Tài nguyên', 'Người dùng', 'Email', 'IP'];
-    const rows = logs.map(log => [
+    const rows = logs.map((log) => [
       new Date(log.created_at).toLocaleString('vi-VN'),
       log.action,
       log.resource,
@@ -103,7 +106,7 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
     ]);
 
     const csvContent = [headers, ...rows]
-      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
       .join('\n');
 
     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -181,8 +184,10 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
           className="px-3 py-2.5 bg-white border border-stone-200 rounded-xl text-sm form-input min-w-[150px]"
         >
           <option value="">Tất cả hành động</option>
-          {availableActions.map(action => (
-            <option key={action} value={action}>{action}</option>
+          {availableActions.map((action) => (
+            <option key={action} value={action}>
+              {action}
+            </option>
           ))}
         </select>
 
@@ -269,11 +274,21 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
                 <>
                   {[1, 2, 3, 4, 5].map((i) => (
                     <tr key={i} className="border-b border-stone-50 animate-pulse">
-                      <td className="px-4 py-3"><div className="h-4 w-32 bg-stone-200 rounded-full" /></td>
-                      <td className="px-4 py-3"><div className="h-6 w-20 bg-stone-200 rounded-full" /></td>
-                      <td className="px-4 py-3 hidden sm:table-cell"><div className="h-4 w-24 bg-stone-200 rounded-full" /></td>
-                      <td className="px-4 py-3 hidden md:table-cell"><div className="h-4 w-28 bg-stone-200 rounded-full" /></td>
-                      <td className="px-4 py-3"><div className="h-6 w-8 bg-stone-200 rounded mx-auto" /></td>
+                      <td className="px-4 py-3">
+                        <div className="h-4 w-32 bg-stone-200 rounded-full" />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="h-6 w-20 bg-stone-200 rounded-full" />
+                      </td>
+                      <td className="px-4 py-3 hidden sm:table-cell">
+                        <div className="h-4 w-24 bg-stone-200 rounded-full" />
+                      </td>
+                      <td className="px-4 py-3 hidden md:table-cell">
+                        <div className="h-4 w-28 bg-stone-200 rounded-full" />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="h-6 w-8 bg-stone-200 rounded mx-auto" />
+                      </td>
                     </tr>
                   ))}
                 </>
@@ -283,7 +298,10 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
                     <div className="flex flex-col items-center gap-3">
                       <Icon name="ExclamationTriangleIcon" size={32} className="text-red-400" />
                       <p className="font-bold text-stone-700">Không thể tải dữ liệu</p>
-                      <button onClick={() => fetchLogs(1)} className="text-xs font-semibold text-primary">
+                      <button
+                        onClick={() => fetchLogs(1)}
+                        className="text-xs font-semibold text-primary"
+                      >
                         Thử lại
                       </button>
                     </div>
@@ -295,7 +313,9 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
                     <div className="flex flex-col items-center gap-3">
                       <Icon name="ClipboardDocumentListIcon" size={32} className="text-stone-300" />
                       <p className="font-bold text-stone-700">Không có nhật ký nào</p>
-                      <p className="text-xs text-stone-400">Các hoạt động sẽ được ghi lại tại đây</p>
+                      <p className="text-xs text-stone-400">
+                        Các hoạt động sẽ được ghi lại tại đây
+                      </p>
                     </div>
                   </td>
                 </tr>
@@ -303,17 +323,21 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
                 logs.map((log, i) => {
                   const actionConfig = getActionConfig(log.action);
                   const isExpanded = expandedLog === log.id;
-                  
+
                   return (
                     <React.Fragment key={log.id}>
-                      <tr className={`border-b border-stone-50 hover:bg-stone-50/50 transition-colors ${i % 2 === 0 ? '' : 'bg-stone-50/30'}`}>
+                      <tr
+                        className={`border-b border-stone-50 hover:bg-stone-50/50 transition-colors ${i % 2 === 0 ? '' : 'bg-stone-50/30'}`}
+                      >
                         <td className="px-4 py-3">
                           <span className="text-xs text-stone-600 font-medium">
                             {formatDate(log.created_at)}
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${actionConfig.bgColor} ${actionConfig.color}`}>
+                          <span
+                            className={`text-xs font-semibold px-2.5 py-1 rounded-full ${actionConfig.bgColor} ${actionConfig.color}`}
+                          >
                             {log.action}
                           </span>
                         </td>
@@ -321,7 +345,9 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
                           <span className="text-xs text-stone-600">
                             {log.resource}
                             {log.resource_id && (
-                              <span className="text-stone-400 ml-1">#{log.resource_id.slice(0, 8)}</span>
+                              <span className="text-stone-400 ml-1">
+                                #{log.resource_id.slice(0, 8)}
+                              </span>
                             )}
                           </span>
                         </td>
@@ -341,7 +367,10 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
                             className="w-7 h-7 bg-stone-100 hover:bg-stone-200 text-stone-500 rounded-lg flex items-center justify-center transition-colors"
                             title={isExpanded ? 'Ẩn chi tiết' : 'Xem chi tiết'}
                           >
-                            <Icon name={isExpanded ? 'ChevronUpIcon' : 'ChevronDownIcon'} size={14} />
+                            <Icon
+                              name={isExpanded ? 'ChevronUpIcon' : 'ChevronDownIcon'}
+                              size={14}
+                            />
                           </button>
                         </td>
                       </tr>
@@ -377,8 +406,8 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
                                 <div className="mt-3 pt-3 border-t border-stone-100">
                                   <p className="text-stone-400 font-medium mb-1">Chi tiết</p>
                                   <pre className="text-xs text-stone-600 bg-slate-100 rounded p-2 overflow-x-auto">
-                                    {typeof log.details === 'string' 
-                                      ? log.details 
+                                    {typeof log.details === 'string'
+                                      ? log.details
                                       : JSON.stringify(log.details, null, 2)}
                                   </pre>
                                 </div>
@@ -386,7 +415,9 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
                               {log.user_agent && (
                                 <div className="mt-3 pt-3 border-t border-stone-100">
                                   <p className="text-stone-400 font-medium mb-1">User Agent</p>
-                                  <p className="text-xs text-stone-500 truncate">{log.user_agent}</p>
+                                  <p className="text-xs text-stone-500 truncate">
+                                    {log.user_agent}
+                                  </p>
                                 </div>
                               )}
                             </div>

@@ -6,10 +6,7 @@ export async function GET(request: NextRequest) {
     const token = request.cookies.get('access_token')?.value;
 
     if (!token) {
-      return NextResponse.json(
-        { user: null, message: 'No session found' },
-        { status: 200 }
-      );
+      return NextResponse.json({ user: null, message: 'No session found' }, { status: 200 });
     }
 
     const payload = verifyAccessToken(token);
