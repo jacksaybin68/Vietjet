@@ -59,7 +59,7 @@ export async function PATCH(request: NextRequest) {
     // Process each setting
     for (const [key, valueObj] of Object.entries(settings)) {
       const value = (valueObj as any).value;
-      
+
       if (value === undefined) continue;
 
       // Upsert each setting

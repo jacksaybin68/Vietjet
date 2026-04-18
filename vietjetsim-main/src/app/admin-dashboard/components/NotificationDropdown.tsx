@@ -17,7 +17,9 @@ interface NotificationDropdownProps {
   onNotificationCountChange?: (count: number) => void;
 }
 
-export default function NotificationDropdown({ onNotificationCountChange }: NotificationDropdownProps) {
+export default function NotificationDropdown({
+  onNotificationCountChange,
+}: NotificationDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -49,13 +51,13 @@ export default function NotificationDropdown({ onNotificationCountChange }: Noti
 
   const fetchNotifications = async () => {
     if (!user) return;
-    
+
     setIsLoading(true);
     try {
       const res = await fetch('/api/notifications?limit=10', {
         credentials: 'include',
       });
-      
+
       if (res.ok) {
         const data = await res.json();
         setNotifications(data.notifications || []);
@@ -90,7 +92,7 @@ export default function NotificationDropdown({ onNotificationCountChange }: Noti
 
   const markAllAsRead = async () => {
     if (notifications.length === 0) return;
-    
+
     setIsMarkingAllRead(true);
     try {
       const res = await fetch('/api/notifications/mark-all-read', {
@@ -249,7 +251,10 @@ export default function NotificationDropdown({ onNotificationCountChange }: Noti
               </div>
             ) : notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 gap-3">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'rgba(148, 163, 184, 0.1)' }}>
+                <div
+                  className="w-16 h-16 rounded-full flex items-center justify-center"
+                  style={{ background: 'rgba(148, 163, 184, 0.1)' }}
+                >
                   <Icon name="BellSlashIcon" size={24} className="text-slate-500" />
                 </div>
                 <div className="text-center">

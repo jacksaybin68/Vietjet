@@ -3,17 +3,23 @@ import { sql } from '@/lib/neon';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 
 // ─── PATCH: Update a bank account ───────────────────────────────────────────
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const { error, response } = await verifyAdminRequest(request, 'system:config' as any);
     if (error) return response;
 
     const body = await request.json();
-    const { bank_name, account_number, account_holder, bank_bin, branch, is_default, is_active, transfer_note_template } = body;
+    const {
+      bank_name,
+      account_number,
+      account_holder,
+      bank_bin,
+      branch,
+      is_default,
+      is_active,
+      transfer_note_template,
+    } = body;
 
     // If setting as default, unset others first
     if (is_default) {

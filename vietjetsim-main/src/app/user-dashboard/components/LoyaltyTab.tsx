@@ -39,7 +39,12 @@ const TYPE_CONFIG: Record<string, { label: string; color: string; bg: string; ic
   redeem: { label: 'Đổi điểm', color: '#EC2029', bg: '#FEE2E2', icon: 'GiftIcon' },
   expire: { label: 'Hết hạn', color: '#6B7280', bg: '#F3F4F6', icon: 'ClockIcon' },
   bonus: { label: 'Thưởng', color: '#F59E0B', bg: '#FEF3C7', icon: 'StarIcon' },
-  adjust: { label: 'Điều chỉnh', color: '#8B5CF6', bg: '#EDE9FE', icon: 'AdjustmentsHorizontalIcon' },
+  adjust: {
+    label: 'Điều chỉnh',
+    color: '#8B5CF6',
+    bg: '#EDE9FE',
+    icon: 'AdjustmentsHorizontalIcon',
+  },
 };
 
 function formatPoints(points: number): string {
@@ -237,15 +242,14 @@ export default function LoyaltyTab() {
   const tierColors = loyalty ? getTierColor(loyalty.tier) : getTierColor('Bronze');
 
   const currentTierIndex = tiers.findIndex((t) => t.name === loyalty?.tier);
-  const nextTier = currentTierIndex >= 0 && currentTierIndex < tiers.length - 1
-    ? tiers[currentTierIndex + 1]
-    : null;
+  const nextTier =
+    currentTierIndex >= 0 && currentTierIndex < tiers.length - 1
+      ? tiers[currentTierIndex + 1]
+      : null;
   const currentTierMin = tiers[currentTierIndex]?.min_lifetime_points || 0;
   const range = nextTier ? nextTier.min_lifetime_points - currentTierMin : 1;
   const progress = loyalty ? loyalty.lifetime_points - currentTierMin : 0;
-  const progressPercent = nextTier
-    ? Math.min(100, Math.round((progress / range) * 100))
-    : 100;
+  const progressPercent = nextTier ? Math.min(100, Math.round((progress / range) * 100)) : 100;
 
   if (loading) {
     return (
@@ -262,9 +266,7 @@ export default function LoyaltyTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[#1A2948]">
-            Điểm thưởng
-          </h2>
+          <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[#1A2948]">Điểm thưởng</h2>
           <p className="text-sm text-stone-500 mt-1 font-[Be Vietnam Pro,sans-serif]">
             Chương trình tích điểm Vietjet Air Rewards
           </p>
@@ -298,8 +300,7 @@ export default function LoyaltyTab() {
               {loyalty?.tier || 'Bronze'}
             </div>
             <span className="text-sm text-white/70 font-[Be Vietnam Pro,sans-serif]">
-              Thành viên từ{' '}
-              {loyalty?.joined_at ? formatDate(loyalty.joined_at) : 'N/A'}
+              Thành viên từ {loyalty?.joined_at ? formatDate(loyalty.joined_at) : 'N/A'}
             </span>
           </div>
 
@@ -317,13 +318,17 @@ export default function LoyaltyTab() {
           {/* Stats Row */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white/10 rounded-xl p-3">
-              <div className="text-xs text-white/60 font-[Be Vietnam Pro,sans-serif]">Tổng điểm</div>
+              <div className="text-xs text-white/60 font-[Be Vietnam Pro,sans-serif]">
+                Tổng điểm
+              </div>
               <div className="text-lg font-bold font-[KoHo,sans-serif]">
                 {formatPoints(loyalty?.total_points || 0)}
               </div>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
-              <div className="text-xs text-white/60 font-[Be Vietnam Pro,sans-serif]">Điểm tích lũy trọn đời</div>
+              <div className="text-xs text-white/60 font-[Be Vietnam Pro,sans-serif]">
+                Điểm tích lũy trọn đời
+              </div>
               <div className="text-lg font-bold font-[KoHo,sans-serif]">
                 {formatPoints(loyalty?.lifetime_points || 0)}
               </div>
@@ -338,7 +343,8 @@ export default function LoyaltyTab() {
                   {nextTier.name}
                 </span>
                 <span className="text-xs text-white/60 font-[Be Vietnam Pro,sans-serif]">
-                  {formatPoints(loyalty?.lifetime_points || 0)} / {formatPoints(nextTier.min_lifetime_points)} điểm
+                  {formatPoints(loyalty?.lifetime_points || 0)} /{' '}
+                  {formatPoints(nextTier.min_lifetime_points)} điểm
                 </span>
               </div>
               <div className="w-full bg-white/20 rounded-full h-2">
@@ -374,7 +380,11 @@ export default function LoyaltyTab() {
                   className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2"
                   style={{ background: colors.bg }}
                 >
-                  <Icon name="StarIcon" size={18} style={{ color: colors.bg === '#FFD700' ? colors.text : colors.bg }} />
+                  <Icon
+                    name="StarIcon"
+                    size={18}
+                    style={{ color: colors.bg === '#FFD700' ? colors.text : colors.bg }}
+                  />
                 </div>
                 <div
                   className="text-sm font-bold font-[KoHo,sans-serif]"
@@ -424,11 +434,7 @@ export default function LoyaltyTab() {
                     className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                     style={{ background: config.bg }}
                   >
-                    <Icon
-                      name={config.icon as any}
-                      size={18}
-                      style={{ color: config.color }}
-                    />
+                    <Icon name={config.icon as any} size={18} style={{ color: config.color }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-sm text-[#1A2948] font-[KoHo,sans-serif]">
@@ -443,7 +449,8 @@ export default function LoyaltyTab() {
                       isPositive ? 'text-[#10B981]' : 'text-[#EF4444]'
                     }`}
                   >
-                    {isPositive ? '+' : '-'}{formatPoints(tx.points)}
+                    {isPositive ? '+' : '-'}
+                    {formatPoints(tx.points)}
                   </div>
                 </div>
               );

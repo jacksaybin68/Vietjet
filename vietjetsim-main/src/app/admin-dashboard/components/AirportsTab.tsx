@@ -188,7 +188,7 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-           <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
             <Icon name="BuildingOfficeIcon" size={24} className="text-primary" />
             Quản lý sân bay
           </h2>
@@ -225,40 +225,61 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
       </div>
 
       {/* Table */}
-      <div 
+      <div
         className="rounded-3xl border overflow-hidden transition-all duration-500"
-        style={{ 
-          background: 'rgba(30, 41, 59, 0.4)', 
+        style={{
+          background: 'rgba(30, 41, 59, 0.4)',
           backdropFilter: 'blur(16px)',
           borderColor: 'rgba(255, 255, 255, 0.05)',
-          boxShadow: '0 20px 50px rgba(0,0,0,0.3)'
+          boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
         }}
       >
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="bg-white/5 border-b border-white/5">
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-left">Mã IATA</th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-left">Tên sân bay</th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-left hidden sm:table-cell">Thành phố</th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-left hidden md:table-cell">Quốc gia</th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Thao tác</th>
+                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-left">
+                  Mã IATA
+                </th>
+                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-left">
+                  Tên sân bay
+                </th>
+                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-left hidden sm:table-cell">
+                  Thành phố
+                </th>
+                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-left hidden md:table-cell">
+                  Quốc gia
+                </th>
+                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">
+                  Thao tác
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.03]">
               {isLoading ? (
                 [1, 2, 3, 4, 5].map((i) => (
                   <tr key={i} className="animate-pulse">
-                    <td colSpan={5} className="px-6 py-6"><div className="h-6 bg-slate-800/50 rounded-xl w-full"></div></td>
+                    <td colSpan={5} className="px-6 py-6">
+                      <div className="h-6 bg-slate-800/50 rounded-xl w-full"></div>
+                    </td>
                   </tr>
                 ))
               ) : hasError ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-24 text-center">
                     <div className="flex flex-col items-center gap-4">
-                      <Icon name="ExclamationTriangleIcon" size={32} className="text-red-400 opacity-50" />
+                      <Icon
+                        name="ExclamationTriangleIcon"
+                        size={32}
+                        className="text-red-400 opacity-50"
+                      />
                       <p className="font-black text-slate-400">Không thể tải dữ liệu</p>
-                      <button onClick={() => fetchAirports(1, searchQuery)} className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline">Thử lại</button>
+                      <button
+                        onClick={() => fetchAirports(1, searchQuery)}
+                        className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline"
+                      >
+                        Thử lại
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -267,14 +288,16 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
                   <td colSpan={5} className="px-6 py-24 text-center">
                     <div className="flex flex-col items-center gap-4">
                       <Icon name="InboxIcon" size={32} className="text-slate-600" />
-                      <p className="font-black text-slate-400 uppercase text-[10px] tracking-widest">Sân bay trống</p>
+                      <p className="font-black text-slate-400 uppercase text-[10px] tracking-widest">
+                        Sân bay trống
+                      </p>
                     </div>
                   </td>
                 </tr>
               ) : (
                 airports.map((airport, i) => (
-                  <tr 
-                    key={airport.id} 
+                  <tr
+                    key={airport.id}
                     onClick={() => setViewingAirport(airport)}
                     className="hover:bg-white/[0.04] transition-all cursor-pointer group"
                   >
@@ -336,7 +359,10 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
           formData={formData}
           setFormData={setFormData}
           onSubmit={handleAddAirport}
-          onClose={() => { setShowAddModal(false); resetForm(); }}
+          onClose={() => {
+            setShowAddModal(false);
+            resetForm();
+          }}
           isSubmitting={isSubmitting}
         />
       )}
@@ -348,7 +374,10 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
           formData={formData}
           setFormData={setFormData}
           onSubmit={handleUpdateAirport}
-          onClose={() => { setEditingAirport(null); resetForm(); }}
+          onClose={() => {
+            setEditingAirport(null);
+            resetForm();
+          }}
           isSubmitting={isSubmitting}
           isEditing
         />
@@ -357,61 +386,100 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
       {/* Detail Modal */}
       {viewingAirport && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-           <div 
-             className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-[40px] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-300"
-             style={{ background: 'linear-gradient(135deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 100%)' }}
-           >
-              <div className="px-8 py-8 border-b border-white/5 flex items-center justify-between">
-                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
-                       <Icon name="BuildingOfficeIcon" size={24} />
-                    </div>
-                    <div>
-                        <h3 className="text-xl font-black text-white uppercase tracking-tight">{viewingAirport.name}</h3>
-                        <p className="text-[10px] font-black text-primary uppercase tracking-widest">Mã IATA: {viewingAirport.code}</p>
-                    </div>
-                 </div>
-                 <button onClick={() => setViewingAirport(null)} className="w-10 h-10 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-400 flex items-center justify-center transition-all border border-white/5">
-                    <Icon name="XMarkIcon" size={20} />
-                 </button>
+          <div
+            className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-[40px] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-300"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 100%)',
+            }}
+          >
+            <div className="px-8 py-8 border-b border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                  <Icon name="BuildingOfficeIcon" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-white uppercase tracking-tight">
+                    {viewingAirport.name}
+                  </h3>
+                  <p className="text-[10px] font-black text-primary uppercase tracking-widest">
+                    Mã IATA: {viewingAirport.code}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setViewingAirport(null)}
+                className="w-10 h-10 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-400 flex items-center justify-center transition-all border border-white/5"
+              >
+                <Icon name="XMarkIcon" size={20} />
+              </button>
+            </div>
+
+            <div className="p-8 space-y-8">
+              <div className="grid grid-cols-2 gap-8">
+                <div>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">
+                    Thành phố
+                  </label>
+                  <p className="text-sm font-black text-slate-200">{viewingAirport.city}</p>
+                </div>
+                <div>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">
+                    Quốc gia
+                  </label>
+                  <p className="text-sm font-black text-slate-200">{viewingAirport.country}</p>
+                </div>
+                <div>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">
+                    Ngày tạo
+                  </label>
+                  <p className="text-xs font-bold text-slate-400">
+                    {new Date(viewingAirport.created_at).toLocaleDateString('vi-VN')}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">
+                    ID Hệ thống
+                  </label>
+                  <p className="text-[10px] font-mono text-slate-500 uppercase truncate">
+                    {viewingAirport.id}
+                  </p>
+                </div>
               </div>
 
-              <div className="p-8 space-y-8">
-                 <div className="grid grid-cols-2 gap-8">
-                    <div>
-                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">Thành phố</label>
-                       <p className="text-sm font-black text-slate-200">{viewingAirport.city}</p>
-                    </div>
-                    <div>
-                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">Quốc gia</label>
-                       <p className="text-sm font-black text-slate-200">{viewingAirport.country}</p>
-                    </div>
-                    <div>
-                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">Ngày tạo</label>
-                       <p className="text-xs font-bold text-slate-400">{new Date(viewingAirport.created_at).toLocaleDateString('vi-VN')}</p>
-                    </div>
-                    <div>
-                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">ID Hệ thống</label>
-                       <p className="text-[10px] font-mono text-slate-500 uppercase truncate">{viewingAirport.id}</p>
-                    </div>
-                 </div>
-
-                 <div className="bg-slate-950/40 border border-white/5 rounded-3xl p-6 flex items-center gap-5">
-                    <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400 border border-indigo-500/20">
-                       <Icon name="GlobeAltIcon" size={24} />
-                    </div>
-                    <div>
-                       <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Vị trí kết nối</p>
-                       <p className="text-xs font-bold text-slate-300">Đang phục vụ mạng lưới đường bay nội địa & quốc tế.</p>
-                    </div>
-                 </div>
+              <div className="bg-slate-950/40 border border-white/5 rounded-3xl p-6 flex items-center gap-5">
+                <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400 border border-indigo-500/20">
+                  <Icon name="GlobeAltIcon" size={24} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">
+                    Vị trí kết nối
+                  </p>
+                  <p className="text-xs font-bold text-slate-300">
+                    Đang phục vụ mạng lưới đường bay nội địa & quốc tế.
+                  </p>
+                </div>
               </div>
+            </div>
 
-              <div className="p-8 pt-0 flex gap-4">
-                 <button onClick={() => { setViewingAirport(null); openEditModal(viewingAirport); }} className="flex-1 px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest border border-white/5 transition-all active:scale-95">Chỉnh sửa</button>
-                 <button onClick={() => setViewingAirport(null)} className="flex-1 px-8 py-4 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-primary/20">Đóng</button>
-              </div>
-           </div>
+            <div className="p-8 pt-0 flex gap-4">
+              <button
+                onClick={() => {
+                  setViewingAirport(null);
+                  openEditModal(viewingAirport);
+                }}
+                className="flex-1 px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest border border-white/5 transition-all active:scale-95"
+              >
+                Chỉnh sửa
+              </button>
+              <button
+                onClick={() => setViewingAirport(null)}
+                className="flex-1 px-8 py-4 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-primary/20"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -441,7 +509,10 @@ function AirportModal({
       <div className="bg-slate-900 border border-white/10 rounded-[40px] shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
         <div className="flex items-center justify-between p-8 border-b border-white/5 bg-white/[0.02]">
           <h3 className="text-lg font-black text-white uppercase tracking-tight">{title}</h3>
-          <button onClick={onClose} className="w-10 h-10 bg-white/5 hover:bg-white/10 text-slate-400 rounded-2xl flex items-center justify-center transition-all">
+          <button
+            onClick={onClose}
+            className="w-10 h-10 bg-white/5 hover:bg-white/10 text-slate-400 rounded-2xl flex items-center justify-center transition-all"
+          >
             <Icon name="XMarkIcon" size={20} />
           </button>
         </div>
@@ -453,7 +524,7 @@ function AirportModal({
             <input
               type="text"
               value={formData.code}
-              onChange={(e) => setFormData(p => ({ ...p, code: e.target.value.toUpperCase() }))}
+              onChange={(e) => setFormData((p) => ({ ...p, code: e.target.value.toUpperCase() }))}
               placeholder="HAN"
               maxLength={3}
               disabled={isEditing}
@@ -468,7 +539,7 @@ function AirportModal({
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))}
+              onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
               placeholder="Sân bay Nội Bài"
               className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold text-white placeholder-slate-700 focus:outline-none focus:border-primary/50 transition-all"
               required
@@ -482,7 +553,7 @@ function AirportModal({
               <input
                 type="text"
                 value={formData.city}
-                onChange={(e) => setFormData(p => ({ ...p, city: e.target.value }))}
+                onChange={(e) => setFormData((p) => ({ ...p, city: e.target.value }))}
                 placeholder="Hà Nội"
                 className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold text-white placeholder-slate-700 focus:outline-none focus:border-primary/50 transition-all"
                 required
@@ -495,7 +566,7 @@ function AirportModal({
               <input
                 type="text"
                 value={formData.country}
-                onChange={(e) => setFormData(p => ({ ...p, country: e.target.value }))}
+                onChange={(e) => setFormData((p) => ({ ...p, country: e.target.value }))}
                 placeholder="Vietnam"
                 className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold text-white placeholder-slate-700 focus:outline-none focus:border-primary/50 transition-all"
               />
@@ -520,7 +591,11 @@ function AirportModal({
                   <Icon name="ArrowPathIcon" size={16} className="animate-spin" />
                   Đang xử lý...
                 </>
-              ) : isEditing ? 'Lưu thay đổi' : 'Thêm sân bay'}
+              ) : isEditing ? (
+                'Lưu thay đổi'
+              ) : (
+                'Thêm sân bay'
+              )}
             </button>
           </div>
         </form>

@@ -322,10 +322,20 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        onToast?.success('Thêm chuyến bay thành công', `Chuyến bay ${payload.flight_no} đã được tạo.`);
+        onToast?.success(
+          'Thêm chuyến bay thành công',
+          `Chuyến bay ${payload.flight_no} đã được tạo.`
+        );
         setShowAddModal(false);
         setNewFlight({
-          flightNo: '', from: 'HAN', to: 'SGN', departTime: '', arriveTime: '', date: '', price: '', capacity: '',
+          flightNo: '',
+          from: 'HAN',
+          to: 'SGN',
+          departTime: '',
+          arriveTime: '',
+          date: '',
+          price: '',
+          capacity: '',
         });
         fetchFlights();
       } else {
@@ -343,7 +353,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
       const res = await fetch(`/api/admin/flights/${encodeURIComponent(id)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -360,7 +370,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
   const handleDelete = async (id: string) => {
     const flight = flights.find((f) => f.id === id);
     if (!confirm('Bạn có chắc muốn xoá chuyến bay này?')) return;
-    
+
     setDeletingId(id);
     try {
       const res = await fetch(`/api/admin/flights?flight_id=${encodeURIComponent(id)}`, {
@@ -389,12 +399,14 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
     setIsSavingEdit(true);
     try {
       // Build depart_time and arrive_time ISO strings from date + time
-      const departTimeStr = editingFlight.date && editingFlight.departTime
-        ? `${editingFlight.date}T${editingFlight.departTime}:00`
-        : editingFlight.departTime;
-      const arriveTimeStr = editingFlight.date && editingFlight.arriveTime
-        ? `${editingFlight.date}T${editingFlight.arriveTime}:00`
-        : editingFlight.arriveTime;
+      const departTimeStr =
+        editingFlight.date && editingFlight.departTime
+          ? `${editingFlight.date}T${editingFlight.departTime}:00`
+          : editingFlight.departTime;
+      const arriveTimeStr =
+        editingFlight.date && editingFlight.arriveTime
+          ? `${editingFlight.date}T${editingFlight.arriveTime}:00`
+          : editingFlight.arriveTime;
 
       const payload: Record<string, any> = {
         flight_no: editingFlight.flightNo,
@@ -433,9 +445,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
         );
         setEditingFlight(null);
 
-        const changedFields = (data.changes || [])
-          .map((c: any) => c.label)
-          .join(', ');
+        const changedFields = (data.changes || []).map((c: any) => c.label).join(', ');
         onToast?.success(
           'Cập nhật chuyến bay thành công',
           changedFields
@@ -462,15 +472,14 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 booked: Math.floor(Math.random() * (Number(f.available) || 1)),
                 status: f.status || 'active',
               }));
-              setFlights(mapped.length > 0 ? mapped : prev => prev);
+              setFlights(mapped.length > 0 ? mapped : (prev) => prev);
             }
           }
-        } catch { /* keep local state */ }
+        } catch {
+          /* keep local state */
+        }
       } else {
-        onToast?.error(
-          'Lỗi cập nhật',
-          data.message || 'Không thể lưu thay đổi. Vui lòng thử lại.'
-        );
+        onToast?.error('Lỗi cập nhật', data.message || 'Không thể lưu thay đổi. Vui lòng thử lại.');
       }
     } catch (err: any) {
       onToast?.error('Lỗi mạng', err.message || 'Kết nối đến server thất bại.');
@@ -1103,7 +1112,9 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               {/* ── Field 1: Số hiệu chuyến bay (flight_no) ── */}
               <div>
                 <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                  <span className="w-5 h-5 rounded bg-red-50 text-red-600 flex items-center justify-center text-[10px] font-bold">1</span>
+                  <span className="w-5 h-5 rounded bg-red-50 text-red-600 flex items-center justify-center text-[10px] font-bold">
+                    1
+                  </span>
                   Số hiệu chuyến bay
                   <span className="text-red-400">*</span>
                 </label>
@@ -1111,28 +1122,36 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   type="text"
                   value={editingFlight.flightNo}
                   onChange={(e) =>
-                    setEditingFlight((p) => (p ? { ...p, flightNo: e.target.value.toUpperCase() } : p))
+                    setEditingFlight((p) =>
+                      p ? { ...p, flightNo: e.target.value.toUpperCase() } : p
+                    )
                   }
                   placeholder="Ví dụ: VJ 101"
                   maxLength={10}
                   className={`w-full px-3 py-2.5 bg-stone-50 border ${editingFlight.flightNo.length >= 3 ? 'border-green-300' : 'border-stone-200'} rounded-lg text-sm font-mono font-bold focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all`}
                   required
                 />
-                <p className="text-[11px] text-stone-400 mt-1">Định dạng: VJ 101, VN001, BL 202...</p>
+                <p className="text-[11px] text-stone-400 mt-1">
+                  Định dạng: VJ 101, VN001, BL 202...
+                </p>
               </div>
 
               {/* ── Field 2 & 3: Điểm đi / Điểm đến ── */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded bg-blue-50 text-blue-600 flex items-center justify-center text-[10px] font-bold">2</span>
+                    <span className="w-5 h-5 rounded bg-blue-50 text-blue-600 flex items-center justify-center text-[10px] font-bold">
+                      2
+                    </span>
                     Điểm đi
                     <span className="text-red-400">*</span>
                   </label>
                   <select
                     value={editingFlight.from}
                     onChange={(e) =>
-                      setEditingFlight((p) => (p ? { ...p, from: e.target.value.toUpperCase() } : p))
+                      setEditingFlight((p) =>
+                        p ? { ...p, from: e.target.value.toUpperCase() } : p
+                      )
                     }
                     className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm font-mono font-bold focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
                     required
@@ -1144,7 +1163,9 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded bg-blue-50 text-blue-600 flex items-center justify-center text-[10px] font-bold">3</span>
+                    <span className="w-5 h-5 rounded bg-blue-50 text-blue-600 flex items-center justify-center text-[10px] font-bold">
+                      3
+                    </span>
                     Điểm đến
                     <span className="text-red-400">*</span>
                   </label>
@@ -1165,9 +1186,15 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
 
               {/* Warning if from === to */}
               {editingFlight.from === editingFlight.to && editingFlight.from !== '' && (
-                <div className="rounded-lg p-2.5 flex items-center gap-2"
-                  style={{ background: '#FEF2F2', border: '1px solid #FECACA' }}>
-                  <Icon name="ExclamationTriangleIcon" size={14} className="text-red-500 flex-shrink-0" />
+                <div
+                  className="rounded-lg p-2.5 flex items-center gap-2"
+                  style={{ background: '#FEF2F2', border: '1px solid #FECACA' }}
+                >
+                  <Icon
+                    name="ExclamationTriangleIcon"
+                    size={14}
+                    className="text-red-500 flex-shrink-0"
+                  />
                   <p className="text-xs font-medium" style={{ color: '#991B1B' }}>
                     Điểm đi và điểm đến không được trùng nhau!
                   </p>
@@ -1178,7 +1205,9 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded bg-amber-50 text-amber-700 flex items-center justify-center text-[10px] font-bold">4</span>
+                    <span className="w-5 h-5 rounded bg-amber-50 text-amber-700 flex items-center justify-center text-[10px] font-bold">
+                      4
+                    </span>
                     Giờ khởi hành
                     <span className="text-red-400">*</span>
                   </label>
@@ -1194,7 +1223,9 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded bg-amber-50 text-amber-700 flex items-center justify-center text-[10px] font-bold">5</span>
+                    <span className="w-5 h-5 rounded bg-amber-50 text-amber-700 flex items-center justify-center text-[10px] font-bold">
+                      5
+                    </span>
                     Giờ đến
                     <span className="text-red-400">*</span>
                   </label>
@@ -1227,37 +1258,59 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               </div>
 
               {/* Time validation warning */}
-              {editingFlight.departTime && editingFlight.arriveTime &&
-               editingFlight.departTime >= editingFlight.arriveTime && (
-                <div className="rounded-lg p-2.5 flex items-center gap-2"
-                  style={{ background: '#FFFBEB', border: '1px solid #FDE68A' }}>
-                  <Icon name="ExclamationTriangleIcon" size={14} className="text-yellow-600 flex-shrink-0" />
-                  <p className="text-xs font-medium" style={{ color: '#92400E' }}>
-                    Thời gian khởi hành phải sớm hơn thời gian đến!
-                  </p>
-                </div>
-              )}
+              {editingFlight.departTime &&
+                editingFlight.arriveTime &&
+                editingFlight.departTime >= editingFlight.arriveTime && (
+                  <div
+                    className="rounded-lg p-2.5 flex items-center gap-2"
+                    style={{ background: '#FFFBEB', border: '1px solid #FDE68A' }}
+                  >
+                    <Icon
+                      name="ExclamationTriangleIcon"
+                      size={14}
+                      className="text-yellow-600 flex-shrink-0"
+                    />
+                    <p className="text-xs font-medium" style={{ color: '#92400E' }}>
+                      Thời gian khởi hành phải sớm hơn thời gian đến!
+                    </p>
+                  </div>
+                )}
 
               {/* ── Field 6: Trạng thái chuyến bay ── */}
               <div>
                 <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                  <span className="w-5 h-5 rounded bg-purple-50 text-purple-600 flex items-center justify-center text-[10px] font-bold">6</span>
+                  <span className="w-5 h-5 rounded bg-purple-50 text-purple-600 flex items-center justify-center text-[10px] font-bold">
+                    6
+                  </span>
                   Trạng thái chuyến bay
                   <span className="text-red-400">*</span>
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { val: 'active', label: 'Hoạt động', icon: 'CheckCircleIcon', cls: 'bg-green-50 border-green-300 text-green-700' },
-                    { val: 'delayed', label: 'Trễ giờ', icon: 'ClockIcon', cls: 'bg-amber-50 border-amber-300 text-amber-700' },
-                    { val: 'cancelled', label: 'Đã huỷ', icon: 'XCircleIcon', cls: 'bg-red-50 border-red-300 text-red-700' },
+                    {
+                      val: 'active',
+                      label: 'Hoạt động',
+                      icon: 'CheckCircleIcon',
+                      cls: 'bg-green-50 border-green-300 text-green-700',
+                    },
+                    {
+                      val: 'delayed',
+                      label: 'Trễ giờ',
+                      icon: 'ClockIcon',
+                      cls: 'bg-amber-50 border-amber-300 text-amber-700',
+                    },
+                    {
+                      val: 'cancelled',
+                      label: 'Đã huỷ',
+                      icon: 'XCircleIcon',
+                      cls: 'bg-red-50 border-red-300 text-red-700',
+                    },
                   ].map((opt) => (
                     <button
                       key={opt.val}
                       type="button"
                       onClick={() =>
-                        setEditingFlight((p) =>
-                          p ? { ...p, status: opt.val as FlightStatus } : p
-                        )
+                        setEditingFlight((p) => (p ? { ...p, status: opt.val as FlightStatus } : p))
                       }
                       className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-bold border-2 transition-all ${
                         editingFlight.status === opt.val
@@ -1280,8 +1333,10 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 className="rounded-xl p-3 space-y-1.5"
                 style={{ background: '#F8FAFC', border: '1px solid #E2E8F0' }}
               >
-                <p className="text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5"
-                   style={{ color: '#64748B' }}>
+                <p
+                  className="text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5"
+                  style={{ color: '#64748B' }}
+                >
                   <Icon name="EyeIcon" size={12} /> Xem trước thay đổi
                 </p>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
@@ -1291,15 +1346,21 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-stone-400">Hành trình:</span>
-                    <span className="font-mono font-bold">{editingFlight.from} → {editingFlight.to}</span>
+                    <span className="font-mono font-bold">
+                      {editingFlight.from} → {editingFlight.to}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-stone-400">Giờ bay:</span>
-                    <span className="font-mono">{editingFlight.departTime || '—'} → {editingFlight.arriveTime || '—'}</span>
+                    <span className="font-mono">
+                      {editingFlight.departTime || '—'} → {editingFlight.arriveTime || '—'}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-stone-400">Trạng thái:</span>
-                    <span className={`font-bold ${STATUS_MAP[editingFlight.status]?.cls?.replace('badge-', 'text-') || ''}`}>
+                    <span
+                      className={`font-bold ${STATUS_MAP[editingFlight.status]?.cls?.replace('badge-', 'text-') || ''}`}
+                    >
                       {STATUS_MAP[editingFlight.status]?.label || editingFlight.status}
                     </span>
                   </div>
@@ -1326,18 +1387,29 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                     !editingFlight.departTime ||
                     !editingFlight.arriveTime ||
                     editingFlight.from === editingFlight.to ||
-                    (editingFlight.departTime >= editingFlight.arriveTime)
+                    editingFlight.departTime >= editingFlight.arriveTime
                   }
                   className="flex-1 text-white font-bold py-2.5 rounded-xl text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   style={{
-                    background: isSavingEdit ? '#9CA3AF' : '#EC2029'
+                    background: isSavingEdit ? '#9CA3AF' : '#EC2029',
                   }}
                 >
                   {isSavingEdit ? (
                     <>
                       <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        />
                       </svg>
                       Đang lưu...
                     </>
@@ -1356,11 +1428,12 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
       {/* Flight Detail Modal */}
       {selectedFlight && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div 
+          <div
             className="w-full max-w-2xl bg-slate-900 border border-white/10 rounded-[40px] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-300"
-            style={{ 
-              background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.98) 0%, rgba(15, 23, 42, 0.98) 100%)',
-              boxShadow: '0 25px 70px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(99, 102, 241, 0.1)'
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(30, 41, 59, 0.98) 0%, rgba(15, 23, 42, 0.98) 100%)',
+              boxShadow: '0 25px 70px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(99, 102, 241, 0.1)',
             }}
           >
             {/* Header */}
@@ -1371,8 +1444,12 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 </div>
                 <div>
                   <div className="flex items-center gap-3">
-                    <h3 className="text-2xl font-black text-white tracking-tight">{selectedFlight.flightNo}</h3>
-                    <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest ${selectedFlight.status === 'active' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}>
+                    <h3 className="text-2xl font-black text-white tracking-tight">
+                      {selectedFlight.flightNo}
+                    </h3>
+                    <span
+                      className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest ${selectedFlight.status === 'active' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}
+                    >
                       {STATUS_MAP[selectedFlight.status]?.label || selectedFlight.status}
                     </span>
                   </div>
@@ -1381,11 +1458,13 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                     <Icon name="ArrowRightIcon" size={12} className="text-slate-600" />
                     <span className="text-sm font-bold text-slate-300">{selectedFlight.to}</span>
                     <span className="mx-2 text-slate-700">•</span>
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{selectedFlight.date}</span>
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                      {selectedFlight.date}
+                    </span>
                   </div>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => setSelectedFlight(null)}
                 className="w-12 h-12 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-2xl flex items-center justify-center transition-all active:scale-90 border border-white/5"
               >
@@ -1399,32 +1478,48 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 {/* Schedule info */}
                 <div className="space-y-8">
                   <section>
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">Lịch trình bay</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">
+                      Lịch trình bay
+                    </label>
                     <div className="relative pl-6 space-y-8">
                       <div className="absolute left-1.5 top-2 bottom-2 w-[2px] bg-gradient-to-b from-indigo-500 to-violet-500 rounded-full" />
-                      
+
                       <div className="relative">
                         <div className="absolute -left-[23px] top-1.5 w-4 h-4 rounded-full bg-slate-900 border-2 border-indigo-500" />
                         <div>
-                          <p className="text-xs font-black text-slate-500 uppercase tracking-widest">Cất cánh</p>
-                          <p className="text-xl font-black text-white">{selectedFlight.departTime}</p>
-                          <p className="text-xs font-bold text-indigo-400 mt-0.5">Sân bay {selectedFlight.from}</p>
+                          <p className="text-xs font-black text-slate-500 uppercase tracking-widest">
+                            Cất cánh
+                          </p>
+                          <p className="text-xl font-black text-white">
+                            {selectedFlight.departTime}
+                          </p>
+                          <p className="text-xs font-bold text-indigo-400 mt-0.5">
+                            Sân bay {selectedFlight.from}
+                          </p>
                         </div>
                       </div>
 
                       <div className="relative">
                         <div className="absolute -left-[23px] top-1.5 w-4 h-4 rounded-full bg-slate-900 border-2 border-violet-500" />
                         <div>
-                          <p className="text-xs font-black text-slate-500 uppercase tracking-widest">Hạ cánh</p>
-                          <p className="text-xl font-black text-white">{selectedFlight.arriveTime}</p>
-                          <p className="text-xs font-bold text-violet-400 mt-0.5">Sân bay {selectedFlight.to}</p>
+                          <p className="text-xs font-black text-slate-500 uppercase tracking-widest">
+                            Hạ cánh
+                          </p>
+                          <p className="text-xl font-black text-white">
+                            {selectedFlight.arriveTime}
+                          </p>
+                          <p className="text-xs font-bold text-violet-400 mt-0.5">
+                            Sân bay {selectedFlight.to}
+                          </p>
                         </div>
                       </div>
                     </div>
                   </section>
 
                   <section>
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">Thời gian bay dự kiến</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">
+                      Thời gian bay dự kiến
+                    </label>
                     <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-4 flex items-center gap-4">
                       <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-indigo-400 shadow-inner">
                         <Icon name="ClockIcon" size={20} />
@@ -1437,41 +1532,60 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 {/* Capacity & Commercial */}
                 <div className="space-y-8">
                   <section>
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">Tải lượng & Đặt chỗ</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">
+                      Tải lượng & Đặt chỗ
+                    </label>
                     <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-6">
                       <div className="flex justify-between items-end mb-4">
                         <div>
                           <p className="text-3xl font-black text-white tabular-nums tracking-tighter">
-                            {Math.round((selectedFlight.booked / (selectedFlight.capacity || 1)) * 100)}%
+                            {Math.round(
+                              (selectedFlight.booked / (selectedFlight.capacity || 1)) * 100
+                            )}
+                            %
                           </p>
-                          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Hệ số sử dụng ghế</p>
+                          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">
+                            Hệ số sử dụng ghế
+                          </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-black text-slate-300">{selectedFlight.booked} / {selectedFlight.capacity}</p>
-                          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Ghế đã đặt</p>
+                          <p className="text-sm font-black text-slate-300">
+                            {selectedFlight.booked} / {selectedFlight.capacity}
+                          </p>
+                          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">
+                            Ghế đã đặt
+                          </p>
                         </div>
                       </div>
                       <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden shadow-inner">
-                        <div 
+                        <div
                           className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-1000"
-                          style={{ width: `${(selectedFlight.booked / (selectedFlight.capacity || 1)) * 100}%` }}
+                          style={{
+                            width: `${(selectedFlight.booked / (selectedFlight.capacity || 1)) * 100}%`,
+                          }}
                         />
                       </div>
                     </div>
                   </section>
 
                   <section>
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">Thanh khoản dự kiến</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">
+                      Thanh khoản dự kiến
+                    </label>
                     <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-3xl p-6 relative group overflow-hidden">
                       <div className="absolute top-[-20%] right-[-10%] w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
                       <div className="relative z-10">
-                        <p className="text-[10px] font-black text-emerald-500/70 uppercase tracking-widest mb-1">Doanh thu hiện tại</p>
+                        <p className="text-[10px] font-black text-emerald-500/70 uppercase tracking-widest mb-1">
+                          Doanh thu hiện tại
+                        </p>
                         <p className="text-2xl font-black text-emerald-400 tabular-nums tracking-tighter">
                           {(selectedFlight.booked * selectedFlight.price).toLocaleString('vi-VN')}₫
                         </p>
                         <div className="mt-3 flex items-center gap-2">
                           <span className="text-xs font-bold text-slate-400">Giá cơ bản:</span>
-                          <span className="text-xs font-black text-white">{selectedFlight.price.toLocaleString('vi-VN')}₫</span>
+                          <span className="text-xs font-black text-white">
+                            {selectedFlight.price.toLocaleString('vi-VN')}₫
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -1482,7 +1596,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
 
             {/* Actions */}
             <div className="p-8 bg-white/[0.02] border-t border-white/5 flex flex-col sm:flex-row gap-4">
-              <button 
+              <button
                 onClick={() => {
                   setEditingFlight(selectedFlight);
                   setSelectedFlight(null);
@@ -1491,9 +1605,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               >
                 Cập nhật chuyến bay
               </button>
-              <button 
-                className="px-8 py-4 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/5 rounded-2xl text-xs font-black uppercase tracking-[0.2em] transition-all active:scale-90"
-              >
+              <button className="px-8 py-4 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/5 rounded-2xl text-xs font-black uppercase tracking-[0.2em] transition-all active:scale-90">
                 Xem danh sách khách
               </button>
             </div>

@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const methods = await getSavedPaymentMethods(token.userId);
 
     return NextResponse.json({
-      methods: methods.map(m => ({
+      methods: methods.map((m) => ({
         id: m.id,
         type: m.type,
         card_brand: m.card_brand,
@@ -41,7 +41,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { type, card_brand, last_four, card_holder_name, expiry_month, expiry_year, bank_id, bank_name, bank_code } = body;
+    const {
+      type,
+      card_brand,
+      last_four,
+      card_holder_name,
+      expiry_month,
+      expiry_year,
+      bank_id,
+      bank_name,
+      bank_code,
+    } = body;
 
     if (!type || !['card', 'bank'].includes(type)) {
       return NextResponse.json({ error: 'Invalid payment method type' }, { status: 400 });

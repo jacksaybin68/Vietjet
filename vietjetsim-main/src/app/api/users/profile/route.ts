@@ -81,7 +81,17 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { full_name, phone, avatar_url, dob, gender, address, city, country, preferred_language } = body;
+    const {
+      full_name,
+      phone,
+      avatar_url,
+      dob,
+      gender,
+      address,
+      city,
+      country,
+      preferred_language,
+    } = body;
 
     const updates: Record<string, string> = {};
     if (full_name !== undefined) updates.full_name = full_name;
@@ -118,10 +128,7 @@ export async function PUT(request: NextRequest) {
       }
       setParts.push(`updated_at = NOW()`);
       vals.push(payload.userId);
-      await sql.query(
-        `UPDATE user_profiles SET ${setParts.join(', ')} WHERE id = $${idx}`,
-        vals
-      );
+      await sql.query(`UPDATE user_profiles SET ${setParts.join(', ')} WHERE id = $${idx}`, vals);
     }
 
     const updatedUser = await findUserById(payload.userId);

@@ -1,9 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-  getOrCreateWallet,
-  getWalletTransactions,
-  topupWallet,
-} from '@/lib/db';
+import { getOrCreateWallet, getWalletTransactions, topupWallet } from '@/lib/db';
 
 // Mock the neon module
 vi.mock('@/lib/neon', () => {
@@ -54,7 +50,7 @@ describe('Wallet Database Module', () => {
 
       const mockTransactions = [
         { id: 'tx-1', amount: 50 },
-        { id: 'tx-2', amount: 20 }
+        { id: 'tx-2', amount: 20 },
       ];
       (sql as any).mockResolvedValueOnce(mockTransactions); // fetch transactions
       (sql as any).mockResolvedValueOnce([{ total: '2' }]); // fetch count
@@ -71,9 +67,7 @@ describe('Wallet Database Module', () => {
       const mockWallet = { id: 'wallet-1', user_id: 'user-1', balance: 100, currency: 'VND' };
       (sql as any).mockResolvedValueOnce([mockWallet]); // getOrCreateWallet
 
-      const mockTransactions = [
-        { id: 'tx-1', amount: 50, type: 'topup' }
-      ];
+      const mockTransactions = [{ id: 'tx-1', amount: 50, type: 'topup' }];
       (sql as any).mockResolvedValueOnce(mockTransactions); // fetch transactions
       (sql as any).mockResolvedValueOnce([{ total: '1' }]); // fetch count
 
@@ -94,12 +88,7 @@ describe('Wallet Database Module', () => {
       (sql as any).mockResolvedValueOnce([mockTx]); // insert transaction
       (sql as any).mockResolvedValueOnce([mockWallet]); // update user_wallets
 
-      const result = await topupWallet(
-        'user-1',
-        50,
-        'pm-1',
-        'Test topup'
-      );
+      const result = await topupWallet('user-1', 50, 'pm-1', 'Test topup');
 
       expect(sql).toHaveBeenCalledTimes(3);
       expect(result).toBeDefined();

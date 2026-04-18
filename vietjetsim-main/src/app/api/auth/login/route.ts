@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
-import { comparePassword, generateTokens, setAuthCookiesOnResponse, hashToken, generateTokenFamily } from '@/lib/auth';
+import {
+  comparePassword,
+  generateTokens,
+  setAuthCookiesOnResponse,
+  hashToken,
+  generateTokenFamily,
+} from '@/lib/auth';
 import { storeRefreshToken } from '@/lib/db';
 import type { User } from '@/lib/auth';
 
@@ -14,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user in Neon PostgreSQL
-    // Identifier can be either email or phone number    
+    // Identifier can be either email or phone number
     const results = await sql`
       SELECT id, email, password_hash, full_name, role, phone, avatar_url, created_at, updated_at
       FROM user_profiles
@@ -24,13 +30,16 @@ export async function POST(request: NextRequest) {
     console.log(`[AUTH] Login attempt for identifier: ${email}`);
     if (results.length === 0) {
       console.warn(`[AUTH] Login failed: User not found in database for identifier: ${email}`);
-      return NextResponse.json({ error: 'Email/Số điện thoại hoặc mật khẩu không đúng' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Email/Số điện thoại hoặc mật khẩu không đúng' },
+        { status: 401 }
+      );
     }
- 
+
     console.log(`[AUTH] User found, comparing password for: ${email}`);
     const userRecord = results[0];
     const isValidPassword = await comparePassword(password, userRecord.password_hash);
- 
+
     if (!isValidPassword) {
       console.warn(`[AUTH] Login failed: Invalid password for email: ${email}`);
       return NextResponse.json({ error: 'Email hoặc mật khẩu không đúng' }, { status: 401 });

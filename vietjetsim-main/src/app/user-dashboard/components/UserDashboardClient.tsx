@@ -13,7 +13,9 @@ import Pagination from '@/components/ui/Pagination';
 
 // ─── Dynamic imports for heavy tab components (code-split) ──────────────
 const UserChat = dynamic(() => import('@/components/chat/UserChat'), {
-  loading: () => <div className="fixed bottom-6 right-6 w-80 h-12 bg-white rounded-2xl shadow-lg animate-pulse" />,
+  loading: () => (
+    <div className="fixed bottom-6 right-6 w-80 h-12 bg-white rounded-2xl shadow-lg animate-pulse" />
+  ),
   ssr: false,
 });
 const NotificationsTab = dynamic(() => import('./NotificationsTab'), {
@@ -27,23 +29,53 @@ const NotificationsTab = dynamic(() => import('./NotificationsTab'), {
   ssr: false,
 });
 const NotificationSettingsTab = dynamic(() => import('./NotificationSettingsTab'), {
-  loading: () => <div className="p-4 space-y-4">{[1, 2, 3].map((i) => <div key={i} className="h-12 bg-stone-100 rounded-lg animate-pulse" />)}</div>,
+  loading: () => (
+    <div className="p-4 space-y-4">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="h-12 bg-stone-100 rounded-lg animate-pulse" />
+      ))}
+    </div>
+  ),
   ssr: false,
 });
 const WalletTab = dynamic(() => import('./WalletTab'), {
-  loading: () => <div className="p-4 space-y-4">{[1, 2, 3].map((i) => <div key={i} className="h-32 bg-stone-100 rounded-2xl animate-pulse" />)}</div>,
+  loading: () => (
+    <div className="p-4 space-y-4">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="h-32 bg-stone-100 rounded-2xl animate-pulse" />
+      ))}
+    </div>
+  ),
   ssr: false,
 });
 const PaymentHistoryTab = dynamic(() => import('./PaymentHistoryTab'), {
-  loading: () => <div className="p-4 space-y-3">{[1, 2, 3, 4].map((i) => <div key={i} className="h-20 bg-stone-100 rounded-xl animate-pulse" />)}</div>,
+  loading: () => (
+    <div className="p-4 space-y-3">
+      {[1, 2, 3, 4].map((i) => (
+        <div key={i} className="h-20 bg-stone-100 rounded-xl animate-pulse" />
+      ))}
+    </div>
+  ),
   ssr: false,
 });
 const LoyaltyTab = dynamic(() => import('./LoyaltyTab'), {
-  loading: () => <div className="p-4 space-y-4">{[1, 2].map((i) => <div key={i} className="h-48 bg-stone-100 rounded-2xl animate-pulse" />)}</div>,
+  loading: () => (
+    <div className="p-4 space-y-4">
+      {[1, 2].map((i) => (
+        <div key={i} className="h-48 bg-stone-100 rounded-2xl animate-pulse" />
+      ))}
+    </div>
+  ),
   ssr: false,
 });
 const SecurityTab = dynamic(() => import('./SecurityTab'), {
-  loading: () => <div className="p-4 space-y-4">{[1, 2, 3].map((i) => <div key={i} className="h-24 bg-stone-100 rounded-2xl animate-pulse" />)}</div>,
+  loading: () => (
+    <div className="p-4 space-y-4">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="h-24 bg-stone-100 rounded-2xl animate-pulse" />
+      ))}
+    </div>
+  ),
   ssr: false,
 });
 
@@ -52,7 +84,17 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/components/ui/Toast';
 
-type Tab = 'upcoming' | 'history' | 'profile' | 'notifications' | 'notif-settings' | 'refund' | 'wallet' | 'payment-history' | 'loyalty' | 'security';
+type Tab =
+  | 'upcoming'
+  | 'history'
+  | 'profile'
+  | 'notifications'
+  | 'notif-settings'
+  | 'refund'
+  | 'wallet'
+  | 'payment-history'
+  | 'loyalty'
+  | 'security';
 
 // Fallback data — used only when API fails or returns empty results
 const FALLBACK_UPCOMING = [
@@ -626,9 +668,12 @@ export default function UserDashboardClient() {
 
   const toast = useToast();
   return (
-    <div className="pt-[140px] pb-12 min-h-screen" style={{
-      background: 'linear-gradient(180deg, #fefce8 0%, #fffbeb 50%, #fef9c3 100%)'
-    }}>
+    <div
+      className="pt-[140px] pb-12 min-h-screen"
+      style={{
+        background: 'linear-gradient(180deg, #fefce8 0%, #fffbeb 50%, #fef9c3 100%)',
+      }}
+    >
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Mobile: top bar with drawer toggle + active tab label */}
         <div className="flex items-center gap-3 mb-4 lg:hidden">
@@ -681,12 +726,8 @@ export default function UserDashboardClient() {
                     <Icon name="UserCircleIcon" size={24} className="text-white" />
                   </div>
                   <div>
-                    <span className="text-white font-bold text-base block">
-                      Xin chào!
-                    </span>
-                    <span className="text-white/80 text-xs">
-                      {user?.fullName || 'Khách hàng'}
-                    </span>
+                    <span className="text-white font-bold text-base block">Xin chào!</span>
+                    <span className="text-white/80 text-xs">{user?.fullName || 'Khách hàng'}</span>
                   </div>
                 </div>
                 <button
@@ -705,9 +746,12 @@ export default function UserDashboardClient() {
                       sidebarCollapsed ? 'justify-center' : ''
                     }`}
                     style={{
-                      background: activeTab === tab.id ? 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)' : 'transparent',
+                      background:
+                        activeTab === tab.id
+                          ? 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)'
+                          : 'transparent',
                       color: activeTab === tab.id ? 'white' : '#92400e',
-                      fontWeight: activeTab === tab.id ? 700 : 600
+                      fontWeight: activeTab === tab.id ? 700 : 600,
                     }}
                     onMouseEnter={(e) => {
                       if (activeTab !== tab.id) e.currentTarget.style.background = '#fef3c7';
@@ -749,7 +793,10 @@ export default function UserDashboardClient() {
           >
             <div
               className="bg-white border border-amber-100 rounded-3xl overflow-hidden sticky top-[140px]"
-              style={{ boxShadow: '0 8px 32px rgba(245, 158, 11, 0.12), 0 4px 12px rgba(251, 191, 36, 0.08)' }}
+              style={{
+                boxShadow:
+                  '0 8px 32px rgba(245, 158, 11, 0.12), 0 4px 12px rgba(251, 191, 36, 0.08)',
+              }}
             >
               {/* Sidebar header */}
               <div
@@ -766,7 +813,9 @@ export default function UserDashboardClient() {
                     </div>
                     <div>
                       <span className="text-white font-bold text-sm block">Xin chào!</span>
-                      <span className="text-white/80 text-xs">{user?.fullName || 'Khách hàng'}</span>
+                      <span className="text-white/80 text-xs">
+                        {user?.fullName || 'Khách hàng'}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -795,7 +844,11 @@ export default function UserDashboardClient() {
                         ? 'text-white shadow-lg'
                         : 'text-amber-800 hover:bg-amber-50'
                     } ${sidebarCollapsed ? 'justify-center' : ''}`}
-                    style={activeTab === tab.id ? { background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)' } : {}}
+                    style={
+                      activeTab === tab.id
+                        ? { background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)' }
+                        : {}
+                    }
                   >
                     <div className="relative flex-shrink-0">
                       <Icon
@@ -888,11 +941,16 @@ export default function UserDashboardClient() {
                 ) : upcomingBookings.length === 0 ? (
                   <div
                     className="bg-white rounded-3xl border border-amber-100 overflow-hidden"
-                    style={{ boxShadow: '0 8px 32px rgba(245, 158, 11, 0.1), 0 4px 12px rgba(251, 191, 36, 0.06)' }}
+                    style={{
+                      boxShadow:
+                        '0 8px 32px rgba(245, 158, 11, 0.1), 0 4px 12px rgba(251, 191, 36, 0.06)',
+                    }}
                   >
                     <div
                       className="h-2 w-full"
-                      style={{ background: 'linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #fcd34d 100%)' }}
+                      style={{
+                        background: 'linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #fcd34d 100%)',
+                      }}
                     />
                     <div className="p-10 flex flex-col sm:flex-row items-center gap-8 max-w-lg mx-auto">
                       <div className="shrink-0 w-36 h-36">
@@ -914,7 +972,10 @@ export default function UserDashboardClient() {
                           <Link
                             href="/flight-booking"
                             className="inline-flex items-center gap-2 text-white font-bold px-6 py-3 rounded-2xl text-sm transition-all hover:opacity-90 active:scale-95 shadow-lg"
-                            style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)', boxShadow: '0 4px 16px rgba(245, 158, 11, 0.3)' }}
+                            style={{
+                              background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
+                              boxShadow: '0 4px 16px rgba(245, 158, 11, 0.3)',
+                            }}
                           >
                             <Icon name="PaperAirplaneIcon" size={15} />
                             Đặt vé ngay
@@ -936,12 +997,16 @@ export default function UserDashboardClient() {
                       <div
                         className="bg-white rounded-3xl border border-amber-100 overflow-hidden card-hover-yellow"
                         style={{
-                          boxShadow: '0 4px 20px rgba(245, 158, 11, 0.08), 0 2px 8px rgba(251, 191, 36, 0.04)',
+                          boxShadow:
+                            '0 4px 20px rgba(245, 158, 11, 0.08), 0 2px 8px rgba(251, 191, 36, 0.04)',
                         }}
                       >
                         <div
                           className="h-2 w-full"
-                          style={{ background: 'linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #fcd34d 100%)' }}
+                          style={{
+                            background:
+                              'linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #fcd34d 100%)',
+                          }}
                         />
                         <div className="grid grid-cols-1 sm:grid-cols-3">
                           <div className="relative h-40 sm:h-auto sm:col-span-1">
@@ -1025,7 +1090,9 @@ export default function UserDashboardClient() {
                                 <div>Xuất trình QR code tại sân bay</div>
                               </div>
                               <button
-                                onClick={() => window.location.href = `/check-in?bookingId=${booking.id}`}
+                                onClick={() =>
+                                  (window.location.href = `/check-in?bookingId=${booking.id}`)
+                                }
                                 className="ml-auto text-xs font-semibold border px-3 py-1.5 rounded-lg transition-all"
                                 style={{
                                   color: '#1e40af',
@@ -1727,9 +1794,7 @@ export default function UserDashboardClient() {
                         <Icon name="BanknotesIcon" size={20} className="text-white" />
                       </div>
                       <div>
-                        <h2 className="font-bold text-base text-amber-900">
-                          Yêu cầu hoàn tiền
-                        </h2>
+                        <h2 className="font-bold text-base text-amber-900">Yêu cầu hoàn tiền</h2>
                         <p className="text-xs text-amber-600">
                           Điền thông tin để gửi yêu cầu hoàn tiền vé máy bay
                         </p>
@@ -2081,11 +2146,16 @@ export default function UserDashboardClient() {
                 {/* Refund history */}
                 <div
                   className="bg-white rounded-3xl border border-amber-100 overflow-hidden"
-                  style={{ boxShadow: '0 8px 32px rgba(245, 158, 11, 0.1), 0 4px 12px rgba(251, 191, 36, 0.06)' }}
+                  style={{
+                    boxShadow:
+                      '0 8px 32px rgba(245, 158, 11, 0.1), 0 4px 12px rgba(251, 191, 36, 0.06)',
+                  }}
                 >
                   <div
                     className="h-1.5 w-full"
-                    style={{ background: 'linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #fcd34d 100%)' }}
+                    style={{
+                      background: 'linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #fcd34d 100%)',
+                    }}
                   />
                   <div className="p-5 border-b border-amber-50">
                     <div className="flex items-center justify-between mb-4">

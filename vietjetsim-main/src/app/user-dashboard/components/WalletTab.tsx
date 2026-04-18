@@ -73,7 +73,11 @@ function AddPaymentMethodModal({
   const [bankId, setBankId] = useState('');
 
   const formatCardNumber = (val: string) =>
-    val.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
+    val
+      .replace(/\D/g, '')
+      .slice(0, 16)
+      .replace(/(.{4})/g, '$1 ')
+      .trim();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -266,13 +270,11 @@ function AddPaymentMethodModal({
                     className={inputClass}
                   >
                     <option value="">YYYY</option>
-                    {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i).map(
-                      (y) => (
-                        <option key={y} value={y}>
-                          {y}
-                        </option>
-                      )
-                    )}
+                    {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i).map((y) => (
+                      <option key={y} value={y}>
+                        {y}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -436,9 +438,7 @@ export default function WalletTab({ user }: WalletTabProps) {
         return;
       }
 
-      setWallet((prev) =>
-        prev ? { ...prev, balance: data.wallet.balance } : null
-      );
+      setWallet((prev) => (prev ? { ...prev, balance: data.wallet.balance } : null));
       setTopupAmount('');
       toast.success('Thành công', `Đã nạp ${amount.toLocaleString('vi-VN')} VND vào ví.`);
     } catch {
@@ -458,9 +458,7 @@ export default function WalletTab({ user }: WalletTabProps) {
       });
 
       if (res.ok) {
-        setMethods((prev) =>
-          prev.map((m) => ({ ...m, isDefault: m.id === methodId }))
-        );
+        setMethods((prev) => prev.map((m) => ({ ...m, isDefault: m.id === methodId })));
         toast.success('Thành công', 'Đã đặt làm phương thức mặc định.');
       }
     } catch {
@@ -542,21 +540,30 @@ export default function WalletTab({ user }: WalletTabProps) {
                 Số dư ví
               </span>
             </div>
-            
+
             {/* Account Number Display */}
             {wallet?.account_number && (
-              <div className="flex items-center gap-2 bg-black/20 rounded-lg px-3 py-1.5 backdrop-blur-sm group hover:bg-black/30 transition-colors cursor-pointer"
-                   onClick={() => {
-                     navigator.clipboard.writeText(wallet.account_number);
-                     toast.success('Đã sao chép', 'Số tài khoản đã được copy vào khay nhớ tạm.');
-                   }}
-                   title="Nhấn để copy"
+              <div
+                className="flex items-center gap-2 bg-black/20 rounded-lg px-3 py-1.5 backdrop-blur-sm group hover:bg-black/30 transition-colors cursor-pointer"
+                onClick={() => {
+                  navigator.clipboard.writeText(wallet.account_number);
+                  toast.success('Đã sao chép', 'Số tài khoản đã được copy vào khay nhớ tạm.');
+                }}
+                title="Nhấn để copy"
               >
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs text-white/60 font-[Be Vietnam Pro,sans-serif] uppercase tracking-wider">Số TK:</span>
-                  <span className="text-sm font-bold font-[KoHo,sans-serif] text-white tracking-widest">{wallet.account_number}</span>
+                  <span className="text-xs text-white/60 font-[Be Vietnam Pro,sans-serif] uppercase tracking-wider">
+                    Số TK:
+                  </span>
+                  <span className="text-sm font-bold font-[KoHo,sans-serif] text-white tracking-widest">
+                    {wallet.account_number}
+                  </span>
                 </div>
-                <Icon name="DocumentDuplicateIcon" size={14} className="text-white/40 group-hover:text-white transition-colors" />
+                <Icon
+                  name="DocumentDuplicateIcon"
+                  size={14}
+                  className="text-white/40 group-hover:text-white transition-colors"
+                />
               </div>
             )}
           </div>
@@ -579,7 +586,9 @@ export default function WalletTab({ user }: WalletTabProps) {
                   placeholder="Nhập số tiền nạp"
                   className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 text-sm focus:outline-none focus:ring-2 focus:ring-white/40 font-[Be Vietnam Pro,sans-serif]"
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 text-sm">VND</span>
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 text-sm">
+                  VND
+                </span>
               </div>
               <button
                 onClick={handleTopup}
@@ -678,8 +687,8 @@ export default function WalletTab({ user }: WalletTabProps) {
                     {method.type === 'card'
                       ? `${method.cardHolderName || ''}${method.expiryMonth ? ` · Hết hạn ${method.expiryMonth.toString().padStart(2, '0')}/${method.expiryYear}` : ''}`
                       : method.bankId
-                      ? `Số TK: ${method.bankId}`
-                      : 'Tài khoản ngân hàng'}
+                        ? `Số TK: ${method.bankId}`
+                        : 'Tài khoản ngân hàng'}
                   </p>
                 </div>
 

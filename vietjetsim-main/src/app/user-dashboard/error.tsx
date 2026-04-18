@@ -27,9 +27,7 @@ export default function UserDashboardError({
           </div>
 
           {/* Title */}
-          <h2 className="text-2xl font-bold text-[#1A2948] font-koho mb-3">
-            Đã xảy ra lỗi
-          </h2>
+          <h2 className="text-2xl font-bold text-[#1A2948] font-koho mb-3">Đã xảy ra lỗi</h2>
 
           {/* Description */}
           <p className="text-gray-600 mb-4 font-heading-sm">

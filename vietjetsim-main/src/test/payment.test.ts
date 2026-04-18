@@ -33,7 +33,7 @@ describe('Payment Database Module', () => {
         booking_id: 'booking-1',
         method: 'credit_card',
         amount: 1000,
-        status: 'completed'
+        status: 'completed',
       };
 
       const expectedRecord = { id: 'payment-1', ...mockPayment };
@@ -42,7 +42,7 @@ describe('Payment Database Module', () => {
       const result = await createPayment({
         booking_id: 'booking-1',
         method: 'credit_card',
-        amount: 1000
+        amount: 1000,
       });
 
       expect(sql).toHaveBeenCalledTimes(1);
@@ -54,7 +54,7 @@ describe('Payment Database Module', () => {
     it('should fetch payments by booking ID', async () => {
       const mockPayments = [
         { id: 'payment-1', booking_id: 'booking-1', amount: 1000 },
-        { id: 'payment-2', booking_id: 'booking-1', amount: 500 }
+        { id: 'payment-2', booking_id: 'booking-1', amount: 500 },
       ];
 
       (sql as any).mockResolvedValueOnce(mockPayments);
@@ -69,7 +69,13 @@ describe('Payment Database Module', () => {
   describe('getSavedPaymentMethods', () => {
     it('should fetch saved payment methods for a user', async () => {
       const mockMethods = [
-        { id: 'pm-1', user_id: 'user-1', type: "card" as const, card_brand: 'visa', last_four: '4242' }
+        {
+          id: 'pm-1',
+          user_id: 'user-1',
+          type: 'card' as const,
+          card_brand: 'visa',
+          last_four: '4242',
+        },
       ];
 
       (sql as any).mockResolvedValueOnce(mockMethods);
@@ -85,12 +91,13 @@ describe('Payment Database Module', () => {
     it('should add a new saved payment method', async () => {
       const newMethod = {
         user_id: 'user-1',
-        type: "card" as const, card_brand: 'visa',
+        type: 'card' as const,
+        card_brand: 'visa',
         last_four: '4242',
         expiry_month: 12,
         expiry_year: 25,
         card_holder_name: 'John Doe',
-        is_default: true
+        is_default: true,
       };
 
       const expectedRecord = { id: 'pm-2', ...newMethod };
@@ -126,7 +133,13 @@ describe('Payment Database Module', () => {
 
   describe('createPaymentAndConfirmBooking', () => {
     it('should confirm booking after payment is created', async () => {
-      const mockPaymentRecord = { id: 'payment-1', booking_id: 'booking-1', amount: 1000, method: 'wallet', status: 'completed' };
+      const mockPaymentRecord = {
+        id: 'payment-1',
+        booking_id: 'booking-1',
+        amount: 1000,
+        method: 'wallet',
+        status: 'completed',
+      };
       const mockBookingRecord = { id: 'booking-1', status: 'confirmed' };
 
       (sql as any).transaction.mockResolvedValueOnce([]);
@@ -147,7 +160,7 @@ describe('Payment Database Module', () => {
       const result = await createPaymentAndConfirmBooking({
         booking_id: 'booking-1',
         method: 'wallet',
-        amount: 1000
+        amount: 1000,
       });
 
       expect(sql.transaction).toHaveBeenCalledTimes(1);

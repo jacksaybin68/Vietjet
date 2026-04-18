@@ -173,10 +173,19 @@ const FALLBACK_FLIGHTS: Flight[] = [
 // ─── Airport code → City name mapping ───────────────────────────────────────
 
 const AIRPORT_CITIES: Record<string, string> = {
-  HAN: 'Hà Nội', SGN: 'TP.HCM', DAD: 'Đà Nẵng', PQC: 'Phú Quốc',
-  CXR: 'Nha Trang', HPH: 'Hải Phòng', HUI: 'Huế',
-  VCL: 'Chu Lai', PUI: 'Phù Cát', VCS: 'Côn Đảo', VCA: 'Phú Cat',
-  DLI: 'Lâm Đồng', BMV: 'Buôn Ma Thuột',
+  HAN: 'Hà Nội',
+  SGN: 'TP.HCM',
+  DAD: 'Đà Nẵng',
+  PQC: 'Phú Quốc',
+  CXR: 'Nha Trang',
+  HPH: 'Hải Phòng',
+  HUI: 'Huế',
+  VCL: 'Chu Lai',
+  PUI: 'Phù Cát',
+  VCS: 'Côn Đảo',
+  VCA: 'Phú Cat',
+  DLI: 'Lâm Đồng',
+  BMV: 'Buôn Ma Thuột',
 };
 
 function getAirportCity(code: string): string {
@@ -207,8 +216,8 @@ function mapDbFlightToFlight(row: any): Flight {
     to: (row.to_code || '').toUpperCase(),
     fromCity: getAirportCity(row.from_code || ''),
     toCity: getAirportCity(row.to_code || ''),
-    departTime: `${String(depTime.getHours()).padStart(2,'0')}:${String(depTime.getMinutes()).padStart(2,'0')}`,
-    arriveTime: `${String(arrTime.getHours()).padStart(2,'0')}:${String(arrTime.getMinutes()).padStart(2,'0')}`,
+    departTime: `${String(depTime.getHours()).padStart(2, '0')}:${String(depTime.getMinutes()).padStart(2, '0')}`,
+    arriveTime: `${String(arrTime.getHours()).padStart(2, '0')}:${String(arrTime.getMinutes()).padStart(2, '0')}`,
     duration,
     price: Number(row.price) || 0,
     class: row.class === 'business' ? 'business' : 'economy',
@@ -321,9 +330,7 @@ function SearchErrorModal({ message, onRetry, onDismiss }: SearchErrorModalProps
           <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-5 border-4 border-red-100">
             <Icon name="MagnifyingGlassIcon" size={28} className="text-primary" />
           </div>
-          <h3
-            className="font-black text-[#1A2948] text-xl mb-2 font-koho"
-          >
+          <h3 className="font-black text-[#1A2948] text-xl mb-2 font-koho">
             Không tìm thấy chuyến bay
           </h3>
           <p className="text-sm text-stone-500 leading-relaxed mb-7">{message}</p>
@@ -351,7 +358,14 @@ function SearchErrorModal({ message, onRetry, onDismiss }: SearchErrorModalProps
 export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) => void }) {
   const [flights, setFlights] = useState<Flight[]>([]);
   const [sortBy, setSortBy] = useState<string>('price_asc');
-  const [filters, setFilters] = useState<Filters>({ airlines: [], minPrice: 0, maxPrice: Infinity, departureSlots: [], stops: [], maxDuration: Infinity });
+  const [filters, setFilters] = useState<Filters>({
+    airlines: [],
+    minPrice: 0,
+    maxPrice: Infinity,
+    departureSlots: [],
+    stops: [],
+    maxDuration: Infinity,
+  });
   const [filtersOpen, setFiltersOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -363,9 +377,19 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
 
   // ─── Derived constants (computed from fetched flights) ─────────────────
   const allAirlines = useMemo(() => Array.from(new Set(flights.map((f) => f.airline))), [flights]);
-  const minPrice = useMemo(() => flights.length > 0 ? Math.min(...flights.map((f) => f.price)) : 0, [flights]);
-  const maxPrice = useMemo(() => flights.length > 0 ? Math.max(...flights.map((f) => f.price)) : 0, [flights]);
-  const maxDuration = useMemo(() => flights.length > 0 ? Math.max(...flights.map((f) => parseDurationMinutes(f.duration))) : 240, [flights]);
+  const minPrice = useMemo(
+    () => (flights.length > 0 ? Math.min(...flights.map((f) => f.price)) : 0),
+    [flights]
+  );
+  const maxPrice = useMemo(
+    () => (flights.length > 0 ? Math.max(...flights.map((f) => f.price)) : 0),
+    [flights]
+  );
+  const maxDuration = useMemo(
+    () =>
+      flights.length > 0 ? Math.max(...flights.map((f) => parseDurationMinutes(f.duration))) : 240,
+    [flights]
+  );
 
   // Reset filters when flight data changes
   useEffect(() => {
@@ -407,7 +431,9 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
             searchUrl = `/api/flights?${params.toString()}`;
           }
         }
-      } catch { /* no session data — use default */ }
+      } catch {
+        /* no session data — use default */
+      }
 
       const res = await fetch(searchUrl);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -489,17 +515,18 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return flights.filter((f) => {
-      if (!q) return true;
-      return (
-        f.flightNo.toLowerCase().includes(q) ||
-        f.airline.toLowerCase().includes(q) ||
-        f.fromCity.toLowerCase().includes(q) ||
-        f.toCity.toLowerCase().includes(q) ||
-        f.from.toLowerCase().includes(q) ||
-        f.to.toLowerCase().includes(q)
-      );
-    })
+    return flights
+      .filter((f) => {
+        if (!q) return true;
+        return (
+          f.flightNo.toLowerCase().includes(q) ||
+          f.airline.toLowerCase().includes(q) ||
+          f.fromCity.toLowerCase().includes(q) ||
+          f.toCity.toLowerCase().includes(q) ||
+          f.from.toLowerCase().includes(q) ||
+          f.to.toLowerCase().includes(q)
+        );
+      })
       .filter((f) => filters.airlines.length === 0 || filters.airlines.includes(f.airline))
       .filter((f) => f.price >= filters.minPrice && f.price <= filters.maxPrice)
       .filter((f) => {
@@ -555,9 +582,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
           <div className="h-0.5 w-full bg-gradient-to-r from-primary via-primary-light to-primary" />
           {/* Filter Header */}
           <div className="flex items-center justify-between px-3 py-2.5 border-b border-stone-100 bg-stone-50">
-            <h3
-              className="font-bold text-[#1A2948] text-sm flex items-center gap-1.5 font-koho"
-            >
+            <h3 className="font-bold text-[#1A2948] text-sm flex items-center gap-1.5 font-koho">
               <Icon name="AdjustmentsHorizontalIcon" size={15} className="text-primary" />
               Bộ lọc
               {activeFilterCount > 0 && (
@@ -579,9 +604,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
           <div className="p-3 space-y-4">
             {/* Sort */}
             <div>
-              <label
-                className="text-[10px] font-bold text-[#1A2948] uppercase tracking-wider block mb-1.5 font-koho"
-              >
+              <label className="text-[10px] font-bold text-[#1A2948] uppercase tracking-wider block mb-1.5 font-koho">
                 Sắp xếp theo
               </label>
               <select
@@ -599,9 +622,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
 
             {/* Airline Filter */}
             <div>
-              <label
-                className="text-[10px] font-bold text-[#1A2948] uppercase tracking-wider block mb-2 font-koho"
-              >
+              <label className="text-[10px] font-bold text-[#1A2948] uppercase tracking-wider block mb-2 font-koho">
                 Hãng hàng không
               </label>
               <div className="space-y-1.5">
@@ -628,9 +649,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
 
             {/* Price Range */}
             <div>
-              <label
-                className="text-[10px] font-bold text-[#1A2948] uppercase tracking-wider block mb-2 font-koho"
-              >
+              <label className="text-[10px] font-bold text-[#1A2948] uppercase tracking-wider block mb-2 font-koho">
                 Khoảng giá
               </label>
               <div className="space-y-2">
@@ -685,9 +704,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
 
             {/* Departure Time */}
             <div>
-              <label
-                className="text-[10px] font-bold text-[#1A2948] uppercase tracking-wider block mb-2 font-koho"
-              >
+              <label className="text-[10px] font-bold text-[#1A2948] uppercase tracking-wider block mb-2 font-koho">
                 Giờ khởi hành
               </label>
               <div className="grid grid-cols-2 gap-1.5">
@@ -710,9 +727,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
 
             {/* Stop Count */}
             <div>
-              <label
-                className="text-[10px] font-bold text-[#1A2948] uppercase tracking-wider block mb-2 font-koho"
-              >
+              <label className="text-[10px] font-bold text-[#1A2948] uppercase tracking-wider block mb-2 font-koho">
                 Số điểm dừng
               </label>
               <div className="space-y-1.5">
@@ -747,9 +762,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
 
             {/* Duration */}
             <div>
-              <label
-                className="text-[10px] font-bold text-[#1A2948] uppercase tracking-wider block mb-2 font-koho"
-              >
+              <label className="text-[10px] font-bold text-[#1A2948] uppercase tracking-wider block mb-2 font-koho">
                 Thời gian bay tối đa:{' '}
                 <span className="text-primary">
                   {Math.floor(filters.maxDuration / 60)}h{' '}
@@ -782,7 +795,11 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
 
         {/* Search Bar */}
         <div className="relative">
-          <Icon name="MagnifyingGlassIcon" size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+          <Icon
+            name="MagnifyingGlassIcon"
+            size={15}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+          />
           <input
             id="search-input"
             name="search"
@@ -846,9 +863,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
               <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Icon name="ExclamationTriangleIcon" size={32} className="text-primary" />
               </div>
-              <h3
-                className="text-lg font-black text-[#1A2948] mb-2 font-koho"
-              >
+              <h3 className="text-lg font-black text-[#1A2948] mb-2 font-koho">
                 Lỗi tìm kiếm chuyến bay
               </h3>
               <p className="text-sm text-stone-500 max-w-sm mx-auto mb-6">{loadError}</p>
@@ -873,78 +888,133 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
           filtered.map((flight, idx) => {
             const basePrice = flight.price;
             const fareClasses = [
-              { id: 'business', name: 'Business', price: basePrice + 1200000, color: 'bg-[#FBE5E6] text-[#B30000] border-transparent hover:border-[#B30000]', headerClass: 'bg-[#D1161B] text-white', priceColor: 'text-[#B30000]' },
-              { id: 'skyboss', name: 'SkyBOSS', price: basePrice + 800000, color: 'bg-[#E6F3FF] text-[#1A2948] border-transparent hover:border-[#1A2948]', headerClass: 'bg-[#1A2948] text-white', priceColor: 'text-[#1A2948]' },
-              { id: 'deluxe', name: 'Deluxe', price: basePrice + 300000, color: 'bg-[#F2F2F2] text-[#1A2948] border-transparent hover:border-gray-400', headerClass: 'bg-[#FFDD00] text-[#1A2948]', priceColor: 'text-[#1A2948]' },
-              { id: 'eco', name: 'Eco', price: basePrice, color: 'bg-white text-gray-600 border-gray-200 hover:border-[#D1161B] hover:text-[#D1161B]', headerClass: 'bg-[#E6E6E6] text-gray-800', priceColor: 'text-[#1A2948]' }
+              {
+                id: 'business',
+                name: 'Business',
+                price: basePrice + 1200000,
+                color: 'bg-[#FBE5E6] text-[#B30000] border-transparent hover:border-[#B30000]',
+                headerClass: 'bg-[#D1161B] text-white',
+                priceColor: 'text-[#B30000]',
+              },
+              {
+                id: 'skyboss',
+                name: 'SkyBOSS',
+                price: basePrice + 800000,
+                color: 'bg-[#E6F3FF] text-[#1A2948] border-transparent hover:border-[#1A2948]',
+                headerClass: 'bg-[#1A2948] text-white',
+                priceColor: 'text-[#1A2948]',
+              },
+              {
+                id: 'deluxe',
+                name: 'Deluxe',
+                price: basePrice + 300000,
+                color: 'bg-[#F2F2F2] text-[#1A2948] border-transparent hover:border-gray-400',
+                headerClass: 'bg-[#FFDD00] text-[#1A2948]',
+                priceColor: 'text-[#1A2948]',
+              },
+              {
+                id: 'eco',
+                name: 'Eco',
+                price: basePrice,
+                color:
+                  'bg-white text-gray-600 border-gray-200 hover:border-[#D1161B] hover:text-[#D1161B]',
+                headerClass: 'bg-[#E6E6E6] text-gray-800',
+                priceColor: 'text-[#1A2948]',
+              },
             ];
 
             return (
-            <div
-              key={flight.id}
-              style={{ transitionDelay: `${Math.min(idx * 50, 300)}ms` }}
-              className={`bg-white rounded-xl border border-[#D1161B] transition-all hover:shadow-lg relative overflow-hidden flex flex-col xl:flex-row shadow-[0_2px_8px_rgba(209,22,27,0.15)]`}
-            >
+              <div
+                key={flight.id}
+                style={{ transitionDelay: `${Math.min(idx * 50, 300)}ms` }}
+                className={`bg-white rounded-xl border border-[#D1161B] transition-all hover:shadow-lg relative overflow-hidden flex flex-col xl:flex-row shadow-[0_2px_8px_rgba(209,22,27,0.15)]`}
+              >
                 {/* Left: Flight Info */}
                 <div className="w-full xl:w-[280px] shrink-0 p-4 border-b xl:border-b-0 border-[#fbe5e6] flex flex-col justify-between">
-                   <div className="flex items-center gap-2 mb-4">
-                     <span className="font-black text-[#1A2948] text-sm leading-none font-koho">{flight.flightNo}</span>
-                     <span className="text-[11px] text-stone-500 font-semibold uppercase">{flight.airline}</span>
-                   </div>
-                   <div className="flex items-center justify-between mb-4">
-                     {/* Dep */}
-                     <div className="text-center min-w-[50px]">
-                        <div className="text-xl font-black text-[#1A2948] leading-none font-koho">{flight.departTime}</div>
-                        <div className="text-xs font-bold text-stone-600 mt-1">{flight.from}</div>
-                     </div>
-                     {/* Line */}
-                     <div className="flex-1 flex flex-col items-center px-2">
-                        <div className="text-[10px] text-stone-400 font-semibold mb-1">{flight.duration}</div>
-                        <div className="w-full flex items-center justify-center">
-                           <div className="w-2 h-2 rounded-full border border-stone-300 shrink-0"></div>
-                           <div className="flex-1 border-t border-dashed border-stone-300 min-w-[20px]"></div>
-                           <Icon name="PaperAirplaneIcon" size={10} className="text-primary rotate-90 mx-1 shrink-0" />
-                           <div className="flex-1 border-t border-dashed border-stone-300 min-w-[20px]"></div>
-                           <div className="w-2 h-2 rounded-full border border-primary bg-primary shrink-0"></div>
-                        </div>
-                        <div className="text-[10px] text-primary font-bold mt-1 text-center whitespace-nowrap">{flight.stops === 0 ? 'Bay thẳng' : `${flight.stops} Điểm dừng`}</div>
-                     </div>
-                     {/* Arr */}
-                     <div className="text-center min-w-[50px]">
-                        <div className="text-xl font-black text-[#1A2948] leading-none font-koho">{flight.arriveTime}</div>
-                        <div className="text-xs font-bold text-stone-600 mt-1">{flight.to}</div>
-                     </div>
-                   </div>
-                   <button className="text-[11px] font-bold text-[#EC2029] hover:underline text-left inline-flex items-center gap-1">
-                     Chi tiết chuyến bay <Icon name="ChevronDownIcon" size={10} />
-                   </button>
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="font-black text-[#1A2948] text-sm leading-none font-koho">
+                      {flight.flightNo}
+                    </span>
+                    <span className="text-[11px] text-stone-500 font-semibold uppercase">
+                      {flight.airline}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mb-4">
+                    {/* Dep */}
+                    <div className="text-center min-w-[50px]">
+                      <div className="text-xl font-black text-[#1A2948] leading-none font-koho">
+                        {flight.departTime}
+                      </div>
+                      <div className="text-xs font-bold text-stone-600 mt-1">{flight.from}</div>
+                    </div>
+                    {/* Line */}
+                    <div className="flex-1 flex flex-col items-center px-2">
+                      <div className="text-[10px] text-stone-400 font-semibold mb-1">
+                        {flight.duration}
+                      </div>
+                      <div className="w-full flex items-center justify-center">
+                        <div className="w-2 h-2 rounded-full border border-stone-300 shrink-0"></div>
+                        <div className="flex-1 border-t border-dashed border-stone-300 min-w-[20px]"></div>
+                        <Icon
+                          name="PaperAirplaneIcon"
+                          size={10}
+                          className="text-primary rotate-90 mx-1 shrink-0"
+                        />
+                        <div className="flex-1 border-t border-dashed border-stone-300 min-w-[20px]"></div>
+                        <div className="w-2 h-2 rounded-full border border-primary bg-primary shrink-0"></div>
+                      </div>
+                      <div className="text-[10px] text-primary font-bold mt-1 text-center whitespace-nowrap">
+                        {flight.stops === 0 ? 'Bay thẳng' : `${flight.stops} Điểm dừng`}
+                      </div>
+                    </div>
+                    {/* Arr */}
+                    <div className="text-center min-w-[50px]">
+                      <div className="text-xl font-black text-[#1A2948] leading-none font-koho">
+                        {flight.arriveTime}
+                      </div>
+                      <div className="text-xs font-bold text-stone-600 mt-1">{flight.to}</div>
+                    </div>
+                  </div>
+                  <button className="text-[11px] font-bold text-[#EC2029] hover:underline text-left inline-flex items-center gap-1">
+                    Chi tiết chuyến bay <Icon name="ChevronDownIcon" size={10} />
+                  </button>
                 </div>
 
                 {/* Right: Fare Classes */}
                 <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-1 p-2 bg-gray-50/50">
-                  {fareClasses.map(fc => (
-                    <div key={fc.id} className="flex flex-col relative rounded-lg overflow-hidden group">
-                       <div className={`text-center py-1.5 ${fc.headerClass}`}>
-                         <div className="text-[10px] font-black uppercase font-koho tracking-widest">{fc.name}</div>
-                       </div>
-                       <div className="bg-white flex flex-col justify-center items-center flex-1 p-3 border-x border-b border-gray-100 rounded-b-lg">
-                         <div className={`text-sm font-black ${fc.priceColor} font-koho mb-3 leading-none`}>
-                            {fc.price.toLocaleString('vi-VN')}₫
-                         </div>
-                         <button
-                           onClick={() => onSelect({ ...flight, price: fc.price, class: fc.id as any })}
-                           className={`w-[80%] py-1.5 rounded text-xs font-bold transition-all border ${fc.color}`}
-                         >
-                           Chọn
-                         </button>
-                       </div>
-                       {/* Overlay effect on hover */}
-                       <div className="absolute inset-0 border-2 border-transparent group-hover:border-[#EC2029] pointer-events-none rounded-lg transition-colors" />
+                  {fareClasses.map((fc) => (
+                    <div
+                      key={fc.id}
+                      className="flex flex-col relative rounded-lg overflow-hidden group"
+                    >
+                      <div className={`text-center py-1.5 ${fc.headerClass}`}>
+                        <div className="text-[10px] font-black uppercase font-koho tracking-widest">
+                          {fc.name}
+                        </div>
+                      </div>
+                      <div className="bg-white flex flex-col justify-center items-center flex-1 p-3 border-x border-b border-gray-100 rounded-b-lg">
+                        <div
+                          className={`text-sm font-black ${fc.priceColor} font-koho mb-3 leading-none`}
+                        >
+                          {fc.price.toLocaleString('vi-VN')}₫
+                        </div>
+                        <button
+                          onClick={() =>
+                            onSelect({ ...flight, price: fc.price, class: fc.id as any })
+                          }
+                          className={`w-[80%] py-1.5 rounded text-xs font-bold transition-all border ${fc.color}`}
+                        >
+                          Chọn
+                        </button>
+                      </div>
+                      {/* Overlay effect on hover */}
+                      <div className="absolute inset-0 border-2 border-transparent group-hover:border-[#EC2029] pointer-events-none rounded-lg transition-colors" />
                     </div>
                   ))}
                 </div>
-            </div>
-          )})}
+              </div>
+            );
+          })}
 
         {/* Enhanced empty state */}
         {!isLoading && filtered.length === 0 && (
@@ -963,9 +1033,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
 
               {/* Content */}
               <div className="flex-1 text-center sm:text-left">
-                <h3
-                  className="text-xl font-black text-[#1A2948] mb-2 font-koho"
-                >
+                <h3 className="text-xl font-black text-[#1A2948] mb-2 font-koho">
                   {searchQuery ? 'Không tìm thấy chuyến bay' : 'Không có chuyến bay phù hợp'}
                 </h3>
 
@@ -977,9 +1045,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
 
                 {/* Suggestions */}
                 <div className="bg-stone-50 rounded-xl p-4 mb-5 text-left max-w-sm">
-                  <p
-                    className="text-xs font-bold text-[#1A2948] uppercase tracking-wider mb-3 font-koho"
-                  >
+                  <p className="text-xs font-bold text-[#1A2948] uppercase tracking-wider mb-3 font-koho">
                     Gợi ý cho bạn
                   </p>
                   <ul className="space-y-2">
@@ -1081,9 +1147,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
           <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t-2 border-primary shadow-2xl">
             <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 flex-wrap">
-                <span
-                  className="text-sm font-black text-[#1A2948] flex items-center gap-1.5 font-koho"
-                >
+                <span className="text-sm font-black text-[#1A2948] flex items-center gap-1.5 font-koho">
                   <Icon name="ArrowsRightLeftIcon" size={16} className="text-primary" />
                   So sánh ({compareIds.length}/3):
                 </span>
@@ -1142,11 +1206,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
               <div className="bg-gradient-to-r from-[#1A2948] to-[#0F1E3A] px-6 py-4 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2.5">
                   <Icon name="ArrowsRightLeftIcon" size={18} className="text-accent" />
-                  <h2
-                    className="text-white font-black text-lg font-koho"
-                  >
-                    So sánh chuyến bay
-                  </h2>
+                  <h2 className="text-white font-black text-lg font-koho">So sánh chuyến bay</h2>
                   <span className="text-xs bg-primary/30 text-white border border-primary/40 rounded-full px-2 py-0.5 font-semibold">
                     {compareFlights.length} chuyến bay
                   </span>
@@ -1167,9 +1227,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                 >
                   {/* Column Headers */}
                   <div className="bg-stone-50 p-4 flex items-end pb-5">
-                    <span
-                      className="text-xs font-bold text-[#1A2948] uppercase tracking-wider font-koho"
-                    >
+                    <span className="text-xs font-bold text-[#1A2948] uppercase tracking-wider font-koho">
                       Tiêu chí
                     </span>
                   </div>
@@ -1209,9 +1267,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                             />
                           </div>
                           <div>
-                            <div
-                              className="font-black text-[#1A2948] text-base font-koho"
-                            >
+                            <div className="font-black text-[#1A2948] text-base font-koho">
                               {flight.flightNo}
                             </div>
                             <div className="text-xs text-stone-400">{flight.airline}</div>
@@ -1253,9 +1309,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                   <CompareRowLabel icon="ClockIcon" label="Giờ khởi hành" />
                   {compareFlights.map((flight) => (
                     <div key={flight.id} className="px-4 py-4 flex flex-col justify-center">
-                      <div
-                        className="text-xl font-black text-[#1A2948] font-koho"
-                      >
+                      <div className="text-xl font-black text-[#1A2948] font-koho">
                         {flight.departTime}
                       </div>
                       <div className="text-xs text-stone-500">
@@ -1270,9 +1324,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                   <CompareRowLabel icon="MapPinIcon" label="Giờ đến" />
                   {compareFlights.map((flight) => (
                     <div key={flight.id} className="px-4 py-4 flex flex-col justify-center">
-                      <div
-                        className="text-xl font-black text-[#1A2948] font-koho"
-                      >
+                      <div className="text-xl font-black text-[#1A2948] font-koho">
                         {flight.arriveTime}
                       </div>
                       <div className="text-xs text-stone-500">
@@ -1344,9 +1396,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                   {/* Fare Breakdown Section Header */}
                   <div className="col-span-full bg-[#1A2948]/5 px-4 py-2.5 flex items-center gap-2 border-l-4 border-primary">
                     <Icon name="ReceiptPercentIcon" size={14} className="text-primary" />
-                    <span
-                      className="text-xs font-bold text-[#1A2948] uppercase tracking-wider font-koho"
-                    >
+                    <span className="text-xs font-bold text-[#1A2948] uppercase tracking-wider font-koho">
                       Chi tiết giá vé
                     </span>
                   </div>
@@ -1425,11 +1475,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
 
                   {/* Total */}
                   <div className="bg-stone-50 px-4 py-4 flex items-center">
-                    <span
-                      className="text-sm font-bold text-[#1A2948] font-koho"
-                    >
-                      Tổng cộng
-                    </span>
+                    <span className="text-sm font-bold text-[#1A2948] font-koho">Tổng cộng</span>
                   </div>
                   {compareFlights.map((flight) => {
                     const isBest = flight.price === Math.min(...compareFlights.map((f) => f.price));
@@ -1438,9 +1484,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                         key={flight.id}
                         className={`px-4 py-4 flex flex-col justify-center ${isBest ? 'bg-emerald-50/50' : 'bg-stone-50'}`}
                       >
-                        <div
-                          className="text-lg font-black text-primary font-koho"
-                        >
+                        <div className="text-lg font-black text-primary font-koho">
                           {flight.price.toLocaleString('vi-VN')}₫
                         </div>
                       </div>
@@ -1491,7 +1535,10 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
 
       {/* Booking Summary Sidebar */}
       <aside className="w-full lg:w-[280px] xl:w-[320px] shrink-0">
-        <div className="bg-white rounded-xl border border-[#EC2029]/20 sticky top-[160px] overflow-hidden shadow-sm" style={{ boxShadow: '0 4px 12px rgba(209,22,27,0.08)' }}>
+        <div
+          className="bg-white rounded-xl border border-[#EC2029]/20 sticky top-[160px] overflow-hidden shadow-sm"
+          style={{ boxShadow: '0 4px 12px rgba(209,22,27,0.08)' }}
+        >
           {/* Top Bar */}
           <div className="h-1 w-full bg-[#EC2029]" />
           <div className="bg-[#1A2948] p-3 text-white flex items-center justify-center relative">
@@ -1499,30 +1546,38 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
               Thông tin đặt chỗ
             </h3>
             <div className="absolute right-0 top-0 h-full overflow-hidden flex items-center pointer-events-none">
-               <div className="w-16 h-24 bg-white/5 rounded-full transform -translate-x-1/4 -translate-y-1/2rotate-45" />
+              <div className="w-16 h-24 bg-white/5 rounded-full transform -translate-x-1/4 -translate-y-1/2rotate-45" />
             </div>
           </div>
-          
+
           <div className="p-4 space-y-4">
             <div className="border border-[#EC2029]/10 rounded-lg p-3 bg-[#EC2029]/5 border-l-4 border-l-[#EC2029]">
               <div className="flex justify-between items-start mb-2">
-                 <span className="font-bold text-[#1A2948] font-koho text-sm uppercase">Chuyến đi</span>
-                 <button className="text-[10px] font-bold text-[#EC2029] hover:underline">Chi tiết</button>
+                <span className="font-bold text-[#1A2948] font-koho text-sm uppercase">
+                  Chuyến đi
+                </span>
+                <button className="text-[10px] font-bold text-[#EC2029] hover:underline">
+                  Chi tiết
+                </button>
               </div>
               <div className="text-xs text-gray-500 italic pb-1">Vui lòng chọn chuyến bay</div>
             </div>
 
             <div className="border border-gray-100 rounded-lg p-3 bg-gray-50/50">
               <div className="flex justify-between items-start mb-2">
-                 <span className="font-bold text-gray-600 font-koho text-sm uppercase">Hành khách</span>
+                <span className="font-bold text-gray-600 font-koho text-sm uppercase">
+                  Hành khách
+                </span>
               </div>
               <div className="flex justify-between items-center text-xs text-gray-600 font-semibold border-b border-dashed border-gray-200 pb-2 mb-2">
-                 <span>Người lớn (x1)</span>
-                 <span>0₫</span>
+                <span>Người lớn (x1)</span>
+                <span>0₫</span>
               </div>
               <div className="flex justify-between items-center mt-2">
-                 <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Hành lý & Dịch vụ</span>
-                 <span className="text-xs font-semibold text-gray-400">Chưa chọn</span>
+                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                  Hành lý & Dịch vụ
+                </span>
+                <span className="text-xs font-semibold text-gray-400">Chưa chọn</span>
               </div>
             </div>
 
@@ -1530,13 +1585,22 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
               <div className="absolute -left-5 top-1.5 w-3 h-3 bg-gray-50 rounded-full border-r border-[#EC2029]/20" />
               <div className="absolute -right-5 top-1.5 w-3 h-3 bg-gray-50 rounded-full border-l border-[#EC2029]/20" />
               <div className="flex justify-between items-center mb-1">
-                 <span className="font-black text-gray-600 font-koho text-[11px] tracking-widest uppercase">Tóm tắt</span>
+                <span className="font-black text-gray-600 font-koho text-[11px] tracking-widest uppercase">
+                  Tóm tắt
+                </span>
               </div>
               <div className="flex justify-between items-end mt-2">
-                 <span className="text-xs text-gray-500 font-bold">Tổng tiền:</span>
-                 <span className="text-xl font-black text-[#EC2029] font-koho leading-none">0<span className="text-sm underline decoration-2 underline-offset-2 ml-0.5">đ</span></span>
+                <span className="text-xs text-gray-500 font-bold">Tổng tiền:</span>
+                <span className="text-xl font-black text-[#EC2029] font-koho leading-none">
+                  0
+                  <span className="text-sm underline decoration-2 underline-offset-2 ml-0.5">
+                    đ
+                  </span>
+                </span>
               </div>
-              <div className="text-right text-[10px] text-gray-400 italic mt-1">Đã bao gồm thuế, phí, phụ thu</div>
+              <div className="text-right text-[10px] text-gray-400 italic mt-1">
+                Đã bao gồm thuế, phí, phụ thu
+              </div>
             </div>
           </div>
         </div>

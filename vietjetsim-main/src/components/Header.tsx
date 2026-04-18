@@ -8,7 +8,10 @@ import { useAuth } from '@/contexts/AuthContext';
 
 // Main navigation items generator
 const getMainNav = (isAdmin: boolean) => [
-  { label: isAdmin ? 'BẢNG QUẢN TRỊ' : 'CHUYẾN BAY CỦA TÔI', href: isAdmin ? '/admin-dashboard' : '/user-dashboard' },
+  {
+    label: isAdmin ? 'BẢNG QUẢN TRỊ' : 'CHUYẾN BAY CỦA TÔI',
+    href: isAdmin ? '/admin-dashboard' : '/user-dashboard',
+  },
   { label: 'LÀM THỦ TỤC ONLINE', href: '/check-in' },
   { label: 'DỊCH VỤ CHUYẾN BAY', href: '/services' },
   { label: 'DỊCH VỤ KHÁC', href: '/homepage' },
@@ -108,7 +111,7 @@ export default function Header() {
   );
   const pathname = usePathname();
   const { user, signOut, isAdmin } = useAuth();
-  
+
   const mainNavItems = getMainNav(isAdmin);
 
   useEffect(() => {
@@ -135,9 +138,7 @@ export default function Header() {
                 <span className="text-sm flex-shrink-0 text-[#EC2029]">
                   <Icon name="BellIcon" size={14} />
                 </span>
-                <p
-                  className="text-[11px] text-[#333333] flex-1 min-w-0 truncate font-medium font-koho-medium"
-                >
+                <p className="text-[11px] text-[#333333] flex-1 min-w-0 truncate font-medium font-koho-medium">
                   {announcement}
                 </p>
                 <div className="flex items-center gap-0.5 flex-shrink-0 ml-1">
@@ -165,32 +166,47 @@ export default function Header() {
             <div className="flex flex-col">
               {/* Utility row (Top-right) */}
               <div className="flex justify-end items-center gap-4 py-2 border-b border-gray-50">
-                <Link href="/contact" className="flex items-center gap-1.5 text-[11px] font-semibold text-[#6D6E71] hover:text-[#EC2029] transition-colors">
+                <Link
+                  href="/contact"
+                  className="flex items-center gap-1.5 text-[11px] font-semibold text-[#6D6E71] hover:text-[#EC2029] transition-colors"
+                >
                   <Icon name="QuestionMarkCircleIcon" size={14} className="text-[#EC2029]" />
                   Hỗ trợ
                 </Link>
                 {user ? (
                   <div className="flex items-center gap-2">
-                    <Link href={isAdmin ? '/admin-dashboard' : '/user-dashboard'} className="text-[11px] font-bold text-[#EC2029]">
+                    <Link
+                      href={isAdmin ? '/admin-dashboard' : '/user-dashboard'}
+                      className="text-[11px] font-bold text-[#EC2029]"
+                    >
                       {user.fullName || user.email}
                     </Link>
                     <span className="text-gray-300 text-[10px]">|</span>
-                    <button onClick={() => signOut()} className="text-[11px] font-bold text-[#6D6E71] hover:text-[#EC2029]">
+                    <button
+                      onClick={() => signOut()}
+                      className="text-[11px] font-bold text-[#6D6E71] hover:text-[#EC2029]"
+                    >
                       Đăng xuất
                     </button>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <Link href="/sign-up-login" className="text-[11px] font-bold text-[#EC2029] hover:underline">
+                    <Link
+                      href="/sign-up-login"
+                      className="text-[11px] font-bold text-[#EC2029] hover:underline"
+                    >
                       Đăng ký
                     </Link>
                     <span className="text-gray-300 text-[10px]">|</span>
-                    <Link href="/sign-up-login" className="text-[11px] font-bold text-[#EC2029] hover:underline">
+                    <Link
+                      href="/sign-up-login"
+                      className="text-[11px] font-bold text-[#EC2029] hover:underline"
+                    >
                       Đăng nhập
                     </Link>
                   </div>
                 )}
-                
+
                 <button className="flex items-center gap-1 text-[11px] font-bold text-[#6D6E71] border border-gray-200 rounded px-2 py-0.5 hover:bg-gray-50">
                   Tiếng Việt
                   <Icon name="ChevronDownIcon" size={10} />
@@ -200,9 +216,9 @@ export default function Header() {
               {/* Logo & Primary Nav row */}
               <div className="flex items-center h-16">
                 <Link href="/homepage" className="flex items-center flex-shrink-0">
-                  <AppLogo size={140} color="#EC2029" />
+                  <AppLogo size={140} />
                 </Link>
-                
+
                 <div className="flex-1" />
 
                 {/* Primary Nav */}
@@ -236,7 +252,10 @@ export default function Header() {
         </div>
 
         {/* Tier 3: Service tabs row — Icons */}
-        <div className="border-t border-b border-gray-100" style={{ background: 'linear-gradient(to right, #F9A51A, #FBB612, #FFDD00)' }}>
+        <div
+          className="border-t border-b border-gray-100"
+          style={{ background: 'linear-gradient(to right, #F9A51A, #FBB612, #FFDD00)' }}
+        >
           <div className="max-w-[1400px] mx-auto px-4">
             <div className="flex items-center overflow-x-auto no-scrollbar">
               {SERVICE_TABS.map((tab, i) => {
@@ -246,9 +265,7 @@ export default function Header() {
                     key={tab.label}
                     href={tab.href}
                     className={`flex items-center gap-2 px-6 py-2 text-[12px] font-black whitespace-nowrap transition-all flex-shrink-0 ${
-                      isTabActive
-                        ? 'bg-[#FFDD00] text-[#EC2029]'
-                        : 'text-white hover:bg-white/10'
+                      isTabActive ? 'bg-[#FFDD00] text-[#EC2029]' : 'text-white hover:bg-white/10'
                     }`}
                   >
                     <span className={isTabActive ? 'text-[#EC2029]' : 'text-white'}>{tab.svg}</span>
@@ -279,7 +296,7 @@ export default function Header() {
                   </Link>
                 ))}
               </div>
-              
+
               <div className="space-y-1">
                 {mainNavItems.map((link) => (
                   <Link

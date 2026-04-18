@@ -4,10 +4,7 @@ import { verifyAdminRequest } from '@/lib/admin-auth';
 
 // ─── PATCH: Update an airport ──────────────────────────────────────────────
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'airport:manage');
     if (error) return response;
@@ -120,9 +117,10 @@ export async function DELETE(
 
     if (flightsUsingAirport.length > 0) {
       return NextResponse.json(
-        { 
-          error: 'Conflict', 
-          message: 'Cannot delete airport that is used by existing flights. Please remove or reassign flights first.' 
+        {
+          error: 'Conflict',
+          message:
+            'Cannot delete airport that is used by existing flights. Please remove or reassign flights first.',
         },
         { status: 409 }
       );

@@ -34,27 +34,28 @@ export interface AuthTokens {
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_REFRESH_SECRET =
-  process.env.JWT_REFRESH_SECRET;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 
 if (!JWT_SECRET || !JWT_REFRESH_SECRET) {
   throw new Error(
     'CRITICAL: JWT_SECRET and/or JWT_REFRESH_SECRET environment variables are not set. ' +
-    'Please create a .env.local file from .env.local.example and configure both secrets.'
+      'Please create a .env.local file from .env.local.example and configure both secrets.'
   );
 }
 
-if (JWT_SECRET === 'dev-secret-key-do-not-use-in-production' ||
-    JWT_REFRESH_SECRET === 'dev-refresh-secret-key-do-not-use-in-production') {
+if (
+  JWT_SECRET === 'dev-secret-key-do-not-use-in-production' ||
+  JWT_REFRESH_SECRET === 'dev-refresh-secret-key-do-not-use-in-production'
+) {
   if (process.env.NODE_ENV === 'production') {
     throw new Error(
       'CRITICAL SECURITY ERROR: Using default dummy JWT secrets in production is forbidden! ' +
-      'Please configure JWT_SECRET and JWT_REFRESH_SECRET environment variables.'
+        'Please configure JWT_SECRET and JWT_REFRESH_SECRET environment variables.'
     );
   }
   console.warn(
     'WARNING: Using default JWT secret keys. This is ONLY acceptable for local development. ' +
-    'NEVER deploy with default secrets!'
+      'NEVER deploy with default secrets!'
   );
 }
 const ACCESS_TOKEN_EXPIRY = '15m';
@@ -88,7 +89,10 @@ export function signAccessToken(payload: JWTPayload): string {
 }
 
 export function signRefreshToken(payload: JWTPayload): string {
-  return jwt.sign(payload, JWT_REFRESH_SECRET!, { expiresIn: REFRESH_TOKEN_EXPIRY, algorithm: 'HS256' });
+  return jwt.sign(payload, JWT_REFRESH_SECRET!, {
+    expiresIn: REFRESH_TOKEN_EXPIRY,
+    algorithm: 'HS256',
+  });
 }
 
 export function verifyAccessToken(token: string): JWTPayload | null {
@@ -101,7 +105,9 @@ export function verifyAccessToken(token: string): JWTPayload | null {
 
 export function verifyRefreshToken(token: string): JWTPayload | null {
   try {
-    return jwt.verify(token, JWT_REFRESH_SECRET!, { algorithms: ['HS256'] }) as unknown as JWTPayload;
+    return jwt.verify(token, JWT_REFRESH_SECRET!, {
+      algorithms: ['HS256'],
+    }) as unknown as JWTPayload;
   } catch {
     return null;
   }
@@ -254,7 +260,7 @@ export async function getToken(request: Request): Promise<JWTPayload | null> {
   const cookieHeader = request.headers.get('Cookie');
   if (cookieHeader) {
     const cookies = Object.fromEntries(
-      cookieHeader.split(';').map(c => {
+      cookieHeader.split(';').map((c) => {
         const [key, ...value] = c.trim().split('=');
         return [key, value.join('=')];
       })
@@ -279,6 +285,3 @@ export async function verifyAuthRequest(request: Request) {
   }
   return { user, error: null, response: null };
 }
-
-
-

@@ -3,10 +3,7 @@ import { verifyAdminRequest } from '@/lib/admin-auth';
 import { getDiscountCodeById, updateDiscountCode, deleteDiscountCode } from '@/lib/db';
 
 // ─── GET: Get discount code by ID ───────────────────────────────────────────
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'discount:view' as any);
     if (error) return response;
@@ -25,17 +22,17 @@ export async function GET(
   } catch (error) {
     console.error('Error fetching discount by ID:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error', message: (error instanceof Error ? error.message : "Unknown error") },
+      {
+        error: 'Internal Server Error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
 }
 
 // ─── PATCH: Update a discount code ──────────────────────────────────────────
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'discount:update' as any);
     if (error) return response;
@@ -60,7 +57,10 @@ export async function PATCH(
   } catch (error) {
     console.error('Error updating discount:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error', message: (error instanceof Error ? error.message : "Unknown error") },
+      {
+        error: 'Internal Server Error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
@@ -85,7 +85,10 @@ export async function DELETE(
   } catch (error) {
     console.error('Error deleting discount:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error', message: (error instanceof Error ? error.message : "Unknown error") },
+      {
+        error: 'Internal Server Error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

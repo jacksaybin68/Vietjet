@@ -144,7 +144,7 @@ export default function BookingsTab() {
   const [invoiceForm, setInvoiceForm] = useState({
     method: 'bank',
     amount: 0,
-    status: 'completed'
+    status: 'completed',
   });
 
   React.useEffect(() => {
@@ -339,7 +339,7 @@ export default function BookingsTab() {
   const handleSaveEdit = () => {
     if (selectedBooking && editForm) {
       setBookings((prev) =>
-        prev.map((b) => (b.id === selectedBooking.id ? { ...b, ...editForm } as Booking : b))
+        prev.map((b) => (b.id === selectedBooking.id ? ({ ...b, ...editForm } as Booking) : b))
       );
       setSelectedBooking({ ...selectedBooking, ...editForm } as Booking);
       setIsEditing(false);
@@ -357,7 +357,7 @@ export default function BookingsTab() {
           booking_id: selectedBooking.id,
           amount: invoiceForm.amount || selectedBooking.amount,
           method: invoiceForm.method,
-          status: invoiceForm.status
+          status: invoiceForm.status,
         }),
       });
 
@@ -365,8 +365,18 @@ export default function BookingsTab() {
       if (res.ok) {
         // Update local state
         const newStatus = invoiceForm.status === 'completed' ? 'confirmed' : selectedBooking.status;
-        setBookings(prev => prev.map(b => b.id === selectedBooking.id ? { ...b, status: newStatus as BookingStatus, payMethod: invoiceForm.method } : b));
-        setSelectedBooking(prev => prev ? { ...prev, status: newStatus as BookingStatus, payMethod: invoiceForm.method } : null);
+        setBookings((prev) =>
+          prev.map((b) =>
+            b.id === selectedBooking.id
+              ? { ...b, status: newStatus as BookingStatus, payMethod: invoiceForm.method }
+              : b
+          )
+        );
+        setSelectedBooking((prev) =>
+          prev
+            ? { ...prev, status: newStatus as BookingStatus, payMethod: invoiceForm.method }
+            : null
+        );
         setShowInvoiceModal(false);
         // Assuming toast is available via props if integrated like other tabs, but BookingsTab doesn't have it in props yet.
         // For consistency with other parts of the app:
@@ -483,21 +493,28 @@ export default function BookingsTab() {
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: 'Tổng đơn', value: bookings.length, color: 'from-slate-700/50 to-slate-800/50 text-white border-white/5 shadow-lg' },
+          {
+            label: 'Tổng đơn',
+            value: bookings.length,
+            color: 'from-slate-700/50 to-slate-800/50 text-white border-white/5 shadow-lg',
+          },
           {
             label: 'Xác nhận',
             value: bookings.filter((b) => b.status === 'confirmed').length,
-            color: 'from-emerald-500/10 to-emerald-600/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]',
+            color:
+              'from-emerald-500/10 to-emerald-600/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]',
           },
           {
             label: 'Chờ duyệt',
             value: bookings.filter((b) => b.status === 'pending').length,
-            color: 'from-amber-500/10 to-amber-600/10 text-amber-400 border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]',
+            color:
+              'from-amber-500/10 to-amber-600/10 text-amber-400 border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]',
           },
           {
             label: 'Đã huỷ',
             value: bookings.filter((b) => b.status === 'cancelled').length,
-            color: 'from-rose-500/10 to-rose-600/10 text-rose-400 border-rose-500/20 shadow-[0_0_15px_rgba(244,63,94,0.1)]',
+            color:
+              'from-rose-500/10 to-rose-600/10 text-rose-400 border-rose-500/20 shadow-[0_0_15px_rgba(244,63,94,0.1)]',
           },
         ].map((stat) => (
           <div
@@ -506,7 +523,9 @@ export default function BookingsTab() {
           >
             <div className="absolute top-[-20%] right-[-10%] w-24 h-24 bg-white/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
             <div className="text-3xl font-black tracking-tighter relative z-10">{stat.value}</div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.2em] mt-1.5 opacity-60 relative z-10">{stat.label}</div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.2em] mt-1.5 opacity-60 relative z-10">
+              {stat.label}
+            </div>
           </div>
         ))}
       </div>
@@ -527,7 +546,7 @@ export default function BookingsTab() {
             className="w-full pl-12 pr-4 py-3 bg-slate-800/40 border border-white/5 rounded-2xl text-sm font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 transition-all focus:bg-slate-800/60"
           />
         </div>
-        
+
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center bg-slate-800/40 border border-white/5 rounded-2xl p-1 gap-1">
             <div className="relative">
@@ -569,7 +588,9 @@ export default function BookingsTab() {
 
           <select
             value={filterStatus}
-            onChange={(e) => handleFilterChange(searchQuery, e.target.value as 'all' | BookingStatus)}
+            onChange={(e) =>
+              handleFilterChange(searchQuery, e.target.value as 'all' | BookingStatus)
+            }
             className="px-4 py-3 bg-slate-800/40 border border-white/5 rounded-2xl text-xs font-bold text-slate-300 focus:outline-none focus:border-indigo-500/50 appearance-none min-w-[140px] transition-all"
           >
             <option value="all">Tất cả trạng thái</option>
@@ -598,11 +619,11 @@ export default function BookingsTab() {
       {/* Table */}
       <div
         className="rounded-3xl border overflow-hidden transition-all duration-500"
-        style={{ 
-          background: 'rgba(30, 41, 59, 0.4)', 
+        style={{
+          background: 'rgba(30, 41, 59, 0.4)',
           backdropFilter: 'blur(16px)',
           borderColor: 'rgba(255, 255, 255, 0.05)',
-          boxShadow: '0 20px 50px rgba(0,0,0,0.3)'
+          boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
         }}
       >
         <div className="overflow-x-auto">
@@ -874,8 +895,12 @@ export default function BookingsTab() {
                       </span>
                     </td>
                     <td className="px-6 py-5">
-                      <div className="font-bold text-slate-200 text-sm group-hover:text-white transition-colors">{booking.userName}</div>
-                      <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-0.5">Ghế {booking.seat}</div>
+                      <div className="font-bold text-slate-200 text-sm group-hover:text-white transition-colors">
+                        {booking.userName}
+                      </div>
+                      <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-0.5">
+                        Ghế {booking.seat}
+                      </div>
                     </td>
                     <td className="px-6 py-5 hidden sm:table-cell">
                       <div className="font-bold text-slate-300 text-sm">{booking.flightNo}</div>
@@ -902,21 +927,34 @@ export default function BookingsTab() {
                           handleStatusChange(booking.id, e.target.value as BookingStatus)
                         }
                         className={`text-[10px] font-black px-3 py-1 rounded-lg border-0 cursor-pointer appearance-none text-center uppercase tracking-wider transition-all focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 ${
-                          booking.status === 'confirmed' ? 'bg-emerald-500/10 text-emerald-400 focus:ring-emerald-500/50' : 
-                          booking.status === 'pending' ? 'bg-amber-500/10 text-amber-400 focus:ring-amber-500/50' : 
-                          booking.status === 'cancelled' ? 'bg-rose-500/10 text-rose-400 focus:ring-rose-500/50' : 
-                          'bg-sky-500/10 text-sky-400 focus:ring-sky-500/50'
+                          booking.status === 'confirmed'
+                            ? 'bg-emerald-500/10 text-emerald-400 focus:ring-emerald-500/50'
+                            : booking.status === 'pending'
+                              ? 'bg-amber-500/10 text-amber-400 focus:ring-amber-500/50'
+                              : booking.status === 'cancelled'
+                                ? 'bg-rose-500/10 text-rose-400 focus:ring-rose-500/50'
+                                : 'bg-sky-500/10 text-sky-400 focus:ring-sky-500/50'
                         }`}
                         style={{ border: '1px solid currentColor' }}
                       >
-                        <option value="confirmed" className="bg-slate-800 text-emerald-400">Xác nhận</option>
-                        <option value="pending" className="bg-slate-800 text-amber-400">Chờ duyệt</option>
-                        <option value="completed" className="bg-slate-800 text-sky-400">Hoàn thành</option>
-                        <option value="cancelled" className="bg-slate-800 text-rose-400">Huỷ</option>
+                        <option value="confirmed" className="bg-slate-800 text-emerald-400">
+                          Xác nhận
+                        </option>
+                        <option value="pending" className="bg-slate-800 text-amber-400">
+                          Chờ duyệt
+                        </option>
+                        <option value="completed" className="bg-slate-800 text-sky-400">
+                          Hoàn thành
+                        </option>
+                        <option value="cancelled" className="bg-slate-800 text-rose-400">
+                          Huỷ
+                        </option>
                       </select>
                     </td>
                     <td className="px-6 py-5 hidden lg:table-cell text-right">
-                      <span className="text-xs font-medium text-slate-500">{booking.createdAt}</span>
+                      <span className="text-xs font-medium text-slate-500">
+                        {booking.createdAt}
+                      </span>
                     </td>
                   </tr>
                 ))
@@ -924,7 +962,10 @@ export default function BookingsTab() {
             </tbody>
             <tfoot>
               <tr className="bg-white/5 border-t border-white/5">
-                <td colSpan={4} className="px-6 py-5 text-sm font-black text-slate-400 uppercase tracking-widest">
+                <td
+                  colSpan={4}
+                  className="px-6 py-5 text-sm font-black text-slate-400 uppercase tracking-widest"
+                >
                   Tổng ({sorted.filter((b) => b.status !== 'cancelled').length} đơn hợp lệ)
                 </td>
                 <td className="px-6 py-5 text-right font-black text-rose-400 text-lg tracking-tight">
@@ -978,11 +1019,12 @@ export default function BookingsTab() {
       {/* Booking Detail Modal */}
       {selectedBooking && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div 
+          <div
             className="w-full max-w-2xl bg-slate-900 border border-white/10 rounded-[32px] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-300"
-            style={{ 
-              background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%)',
-              boxShadow: '0 25px 70px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(99, 102, 241, 0.1)'
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%)',
+              boxShadow: '0 25px 70px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(99, 102, 241, 0.1)',
             }}
           >
             {/* Modal Header */}
@@ -993,7 +1035,9 @@ export default function BookingsTab() {
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-white tracking-tight">Chi tiết đặt vé</h3>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Mã: <span className="text-indigo-400">{selectedBooking.id}</span></p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">
+                    Mã: <span className="text-indigo-400">{selectedBooking.id}</span>
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -1030,7 +1074,7 @@ export default function BookingsTab() {
                     </button>
                   </>
                 )}
-                <button 
+                <button
                   onClick={() => setSelectedBooking(null)}
                   className="w-10 h-10 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-xl flex items-center justify-center transition-all active:scale-90"
                 >
@@ -1045,16 +1089,22 @@ export default function BookingsTab() {
                 {/* Left Column: Guest & Flight */}
                 <div className="space-y-6">
                   <section>
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">Thông tin khách hàng</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">
+                      Thông tin khách hàng
+                    </label>
                     <div className="bg-white/5 border border-white/5 rounded-2xl p-4">
                       {isEditing ? (
                         <div className="space-y-3">
                           <div>
-                            <label className="text-xs text-slate-400 block mb-1">Tên khách hàng</label>
+                            <label className="text-xs text-slate-400 block mb-1">
+                              Tên khách hàng
+                            </label>
                             <input
                               type="text"
                               value={editForm.userName || ''}
-                              onChange={(e) => setEditForm(prev => ({ ...prev, userName: e.target.value }))}
+                              onChange={(e) =>
+                                setEditForm((prev) => ({ ...prev, userName: e.target.value }))
+                              }
                               className="w-full bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500/50"
                             />
                           </div>
@@ -1064,7 +1114,9 @@ export default function BookingsTab() {
                               <input
                                 type="text"
                                 value={editForm.seat || ''}
-                                onChange={(e) => setEditForm(prev => ({ ...prev, seat: e.target.value }))}
+                                onChange={(e) =>
+                                  setEditForm((prev) => ({ ...prev, seat: e.target.value }))
+                                }
                                 className="w-full bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500/50"
                               />
                             </div>
@@ -1076,16 +1128,26 @@ export default function BookingsTab() {
                             <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center text-xs font-black text-white shadow-lg shadow-indigo-500/20">
                               {selectedBooking.userName.charAt(0)}
                             </div>
-                            <span className="font-bold text-slate-200">{selectedBooking.userName}</span>
+                            <span className="font-bold text-slate-200">
+                              {selectedBooking.userName}
+                            </span>
                           </div>
                           <div className="space-y-2 text-xs">
                             <div className="flex justify-between">
-                              <span className="text-slate-500 font-medium tracking-tight">ID Người dùng</span>
-                              <span className="text-slate-300 font-bold">#{selectedBooking.userId}</span>
+                              <span className="text-slate-500 font-medium tracking-tight">
+                                ID Người dùng
+                              </span>
+                              <span className="text-slate-300 font-bold">
+                                #{selectedBooking.userId}
+                              </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-slate-500 font-medium tracking-tight">Số ghế</span>
-                              <span className="text-emerald-400 font-black px-2 py-0.5 bg-emerald-500/10 rounded-md">{selectedBooking.seat}</span>
+                              <span className="text-slate-500 font-medium tracking-tight">
+                                Số ghế
+                              </span>
+                              <span className="text-emerald-400 font-black px-2 py-0.5 bg-emerald-500/10 rounded-md">
+                                {selectedBooking.seat}
+                              </span>
                             </div>
                           </div>
                         </>
@@ -1094,16 +1156,22 @@ export default function BookingsTab() {
                   </section>
 
                   <section>
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">Hành trình</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">
+                      Hành trình
+                    </label>
                     <div className="bg-white/5 border border-white/5 rounded-2xl p-4">
                       {isEditing ? (
                         <div className="space-y-3">
                           <div>
-                            <label className="text-xs text-slate-400 block mb-1">Hành trình (VD: HAN → SGN)</label>
+                            <label className="text-xs text-slate-400 block mb-1">
+                              Hành trình (VD: HAN → SGN)
+                            </label>
                             <input
                               type="text"
                               value={editForm.route || ''}
-                              onChange={(e) => setEditForm(prev => ({ ...prev, route: e.target.value }))}
+                              onChange={(e) =>
+                                setEditForm((prev) => ({ ...prev, route: e.target.value }))
+                              }
                               className="w-full bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500/50"
                             />
                           </div>
@@ -1112,7 +1180,9 @@ export default function BookingsTab() {
                             <input
                               type="text"
                               value={editForm.flightNo || ''}
-                              onChange={(e) => setEditForm(prev => ({ ...prev, flightNo: e.target.value }))}
+                              onChange={(e) =>
+                                setEditForm((prev) => ({ ...prev, flightNo: e.target.value }))
+                              }
                               className="w-full bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500/50"
                             />
                           </div>
@@ -1121,22 +1191,36 @@ export default function BookingsTab() {
                         <>
                           <div className="flex items-center justify-between mb-4">
                             <div className="text-center">
-                              <div className="text-lg font-black text-white">{selectedBooking.route.split(' → ')[0]}</div>
-                              <div className="text-[10px] font-bold text-slate-500 uppercase">Khởi hành</div>
+                              <div className="text-lg font-black text-white">
+                                {selectedBooking.route.split(' → ')[0]}
+                              </div>
+                              <div className="text-[10px] font-bold text-slate-500 uppercase">
+                                Khởi hành
+                              </div>
                             </div>
                             <div className="flex-1 flex items-center justify-center px-4 relative">
                               <div className="h-[2px] w-full bg-indigo-500/20" />
-                              <Icon name="PaperAirplaneIcon" size={14} className="absolute text-indigo-400 rotate-90" />
+                              <Icon
+                                name="PaperAirplaneIcon"
+                                size={14}
+                                className="absolute text-indigo-400 rotate-90"
+                              />
                             </div>
                             <div className="text-center">
-                              <div className="text-lg font-black text-white">{selectedBooking.route.split(' → ')[1] || ''}</div>
-                              <div className="text-[10px] font-bold text-slate-500 uppercase">Điểm đến</div>
+                              <div className="text-lg font-black text-white">
+                                {selectedBooking.route.split(' → ')[1] || ''}
+                              </div>
+                              <div className="text-[10px] font-bold text-slate-500 uppercase">
+                                Điểm đến
+                              </div>
                             </div>
                           </div>
                           <div className="flex justify-between items-center text-xs">
                             <div>
                               <p className="text-slate-500 mb-0.5">Chuyến bay</p>
-                              <p className="font-black text-indigo-300">{selectedBooking.flightNo}</p>
+                              <p className="font-black text-indigo-300">
+                                {selectedBooking.flightNo}
+                              </p>
                             </div>
                             <div className="text-right">
                               <p className="text-slate-500 mb-0.5">Ngày khởi hành</p>
@@ -1152,25 +1236,35 @@ export default function BookingsTab() {
                 {/* Right Column: Payment & History */}
                 <div className="space-y-6">
                   <section>
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">Thanh toán</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">
+                      Thanh toán
+                    </label>
                     <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-2xl p-4 overflow-hidden relative group">
                       <div className="absolute top-[-20%] right-[-10%] w-20 h-20 bg-indigo-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
                       {isEditing ? (
                         <div className="relative z-10 space-y-3">
                           <div>
-                            <label className="text-xs text-slate-400 block mb-1">Số tiền (VND)</label>
+                            <label className="text-xs text-slate-400 block mb-1">
+                              Số tiền (VND)
+                            </label>
                             <input
                               type="number"
                               value={editForm.amount || 0}
-                              onChange={(e) => setEditForm(prev => ({ ...prev, amount: Number(e.target.value) }))}
+                              onChange={(e) =>
+                                setEditForm((prev) => ({ ...prev, amount: Number(e.target.value) }))
+                              }
                               className="w-full bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500/50"
                             />
                           </div>
                           <div>
-                            <label className="text-xs text-slate-400 block mb-1">Phương thức thanh toán</label>
+                            <label className="text-xs text-slate-400 block mb-1">
+                              Phương thức thanh toán
+                            </label>
                             <select
                               value={editForm.payMethod || 'Thẻ tín dụng'}
-                              onChange={(e) => setEditForm(prev => ({ ...prev, payMethod: e.target.value }))}
+                              onChange={(e) =>
+                                setEditForm((prev) => ({ ...prev, payMethod: e.target.value }))
+                              }
                               className="w-full bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500/50"
                             >
                               <option value="Thẻ tín dụng">Thẻ tín dụng</option>
@@ -1185,7 +1279,9 @@ export default function BookingsTab() {
                         <>
                           <div className="flex justify-between items-start mb-4 relative z-10">
                             <div>
-                              <p className="text-xs font-bold text-slate-500 mb-1 tracking-tight">Tổng cộng cần thanh toán</p>
+                              <p className="text-xs font-bold text-slate-500 mb-1 tracking-tight">
+                                Tổng cộng cần thanh toán
+                              </p>
                               <p className="text-2xl font-black text-white tracking-tighter tabular-nums">
                                 {selectedBooking.amount.toLocaleString('vi-VN')}₫
                               </p>
@@ -1195,8 +1291,12 @@ export default function BookingsTab() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2 relative z-10">
-                            <div className={`w-2 h-2 rounded-full ${selectedBooking.status === 'confirmed' ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : selectedBooking.status === 'pending' ? 'bg-amber-500 shadow-[0_0_8px_#f59e0b]' : 'bg-rose-500 shadow-[0_0_8px_#f43f5e]'}`} />
-                            <span className={`text-[10px] font-black uppercase tracking-widest ${selectedBooking.status === 'confirmed' ? 'text-emerald-400' : selectedBooking.status === 'pending' ? 'text-amber-400' : 'text-rose-400'}`}>
+                            <div
+                              className={`w-2 h-2 rounded-full ${selectedBooking.status === 'confirmed' ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : selectedBooking.status === 'pending' ? 'bg-amber-500 shadow-[0_0_8px_#f59e0b]' : 'bg-rose-500 shadow-[0_0_8px_#f43f5e]'}`}
+                            />
+                            <span
+                              className={`text-[10px] font-black uppercase tracking-widest ${selectedBooking.status === 'confirmed' ? 'text-emerald-400' : selectedBooking.status === 'pending' ? 'text-amber-400' : 'text-rose-400'}`}
+                            >
                               {STATUS_MAP[selectedBooking.status].label}
                             </span>
                           </div>
@@ -1206,19 +1306,35 @@ export default function BookingsTab() {
                   </section>
 
                   <section>
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">Lịch sử đơn hàng</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">
+                      Lịch sử đơn hàng
+                    </label>
                     <div className="space-y-4">
                       {[
-                        { time: selectedBooking.createdAt, event: 'Khách hàng đặt vé thành công', status: 'done' },
-                        { time: '16/03/2026 21:05', event: 'Hệ thống xác nhận thanh toán', status: selectedBooking.status === 'confirmed' ? 'done' : 'pending' },
-                        { time: 'Chờ xử lý', event: 'Gửi vé điện tử qua Email', status: 'next' }
+                        {
+                          time: selectedBooking.createdAt,
+                          event: 'Khách hàng đặt vé thành công',
+                          status: 'done',
+                        },
+                        {
+                          time: '16/03/2026 21:05',
+                          event: 'Hệ thống xác nhận thanh toán',
+                          status: selectedBooking.status === 'confirmed' ? 'done' : 'pending',
+                        },
+                        { time: 'Chờ xử lý', event: 'Gửi vé điện tử qua Email', status: 'next' },
                       ].map((item, idx) => (
                         <div key={idx} className="flex gap-4 relative">
-                          {idx !== 2 && <div className="absolute left-[7px] top-[18px] w-[2px] h-full bg-white/5" />}
-                          <div className={`w-4 h-4 rounded-full mt-0.5 relative z-10 border-2 ${item.status === 'done' ? 'bg-indigo-500 border-indigo-400 shadow-[0_0_8px_#6366f1]' : item.status === 'pending' ? 'bg-slate-800 border-indigo-500/50' : 'bg-slate-800 border-slate-700'}`} />
+                          {idx !== 2 && (
+                            <div className="absolute left-[7px] top-[18px] w-[2px] h-full bg-white/5" />
+                          )}
+                          <div
+                            className={`w-4 h-4 rounded-full mt-0.5 relative z-10 border-2 ${item.status === 'done' ? 'bg-indigo-500 border-indigo-400 shadow-[0_0_8px_#6366f1]' : item.status === 'pending' ? 'bg-slate-800 border-indigo-500/50' : 'bg-slate-800 border-slate-700'}`}
+                          />
                           <div>
                             <p className="text-[11px] font-bold text-slate-200">{item.event}</p>
-                            <p className="text-[9px] font-black text-slate-500 uppercase mt-0.5 tracking-wider">{item.time}</p>
+                            <p className="text-[9px] font-black text-slate-500 uppercase mt-0.5 tracking-wider">
+                              {item.time}
+                            </p>
                           </div>
                         </div>
                       ))}
@@ -1239,7 +1355,7 @@ export default function BookingsTab() {
                   In hoá đơn
                 </button>
                 {selectedBooking.status === 'pending' && (
-                  <button 
+                  <button
                     onClick={() => {
                       setInvoiceForm({ ...invoiceForm, amount: selectedBooking.amount });
                       setShowInvoiceModal(true);
@@ -1251,7 +1367,7 @@ export default function BookingsTab() {
                   </button>
                 )}
               </div>
-              
+
               <div className="flex gap-3">
                 <button
                   onClick={() => setIsEditing(!isEditing)}
@@ -1259,11 +1375,13 @@ export default function BookingsTab() {
                 >
                   {isEditing ? 'Huỷ chỉnh sửa' : 'Chỉnh sửa nhanh'}
                 </button>
-                <button 
+                <button
                   onClick={() => {
-                    if(confirm('Bạn có chắc muốn huỷ đơn đặt vé này?')) {
+                    if (confirm('Bạn có chắc muốn huỷ đơn đặt vé này?')) {
                       handleStatusChange(selectedBooking.id, 'cancelled');
-                      setSelectedBooking(prev => prev ? {...prev, status: 'cancelled'} : null);
+                      setSelectedBooking((prev) =>
+                        prev ? { ...prev, status: 'cancelled' } : null
+                      );
                     }
                   }}
                   disabled={selectedBooking.status === 'cancelled'}
@@ -1281,37 +1399,49 @@ export default function BookingsTab() {
       {/* Manual Invoice Modal */}
       {showInvoiceModal && selectedBooking && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-          <div 
+          <div
             className="bg-slate-900 border border-white/10 rounded-[32px] w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200"
             style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)' }}
           >
             <div className="px-8 py-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
               <div>
-                <h3 className="font-black uppercase tracking-widest text-xs text-white">Xử lý thanh toán</h3>
-                <p className="text-[10px] font-bold text-indigo-400 mt-0.5">Booking ID: {selectedBooking.id}</p>
+                <h3 className="font-black uppercase tracking-widest text-xs text-white">
+                  Xử lý thanh toán
+                </h3>
+                <p className="text-[10px] font-bold text-indigo-400 mt-0.5">
+                  Booking ID: {selectedBooking.id}
+                </p>
               </div>
-              <button 
+              <button
                 onClick={() => setShowInvoiceModal(false)}
                 className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 flex items-center justify-center transition-colors"
-                >
+              >
                 <Icon name="XMarkIcon" size={18} />
               </button>
             </div>
             <div className="p-8 space-y-6">
               <div>
-                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">Số tiền thanh toán</label>
+                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">
+                  Số tiền thanh toán
+                </label>
                 <div className="relative group">
                   <input
                     type="number"
                     value={invoiceForm.amount}
-                    onChange={(e) => setInvoiceForm({ ...invoiceForm, amount: Number(e.target.value) })}
+                    onChange={(e) =>
+                      setInvoiceForm({ ...invoiceForm, amount: Number(e.target.value) })
+                    }
                     className="w-full pl-5 pr-14 py-4 bg-slate-800/50 border border-white/10 rounded-2xl text-base font-black text-white focus:outline-none focus:border-indigo-500/50 transition-all"
                   />
-                  <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-500 uppercase">VNĐ</span>
+                  <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-500 uppercase">
+                    VNĐ
+                  </span>
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">Phương thức ghi nhận</label>
+                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">
+                  Phương thức ghi nhận
+                </label>
                 <div className="relative group">
                   <select
                     value={invoiceForm.method}
@@ -1323,7 +1453,11 @@ export default function BookingsTab() {
                     <option value="wallet">Ví điện tử cá nhân</option>
                     <option value="other">Hệ thống đối tác</option>
                   </select>
-                  <Icon name="ChevronDownIcon" size={14} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                  <Icon
+                    name="ChevronDownIcon"
+                    size={14}
+                    className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"
+                  />
                 </div>
               </div>
               <div className="pt-4">
@@ -1340,7 +1474,8 @@ export default function BookingsTab() {
                   {isProcessingInvoice ? 'Đang xác thực...' : 'Xác nhận đặt vé ngay'}
                 </button>
                 <p className="text-[10px] text-center text-slate-500 mt-6 leading-relaxed px-4 font-medium italic">
-                  Thao tác này đồng nghĩa với việc bạn xác nhận đã nhận đủ số tiền và tự động thay đổi trạng thái Booking sang <strong>Confirmed</strong>.
+                  Thao tác này đồng nghĩa với việc bạn xác nhận đã nhận đủ số tiền và tự động thay
+                  đổi trạng thái Booking sang <strong>Confirmed</strong>.
                 </p>
               </div>
             </div>

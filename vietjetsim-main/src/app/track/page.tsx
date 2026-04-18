@@ -24,7 +24,7 @@ interface BookingResult {
 }
 
 const MOCK_BOOKINGS: Record<string, BookingResult> = {
-  'VJ8A3F': {
+  VJ8A3F: {
     pnr: 'VJ8A3F',
     flightNo: 'VJ 101',
     from: 'SGN',
@@ -40,7 +40,7 @@ const MOCK_BOOKINGS: Record<string, BookingResult> = {
     status: 'confirmed',
     price: 899000,
   },
-  'VJ7B2K': {
+  VJ7B2K: {
     pnr: 'VJ7B2K',
     flightNo: 'VJ 503',
     from: 'HAN',
@@ -56,7 +56,7 @@ const MOCK_BOOKINGS: Record<string, BookingResult> = {
     status: 'pending',
     price: 650000,
   },
-  'VJ5C9M': {
+  VJ5C9M: {
     pnr: 'VJ5C9M',
     flightNo: 'VJ 807',
     from: 'SGN',
@@ -134,11 +134,7 @@ export default function TrackBookingPage() {
           <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
             <Icon name="MagnifyingGlassIcon" size={28} className="text-white" />
           </div>
-          <h1
-            className="text-2xl sm:text-3xl font-black mb-1 font-heading-sm"
-          >
-            Tra Cứu Đặt Chỗ
-          </h1>
+          <h1 className="text-2xl sm:text-3xl font-black mb-1 font-heading-sm">Tra Cứu Đặt Chỗ</h1>
           <p className="text-white/80 text-sm font-koho">
             Nhập mã đặt chỗ và email để xem thông tin chuyến bay
           </p>
@@ -236,7 +232,8 @@ export default function TrackBookingPage() {
             </div>
             <h2 className="text-xl font-bold text-stone-900 mb-2">Không tìm thấy đặt chỗ</h2>
             <p className="text-stone-500 mb-6 text-sm">
-              Không có đặt chỗ nào khớp với mã PNR và email bạn đã nhập. Vui lòng kiểm tra lại thông tin.
+              Không có đặt chỗ nào khớp với mã PNR và email bạn đã nhập. Vui lòng kiểm tra lại thông
+              tin.
             </p>
             <button
               onClick={handleReset}
@@ -300,7 +297,11 @@ export default function TrackBookingPage() {
                     <div className="text-xs text-stone-400 mb-1">Bay thẳng</div>
                     <div className="w-full h-px bg-stone-300 relative">
                       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2">
-                        <Icon name="PaperAirplaneIcon" size={16} className="text-primary rotate-90" />
+                        <Icon
+                          name="PaperAirplaneIcon"
+                          size={16}
+                          className="text-primary rotate-90"
+                        />
                       </div>
                     </div>
                     <div className="text-xs text-stone-400 mt-1">{result.date}</div>
@@ -335,7 +336,9 @@ export default function TrackBookingPage() {
                   </div>
                   <div>
                     <div className="text-xs text-stone-400 uppercase">Giá vé</div>
-                    <div className="font-bold text-stone-800">{result.price.toLocaleString('vi-VN')}₫</div>
+                    <div className="font-bold text-stone-800">
+                      {result.price.toLocaleString('vi-VN')}₫
+                    </div>
                   </div>
                 </div>
 
@@ -344,9 +347,7 @@ export default function TrackBookingPage() {
                   <div className="w-28 h-28 bg-white rounded-lg flex items-center justify-center border-2 border-dashed border-stone-300 mb-2">
                     <Icon name="QrCodeIcon" size={48} className="text-stone-400" />
                   </div>
-                  <p className="text-xs text-stone-500 text-center">
-                    Xuất trình mã QR tại sân bay
-                  </p>
+                  <p className="text-xs text-stone-500 text-center">Xuất trình mã QR tại sân bay</p>
                 </div>
               </div>
             </div>

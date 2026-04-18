@@ -32,10 +32,7 @@ export function formatNumber(value: number): string {
 /**
  * Format a date for display
  */
-export function formatDate(
-  date: Date | string,
-  options?: Intl.DateTimeFormatOptions
-): string {
+export function formatDate(date: Date | string, options?: Intl.DateTimeFormatOptions): string {
   const d = typeof date === 'string' ? new Date(date) : date;
   return new Intl.DateTimeFormat('vi-VN', {
     dateStyle: 'medium',
@@ -46,10 +43,7 @@ export function formatDate(
 /**
  * Format a date with time for display
  */
-export function formatDateTime(
-  date: Date | string,
-  options?: Intl.DateTimeFormatOptions
-): string {
+export function formatDateTime(date: Date | string, options?: Intl.DateTimeFormatOptions): string {
   const d = typeof date === 'string' ? new Date(date) : date;
   return new Intl.DateTimeFormat('vi-VN', {
     dateStyle: 'medium',

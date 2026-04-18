@@ -32,13 +32,7 @@ interface TwoFAData {
 
 // ─── 2FA Setup Modal ────────────────────────────────────────────────────────
 
-function TwoFASetupModal({
-  onClose,
-  onSuccess,
-}: {
-  onClose: () => void;
-  onSuccess: () => void;
-}) {
+function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
   const toast = useToast();
   const [step, setStep] = useState<'setup' | 'verify' | 'done'>('setup');
   const [secret, setSecret] = useState('');
@@ -135,7 +129,8 @@ function TwoFASetupModal({
                 Quét mã QR với ứng dụng xác thực
               </h4>
               <p className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">
-                Sử dụng ứng dụng Google Authenticator, Authy hoặc Microsoft Authenticator để quét mã QR bên dưới.
+                Sử dụng ứng dụng Google Authenticator, Authy hoặc Microsoft Authenticator để quét mã
+                QR bên dưới.
               </p>
 
               {/* QR Code placeholder */}
@@ -236,7 +231,8 @@ function TwoFASetupModal({
                 Mã dự phòng
               </h4>
               <p className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">
-                Lưu giữ các mã dưới đây ở nơi an toàn. Bạn có thể dùng chúng để đăng nhập nếu mất quyền truy cập vào ứng dụng xác thực.
+                Lưu giữ các mã dưới đây ở nơi an toàn. Bạn có thể dùng chúng để đăng nhập nếu mất
+                quyền truy cập vào ứng dụng xác thực.
               </p>
 
               <div className="grid grid-cols-2 gap-2">
@@ -482,8 +478,8 @@ export default function SecurityTab() {
                       session.device_type === 'Mobile'
                         ? 'DevicePhoneMobileIcon'
                         : session.device_type === 'Tablet'
-                        ? 'DeviceTabletIcon'
-                        : 'ComputerDesktopIcon'
+                          ? 'DeviceTabletIcon'
+                          : 'ComputerDesktopIcon'
                     }
                     size={20}
                     className="text-stone-500"
@@ -492,7 +488,8 @@ export default function SecurityTab() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-sm text-[#1A2948] font-[KoHo,sans-serif]">
-                      {session.device_name || `${session.browser || 'Trình duyệt'} trên ${session.os || 'thiết bị'}`}
+                      {session.device_name ||
+                        `${session.browser || 'Trình duyệt'} trên ${session.os || 'thiết bị'}`}
                     </span>
                     {session.is_current && (
                       <span className="px-2 py-0.5 bg-[#10B981]/10 text-[#10B981] rounded-full text-xs font-semibold font-[Be Vietnam Pro,sans-serif]">
@@ -501,7 +498,8 @@ export default function SecurityTab() {
                     )}
                   </div>
                   <p className="text-xs text-stone-500 mt-0.5 font-[Be Vietnam Pro,sans-serif]">
-                    {session.ip_address || 'Địa chỉ không xác định'} · {formatDate(session.last_active)}
+                    {session.ip_address || 'Địa chỉ không xác định'} ·{' '}
+                    {formatDate(session.last_active)}
                   </p>
                 </div>
                 {!session.is_current && (
@@ -562,10 +560,7 @@ export default function SecurityTab() {
       </div>
 
       {show2FASetup && (
-        <TwoFASetupModal
-          onClose={() => setShow2FASetup(false)}
-          onSuccess={fetchData}
-        />
+        <TwoFASetupModal onClose={() => setShow2FASetup(false)} onSuccess={fetchData} />
       )}
     </div>
   );

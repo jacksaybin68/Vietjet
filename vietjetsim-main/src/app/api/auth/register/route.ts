@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
-import { hashPassword, generateTokens, setAuthCookiesOnResponse, validatePassword } from '@/lib/auth';
+import {
+  hashPassword,
+  generateTokens,
+  setAuthCookiesOnResponse,
+  validatePassword,
+} from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,7 +14,10 @@ export async function POST(request: NextRequest) {
 
     // Validation: Require password, full_name, and AT LEAST ONE of email or phone
     if (!password || !full_name || (!email && !phone)) {
-      return NextResponse.json({ error: 'Mật khẩu, họ tên và (Email hoặc Số điện thoại) là bắt buộc' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Mật khẩu, họ tên và (Email hoặc Số điện thoại) là bắt buộc' },
+        { status: 400 }
+      );
     }
 
     // M2: Strengthened password policy (8+ chars + complexity)
@@ -26,7 +34,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Email đã được đăng ký' }, { status: 409 });
       }
     }
-    
+
     if (phone) {
       existingUsers = await sql`SELECT id FROM user_profiles WHERE phone = ${phone}`;
       if (existingUsers.length > 0) {

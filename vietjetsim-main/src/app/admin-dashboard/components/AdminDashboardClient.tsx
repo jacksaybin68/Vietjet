@@ -80,7 +80,12 @@ const NAV_ITEMS: {
   { id: 'refunds', label: 'Hoàn tiền', icon: 'BanknotesIcon', category: 'management' },
   { id: 'chat', label: 'Chat hỗ trợ', icon: 'ChatBubbleLeftRightIcon', category: 'support' },
   { id: 'announcements', label: 'Thông báo', icon: 'MegaphoneIcon', category: 'support' },
-  { id: 'analytics', label: 'Phân tích dữ liệu', icon: 'PresentationChartBarIcon', category: 'system' },
+  {
+    id: 'analytics',
+    label: 'Phân tích dữ liệu',
+    icon: 'PresentationChartBarIcon',
+    category: 'system',
+  },
   { id: 'sstk', label: 'SSTK', icon: 'WrenchScrewdriverIcon', category: 'system' },
   { id: 'rbac', label: 'RBAC', icon: 'ShieldCheckIcon', category: 'system' },
   { id: 'settings', label: 'Cài đặt', icon: 'CogIcon', category: 'system' },
@@ -187,8 +192,8 @@ export default function AdminDashboardClient() {
 
   const renderNavItems = (items: typeof NAV_ITEMS, isMobile = false) => {
     const groupedItems: Record<string, typeof NAV_ITEMS> = {};
-    
-    items.forEach(item => {
+
+    items.forEach((item) => {
       const category = item.category || 'management';
       if (!groupedItems[category]) {
         groupedItems[category] = [];
@@ -203,9 +208,10 @@ export default function AdminDashboardClient() {
           onClick={() => handleTabSelect(item.id)}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-xl mb-1 text-sm font-semibold transition-all text-left"
           style={{
-            background: activeTab === item.id
-              ? 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'
-              : 'transparent',
+            background:
+              activeTab === item.id
+                ? 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'
+                : 'transparent',
             color: activeTab === item.id ? 'white' : '#94a3b8',
           }}
         >
@@ -220,7 +226,7 @@ export default function AdminDashboardClient() {
         {!sidebarCollapsed && (
           <div className="px-4 pt-4 pb-1">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest opacity-60">
-              {NAV_CATEGORIES.find(c => c.id === category)?.label || category}
+              {NAV_CATEGORIES.find((c) => c.id === category)?.label || category}
             </span>
           </div>
         )}
@@ -229,30 +235,36 @@ export default function AdminDashboardClient() {
             key={item.id}
             onClick={() => setActiveTab(item.id)}
             className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all relative group overflow-hidden ${
-              activeTab === item.id 
-                ? 'text-white shadow-lg shadow-indigo-500/20' 
+              activeTab === item.id
+                ? 'text-white shadow-lg shadow-indigo-500/20'
                 : 'text-slate-400 hover:text-white hover:bg-white/5'
             } ${sidebarCollapsed ? 'justify-center' : ''}`}
             style={{
-              background: activeTab === item.id
-                ? 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)'
-                : 'transparent',
+              background:
+                activeTab === item.id
+                  ? 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)'
+                  : 'transparent',
             }}
             title={sidebarCollapsed ? item.label : undefined}
           >
             {activeTab === item.id && (
               <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
             )}
-            <Icon 
-              name={item.icon} 
-              size={18} 
-              className={`flex-shrink-0 transition-transform duration-300 ${activeTab === item.id ? 'scale-110' : 'group-hover:scale-110'}`} 
+            <Icon
+              name={item.icon}
+              size={18}
+              className={`flex-shrink-0 transition-transform duration-300 ${activeTab === item.id ? 'scale-110' : 'group-hover:scale-110'}`}
             />
             {!sidebarCollapsed && <span className="relative z-10">{item.label}</span>}
             {sidebarCollapsed && (
               <span
                 className="absolute left-full ml-3 px-3 py-2 text-white text-xs font-bold rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 translate-x-[-10px] group-hover:translate-x-0 z-50"
-                style={{ background: 'rgba(30, 41, 59, 0.95)', backdropFilter: 'blur(8px)', boxShadow: '0 10px 40px rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)' }}
+                style={{
+                  background: 'rgba(30, 41, 59, 0.95)',
+                  backdropFilter: 'blur(8px)',
+                  boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                }}
               >
                 {item.label}
               </span>
@@ -281,12 +293,21 @@ export default function AdminDashboardClient() {
             sidebarCollapsed ? 'justify-center' : ''
           }`}
         >
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-              <path d="M2 17l10 5 10-5"/>
-              <path d="M2 12l10 5 10-5"/>
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+            style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+            >
+              <path d="M12 2L2 7l10 5 10-5-10-5z" />
+              <path d="M2 17l10 5 10-5" />
+              <path d="M2 12l10 5 10-5" />
             </svg>
           </div>
           {!sidebarCollapsed && (
@@ -309,7 +330,8 @@ export default function AdminDashboardClient() {
           <div
             className="mx-3 mt-4 mb-2 rounded-xl p-3"
             style={{
-              background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%)',
+              background:
+                'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%)',
               border: '1px solid rgba(99, 102, 241, 0.2)',
             }}
           >
@@ -319,9 +341,15 @@ export default function AdminDashboardClient() {
                 style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}
               >
                 {profile?.avatarUrl ? (
-                  <img src={profile.avatarUrl} alt={profile.fullName} className="w-full h-full object-cover" />
+                  <img
+                    src={profile.avatarUrl}
+                    alt={profile.fullName}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
-                  <span className="drop-shadow-sm">{getInitials(profile?.fullName || user?.email || 'Admin')}</span>
+                  <span className="drop-shadow-sm">
+                    {getInitials(profile?.fullName || user?.email || 'Admin')}
+                  </span>
                 )}
               </div>
               <div className="overflow-hidden">
@@ -338,9 +366,7 @@ export default function AdminDashboardClient() {
         )}
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-2 overflow-y-auto">
-          {renderNavItems(NAV_ITEMS)}
-        </nav>
+        <nav className="flex-1 px-3 py-2 overflow-y-auto">{renderNavItems(NAV_ITEMS)}</nav>
 
         {/* Bottom actions */}
         <div className="p-3 border-t border-slate-700/50 space-y-1">
@@ -378,24 +404,33 @@ export default function AdminDashboardClient() {
             className="absolute left-0 top-0 bottom-0 w-72 flex flex-col"
             style={{
               background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)',
-              animation: 'slideInLeft 0.25s ease-out'
+              animation: 'slideInLeft 0.25s ease-out',
             }}
           >
-            <div
-              className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50"
-            >
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                    <path d="M2 17l10 5 10-5"/>
-                    <path d="M2 12l10 5 10-5"/>
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="2"
+                  >
+                    <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                    <path d="M2 17l10 5 10-5" />
+                    <path d="M2 12l10 5 10-5" />
                   </svg>
                 </div>
                 <div>
                   <div className="text-white font-bold text-sm">Vietjet Air</div>
-                  <div className="text-[10px] text-indigo-400 font-medium tracking-wider uppercase">Bảng Quản Trị</div>
+                  <div className="text-[10px] text-indigo-400 font-medium tracking-wider uppercase">
+                    Bảng Quản Trị
+                  </div>
                 </div>
               </div>
               <button
@@ -407,18 +442,25 @@ export default function AdminDashboardClient() {
             </div>
 
             {/* Role badge mobile */}
-            <div className="mx-4 mt-4 mb-2 rounded-xl p-3"
+            <div
+              className="mx-4 mt-4 mb-2 rounded-xl p-3"
               style={{
-                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%)',
+                background:
+                  'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%)',
                 border: '1px solid rgba(99, 102, 241, 0.2)',
-              }}>
+              }}
+            >
               <div className="flex items-center gap-3">
                 <div
                   className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold text-white overflow-hidden"
                   style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}
                 >
                   {profile?.avatarUrl ? (
-                    <img src={profile.avatarUrl} alt={profile.fullName} className="w-full h-full object-cover" />
+                    <img
+                      src={profile.avatarUrl}
+                      alt={profile.fullName}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     getInitials(profile?.fullName || user?.email || 'Admin')
                   )}
@@ -482,10 +524,17 @@ export default function AdminDashboardClient() {
             <button
               onClick={() => setSearchOpen(true)}
               className="relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 hover:bg-white/10 group active:scale-95"
-              style={{ background: 'rgba(148, 163, 184, 0.08)', border: '1px solid rgba(255,255,255,0.05)' }}
+              style={{
+                background: 'rgba(148, 163, 184, 0.08)',
+                border: '1px solid rgba(255,255,255,0.05)',
+              }}
               title="Tìm kiếm (Ctrl+K)"
             >
-              <Icon name="MagnifyingGlassIcon" size={18} className="text-slate-400 group-hover:text-white transition-colors" />
+              <Icon
+                name="MagnifyingGlassIcon"
+                size={18}
+                className="text-slate-400 group-hover:text-white transition-colors"
+              />
             </button>
 
             {/* Notification Dropdown */}
@@ -497,104 +546,105 @@ export default function AdminDashboardClient() {
         </header>
 
         {/* Tab Content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6"
+        <main
+          className="flex-1 overflow-y-auto p-4 lg:p-6"
           style={{ background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)' }}
         >
           <div className="max-w-7xl mx-auto">
-          {activeTab === 'overview' && (
-            <ErrorBoundary inline variant="api">
-              <OverviewTab onNavigate={setActiveTab} />
-            </ErrorBoundary>
-          )}
-          {activeTab === 'flights' && (
-            <ErrorBoundary inline variant="api" retryLabel="Tải lại chuyến bay">
-              <FlightsTab onToast={toast} />
-            </ErrorBoundary>
-          )}
-          {activeTab === 'users' && (
-            <ErrorBoundary inline variant="api" retryLabel="Tải lại người dùng">
-              <UsersTab onToast={toast} />
-            </ErrorBoundary>
-          )}
-          {activeTab === 'revenue' && (
-            <ErrorBoundary inline variant="api">
-              <RevenueTab />
-            </ErrorBoundary>
-          )}
-          {activeTab === 'bookings' && (
-            <ErrorBoundary inline variant="api" retryLabel="Tải lại đặt vé">
-              <BookingsTab />
-            </ErrorBoundary>
-          )}
-          {activeTab === 'refunds' && (
-            <ErrorBoundary inline variant="api" retryLabel="Tải lại hoàn tiền">
-              <RefundRequestsTab onToast={toast} />
-            </ErrorBoundary>
-          )}
+            {activeTab === 'overview' && (
+              <ErrorBoundary inline variant="api">
+                <OverviewTab onNavigate={setActiveTab} />
+              </ErrorBoundary>
+            )}
+            {activeTab === 'flights' && (
+              <ErrorBoundary inline variant="api" retryLabel="Tải lại chuyến bay">
+                <FlightsTab onToast={toast} />
+              </ErrorBoundary>
+            )}
+            {activeTab === 'users' && (
+              <ErrorBoundary inline variant="api" retryLabel="Tải lại người dùng">
+                <UsersTab onToast={toast} />
+              </ErrorBoundary>
+            )}
+            {activeTab === 'revenue' && (
+              <ErrorBoundary inline variant="api">
+                <RevenueTab />
+              </ErrorBoundary>
+            )}
+            {activeTab === 'bookings' && (
+              <ErrorBoundary inline variant="api" retryLabel="Tải lại đặt vé">
+                <BookingsTab />
+              </ErrorBoundary>
+            )}
+            {activeTab === 'refunds' && (
+              <ErrorBoundary inline variant="api" retryLabel="Tải lại hoàn tiền">
+                <RefundRequestsTab onToast={toast} />
+              </ErrorBoundary>
+            )}
 
-          {activeTab === 'chat' && (
-            <ErrorBoundary inline variant="network">
-              <ChatTab />
-            </ErrorBoundary>
-          )}
+            {activeTab === 'chat' && (
+              <ErrorBoundary inline variant="network">
+                <ChatTab />
+              </ErrorBoundary>
+            )}
 
-          {activeTab === 'analytics' && (
-            <ErrorBoundary inline variant="api">
-              <AnalyticsTab />
-            </ErrorBoundary>
-          )}
+            {activeTab === 'analytics' && (
+              <ErrorBoundary inline variant="api">
+                <AnalyticsTab />
+              </ErrorBoundary>
+            )}
 
-          {activeTab === 'sstk' && (
-            <ErrorBoundary inline variant="api" retryLabel="Tải lại SSTK">
-              <SstkTab onToast={toast} />
-            </ErrorBoundary>
-          )}
+            {activeTab === 'sstk' && (
+              <ErrorBoundary inline variant="api" retryLabel="Tải lại SSTK">
+                <SstkTab onToast={toast} />
+              </ErrorBoundary>
+            )}
 
-          {activeTab === 'rbac' && (
-            <ErrorBoundary inline variant="api" retryLabel="Tải lại RBAC">
-              <AdminRBACPanel onToast={toast} />
-            </ErrorBoundary>
-          )}
+            {activeTab === 'rbac' && (
+              <ErrorBoundary inline variant="api" retryLabel="Tải lại RBAC">
+                <AdminRBACPanel onToast={toast} />
+              </ErrorBoundary>
+            )}
 
-          {/* Integrated Management Tabs */}
-          {activeTab === 'airports' && (
-            <ErrorBoundary inline variant="api">
-              <AirportsTab onToast={toast} />
-            </ErrorBoundary>
-          )}
-          {activeTab === 'announcements' && (
-            <ErrorBoundary inline variant="api">
-              <AnnouncementsTab onToast={toast} />
-            </ErrorBoundary>
-          )}
-          {activeTab === 'settings' && (
-            <ErrorBoundary inline variant="api">
-              <SystemSettingsTab onToast={toast} />
-            </ErrorBoundary>
-          )}
-          {activeTab === 'audit_logs' && (
-            <ErrorBoundary inline variant="api">
-              <AuditLogsTab onToast={toast} />
-            </ErrorBoundary>
-          )}
+            {/* Integrated Management Tabs */}
+            {activeTab === 'airports' && (
+              <ErrorBoundary inline variant="api">
+                <AirportsTab onToast={toast} />
+              </ErrorBoundary>
+            )}
+            {activeTab === 'announcements' && (
+              <ErrorBoundary inline variant="api">
+                <AnnouncementsTab onToast={toast} />
+              </ErrorBoundary>
+            )}
+            {activeTab === 'settings' && (
+              <ErrorBoundary inline variant="api">
+                <SystemSettingsTab onToast={toast} />
+              </ErrorBoundary>
+            )}
+            {activeTab === 'audit_logs' && (
+              <ErrorBoundary inline variant="api">
+                <AuditLogsTab onToast={toast} />
+              </ErrorBoundary>
+            )}
 
-          {activeTab === 'transactions' && (
-            <ErrorBoundary inline variant="api">
-              <TransactionsTab onToast={toast} />
-            </ErrorBoundary>
-          )}
+            {activeTab === 'transactions' && (
+              <ErrorBoundary inline variant="api">
+                <TransactionsTab onToast={toast} />
+              </ErrorBoundary>
+            )}
 
-          {activeTab === 'banks' && (
-            <ErrorBoundary inline variant="api">
-              <BankAccountsTab onToast={toast} />
-            </ErrorBoundary>
-          )}
+            {activeTab === 'banks' && (
+              <ErrorBoundary inline variant="api">
+                <BankAccountsTab onToast={toast} />
+              </ErrorBoundary>
+            )}
 
-          {activeTab === 'discounts' && (
-            <ErrorBoundary inline variant="api">
-              <DiscountsTab onToast={toast} />
-            </ErrorBoundary>
-          )}
+            {activeTab === 'discounts' && (
+              <ErrorBoundary inline variant="api">
+                <DiscountsTab onToast={toast} />
+              </ErrorBoundary>
+            )}
           </div>
         </main>
       </div>

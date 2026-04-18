@@ -153,10 +153,7 @@ export default function ConfirmationModal({
 
         {/* Body */}
         <div className="bg-white px-6 py-6">
-          <p
-            id="confirm-modal-desc"
-            className="text-base leading-relaxed font-koho"
-          >
+          <p id="confirm-modal-desc" className="text-base leading-relaxed font-koho">
             {description}
           </p>
 
@@ -172,7 +169,7 @@ export default function ConfirmationModal({
               className="px-5 py-2.5 rounded-xl border-2 font-semibold text-sm transition-all duration-200 hover:bg-gray-50 active:scale-95 disabled:opacity-50"
               style={{
                 borderColor: '#1A2948',
-                color: '#1A2948'
+                color: '#1A2948',
               }}
             >
               {cancelLabel}
@@ -189,7 +186,7 @@ export default function ConfirmationModal({
                   ? '#E6BF00'
                   : 'linear-gradient(135deg, #FFD400 0%, #FFC72C 100%)',
                 color: '#1A2948',
-                transform: isLoading ? 'none' : undefined
+                transform: isLoading ? 'none' : undefined,
               }}
               onMouseEnter={(e) => {
                 if (!isLoading)

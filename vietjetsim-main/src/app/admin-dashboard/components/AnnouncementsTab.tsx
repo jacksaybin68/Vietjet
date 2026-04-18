@@ -293,7 +293,9 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
         >
           <option value="">Tất cả loại</option>
           {TYPE_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
           ))}
         </select>
       </div>
@@ -326,11 +328,21 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
                 <>
                   {[1, 2, 3, 4, 5].map((i) => (
                     <tr key={i} className="border-b border-stone-50 animate-pulse">
-                      <td className="px-4 py-3"><div className="h-4 w-48 bg-stone-200 rounded-full" /></td>
-                      <td className="px-4 py-3 hidden sm:table-cell"><div className="h-6 w-20 bg-stone-200 rounded-full" /></td>
-                      <td className="px-4 py-3 hidden md:table-cell"><div className="h-6 w-16 bg-stone-200 rounded-full" /></td>
-                      <td className="px-4 py-3 hidden lg:table-cell"><div className="h-6 w-16 bg-stone-200 rounded-full mx-auto" /></td>
-                      <td className="px-4 py-3"><div className="h-6 w-16 bg-stone-200 rounded mx-auto" /></td>
+                      <td className="px-4 py-3">
+                        <div className="h-4 w-48 bg-stone-200 rounded-full" />
+                      </td>
+                      <td className="px-4 py-3 hidden sm:table-cell">
+                        <div className="h-6 w-20 bg-stone-200 rounded-full" />
+                      </td>
+                      <td className="px-4 py-3 hidden md:table-cell">
+                        <div className="h-6 w-16 bg-stone-200 rounded-full" />
+                      </td>
+                      <td className="px-4 py-3 hidden lg:table-cell">
+                        <div className="h-6 w-16 bg-stone-200 rounded-full mx-auto" />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="h-6 w-16 bg-stone-200 rounded mx-auto" />
+                      </td>
                     </tr>
                   ))}
                 </>
@@ -340,7 +352,10 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
                     <div className="flex flex-col items-center gap-3">
                       <Icon name="ExclamationTriangleIcon" size={32} className="text-red-400" />
                       <p className="font-bold text-stone-700">Không thể tải dữ liệu</p>
-                      <button onClick={() => fetchAnnouncements(1, searchQuery, typeFilter)} className="text-xs font-semibold text-primary">
+                      <button
+                        onClick={() => fetchAnnouncements(1, searchQuery, typeFilter)}
+                        className="text-xs font-semibold text-primary"
+                      >
                         Thử lại
                       </button>
                     </div>
@@ -360,21 +375,29 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
                 announcements.map((announcement, i) => {
                   const typeConfig = TYPE_CONFIG[announcement.type] || TYPE_CONFIG.info;
                   return (
-                    <tr key={announcement.id} className={`border-b border-stone-50 hover:bg-stone-50 ${i % 2 === 0 ? '' : 'bg-stone-50/30'}`}>
+                    <tr
+                      key={announcement.id}
+                      className={`border-b border-stone-50 hover:bg-stone-50 ${i % 2 === 0 ? '' : 'bg-stone-50/30'}`}
+                    >
                       <td className="px-4 py-3">
                         <div>
                           <p className="font-medium text-stone-900">{announcement.title}</p>
-                          <p className="text-xs text-stone-500 mt-0.5 line-clamp-1">{announcement.content}</p>
+                          <p className="text-xs text-stone-500 mt-0.5 line-clamp-1">
+                            {announcement.content}
+                          </p>
                         </div>
                       </td>
                       <td className="px-4 py-3 hidden sm:table-cell">
-                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${typeConfig.bgColor} ${typeConfig.color}`}>
+                        <span
+                          className={`text-xs font-semibold px-2.5 py-1 rounded-full ${typeConfig.bgColor} ${typeConfig.color}`}
+                        >
                           {typeConfig.label}
                         </span>
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell">
                         <span className="text-xs text-stone-600">
-                          {ROLE_OPTIONS.find(r => r.value === announcement.target_role)?.label || announcement.target_role}
+                          {ROLE_OPTIONS.find((r) => r.value === announcement.target_role)?.label ||
+                            announcement.target_role}
                         </span>
                       </td>
                       <td className="px-4 py-3 hidden lg:table-cell text-center">
@@ -434,7 +457,10 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
           formData={formData}
           setFormData={setFormData}
           onSubmit={handleAddAnnouncement}
-          onClose={() => { setShowAddModal(false); resetForm(); }}
+          onClose={() => {
+            setShowAddModal(false);
+            resetForm();
+          }}
           isSubmitting={isSubmitting}
         />
       )}
@@ -446,7 +472,10 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
           formData={formData}
           setFormData={setFormData}
           onSubmit={handleUpdateAnnouncement}
-          onClose={() => { setEditingAnnouncement(null); resetForm(); }}
+          onClose={() => {
+            setEditingAnnouncement(null);
+            resetForm();
+          }}
           isSubmitting={isSubmitting}
           isEditing
         />
@@ -486,7 +515,10 @@ function AnnouncementModal({
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-5 border-b border-stone-100">
           <h3 className="font-bold text-stone-900">{title}</h3>
-          <button onClick={onClose} className="w-8 h-8 bg-stone-100 hover:bg-stone-200 rounded-lg flex items-center justify-center transition-colors">
+          <button
+            onClick={onClose}
+            className="w-8 h-8 bg-stone-100 hover:bg-stone-200 rounded-lg flex items-center justify-center transition-colors"
+          >
             <Icon name="XMarkIcon" size={16} />
           </button>
         </div>
@@ -498,7 +530,7 @@ function AnnouncementModal({
             <input
               type="text"
               value={formData.title}
-              onChange={(e) => setFormData(p => ({ ...p, title: e.target.value }))}
+              onChange={(e) => setFormData((p) => ({ ...p, title: e.target.value }))}
               placeholder="Nhập tiêu đề thông báo"
               className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"
               required
@@ -511,7 +543,7 @@ function AnnouncementModal({
             </label>
             <textarea
               value={formData.content}
-              onChange={(e) => setFormData(p => ({ ...p, content: e.target.value }))}
+              onChange={(e) => setFormData((p) => ({ ...p, content: e.target.value }))}
               placeholder="Nhập nội dung thông báo"
               rows={4}
               className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 resize-none"
@@ -526,11 +558,13 @@ function AnnouncementModal({
               </label>
               <select
                 value={formData.type}
-                onChange={(e) => setFormData(p => ({ ...p, type: e.target.value as any }))}
+                onChange={(e) => setFormData((p) => ({ ...p, type: e.target.value as any }))}
                 className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"
               >
                 {TYPE_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -540,11 +574,13 @@ function AnnouncementModal({
               </label>
               <select
                 value={formData.target_role}
-                onChange={(e) => setFormData(p => ({ ...p, target_role: e.target.value }))}
+                onChange={(e) => setFormData((p) => ({ ...p, target_role: e.target.value }))}
                 className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"
               >
                 {ROLE_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -558,7 +594,7 @@ function AnnouncementModal({
               <input
                 type="date"
                 value={formData.start_date}
-                onChange={(e) => setFormData(p => ({ ...p, start_date: e.target.value }))}
+                onChange={(e) => setFormData((p) => ({ ...p, start_date: e.target.value }))}
                 className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"
               />
             </div>
@@ -569,7 +605,7 @@ function AnnouncementModal({
               <input
                 type="date"
                 value={formData.end_date}
-                onChange={(e) => setFormData(p => ({ ...p, end_date: e.target.value }))}
+                onChange={(e) => setFormData((p) => ({ ...p, end_date: e.target.value }))}
                 className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"
               />
             </div>
@@ -580,7 +616,7 @@ function AnnouncementModal({
               type="checkbox"
               id="is_active"
               checked={formData.is_active}
-              onChange={(e) => setFormData(p => ({ ...p, is_active: e.target.checked }))}
+              onChange={(e) => setFormData((p) => ({ ...p, is_active: e.target.checked }))}
               className="w-4 h-4 text-primary border-stone-300 rounded focus:ring-primary"
             />
             <label htmlFor="is_active" className="text-sm text-stone-700">
@@ -605,12 +641,27 @@ function AnnouncementModal({
               {isSubmitting ? (
                 <>
                   <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    />
                   </svg>
                   Đang xử lý...
                 </>
-              ) : isEditing ? 'Lưu thay đổi' : 'Tạo thông báo'}
+              ) : isEditing ? (
+                'Lưu thay đổi'
+              ) : (
+                'Tạo thông báo'
+              )}
             </button>
           </div>
         </form>

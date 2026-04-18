@@ -8,22 +8,22 @@ const PROMO_DATA = [
     description: 'Trải nghiệm phòng chờ hạng sang, thư giãn tối đa trước chuyến bay.',
     image: '/assets/images/banners/sky_space.png',
     color: 'bg-red-500',
-    link: '/services'
+    link: '/services',
   },
   {
     title: 'Bảo hiểm Du lịch',
     description: 'An tâm trọn vẹn trên mọi hành trình với gói bảo hiểm toàn diện.',
     image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb',
     color: 'bg-blue-600',
-    link: '/services'
+    link: '/services',
   },
   {
     title: 'Kết nối E-Sim',
     description: 'Giữ liên lạc thông suốt tại hơn 100 quốc gia mà không cần đổi Sim.',
     image: 'https://images.unsplash.com/photo-1556656793-062ff98782ee',
     color: 'bg-green-600',
-    link: '/services'
-  }
+    link: '/services',
+  },
 ];
 
 export default function PromotionalBannersSection() {
@@ -39,20 +39,22 @@ export default function PromotionalBannersSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {PROMO_DATA.map((item, index) => (
-            <Link 
-              key={index} 
+            <Link
+              key={index}
               href={item.link}
               className="group block relative h-[400px] rounded-3xl overflow-hidden bg-gray-200 shadow-lg"
             >
               {/* Simple background image or color fallback */}
-              <div 
+              <div
                 className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
                 style={{ backgroundImage: `url(${item.image})` }}
               />
               <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-all z-10" />
-              
+
               <div className="absolute inset-0 z-20 p-8 flex flex-col justify-end text-white">
-                <span className={`inline-block px-3 py-1 rounded-lg ${item.color} text-xs font-bold mb-3 w-fit`}>
+                <span
+                  className={`inline-block px-3 py-1 rounded-lg ${item.color} text-xs font-bold mb-3 w-fit`}
+                >
                   NEW SERVICE
                 </span>
                 <h3 className="text-2xl font-black italic uppercase mb-2">{item.title}</h3>

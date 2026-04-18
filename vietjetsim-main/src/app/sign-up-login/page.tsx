@@ -51,7 +51,7 @@ export default function SignUpLoginPage() {
     if (!otpRequested) {
       setLoading(true);
       setError('');
-      
+
       if (!name || (!email && !phone) || !password) {
         setError('Vui lòng điền họ tên, mật khẩu và (Email hoặc Số điện thoại).');
         setLoading(false);
@@ -89,15 +89,14 @@ export default function SignUpLoginPage() {
   };
 
   const isEmailValid = email.length === 0 || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); // Make email optional in registration
-  const isLoginIdentifierValid = isEmailValid || phone.replace(/\D/g, '').length >= 9 || email.replace(/\D/g, '').length >= 9; // Allow email or phone in login
+  const isLoginIdentifierValid =
+    isEmailValid || phone.replace(/\D/g, '').length >= 9 || email.replace(/\D/g, '').length >= 9; // Allow email or phone in login
   const isPasswordValid = password.length >= 6;
   const isNameValid = name.trim().length >= 2;
   const isPhoneValid = phone.replace(/\D/g, '').length >= 9;
 
   return (
-    <div
-      className="min-h-screen flex font-body"
-    >
+    <div className="min-h-screen flex font-body">
       {/* Left Panel - VietJet red brand panel */}
       <div
         className="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col"
@@ -150,7 +149,7 @@ export default function SignUpLoginPage() {
                 className="text-xs font-semibold uppercase tracking-wider"
                 style={{
                   color: 'rgba(255,255,255,0.9)',
-                  fontWeight: 600
+                  fontWeight: 600,
                 }}
               >
                 Nền tảng mô phỏng
@@ -160,7 +159,7 @@ export default function SignUpLoginPage() {
               className="text-5xl font-black text-white leading-tight tracking-tight mb-4"
               style={{
                 fontStyle: 'italic',
-                fontWeight: 900
+                fontWeight: 900,
               }}
             >
               Bay khắp
@@ -173,7 +172,7 @@ export default function SignUpLoginPage() {
               className="text-base leading-relaxed max-w-sm"
               style={{
                 color: 'rgba(255,255,255,0.70)',
-                fontWeight: 500
+                fontWeight: 500,
               }}
             >
               Trải nghiệm đặt vé máy bay hoàn chỉnh với hệ thống quản lý chuyến bay chuyên nghiệp.
@@ -193,16 +192,12 @@ export default function SignUpLoginPage() {
                   className="text-2xl font-black"
                   style={{
                     color: '#FFD400',
-                    fontWeight: 900
+                    fontWeight: 900,
                   }}
                 >
                   {val}
                 </div>
-                <div
-                  className="text-xs mt-0.5 font-koho"
-                >
-                  {label}
-                </div>
+                <div className="text-xs mt-0.5 font-koho">{label}</div>
               </div>
             ))}
           </div>
@@ -218,7 +213,7 @@ export default function SignUpLoginPage() {
             <span
               className="font-black text-primary"
               style={{
-                fontWeight: 900
+                fontWeight: 900,
               }}
             >
               Vietjet Air
@@ -241,7 +236,7 @@ export default function SignUpLoginPage() {
               style={{
                 color: tab === 'login' ? '#EC2029' : '#939598',
                 borderColor: tab === 'login' ? '#EC2029' : 'transparent',
-                fontWeight: 700
+                fontWeight: 700,
               }}
             >
               Đăng nhập
@@ -260,7 +255,7 @@ export default function SignUpLoginPage() {
               style={{
                 color: tab === 'register' ? '#EC2029' : '#939598',
                 borderColor: tab === 'register' ? '#EC2029' : 'transparent',
-                fontWeight: 700
+                fontWeight: 700,
               }}
             >
               Đăng ký
@@ -272,26 +267,18 @@ export default function SignUpLoginPage() {
             className="rounded-xl p-4 mb-6 text-xs bg-primary-50"
             style={{ border: '1px solid #FFE0E0' }}
           >
-            <div
-              className="font-bold mb-2 flex items-center gap-1.5 text-primary"
-            >
+            <div className="font-bold mb-2 flex items-center gap-1.5 text-primary">
               <Icon name="InformationCircleIcon" size={14} className="text-primary" />
               Tài khoản demo:
             </div>
-            <div
-              className="space-y-1 font-koho"
-            >
+            <div className="space-y-1 font-koho">
               <div>
-                <span className="font-semibold text-vj-text">
-                  User:
-                </span>{' '}
-                user@Vietjet Air.vn / user123
+                <span className="font-semibold text-vj-text">User:</span> user@Vietjet Air.vn /
+                user123
               </div>
               <div>
-                <span className="font-semibold text-vj-text">
-                  Admin:
-                </span>{' '}
-                admin@Vietjet Air.vn / admin123
+                <span className="font-semibold text-vj-text">Admin:</span> admin@Vietjet Air.vn /
+                admin123
               </div>
             </div>
           </div>
@@ -302,7 +289,7 @@ export default function SignUpLoginPage() {
               style={{
                 background: '#FFF1F1',
                 border: '1px solid #FFC5C6',
-                color: '#C41017'
+                color: '#C41017',
               }}
             >
               <Icon name="ExclamationCircleIcon" size={16} />
@@ -315,7 +302,7 @@ export default function SignUpLoginPage() {
               style={{
                 background: '#f0fdf4',
                 border: '1px solid #bbf7d0',
-                color: '#16a34a'
+                color: '#16a34a',
               }}
             >
               <Icon name="CheckCircleIcon" size={16} />
@@ -380,9 +367,7 @@ export default function SignUpLoginPage() {
               </div>
 
               <div className="flex items-center justify-between">
-                <label
-                  className="flex items-center gap-2 text-sm cursor-pointer font-koho"
-                >
+                <label className="flex items-center gap-2 text-sm cursor-pointer font-koho">
                   <input
                     id="remember-me"
                     name="remember"
@@ -406,7 +391,7 @@ export default function SignUpLoginPage() {
                 style={{
                   background: loading ? '#C41017' : '#EC2029',
                   boxShadow: '0 2px 8px rgba(236,32,41,0.28)',
-                  fontWeight: 900
+                  fontWeight: 900,
                 }}
                 onMouseEnter={(e) => !loading && (e.currentTarget.style.background = '#D0021B')}
                 onMouseLeave={(e) => !loading && (e.currentTarget.style.background = '#EC2029')}
@@ -539,15 +524,26 @@ export default function SignUpLoginPage() {
                     style={{
                       background: loading ? '#C41017' : '#EC2029',
                       boxShadow: '0 2px 8px rgba(236,32,41,0.28)',
-                      fontWeight: 900
+                      fontWeight: 900,
                     }}
                     onMouseEnter={(e) => !loading && (e.currentTarget.style.background = '#D0021B')}
                     onMouseLeave={(e) => !loading && (e.currentTarget.style.background = '#EC2029')}
                   >
                     {loading ? (
                       <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
-                        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" className="opacity-75" />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          className="opacity-25"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          className="opacity-75"
+                        />
                       </svg>
                     ) : (
                       <>
@@ -565,7 +561,8 @@ export default function SignUpLoginPage() {
                     </div>
                     <h3 className="font-bold text-lg text-gray-900">Xác thực OTP</h3>
                     <p className="text-sm text-gray-500 mt-2">
-                      Vui lòng nhập mã bảo mật 6 số được gửi tới<br/>
+                      Vui lòng nhập mã bảo mật 6 số được gửi tới
+                      <br />
                       <span className="font-semibold text-primary">{phone || email}</span>
                     </p>
                   </div>
@@ -587,7 +584,12 @@ export default function SignUpLoginPage() {
                       className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-center tracking-[0.5em] font-bold text-xl transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white"
                       required
                     />
-                    <label className="form-label-float has-icon text-center w-full" style={{marginLeft: '-1.5rem', pointerEvents: 'none'}}>Mã OTP (123456)</label>
+                    <label
+                      className="form-label-float has-icon text-center w-full"
+                      style={{ marginLeft: '-1.5rem', pointerEvents: 'none' }}
+                    >
+                      Mã OTP (123456)
+                    </label>
                   </div>
 
                   <button
@@ -597,15 +599,34 @@ export default function SignUpLoginPage() {
                     style={{
                       background: loading ? '#C41017' : '#EC2029',
                       boxShadow: '0 2px 8px rgba(236,32,41,0.28)',
-                      fontWeight: 900
+                      fontWeight: 900,
                     }}
-                    onMouseEnter={(e) => !loading && otpInput.length >= 6 && (e.currentTarget.style.background = '#D0021B')}
-                    onMouseLeave={(e) => !loading && otpInput.length >= 6 && (e.currentTarget.style.background = '#EC2029')}
+                    onMouseEnter={(e) =>
+                      !loading &&
+                      otpInput.length >= 6 &&
+                      (e.currentTarget.style.background = '#D0021B')
+                    }
+                    onMouseLeave={(e) =>
+                      !loading &&
+                      otpInput.length >= 6 &&
+                      (e.currentTarget.style.background = '#EC2029')
+                    }
                   >
                     {loading ? (
                       <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
-                        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" className="opacity-75" />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          className="opacity-25"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          className="opacity-75"
+                        />
                       </svg>
                     ) : (
                       <>
@@ -615,7 +636,14 @@ export default function SignUpLoginPage() {
                     )}
                   </button>
 
-                  <p className="text-center text-sm text-gray-500 font-medium cursor-pointer flex justify-center items-center gap-1 hover:text-primary transition-colors mt-4" onClick={() => { setOtpRequested(false); setSuccess(''); setError(''); }}>
+                  <p
+                    className="text-center text-sm text-gray-500 font-medium cursor-pointer flex justify-center items-center gap-1 hover:text-primary transition-colors mt-4"
+                    onClick={() => {
+                      setOtpRequested(false);
+                      setSuccess('');
+                      setError('');
+                    }}
+                  >
                     <Icon name="ArrowLeftIcon" size={14} /> Quay lại chỉnh sửa
                   </p>
                 </div>

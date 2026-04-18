@@ -64,15 +64,15 @@ export async function POST(request: NextRequest) {
       // Since we don't have a separate table yet, we can check bookings table.
       // Note: This assumes we store the used discount code in the booking or payment.
       // Wait, let's check if 'bookings' table has a 'discount_code' column.
-      // I should have added it in the migration! 
+      // I should have added it in the migration!
     }
 
     // 5. Check minimum booking amount
     if (bookingAmount < Number(discount.min_booking_amount)) {
       return NextResponse.json(
-        { 
-          valid: false, 
-          message: `Mã giảm giá chỉ áp dụng cho đơn hàng từ ${Number(discount.min_booking_amount).toLocaleString('vi-VN')}₫` 
+        {
+          valid: false,
+          message: `Mã giảm giá chỉ áp dụng cho đơn hàng từ ${Number(discount.min_booking_amount).toLocaleString('vi-VN')}₫`,
         },
         { status: 400 }
       );
@@ -98,9 +98,8 @@ export async function POST(request: NextRequest) {
         value: discount.value,
         discountAmount: Math.round(discountAmount),
       },
-      message: 'Áp dụng mã giảm giá thành công'
+      message: 'Áp dụng mã giảm giá thành công',
     });
-
   } catch (error: any) {
     console.error('Error validating discount:', error);
     return NextResponse.json(

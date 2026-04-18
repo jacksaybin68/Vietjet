@@ -15,7 +15,13 @@ describe('Refund Optimization Verification', () => {
 
   it('verifies that archiveOldRefunds uses a single bulk update query', async () => {
     // Mock the response to simulate 5 records being updated
-    (sql as any).mockResolvedValueOnce([{ id: '1' }, { id: '2' }, { id: '3' }, { id: '4' }, { id: '5' }]);
+    (sql as any).mockResolvedValueOnce([
+      { id: '1' },
+      { id: '2' },
+      { id: '3' },
+      { id: '4' },
+      { id: '5' },
+    ]);
 
     const result = await archiveOldRefunds(90);
 
@@ -32,7 +38,7 @@ describe('Refund Optimization Verification', () => {
 
     expect(queryJoined).toContain('UPDATE refund_requests');
     expect(queryJoined).toContain("SET status = 'archived'");
-    expect(queryJoined).toContain('OR status = \'approved\'');
+    expect(queryJoined).toContain("OR status = 'approved'");
     expect(call[1]).toBe(90); // The days parameter
   });
 });

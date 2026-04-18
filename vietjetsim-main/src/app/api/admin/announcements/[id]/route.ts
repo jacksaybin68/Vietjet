@@ -4,10 +4,7 @@ import { verifyAdminRequest } from '@/lib/admin-auth';
 
 // ─── PATCH: Update an announcement ──────────────────────────────────────────
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'announcement:crud');
     if (error) return response;

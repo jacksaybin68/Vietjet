@@ -53,7 +53,8 @@ export async function GET(request: NextRequest) {
       const limit = parseInt(searchParams.get('limit') || '30');
       const actionFilter = searchParams.get('action') || undefined;
       const logs = await getAuditLogs({
-        page, limit,
+        page,
+        limit,
         action: actionFilter,
         startDate: searchParams.get('from') || undefined,
         endDate: searchParams.get('to') || undefined,
@@ -85,7 +86,6 @@ export async function GET(request: NextRequest) {
       permissionLabels: PERMISSION_LABELS,
       assignedRoles: roles,
     });
-
   } catch (err: any) {
     console.error('[RBAC-GET]', err);
     return NextResponse.json({ error: err.message }, { status: 500 });
@@ -113,12 +113,18 @@ export async function POST(request: NextRequest) {
       };
 
       if (!targetUserId || !roleName) {
-        return NextResponse.json({ error: 'Bad Request', message: 'Thiếu targetUserId hoặc roleName' }, { status: 400 });
+        return NextResponse.json(
+          { error: 'Bad Request', message: 'Thiếu targetUserId hoặc roleName' },
+          { status: 400 }
+        );
       }
 
       if (!SYSTEM_ROLES[roleName]) {
         const validNames = Object.keys(SYSTEM_ROLES).join(', ');
-        return NextResponse.json({ error: 'Bad Request', message: `roleName không hợp lệ. Các giá trị: ${validNames}` }, { status: 400 });
+        return NextResponse.json(
+          { error: 'Bad Request', message: `roleName không hợp lệ. Các giá trị: ${validNames}` },
+          { status: 400 }
+        );
       }
 
       const roleDef = await assignAdminRole(targetUserId, roleName, auth.userId, customPermissions);
@@ -129,13 +135,20 @@ export async function POST(request: NextRequest) {
         action: 'rbac:role_assign',
         targetType: 'role',
         targetId: targetUserId,
-        detailsJson: JSON.stringify({ roleName, customPermissions: customPermissions?.length || 0 }),
+        detailsJson: JSON.stringify({
+          roleName,
+          customPermissions: customPermissions?.length || 0,
+        }),
         status: 'success',
         ipAddress: request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || undefined,
         userAgent: request.headers.get('user-agent') || undefined,
       });
 
-      return NextResponse.json({ success: true, role: roleDef, message: `Đã gán role ${roleName} cho user` });
+      return NextResponse.json({
+        success: true,
+        role: roleDef,
+        message: `Đã gán role ${roleName} cho user`,
+      });
     }
 
     // ─── Action: remove_role ──────────────────────────────────────────
@@ -143,11 +156,17 @@ export async function POST(request: NextRequest) {
       const { targetUserId } = body as { targetUserId: string };
 
       if (!targetUserId) {
-        return NextResponse.json({ error: 'Bad Request', message: 'Thiếu targetUserId' }, { status: 400 });
+        return NextResponse.json(
+          { error: 'Bad Request', message: 'Thiếu targetUserId' },
+          { status: 400 }
+        );
       }
 
       if (targetUserId === auth.userId) {
-        return NextResponse.json({ error: 'Bad Request', message: 'Không thể xóa role của chính mình' }, { status: 400 });
+        return NextResponse.json(
+          { error: 'Bad Request', message: 'Không thể xóa role của chính mình' },
+          { status: 400 }
+        );
       }
 
       await removeAdminRole(targetUserId);
@@ -170,16 +189,23 @@ export async function POST(request: NextRequest) {
     // ─── Action: set_config ────────────────────────────────────────────
     if (action === 'set_config') {
       const { key, value, type, description, category } = body as {
-        key: string; value: string; type?: string;
-        description?: string; category?: string;
+        key: string;
+        value: string;
+        type?: string;
+        description?: string;
+        category?: string;
       };
 
       if (!key || value === undefined) {
-        return NextResponse.json({ error: 'Bad Request', message: 'Thiếu key hoặc value' }, { status: 400 });
+        return NextResponse.json(
+          { error: 'Bad Request', message: 'Thiếu key hoặc value' },
+          { status: 400 }
+        );
       }
 
       const cfg = await setConfigValue(
-        key, value,
+        key,
+        value,
         type || 'string',
         description || null,
         category || 'general',
@@ -198,11 +224,18 @@ export async function POST(request: NextRequest) {
         userAgent: request.headers.get('user-agent') || undefined,
       });
 
-      return NextResponse.json({ success: true, config: cfg, message: `Đã cập nhật config: ${key}` });
+      return NextResponse.json({
+        success: true,
+        config: cfg,
+        message: `Đã cập nhật config: ${key}`,
+      });
     }
 
     return NextResponse.json(
-      { error: 'Bad Request', message: `Action "${action}" không hợp lệ. Dùng: assign_role, remove_role, set_config` },
+      {
+        error: 'Bad Request',
+        message: `Action "${action}" không hợp lệ. Dùng: assign_role, remove_role, set_config`,
+      },
       { status: 400 }
     );
   } catch (err: any) {

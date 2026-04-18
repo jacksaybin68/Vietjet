@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
     // Use multiple queries or a more structured approach since tagged templates don't easily support dynamic building without helpers
     // For simplicity with this library, we'll branch based on filters
-    
+
     let result;
     if (status && status !== 'all') {
       result = await sql`
@@ -55,7 +55,10 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching transactions:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error', message: (error instanceof Error ? error.message : "Unknown error") },
+      {
+        error: 'Internal Server Error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

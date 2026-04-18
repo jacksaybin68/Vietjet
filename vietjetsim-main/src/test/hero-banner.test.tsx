@@ -19,7 +19,9 @@ describe('HeroSection Banner', () => {
       vi.advanceTimersByTime(600);
     });
     expect(screen.getByText('BAY VIETJETSIM NHẬN LỘC VÀNG')).toBeInTheDocument();
-    expect(screen.getByText('Mua vé từ 03/03/2026 đến 19/05/2026 để nhận thưởng')).toBeInTheDocument();
+    expect(
+      screen.getByText('Mua vé từ 03/03/2026 đến 19/05/2026 để nhận thưởng')
+    ).toBeInTheDocument();
   });
 
   it('changes active banner when dot indicator is clicked', async () => {

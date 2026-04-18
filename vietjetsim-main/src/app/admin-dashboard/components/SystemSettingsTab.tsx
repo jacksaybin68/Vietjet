@@ -153,7 +153,7 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
   }, [fetchSettings]);
 
   const handleSettingChange = (key: string, value: string | boolean) => {
-    setLocalSettings(prev => ({
+    setLocalSettings((prev) => ({
       ...prev,
       [key]: {
         ...prev[key],
@@ -214,7 +214,7 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
         </div>
         <div className="bg-white rounded-2xl border border-stone-200 p-6">
           <div className="animate-pulse space-y-4">
-            {[1, 2, 3, 4, 5].map(i => (
+            {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="h-16 bg-stone-100 rounded-lg" />
             ))}
           </div>
@@ -275,8 +275,19 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
             {isSaving ? (
               <>
                 <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
                 </svg>
                 Đang lưu...
               </>
@@ -292,7 +303,7 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
 
       {/* Categories Tabs */}
       <div className="flex bg-white rounded-xl border border-stone-200 p-1.5 gap-1 overflow-x-auto">
-        {SETTING_CATEGORIES.map(cat => (
+        {SETTING_CATEGORIES.map((cat) => (
           <button
             key={cat.id}
             onClick={() => setActiveCategory(cat.id)}
@@ -310,41 +321,52 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
 
       {/* Settings List */}
       <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
-        <div className="p-5 border-b border-stone-100" style={{ background: 'linear-gradient(135deg, #1A2948 0%, #2D3E5F 100%)' }}>
+        <div
+          className="p-5 border-b border-stone-100"
+          style={{ background: 'linear-gradient(135deg, #1A2948 0%, #2D3E5F 100%)' }}
+        >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.1)' }}>
-              <Icon 
-                name={(SETTING_CATEGORIES.find(c => c.id === activeCategory)?.icon || 'CogIcon') as any} 
-                size={20} 
-                className="text-white" 
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ background: 'rgba(255,255,255,0.1)' }}
+            >
+              <Icon
+                name={
+                  (SETTING_CATEGORIES.find((c) => c.id === activeCategory)?.icon ||
+                    'CogIcon') as any
+                }
+                size={20}
+                className="text-white"
               />
             </div>
             <div>
               <h3 className="font-bold text-white">
-                {SETTING_CATEGORIES.find(c => c.id === activeCategory)?.label}
+                {SETTING_CATEGORIES.find((c) => c.id === activeCategory)?.label}
               </h3>
               <p className="text-xs text-white/70 mt-0.5">
-                Cập nhật các thông số quan trọng liên quan đến {SETTING_CATEGORIES.find(c => c.id === activeCategory)?.label.toLowerCase()}
+                Cập nhật các thông số quan trọng liên quan đến{' '}
+                {SETTING_CATEGORIES.find((c) => c.id === activeCategory)?.label.toLowerCase()}
               </p>
             </div>
           </div>
         </div>
 
         <div className="divide-y divide-stone-100">
-          {DEFAULT_SETTINGS.filter(s => s.category === activeCategory).map(setting => {
+          {DEFAULT_SETTINGS.filter((s) => s.category === activeCategory).map((setting) => {
             const value = getSettingValue(setting.key, setting.type);
-            
+
             return (
               <div key={setting.key} className="px-5 py-5 hover:bg-stone-50/50 transition-colors">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <h4 className="font-semibold text-stone-900">{setting.label}</h4>
-                      {hasChanges && localSettings[setting.key]?.value !== settings[setting.key]?.value && (
-                        <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
-                          Đã thay đổi
-                        </span>
-                      )}
+                      {hasChanges &&
+                        localSettings[setting.key]?.value !== settings[setting.key]?.value && (
+                          <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
+                            Đã thay đổi
+                          </span>
+                        )}
                     </div>
                     <p className="text-xs text-stone-500 mt-1 max-w-xl">{setting.description}</p>
                   </div>
@@ -352,7 +374,9 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
                     {setting.type === 'boolean' ? (
                       <div className="flex items-center">
                         <button
-                          onClick={() => handleSettingChange(setting.key, value === 'true' ? 'false' : 'true')}
+                          onClick={() =>
+                            handleSettingChange(setting.key, value === 'true' ? 'false' : 'true')
+                          }
                           className={`relative w-12 h-6 rounded-full transition-all duration-300 ${
                             value === 'true' ? 'bg-green-500' : 'bg-stone-300'
                           }`}
@@ -373,8 +397,10 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
                         onChange={(e) => handleSettingChange(setting.key, e.target.value)}
                         className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                       >
-                        {setting.options?.map(opt => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        {setting.options?.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
                         ))}
                       </select>
                     ) : (
@@ -397,7 +423,11 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
 
       {/* Info Box */}
       <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
-        <Icon name="InformationCircleIcon" size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
+        <Icon
+          name="InformationCircleIcon"
+          size={20}
+          className="text-blue-600 flex-shrink-0 mt-0.5"
+        />
         <div>
           <p className="text-sm font-semibold text-blue-900">Lưu ý khi thay đổi cài đặt</p>
           <ul className="text-xs text-blue-700 mt-1 space-y-1">

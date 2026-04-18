@@ -27,7 +27,15 @@ export async function POST(request: NextRequest) {
     if (error) return response;
 
     const body = await request.json();
-    const { bank_name, account_number, account_holder, bank_bin, branch, is_default, transfer_note_template } = body;
+    const {
+      bank_name,
+      account_number,
+      account_holder,
+      bank_bin,
+      branch,
+      is_default,
+      transfer_note_template,
+    } = body;
 
     if (!bank_name || !account_number || !account_holder) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });

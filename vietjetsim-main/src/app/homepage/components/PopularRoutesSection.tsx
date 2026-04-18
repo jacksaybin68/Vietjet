@@ -115,11 +115,11 @@ const POPULAR_ROUTES = [
 
 const TAG_COLORS: Record<string, { bg: string; text: string }> = {
   'Phổ biến nhất': { bg: 'rgba(236,32,41,0.10)', text: '#EC2029' },
-  'Giá tốt':       { bg: 'rgba(16,185,129,0.12)', text: '#059669' },
-  'Hot':           { bg: 'rgba(249,115,22,0.12)', text: '#ea580c' },
-  'Nghỉ dưỡng':   { bg: 'rgba(14,165,233,0.12)', text: '#0284c7' },
-  'Khuyến mãi':   { bg: 'rgba(124,58,237,0.12)', text: '#7c3aed' },
-  'Biển đẹp':     { bg: 'rgba(6,182,212,0.12)', text: '#0891b2' },
+  'Giá tốt': { bg: 'rgba(16,185,129,0.12)', text: '#059669' },
+  Hot: { bg: 'rgba(249,115,22,0.12)', text: '#ea580c' },
+  'Nghỉ dưỡng': { bg: 'rgba(14,165,233,0.12)', text: '#0284c7' },
+  'Khuyến mãi': { bg: 'rgba(124,58,237,0.12)', text: '#7c3aed' },
+  'Biển đẹp': { bg: 'rgba(6,182,212,0.12)', text: '#0891b2' },
 };
 
 export default function PopularRoutesSection() {
@@ -283,9 +283,7 @@ export default function PopularRoutesSection() {
                       <span className="text-sm font-black text-vj-text" style={{ fontWeight: 900 }}>
                         {route?.fromCode}
                       </span>
-                      <MdArrowForward
-                        className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 text-[#EC2029]"
-                      />
+                      <MdArrowForward className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 text-[#EC2029]" />
                       <span className="text-sm font-black text-vj-text" style={{ fontWeight: 900 }}>
                         {route?.toCode}
                       </span>
@@ -299,10 +297,7 @@ export default function PopularRoutesSection() {
                         {route?.tag}
                       </span>
                     </div>
-                    <p
-                      className="text-xs truncate mt-0.5 text-vj-gray"
-                      style={{ fontWeight: 500 }}
-                    >
+                    <p className="text-xs truncate mt-0.5 text-vj-gray" style={{ fontWeight: 500 }}>
                       {route?.from} → {route?.to} · {route?.duration}
                     </p>
                   </div>

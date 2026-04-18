@@ -79,16 +79,13 @@ export default function ChatTab() {
   }, []);
 
   // Mark user messages as read (local UI update only)
-  const markUserMessagesRead = useCallback(
-    (convId: string) => {
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.sender_role === 'user' && !m.read_at ? { ...m, read_at: new Date().toISOString() } : m
-        )
-      );
-    },
-    []
-  );
+  const markUserMessagesRead = useCallback((convId: string) => {
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.sender_role === 'user' && !m.read_at ? { ...m, read_at: new Date().toISOString() } : m
+      )
+    );
+  }, []);
 
   // Load all conversations via API
   const loadConversations = useCallback(async () => {
@@ -347,9 +344,7 @@ export default function ChatTab() {
     markUserMessagesRead(selectedConv.id);
     // Mark conversation unread count as cleared
     setConversations((prev) =>
-      prev.map((c) =>
-        c.id === selectedConv.id ? { ...c, unread_by_admin: 0 } : c
-      )
+      prev.map((c) => (c.id === selectedConv.id ? { ...c, unread_by_admin: 0 } : c))
     );
   }, [selectedConv?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -487,9 +482,7 @@ export default function ChatTab() {
                       <span className="text-primary font-bold text-sm">
                         {(conv.user_name || conv.user_email || 'K').charAt(0).toUpperCase()}
                       </span>
-                      <span
-                        className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white bg-gray-300"
-                      />
+                      <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white bg-gray-300" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
@@ -612,9 +605,7 @@ export default function ChatTab() {
                     .charAt(0)
                     .toUpperCase()}
                 </span>
-                <span
-                  className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white bg-gray-300"
-                />
+                <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white bg-gray-300" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="font-bold text-navy text-sm truncate">

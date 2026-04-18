@@ -12,32 +12,46 @@ export async function POST(req: NextRequest) {
     // ─── OpenClaw Role Enforcement: COORDINATOR (Real-Time Flight Updates ONLY) ─
     let augmentedHistory = [
       {
-        role: 'system', 
+        role: 'system',
         content: `Bạn là OpenClaw Coordinator. 
 CHỨC NĂNG DUY NHẤT: Điều phối cập nhật chặng bay thực tế từ VietjetAir.com vào cơ sở dữ liệu.
 QUY TẮC: 
 1. Chỉ trả lời các vấn đề liên quan đến tra cứu chuyến bay thực tế, lộ trình và cập nhật thông tin chuyến bay vào admin dashboard.
 2. Từ chối lịch sự mọi câu hỏi về eSIM, gói cước, hoặc hỗ trợ khách hàng chung.
-3. Luôn cung cấp link tra cứu từ VietjetAir dựa trên thông tin tra cứu được.`
+3. Luôn cung cấp link tra cứu từ VietjetAir dựa trên thông tin tra cứu được.`,
       },
-      ...history
+      ...history,
     ];
-    
+
     const lowerMsg = message.toLowerCase();
-    const flightKeywords = ['chuyến bay', 'vé máy bay', 'flight', 'bay từ', 'han', 'sgn', 'dad', 'pqc', 'cxr', 'hph', 'vj', 'cập nhật', 'route'];
-    
-    const isFlightRelated = flightKeywords.some(key => lowerMsg.includes(key));
-    
+    const flightKeywords = [
+      'chuyến bay',
+      'vé máy bay',
+      'flight',
+      'bay từ',
+      'han',
+      'sgn',
+      'dad',
+      'pqc',
+      'cxr',
+      'hph',
+      'vj',
+      'cập nhật',
+      'route',
+    ];
+
+    const isFlightRelated = flightKeywords.some((key) => lowerMsg.includes(key));
+
     if (isFlightRelated) {
       const origin = lowerMsg.includes('han') || lowerMsg.includes('hà nội') ? 'HAN' : 'SGN';
       const destination = lowerMsg.includes('sgn') || lowerMsg.includes('sài gòn') ? 'SGN' : 'HAN';
-      const date = new Date().toISOString().split('T')[0]; 
+      const date = new Date().toISOString().split('T')[0];
 
       try {
         const research = await researchVietjetFlights(origin, destination, date);
         augmentedHistory.push({
           role: 'system',
-          content: `TRẠNG THÁI HIỆN TẠI: Đã tìm thấy lộ trình thực tế ${origin}-${destination} (${date}) tại VietjetAir. Link cập nhật: ${research.bookingUrl}. Hãy hướng dẫn người dùng sử dụng link này để đồng bộ dữ liệu vào hệ thống.`
+          content: `TRẠNG THÁI HIỆN TẠI: Đã tìm thấy lộ trình thực tế ${origin}-${destination} (${date}) tại VietjetAir. Link cập nhật: ${research.bookingUrl}. Hãy hướng dẫn người dùng sử dụng link này để đồng bộ dữ liệu vào hệ thống.`,
         });
       } catch (e) {
         console.error('Coordinator research failed:', e);
@@ -53,7 +67,7 @@ QUY TẮC:
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
           message,
@@ -67,30 +81,30 @@ QUY TẮC:
       }
 
       const data = await response.json();
-      
+
       return NextResponse.json({
-        content: data.reply || data.content || data.message || "Xin lỗi, tôi không thể trả lời lúc này.",
+        content:
+          data.reply || data.content || data.message || 'Xin lỗi, tôi không thể trả lời lúc này.',
         id: Date.now().toString(),
       });
     } catch (apiError) {
       console.error('OpenClaw API Error:', apiError);
-      
+
       // Fallback for development (Simulation mode)
       if (process.env.NODE_ENV === 'development') {
-        const researchText = isFlightRelated ? `[Coordinator Context: Đã trích xuất thông tin lộ trình VietJet thực tế]` : '';
+        const researchText = isFlightRelated
+          ? `[Coordinator Context: Đã trích xuất thông tin lộ trình VietJet thực tế]`
+          : '';
         return NextResponse.json({
           content: `${researchText} [Demo Mode] Tôi là OpenClaw Coordinator. Gateway hiện đang ngoại tuyến, nhưng tôi đã sẵn sàng link điều phối cập nhật chặng bay cho bạn.`,
           id: Date.now().toString(),
         });
       }
-      
+
       throw apiError;
     }
   } catch (error: any) {
     console.error('OpenClaw Route Error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Internal Server Error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }

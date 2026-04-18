@@ -144,8 +144,6 @@ export default function ToastDemo() {
               <span className="w-2 h-2 rounded-full bg-[#1A2948] inline-block" />
               Thông tin
             </button>
-
-
           </div>
 
           {/* Confirmation Modal Demo */}
@@ -199,8 +197,6 @@ export default function ToastDemo() {
                 </svg>
                 Xóa đặt chỗ
               </button>
-
-
             </div>
           </div>
         </div>

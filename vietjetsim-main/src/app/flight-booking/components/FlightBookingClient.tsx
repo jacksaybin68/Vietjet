@@ -79,7 +79,7 @@ export default function FlightBookingClient() {
       const flightId = booking.selectedFlight?.id;
       const passengers = booking.passengers;
       const basePrice = booking.selectedFlight?.price || 0;
-      
+
       const passengerCount = passengers.length;
       // Note: Tax and fee calculations simulate simple logic.
       const taxAndFee = Math.round(basePrice * passengerCount * 0.15);
@@ -92,7 +92,7 @@ export default function FlightBookingClient() {
         body: JSON.stringify({
           flight_id: flightId,
           total_price: totalPrice,
-          passengers: passengers
+          passengers: passengers,
         }),
       });
 
@@ -102,22 +102,25 @@ export default function FlightBookingClient() {
       const bookingId = data.booking.id;
 
       setBooking((b) => ({ ...b, selectedSeats: seats }));
-      
-      sessionStorage.setItem('vjsim_booking', JSON.stringify({
-        bookingId: bookingId,
-        flightNo: booking.selectedFlight?.flightNo,
-        from: booking.selectedFlight?.from,
-        to: booking.selectedFlight?.to,
-        fromCity: booking.selectedFlight?.fromCity,
-        toCity: booking.selectedFlight?.toCity,
-        departTime: booking.selectedFlight?.departTime,
-        arriveTime: booking.selectedFlight?.arriveTime,
-        date: new Date().toLocaleDateString('vi-VN'),
-        passengers: passengers.map((p, i) => ({ name: p.name, seat: seats[i] })),
-        basePrice: basePrice * passengerCount,
-        tax: taxAndFee,
-        seatFee: seatsFee
-      }));
+
+      sessionStorage.setItem(
+        'vjsim_booking',
+        JSON.stringify({
+          bookingId: bookingId,
+          flightNo: booking.selectedFlight?.flightNo,
+          from: booking.selectedFlight?.from,
+          to: booking.selectedFlight?.to,
+          fromCity: booking.selectedFlight?.fromCity,
+          toCity: booking.selectedFlight?.toCity,
+          departTime: booking.selectedFlight?.departTime,
+          arriveTime: booking.selectedFlight?.arriveTime,
+          date: new Date().toLocaleDateString('vi-VN'),
+          passengers: passengers.map((p, i) => ({ name: p.name, seat: seats[i] })),
+          basePrice: basePrice * passengerCount,
+          tax: taxAndFee,
+          seatFee: seatsFee,
+        })
+      );
 
       toast.success(
         'Chỗ ngồi đã được chọn!',
@@ -131,9 +134,7 @@ export default function FlightBookingClient() {
   };
 
   return (
-    <div
-      className="pt-[128px] pb-12 min-h-screen bg-gray-50 font-body"
-    >
+    <div className="pt-[128px] pb-12 min-h-screen bg-gray-50 font-body">
       {/* VietJet-style sticky step bar */}
       <div
         className="sticky top-[128px] z-30"
@@ -162,7 +163,7 @@ export default function FlightBookingClient() {
                             ? 'white'
                             : 'rgba(255,255,255,0.20)',
                       color: step > s.id ? '#1A2948' : step === s.id ? '#EC2029' : 'white',
-                      fontWeight: 900
+                      fontWeight: 900,
                     }}
                   >
                     {step > s.id ? <Icon name="CheckIcon" size={16} /> : s.id}
@@ -176,7 +177,7 @@ export default function FlightBookingClient() {
                           : step > s.id
                             ? '#FFD400'
                             : 'rgba(255,255,255,0.60)',
-                      fontWeight: step === s.id ? 700 : 600
+                      fontWeight: step === s.id ? 700 : 600,
                     }}
                   >
                     {s.label}

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from '@/lib/auth';
-import { getSavedPaymentMethods, deleteSavedPaymentMethod, setDefaultPaymentMethod } from '@/lib/db';
+import {
+  getSavedPaymentMethods,
+  deleteSavedPaymentMethod,
+  setDefaultPaymentMethod,
+} from '@/lib/db';
 
 export async function DELETE(
   request: NextRequest,
@@ -22,10 +26,7 @@ export async function DELETE(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const token = await getToken(request);
     if (!token?.userId) {
