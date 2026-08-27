@@ -14,7 +14,9 @@ export default function SignUpLoginPage() {
   const [tab, setTab] = useState<AuthTab>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [surname, setSurname] = useState('');
+  const [givenName, setGivenName] = useState('');
+  const [agreeTerms, setAgreeTerms] = useState(false);
   const [phone, setPhone] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -52,8 +54,12 @@ export default function SignUpLoginPage() {
       setLoading(true);
       setError('');
 
-      if (!name || (!email && !phone) || !password) {
-        setError('Vui lòng điền họ tên, mật khẩu và (Email hoặc Số điện thoại).');
+      if (!surname.trim() || !givenName.trim() || (!email && !phone) || !password || !agreeTerms) {
+        setError(
+          !agreeTerms
+            ? 'Vui lòng đồng ý với Điều khoản dịch vụ và Chính sách bảo mật.'
+            : 'Vui lòng điền họ tên, mật khẩu và (Email hoặc Số điện thoại).'
+        );
         setLoading(false);
         return;
       }
@@ -78,7 +84,7 @@ export default function SignUpLoginPage() {
     }
 
     try {
-      await signUp(email, password, { fullName: name, phone: phone });
+      await signUp(email, password, { fullName: (surname.trim() + ' ' + givenName.trim()).trim(), phone: phone });
       setSuccess('Đăng ký thành công! Đang chuyển hướng...');
       setTimeout(() => router.push('/tai-khoan'), 1200);
     } catch (err: any) {
@@ -92,7 +98,7 @@ export default function SignUpLoginPage() {
   const isLoginIdentifierValid =
     isEmailValid || phone.replace(/\D/g, '').length >= 9 || email.replace(/\D/g, '').length >= 9; // Allow email or phone in login
   const isPasswordValid = password.length >= 6;
-  const isNameValid = name.trim().length >= 2;
+  const isNameValid = surname.trim().length >= 1 && givenName.trim().length >= 1;
   const isPhoneValid = phone.replace(/\D/g, '').length >= 9;
 
   return (
@@ -205,21 +211,8 @@ export default function SignUpLoginPage() {
       </div>
 
       {/* Right Panel - Form */}
-      <div className="flex-1 flex items-center justify-center p-6 bg-white">
-        <div className="w-full max-w-md">
-          {/* Mobile logo */}
-          <div className="lg:hidden flex items-center gap-2 mb-8">
-            <AppLogo size={32} />
-            <span
-              className="font-black text-primary"
-              style={{
-                fontWeight: 900,
-              }}
-            >
-              Vietjet Air
-            </span>
-          </div>
-
+      <div className="flex-1 flex items-center justify-center p-8 bg-white">
+        <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-10 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]">
           {/* VietJet-style tabs */}
           <div className="flex border-b-2 border-gray-200 mb-8">
             <button
@@ -260,27 +253,6 @@ export default function SignUpLoginPage() {
             >
               Đăng ký
             </button>
-          </div>
-
-          {/* Demo credentials */}
-          <div
-            className="rounded-xl p-4 mb-6 text-xs bg-primary-50"
-            style={{ border: '1px solid #FFE0E0' }}
-          >
-            <div className="font-bold mb-2 flex items-center gap-1.5 text-primary">
-              <Icon name="InformationCircleIcon" size={14} className="text-primary" />
-              Tài khoản demo:
-            </div>
-            <div className="space-y-1 font-koho">
-              <div>
-                <span className="font-semibold text-vj-text">User:</span> user@Vietjet Air.vn /
-                user123
-              </div>
-              <div>
-                <span className="font-semibold text-vj-text">Admin:</span> admin@Vietjet Air.vn /
-                admin123
-              </div>
-            </div>
           </div>
 
           {error && (
@@ -427,42 +399,54 @@ export default function SignUpLoginPage() {
             <form onSubmit={handleRegister} className="space-y-4">
               {!otpRequested ? (
                 <div className="space-y-4 animate-in fade-in slide-in-from-left-2 duration-300">
-                  <div className={`form-field-float ${name ? 'has-value' : ''}`}>
-                    <Icon
-                      name="UserIcon"
-                      size={18}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10 pointer-events-none"
-                    />
-                    <input
-                      id="full_name"
-                      name="full_name"
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder=" "
-                      className={`w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm form-input ${isNameValid ? 'form-input-valid' : ''} font-body-vj transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white`}
-                      required
-                    />
-                    <label className="form-label-float has-icon">Họ và tên</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className={`form-field-float ${surname ? 'has-value' : ''}`}>
+                      <input
+                        id="surname"
+                        name="surname"
+                        type="text"
+                        value={surname}
+                        onChange={(e) => setSurname(e.target.value)}
+                        placeholder=" "
+                        className={`w-full pl-4 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm form-input ${isNameValid ? 'form-input-valid' : ''} font-body-vj transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white`}
+                        required
+                      />
+                      <label className="form-label-float">Họ</label>
+                    </div>
+                    <div className={`form-field-float ${givenName ? 'has-value' : ''}`}>
+                      <input
+                        id="given_name"
+                        name="given_name"
+                        type="text"
+                        value={givenName}
+                        onChange={(e) => setGivenName(e.target.value)}
+                        placeholder=" "
+                        className={`w-full pl-4 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm form-input ${isNameValid ? 'form-input-valid' : ''} font-body-vj transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white`}
+                        required
+                      />
+                      <label className="form-label-float">Tên đệm/tên</label>
+                    </div>
                   </div>
 
-                  <div className={`form-field-float ${phone ? 'has-value' : ''}`}>
-                    <Icon
-                      name="PhoneIcon"
-                      size={18}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10 pointer-events-none"
-                    />
-                    <input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder=" "
-                      className={`w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm form-input ${isPhoneValid ? 'form-input-valid' : ''} font-body-vj transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white`}
-                      required
-                    />
-                    <label className="form-label-float has-icon">Số điện thoại *</label>
+                  <div>
+                    <label htmlFor="phone" className="block text-xs text-gray-500 mb-1 font-koho">
+                      Số điện thoại
+                    </label>
+                    <div
+                      className={`flex items-center bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 transition-all focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary ${isPhoneValid ? 'border-primary/40' : ''}`}
+                    >
+                      <span className="text-sm text-gray-500 font-koho select-none">(+84)</span>
+                      <input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                        placeholder="912 345 678"
+                        className="flex-1 ml-2 bg-transparent outline-none text-sm font-body-vj text-vj-text placeholder:text-gray-400"
+                        required
+                      />
+                    </div>
                   </div>
 
                   <div className={`form-field-float ${email ? 'has-value' : ''}`}>
@@ -516,6 +500,27 @@ export default function SignUpLoginPage() {
                       <Icon name={showPassword ? 'EyeSlashIcon' : 'EyeIcon'} size={18} />
                     </button>
                   </div>
+
+                  <label className="flex items-start gap-2 text-xs text-gray-500 font-koho cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={agreeTerms}
+                      onChange={(e) => setAgreeTerms(e.target.checked)}
+                      className="mt-0.5 rounded"
+                      style={{ accentColor: '#EC2029' }}
+                    />
+                    <span>
+                      Tôi đồng ý với{' '}
+                      <a href="#" className="text-primary font-semibold hover:underline">
+                        Điều khoản dịch vụ
+                      </a>{' '}
+                      và{' '}
+                      <a href="#" className="text-primary font-semibold hover:underline">
+                        Chính sách bảo mật
+                      </a>{' '}
+                      của Vietjet Air / SkyJoy.
+                    </span>
+                  </label>
 
                   <button
                     type="submit"
