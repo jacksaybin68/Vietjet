@@ -214,9 +214,9 @@ export default function Header() {
               </div>
 
               {/* Logo & Primary Nav row */}
-              <div className="flex items-center h-16">
+              <div className="flex items-center h-20">
                 <Link href="/" className="flex items-center flex-shrink-0">
-                  <AppLogo size={100} className="h-12" />
+                  <AppLogo size={100} className="h-14" />
                 </Link>
 
                 <div className="flex-1" />
