@@ -14,6 +14,7 @@ const nextConfig = {
 
   images: {
     remotePatterns: imageHosts,
+    qualities: [40, 55, 70, 80, 85, 90, 95, 100],
   },
 
   async redirects() {
