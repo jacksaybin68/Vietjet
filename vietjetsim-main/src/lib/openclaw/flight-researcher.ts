@@ -19,7 +19,7 @@ export async function researchVietjetFlights(
   date: string
 ): Promise<FlightResearchResult> {
   // 1. Generate the official Vietjet booking URL
-  const bookingUrl = `https://www.vietjetair.com/vi/booking/search?origin=${origin}&destination=${destination}&departureDate=${date}&adults=1&currency=VND`;
+  const bookingUrl = `https://www.vietjetair.com/vi/dat-ve/search?origin=${origin}&destination=${destination}&departureDate=${date}&adults=1&currency=VND`;
 
   try {
     // 2. In a real production app, we would call a protected scaper or partner API.

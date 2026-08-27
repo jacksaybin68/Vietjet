@@ -20,7 +20,7 @@ const nextConfig = {
     return [
       {
         source: '/',
-        destination: '/homepage',
+        destination: '/trang-chu',
         permanent: false,
       },
     ];

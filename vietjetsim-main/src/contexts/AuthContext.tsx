@@ -112,7 +112,7 @@ export const useAuth = (): AuthContextType => {
 // ─── API Helpers ────────────────────────────────────────────────────────────
 
 async function fetchAuth(endpoint: string, options?: RequestInit) {
-  const res = await fetch(`/api/auth${endpoint}`, {
+  const res = await fetch(`/api/xac-thuc${endpoint}`, {
     headers: {
       'Content-Type': 'application/json',
       ...options?.headers,
@@ -145,7 +145,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const roleLabel = getRoleLabel(role);
   const roleLevel = getRoleLevel(role);
 
-  // Fetch current user from /api/auth/me
+  // Fetch current user from /api/xac-thuc/toi
   const fetchCurrentUser = useCallback(async () => {
     try {
       const data = await fetchAuth('/me');
@@ -256,7 +256,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signIn = async (email: string, password: string) => {
-    const data = await fetchAuth('/login', {
+    const data = await fetchAuth('/dang-nhap', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
@@ -284,7 +284,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       clearInterval(refreshTimerRef.current);
     }
 
-    router.push('/sign-up-login');
+    router.push('/dang-nhap');
   };
 
   const getCurrentUser = async () => {
@@ -334,7 +334,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updateUserRole = async (userId: string, newRole: UserRole) => {
     try {
-      const res = await fetch('/api/admin/users', {
+      const res = await fetch('/api/quan-tri/nguoi-dung', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

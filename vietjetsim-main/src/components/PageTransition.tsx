@@ -5,18 +5,18 @@ import { usePathname } from 'next/navigation';
 
 // Define the ordered flow for directional slide transitions
 const ROUTE_ORDER: Record<string, number> = {
-  '/homepage': 0,
+  '/trang-chu': 0,
   '/': 0,
-  '/flight-booking': 1,
-  '/booking': 2,
-  '/payment': 3,
+  '/tim-ve': 1,
+  '/dat-ve': 2,
+  '/thanh-toan': 3,
   '/confirmation': 4,
-  '/user-dashboard': 5,
-  '/admin-dashboard': 5,
+  '/tai-khoan': 5,
+  '/quan-tri': 5,
 };
 
 function getRouteIndex(path: string): number {
-  // Get the base route (e.g. /flight-booking/results -> /flight-booking)
+  // Get the base route (e.g. /tim-ve/results -> /tim-ve)
   const baseRoute = path === '/' ? '/' : `/${path.split('/')[1]}`;
 
   // Match by prefix for nested routes

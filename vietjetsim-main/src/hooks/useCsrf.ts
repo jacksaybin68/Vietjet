@@ -10,7 +10,7 @@
  *   const { csrfFetch, getCsrfToken, refreshToken } = useCsrf();
  *
  *   // Use csrfFetch for mutations
- *   await csrfFetch('/api/bookings', { method: 'POST', body: JSON.stringify(data) });
+ *   await csrfFetch('/api/dat-ve', { method: 'POST', body: JSON.stringify(data) });
  *
  *   // Or get token manually
  *   const token = getCsrfToken();
@@ -94,7 +94,7 @@ export function useCsrf(): UseCsrfReturn {
 export async function refreshCsrfToken(): Promise<string | null> {
   try {
     // Fetch any page to get the CSRF cookie set
-    await fetch('/api/auth/me', { credentials: 'include' });
+    await fetch('/api/xac-thuc/toi', { credentials: 'include' });
     return getCsrfTokenFromDocument();
   } catch {
     return null;

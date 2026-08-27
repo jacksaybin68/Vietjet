@@ -15,7 +15,7 @@ interface Message {
 export default function OpenClawAssistant() {
   const { isAdmin, user } = useAuth();
   const pathname = usePathname();
-  const isInsideAdmin = pathname?.startsWith('/admin-dashboard');
+  const isInsideAdmin = pathname?.startsWith('/quan-tri');
 
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -30,13 +30,10 @@ export default function OpenClawAssistant() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
-  if (!isAdmin || !isInsideAdmin) return null;
-
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 100);
       if (messages.length === 0) {
-        // Welcoming message - Dedicated Coordinator Focus
         setMessages([
           {
             id: 'welcome',
@@ -52,6 +49,8 @@ export default function OpenClawAssistant() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping, scrollToBottom]);
+
+  if (!isAdmin || !isInsideAdmin) return null;
 
   const handleSend = async () => {
     if (!inputText.trim() || sending) return;
@@ -70,7 +69,7 @@ export default function OpenClawAssistant() {
     setIsTyping(true);
 
     try {
-      const response = await fetch('/api/openclaw/chat', {
+      const response = await fetch('/api/tro-ly-ai/tro-chuyen', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

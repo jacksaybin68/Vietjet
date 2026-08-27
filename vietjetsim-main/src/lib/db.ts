@@ -605,41 +605,36 @@ export async function createBooking(
     flight_id: string;
     total_price: number;
   },
-  passengers: { name: string; dob?: string; id_number?: string; gender?: string }[]
+  passengers: { name: string; dob?: string; id_number?: string; gender?: string }[],
+  seats?: string[] // seat numbers to reserve
 ): Promise<BookingRecord> {
-  // Wrap booking + all passenger inserts in a single transaction.
-  // Without this: if passenger insert fails after booking insert → orphan booking with no passengers.
-  // sql.transaction() runs all queries atomically — any failure rolls back all of them.
-  const queries = [
-    sql`
-      INSERT INTO bookings (user_id, flight_id, status, total_price)
-      VALUES (${booking.user_id}, ${booking.flight_id}, 'pending', ${booking.total_price})
-      RETURNING *
-    `,
-    ...passengers.map(
-      (p) => sql`
-        WITH bk AS (
-          SELECT id FROM bookings
-          WHERE user_id = ${booking.user_id}
-          ORDER BY created_at DESC LIMIT 1
-        )
-        INSERT INTO passengers (booking_id, name, dob, id_number, gender)
-        SELECT bk.id, ${p.name}, ${p.dob || null}, ${p.id_number || null}, ${p.gender || 'male'}
-        FROM bk
-      `
-    ),
-  ];
+  // Use a single transaction for booking + passengers + seats.
+  // Using RETURNING id from the INSERT ensures we get the correct booking_id
+  // even if multiple bookings are created concurrently.
+  const bookingInsert = sql`
+    INSERT INTO bookings (user_id, flight_id, status, total_price)
+    VALUES (${booking.user_id}, ${booking.flight_id}, 'pending', ${booking.total_price})
+    RETURNING id, user_id, flight_id, status, total_price, created_at, updated_at
+  `;
 
-  await sql.transaction(queries);
+  const passengerInserts = passengers.map(
+    (p) => sql`
+      INSERT INTO passengers (booking_id, name, dob, id_number, gender)
+      VALUES (${bookingInsert.id}, ${p.name}, ${p.dob || null}, ${p.id_number || null}, ${p.gender || 'male'})
+    `
+  );
 
-  // Re-fetch the booking we just inserted (transaction guarantees it exists)
-  const [created] = (await sql`
-    SELECT * FROM bookings
-    WHERE user_id = ${booking.user_id} AND flight_id = ${booking.flight_id}
-    ORDER BY created_at DESC LIMIT 1
-  `) as BookingRecord[];
+  // Insert seats if provided
+  const seatInserts = (seats || []).map(
+    (seatNumber) => sql`
+      INSERT INTO seats (booking_id, flight_id, seat_number, status)
+      VALUES (${bookingInsert.id}, ${booking.flight_id}, ${seatNumber}, 'reserved')
+    `
+  );
 
-  return created;
+  await sql.transaction([bookingInsert, ...passengerInserts, ...seatInserts]);
+
+  return bookingInsert as unknown as BookingRecord;
 }
 
 export async function updateBookingStatus(
@@ -1284,7 +1279,7 @@ export async function getAllAdminRoles(): Promise<AdminRoleRecord[]> {
   const rows = await sql`
     SELECT ar.*, u.email, u.full_name
     FROM admin_roles ar
-    JOIN users u ON ar.user_id = u.id
+    JOIN user_profiles u ON ar.user_id = u.id
     ORDER BY ar.created_at DESC
   `;
   return rows as AdminRoleRecord[];
