@@ -40,7 +40,7 @@ const HOT_DEALS = [
 const BANNERS = [
   {
     id: 1,
-    image: '/assets/images/banners/loc_vang.png',
+    image: '/images/hero/banner-3-loc-vang.jpg',
     alt: 'Bay Vietjet Air nhận lộc vàng - khuyến mãi vé máy bay hấp dẫn',
     title: 'BAY VIETJET AIR NHẬN LỘC VÀNG',
     subtitle: 'Mua vé từ 03/03/2026 đến 19/05/2026 để nhận thưởng',
@@ -48,7 +48,7 @@ const BANNERS = [
   },
   {
     id: 2,
-    image: '/assets/images/banners/destinations.png',
+    image: '/images/hero/banner-1-hongkong.jpg',
     alt: 'Khám phá điểm đến mới cùng Vietjet Air - hơn 50 đường bay',
     title: 'KHÁM PHÁ ĐIỂM ĐẾN MỚI',
     subtitle: 'Hơn 50 đường bay nội địa và quốc tế',
@@ -56,7 +56,7 @@ const BANNERS = [
   },
   {
     id: 3,
-    image: '/assets/images/banners/dich-vu.png',
+    image: '/images/hero/banner-2-skyboss.jpg',
     alt: 'Trải nghiệm dịch vụ cao cấp trên máy bay Vietjet Air',
     title: 'DỊCH VỤ SKYBOSS CAO CẤP',
     subtitle: 'Tận hưởng sự thoải mái tối đa và tiện ích đặc quyền',
@@ -105,7 +105,7 @@ export default function HeroSection() {
   return (
     <section className="relative pt-[128px]">
       {/* Full-width banner */}
-      <div className="relative w-full h-[400px] sm:h-[500px] lg:h-[600px] overflow-hidden">
+      <div className="relative w-full h-[350px] sm:h-[420px] lg:h-[520px] overflow-hidden">
         {BANNERS.map((banner, i) => (
           <div
             key={banner.id}
@@ -184,7 +184,7 @@ export default function HeroSection() {
 
         {/* Cloud background fade effect at bottom */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-32 lg:h-48 pointer-events-none z-10"
+          className="absolute bottom-0 left-0 right-0 h-24 lg:h-32 pointer-events-none z-10"
           style={{
             background:
               'linear-gradient(to top, rgba(230,243,255,0.9) 0%, rgba(255,255,255,0) 100%)',
@@ -202,14 +202,14 @@ export default function HeroSection() {
         </div>
 
         {/* ===== RIGHT-ALIGNED SEARCH FORM OVERLAY ===== */}
-        <div className="absolute inset-x-0 top-0 bottom-10 flex items-center justify-center lg:justify-end z-20 px-3 sm:px-10 lg:px-20 max-w-[1400px] mx-auto pointer-events-none">
+        <div className="absolute inset-x-0 top-0 bottom-10 flex items-center justify-center lg:justify-end z-20 px-4 sm:px-8 lg:px-16 max-w-[1400px] mx-auto pointer-events-none">
           {formLoading ? (
-            <div className="w-full max-w-lg pointer-events-auto">
+            <div className="w-full max-w-md pointer-events-auto">
               <FlightSearchFormSkeleton />
             </div>
           ) : (
             <div
-              className="w-full max-w-[440px] rounded-2xl overflow-visible shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] border border-white/20 relative pointer-events-auto"
+              className="w-full max-w-[400px] rounded-2xl overflow-visible shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] border border-white/20 relative pointer-events-auto"
               style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(10px)' }}
             >
               {/* Mascot */}
@@ -232,30 +232,27 @@ export default function HeroSection() {
 
               {/* Red Header Bar with Fare Types */}
               <div
-                className="flex rounded-t-2xl overflow-hidden p-2 gap-1"
+                className="flex rounded-t-2xl overflow-hidden p-1.5 gap-1"
                 style={{
                   background: '#D1161B',
                 }}
               >
-                <div className="flex-1 px-2.5 py-1.5">
-                  <span className="text-white text-xs font-bold block mb-0.5">
-                    Mua hành lý, suất ăn, chọn chỗ ngồi và hơn thế nữa...
+                <div className="flex-1 px-2 py-1">
+                  <span className="text-white text-[10px] font-bold block leading-tight">
+                    Mua hành lý, suất ăn, chọn chỗ...
                   </span>
                 </div>
-                <div className="flex-none bg-[#FFDD00] rounded-md px-3 py-1.5 flex items-center justify-center shadow-inner text-[#B30000] text-xs font-black leading-tight cursor-pointer hover:bg-yellow-300 transition-colors">
-                  Đổi thưởng &<br />
-                  Mua Skypoint
+                <div className="flex-none bg-[#FFDD00] rounded-md px-2 py-1 flex items-center justify-center shadow-inner text-[#B30000] text-[9px] font-black leading-tight cursor-pointer hover:bg-yellow-300 transition-colors">
+                  Đổi thưởng
                 </div>
-                <div className="flex-none bg-[#B30000] rounded-md px-3 py-1.5 flex items-center justify-center text-white text-xs font-bold leading-tight cursor-pointer hover:bg-[#8F0000] transition-colors">
+                <div className="flex-none bg-[#B30000] rounded-md px-2 py-1 flex items-center justify-center text-white text-[9px] font-bold leading-tight cursor-pointer hover:bg-[#8F0000] transition-colors">
                   Gửi hàng
-                  <br />
-                  nhanh
                 </div>
               </div>
 
               {/* Quick Trip Type Selectors (Khứ hồi / Một chiều - Radio buttons) */}
               <div
-                className="px-5 pt-3 pb-2 flex items-center gap-4 border-b border-gray-100"
+                className="px-4 pt-2 pb-1.5 flex items-center gap-3 border-b border-gray-100"
                 style={{ background: '#D1161B' }}
               >
                 {[
@@ -292,7 +289,7 @@ export default function HeroSection() {
               </div>
 
               {/* Form body */}
-              <div className="px-4 pt-4 pb-4 bg-[#D1161B] rounded-b-2xl">
+              <div className="px-3 pt-3 pb-3 bg-[#D1161B] rounded-b-2xl">
                 {/* Search Fields Wrapper (White rounded block) */}
                 <div className="space-y-0 text-gray-800">
                   {/* From / To row */}
@@ -346,20 +343,26 @@ export default function HeroSection() {
                         <div className="w-10 sm:w-12 h-12 flex items-center justify-center flex-shrink-0 text-gray-500">
                           <FaPlane className="rotate-90 w-4 h-4" />
                         </div>
-                        <div className="flex-1 min-w-0 pr-4 h-12 flex items-center">
-                          <span className="font-bold text-sm sm:text-base text-gray-800 tracking-wide">
+                        <div className="flex-1 min-w-0 pr-4 h-12 flex flex-col justify-center">
+                          <div className="text-[10px] font-semibold uppercase tracking-wider font-koho text-gray-500">
                             Điểm đến
-                          </span>
+                          </div>
+                          <div className="font-black text-sm truncate">{toAirport?.name}</div>
+                          <div className="text-[10px] font-koho text-gray-500">
+                            {toAirport?.code} · {toAirport?.city}
+                          </div>
                         </div>
                         {/* Return Date aligned across */}
-                        <div className="w-[120px] sm:w-[150px] border-l border-gray-200 h-10 flex flex-col justify-center px-3">
-                          <div className="text-[10px] text-gray-500 font-semibold mb-0.5">
-                            Ngày về
+                        {tripType !== 'one-way' && (
+                          <div className="w-[120px] sm:w-[150px] border-l border-gray-200 h-10 flex flex-col justify-center px-3">
+                            <div className="text-[10px] text-gray-500 font-semibold mb-0.5">
+                              Ngày về
+                            </div>
+                            <div className="font-bold text-xs sm:text-sm text-gray-800 whitespace-nowrap overflow-hidden text-ellipsis">
+                              {returnDate.split('-').reverse().join('/')}
+                            </div>
                           </div>
-                          <div className="font-bold text-xs sm:text-sm text-gray-800 whitespace-nowrap overflow-hidden text-ellipsis">
-                            Xin chào!
-                          </div>
-                        </div>
+                        )}
                       </div>
                       {showToDropdown && (
                         <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 overflow-hidden max-h-52 overflow-y-auto mt-1">
@@ -389,7 +392,7 @@ export default function HeroSection() {
                   </div>
 
                   {/* Passenger row */}
-                  <div className="flex flex-col sm:flex-row gap-2 mt-2">
+                  <div className="flex flex-col sm:flex-row gap-2 mt-1.5">
                     <div className="w-full relative min-w-0">
                       <div
                         className="flex items-center h-12 px-3 sm:px-4 bg-white rounded-xl cursor-pointer hover:border-[#EC2029] transition-colors"
@@ -408,17 +411,12 @@ export default function HeroSection() {
                             {passengers} người lớn
                           </span>
                         </div>
-                        <div className="bg-gray-100 rounded px-2 py-0.5 ml-2 cursor-pointer relative -top-3 left-6">
-                          <div className="w-16 h-12 bg-white border border-gray-200 absolute rounded shadow-md z-[51] flex items-center justify-center p-1 -right-2 top-0 pointer-events-none">
-                            <div className="text-[10px] absolute -top-4 rounded bg-white shadow py-0.5 px-1 right-2 text-gray-600 whitespace-nowrap">
-                              Xin chào!
-                            </div>
-                            <img
-                              src="/assets/images/app_logo.png"
-                              className="w-10 h-10 object-contain drop-shadow"
-                              alt="Vietjet Mascot"
-                            />
-                          </div>
+                        <div className="ml-2 flex-shrink-0 hidden sm:block">
+                          <img
+                            src="/assets/images/app_logo.png"
+                            className="w-9 h-9 object-contain drop-shadow"
+                            alt="Vietjet"
+                          />
                         </div>
                       </div>
                       {showPassengerDropdown && (
@@ -458,7 +456,7 @@ export default function HeroSection() {
                   </div>
 
                   {/* Promo code + Find lowest */}
-                  <div className="flex flex-col sm:flex-row gap-2 mb-3">
+                  <div className="flex flex-col sm:flex-row gap-2 mb-2">
                     <div className="flex-1 flex items-center gap-2 px-3 sm:px-4 py-2.5 border border-gray-200 rounded-xl bg-white">
                       <MdLocalOffer
                         className="w-4 h-4 flex-shrink-0"

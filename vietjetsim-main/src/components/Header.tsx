@@ -216,7 +216,7 @@ export default function Header() {
               {/* Logo & Primary Nav row */}
               <div className="flex items-center h-16">
                 <Link href="/" className="flex items-center flex-shrink-0">
-                  <AppLogo size={140} />
+                  <AppLogo size={100} className="h-12" />
                 </Link>
 
                 <div className="flex-1" />
@@ -257,19 +257,23 @@ export default function Header() {
           style={{ background: 'linear-gradient(to right, #F9A51A, #FBB612, #FFDD00)' }}
         >
           <div className="max-w-[1400px] mx-auto px-4">
-            <div className="flex items-center overflow-x-auto no-scrollbar">
+            <div className="flex items-center overflow-x-auto no-scrollbar gap-1">
               {SERVICE_TABS.map((tab, i) => {
                 const isTabActive = i === 0 || isActive(tab.href);
                 return (
                   <Link
                     key={tab.label}
                     href={tab.href}
-                    className={`flex items-center gap-2 px-6 py-2 text-[12px] font-black whitespace-nowrap transition-all flex-shrink-0 ${
-                      isTabActive ? 'bg-[#FFDD00] text-[#EC2029]' : 'text-white hover:bg-white/10'
+                    className={`flex items-center gap-1 px-3 py-1.5 text-[10px] font-bold whitespace-nowrap transition-all flex-shrink-0 rounded-md ${
+                      isTabActive 
+                        ? 'bg-white text-[#EC2029] shadow-sm font-black' 
+                        : 'text-white hover:bg-white/20'
                     }`}
                   >
-                    <span className={isTabActive ? 'text-[#EC2029]' : 'text-white'}>{tab.svg}</span>
-                    {tab.label}
+                    <span className={`w-3.5 h-3.5 flex items-center justify-center ${isTabActive ? 'text-[#EC2029]' : 'text-white'}`}>
+                      {tab.svg}
+                    </span>
+                    <span>{tab.label}</span>
                   </Link>
                 );
               })}

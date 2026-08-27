@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import Link from 'next/link';
+import AppImage from '@/components/ui/AppImage';
 
 const PROMO_DATA = [
   {
@@ -13,14 +14,14 @@ const PROMO_DATA = [
   {
     title: 'Bảo hiểm Du lịch',
     description: 'An tâm trọn vẹn trên mọi hành trình với gói bảo hiểm toàn diện.',
-    image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb',
+    image: '/images/hero/download-1.jpg',
     color: 'bg-blue-600',
     link: '/dich-vu',
   },
   {
     title: 'Kết nối E-Sim',
     description: 'Giữ liên lạc thông suốt tại hơn 100 quốc gia mà không cần đổi Sim.',
-    image: 'https://images.unsplash.com/photo-1556656793-062ff98782ee',
+    image: '/images/hero/download-2.jpg',
     color: 'bg-green-600',
     link: '/dich-vu',
   },
@@ -42,12 +43,15 @@ export default function PromotionalBannersSection() {
             <Link
               key={index}
               href={item.link}
-              className="group block relative h-[400px] rounded-3xl overflow-hidden bg-gray-200 shadow-lg"
+              className="group block relative h-[400px] rounded-3xl overflow-hidden shadow-lg"
             >
-              {/* Simple background image or color fallback */}
-              <div
-                className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                style={{ backgroundImage: `url(${item.image})` }}
+              {/* Optimized image with AppImage */}
+              <AppImage
+                src={item.image}
+                alt={item.title}
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-110"
+                sizes="(max-width: 768px) 100vw, 33vw"
               />
               <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-all z-10" />
 
