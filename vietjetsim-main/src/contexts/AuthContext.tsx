@@ -148,7 +148,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Fetch current user from /api/xac-thuc/toi
   const fetchCurrentUser = useCallback(async () => {
     try {
-      const data = await fetchAuth('/me');
+      const data = await fetchAuth('/toi');
       if (data.user) {
         const userData: User = {
           id: data.user.id,
