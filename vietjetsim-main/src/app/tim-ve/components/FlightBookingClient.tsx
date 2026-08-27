@@ -166,18 +166,12 @@ function FlightBookingClientInner() {
         }}
       >
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-8 py-5">
+          <div className="flex items-center gap-4 sm:gap-6 py-3">
             {STEPS.map((s, i) => (
               <React.Fragment key={s.id}>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <div
-                    className={`w-11 h-11 rounded-full flex items-center justify-center text-base font-black transition-all ${
-                      step > s.id
-                        ? 'text-[#1A2948]'
-                        : step === s.id
-                          ? 'bg-white'
-                          : 'bg-white/20 text-white'
-                    }`}
+                    className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs sm:text-sm font-black transition-all flex-shrink-0`}
                     style={{
                       background:
                         step > s.id
@@ -189,10 +183,10 @@ function FlightBookingClientInner() {
                       fontWeight: 900,
                     }}
                   >
-                    {step > s.id ? <Icon name="CheckIcon" size={16} /> : s.id}
+                    {step > s.id ? <Icon name="CheckIcon" size={14} className="sm:!w-4 sm:!h-4" /> : s.id}
                   </div>
                   <span
-                    className={`text-base font-semibold hidden sm:block transition-colors`}
+                    className={`text-xs sm:text-sm font-semibold hidden xs:block transition-colors`}
                     style={{
                       color:
                         step === s.id
@@ -208,7 +202,7 @@ function FlightBookingClientInner() {
                 </div>
                 {i < STEPS.length - 1 && (
                   <div
-                    className={`flex-1 h-px max-w-16 sm:max-w-24 transition-colors`}
+                    className={`flex-1 h-0.5 min-w-8 sm:min-w-12 max-w-12 sm:max-w-16 transition-colors`}
                     style={{
                       background:
                         step > s.id + 1
