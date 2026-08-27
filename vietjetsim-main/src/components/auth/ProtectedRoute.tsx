@@ -16,11 +16,11 @@ export default function ProtectedRoute({ children, requiredRole = 'user' }: Prot
   useEffect(() => {
     if (loading) return;
     if (!user) {
-      router.push('/sign-up-login');
+      router.push('/dang-nhap');
       return;
     }
     if (requiredRole === 'admin' && !isAdminRole(role)) {
-      router.push('/user-dashboard');
+      router.push('/tai-khoan');
     }
   }, [loading, user, role, requiredRole, router]);
 

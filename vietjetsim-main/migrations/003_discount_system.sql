@@ -41,6 +41,7 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+DROP TRIGGER IF EXISTS update_discount_codes_updated_at ON discount_codes;
 CREATE TRIGGER update_discount_codes_updated_at
     BEFORE UPDATE ON discount_codes
     FOR EACH ROW

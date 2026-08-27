@@ -433,7 +433,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   handleGoHome = () => {
     if (typeof window !== 'undefined') {
-      window.location.href = '/homepage';
+      window.location.href = '/trang-chu';
     }
   };
 

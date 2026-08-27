@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS bank_accounts (
   bank_bin VARCHAR(20),
   branch VARCHAR(255),
   logo_url TEXT,
+  transfer_note_template TEXT,
   is_default BOOLEAN DEFAULT false,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT NOW(),

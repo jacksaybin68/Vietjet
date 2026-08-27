@@ -1,6 +1,6 @@
 -- 000_core_schema.sql - NO BOM
 CREATE TABLE IF NOT EXISTS user_profiles (
-  id TEXT PRIMARY KEY,
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   email VARCHAR(255) UNIQUE NOT NULL,
   password_hash TEXT,
   full_name VARCHAR(255),
@@ -74,16 +74,6 @@ CREATE TABLE IF NOT EXISTS seats (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS refresh_tokens (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id TEXT NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
-  token_hash TEXT NOT NULL,
-  family_id TEXT,
-  revoked BOOLEAN DEFAULT false,
-  expires_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
 CREATE TABLE IF NOT EXISTS chat_conversations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id TEXT NOT NULL REFERENCES user_profiles(id),
@@ -104,8 +94,10 @@ CREATE TABLE IF NOT EXISTS chat_messages (
 CREATE TABLE IF NOT EXISTS refund_requests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   booking_id UUID NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   reason TEXT,
   amount DECIMAL(12, 2),
+  bank_info TEXT,
   status VARCHAR(20) DEFAULT 'pending',
   admin_note TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -127,38 +119,3 @@ CREATE TABLE announcements (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS discount_codes (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  code VARCHAR(50) UNIQUE NOT NULL,
-  type VARCHAR(20) NOT NULL,
-  value DECIMAL(12, 2) NOT NULL,
-  min_booking_amount DECIMAL(12, 2) DEFAULT 0,
-  max_discount_amount DECIMAL(12, 2),
-  start_date TIMESTAMPTZ,
-  end_date TIMESTAMPTZ,
-  usage_limit INTEGER,
-  usage_per_user_limit INTEGER DEFAULT 1,
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS wallet_transactions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  wallet_id UUID NOT NULL,
-  amount DECIMAL(12, 2) NOT NULL,
-  type VARCHAR(20) NOT NULL,
-  status VARCHAR(20) DEFAULT 'completed',
-  description TEXT,
-  reference_id TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS user_wallets (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id TEXT UNIQUE NOT NULL REFERENCES user_profiles(id),
-  balance DECIMAL(12, 2) DEFAULT 0,
-  account_number TEXT UNIQUE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);

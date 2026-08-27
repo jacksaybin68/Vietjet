@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-const PREFETCH_ROUTES = ['/homepage', '/flight-booking', '/booking', '/user-dashboard'];
+const PREFETCH_ROUTES = ['/trang-chu', '/tim-ve', '/dat-ve', '/tai-khoan'];
 
 export default function NavigationOptimizer() {
   const router = useRouter();

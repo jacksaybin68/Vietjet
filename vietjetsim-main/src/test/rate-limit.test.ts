@@ -76,7 +76,7 @@ describe('Rate Limiter Convenience Functions', () => {
   });
 
   it('should use auth config', () => {
-    const request = new Request('http://localhost/api/auth/login', {
+    const request = new Request('http://localhost/api/xac-thuc/dang-nhap', {
       method: 'POST',
       headers: { 'x-forwarded-for': '10.0.0.1' },
     });
