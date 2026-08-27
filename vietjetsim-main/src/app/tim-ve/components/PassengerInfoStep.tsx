@@ -52,7 +52,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
                 <div className="flex items-center gap-4 relative z-10">
                   <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center p-2 shrinks-0 shadow-sm">
                     <img
-                      src="https://corp-website-pb-assets.skyjoy.vn/wp-content/uploads/wpfiles/2021/10/19095855/Logo-white-131x41-1.png"
+                      src="https://skyjoy-id.vietjetair.com/resources/zp16p/login/vietjet-air-iframe-v2/images/sky-loy.svg"
                       alt="SkyJoy"
                       onError={(e) => {
                         e.currentTarget.src =
