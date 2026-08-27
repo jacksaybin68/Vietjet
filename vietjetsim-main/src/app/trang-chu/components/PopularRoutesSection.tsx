@@ -29,7 +29,7 @@ const SERVICES = [
 const PROMO_BANNERS = [
   {
     id: 1,
-    image: 'https://img.rocket.new/generatedImages/rocket_gen_img_191890201-1773716195662.png',
+    image: '/images/hero/download-6.jpg',
     alt: 'Jet Cafe - Bua an tuoi ngon tren chuyen bay Vietjet',
     label: 'Enjoy flying',
     title: 'Jet Café',
@@ -38,7 +38,7 @@ const PROMO_BANNERS = [
   },
   {
     id: 2,
-    image: 'https://img.rocket.new/generatedImages/rocket_gen_img_13b317307-1773716193087.png',
+    image: '/images/hero/download-1.jpg',
     alt: 'Bao hiem du lich toan dien cho hanh khach Vietjet',
     label: 'Bảo hiểm',
     title: 'An tâm bay',
@@ -47,7 +47,7 @@ const PROMO_BANNERS = [
   },
   {
     id: 3,
-    image: 'https://img.rocket.new/generatedImages/rocket_gen_img_1932a17a0-1773716193603.png',
+    image: '/images/hero/download-7.jpg',
     alt: 'Dich vu chuyen phat nhanh hang hoa Vietjet Cargo',
     label: 'Chuyển phát',
     title: 'Gửi hàng nhanh',
