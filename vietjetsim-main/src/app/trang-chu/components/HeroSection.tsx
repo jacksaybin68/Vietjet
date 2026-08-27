@@ -131,38 +131,6 @@ export default function HeroSection() {
                   'linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.35) 40%, rgba(0,0,0,0.65) 100%)',
               }}
             />
-
-            {/* Banner text - top left */}
-            {!banner.hideOverlay && (
-              <div
-                className={`absolute top-1/4 left-4 sm:left-10 hidden lg:block transition-all duration-1000 transform ${
-                  i === activeBanner ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
-                }`}
-              >
-                <h2
-                  className="text-2xl sm:text-4xl lg:text-5xl font-black text-white leading-tight uppercase"
-                  style={{
-                    fontStyle: 'italic',
-                    textShadow: '0 4px 30px rgba(0,0,0,0.9)',
-                    WebkitTextStroke: '0.5px rgba(255,255,255,0.2)',
-                    letterSpacing: '-0.02em',
-                    maxWidth: '60%',
-                  }}
-                >
-                  {banner.title}
-                </h2>
-                <div className="h-1.5 w-32 bg-yellow-400 mt-2 rounded-full shadow-2xl" />
-                <p
-                  className="text-white text-base sm:text-xl mt-4 font-bold max-w-lg"
-                  style={{
-                    textShadow: '0 3px 15px rgba(0,0,0,0.8)',
-                    letterSpacing: '0.01em',
-                  }}
-                >
-                  {banner.subtitle}
-                </p>
-              </div>
-            )}
           </div>
         ))}
 

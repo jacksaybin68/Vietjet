@@ -132,13 +132,13 @@ export default function Header() {
       >
         {/* Tier 1: Announcement ticker bar */}
         {announcementVisible && (
-          <div className="bg-[#F2F2F2] border-b border-gray-100">
+          <div className="bg-[#EC2029] border-b border-[#D91E28]">
             <div className="max-w-[1400px] mx-auto px-4">
               <div className="flex items-center h-8 gap-2">
-                <span className="text-sm flex-shrink-0 text-[#EC2029]">
+                <span className="text-sm flex-shrink-0 text-white">
                   <Icon name="BellIcon" size={14} />
                 </span>
-                <p className="text-[11px] text-[#333333] flex-1 min-w-0 truncate font-medium font-koho-medium">
+                <p className="text-[11px] text-white flex-1 min-w-0 truncate font-medium font-koho-medium">
                   {announcement}
                 </p>
                 <div className="flex items-center gap-0.5 flex-shrink-0 ml-1">
