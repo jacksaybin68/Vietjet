@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import AppLogo from '@/components/ui/AppLogo';
 import Icon from '@/components/ui/AppIcon';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -14,7 +13,7 @@ const getMainNav = (isAdmin: boolean) => [
   },
   { label: 'LÀM THỦ TỤC ONLINE', href: '/lam-thu-tuc' },
   { label: 'DỊCH VỤ CHUYẾN BAY', href: '/dich-vu' },
-    { label: 'DỊCH VỤ KHÁC', href: '/' },
+  { label: 'DỊCH VỤ KHÁC', href: '/' },
 ];
 
 const SERVICE_TABS = [
@@ -22,7 +21,7 @@ const SERVICE_TABS = [
     label: 'Đặt vé',
     href: '/tim-ve',
     svg: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+      <svg viewBox="0 0 24 24" fill="#EC2029" className="w-4 h-4">
         <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
       </svg>
     ),
@@ -32,7 +31,7 @@ const SERVICE_TABS = [
     label: 'Skyshop',
     href: '/',
     svg: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+      <svg viewBox="0 0 24 24" fill="#EC2029" className="w-4 h-4">
         <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96C5 16.1 6.1 17 7 17h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63H19c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0023.25 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" />
       </svg>
     ),
@@ -41,7 +40,7 @@ const SERVICE_TABS = [
     label: 'Khách sạn',
     href: '/',
     svg: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+      <svg viewBox="0 0 24 24" fill="#EC2029" className="w-4 h-4">
         <path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z" />
       </svg>
     ),
@@ -50,7 +49,7 @@ const SERVICE_TABS = [
     label: 'E-Voucher',
     href: '/',
     svg: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+      <svg viewBox="0 0 24 24" fill="#EC2029" className="w-4 h-4">
         <path d="M20 12c0-1.1.9-2 2-2V6c0-1.1-.9-2-2-2H4c-1.1 0-1.99.9-1.99 2v4c1.1 0 1.99.9 1.99 2s-.89 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c-1.1 0-2-.9-2-2zm-4.42 4.8L12 14.5l-3.58 2.3 1.08-4.12-3.29-2.69 4.24-.25L12 5.8l1.54 3.95 4.24.25-3.29 2.69 1.09 4.11z" />
       </svg>
     ),
@@ -59,7 +58,7 @@ const SERVICE_TABS = [
     label: 'E-Sim',
     href: '/',
     svg: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+      <svg viewBox="0 0 24 24" fill="#EC2029" className="w-4 h-4">
         <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z" />
       </svg>
     ),
@@ -68,7 +67,7 @@ const SERVICE_TABS = [
     label: 'E-Visa',
     href: '/',
     svg: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+      <svg viewBox="0 0 24 24" fill="#EC2029" className="w-4 h-4">
         <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" />
       </svg>
     ),
@@ -77,7 +76,7 @@ const SERVICE_TABS = [
     label: 'Mua ngoại tệ',
     href: '/',
     svg: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+      <svg viewBox="0 0 24 24" fill="#EC2029" className="w-4 h-4">
         <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" />
       </svg>
     ),
@@ -86,7 +85,7 @@ const SERVICE_TABS = [
     label: 'Bảo hiểm',
     href: '/',
     svg: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+      <svg viewBox="0 0 24 24" fill="#EC2029" className="w-4 h-4">
         <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" />
       </svg>
     ),
@@ -95,7 +94,7 @@ const SERVICE_TABS = [
     label: 'SkyJoy',
     href: '/',
     svg: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+      <svg viewBox="0 0 24 24" fill="#EC2029" className="w-4 h-4">
         <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
       </svg>
     ),
@@ -120,8 +119,7 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const isActive = (href: string) =>
-    href === '/' ? pathname === '/' : pathname.startsWith(href);
+  const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href));
 
   return (
     <>
@@ -133,7 +131,7 @@ export default function Header() {
         {/* Tier 1: Announcement ticker bar */}
         {announcementVisible && (
           <div className="bg-[#EC2029] border-b border-[#D91E28]">
-            <div className="max-w-[1400px] mx-auto px-4">
+            <div className="max-w-[1400px] mx-auto px-4 lg:px-6">
               <div className="flex items-center h-8 gap-2">
                 <span className="text-sm flex-shrink-0 text-white">
                   <Icon name="BellIcon" size={14} />
@@ -214,9 +212,13 @@ export default function Header() {
               </div>
 
               {/* Logo & Primary Nav row */}
-              <div className="flex items-center h-20">
+              <div className="flex items-center h-16">
                 <Link href="/" className="flex items-center flex-shrink-0">
-                  <AppLogo size={100} className="h-14" />
+                  <img
+                    src="https://www.vietjetair.com/static/media/vj-logo.0f71c68b.svg"
+                    alt="Vietjet Air"
+                    className="h-14 w-auto object-contain"
+                  />
                 </Link>
 
                 <div className="flex-1" />
@@ -257,23 +259,35 @@ export default function Header() {
           style={{ background: 'linear-gradient(to right, #F9A51A, #FBB612, #FFDD00)' }}
         >
           <div className="max-w-[1400px] mx-auto px-4">
-            <div className="flex items-center overflow-x-auto no-scrollbar gap-1">
+            <div className="flex justify-end items-center overflow-x-auto no-scrollbar gap-1">
               {SERVICE_TABS.map((tab, i) => {
                 const isTabActive = i === 0 || isActive(tab.href);
                 return (
                   <Link
                     key={tab.label}
                     href={tab.href}
-                    className={`flex items-center gap-1 px-3 py-1.5 text-[10px] font-bold whitespace-nowrap transition-all flex-shrink-0 rounded-md ${
-                      isTabActive 
-                        ? 'bg-white text-[#EC2029] shadow-sm font-black' 
-                        : 'text-white hover:bg-white/20'
+                    className={`group flex items-center gap-1 px-3 py-1.5 text-[10px] font-bold whitespace-nowrap transition-all flex-shrink-0 rounded-md ${
+                      isTabActive
+                        ? 'bg-white text-[#EC2029] shadow-sm font-black'
+                        : 'bg-transparent text-white hover:bg-[#FFD400]'
                     }`}
                   >
-                    <span className={`w-3.5 h-3.5 flex items-center justify-center ${isTabActive ? 'text-[#EC2029]' : 'text-white'}`}>
+                    <span
+                      className={`w-3.5 h-3.5 flex items-center justify-center transition-colors duration-200 ${
+                        isTabActive
+                          ? 'text-[#EC2029]'
+                          : 'text-[#EC2029] group-hover:text-[#D1161B]'
+                      }`}
+                    >
                       {tab.svg}
                     </span>
-                    <span>{tab.label}</span>
+                    <span
+                      className={`transition-colors duration-200 ${
+                        isTabActive ? '' : 'group-hover:text-[#D1161B]'
+                      }`}
+                    >
+                      {tab.label}
+                    </span>
                   </Link>
                 );
               })}

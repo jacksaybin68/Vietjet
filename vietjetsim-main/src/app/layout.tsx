@@ -55,7 +55,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi">
+    <html lang="vi" suppressHydrationWarning>
       <head>
         {/* KoHo is VietJet's primary body font; Be Vietnam Pro for headings */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
