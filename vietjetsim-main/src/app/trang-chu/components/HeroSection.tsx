@@ -105,7 +105,7 @@ export default function HeroSection() {
   return (
     <section className="relative pt-[128px]">
       {/* Full-width banner */}
-      <div className="relative w-full h-[350px] sm:h-[420px] lg:h-[520px] overflow-hidden">
+      <div className="relative w-full h-[500px] sm:h-[600px] lg:h-[800px] overflow-hidden">
         {BANNERS.map((banner, i) => (
           <div
             key={banner.id}
@@ -159,9 +159,8 @@ export default function HeroSection() {
           }}
         />
 
-
         {/* ===== RIGHT-ALIGNED SEARCH FORM OVERLAY ===== */}
-        <div className="absolute inset-x-0 top-0 bottom-10 flex items-center justify-center lg:justify-end z-20 px-4 sm:px-8 lg:px-16 max-w-[1400px] mx-auto pointer-events-none">
+        <div className="absolute inset-x-0 top-[240px] sm:top-[280px] lg:top-[320px] bottom-10 flex items-start lg:items-center justify-center z-20 px-4 sm:px-8 lg:px-16 max-w-[1400px] mx-auto pointer-events-none">
           {formLoading ? (
             <div className="w-full max-w-md pointer-events-auto">
               <FlightSearchFormSkeleton />
