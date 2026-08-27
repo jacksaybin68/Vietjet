@@ -71,7 +71,7 @@ async function setupAdminAccount() {
     console.log('═'.repeat(50));
     console.log('📧 Email:    ' + admin.email);
     console.log('👤 Name:     ' + admin.full_name);
-    console.log('🔐 Password: Admin@123');
+    console.log('🔐 Password: ' + ADMIN_PASSWORD);
     console.log('🎭 Role:     ' + admin.role);
     console.log('🆔 ID:       ' + admin.id);
     console.log('📅 Created: ' + admin.created_at);
