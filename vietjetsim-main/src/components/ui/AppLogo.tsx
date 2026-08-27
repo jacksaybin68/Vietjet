@@ -36,7 +36,7 @@ const AppLogo = memo(function AppLogo({
           alt="Logo"
           width={size}
           height={size}
-          className={`h-12 w-auto object-contain ${className}`}
+          className={`h-14 w-auto object-contain ${className}`}
           loading="eager"
         />
       ) : (

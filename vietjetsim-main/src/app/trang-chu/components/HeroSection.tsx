@@ -191,15 +191,6 @@ export default function HeroSection() {
           }}
         />
 
-        {/* Promo icon bottom left */}
-        <div className="absolute bottom-[-20px] left-5 lg:left-20 z-30 hidden md:block w-[280px] h-[280px] hover:scale-105 transition-transform duration-500 cursor-pointer pointer-events-auto">
-          <AppImage
-            src="/assets/images/banners/loc_vang.png"
-            alt="Bay Vietjet Nhận Lộc Vàng"
-            fill
-            className="object-contain drop-shadow-2xl"
-          />
-        </div>
 
         {/* ===== RIGHT-ALIGNED SEARCH FORM OVERLAY ===== */}
         <div className="absolute inset-x-0 top-0 bottom-10 flex items-center justify-center lg:justify-end z-20 px-4 sm:px-8 lg:px-16 max-w-[1400px] mx-auto pointer-events-none">
