@@ -465,7 +465,7 @@ export async function deleteFlight(flightId: string): Promise<void> {
 
 export async function getBookingsByUserId(
   userId: string,
-  params?: { status?: string; page?: number; limit?: number }
+  params?: { status?: string | string[]; page?: number; limit?: number }
 ): Promise<{
   bookings: Array<
     BookingRecord & {
@@ -482,24 +482,31 @@ export async function getBookingsByUserId(
   const page = params?.page || 1;
   const limit = params?.limit || 20;
   const offset = (page - 1) * limit;
+  const statuses = Array.isArray(params?.status)
+    ? params.status.filter((item) => !!item)
+    : params?.status
+      ? [params.status]
+      : [];
 
-  // Get total count (without LIMIT/OFFSET)
-  let countResult;
-  if (params?.status) {
-    countResult = await sql`
-      SELECT COUNT(*) as total FROM bookings WHERE user_id = ${userId} AND status = ${params.status}
-    `;
-  } else {
-    countResult = await sql`
-      SELECT COUNT(*) as total FROM bookings WHERE user_id = ${userId}
-    `;
-  }
+  const hasStatusFilter = statuses.length > 0;
+  const statusPlaceholders = statuses.map((_, index) => `$${index + 2}`).join(', ');
+  const whereClause = hasStatusFilter
+    ? `b.user_id = $1 AND b.status IN (${statusPlaceholders})`
+    : 'b.user_id = $1';
+  const whereClauseForCount = hasStatusFilter
+    ? `user_id = $1 AND status IN (${statusPlaceholders})`
+    : 'user_id = $1';
+  const countValues = [userId, ...statuses];
+  const queryValues = [userId, ...statuses, limit, offset];
+
+  const countResult = await sql.query(
+    `SELECT COUNT(*) as total FROM bookings WHERE ${whereClauseForCount}`,
+    countValues
+  );
   const total = parseInt((countResult as any)[0].total, 10);
 
-  // Get paginated results
-  let bookings;
-  if (params?.status) {
-    bookings = await sql`
+  const bookings = await sql.query(
+    `
       SELECT b.*,
              f.flight_no, f.from_code, f.to_code, f.depart_time, f.arrive_time,
              json_agg(DISTINCT p) FILTER (WHERE p.id IS NOT NULL) as passengers,
@@ -508,27 +515,13 @@ export async function getBookingsByUserId(
       JOIN flights f ON b.flight_id = f.id
       LEFT JOIN passengers p ON b.id = p.booking_id
       LEFT JOIN payments pay ON b.id = pay.booking_id
-      WHERE b.user_id = ${userId} AND b.status = ${params.status}
+      WHERE ${whereClause}
       GROUP BY b.id, f.id
       ORDER BY b.created_at DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `;
-  } else {
-    bookings = await sql`
-      SELECT b.*,
-             f.flight_no, f.from_code, f.to_code, f.depart_time, f.arrive_time,
-             json_agg(DISTINCT p) FILTER (WHERE p.id IS NOT NULL) as passengers,
-             json_agg(DISTINCT pay) FILTER (WHERE pay.id IS NOT NULL) as payments
-      FROM bookings b
-      JOIN flights f ON b.flight_id = f.id
-      LEFT JOIN passengers p ON b.id = p.booking_id
-      LEFT JOIN payments pay ON b.id = pay.booking_id
-      WHERE b.user_id = ${userId}
-      GROUP BY b.id, f.id
-      ORDER BY b.created_at DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `;
-  }
+      LIMIT $${queryValues.length - 1} OFFSET $${queryValues.length}
+    `,
+    queryValues
+  );
 
   return {
     total,

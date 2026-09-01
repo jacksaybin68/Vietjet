@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Icon from '@/components/ui/AppIcon';
 import { useAuth } from '@/contexts/AuthContext';
+import { getCsrfHeaders } from '@/hooks/useCsrf';
 
 interface Notification {
   id: string;
@@ -74,7 +75,7 @@ export default function NotificationDropdown({
     try {
       const res = await fetch(`/api/thong-bao/${notificationId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         credentials: 'include',
         body: JSON.stringify({ is_read: true }),
       });
@@ -97,6 +98,7 @@ export default function NotificationDropdown({
     try {
       const res = await fetch('/api/thong-bao/danh-dau-tat-ca', {
         method: 'POST',
+        headers: { ...getCsrfHeaders() },
         credentials: 'include',
       });
 
