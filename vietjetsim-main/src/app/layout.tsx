@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     siteName: 'Vietjet Air',
     images: [
       {
-        url: 'https://placehold.co/1200x630/EC2029/FFFFFF?text=Vietjet+Air',
+        url: '/logo.png',
         width: 1200,
         height: 630,
         alt: 'Vietjet Air Booking Interface',
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     title: 'Vietjet Air — Đặt Vé Máy Bay Giá Rẻ',
     description:
       'Hệ thống đặt vé máy bay Vietjet Air chính thức. Tìm kiếm, đặt chỗ, chọn ghế và thanh toán trực tuyến.',
-    images: ['https://placehold.co/1200x630/EC2029/FFFFFF?text=Vietjet+Air'],
+    images: ['/logo.png'],
   },
   icons: {
     icon: [{ url: '/favicon.ico', type: 'image/x-icon' }],
