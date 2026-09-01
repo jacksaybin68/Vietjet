@@ -6,37 +6,37 @@ import AppImage from '@/components/ui/AppImage';
 const DESTINATIONS = [
   {
     name: 'Hà Nội',
-    image: 'https://img.rocket.new/generatedImages/rocket_gen_img_16ef498fe-1773722432120.png',
+    image: '/images/hero/download.jpg',
     alt: 'Ha Noi - Thu do ngan nam van hien voi Ho Hoan Kiem',
     code: 'HAN',
   },
   {
     name: 'TP. Hồ Chí Minh',
-    image: 'https://img.rocket.new/generatedImages/rocket_gen_img_14bf0c4cc-1773722431404.png',
+    image: '/images/hero/download-6.jpg',
     alt: 'TP. Ho Chi Minh - Thanh pho nang dong nhat Viet Nam',
     code: 'SGN',
   },
   {
     name: 'Phú Quốc',
-    image: 'https://img.rocket.new/generatedImages/rocket_gen_img_107571e1a-1773695589380.png',
+    image: '/images/hero/download-5.jpg',
     alt: 'Phu Quoc - Dao ngoc nhiet doi voi bai bien xanh trong',
     code: 'PQC',
   },
   {
     name: 'Đà Nẵng',
-    image: 'https://img.rocket.new/generatedImages/rocket_gen_img_104ff72bb-1773722430753.png',
+    image: '/images/hero/banner-4-44-sale.jpg',
     alt: 'Da Nang - Thanh pho bien dang song voi Cau Rong',
     code: 'DAD',
   },
   {
     name: 'Nha Trang',
-    image: 'https://img.rocket.new/generatedImages/rocket_gen_img_1d9901b99-1773722428997.png',
+    image: '/images/hero/download-2.jpg',
     alt: 'Nha Trang - Vinh bien xanh trong noi tieng mien Trung',
     code: 'CXR',
   },
   {
     name: 'Huế',
-    image: 'https://img.rocket.new/generatedImages/rocket_gen_img_12736a988-1773722431348.png',
+    image: '/images/hero/download-4.jpg',
     alt: 'Hue - Co do lich su voi Dai Noi va lang tam trieu Nguyen',
     code: 'HUI',
   },
