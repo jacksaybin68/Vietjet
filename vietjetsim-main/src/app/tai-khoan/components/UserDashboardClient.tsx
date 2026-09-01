@@ -122,7 +122,7 @@ const FALLBACK_UPCOMING = [
     seat: '14A',
     price: 1038900,
     status: 'confirmed',
-    image: 'https://img.rocket.new/generatedImages/rocket_gen_img_1384cb481-1773695589532.png',
+    image: '/images/hero/download-6.jpg',
     alt: 'Ho Chi Minh City skyline',
   },
   {
@@ -138,7 +138,7 @@ const FALLBACK_UPCOMING = [
     seat: '8C',
     price: 598900,
     status: 'confirmed',
-    image: 'https://img.rocket.new/generatedImages/rocket_gen_img_107571e1a-1773695589380.png',
+    image: '/images/hero/download-5.jpg',
     alt: 'Phu Quoc island beach',
   },
 ];
