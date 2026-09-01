@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Icon from '@/components/ui/AppIcon';
 import { useAuth } from '@/contexts/AuthContext';
+import { getCsrfHeaders } from '@/hooks/useCsrf';
 
 type NotificationType = 'all' | 'booking' | 'flight' | 'promo';
 
@@ -546,7 +547,7 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
         try {
           await fetch('/api/thong-bao', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
             credentials: 'include',
             body: JSON.stringify({ notification_id: id, action: 'mark_read' }),
           });
@@ -564,7 +565,7 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
       try {
         await fetch('/api/thong-bao', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
           credentials: 'include',
           body: JSON.stringify({ action: 'mark_all_read' }),
         });

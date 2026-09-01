@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/auth';
 import { validateCsrfOrReject } from '@/lib/csrf';
-import { getBookingsByUserId, createBooking, sql } from '@/lib/db';
+import { getBookingsByUserId, createBooking } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,7 +19,16 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
-    const status = searchParams.get('status') || undefined;
+    const statusParam = searchParams.get('status');
+    const requestedStatuses = statusParam
+      ? statusParam
+          .split(',')
+          .map((item) => item.trim())
+          .filter((item) => !!item)
+      : [];
+    const allowedStatuses = new Set(['pending', 'confirmed', 'completed', 'cancelled', 'refunded']);
+    const filteredStatuses = requestedStatuses.filter((status) => allowedStatuses.has(status));
+    const status = filteredStatuses.length > 0 ? filteredStatuses : undefined;
 
     const result = await getBookingsByUserId(payload.userId, { page, limit, status });
     const { bookings, total } = result;
@@ -57,16 +66,19 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { flight_id, total_price, passengers, seats } = body;
+    const parsedTotalPrice =
+      typeof total_price === 'number' ? total_price : Number.parseFloat(String(total_price));
 
     if (
       !flight_id ||
-      !total_price ||
+      !Number.isFinite(parsedTotalPrice) ||
+      parsedTotalPrice <= 0 ||
       !passengers ||
       !Array.isArray(passengers) ||
       passengers.length === 0
     ) {
       return NextResponse.json(
-        { error: 'flight_id, total_price, and passengers are required' },
+        { error: 'flight_id, total_price (> 0), and passengers are required' },
         { status: 400 }
       );
     }
@@ -88,7 +100,7 @@ export async function POST(request: NextRequest) {
     }
 
     const booking = await createBooking(
-      { user_id: userId as string, flight_id, total_price },
+      { user_id: userId as string, flight_id, total_price: parsedTotalPrice },
       passengers,
       seats || []
     );
