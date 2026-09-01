@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql, getOrCreateWallet, WalletTransactionRecord } from '@/lib/db';
+import {
+  getOrCreateWallet,
+  getSavedPaymentMethods,
+  getWalletTransactions,
+  topupWallet,
+  withdrawWallet,
+} from '@/lib/db';
 import { verifyAuthRequest } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
@@ -8,7 +14,15 @@ export async function GET(request: NextRequest) {
     if (error || !user) return response!;
 
     const wallet = await getOrCreateWallet(user.userId);
-    return NextResponse.json({ success: true, wallet });
+    const methods = await getSavedPaymentMethods(user.userId);
+    const { transactions } = await getWalletTransactions(user.userId, { page: 1, limit: 10 });
+
+    return NextResponse.json({
+      success: true,
+      wallet,
+      linkedBankAccounts: methods.filter((method) => method.type === 'bank'),
+      transactions,
+    });
   } catch (error: any) {
     return NextResponse.json(
       { error: 'Internal Server Error', message: error.message },
@@ -24,44 +38,78 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { action, amount, description, paymentMethodId } = body;
-
-    const wallet = await getOrCreateWallet(user.userId);
+    const numericAmount = Number(amount);
 
     if (action === 'topup') {
-      if (!amount || amount <= 0) {
+      if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
         return NextResponse.json(
           { error: 'Bad Request', message: 'Invalid amount' },
           { status: 400 }
         );
       }
-
-      const balanceBefore = parseFloat(String(wallet.balance));
-      const balanceAfter = balanceBefore + amount;
-
-      // Start transaction
-      const results = await sql.transaction([
-        sql`
-          INSERT INTO wallet_transactions (
-            wallet_id, type, amount, balance_before, balance_after,
-            description, payment_method_id, status
-          )
-          VALUES (
-            ${wallet.id}, 'topup', ${amount}, ${balanceBefore}, ${balanceAfter},
-            ${description || 'Nạp tiền vào ví'}, ${paymentMethodId || null}, 'completed'
-          )
-          RETURNING *
-        `,
-        sql`
-          UPDATE user_wallets 
-          SET balance = ${balanceAfter}, updated_at = NOW()
-          WHERE id = ${wallet.id}
-        `,
-      ]);
+      if (!paymentMethodId) {
+        return NextResponse.json(
+          { error: 'Bad Request', message: 'Missing payment method' },
+          { status: 400 }
+        );
+      }
+      const methods = await getSavedPaymentMethods(user.userId);
+      const linkedMethod = methods.find((method) => method.id === paymentMethodId);
+      if (!linkedMethod) {
+        return NextResponse.json(
+          { error: 'Bad Request', message: 'Payment method not found' },
+          { status: 400 }
+        );
+      }
+      const transaction = await topupWallet(
+        user.userId,
+        numericAmount,
+        paymentMethodId,
+        description || 'Nạp tiền vào ví Vietjet Air'
+      );
+      const wallet = await getOrCreateWallet(user.userId);
 
       return NextResponse.json({
         success: true,
-        wallet: { ...wallet, balance: balanceAfter },
-        transaction: results[0][0],
+        wallet,
+        transaction,
+      });
+    }
+
+    if (action === 'withdraw') {
+      if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+        return NextResponse.json(
+          { error: 'Bad Request', message: 'Invalid amount' },
+          { status: 400 }
+        );
+      }
+      if (!paymentMethodId) {
+        return NextResponse.json(
+          { error: 'Bad Request', message: 'Missing linked bank account' },
+          { status: 400 }
+        );
+      }
+      const methods = await getSavedPaymentMethods(user.userId);
+      const linkedBank = methods.find((method) => method.id === paymentMethodId && method.type === 'bank');
+      if (!linkedBank) {
+        return NextResponse.json(
+          { error: 'Bad Request', message: 'Linked bank account not found' },
+          { status: 400 }
+        );
+      }
+
+      const transaction = await withdrawWallet(
+        user.userId,
+        numericAmount,
+        paymentMethodId,
+        description || `Rút tiền về ${linkedBank.bank_name} - ${linkedBank.bank_id}`
+      );
+      const wallet = await getOrCreateWallet(user.userId);
+
+      return NextResponse.json({
+        success: true,
+        wallet,
+        transaction,
       });
     }
 
