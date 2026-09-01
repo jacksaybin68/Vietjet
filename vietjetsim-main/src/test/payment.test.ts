@@ -137,7 +137,7 @@ describe('Payment Database Module', () => {
         id: 'payment-1',
         booking_id: 'booking-1',
         amount: 1000,
-        method: 'wallet',
+        method: 'card',
         status: 'completed',
       };
       const mockBookingRecord = { id: 'booking-1', status: 'confirmed' };
@@ -159,7 +159,7 @@ describe('Payment Database Module', () => {
 
       const result = await createPaymentAndConfirmBooking({
         booking_id: 'booking-1',
-        method: 'wallet',
+        method: 'card',
         amount: 1000,
       });
 

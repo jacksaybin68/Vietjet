@@ -37,7 +37,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const body = await request.json();
     const { action } = body;
 
-    if (action === 'set_default') {
+    if (action === 'set_default' || action === 'setDefault') {
       await setDefaultPaymentMethod(id, token.userId);
       return NextResponse.json({ success: true });
     }

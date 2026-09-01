@@ -29,6 +29,14 @@ interface WalletData {
   account_number: string;
 }
 
+interface WalletTransaction {
+  id: string;
+  type: 'topup' | 'withdraw' | 'payment' | 'refund' | 'bonus';
+  amount: number;
+  description: string | null;
+  created_at: string;
+}
+
 // ─── Card Brand Icons ─────────────────────────────────────────────────────────
 
 const CARD_BRANDS: Record<string, { name: string; color: string }> = {
@@ -363,11 +371,32 @@ export default function WalletTab({ user }: WalletTabProps) {
   const toast = useToast();
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [methods, setMethods] = useState<PaymentMethod[]>([]);
+  const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [topupAmount, setTopupAmount] = useState('');
   const [topupLoading, setTopupLoading] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [withdrawLoading, setWithdrawLoading] = useState(false);
+  const [topupMethodId, setTopupMethodId] = useState('');
+  const [withdrawMethodId, setWithdrawMethodId] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const linkedBanks = methods.filter((method) => method.type === 'bank');
+  const defaultLinkedBank = linkedBanks.find((method) => method.isDefault) || linkedBanks[0] || null;
+  const activeTopupMethods = methods;
+  const selectedTopupMethod =
+    activeTopupMethods.find((method) => method.id === topupMethodId) ||
+    activeTopupMethods.find((method) => method.isDefault) ||
+    activeTopupMethods[0] ||
+    null;
+  const selectedWithdrawBank =
+    linkedBanks.find((method) => method.id === withdrawMethodId) ||
+    (withdrawMethodId ? null : defaultLinkedBank);
+
+  const parseFormattedAmount = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    return digits ? parseInt(digits, 10) : 0;
+  };
 
   const fetchData = useCallback(async () => {
     try {
@@ -381,10 +410,10 @@ export default function WalletTab({ user }: WalletTabProps) {
 
       if (walletRes.ok && walletData.wallet) {
         setWallet(walletData.wallet);
+        setTransactions(walletData.transactions || []);
       }
       if (methodsRes.ok && methodsData.methods) {
-        setMethods(
-          methodsData.methods.map((m: any) => ({
+        const normalizedMethods = methodsData.methods.map((m: any) => ({
             id: m.id,
             type: m.type,
             cardBrand: m.card_brand,
@@ -398,8 +427,18 @@ export default function WalletTab({ user }: WalletTabProps) {
             isDefault: m.is_default,
             isActive: m.is_active,
             createdAt: m.created_at,
-          }))
-        );
+          }));
+        setMethods(normalizedMethods);
+        const defaultMethod = normalizedMethods.find((m: PaymentMethod) => m.isDefault) || normalizedMethods[0];
+        if (defaultMethod) {
+          setTopupMethodId(defaultMethod.id);
+        }
+        const defaultBankMethod = normalizedMethods.find(
+          (m: PaymentMethod) => m.type === 'bank' && m.isDefault
+        ) || normalizedMethods.find((m: PaymentMethod) => m.type === 'bank');
+        if (defaultBankMethod) {
+          setWithdrawMethodId(defaultBankMethod.id);
+        }
       }
     } catch {
       toast.error('Lỗi', 'Không thể tải dữ liệu ví.');
@@ -413,7 +452,11 @@ export default function WalletTab({ user }: WalletTabProps) {
   }, [fetchData]);
 
   const handleTopup = async () => {
-    const amount = parseFloat(topupAmount);
+    const amount = parseFormattedAmount(topupAmount);
+    if (!selectedTopupMethod) {
+      toast.error('Thiếu phương thức nạp', 'Vui lòng liên kết thẻ hoặc tài khoản để nạp tiền.');
+      return;
+    }
     if (!amount || amount <= 0) {
       toast.error('Lỗi', 'Vui lòng nhập số tiền hợp lệ.');
       return;
@@ -428,6 +471,7 @@ export default function WalletTab({ user }: WalletTabProps) {
         body: JSON.stringify({
           action: 'topup',
           amount: amount,
+          paymentMethodId: selectedTopupMethod.id,
           description: 'Nạp tiền vào ví Vietjet Air',
         }),
       });
@@ -439,12 +483,62 @@ export default function WalletTab({ user }: WalletTabProps) {
       }
 
       setWallet((prev) => (prev ? { ...prev, balance: data.wallet.balance } : null));
+      if (data.transaction) {
+        setTransactions((prev) => [data.transaction, ...prev].slice(0, 10));
+      }
       setTopupAmount('');
       toast.success('Thành công', `Đã nạp ${amount.toLocaleString('vi-VN')} VND vào ví.`);
     } catch {
       toast.error('Lỗi', 'Nạp tiền thất bại. Vui lòng thử lại.');
     } finally {
       setTopupLoading(false);
+    }
+  };
+
+  const handleWithdraw = async () => {
+    const amount = parseFormattedAmount(withdrawAmount);
+    if (!selectedWithdrawBank) {
+      toast.error('Thiếu tài khoản ngân hàng', 'Vui lòng liên kết tài khoản ngân hàng trước khi rút.');
+      return;
+    }
+    if (!amount || amount <= 0) {
+      toast.error('Lỗi', 'Vui lòng nhập số tiền rút hợp lệ.');
+      return;
+    }
+    if ((wallet?.balance || 0) < amount) {
+      toast.error('Lỗi', 'Số dư ví không đủ để rút.');
+      return;
+    }
+
+    setWithdrawLoading(true);
+    try {
+      const res = await fetch('/api/vi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          action: 'withdraw',
+          amount,
+          paymentMethodId: selectedWithdrawBank.id,
+          description: `Rút tiền về ${selectedWithdrawBank.bankName} - ${selectedWithdrawBank.bankId}`,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error('Rút tiền thất bại', data.message || data.error || 'Không thể rút tiền.');
+        return;
+      }
+
+      setWallet((prev) => (prev ? { ...prev, balance: data.wallet.balance } : null));
+      if (data.transaction) {
+        setTransactions((prev) => [data.transaction, ...prev].slice(0, 10));
+      }
+      setWithdrawAmount('');
+      toast.success('Rút tiền thành công', `Đã rút ${amount.toLocaleString('vi-VN')} VND về tài khoản liên kết.`);
+    } catch {
+      toast.error('Rút tiền thất bại', 'Vui lòng thử lại sau.');
+    } finally {
+      setWithdrawLoading(false);
     }
   };
 
@@ -522,6 +616,15 @@ export default function WalletTab({ user }: WalletTabProps) {
         </div>
       </div>
 
+      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+        <p className="text-sm font-semibold text-amber-900 mb-2">Thiết lập ví để đặt vé</p>
+        <div className="space-y-1 text-xs text-amber-800">
+          <p>{methods.length > 0 ? '✓' : '•'} Bước 1: Liên kết tài khoản/thẻ thanh toán</p>
+          <p>{(wallet?.balance || 0) > 0 ? '✓' : '•'} Bước 2: Nạp tiền vào ví</p>
+          <p>• Bước 3: Dùng số dư ví để thanh toán vé tại trang thanh toán</p>
+        </div>
+      </div>
+
       {/* Balance Card */}
       <div
         className="rounded-2xl p-6 text-white relative overflow-hidden"
@@ -574,6 +677,24 @@ export default function WalletTab({ user }: WalletTabProps) {
 
           {/* Topup Form */}
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+            <div className="mb-3">
+              <label className="block text-xs text-white/70 mb-1 font-[Be Vietnam Pro,sans-serif]">
+                Nguồn nạp tiền
+              </label>
+              <select
+                value={selectedTopupMethod?.id || ''}
+                onChange={(e) => setTopupMethodId(e.target.value)}
+                className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-xl text-sm text-white"
+              >
+                {activeTopupMethods.map((method) => (
+                  <option key={method.id} value={method.id} className="text-stone-900">
+                    {method.type === 'card'
+                      ? `${getCardBrandLabel(method.cardBrand)} •••• ${method.lastFour || ''}`
+                      : `${method.bankName || 'Ngân hàng'} - ${method.bankId || ''}`}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className="flex items-center gap-3">
               <div className="flex-1 relative">
                 <input
@@ -581,7 +702,7 @@ export default function WalletTab({ user }: WalletTabProps) {
                   value={topupAmount}
                   onChange={(e) => {
                     const val = e.target.value.replace(/\D/g, '');
-                    setTopupAmount(val ? parseInt(val).toLocaleString('vi-VN') : '');
+                    setTopupAmount(val ? parseInt(val, 10).toLocaleString('vi-VN') : '');
                   }}
                   placeholder="Nhập số tiền nạp"
                   className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 text-sm focus:outline-none focus:ring-2 focus:ring-white/40 font-[Be Vietnam Pro,sans-serif]"
@@ -592,7 +713,7 @@ export default function WalletTab({ user }: WalletTabProps) {
               </div>
               <button
                 onClick={handleTopup}
-                disabled={topupLoading || !topupAmount}
+                disabled={topupLoading || !topupAmount || !selectedTopupMethod}
                 className="px-6 py-3 bg-white text-[#EC2029] rounded-xl font-bold text-sm font-[KoHo,sans-serif] hover:bg-white/90 transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               >
                 {topupLoading ? (
@@ -602,6 +723,11 @@ export default function WalletTab({ user }: WalletTabProps) {
                 )}
               </button>
             </div>
+            {activeTopupMethods.length === 0 && (
+              <p className="text-xs text-white/80 mt-2 font-[Be Vietnam Pro,sans-serif]">
+                Bạn cần thêm phương thức thanh toán trước khi nạp tiền.
+              </p>
+            )}
             <div className="flex gap-2 mt-3">
               {[100000, 200000, 500000, 1000000].map((amt) => (
                 <button
@@ -716,6 +842,92 @@ export default function WalletTab({ user }: WalletTabProps) {
                 </div>
               </div>
             ))
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-white rounded-2xl border border-stone-200 p-5 shadow-vj-card">
+          <div className="flex items-center gap-2 mb-3">
+            <Icon name="BuildingColumnsIcon" size={18} className="text-[#EC2029]" />
+            <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948]">
+              Rút tiền về tài khoản liên kết
+            </h3>
+          </div>
+          {defaultLinkedBank ? (
+            <>
+              <select
+                value={selectedWithdrawBank?.id || ''}
+                onChange={(e) => setWithdrawMethodId(e.target.value)}
+                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm mb-2"
+              >
+                {linkedBanks.map((bankMethod) => (
+                  <option key={bankMethod.id} value={bankMethod.id}>
+                    {bankMethod.bankName} - {bankMethod.bankId}
+                    {bankMethod.isDefault ? ' (Mặc định)' : ''}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-stone-500 mb-2 font-[Be Vietnam Pro,sans-serif]">
+                Tài khoản nhận: {selectedWithdrawBank?.bankName} - {selectedWithdrawBank?.bankId}
+              </p>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={withdrawAmount}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    setWithdrawAmount(val ? parseInt(val, 10).toLocaleString('vi-VN') : '');
+                  }}
+                  placeholder="Nhập số tiền rút"
+                  className="flex-1 px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm"
+                />
+                <button
+                  onClick={handleWithdraw}
+                  disabled={withdrawLoading || !withdrawAmount}
+                  className="px-4 py-3 bg-[#1A2948] text-white rounded-xl text-sm font-semibold hover:bg-[#121d35] disabled:opacity-50"
+                >
+                  {withdrawLoading ? 'Đang rút...' : 'Rút tiền'}
+                </button>
+              </div>
+            </>
+          ) : (
+            <p className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">
+              Bạn cần liên kết tài khoản ngân hàng để rút tiền về STK.
+            </p>
+          )}
+        </div>
+
+        <div className="bg-white rounded-2xl border border-stone-200 p-5 shadow-vj-card">
+          <div className="flex items-center gap-2 mb-3">
+            <Icon name="ClockIcon" size={18} className="text-[#EC2029]" />
+            <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948]">
+              Giao dịch gần đây
+            </h3>
+          </div>
+          {transactions.length === 0 ? (
+            <p className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">Chưa có giao dịch.</p>
+          ) : (
+            <div className="space-y-2">
+              {transactions.map((tx) => (
+                <div key={tx.id} className="flex items-center justify-between bg-stone-50 rounded-xl p-3">
+                  <div>
+                    <p className="text-sm font-semibold text-[#1A2948]">
+                      {tx.description || 'Giao dịch ví'}
+                    </p>
+                    <p className="text-xs text-stone-500">
+                      {new Date(tx.created_at).toLocaleString('vi-VN')}
+                    </p>
+                  </div>
+                  <span
+                    className={`text-sm font-bold ${tx.amount >= 0 ? 'text-emerald-600' : 'text-red-500'}`}
+                  >
+                    {tx.amount >= 0 ? '+' : ''}
+                    {Math.abs(tx.amount).toLocaleString('vi-VN')}đ
+                  </span>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>
