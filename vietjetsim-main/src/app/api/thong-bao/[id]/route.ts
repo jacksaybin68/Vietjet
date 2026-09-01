@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/auth';
 import { sql } from '@/lib/neon';
+import { validateCsrfOrReject } from '@/lib/csrf';
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const csrfError = await validateCsrfOrReject(request);
+  if (csrfError) return csrfError;
+
   try {
     const token = request.cookies.get('access_token')?.value;
 
@@ -65,6 +69,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const csrfError = await validateCsrfOrReject(request);
+  if (csrfError) return csrfError;
+
   try {
     const token = request.cookies.get('access_token')?.value;
 

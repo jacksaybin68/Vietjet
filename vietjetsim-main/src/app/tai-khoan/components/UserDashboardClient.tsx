@@ -78,11 +78,22 @@ const SecurityTab = dynamic(() => import('./SecurityTab'), {
   ),
   ssr: false,
 });
+const ProfileTab = dynamic(() => import('./ProfileTab'), {
+  loading: () => <ProfileSkeleton />,
+  ssr: false,
+});
+const UserDashboardMobileNav = dynamic(() => import('./UserDashboardMobileNav'), {
+  ssr: false,
+});
+const UserDashboardDesktopSidebar = dynamic(() => import('./UserDashboardDesktopSidebar'), {
+  ssr: false,
+});
 
 // Supabase removed - using API routes instead
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/components/ui/Toast';
+import { getCsrfHeaders } from '@/hooks/useCsrf';
 
 type Tab =
   | 'upcoming'
@@ -261,11 +272,6 @@ export default function UserDashboardClient() {
   const [activeTab, setActiveTab] = useState<Tab>('upcoming');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [profileName, setProfileName] = useState('');
-  const [profileEmail, setProfileEmail] = useState('');
-  const [profilePhone, setProfilePhone] = useState('');
-  const [profileDob, setProfileDob] = useState('1990-05-15');
-  const [saveSuccess, setSaveSuccess] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
 
   // Refund state
@@ -297,8 +303,6 @@ export default function UserDashboardClient() {
   // Skeleton / error states
   const [upcomingLoading, setUpcomingLoading] = useState(true);
   const [upcomingError, setUpcomingError] = useState(false);
-  const [profileLoading, setProfileLoading] = useState(true);
-  const [profileError, setProfileError] = useState(false);
   const [historyError, setHistoryError] = useState(false);
 
   // Dynamic booking data from API
@@ -445,12 +449,6 @@ export default function UserDashboardClient() {
     }
   }, [user]);
 
-  const retryProfile = () => {
-    setProfileError(false);
-    setProfileLoading(true);
-    setTimeout(() => setProfileLoading(false), 50);
-  };
-
   const fetchHistoryBookings = useCallback(async () => {
     if (!user) return;
     setHistoryLoading(true);
@@ -574,26 +572,6 @@ export default function UserDashboardClient() {
     }, 300);
   };
 
-  const handleSaveProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await fetch('/api/nguoi-dung/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          full_name: profileName,
-          phone: profilePhone,
-        }),
-      });
-      if (res.ok) {
-        setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 3000);
-      }
-    } catch {
-      // silently fail
-    }
-  };
-
   const tabs: { id: Tab; label: string; icon: string }[] = [
     { id: 'upcoming', label: 'Chuyến bay sắp tới', icon: 'CalendarIcon' },
     { id: 'history', label: 'Lịch sử đặt vé', icon: 'ClockIcon' },
@@ -623,15 +601,6 @@ export default function UserDashboardClient() {
       fetchHistoryBookings();
     }
   }, [activeTab, historyBookings.length, historyLoading, fetchHistoryBookings]);
-
-  // Sync profile fields from authenticated user data
-  useEffect(() => {
-    if (user) {
-      setProfileName(user.fullName || '');
-      setProfileEmail(user.email || '');
-      setProfilePhone(user.phone || '');
-    }
-  }, [user]);
 
   // Load refund requests when tab is active or user changes
   useEffect(() => {
@@ -675,238 +644,39 @@ export default function UserDashboardClient() {
       }}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* Mobile: top bar with drawer toggle + active tab label */}
-        <div className="flex items-center gap-3 mb-4 lg:hidden">
-          <button
-            onClick={() => setDrawerOpen(true)}
-            className="flex items-center gap-2 bg-white border border-amber-200 rounded-2xl px-4 py-2.5 text-sm font-semibold shadow-sm"
-            style={{ color: '#d97706' }}
-          >
-            <Icon name="Bars3Icon" size={18} />
-            <span>{tabs.find((t) => t.id === activeTab)?.label}</span>
-            <Icon name="ChevronDownIcon" size={14} className="text-amber-400 ml-1" />
-          </button>
-          {/* Notification bell badge (mobile) */}
-          <button
-            onClick={() => setActiveTab('notifications')}
-            className="relative ml-auto flex items-center justify-center w-10 h-10 bg-white border border-amber-200 rounded-2xl shadow-sm"
-            title="Thông báo"
-          >
-            <Icon name="BellIcon" size={18} style={{ color: '#d97706' }} />
-            {notifUnreadCount > 0 && (
-              <span
-                className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center text-white text-[10px] font-bold rounded-full px-1"
-                style={{ background: '#ef4444' }}
-              >
-                {notifUnreadCount > 99 ? '99+' : notifUnreadCount}
-              </span>
-            )}
-          </button>
-        </div>
-
-        {/* Mobile Drawer Overlay */}
-        {drawerOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden">
-            <div
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-              onClick={() => setDrawerOpen(false)}
-            />
-            <div
-              className="absolute left-0 top-0 bottom-0 w-72 bg-white shadow-2xl flex flex-col rounded-r-3xl"
-              style={{ animation: 'slideInLeft 0.25s ease-out' }}
-            >
-              <div
-                className="flex items-center justify-between px-5 py-5 rounded-br-3xl"
-                style={{
-                  background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
-                    <Icon name="UserCircleIcon" size={24} className="text-white" />
-                  </div>
-                  <div>
-                    <span className="text-white font-bold text-base block">Xin chào!</span>
-                    <span className="text-white/80 text-xs">{user?.fullName || 'Khách hàng'}</span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setDrawerOpen(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/20 hover:bg-white/30 transition-colors"
-                >
-                  <Icon name="XMarkIcon" size={18} className="text-white" />
-                </button>
-              </div>
-              <nav className="flex-1 overflow-y-auto py-4 px-3">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl mb-1 text-sm font-semibold transition-all text-left ${
-                      sidebarCollapsed ? 'justify-center' : ''
-                    }`}
-                    style={{
-                      background:
-                        activeTab === tab.id
-                          ? 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)'
-                          : 'transparent',
-                      color: activeTab === tab.id ? 'white' : '#92400e',
-                      fontWeight: activeTab === tab.id ? 700 : 600,
-                    }}
-                    onMouseEnter={(e) => {
-                      if (activeTab !== tab.id) e.currentTarget.style.background = '#fef3c7';
-                    }}
-                    onMouseLeave={(e) => {
-                      if (activeTab !== tab.id) e.currentTarget.style.background = 'transparent';
-                    }}
-                  >
-                    <Icon
-                      name={tab.icon}
-                      size={20}
-                      className={activeTab === tab.id ? 'text-white' : 'text-amber-500'}
-                    />
-                    {!sidebarCollapsed && <span className="truncate text-left">{tab.label}</span>}
-                    {activeTab === tab.id && !sidebarCollapsed && (
-                      <Icon name="ChevronRightIcon" size={14} className="ml-auto text-white/70" />
-                    )}
-                  </button>
-                ))}
-              </nav>
-              <div className="px-3 py-4 border-t border-amber-100">
-                <Link
-                  href="/dang-nhap"
-                  className="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all text-amber-700 hover:bg-red-50 hover:text-red-600"
-                >
-                  <Icon name="ArrowRightOnRectangleIcon" size={20} className="text-amber-500" />
-                  Đăng xuất
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
+        <UserDashboardMobileNav
+          tabs={tabs}
+          activeTab={activeTab}
+          drawerOpen={drawerOpen}
+          sidebarCollapsed={sidebarCollapsed}
+          notifUnreadCount={notifUnreadCount}
+          userFullName={user?.fullName}
+          onOpenDrawer={() => setDrawerOpen(true)}
+          onCloseDrawer={() => setDrawerOpen(false)}
+          onSelectTab={(tabId) => {
+            const tab = tabs.find((item) => item.id === tabId);
+            if (tab) {
+              handleTabSelect(tab.id);
+            }
+          }}
+        />
 
         {/* Main layout: sidebar + content */}
         <div className="flex gap-6 items-start">
-          {/* Desktop Sidebar */}
-          <aside
-            className={`hidden lg:flex flex-col flex-shrink-0 transition-all duration-300 ${sidebarCollapsed ? 'w-20' : 'w-64'}`}
-          >
-            <div
-              className="bg-white border border-amber-100 rounded-3xl overflow-hidden sticky top-[140px]"
-              style={{
-                boxShadow:
-                  '0 8px 32px rgba(245, 158, 11, 0.12), 0 4px 12px rgba(251, 191, 36, 0.08)',
-              }}
-            >
-              {/* Sidebar header */}
-              <div
-                className="flex items-center justify-between px-5 py-5 border-b border-amber-100"
-                style={{
-                  background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
-                  borderRadius: '1.5rem 1.5rem 0 0',
-                }}
-              >
-                {!sidebarCollapsed && (
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                      <Icon name="UserCircleIcon" size={22} className="text-white" />
-                    </div>
-                    <div>
-                      <span className="text-white font-bold text-sm block">Xin chào!</span>
-                      <span className="text-white/80 text-xs">
-                        {user?.fullName || 'Khách hàng'}
-                      </span>
-                    </div>
-                  </div>
-                )}
-                <button
-                  onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                  className={`w-8 h-8 flex items-center justify-center rounded-xl bg-white/20 hover:bg-white/30 transition-colors ${sidebarCollapsed ? 'mx-auto' : ''}`}
-                  title={sidebarCollapsed ? 'Mở rộng' : 'Thu gọn'}
-                >
-                  <Icon
-                    name={sidebarCollapsed ? 'ChevronRightIcon' : 'ChevronLeftIcon'}
-                    size={14}
-                    className="text-white"
-                  />
-                </button>
-              </div>
-
-              {/* Sidebar nav items */}
-              <nav className="py-3 px-3">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    title={sidebarCollapsed ? tab.label : undefined}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl mb-1 text-sm font-semibold transition-all text-left ${
-                      activeTab === tab.id
-                        ? 'text-white shadow-lg'
-                        : 'text-amber-800 hover:bg-amber-50'
-                    } ${sidebarCollapsed ? 'justify-center' : ''}`}
-                    style={
-                      activeTab === tab.id
-                        ? { background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)' }
-                        : {}
-                    }
-                  >
-                    <div className="relative flex-shrink-0">
-                      <Icon
-                        name={tab.icon}
-                        size={20}
-                        className={activeTab === tab.id ? 'text-white' : 'text-amber-500'}
-                      />
-                      {tab.id === 'notifications' && notifUnreadCount > 0 && (
-                        <span
-                          className="absolute -top-1.5 -right-1.5 min-w-[16px] h-[16px] flex items-center justify-center text-white text-[9px] font-bold rounded-full px-0.5"
-                          style={{
-                            background: activeTab === tab.id ? 'rgba(255,255,255,0.3)' : '#ef4444',
-                          }}
-                        >
-                          {notifUnreadCount > 9 ? '9+' : notifUnreadCount}
-                        </span>
-                      )}
-                    </div>
-                    {!sidebarCollapsed && <span className="truncate text-left">{tab.label}</span>}
-                    {!sidebarCollapsed && tab.id === 'notifications' && notifUnreadCount > 0 && (
-                      <span
-                        className="ml-auto text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
-                        style={{
-                          background: activeTab === tab.id ? 'rgba(255,255,255,0.3)' : '#ef4444',
-                        }}
-                      >
-                        {notifUnreadCount > 99 ? '99+' : notifUnreadCount}
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </nav>
-
-              {/* Sidebar footer */}
-              {!sidebarCollapsed && (
-                <div className="px-3 py-3 border-t border-amber-100">
-                  <Link
-                    href="/dang-nhap"
-                    className="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-amber-700 hover:bg-red-50 hover:text-red-600 transition-all"
-                  >
-                    <Icon name="ArrowRightOnRectangleIcon" size={20} className="text-amber-500" />
-                    <span>Đăng xuất</span>
-                  </Link>
-                </div>
-              )}
-              {sidebarCollapsed && (
-                <div className="px-2 py-3 border-t border-amber-100">
-                  <Link
-                    href="/dang-nhap"
-                    title="Đăng xuất"
-                    className="flex items-center justify-center w-full py-3 rounded-2xl text-amber-700 hover:bg-red-50 hover:text-red-600 transition-all"
-                  >
-                    <Icon name="ArrowRightOnRectangleIcon" size={20} />
-                  </Link>
-                </div>
-              )}
-            </div>
-          </aside>
+          <UserDashboardDesktopSidebar
+            tabs={tabs}
+            activeTab={activeTab}
+            sidebarCollapsed={sidebarCollapsed}
+            notifUnreadCount={notifUnreadCount}
+            userFullName={user?.fullName}
+            onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
+            onSelectTab={(tabId) => {
+              const tab = tabs.find((item) => item.id === tabId);
+              if (tab) {
+                handleTabSelect(tab.id);
+              }
+            }}
+          />
 
           {/* Content area */}
           <div className="flex-1 min-w-0">
@@ -1543,227 +1313,7 @@ export default function UserDashboardClient() {
             )}
 
             {/* Profile */}
-            {activeTab === 'profile' &&
-              (profileLoading ? (
-                <ProfileSkeleton />
-              ) : profileError ? (
-                <div
-                  className="bg-white rounded-2xl border border-red-200 p-8 text-center"
-                  style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
-                >
-                  <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                    <Icon name="ExclamationTriangleIcon" size={28} className="text-red-500" />
-                  </div>
-                  <p className="font-bold text-sm mb-1" style={{ color: '#1A2948' }}>
-                    Không thể tải hồ sơ
-                  </p>
-                  <p className="text-xs text-stone-400 mb-4 max-w-xs mx-auto">
-                    Đã xảy ra lỗi khi tải thông tin cá nhân. Vui lòng thử lại.
-                  </p>
-                  <button
-                    onClick={retryProfile}
-                    className="inline-flex items-center gap-2 text-white font-semibold text-xs px-5 py-2.5 rounded-xl transition-all"
-                    style={{ background: '#EC2029' }}
-                  >
-                    <Icon name="ArrowPathIcon" size={14} />
-                    Thử lại
-                  </button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2">
-                    <form
-                      onSubmit={handleSaveProfile}
-                      className="bg-white rounded-2xl border border-stone-200 overflow-hidden"
-                      style={{
-                        boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)',
-                      }}
-                    >
-                      <div
-                        className="h-1.5 w-full"
-                        style={{ background: 'linear-gradient(90deg, #EC2029 0%, #FF4D6A 100%)' }}
-                      />
-                      <div className="p-4">
-                        <h2 className="font-bold mb-1" style={{ color: '#1A2948' }}>
-                          Thông tin cá nhân
-                        </h2>
-                        <div
-                          className="w-10 h-0.5 mb-5 rounded-full"
-                          style={{ background: '#FFC72C' }}
-                        />
-                        {saveSuccess && (
-                          <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 mb-4 text-sm">
-                            <Icon name="CheckCircleIcon" size={16} />
-                            Cập nhật thông tin thành công!
-                          </div>
-                        )}
-                        <div className="space-y-4">
-                          <div>
-                            <label
-                              className="block text-xs font-bold uppercase tracking-wider mb-1.5"
-                              style={{ color: '#1A2948' }}
-                            >
-                              Họ và tên
-                            </label>
-                            <input
-                              type="text"
-                              value={profileName}
-                              onChange={(e) => setProfileName(e.target.value)}
-                              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm form-input"
-                            />
-                          </div>
-                          <div>
-                            <label
-                              className="block text-xs font-bold uppercase tracking-wider mb-1.5"
-                              style={{ color: '#1A2948' }}
-                            >
-                              Email
-                            </label>
-                            <input
-                              type="email"
-                              value={profileEmail}
-                              onChange={(e) => setProfileEmail(e.target.value)}
-                              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm form-input"
-                            />
-                          </div>
-                          <div>
-                            <label
-                              className="block text-xs font-bold uppercase tracking-wider mb-1.5"
-                              style={{ color: '#1A2948' }}
-                            >
-                              Số điện thoại
-                            </label>
-                            <input
-                              type="tel"
-                              value={profilePhone}
-                              onChange={(e) => setProfilePhone(e.target.value)}
-                              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm form-input"
-                            />
-                          </div>
-                          <div>
-                            <label
-                              className="block text-xs font-bold uppercase tracking-wider mb-1.5"
-                              style={{ color: '#1A2948' }}
-                            >
-                              Ngày sinh
-                            </label>
-                            <input
-                              type="date"
-                              value={profileDob}
-                              onChange={(e) => setProfileDob(e.target.value)}
-                              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm form-input"
-                            />
-                          </div>
-                        </div>
-                        <div className="mt-6 flex gap-3">
-                          <button
-                            type="submit"
-                            className="flex items-center gap-2 text-white font-bold px-6 py-2.5 rounded-xl transition-all text-sm"
-                            style={{ background: '#EC2029' }}
-                          >
-                            <Icon name="CheckIcon" size={16} />
-                            Lưu thay đổi
-                          </button>
-                          <button
-                            type="button"
-                            className="px-6 py-2.5 border border-stone-300 font-semibold rounded-xl text-sm transition-all hover:bg-stone-50"
-                            style={{ color: '#1A2948' }}
-                          >
-                            Huỷ
-                          </button>
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                  <div className="space-y-4">
-                    <div
-                      className="bg-white rounded-2xl border border-stone-200 overflow-hidden"
-                      style={{
-                        boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)',
-                      }}
-                    >
-                      <div
-                        className="h-1.5 w-full"
-                        style={{ background: 'linear-gradient(90deg, #EC2029 0%, #FF4D6A 100%)' }}
-                      />
-                      <div className="p-5">
-                        <h3 className="font-bold mb-1" style={{ color: '#1A2948' }}>
-                          Thống kê của bạn
-                        </h3>
-                        <div
-                          className="w-8 h-0.5 mb-4 rounded-full"
-                          style={{ background: '#FFC72C' }}
-                        />
-                        <div className="space-y-3">
-                          {[
-                            {
-                              label: 'Tổng chuyến bay',
-                              value: '5',
-                              icon: 'PaperAirplaneIcon' as const,
-                              color: '#EC2029',
-                              bg: '#FFF5F5',
-                            },
-                            {
-                              label: 'Điểm tích lũy',
-                              value: '1,250',
-                              icon: 'StarIcon' as const,
-                              color: '#B8860B',
-                              bg: '#FFF8E1',
-                            },
-                            {
-                              label: 'Tổng chi tiêu',
-                              value: '5.2M₫',
-                              icon: 'CurrencyDollarIcon' as const,
-                              color: '#16a34a',
-                              bg: '#f0fdf4',
-                            },
-                          ].map((stat) => (
-                            <div
-                              key={stat.label}
-                              className="flex items-center justify-between py-2 border-b border-stone-50"
-                            >
-                              <div className="flex items-center gap-2">
-                                <div
-                                  className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                  style={{ background: stat.bg }}
-                                >
-                                  <Icon name={stat.icon} size={16} style={{ color: stat.color }} />
-                                </div>
-                                <span className="text-sm text-stone-600">{stat.label}</span>
-                              </div>
-                              <span className="font-black" style={{ color: '#1A2948' }}>
-                                {stat.value}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className="rounded-2xl p-5 text-white overflow-hidden relative"
-                      style={{ background: '#1A2948' }}
-                    >
-                      <div
-                        className="absolute top-0 left-0 right-0 h-1"
-                        style={{ background: '#FFC72C' }}
-                      />
-                      <div className="flex items-center gap-2 mb-3 mt-1">
-                        <Icon name="ShieldCheckIcon" size={20} style={{ color: '#FFC72C' }} />
-                        <span className="font-bold">Bảo mật tài khoản</span>
-                      </div>
-                      <p className="text-white/70 text-xs mb-4">
-                        Tài khoản của bạn được bảo vệ bởi xác thực 2 lớp.
-                      </p>
-                      <button
-                        className="w-full font-semibold py-2.5 rounded-xl text-xs transition-all"
-                        style={{ background: '#FFC72C', color: '#1A2948' }}
-                      >
-                        Đổi mật khẩu
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            {activeTab === 'profile' && user && <ProfileTab user={user} />}
 
             {/* Notifications */}
             {activeTab === 'notifications' && (
@@ -1867,7 +1417,7 @@ export default function UserDashboardClient() {
                             }
                             const res = await fetch('/api/hoan-tien', {
                               method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
+                              headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
                               body: JSON.stringify(insertData),
                             });
                             const insertErr = res.ok ? null : { message: 'Failed to submit' };

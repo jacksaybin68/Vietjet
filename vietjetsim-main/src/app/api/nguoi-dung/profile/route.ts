@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
 import { findUserById, updateUserProfile } from '@/lib/db';
 import { verifyAccessToken } from '@/lib/auth';
+import { validateCsrfOrReject } from '@/lib/csrf';
 
 // ─── GET: Get current user profile ──────────────────────────────────────────
 
@@ -61,6 +62,9 @@ export async function GET(request: NextRequest) {
 // ─── PUT: Update current user profile ───────────────────────────────────────
 
 export async function PUT(request: NextRequest) {
+  const csrfError = await validateCsrfOrReject(request);
+  if (csrfError) return csrfError;
+
   try {
     const token = request.cookies.get('access_token')?.value;
 
