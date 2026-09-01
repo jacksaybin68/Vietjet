@@ -4,12 +4,13 @@
 @tailwind utilities;
 
 :root {
+  /* Official Vietjet Air Branding Colors */
   --primary: #ec2029;
-  --primary-dark: #c41017;
-  --primary-light: #ff4d53;
+  --primary-dark: #6f0000;
+  --primary-light: #d91a21;
   --accent: #ffd400;
-  --accent-dark: #e6bf00;
-  --accent-secondary: #fbb612;
+  --accent-dark: #f9a51a;
+  --accent-secondary: #fedc00;
   --background: #ffffff;
   --surface: #fafafa;
   --surface-2: #f5f5f5;

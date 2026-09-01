@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import AppImage from '@/components/ui/AppImage';
+import AppLogo from '@/components/ui/AppLogo';
 import {
   FaFacebook,
   FaInstagram,
@@ -9,6 +9,8 @@ import {
   FaApple,
   FaGooglePlay,
 } from 'react-icons/fa';
+import { SiZalo, SiWechat } from 'react-icons/si';
+import { MdVerified } from 'react-icons/md';
 
 const FOOTER_COLS = [
   {
@@ -85,49 +87,18 @@ const AWARDS = [
   { text: 'Kinh doanh bền vững' },
 ];
 
-const TrophyIcon = ({ className, style }: { className?: string; style?: React.CSSProperties }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className} style={style}>
-    <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z" />
-  </svg>
-);
-
 const SOCIALS = [
   { name: 'Facebook', Icon: FaFacebook, href: '#' },
   { name: 'Instagram', Icon: FaInstagram, href: '#' },
   { name: 'YouTube', Icon: FaYoutube, href: '#' },
   { name: 'TikTok', Icon: FaTiktok, href: '#' },
+  { name: 'Zalo', Icon: SiZalo, href: '#' },
+  { name: 'WeChat', Icon: SiWechat, href: '#' },
 ];
 
 export default function Footer() {
   return (
     <footer className="bg-white border-t border-gray-200 font-body">
-      {/* Awards section */}
-      <div className="bg-gray-50 border-b border-gray-200 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-6">
-            <p className="text-xs font-bold uppercase tracking-[0.15em] text-vj-muted">
-              Giải thưởng &amp; Công nhận
-            </p>
-          </div>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-4 items-start">
-            {AWARDS?.map((award, i) => (
-              <div key={i} className="flex flex-col items-center text-center gap-2">
-                <div
-                  className="w-14 h-14 rounded-full flex items-center justify-center shadow-sm"
-                  style={{
-                    background: 'linear-gradient(135deg, #FFF9C4 0%, #FFF176 100%)',
-                    border: '1.5px solid #FFD400',
-                  }}
-                >
-                  <TrophyIcon className="w-7 h-7" style={{ color: '#E6BF00' }} />
-                </div>
-                <p className="text-[10px] leading-tight font-medium text-vj-gray">{award?.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* Main footer columns */}
       <div className="py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -187,14 +158,7 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center sm:flex-row sm:justify-between gap-5 sm:gap-4 text-center sm:text-left">
             <div className="flex flex-col sm:flex-row items-center gap-3">
-              <AppImage
-                src="/assets/images/app_logo.svg"
-                alt="Vietjet Air Logo"
-                width={40}
-                height={40}
-                className="rounded-md"
-                priority={true}
-              />
+              <AppLogo size={40} />
               <div>
                 <span
                   className="text-white text-sm"
@@ -209,6 +173,19 @@ export default function Footer() {
                   &copy; 2026 Vietjet Air. Tất cả quyền được bảo lưu.
                 </p>
               </div>
+              {/* Bộ Công Thương compliance badge */}
+              <a
+                href="#"
+                className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 border border-white/20"
+                style={{ background: 'rgba(255,255,255,0.08)' }}
+              >
+                <MdVerified className="w-5 h-5 text-sky-400 flex-shrink-0" />
+                <span className="text-white text-[9px] leading-tight font-koho">
+                  Đã thông báo
+                  <br />
+                  Bộ Công Thương
+                </span>
+              </a>
             </div>
 
             {/* Social links */}

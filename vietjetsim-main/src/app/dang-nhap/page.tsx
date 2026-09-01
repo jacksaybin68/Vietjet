@@ -24,6 +24,7 @@ export default function SignUpLoginPage() {
   const [success, setSuccess] = useState('');
   const [otpRequested, setOtpRequested] = useState(false);
   const [otpInput, setOtpInput] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -31,7 +32,11 @@ export default function SignUpLoginPage() {
     setLoading(true);
     setError('');
     try {
-      const data = await signIn(email, password);
+      const identifier = email || phone;
+      const normalized = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier)
+        ? identifier
+        : normalizePhone(identifier);
+      const data = await signIn(normalized, password);
       setSuccess('Đăng nhập thành công!');
       setTimeout(() => {
         const userRole = data?.user?.role || 'user';
@@ -48,17 +53,24 @@ export default function SignUpLoginPage() {
     }
   };
 
+  const normalizePhone = (p: string): string => {
+    const digits = p.replace(/\D/g, '');
+    if (digits.startsWith('84') && digits.length === 11) return '0' + digits.slice(2);
+    if (digits.length === 9) return '0' + digits;
+    return digits;
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!otpRequested) {
       setLoading(true);
       setError('');
 
-      if (!surname.trim() || !givenName.trim() || (!email && !phone) || !password || !agreeTerms) {
+      if (!surname.trim() || !givenName.trim() || (!email && !phone) || !password || !dateOfBirth || !agreeTerms) {
         setError(
           !agreeTerms
             ? 'Vui lòng đồng ý với Điều khoản dịch vụ và Chính sách bảo mật.'
-            : 'Vui lòng điền họ tên, mật khẩu và (Email hoặc Số điện thoại).'
+            : 'Vui lòng điền đầy đủ thông tin: họ tên, ngày sinh, mật khẩu và (Email hoặc Số điện thoại).'
         );
         setLoading(false);
         return;
@@ -84,7 +96,12 @@ export default function SignUpLoginPage() {
     }
 
     try {
-      await signUp(email, password, { fullName: (surname.trim() + ' ' + givenName.trim()).trim(), phone: phone });
+      const normalizedPhone = phone ? normalizePhone(phone) : '';
+      await signUp(email, password, { 
+        fullName: (surname.trim() + ' ' + givenName.trim()).trim(), 
+        phone: normalizedPhone,
+        dateOfBirth: dateOfBirth 
+      });
       setSuccess('Đăng ký thành công! Đang chuyển hướng...');
       setTimeout(() => router.push('/tai-khoan'), 1200);
     } catch (err: any) {
@@ -94,123 +111,16 @@ export default function SignUpLoginPage() {
     }
   };
 
-  const isEmailValid = email.length === 0 || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); // Make email optional in registration
+  const isEmailValid = email.length === 0 || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const isLoginIdentifierValid =
-    isEmailValid || phone.replace(/\D/g, '').length >= 9 || email.replace(/\D/g, '').length >= 9; // Allow email or phone in login
+    isEmailValid || phone.replace(/\D/g, '').length >= 9 || email.replace(/\D/g, '').length >= 9;
   const isPasswordValid = password.length >= 6;
   const isNameValid = surname.trim().length >= 1 && givenName.trim().length >= 1;
   const isPhoneValid = phone.replace(/\D/g, '').length >= 9;
 
   return (
     <div className="min-h-screen flex font-body">
-      {/* Left Panel - VietJet red brand panel */}
-      <div
-        className="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col"
-        style={{
-          background: 'linear-gradient(20.12deg, rgba(217,26,33,1) 19.6%, rgba(111,0,0,1) 93.86%)',
-        }}
-      >
-        <div
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-          }}
-        />
-
-        <div className="absolute inset-0">
-          <AppImage
-            src="https://images.unsplash.com/photo-1614412445093-05b0f1b1e457"
-            alt="Airplane flying"
-            fill
-            className="object-cover mix-blend-overlay opacity-30"
-            sizes="50vw"
-          />
-        </div>
-
-        {/* Decorative airplane */}
-        <div className="absolute bottom-20 right-8 opacity-20 animate-vj-float">
-          <svg className="w-40 h-40 text-white" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
-          </svg>
-        </div>
-
-        <div className="relative z-10 flex flex-col h-full p-12">
-          <Link href="/trang-chu" className="flex items-center gap-3 mb-auto">
-            <AppLogo size={44} />
-          </Link>
-          <div>
-            <div
-              className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 mb-6"
-              style={{
-                background: 'rgba(255,255,255,0.10)',
-                border: '1px solid rgba(255,255,255,0.20)',
-              }}
-            >
-              <span
-                className="w-2 h-2 rounded-full animate-pulse"
-                style={{ background: '#FFD400' }}
-              />
-              <span
-                className="text-xs font-semibold uppercase tracking-wider"
-                style={{
-                  color: 'rgba(255,255,255,0.9)',
-                  fontWeight: 600,
-                }}
-              >
-                Nền tảng mô phỏng
-              </span>
-            </div>
-            <h1
-              className="text-5xl font-black text-white leading-tight tracking-tight mb-4"
-              style={{
-                fontStyle: 'italic',
-                fontWeight: 900,
-              }}
-            >
-              Bay khắp
-              <br />
-              <span style={{ color: '#FFD400' }}>Việt Nam</span>
-              <br />
-              mọi lúc
-            </h1>
-            <p
-              className="text-base leading-relaxed max-w-sm"
-              style={{
-                color: 'rgba(255,255,255,0.70)',
-                fontWeight: 500,
-              }}
-            >
-              Trải nghiệm đặt vé máy bay hoàn chỉnh với hệ thống quản lý chuyến bay chuyên nghiệp.
-            </p>
-          </div>
-          <div
-            className="flex gap-8 mt-10 pt-8"
-            style={{ borderTop: '1px solid rgba(255,255,255,0.20)' }}
-          >
-            {[
-              ['50+', 'Đường bay'],
-              ['2M+', 'Hành khách'],
-              ['98%', 'Đúng giờ'],
-            ].map(([val, label]) => (
-              <div key={label}>
-                <div
-                  className="text-2xl font-black"
-                  style={{
-                    color: '#FFD400',
-                    fontWeight: 900,
-                  }}
-                >
-                  {val}
-                </div>
-                <div className="text-xs mt-0.5 font-koho">{label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Right Panel - Form */}
+      {/* Left Panel - Form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-white">
         <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-10 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]">
           {/* VietJet-style tabs */}
@@ -442,11 +352,30 @@ export default function SignUpLoginPage() {
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                        placeholder="912 345 678"
+                        placeholder="0912 345 678"
                         className="flex-1 ml-2 bg-transparent outline-none text-sm font-body-vj text-vj-text placeholder:text-gray-400"
                         required
                       />
                     </div>
+                  </div>
+
+                  <div className={`form-field-float ${dateOfBirth ? 'has-value' : ''}`}>
+                    <Icon
+                      name="CalendarIcon"
+                      size={18}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10 pointer-events-none"
+                    />
+                    <input
+                      id="dateOfBirth"
+                      name="dateOfBirth"
+                      type="date"
+                      value={dateOfBirth}
+                      onChange={(e) => setDateOfBirth(e.target.value)}
+                      placeholder=" "
+                      className={`w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm form-input ${dateOfBirth ? 'form-input-valid' : ''} font-body-vj transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white`}
+                      required
+                    />
+                    <label className="form-label-float has-icon">Ngày tháng năm sinh</label>
                   </div>
 
                   <div className={`form-field-float ${email ? 'has-value' : ''}`}>
@@ -655,6 +584,113 @@ export default function SignUpLoginPage() {
               )}
             </form>
           )}
+        </div>
+      </div>
+
+      {/* Right Panel - VietJet red brand panel */}
+      <div
+        className="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col"
+        style={{
+          background: 'linear-gradient(20.12deg, rgba(217,26,33,1) 19.6%, rgba(111,0,0,1) 93.86%)',
+        }}
+      >
+        <div
+          className="absolute inset-0 opacity-5"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+          }}
+        />
+
+        <div className="absolute inset-0">
+          <AppImage
+            src="https://images.unsplash.com/photo-1614412445093-05b0f1b1e457"
+            alt="Airplane flying"
+            fill
+            className="object-cover mix-blend-overlay opacity-30"
+            sizes="50vw"
+          />
+        </div>
+
+        {/* Decorative airplane */}
+        <div className="absolute bottom-20 right-8 opacity-20 animate-vj-float">
+          <svg className="w-40 h-40 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
+          </svg>
+        </div>
+
+        <div className="relative z-10 flex flex-col h-full p-12">
+          <Link href="/trang-chu" className="flex items-center gap-3 mb-auto">
+            <AppLogo size={44} />
+          </Link>
+          <div>
+            <div
+              className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 mb-6"
+              style={{
+                background: 'rgba(255,255,255,0.10)',
+                border: '1px solid rgba(255,255,255,0.20)',
+              }}
+            >
+              <span
+                className="w-2 h-2 rounded-full animate-pulse"
+                style={{ background: '#FFD400' }}
+              />
+              <span
+                className="text-xs font-semibold uppercase tracking-wider"
+                style={{
+                  color: 'rgba(255,255,255,0.9)',
+                  fontWeight: 600,
+                }}
+              >
+                VIETJET AIR
+              </span>
+            </div>
+            <h1
+              className="text-5xl font-black text-white leading-tight tracking-tight mb-4"
+              style={{
+                fontStyle: 'italic',
+                fontWeight: 900,
+              }}
+            >
+              Bay khắp
+              <br />
+              <span style={{ color: '#FFD400' }}>Việt Nam</span>
+              <br />
+              mọi lúc
+            </h1>
+            <p
+              className="text-base leading-relaxed max-w-sm"
+              style={{
+                color: 'rgba(255,255,255,0.70)',
+                fontWeight: 500,
+              }}
+            >
+              Trải nghiệm đặt vé máy bay hoàn chỉnh với hệ thống quản lý chuyến bay chuyên nghiệp.
+            </p>
+          </div>
+          <div
+            className="flex gap-8 mt-10 pt-8"
+            style={{ borderTop: '1px solid rgba(255,255,255,0.20)' }}
+          >
+            {[
+              ['50+', 'Đường bay'],
+              ['2M+', 'Hành khách'],
+              ['98%', 'Đúng giờ'],
+            ].map(([val, label]) => (
+              <div key={label}>
+                <div
+                  className="text-2xl font-black"
+                  style={{
+                    color: '#FFD400',
+                    fontWeight: 900,
+                  }}
+                >
+                  {val}
+                </div>
+                <div className="text-xs mt-0.5 font-koho">{label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

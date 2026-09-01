@@ -9,19 +9,31 @@ module.exports = {
         heading: ['Be Vietnam Pro', 'KoHo', 'sans-serif'],
       },
       colors: {
-        primary: { DEFAULT: '#EC2029', dark: '#C41017', light: '#FF4D53' },
-        accent: { DEFAULT: '#FFD400', dark: '#E6BF00', light: '#FFE033' },
-        navy: { DEFAULT: '#1A2948', dark: '#0F1E3A', light: '#253660' },
+        primary: {
+          DEFAULT: 'var(--primary)',
+          dark: 'var(--primary-dark)',
+          light: 'var(--primary-light)',
+        },
+        accent: {
+          DEFAULT: 'var(--accent)',
+          dark: 'var(--accent-dark)',
+          light: 'var(--accent-secondary)',
+        },
+        navy: {
+          DEFAULT: 'var(--vj-navy)',
+          dark: '#0f1e3a',
+          light: '#253660',
+        },
         vj: {
-          text: '#333333',
-          gray: '#6D6E71',
-          muted: '#939598',
-          red: '#EC2029',
-          'red-dark': '#6F0000',
-          yellow: '#FFD400',
-          'yellow-2': '#FBB612',
-          orange: '#F9A51A',
-          navy: '#1A2948',
+          text: 'var(--vj-text)',
+          gray: 'var(--vj-text-gray)',
+          muted: 'var(--vj-text-muted)',
+          red: 'var(--vj-red)',
+          'red-dark': 'var(--vj-red-dark)',
+          yellow: 'var(--vj-yellow)',
+          'yellow-2': 'var(--vj-yellow-2)',
+          orange: 'var(--vj-orange)',
+          navy: 'var(--vj-navy)',
         },
         stone: {
           50: '#FAFAF9',
@@ -40,6 +52,12 @@ module.exports = {
       borderRadius: {
         '4xl': '2rem',
         arch: '12rem 12rem 0.5rem 0.5rem',
+        sm: '0.125rem',
+        DEFAULT: '0.25rem',
+        md: '0.375rem',
+        lg: '0.5rem',
+        xl: '0.75rem',
+        full: '9999px',
       },
       boxShadow: {
         'vj-sm': '0 2px 8px rgba(0,0,0,0.07)',
@@ -51,11 +69,15 @@ module.exports = {
         'vj-btn-hover': '0 6px 20px rgba(236,32,41,0.32), 0 2px 8px rgba(236,32,41,0.18)',
       },
       backgroundImage: {
-        'gradient-vj': 'linear-gradient(135deg, #EC2029 0%, #1A2948 100%)',
+        'gradient-vj': 'linear-gradient(135deg, var(--primary) 0%, var(--vj-navy) 100%)',
         'gradient-red-vj':
-          'linear-gradient(20.12deg, rgba(217,26,33,1) 19.6%, rgba(111,0,0,1) 93.86%)',
+          'linear-gradient(180deg, var(--primary-light) 34.8%, var(--primary-dark) 182.34%)',
+        'gradient-vj-red':
+          'linear-gradient(180deg, var(--primary-light) 34.8%, var(--primary-dark) 182.34%)',
+        'gradient-vj-yellow':
+          'linear-gradient(180deg, var(--accent-dark), var(--accent-secondary))',
         'gradient-hero': 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%)',
-        'gradient-red': 'linear-gradient(135deg, #EC2029 0%, #C41017 50%, #8B0D12 100%)',
+        'gradient-red': 'linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, var(--primary-dark) 100%)',
       },
       animation: {
         'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',

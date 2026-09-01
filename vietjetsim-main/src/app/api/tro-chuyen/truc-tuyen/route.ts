@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/auth';
 import { getChatPresence, updateChatPresence } from '@/lib/db';
+import { isAdminRole } from '@/lib/rbac';
 
 export async function GET(request: NextRequest) {
   try {
@@ -57,7 +58,12 @@ export async function POST(request: NextRequest) {
     if (is_typing !== undefined) updates.is_typing = is_typing;
     if (last_seen !== undefined) updates.last_seen = last_seen;
 
-    await updateChatPresence(payload.userId, conversationId, payload.role, updates);
+    await updateChatPresence(
+      payload.userId,
+      conversationId,
+      isAdminRole(payload.role) ? 'admin' : 'user',
+      updates
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {

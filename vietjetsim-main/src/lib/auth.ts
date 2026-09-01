@@ -6,7 +6,14 @@ import { NextResponse } from 'next/server';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-export type UserRole = 'user' | 'admin';
+export type UserRole =
+  | 'user'
+  | 'admin'
+  | 'super_admin'
+  | 'admin_ops'
+  | 'admin_finance'
+  | 'admin_support'
+  | 'admin_content';
 
 export interface User {
   id: string;
@@ -24,6 +31,7 @@ export interface JWTPayload {
   email: string;
   role: UserRole;
   fullName: string;
+  phone?: string;
 }
 
 export interface AuthTokens {
@@ -119,6 +127,7 @@ export function generateTokens(user: User): AuthTokens {
     email: user.email,
     role: user.role,
     fullName: user.full_name,
+    phone: user.phone,
   };
 
   return {
