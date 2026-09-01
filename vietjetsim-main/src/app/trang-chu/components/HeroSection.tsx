@@ -105,7 +105,7 @@ export default function HeroSection() {
   return (
     <section className="relative pt-[128px]">
       {/* Full-width banner */}
-      <div className="relative w-full h-[500px] sm:h-[600px] lg:h-[800px] overflow-hidden">
+      <div className="relative w-full h-[600px] sm:h-[720px] lg:h-[880px] overflow-hidden">
         {BANNERS.map((banner, i) => (
           <div
             key={banner.id}
@@ -118,9 +118,7 @@ export default function HeroSection() {
               alt={banner.alt}
               fill
               priority={i === 0 || i === 1}
-              className={`object-cover object-center transition-transform duration-[8000ms] ease-out ${
-                i === activeBanner ? 'scale-110' : 'scale-100'
-              }`}
+              className={`object-cover object-center transition-opacity duration-700`}
               sizes="100vw"
             />
 
@@ -160,7 +158,7 @@ export default function HeroSection() {
         />
 
         {/* ===== RIGHT-ALIGNED SEARCH FORM OVERLAY ===== */}
-        <div className="absolute inset-x-0 top-[240px] sm:top-[280px] lg:top-[320px] bottom-10 flex items-start lg:items-center justify-center z-20 px-4 sm:px-8 lg:px-16 max-w-[1400px] mx-auto pointer-events-none">
+        <div className="absolute inset-x-0 top-0 bottom-0 flex items-center justify-center z-20 px-4 sm:px-8 lg:px-16 max-w-[1400px] mx-auto pointer-events-none">
           {formLoading ? (
             <div className="w-full max-w-md pointer-events-auto">
               <FlightSearchFormSkeleton />
@@ -190,27 +188,27 @@ export default function HeroSection() {
 
               {/* Red Header Bar with Fare Types */}
               <div
-                className="flex rounded-t-2xl overflow-hidden p-1.5 gap-1"
+                className="flex rounded-t-2xl overflow-hidden p-2.5 gap-2"
                 style={{
                   background: '#D1161B',
                 }}
               >
-                <div className="flex-1 px-2 py-1">
-                  <span className="text-white text-[10px] font-bold block leading-tight">
+                <div className="flex-1 px-3 py-2">
+                  <span className="text-white text-xs sm:text-sm font-bold block leading-tight">
                     Mua hành lý, suất ăn, chọn chỗ...
                   </span>
                 </div>
-                <div className="flex-none bg-[#FFDD00] rounded-md px-2 py-1 flex items-center justify-center shadow-inner text-[#B30000] text-[9px] font-black leading-tight cursor-pointer hover:bg-yellow-300 transition-colors">
+                <div className="flex-none bg-[#FFDD00] rounded-md px-3 py-2 flex items-center justify-center shadow-inner text-[#B30000] text-xs font-black leading-tight cursor-pointer hover:bg-yellow-300 transition-colors">
                   Đổi thưởng
                 </div>
-                <div className="flex-none bg-[#B30000] rounded-md px-2 py-1 flex items-center justify-center text-white text-[9px] font-bold leading-tight cursor-pointer hover:bg-[#8F0000] transition-colors">
+                <div className="flex-none bg-[#B30000] rounded-md px-3 py-2 flex items-center justify-center text-white text-xs font-bold leading-tight cursor-pointer hover:bg-[#8F0000] transition-colors">
                   Gửi hàng
                 </div>
               </div>
 
               {/* Quick Trip Type Selectors (Khứ hồi / Một chiều - Radio buttons) */}
               <div
-                className="px-4 pt-2 pb-1.5 flex items-center gap-3 border-b border-gray-100"
+                className="px-4 pt-2 pb-2 flex items-center gap-3 border-b border-white/20"
                 style={{ background: '#D1161B' }}
               >
                 {[
@@ -228,11 +226,11 @@ export default function HeroSection() {
                       onChange={() => setTripType(tab.key as typeof tripType)}
                       className="accent-[#FFDD00] w-4 h-4 cursor-pointer"
                     />
-                    <span className="text-sm font-bold">{tab.label}</span>
+                    <span className="text-xs sm:text-sm font-bold whitespace-nowrap">{tab.label}</span>
                   </label>
                 ))}
                 <div className="flex-1 text-right">
-                  <span className="text-sm font-bold text-white hover:text-yellow-300 cursor-pointer">
+                  <span className="text-xs sm:text-sm font-bold text-white hover:text-yellow-300 cursor-pointer flex items-center justify-end gap-1 whitespace-nowrap">
                     Nhiều chặng{' '}
                     <Icon
                       name="ArrowTopRightOnSquareIcon"
@@ -241,45 +239,54 @@ export default function HeroSection() {
                     />
                   </span>
                 </div>
-                <div className="flex items-center gap-1 text-white font-bold cursor-pointer">
-                  VND <Icon name="ChevronDownIcon" size={12} />
+                <div className="flex items-center gap-1 text-white font-bold cursor-pointer text-xs sm:text-sm whitespace-nowrap">
+                  VND <Icon name="ChevronDownIcon" size={14} />
                 </div>
               </div>
 
               {/* Form body */}
-              <div className="px-3 pt-3 pb-3 bg-[#D1161B] rounded-b-2xl">
-                {/* Search Fields Wrapper (White rounded block) */}
-                <div className="space-y-0 text-gray-800">
-                  {/* From / To row */}
-                  <div className="flex flex-col relative">
-                    {/* From */}
-                    <div className="w-full relative bg-white rounded-t-xl group">
-                      <div
-                        className="flex items-center cursor-pointer p-0"
-                        onClick={() => {
-                          setShowFromDropdown(!showFromDropdown);
-                          setShowToDropdown(false);
-                          setShowPassengerDropdown(false);
-                        }}
-                      >
-                        <MdFlightTakeoff
-                          className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
-                          style={{ color: '#EC2029' }}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-[10px] font-semibold uppercase tracking-wider font-koho">
-                            Điểm khởi hành
+               <div className="px-4 pt-10 pb-10 bg-[#D1161B] rounded-b-2xl overflow-hidden">
+                {/* Search Fields Wrapper (White rounded block) — flex+gap so spacing can't be overridden by descendant margin resets */}
+                <div className="flex flex-col gap-2 text-gray-800">
+                  {/* From / To — two standalone rounded bars with a visible gap, matching the Passenger bar style */}
+                  <div className="flex flex-col relative gap-2">
+                    {/* From — 3-column split: airport info takes 2 parts, depart date takes 1 part */}
+                    <div className="w-full relative bg-white rounded-xl group">
+                      <div className="grid grid-cols-3">
+                        <div
+                          className="col-span-2 flex items-center cursor-pointer p-0 min-w-0"
+                          onClick={() => {
+                            setShowFromDropdown(!showFromDropdown);
+                            setShowToDropdown(false);
+                            setShowPassengerDropdown(false);
+                          }}
+                        >
+                          <div className="w-10 sm:w-12 h-16 flex items-center justify-center flex-shrink-0">
+                            <MdFlightTakeoff className="w-4 h-4 sm:w-5 sm:h-5 text-gray-800" />
                           </div>
-                          <div className="font-black text-sm truncate">{fromAirport?.name}</div>
-                          <div className="text-[10px] font-koho">
-                            {fromAirport?.code} · {fromAirport?.city}
+                          <div className="flex-1 min-w-0 pr-2 h-16 flex flex-col justify-center gap-0.5">
+                            <div className="text-[11px] font-semibold uppercase tracking-wider font-koho">
+                              Điểm khởi hành
+                            </div>
+                            <div className="font-black text-base truncate">
+                              {fromAirport?.name} ({fromAirport?.code})
+                            </div>
+                          </div>
+                        </div>
+                        {/* Depart Date — 1 part, mirrors "Ngày về" on the To row */}
+                        <div className="col-span-1 border-l border-gray-200 h-16 flex flex-col justify-center px-3 min-w-0">
+                          <div className="text-[11px] text-gray-500 font-semibold mb-0.5">
+                            Ngày đi
+                          </div>
+                          <div className="font-bold text-xs sm:text-sm text-gray-800 truncate">
+                            {departDate.split('-').reverse().join('/')}
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Swap button */}
-                    <div className="absolute left-[16px] top-[50%] -translate-y-1/2 z-10 hidden sm:flex pt-[10px]">
+                    {/* Swap button — centered in the gap between the two standalone bars */}
+                    <div className="absolute left-[16px] top-1/2 -translate-y-1/2 z-10 hidden sm:flex">
                       <button
                         onClick={swapAirports}
                         className="w-6 h-6 sm:w-7 sm:h-7 bg-[#D1161B] text-white rounded-md flex items-center justify-center transition-all shadow-md group hover:bg-[#8F0000]"
@@ -288,35 +295,38 @@ export default function HeroSection() {
                       </button>
                     </div>
 
-                    {/* To */}
-                    <div className="w-full relative bg-white group rounded-b-xl border-t border-gray-200 mt-0.5">
+                    {/* To — 3-column split: airport info takes 2 parts, return date takes 1 part (full width when one-way) */}
+                    <div className="w-full relative bg-white group rounded-xl">
                       <div
-                        className="flex items-center cursor-pointer p-0"
-                        onClick={() => {
-                          setShowToDropdown(!showToDropdown);
-                          setShowFromDropdown(false);
-                          setShowPassengerDropdown(false);
-                        }}
+                        className={`grid ${tripType !== 'one-way' ? 'grid-cols-3' : 'grid-cols-1'}`}
                       >
-                        <div className="w-10 sm:w-12 h-12 flex items-center justify-center flex-shrink-0 text-gray-500">
-                          <FaPlane className="rotate-90 w-4 h-4" />
-                        </div>
-                        <div className="flex-1 min-w-0 pr-4 h-12 flex flex-col justify-center">
-                          <div className="text-[10px] font-semibold uppercase tracking-wider font-koho text-gray-500">
-                            Điểm đến
+                        <div
+                          className={`${tripType !== 'one-way' ? 'col-span-2' : ''} flex items-center cursor-pointer p-0 min-w-0`}
+                          onClick={() => {
+                            setShowToDropdown(!showToDropdown);
+                            setShowFromDropdown(false);
+                            setShowPassengerDropdown(false);
+                          }}
+                        >
+                          <div className="w-10 sm:w-12 h-16 flex items-center justify-center flex-shrink-0 text-gray-800">
+                            <FaPlane className="rotate-90 w-4 h-4" />
                           </div>
-                          <div className="font-black text-sm truncate">{toAirport?.name}</div>
-                          <div className="text-[10px] font-koho text-gray-500">
-                            {toAirport?.code} · {toAirport?.city}
+                          <div className="flex-1 min-w-0 pr-2 h-16 flex flex-col justify-center gap-0.5">
+                            <div className="text-[11px] font-semibold uppercase tracking-wider font-koho text-gray-500">
+                              Điểm đến
+                            </div>
+                            <div className="font-black text-base truncate">
+                              {toAirport?.name} ({toAirport?.code})
+                            </div>
                           </div>
                         </div>
-                        {/* Return Date aligned across */}
+                        {/* Return Date — 1 part */}
                         {tripType !== 'one-way' && (
-                          <div className="w-[120px] sm:w-[150px] border-l border-gray-200 h-10 flex flex-col justify-center px-3">
-                            <div className="text-[10px] text-gray-500 font-semibold mb-0.5">
+                          <div className="col-span-1 border-l border-gray-200 h-16 flex flex-col justify-center px-3 min-w-0">
+                            <div className="text-[11px] text-gray-500 font-semibold mb-0.5">
                               Ngày về
                             </div>
-                            <div className="font-bold text-xs sm:text-sm text-gray-800 whitespace-nowrap overflow-hidden text-ellipsis">
+                            <div className="font-bold text-xs sm:text-sm text-gray-800 truncate">
                               {returnDate.split('-').reverse().join('/')}
                             </div>
                           </div>
@@ -350,32 +360,35 @@ export default function HeroSection() {
                   </div>
 
                   {/* Passenger row */}
-                  <div className="flex flex-col sm:flex-row gap-2 mt-1.5">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <div className="w-full relative min-w-0">
                       <div
-                        className="flex items-center h-12 px-3 sm:px-4 bg-white rounded-xl cursor-pointer hover:border-[#EC2029] transition-colors"
+                        className="flex items-center h-14 pr-14 sm:pr-16 bg-white rounded-xl cursor-pointer hover:border-[#EC2029] transition-colors"
                         onClick={() => {
                           setShowPassengerDropdown(!showPassengerDropdown);
                           setShowFromDropdown(false);
                           setShowToDropdown(false);
                         }}
                       >
-                        <MdPerson className="w-4 h-4 flex-shrink-0 text-gray-500 mr-2" />
+                        <div className="w-10 sm:w-12 h-14 flex items-center justify-center flex-shrink-0">
+                          <MdPerson className="w-4 h-4 text-gray-800" />
+                        </div>
                         <div className="flex-1 min-w-0 flex items-center gap-2">
-                          <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider font-koho">
+                          <span className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider font-koho">
                             Hành khách
                           </span>
-                          <span className="text-sm font-bold text-gray-800">
+                          <span className="text-base font-bold text-gray-800">
                             {passengers} người lớn
                           </span>
                         </div>
-                        <div className="ml-2 flex-shrink-0 hidden sm:block">
-                          <img
-                            src="/assets/images/app_logo.png"
-                            className="w-9 h-9 object-contain drop-shadow"
-                            alt="Vietjet"
-                          />
-                        </div>
+                      </div>
+                      {/* Mascot logo — separated from the clickable bar so it never gets clipped by the rounded corner */}
+                      <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 flex-shrink-0 hidden sm:block pointer-events-none">
+                        <img
+                          src="/assets/images/app_logo.png"
+                          className="w-9 h-9 object-contain drop-shadow"
+                          alt="Vietjet"
+                        />
                       </div>
                       {showPassengerDropdown && (
                         <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 p-4 mt-1">
@@ -413,13 +426,10 @@ export default function HeroSection() {
                     </div>
                   </div>
 
-                  {/* Promo code + Find lowest */}
-                  <div className="flex flex-col sm:flex-row gap-2 mb-2">
-                    <div className="flex-1 flex items-center gap-2 px-3 sm:px-4 py-2.5 border border-gray-200 rounded-xl bg-white">
-                      <MdLocalOffer
-                        className="w-4 h-4 flex-shrink-0"
-                        style={{ color: '#EC2029' }}
-                      />
+                  {/* Promo code + Find lowest — standalone white rounded bars, consistent with the bars above */}
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="flex-1 flex items-center gap-2 h-14 px-3 sm:px-4 rounded-xl bg-white hover:border-[#EC2029] transition-colors">
+                      <MdLocalOffer className="w-4 h-4 flex-shrink-0 text-gray-800" />
                       <input
                         id="promo-code"
                         name="promoCode"
@@ -434,7 +444,7 @@ export default function HeroSection() {
                         }}
                       />
                     </div>
-                    <label className="flex items-center gap-2 px-3 py-2.5 cursor-pointer font-koho">
+                    <label className="flex items-center gap-2 h-14 px-3 cursor-pointer font-koho flex-shrink-0">
                       <input
                         id="find-lowest"
                         name="findLowest"
@@ -449,10 +459,10 @@ export default function HeroSection() {
                     </label>
                   </div>
 
-                  {/* Search button */}
+                  {/* Search button — same h-14 height for a consistent stack of bars */}
                   <Link
                     href={`/tim-ve?from=${from}&to=${to}&depart=${departDate}&return=${returnDate}&pax=${passengers}`}
-                    className="flex items-center justify-center gap-2 w-full py-3.5 text-center font-black text-base rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98]"
+                    className="flex items-center justify-center gap-2 w-full h-14 text-center font-black text-lg rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98]"
                     style={{
                       background:
                         'linear-gradient(26.73deg, rgb(249,165,26) 13.7%, rgb(251,182,18) 29.8%, rgb(255,221,0) 66.81%)',

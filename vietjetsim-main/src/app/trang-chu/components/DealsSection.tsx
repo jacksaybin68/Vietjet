@@ -165,7 +165,7 @@ export default function DealsSection() {
               Ưu đãi nóng
             </span>
             <h2
-              className="text-lg sm:text-xl font-black tracking-tight text-vj-text"
+              className="text-xl sm:text-2xl font-black tracking-tight text-vj-text"
               style={{ fontWeight: 900 }}
             >
               Vé giá rẻ hôm nay
@@ -193,7 +193,7 @@ export default function DealsSection() {
         </div>
 
         {/* Deal cards — staggered fade-in + per-image parallax */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 pb-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pb-2">
           {DEALS?.map((deal, i) => (
             <Link
               key={deal?.route}
@@ -206,7 +206,7 @@ export default function DealsSection() {
               className="vj-deal-card reveal-up"
             >
               {/* Image wrapper — overflow hidden so parallax stays clipped */}
-              <div className="relative h-32 overflow-hidden">
+              <div className="relative h-44 overflow-hidden">
                 <div
                   ref={(el) => {
                     imageRefs.current[i] = el;
@@ -219,12 +219,12 @@ export default function DealsSection() {
                     alt={deal?.alt}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    sizes="230px"
+                    sizes="280px"
                   />
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
                 <span
-                  className="absolute top-0 left-0 text-[10px] font-black px-2.5 py-1 text-white shadow-sm bg-primary-solid"
+                  className="absolute top-0 left-0 text-xs font-black px-3 py-1.5 text-white shadow-sm bg-primary-solid"
                   style={{
                     clipPath: 'polygon(0 0, 100% 0, 88% 100%, 0 100%)',
                     letterSpacing: '0.03em',
@@ -235,7 +235,7 @@ export default function DealsSection() {
                   {deal?.badge}
                 </span>
                 <span
-                  className="absolute top-2 right-2 text-[10px] font-black px-2 py-0.5 rounded-md shadow-sm text-navy"
+                  className="absolute top-2 right-2 text-xs font-black px-2.5 py-1 rounded-md shadow-sm text-navy"
                   style={{
                     background:
                       'linear-gradient(26.73deg, rgb(249,165,26) 13.7%, rgb(251,182,18) 29.8%, rgb(255,221,0) 66.81%)',
@@ -244,35 +244,35 @@ export default function DealsSection() {
                 >
                   -{deal?.discount}
                 </span>
-                <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1">
-                  <span className="text-white font-black text-xs font-body">{deal?.fromCity}</span>
-                  <FaPlane className="w-3 h-3 text-yellow-300 flex-shrink-0" />
-                  <span className="text-white font-black text-xs font-body">{deal?.toCity}</span>
+                <div className="absolute bottom-2 left-3 right-3 flex items-center gap-1.5">
+                  <span className="text-white font-black text-sm font-body">{deal?.fromCity}</span>
+                  <FaPlane className="w-3.5 h-3.5 text-yellow-300 flex-shrink-0" />
+                  <span className="text-white font-black text-sm font-body">{deal?.toCity}</span>
                 </div>
               </div>
 
-              <div className="p-3">
-                <div className="text-[10px] font-bold tracking-widest uppercase mb-1 text-vj-muted">
+              <div className="p-4">
+                <div className="text-xs font-bold tracking-widest uppercase mb-1.5 text-vj-muted">
                   {deal?.route}
                 </div>
-                <div className="text-[10px] mb-2.5 flex items-center gap-1 font-koho text-vj-gray">
-                  <MdCalendarToday className="w-3 h-3" />
+                <div className="text-xs mb-3 flex items-center gap-1 font-koho text-vj-gray">
+                  <MdCalendarToday className="w-3.5 h-3.5" />
                   <span>{deal?.date}</span>
                 </div>
                 <div className="flex items-end justify-between gap-1">
                   <div>
-                    <div className="text-[10px] line-through leading-none mb-0.5 text-vj-muted">
+                    <div className="text-xs line-through leading-none mb-1 text-vj-muted">
                       {deal?.original?.toLocaleString('vi-VN')}đ
                     </div>
                     <div
-                      className="text-sm font-black leading-none text-primary"
+                      className="text-lg font-black leading-none text-primary"
                       style={{ fontWeight: 900 }}
                     >
                       {deal?.price?.toLocaleString('vi-VN')}đ
                     </div>
                   </div>
                   <div
-                    className="text-white text-[10px] font-bold px-2 py-1.5 rounded-lg hover:shadow-md transition-all duration-200 hover:brightness-110 bg-primary-solid flex-shrink-0"
+                    className="text-white text-xs font-bold px-3 py-2 rounded-lg hover:shadow-md transition-all duration-200 hover:brightness-110 bg-primary-solid flex-shrink-0"
                     style={{ letterSpacing: '0.02em', fontWeight: 700 }}
                   >
                     Đặt ngay

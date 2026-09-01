@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const getMainNav = (isAdmin: boolean) => [
   {
     label: isAdmin ? 'BẢNG QUẢN TRỊ' : 'CHUYẾN BAY CỦA TÔI',
-    href: isAdmin ? '/quan-tri' : '/tai-khoan',
+    href: isAdmin ? '/quan-tri' : '/chuyen-bay-cua-toi',
   },
   { label: 'LÀM THỦ TỤC ONLINE', href: '/lam-thu-tuc' },
   { label: 'DỊCH VỤ CHUYẾN BAY', href: '/dich-vu' },
@@ -33,15 +33,6 @@ const SERVICE_TABS = [
     svg: (
       <svg viewBox="0 0 24 24" fill="#EC2029" className="w-4 h-4">
         <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96C5 16.1 6.1 17 7 17h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63H19c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0023.25 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" />
-      </svg>
-    ),
-  },
-  {
-    label: 'Khách sạn',
-    href: '/',
-    svg: (
-      <svg viewBox="0 0 24 24" fill="#EC2029" className="w-4 h-4">
-        <path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z" />
       </svg>
     ),
   },
@@ -132,7 +123,7 @@ export default function Header() {
         {announcementVisible && (
           <div className="bg-[#EC2029] border-b border-[#D91E28]">
             <div className="max-w-[1400px] mx-auto px-4 lg:px-6">
-              <div className="flex items-center h-8 gap-2">
+              <div className="flex items-center h-6 gap-2">
                 <span className="text-sm flex-shrink-0 text-white">
                   <Icon name="BellIcon" size={14} />
                 </span>
@@ -163,51 +154,51 @@ export default function Header() {
           <div className="max-w-[1400px] mx-auto px-4">
             <div className="flex flex-col">
               {/* Utility row (Top-right) */}
-              <div className="flex justify-end items-center gap-4 py-2 border-b border-gray-50">
+              <div className="flex justify-end items-center gap-5 py-3 border-b border-gray-50">
                 <Link
                   href="/lien-he"
-                  className="flex items-center gap-1.5 text-[11px] font-semibold text-[#6D6E71] hover:text-[#EC2029] transition-colors"
+                  className="flex items-center gap-2 text-[13px] font-semibold text-[#6D6E71] hover:text-[#EC2029] transition-colors"
                 >
-                  <Icon name="QuestionMarkCircleIcon" size={14} className="text-[#EC2029]" />
+                  <Icon name="QuestionMarkCircleIcon" size={16} className="text-[#EC2029]" />
                   Hỗ trợ
                 </Link>
                 {user ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <Link
                       href={isAdmin ? '/quan-tri' : '/tai-khoan'}
-                      className="text-[11px] font-bold text-[#EC2029]"
+                      className="text-[13px] font-bold text-[#EC2029]"
                     >
                       {user.fullName || user.email}
                     </Link>
-                    <span className="text-gray-300 text-[10px]">|</span>
+                    <span className="text-gray-300 text-[12px]">|</span>
                     <button
                       onClick={() => signOut()}
-                      className="text-[11px] font-bold text-[#6D6E71] hover:text-[#EC2029]"
+                      className="text-[13px] font-bold text-[#6D6E71] hover:text-[#EC2029]"
                     >
                       Đăng xuất
                     </button>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <Link
                       href="/dang-nhap"
-                      className="text-[11px] font-bold text-[#EC2029] hover:underline"
+                      className="text-[13px] font-bold text-[#EC2029] hover:underline"
                     >
                       Đăng ký
                     </Link>
-                    <span className="text-gray-300 text-[10px]">|</span>
+                    <span className="text-gray-300 text-[12px]">|</span>
                     <Link
                       href="/dang-nhap"
-                      className="text-[11px] font-bold text-[#EC2029] hover:underline"
+                      className="text-[13px] font-bold text-[#EC2029] hover:underline"
                     >
                       Đăng nhập
                     </Link>
                   </div>
                 )}
 
-                <button className="flex items-center gap-1 text-[11px] font-bold text-[#6D6E71] border border-gray-200 rounded px-2 py-0.5 hover:bg-gray-50">
+                <button className="flex items-center gap-1.5 text-[13px] font-bold text-[#6D6E71] border border-gray-200 rounded px-3 py-1 hover:bg-gray-50">
                   Tiếng Việt
-                  <Icon name="ChevronDownIcon" size={10} />
+                  <Icon name="ChevronDownIcon" size={12} />
                 </button>
               </div>
 

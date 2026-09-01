@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
       email: payload.email,
       role: payload.role,
       fullName: payload.fullName,
+      phone: payload.phone,
     });
 
     const newRefreshToken = signRefreshToken({
@@ -49,6 +50,7 @@ export async function POST(request: NextRequest) {
       email: payload.email,
       role: payload.role,
       fullName: payload.fullName,
+      phone: payload.phone,
     });
 
     const newHash = hashToken(newRefreshToken);
@@ -82,6 +84,7 @@ export async function POST(request: NextRequest) {
         email: payload.email,
         role: payload.role,
         fullName: payload.fullName,
+        phone: payload.phone,
       },
     });
 

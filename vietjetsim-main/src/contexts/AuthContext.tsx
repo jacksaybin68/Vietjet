@@ -189,7 +189,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Refresh access token before it expires (every 10 minutes)
   const refreshToken = useCallback(async () => {
     try {
-      const data = await fetchAuth('/refresh', { method: 'POST' });
+      const data = await fetchAuth('/lam-moi', { method: 'POST' });
       if (data.user) {
         setUser((prev) =>
           prev
@@ -236,7 +236,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     password: string,
     metadata: { fullName?: string; phone?: string; avatarUrl?: string } = {}
   ) => {
-    const data = await fetchAuth('/register', {
+    const data = await fetchAuth('/dang-ky', {
       method: 'POST',
       body: JSON.stringify({
         email,
