@@ -205,11 +205,7 @@ export default function Header() {
               {/* Logo & Primary Nav row */}
               <div className="flex items-center h-16">
                 <Link href="/" className="flex items-center flex-shrink-0">
-                  <img
-                    src="https://www.vietjetair.com/static/media/vj-logo.0f71c68b.svg"
-                    alt="Vietjet Air"
-                    className="h-14 w-auto object-contain"
-                  />
+                  <img src="/logo.png" alt="Vietjet Air" className="h-14 w-auto object-contain" />
                 </Link>
 
                 <div className="flex-1" />
@@ -250,7 +246,7 @@ export default function Header() {
           style={{ background: 'linear-gradient(to right, #F9A51A, #FBB612, #FFDD00)' }}
         >
           <div className="max-w-[1400px] mx-auto px-4">
-            <div className="flex justify-end items-center overflow-x-auto no-scrollbar gap-1">
+            <div className="flex justify-start items-center overflow-x-auto no-scrollbar gap-1">
               {SERVICE_TABS.map((tab, i) => {
                 const isTabActive = i === 0 || isActive(tab.href);
                 return (
@@ -265,9 +261,7 @@ export default function Header() {
                   >
                     <span
                       className={`w-3.5 h-3.5 flex items-center justify-center transition-colors duration-200 ${
-                        isTabActive
-                          ? 'text-[#EC2029]'
-                          : 'text-[#EC2029] group-hover:text-[#D1161B]'
+                        isTabActive ? 'text-[#EC2029]' : 'text-[#EC2029] group-hover:text-[#D1161B]'
                       }`}
                     >
                       {tab.svg}
