@@ -399,8 +399,8 @@ export default function UserChat() {
                       <div
                         className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed select-text touch-manipulation ${
                           isUser
-                            ? 'bg-primary text-white rounded-br-sm'
-                            : 'bg-white text-navy border border-gray-100 rounded-bl-sm shadow-sm'
+                            ? 'bg-primary text-white rounded-br-sm dark:bg-primary-dark'
+                            : 'bg-gray-100 text-navy border border-gray-200 rounded-bl-sm shadow-sm dark:bg-gray-700 dark:border-gray-600'
                         }`}
                       >
                         {msg.content}

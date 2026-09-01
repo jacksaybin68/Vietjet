@@ -105,14 +105,7 @@ describe('Booking Database Module', () => {
         total_price: 1000,
       };
 
-      (sql as any).transaction.mockResolvedValueOnce([]);
-
-      (sql as any).mockImplementation((strings: any) => {
-        if (strings[0].includes('SELECT * FROM bookings')) {
-          return Promise.resolve([mockBookingRecord]);
-        }
-        return Promise.resolve([]);
-      });
+      (sql as any).transaction.mockResolvedValueOnce([[mockBookingRecord]]);
 
       const result = await createBooking(
         { user_id: 'user-1', flight_id: 'flight-1', total_price: 1000 },
