@@ -60,12 +60,60 @@ export async function POST(request: NextRequest) {
       flight_date,
       amount,
     } = body;
+
     const normalizedBookingId =
       typeof booking_id === 'string' ? booking_id.trim() : String(booking_id || '').trim();
     const normalizedReason = typeof reason === 'string' ? reason.trim() : '';
 
-    if (!normalizedBookingId || !normalizedReason) {
-      return NextResponse.json({ error: 'Booking ID and reason are required' }, { status: 400 });
+    if (!normalizedBookingId) {
+      return NextResponse.json({ error: 'Booking ID is required' }, { status: 400 });
+    }
+
+    if (!normalizedReason) {
+      return NextResponse.json({ error: 'Reason is required' }, { status: 400 });
+    }
+
+    const refundAmount = Number(amount);
+    if (!Number.isFinite(refundAmount) || refundAmount <= 0) {
+      return NextResponse.json({ error: 'Valid refund amount is required' }, { status: 400 });
+    }
+
+    const normalizedBankInfo =
+      bank_info && typeof bank_info === 'object'
+        ? {
+            bank_name:
+              typeof bank_info.bank_name === 'string' ? bank_info.bank_name.trim() : '',
+            account_number:
+              typeof bank_info.account_number === 'string' ? bank_info.account_number.trim() : '',
+            account_holder:
+              typeof bank_info.account_holder === 'string' ? bank_info.account_holder.trim() : '',
+            note: typeof bank_info.note === 'string' ? bank_info.note.trim() : '',
+            flight_no: typeof bank_info.flight_no === 'string' ? bank_info.flight_no.trim() : '',
+            route: typeof bank_info.route === 'string' ? bank_info.route.trim() : '',
+            flight_date:
+              typeof bank_info.flight_date === 'string' ? bank_info.flight_date.trim() : '',
+            amount: Number.isFinite(Number(bank_info.amount)) ? Number(bank_info.amount) : refundAmount,
+          }
+        : {
+            bank_name: typeof bank_name === 'string' ? bank_name.trim() : '',
+            account_number: typeof account_number === 'string' ? account_number.trim() : '',
+            account_holder: typeof account_holder === 'string' ? account_holder.trim() : '',
+            note: typeof note === 'string' ? note.trim() : '',
+            flight_no: typeof flight_no === 'string' ? flight_no.trim() : '',
+            route: typeof route === 'string' ? route.trim() : '',
+            flight_date: typeof flight_date === 'string' ? flight_date.trim() : '',
+            amount: refundAmount,
+          };
+
+    if (
+      !normalizedBankInfo.bank_name ||
+      !normalizedBankInfo.account_holder ||
+      !normalizedBankInfo.account_number
+    ) {
+      return NextResponse.json(
+        { error: 'Bank name, account holder and account number are required' },
+        { status: 400 }
+      );
     }
 
     // Verify booking belongs to current user
@@ -76,20 +124,6 @@ export async function POST(request: NextRequest) {
         { status: 403 }
       );
     }
-
-    const normalizedBankInfo =
-      bank_info && typeof bank_info === 'object'
-        ? bank_info
-        : {
-            bank_name: typeof bank_name === 'string' ? bank_name.trim() : '',
-            account_number: typeof account_number === 'string' ? account_number.trim() : '',
-            account_holder: typeof account_holder === 'string' ? account_holder.trim() : '',
-            note: typeof note === 'string' ? note.trim() : '',
-            flight_no: typeof flight_no === 'string' ? flight_no.trim() : '',
-            route: typeof route === 'string' ? route.trim() : '',
-            flight_date: typeof flight_date === 'string' ? flight_date.trim() : '',
-            amount: Number.isFinite(Number(amount)) ? Number(amount) : 0,
-          };
 
     const refund = await createRefund({
       booking_id: normalizedBookingId,

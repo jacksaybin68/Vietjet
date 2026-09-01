@@ -708,9 +708,22 @@ export async function createPaymentAndConfirmBooking(payment: {
   booking_id: string;
   method: string;
   amount: number;
+  user_id?: string;
   discount_code_id?: string;
   discount_amount?: number;
 }): Promise<{ payment: PaymentRecord; booking: BookingRecord }> {
+  if (payment.method === 'wallet') {
+    if (!payment.user_id) {
+      throw new Error('User id is required for wallet payment');
+    }
+    await spendWalletBalance(
+      payment.user_id,
+      payment.amount,
+      payment.booking_id,
+      `Thanh toán vé máy bay #${payment.booking_id}`
+    );
+  }
+
   await sql.transaction([
     sql`
       INSERT INTO payments (booking_id, method, status, amount)
@@ -724,7 +737,6 @@ export async function createPaymentAndConfirmBooking(payment: {
           updated_at = NOW()
       WHERE id = ${payment.booking_id}
     `,
-    // Increment used_count if a discount was applied
     ...(payment.discount_code_id
       ? [
           sql`UPDATE discount_codes SET used_count = used_count + 1 WHERE id = ${payment.discount_code_id}`,
@@ -1704,21 +1716,21 @@ export async function getWalletTransactions(
 
   const wallet = await getOrCreateWallet(userId);
 
-  let query;
+  let transactions: WalletTransactionRecord[];
   if (params?.type) {
-    query = sql`
+    transactions = (await sql`
       SELECT * FROM wallet_transactions
       WHERE wallet_id = ${wallet.id} AND type = ${params.type}
       ORDER BY created_at DESC
       LIMIT ${limit} OFFSET ${offset}
-    `;
+    `) as WalletTransactionRecord[];
   } else {
-    query = sql`
+    transactions = (await sql`
       SELECT * FROM wallet_transactions
       WHERE wallet_id = ${wallet.id}
       ORDER BY created_at DESC
       LIMIT ${limit} OFFSET ${offset}
-    `;
+    `) as WalletTransactionRecord[];
   }
 
   const countResult = await sql`
@@ -1726,7 +1738,7 @@ export async function getWalletTransactions(
   `;
 
   return {
-    transactions: query as WalletTransactionRecord[],
+    transactions,
     total: parseInt((countResult as any)[0].total, 10),
   };
 }
@@ -1734,7 +1746,7 @@ export async function getWalletTransactions(
 export async function topupWallet(
   userId: string,
   amount: number,
-  paymentMethodId: string,
+  paymentMethodId?: string | null,
   description?: string
 ): Promise<WalletTransactionRecord> {
   const wallet = await getOrCreateWallet(userId);
@@ -1748,7 +1760,71 @@ export async function topupWallet(
     )
     VALUES (
       ${wallet.id}, 'topup', ${amount}, ${balanceBefore}, ${balanceAfter},
-      ${description || 'Nạp tiền vào ví'}, ${paymentMethodId}, 'completed'
+      ${description || 'Nạp tiền vào ví'}, ${paymentMethodId || null}, 'completed'
+    )
+    RETURNING *
+  `;
+
+  await sql`
+    UPDATE user_wallets SET balance = ${balanceAfter}, updated_at = NOW()
+    WHERE id = ${wallet.id}
+  `;
+
+  return (result as WalletTransactionRecord[])[0];
+}
+
+export async function withdrawWallet(
+  userId: string,
+  amount: number,
+  paymentMethodId: string,
+  description?: string
+): Promise<WalletTransactionRecord> {
+  const wallet = await getOrCreateWallet(userId);
+  const balanceBefore = parseFloat(String(wallet.balance));
+  if (amount <= 0) throw new Error('Số tiền rút không hợp lệ');
+  if (balanceBefore < amount) throw new Error('Số dư ví không đủ');
+  const balanceAfter = balanceBefore - amount;
+
+  const result = await sql`
+    INSERT INTO wallet_transactions (
+      wallet_id, type, amount, balance_before, balance_after,
+      description, payment_method_id, status
+    )
+    VALUES (
+      ${wallet.id}, 'withdraw', ${-amount}, ${balanceBefore}, ${balanceAfter},
+      ${description || 'Rút tiền từ ví'}, ${paymentMethodId}, 'completed'
+    )
+    RETURNING *
+  `;
+
+  await sql`
+    UPDATE user_wallets SET balance = ${balanceAfter}, updated_at = NOW()
+    WHERE id = ${wallet.id}
+  `;
+
+  return (result as WalletTransactionRecord[])[0];
+}
+
+export async function spendWalletBalance(
+  userId: string,
+  amount: number,
+  referenceId: string,
+  description?: string
+): Promise<WalletTransactionRecord> {
+  const wallet = await getOrCreateWallet(userId);
+  const balanceBefore = parseFloat(String(wallet.balance));
+  if (amount <= 0) throw new Error('Số tiền thanh toán không hợp lệ');
+  if (balanceBefore < amount) throw new Error('Số dư ví không đủ để thanh toán');
+  const balanceAfter = balanceBefore - amount;
+
+  const result = await sql`
+    INSERT INTO wallet_transactions (
+      wallet_id, type, amount, balance_before, balance_after,
+      description, reference_id, status
+    )
+    VALUES (
+      ${wallet.id}, 'payment', ${-amount}, ${balanceBefore}, ${balanceAfter},
+      ${description || 'Thanh toán bằng ví'}, ${referenceId}, 'completed'
     )
     RETURNING *
   `;

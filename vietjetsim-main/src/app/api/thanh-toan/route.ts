@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
       booking_id,
       method,
       amount,
+      user_id: payload.userId,
       discount_code_id,
       discount_amount: discount_amount || 0,
     });
