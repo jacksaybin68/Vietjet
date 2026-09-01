@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ─── OpenClaw Role Enforcement: COORDINATOR (Real-Time Flight Updates ONLY) ─
-    let augmentedHistory = [
+    const augmentedHistory = [
       {
         role: 'system',
         content: `Bạn là OpenClaw Coordinator. 

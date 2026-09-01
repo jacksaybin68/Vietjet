@@ -495,7 +495,9 @@ function DiscountModal({
     e.preventDefault();
     setIsSaving(true);
     try {
-      const url = discount ? `/api/quan-tri/ma-giam-gia/${discount.id}` : '/api/quan-tri/ma-giam-gia';
+      const url = discount
+        ? `/api/quan-tri/ma-giam-gia/${discount.id}`
+        : '/api/quan-tri/ma-giam-gia';
       const method = discount ? 'PATCH' : 'POST';
 
       const res = await fetch(url, {

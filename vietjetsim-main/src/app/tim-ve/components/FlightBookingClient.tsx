@@ -183,7 +183,11 @@ function FlightBookingClientInner() {
                       fontWeight: 900,
                     }}
                   >
-                    {step > s.id ? <Icon name="CheckIcon" size={14} className="sm:!w-4 sm:!h-4" /> : s.id}
+                    {step > s.id ? (
+                      <Icon name="CheckIcon" size={14} className="sm:!w-4 sm:!h-4" />
+                    ) : (
+                      s.id
+                    )}
                   </div>
                   <span
                     className={`text-xs sm:text-sm font-semibold hidden xs:block transition-colors`}

@@ -84,7 +84,10 @@ export default function SignUpLoginPage() {
     }
 
     try {
-      await signUp(email, password, { fullName: (surname.trim() + ' ' + givenName.trim()).trim(), phone: phone });
+      await signUp(email, password, {
+        fullName: (surname.trim() + ' ' + givenName.trim()).trim(),
+        phone: phone,
+      });
       setSuccess('Đăng ký thành công! Đang chuyển hướng...');
       setTimeout(() => router.push('/tai-khoan'), 1200);
     } catch (err: any) {

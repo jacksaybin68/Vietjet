@@ -287,9 +287,9 @@ function parseHour(time: string): number {
 }
 
 const ALL_AIRLINES: string[] = [];
-let MIN_PRICE = 0;
-let MAX_PRICE = 0;
-let MAX_DURATION = 0;
+const MIN_PRICE = 0;
+const MAX_PRICE = 0;
+const MAX_DURATION = 0;
 
 interface Filters {
   airlines: string[];

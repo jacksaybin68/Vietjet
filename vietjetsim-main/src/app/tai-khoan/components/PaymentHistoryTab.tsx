@@ -136,9 +136,12 @@ export default function PaymentHistoryTab() {
   const fetchPayments = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/thanh-toan/lich-su?limit=${limit}&offset=${(page - 1) * limit}`, {
-        credentials: 'include',
-      });
+      const res = await fetch(
+        `/api/thanh-toan/lich-su?limit=${limit}&offset=${(page - 1) * limit}`,
+        {
+          credentials: 'include',
+        }
+      );
       const data = await res.json();
 
       if (res.ok) {

@@ -274,9 +274,7 @@ export default function Header() {
                   >
                     <span
                       className={`w-3.5 h-3.5 flex items-center justify-center transition-colors duration-200 ${
-                        isTabActive
-                          ? 'text-[#EC2029]'
-                          : 'text-[#EC2029] group-hover:text-[#D1161B]'
+                        isTabActive ? 'text-[#EC2029]' : 'text-[#EC2029] group-hover:text-[#D1161B]'
                       }`}
                     >
                       {tab.svg}

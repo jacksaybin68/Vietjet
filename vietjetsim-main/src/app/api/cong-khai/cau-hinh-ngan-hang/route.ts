@@ -12,15 +12,12 @@ export async function GET(request: NextRequest) {
       ORDER BY is_default DESC, created_at DESC
     `;
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       bankConfig: accounts[0] || {}, // For backward compatibility
-      accounts: accounts 
+      accounts: accounts,
     });
   } catch (error) {
     console.error('Error fetching bank config:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
