@@ -276,6 +276,7 @@ export default function UserDashboardClient() {
 
   // Refund state
   const [refundBookingId, setRefundBookingId] = useState('');
+  const [refundAmount, setRefundAmount] = useState('');
   const [refundReason, setRefundReason] = useState('');
   const [refundNote, setRefundNote] = useState('');
   const [refundSubmitted, setRefundSubmitted] = useState(false);
@@ -287,8 +288,12 @@ export default function UserDashboardClient() {
     {
       id: string;
       bookingId: string;
+      amount: number;
       reason: string;
       note: string;
+      bankName: string;
+      accountHolder: string;
+      accountNumber: string;
       status: 'pending' | 'approved' | 'rejected';
       date: string;
       adminNote?: string;
@@ -320,6 +325,27 @@ export default function UserDashboardClient() {
   const [historySortDir, setHistorySortDir] = useState<'asc' | 'desc'>('asc');
   const [historyPage, setHistoryPage] = useState(1);
   const [historyPageSize, setHistoryPageSize] = useState(10);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const tab = new URLSearchParams(window.location.search).get('tab');
+    if (!tab) return;
+    const supportedTabs: Tab[] = [
+      'upcoming',
+      'history',
+      'profile',
+      'wallet',
+      'payment-history',
+      'refund',
+      'notifications',
+      'notif-settings',
+      'loyalty',
+      'security',
+    ];
+    if (supportedTabs.includes(tab as Tab)) {
+      setActiveTab(tab as Tab);
+    }
+  }, []);
 
   const toggleSort = (field: 'date' | 'status') => {
     if (historySortField === field) {
@@ -432,15 +458,31 @@ export default function UserDashboardClient() {
         return;
       }
       setRefundRequests(
-        (data || []).map((r: any) => ({
+        (data || []).map((r: any) => {
+          const bankInfo =
+            typeof r.bank_info === 'string'
+              ? (() => {
+                  try {
+                    return JSON.parse(r.bank_info);
+                  } catch {
+                    return {};
+                  }
+                })()
+              : r.bank_info || {};
+          return {
           id: r.id,
           bookingId: r.booking_id,
+          amount: Number(bankInfo.amount || 0),
           reason: r.reason,
-          note: r.note || '',
+          note: bankInfo.note || r.note || '',
+          bankName: bankInfo.bank_name || '',
+          accountHolder: bankInfo.account_holder || '',
+          accountNumber: bankInfo.account_number || '',
           status: r.status as 'pending' | 'approved' | 'rejected',
           date: new Date(r.created_at).toLocaleDateString('vi-VN'),
           adminNote: r.admin_note || '',
-        }))
+          };
+        })
       );
     } catch (e: any) {
       setRefundError('Không thể tải dữ liệu');
@@ -1344,7 +1386,12 @@ export default function UserDashboardClient() {
                         <Icon name="BanknotesIcon" size={20} className="text-white" />
                       </div>
                       <div>
-                        <h2 className="font-bold text-base text-amber-900">Yêu cầu hoàn tiền</h2>
+                        <div className="flex items-center gap-2">
+                          <h2 className="font-bold text-base text-amber-900">Yêu cầu hoàn tiền</h2>
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
+                            Giao diện mới
+                          </span>
+                        </div>
                         <p className="text-xs text-amber-600">
                           Điền thông tin để gửi yêu cầu hoàn tiền vé máy bay
                         </p>
@@ -1371,6 +1418,7 @@ export default function UserDashboardClient() {
                           onClick={() => {
                             setRefundSubmitted(false);
                             setRefundBookingId('');
+                            setRefundAmount('');
                             setRefundReason('');
                             setRefundNote('');
                             setRefundBankName('');
@@ -1390,6 +1438,7 @@ export default function UserDashboardClient() {
                           e.preventDefault();
                           if (
                             !refundBookingId ||
+                            !refundAmount ||
                             !refundReason ||
                             !refundBankName ||
                             !refundAccountNumber ||
@@ -1403,14 +1452,14 @@ export default function UserDashboardClient() {
                               booking_id: refundBookingId,
                               reason: refundReason,
                               note: refundNote,
-                              bank_name: refundBankName,
-                              account_number: refundAccountNumber,
-                              account_holder: refundAccountHolder,
-                              status: 'pending',
-                              flight_no: '',
-                              route: '',
-                              flight_date: '',
-                              amount: 0,
+                              amount: Number(refundAmount.replace(/\D/g, '')),
+                              bank_info: {
+                                bank_name: refundBankName,
+                                account_number: refundAccountNumber,
+                                account_holder: refundAccountHolder,
+                                note: refundNote,
+                                amount: Number(refundAmount.replace(/\D/g, '')),
+                              },
                             };
                             if (user) {
                               insertData.user_id = user.id;
@@ -1420,10 +1469,42 @@ export default function UserDashboardClient() {
                               headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
                               body: JSON.stringify(insertData),
                             });
-                            const insertErr = res.ok ? null : { message: 'Failed to submit' };
+                            const responseJson = await res.json();
+                            const insertErr = res.ok
+                              ? null
+                              : { message: responseJson.error || 'Failed to submit' };
                             if (insertErr) {
                               setRefundError(insertErr.message);
                               return;
+                            }
+                            if (responseJson?.refund) {
+                              const bankInfo =
+                                typeof responseJson.refund.bank_info === 'string'
+                                  ? (() => {
+                                      try {
+                                        return JSON.parse(responseJson.refund.bank_info);
+                                      } catch {
+                                        return {};
+                                      }
+                                    })()
+                                  : responseJson.refund.bank_info || {};
+                              setRefundRequests((prev) => [
+                                {
+                                  id: responseJson.refund.id,
+                                  bookingId: responseJson.refund.booking_id,
+                                  amount: Number(bankInfo.amount || 0),
+                                  reason: responseJson.refund.reason || refundReason,
+                                  note: bankInfo.note || refundNote || '',
+                                  bankName: bankInfo.bank_name || refundBankName,
+                                  accountHolder: bankInfo.account_holder || refundAccountHolder,
+                                  accountNumber: bankInfo.account_number || refundAccountNumber,
+                                  status: 'pending',
+                                  date: new Date(
+                                    responseJson.refund.created_at || Date.now()
+                                  ).toLocaleDateString('vi-VN'),
+                                },
+                                ...prev,
+                              ]);
                             }
                             setRefundSubmitted(true);
                             toast.success(
@@ -1470,6 +1551,36 @@ export default function UserDashboardClient() {
                               }}
                             />
                           </div>
+
+                          <div>
+                            <label
+                              className="block text-xs font-bold uppercase tracking-wider mb-1.5"
+                              style={{ color: '#1A2948' }}
+                            >
+                              Số tiền hoàn <span className="text-red-500">*</span>
+                            </label>
+                            <div className="relative">
+                              <Icon
+                                name="BanknotesIcon"
+                                size={15}
+                                className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                              />
+                              <input
+                                type="text"
+                                value={refundAmount}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/\D/g, '');
+                                  setRefundAmount(val ? parseInt(val, 10).toLocaleString('vi-VN') : '');
+                                }}
+                                placeholder="VD: 1.250.000"
+                                required
+                                className="w-full pl-9 pr-14 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition-all"
+                              />
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-stone-500">
+                                VND
+                              </span>
+                            </div>
+                          </div>
                           <p className="text-xs text-stone-400 mt-1">
                             Nhập mã đặt chỗ từ email xác nhận hoặc lịch sử đặt vé
                           </p>
@@ -1486,7 +1597,7 @@ export default function UserDashboardClient() {
                           <textarea
                             value={refundNote}
                             onChange={(e) => setRefundNote(e.target.value)}
-                            placeholder="Mô tả chi tiết lý do hoàn tiền (không bắt buộc)..."
+                            placeholder="Ghi chú cho yêu cầu hoàn vé (không bắt buộc)..."
                             rows={3}
                             className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition-all resize-none"
                             onFocus={(e) => {
@@ -1635,6 +1746,7 @@ export default function UserDashboardClient() {
                             disabled={
                               !refundBookingId ||
                               !refundReason ||
+                              !refundAmount ||
                               !refundBankName ||
                               !refundAccountNumber ||
                               !refundAccountHolder ||
@@ -1677,6 +1789,7 @@ export default function UserDashboardClient() {
                             type="button"
                             onClick={() => {
                               setRefundBookingId('');
+                              setRefundAmount('');
                               setRefundReason('');
                               setRefundNote('');
                               setRefundBankName('');
@@ -1812,6 +1925,13 @@ export default function UserDashboardClient() {
                                   >
                                     {req.bookingId}
                                   </span>
+                                </div>
+                                <div className="text-xs text-stone-500 truncate">
+                                  Mã đặt chỗ: {req.bookingId} · Số tiền:{' '}
+                                  {req.amount.toLocaleString('vi-VN')}đ
+                                </div>
+                                <div className="text-xs text-stone-500 truncate">
+                                  {req.bankName} · {req.accountHolder} · STK: {req.accountNumber}
                                 </div>
                                 <div className="text-xs text-stone-500 truncate">
                                   {req.reason}
