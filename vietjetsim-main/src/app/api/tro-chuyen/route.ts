@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/auth';
+import { isAdminRole } from '@/lib/rbac';
 import {
   getConversationMessages,
   sendChatMessage,
@@ -126,7 +127,7 @@ export async function POST(request: NextRequest) {
     const message = await sendChatMessage({
       conversation_id,
       sender_id: payload.userId,
-      sender_role: payload.role,
+      sender_role: isAdminRole(payload.role) ? 'admin' : 'user',
       content: content.trim(),
     });
 

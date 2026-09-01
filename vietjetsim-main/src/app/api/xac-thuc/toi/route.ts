@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
         email: payload.email,
         fullName: payload.fullName,
         role: payload.role,
+        phone: payload.phone,
       },
     });
   } catch (error) {

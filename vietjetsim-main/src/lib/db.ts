@@ -632,9 +632,11 @@ export async function createBooking(
     `
   );
 
-  await sql.transaction([bookingInsert, ...passengerInserts, ...seatInserts]);
+  const results = await sql.transaction([bookingInsert, ...passengerInserts, ...seatInserts]);
 
-  return bookingInsert as unknown as BookingRecord;
+  // results[0] is the result of bookingInsert, which is an array of inserted rows
+  const bookingRows = results[0] as unknown as BookingRecord[];
+  return bookingRows[0];
 }
 
 export async function updateBookingStatus(

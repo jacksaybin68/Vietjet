@@ -21,3 +21,4 @@ build/
 # Project specific
 vietjetsim-main/node_modules/
 vietjetsim-main/.next/
+.aider*
