@@ -24,7 +24,6 @@ export default function SignUpLoginPage() {
   const [success, setSuccess] = useState('');
   const [otpRequested, setOtpRequested] = useState(false);
   const [otpInput, setOtpInput] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -32,11 +31,7 @@ export default function SignUpLoginPage() {
     setLoading(true);
     setError('');
     try {
-      const identifier = email || phone;
-      const normalized = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier)
-        ? identifier
-        : normalizePhone(identifier);
-      const data = await signIn(normalized, password);
+      const data = await signIn(email, password);
       setSuccess('Đăng nhập thành công!');
       setTimeout(() => {
         const userRole = data?.user?.role || 'user';
@@ -53,24 +48,17 @@ export default function SignUpLoginPage() {
     }
   };
 
-  const normalizePhone = (p: string): string => {
-    const digits = p.replace(/\D/g, '');
-    if (digits.startsWith('84') && digits.length === 11) return '0' + digits.slice(2);
-    if (digits.length === 9) return '0' + digits;
-    return digits;
-  };
-
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!otpRequested) {
       setLoading(true);
       setError('');
 
-      if (!surname.trim() || !givenName.trim() || (!email && !phone) || !password || !dateOfBirth || !agreeTerms) {
+      if (!surname.trim() || !givenName.trim() || (!email && !phone) || !password || !agreeTerms) {
         setError(
           !agreeTerms
             ? 'Vui lòng đồng ý với Điều khoản dịch vụ và Chính sách bảo mật.'
-            : 'Vui lòng điền đầy đủ thông tin: họ tên, ngày sinh, mật khẩu và (Email hoặc Số điện thoại).'
+            : 'Vui lòng điền họ tên, mật khẩu và (Email hoặc Số điện thoại).'
         );
         setLoading(false);
         return;
@@ -96,11 +84,9 @@ export default function SignUpLoginPage() {
     }
 
     try {
-      const normalizedPhone = phone ? normalizePhone(phone) : '';
-      await signUp(email, password, { 
-        fullName: (surname.trim() + ' ' + givenName.trim()).trim(), 
-        phone: normalizedPhone,
-        dateOfBirth: dateOfBirth 
+      await signUp(email, password, {
+        fullName: (surname.trim() + ' ' + givenName.trim()).trim(),
+        phone: phone,
       });
       setSuccess('Đăng ký thành công! Đang chuyển hướng...');
       setTimeout(() => router.push('/tai-khoan'), 1200);
@@ -111,585 +97,476 @@ export default function SignUpLoginPage() {
     }
   };
 
-  const isEmailValid = email.length === 0 || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isEmailValid = email.length === 0 || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); // Make email optional in registration
   const isLoginIdentifierValid =
-    isEmailValid || phone.replace(/\D/g, '').length >= 9 || email.replace(/\D/g, '').length >= 9;
+    isEmailValid || phone.replace(/\D/g, '').length >= 9 || email.replace(/\D/g, '').length >= 9; // Allow email or phone in login
   const isPasswordValid = password.length >= 6;
   const isNameValid = surname.trim().length >= 1 && givenName.trim().length >= 1;
   const isPhoneValid = phone.replace(/\D/g, '').length >= 9;
+  const primaryButtonClass =
+    'w-full rounded-xl bg-[#EC2029] py-3.5 text-base font-black text-white shadow-[0_4px_14px_rgba(236,32,41,0.3)] transition-all hover:bg-[#D0021B] disabled:cursor-not-allowed disabled:bg-[#C41017] disabled:opacity-60';
 
   return (
-    <div className="min-h-screen flex font-body">
-      {/* Left Panel - Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-white">
-        <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-10 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]">
-          {/* VietJet-style tabs */}
-          <div className="flex border-b-2 border-gray-200 mb-8">
-            <button
-              onClick={() => {
-                setTab('login');
-                setError('');
-                setSuccess('');
-                setOtpRequested(false);
-                setOtpInput('');
-              }}
-              className={`flex-1 pb-3 text-sm font-bold transition-all ${
-                tab === 'login' ? 'border-b-2 -mb-0.5' : 'hover:text-gray-600'
-              }`}
-              style={{
-                color: tab === 'login' ? '#EC2029' : '#939598',
-                borderColor: tab === 'login' ? '#EC2029' : 'transparent',
-                fontWeight: 700,
-              }}
-            >
-              Đăng nhập
-            </button>
-            <button
-              onClick={() => {
-                setTab('register');
-                setError('');
-                setSuccess('');
-                setOtpRequested(false);
-                setOtpInput('');
-              }}
-              className={`flex-1 pb-3 text-sm font-bold transition-all ${
-                tab === 'register' ? 'border-b-2 -mb-0.5' : 'hover:text-gray-600'
-              }`}
-              style={{
-                color: tab === 'register' ? '#EC2029' : '#939598',
-                borderColor: tab === 'register' ? '#EC2029' : 'transparent',
-                fontWeight: 700,
-              }}
-            >
-              Đăng ký
-            </button>
+    <div className="min-h-screen bg-[#f5f6f8] font-body">
+      <div className="h-1 w-full bg-[#FFD400]" />
+      <div className="mx-auto flex min-h-[calc(100vh-4px)] max-w-7xl items-center px-4 py-8 sm:px-6 lg:px-8">
+        <div className="grid w-full overflow-hidden rounded-[2rem] border border-[#e9eaee] bg-white shadow-[0_12px_40px_rgba(26,41,72,0.12)] lg:grid-cols-[1.1fr_1fr]">
+          <div className="relative hidden overflow-hidden bg-gradient-red-vj px-10 py-12 text-white lg:flex lg:flex-col">
+            <div className="absolute inset-0 opacity-20">
+              <AppImage
+                src="/images/hero/banner-2-skyboss.jpg"
+                alt="Airplane flying"
+                fill
+                className="object-cover"
+                sizes="50vw"
+              />
+            </div>
+            <div className="relative z-10 mb-auto">
+              <Link href="/trang-chu" className="inline-flex items-center gap-3">
+                <AppLogo size={44} />
+              </Link>
+              <p className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide">
+                <span className="h-2 w-2 rounded-full bg-[#FFD400]" />
+                Bay là thích ngay!
+              </p>
+              <h1 className="mt-6 text-5xl font-black italic leading-tight">
+                Vietjet
+                <br />
+                <span className="text-[#FFD400]">SkyJoy</span>
+              </h1>
+              <p className="mt-4 max-w-sm text-sm leading-6 text-white/85">
+                Trải nghiệm tài khoản hội viên hiện đại, quản lý đặt vé, ưu đãi và lịch sử bay theo
+                phong cách nhận diện chính thức của Vietjet Air.
+              </p>
+            </div>
+            <div className="relative z-10 mt-10 space-y-3 border-t border-white/20 pt-8 text-sm">
+              {[
+                'Đặt vé nhanh với giá ưu đãi',
+                'Theo dõi hành trình dễ dàng',
+                'Tích điểm và đổi quà SkyJoy',
+              ].map((item) => (
+                <p key={item} className="flex items-center gap-2 text-white/90">
+                  <Icon name="CheckCircleIcon" size={16} className="text-[#FFD400]" />
+                  {item}
+                </p>
+              ))}
+            </div>
           </div>
 
-          {error && (
-            <div
-              className="flex items-center gap-2 rounded-xl px-4 py-3 mb-4 text-sm"
-              style={{
-                background: '#FFF1F1',
-                border: '1px solid #FFC5C6',
-                color: '#C41017',
-              }}
-            >
-              <Icon name="ExclamationCircleIcon" size={16} />
-              {error}
-            </div>
-          )}
-          {success && (
-            <div
-              className="flex items-center gap-2 rounded-xl px-4 py-3 mb-4 text-sm"
-              style={{
-                background: '#f0fdf4',
-                border: '1px solid #bbf7d0',
-                color: '#16a34a',
-              }}
-            >
-              <Icon name="CheckCircleIcon" size={16} />
-              {success}
-            </div>
-          )}
-
-          {/* Login Form */}
-          {tab === 'login' && (
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className={`form-field-float ${email ? 'has-value' : ''}`}>
-                <Icon
-                  name="EnvelopeIcon"
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10 pointer-events-none"
-                />
-                <input
-                  id="login-email"
-                  name="email"
-                  type="text"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder=" "
-                  className={`w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm form-input ${isLoginIdentifierValid ? 'form-input-valid' : ''} font-body-vj transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white`}
-                  required
-                />
-                <label className="form-label-float has-icon">Email hoặc Số điện thoại</label>
+          <div className="p-6 sm:p-10 lg:p-12">
+            <div className="mx-auto w-full max-w-md">
+              <div className="mb-6 flex items-center justify-between lg:hidden">
+                <Link href="/trang-chu">
+                  <AppLogo size={38} />
+                </Link>
+                <span className="rounded-full bg-[#FFF4CC] px-3 py-1 text-xs font-semibold text-[#B84D00]">
+                  Website chính thức Vietjet Air
+                </span>
               </div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#EC2029]">
+                Chào mừng bạn trở lại
+              </p>
+              <h2 className="mt-2 text-3xl font-black text-[#1A2948]">
+                Đăng nhập / Đăng ký tài khoản
+              </h2>
+              <p className="mt-2 text-sm text-[#6D6E71]">
+                Vui lòng điền thông tin để tiếp tục sử dụng các tiện ích thành viên.
+              </p>
 
-              <div className={`form-field-float ${password ? 'has-value' : ''}`}>
-                <Icon
-                  name="LockClosedIcon"
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10 pointer-events-none"
-                />
-                <input
-                  id="login-password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder=" "
-                  className={`w-full pl-10 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm form-input ${isPasswordValid ? 'form-input-valid' : ''} transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white`}
-                  style={
-                    isPasswordValid
-                      ? {
-                          paddingRight: '2.5rem',
-                          color: '#333333',
-                        }
-                      : { color: '#333333' }
-                  }
-                  required
-                />
-                <label className="form-label-float has-icon">Mật khẩu</label>
+              <div className="mt-8 mb-6 grid grid-cols-2 rounded-2xl bg-[#f3f4f7] p-1.5">
                 <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 z-10"
+                  onClick={() => {
+                    setTab('login');
+                    setError('');
+                    setSuccess('');
+                    setOtpRequested(false);
+                    setOtpInput('');
+                  }}
+                  className={`rounded-xl px-3 py-2.5 text-sm font-bold transition-all ${
+                    tab === 'login'
+                      ? 'bg-white text-[#EC2029] shadow-vj-sm'
+                      : 'text-[#6D6E71] hover:text-[#1A2948]'
+                  }`}
                 >
-                  <Icon name={showPassword ? 'EyeSlashIcon' : 'EyeIcon'} size={18} />
+                  Đăng nhập
+                </button>
+                <button
+                  onClick={() => {
+                    setTab('register');
+                    setError('');
+                    setSuccess('');
+                    setOtpRequested(false);
+                    setOtpInput('');
+                  }}
+                  className={`rounded-xl px-3 py-2.5 text-sm font-bold transition-all ${
+                    tab === 'register'
+                      ? 'bg-white text-[#EC2029] shadow-vj-sm'
+                      : 'text-[#6D6E71] hover:text-[#1A2948]'
+                  }`}
+                >
+                  Đăng ký
                 </button>
               </div>
 
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 text-sm cursor-pointer font-koho">
-                  <input
-                    id="remember-me"
-                    name="remember"
-                    type="checkbox"
-                    className="rounded"
-                    style={{ accentColor: '#EC2029' }}
-                  />
-                  Ghi nhớ đăng nhập
-                </label>
-                <span
-                  className="text-sm font-semibold opacity-50 cursor-not-allowed text-primary"
-                  title="Tính năng đang phát triển"
+              {error && (
+                <div
+                  className="mb-4 flex items-center gap-2 rounded-xl border px-4 py-3 text-sm"
+                  style={{
+                    background: '#FFF1F1',
+                    borderColor: '#FFC5C6',
+                    color: '#C41017',
+                  }}
                 >
-                  Quên mật khẩu?
-                </span>
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full text-white font-black py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed text-base"
-                style={{
-                  background: loading ? '#C41017' : '#EC2029',
-                  boxShadow: '0 2px 8px rgba(236,32,41,0.28)',
-                  fontWeight: 900,
-                }}
-                onMouseEnter={(e) => !loading && (e.currentTarget.style.background = '#D0021B')}
-                onMouseLeave={(e) => !loading && (e.currentTarget.style.background = '#EC2029')}
-              >
-                {loading ? (
-                  <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                    />
-                  </svg>
-                ) : (
-                  <>
-                    <Icon name="ArrowRightOnRectangleIcon" size={18} />
-                    Đăng nhập
-                  </>
-                )}
-              </button>
-            </form>
-          )}
+                  <Icon name="ExclamationCircleIcon" size={16} />
+                  {error}
+                </div>
+              )}
+              {success && (
+                <div
+                  className="mb-4 flex items-center gap-2 rounded-xl border px-4 py-3 text-sm"
+                  style={{
+                    background: '#f0fdf4',
+                    borderColor: '#bbf7d0',
+                    color: '#16a34a',
+                  }}
+                >
+                  <Icon name="CheckCircleIcon" size={16} />
+                  {success}
+                </div>
+              )}
 
-          {/* Register Form */}
-          {tab === 'register' && (
-            <form onSubmit={handleRegister} className="space-y-4">
-              {!otpRequested ? (
-                <div className="space-y-4 animate-in fade-in slide-in-from-left-2 duration-300">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className={`form-field-float ${surname ? 'has-value' : ''}`}>
-                      <input
-                        id="surname"
-                        name="surname"
-                        type="text"
-                        value={surname}
-                        onChange={(e) => setSurname(e.target.value)}
-                        placeholder=" "
-                        className={`w-full pl-4 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm form-input ${isNameValid ? 'form-input-valid' : ''} font-body-vj transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white`}
-                        required
-                      />
-                      <label className="form-label-float">Họ</label>
-                    </div>
-                    <div className={`form-field-float ${givenName ? 'has-value' : ''}`}>
-                      <input
-                        id="given_name"
-                        name="given_name"
-                        type="text"
-                        value={givenName}
-                        onChange={(e) => setGivenName(e.target.value)}
-                        placeholder=" "
-                        className={`w-full pl-4 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm form-input ${isNameValid ? 'form-input-valid' : ''} font-body-vj transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white`}
-                        required
-                      />
-                      <label className="form-label-float">Tên đệm/tên</label>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="phone" className="block text-xs text-gray-500 mb-1 font-koho">
-                      Số điện thoại
-                    </label>
-                    <div
-                      className={`flex items-center bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 transition-all focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary ${isPhoneValid ? 'border-primary/40' : ''}`}
-                    >
-                      <span className="text-sm text-gray-500 font-koho select-none">(+84)</span>
-                      <input
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                        placeholder="0912 345 678"
-                        className="flex-1 ml-2 bg-transparent outline-none text-sm font-body-vj text-vj-text placeholder:text-gray-400"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className={`form-field-float ${dateOfBirth ? 'has-value' : ''}`}>
-                    <Icon
-                      name="CalendarIcon"
-                      size={18}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10 pointer-events-none"
-                    />
-                    <input
-                      id="dateOfBirth"
-                      name="dateOfBirth"
-                      type="date"
-                      value={dateOfBirth}
-                      onChange={(e) => setDateOfBirth(e.target.value)}
-                      placeholder=" "
-                      className={`w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm form-input ${dateOfBirth ? 'form-input-valid' : ''} font-body-vj transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white`}
-                      required
-                    />
-                    <label className="form-label-float has-icon">Ngày tháng năm sinh</label>
-                  </div>
-
+              {/* Login Form */}
+              {tab === 'login' && (
+                <form onSubmit={handleLogin} className="space-y-4">
                   <div className={`form-field-float ${email ? 'has-value' : ''}`}>
                     <Icon
                       name="EnvelopeIcon"
                       size={18}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10 pointer-events-none"
+                      className="absolute left-3 top-1/2 z-10 -translate-y-1/2 pointer-events-none text-gray-400"
                     />
                     <input
-                      id="email"
+                      id="login-email"
                       name="email"
-                      type="email"
+                      type="text"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder=" "
-                      className={`w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm form-input ${isEmailValid ? 'form-input-valid' : ''} font-body-vj transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white`}
+                      className={`form-input font-body-vj w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm transition-all focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20 ${isLoginIdentifierValid ? 'form-input-valid' : ''}`}
+                      required
                     />
-                    <label className="form-label-float has-icon">Email (Tùy chọn)</label>
+                    <label className="form-label-float has-icon">Email hoặc Số điện thoại</label>
                   </div>
 
                   <div className={`form-field-float ${password ? 'has-value' : ''}`}>
                     <Icon
                       name="LockClosedIcon"
                       size={18}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10 pointer-events-none"
+                      className="absolute left-3 top-1/2 z-10 -translate-y-1/2 pointer-events-none text-gray-400"
                     />
                     <input
-                      id="password"
+                      id="login-password"
                       name="password"
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder=" "
-                      className={`w-full pl-10 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm form-input ${isPasswordValid ? 'form-input-valid' : ''} transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white`}
-                      style={
-                        isPasswordValid
-                          ? {
-                              paddingRight: '2.5rem',
-                              color: '#333333',
-                            }
-                          : { color: '#333333' }
-                      }
+                      className={`form-input w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-12 text-sm transition-all focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20 ${isPasswordValid ? 'form-input-valid' : ''}`}
                       required
                     />
                     <label className="form-label-float has-icon">Mật khẩu</label>
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 z-10"
+                      className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
                       <Icon name={showPassword ? 'EyeSlashIcon' : 'EyeIcon'} size={18} />
                     </button>
                   </div>
 
-                  <label className="flex items-start gap-2 text-xs text-gray-500 font-koho cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={agreeTerms}
-                      onChange={(e) => setAgreeTerms(e.target.checked)}
-                      className="mt-0.5 rounded"
-                      style={{ accentColor: '#EC2029' }}
-                    />
-                    <span>
-                      Tôi đồng ý với{' '}
-                      <a href="#" className="text-primary font-semibold hover:underline">
-                        Điều khoản dịch vụ
-                      </a>{' '}
-                      và{' '}
-                      <a href="#" className="text-primary font-semibold hover:underline">
-                        Chính sách bảo mật
-                      </a>{' '}
-                      của Vietjet Air / SkyJoy.
+                  <div className="flex items-center justify-between">
+                    <label className="flex cursor-pointer items-center gap-2 text-sm font-koho">
+                      <input
+                        id="remember-me"
+                        name="remember"
+                        type="checkbox"
+                        className="rounded"
+                        style={{ accentColor: '#EC2029' }}
+                      />
+                      Ghi nhớ đăng nhập
+                    </label>
+                    <span
+                      className="cursor-not-allowed text-sm font-semibold text-primary opacity-50"
+                      title="Tính năng đang phát triển"
+                    >
+                      Quên mật khẩu?
                     </span>
-                  </label>
-
+                  </div>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full text-white font-black py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed text-base"
-                    style={{
-                      background: loading ? '#C41017' : '#EC2029',
-                      boxShadow: '0 2px 8px rgba(236,32,41,0.28)',
-                      fontWeight: 900,
-                    }}
-                    onMouseEnter={(e) => !loading && (e.currentTarget.style.background = '#D0021B')}
-                    onMouseLeave={(e) => !loading && (e.currentTarget.style.background = '#EC2029')}
+                    className={`${primaryButtonClass} flex items-center justify-center gap-2`}
                   >
                     {loading ? (
-                      <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
+                      <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
                         <circle
+                          className="opacity-25"
                           cx="12"
                           cy="12"
                           r="10"
                           stroke="currentColor"
                           strokeWidth="4"
-                          className="opacity-25"
                         />
                         <path
+                          className="opacity-75"
                           fill="currentColor"
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                          className="opacity-75"
                         />
                       </svg>
                     ) : (
                       <>
-                        <Icon name="ArrowRightIcon" size={18} />
-                        Tiếp tục
+                        <Icon name="ArrowRightOnRectangleIcon" size={18} />
+                        Đăng nhập
                       </>
                     )}
                   </button>
-                </div>
-              ) : (
-                <div className="space-y-6 animate-in slide-in-from-right-4 fade-in duration-300 mt-2">
-                  <div className="text-center mb-6">
-                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Icon name="DevicePhoneMobileIcon" size={32} className="text-primary" />
-                    </div>
-                    <h3 className="font-bold text-lg text-gray-900">Xác thực OTP</h3>
-                    <p className="text-sm text-gray-500 mt-2">
-                      Vui lòng nhập mã bảo mật 6 số được gửi tới
-                      <br />
-                      <span className="font-semibold text-primary">{phone || email}</span>
-                    </p>
-                  </div>
-
-                  <div className={`form-field-float ${otpInput ? 'has-value' : ''}`}>
-                    <Icon
-                      name="ShieldCheckIcon"
-                      size={18}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 z-10 pointer-events-none"
-                    />
-                    <input
-                      id="otp"
-                      name="otp"
-                      type="text"
-                      maxLength={6}
-                      value={otpInput}
-                      onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))}
-                      placeholder=" "
-                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-center tracking-[0.5em] font-bold text-xl transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white"
-                      required
-                    />
-                    <label
-                      className="form-label-float has-icon text-center w-full"
-                      style={{ marginLeft: '-1.5rem', pointerEvents: 'none' }}
-                    >
-                      Mã OTP (123456)
-                    </label>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading || otpInput.length < 6}
-                    className="w-full text-white font-black py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed text-base"
-                    style={{
-                      background: loading ? '#C41017' : '#EC2029',
-                      boxShadow: '0 2px 8px rgba(236,32,41,0.28)',
-                      fontWeight: 900,
-                    }}
-                    onMouseEnter={(e) =>
-                      !loading &&
-                      otpInput.length >= 6 &&
-                      (e.currentTarget.style.background = '#D0021B')
-                    }
-                    onMouseLeave={(e) =>
-                      !loading &&
-                      otpInput.length >= 6 &&
-                      (e.currentTarget.style.background = '#EC2029')
-                    }
-                  >
-                    {loading ? (
-                      <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
-                        <circle
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                          className="opacity-25"
-                        />
-                        <path
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                          className="opacity-75"
-                        />
-                      </svg>
-                    ) : (
-                      <>
-                        <Icon name="CheckCircleIcon" size={18} />
-                        Xác nhận đăng ký
-                      </>
-                    )}
-                  </button>
-
-                  <p
-                    className="text-center text-sm text-gray-500 font-medium cursor-pointer flex justify-center items-center gap-1 hover:text-primary transition-colors mt-4"
-                    onClick={() => {
-                      setOtpRequested(false);
-                      setSuccess('');
-                      setError('');
-                    }}
-                  >
-                    <Icon name="ArrowLeftIcon" size={14} /> Quay lại chỉnh sửa
-                  </p>
-                </div>
+                </form>
               )}
-            </form>
-          )}
-        </div>
-      </div>
 
-      {/* Right Panel - VietJet red brand panel */}
-      <div
-        className="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col"
-        style={{
-          background: 'linear-gradient(20.12deg, rgba(217,26,33,1) 19.6%, rgba(111,0,0,1) 93.86%)',
-        }}
-      >
-        <div
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-          }}
-        />
+              {/* Register Form */}
+              {tab === 'register' && (
+                <form onSubmit={handleRegister} className="space-y-4">
+                  {!otpRequested ? (
+                    <div className="space-y-4 animate-in slide-in-from-left-2 fade-in duration-300">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className={`form-field-float ${surname ? 'has-value' : ''}`}>
+                          <input
+                            id="surname"
+                            name="surname"
+                            type="text"
+                            value={surname}
+                            onChange={(e) => setSurname(e.target.value)}
+                            placeholder=" "
+                            className={`form-input font-body-vj w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-4 pr-4 text-sm transition-all focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20 ${isNameValid ? 'form-input-valid' : ''}`}
+                            required
+                          />
+                          <label className="form-label-float">Họ</label>
+                        </div>
+                        <div className={`form-field-float ${givenName ? 'has-value' : ''}`}>
+                          <input
+                            id="given_name"
+                            name="given_name"
+                            type="text"
+                            value={givenName}
+                            onChange={(e) => setGivenName(e.target.value)}
+                            placeholder=" "
+                            className={`form-input font-body-vj w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-4 pr-4 text-sm transition-all focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20 ${isNameValid ? 'form-input-valid' : ''}`}
+                            required
+                          />
+                          <label className="form-label-float">Tên đệm/tên</label>
+                        </div>
+                      </div>
 
-        <div className="absolute inset-0">
-          <AppImage
-            src="https://images.unsplash.com/photo-1614412445093-05b0f1b1e457"
-            alt="Airplane flying"
-            fill
-            className="object-cover mix-blend-overlay opacity-30"
-            sizes="50vw"
-          />
-        </div>
+                      <div>
+                        <label
+                          htmlFor="phone"
+                          className="mb-1 block text-xs text-gray-500 font-koho"
+                        >
+                          Số điện thoại
+                        </label>
+                        <div
+                          className={`flex items-center rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 ${isPhoneValid ? 'border-primary/40' : ''}`}
+                        >
+                          <span className="select-none text-sm text-gray-500 font-koho">(+84)</span>
+                          <input
+                            id="phone"
+                            name="phone"
+                            type="tel"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                            placeholder="912 345 678"
+                            className="font-body-vj ml-2 flex-1 bg-transparent text-sm text-vj-text outline-none placeholder:text-gray-400"
+                            required
+                          />
+                        </div>
+                      </div>
 
-        {/* Decorative airplane */}
-        <div className="absolute bottom-20 right-8 opacity-20 animate-vj-float">
-          <svg className="w-40 h-40 text-white" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
-          </svg>
-        </div>
+                      <div className={`form-field-float ${email ? 'has-value' : ''}`}>
+                        <Icon
+                          name="EnvelopeIcon"
+                          size={18}
+                          className="absolute left-3 top-1/2 z-10 -translate-y-1/2 pointer-events-none text-gray-400"
+                        />
+                        <input
+                          id="email"
+                          name="email"
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder=" "
+                          className={`form-input font-body-vj w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm transition-all focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20 ${isEmailValid ? 'form-input-valid' : ''}`}
+                        />
+                        <label className="form-label-float has-icon">Email (Tùy chọn)</label>
+                      </div>
 
-        <div className="relative z-10 flex flex-col h-full p-12">
-          <Link href="/trang-chu" className="flex items-center gap-3 mb-auto">
-            <AppLogo size={44} />
-          </Link>
-          <div>
-            <div
-              className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 mb-6"
-              style={{
-                background: 'rgba(255,255,255,0.10)',
-                border: '1px solid rgba(255,255,255,0.20)',
-              }}
-            >
-              <span
-                className="w-2 h-2 rounded-full animate-pulse"
-                style={{ background: '#FFD400' }}
-              />
-              <span
-                className="text-xs font-semibold uppercase tracking-wider"
-                style={{
-                  color: 'rgba(255,255,255,0.9)',
-                  fontWeight: 600,
-                }}
-              >
-                VIETJET AIR
-              </span>
+                      <div className={`form-field-float ${password ? 'has-value' : ''}`}>
+                        <Icon
+                          name="LockClosedIcon"
+                          size={18}
+                          className="absolute left-3 top-1/2 z-10 -translate-y-1/2 pointer-events-none text-gray-400"
+                        />
+                        <input
+                          id="password"
+                          name="password"
+                          type={showPassword ? 'text' : 'password'}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder=" "
+                          className={`form-input w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-12 text-sm transition-all focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20 ${isPasswordValid ? 'form-input-valid' : ''}`}
+                          required
+                        />
+                        <label className="form-label-float has-icon">Mật khẩu</label>
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          <Icon name={showPassword ? 'EyeSlashIcon' : 'EyeIcon'} size={18} />
+                        </button>
+                      </div>
+
+                      <label className="flex cursor-pointer select-none items-start gap-2 text-xs text-gray-500 font-koho">
+                        <input
+                          type="checkbox"
+                          checked={agreeTerms}
+                          onChange={(e) => setAgreeTerms(e.target.checked)}
+                          className="mt-0.5 rounded"
+                          style={{ accentColor: '#EC2029' }}
+                        />
+                        <span>
+                          Tôi đồng ý với{' '}
+                          <a href="#" className="font-semibold text-primary hover:underline">
+                            Điều khoản dịch vụ
+                          </a>{' '}
+                          và{' '}
+                          <a href="#" className="font-semibold text-primary hover:underline">
+                            Chính sách bảo mật
+                          </a>{' '}
+                          của Vietjet Air / SkyJoy.
+                        </span>
+                      </label>
+
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className={`${primaryButtonClass} flex items-center justify-center gap-2`}
+                      >
+                        {loading ? (
+                          <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                            <circle
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              className="opacity-25"
+                            />
+                            <path
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                              className="opacity-75"
+                            />
+                          </svg>
+                        ) : (
+                          <>
+                            <Icon name="ArrowRightIcon" size={18} />
+                            Tiếp tục
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="mt-2 space-y-6 animate-in slide-in-from-right-4 fade-in duration-300">
+                      <div className="mb-6 text-center">
+                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                          <Icon name="DevicePhoneMobileIcon" size={32} className="text-primary" />
+                        </div>
+                        <h3 className="text-lg font-bold text-gray-900">Xác thực OTP</h3>
+                        <p className="mt-2 text-sm text-gray-500">
+                          Vui lòng nhập mã bảo mật 6 số được gửi tới
+                          <br />
+                          <span className="font-semibold text-primary">{phone || email}</span>
+                        </p>
+                      </div>
+
+                      <div className={`form-field-float ${otpInput ? 'has-value' : ''}`}>
+                        <Icon
+                          name="ShieldCheckIcon"
+                          size={18}
+                          className="absolute left-4 top-1/2 z-10 -translate-y-1/2 pointer-events-none text-gray-400"
+                        />
+                        <input
+                          id="otp"
+                          name="otp"
+                          type="text"
+                          maxLength={6}
+                          value={otpInput}
+                          onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))}
+                          placeholder=" "
+                          className="w-full rounded-xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-center text-xl font-bold tracking-[0.5em] transition-all focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20"
+                          required
+                        />
+                        <label
+                          className="form-label-float has-icon w-full text-center"
+                          style={{ marginLeft: '-1.5rem', pointerEvents: 'none' }}
+                        >
+                          Mã OTP (123456)
+                        </label>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={loading || otpInput.length < 6}
+                        className={`${primaryButtonClass} flex items-center justify-center gap-2`}
+                      >
+                        {loading ? (
+                          <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                            <circle
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              className="opacity-25"
+                            />
+                            <path
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                              className="opacity-75"
+                            />
+                          </svg>
+                        ) : (
+                          <>
+                            <Icon name="CheckCircleIcon" size={18} />
+                            Xác nhận đăng ký
+                          </>
+                        )}
+                      </button>
+
+                      <p
+                        className="mt-4 flex cursor-pointer items-center justify-center gap-1 text-center text-sm font-medium text-gray-500 transition-colors hover:text-primary"
+                        onClick={() => {
+                          setOtpRequested(false);
+                          setSuccess('');
+                          setError('');
+                        }}
+                      >
+                        <Icon name="ArrowLeftIcon" size={14} /> Quay lại chỉnh sửa
+                      </p>
+                    </div>
+                  )}
+                </form>
+              )}
             </div>
-            <h1
-              className="text-5xl font-black text-white leading-tight tracking-tight mb-4"
-              style={{
-                fontStyle: 'italic',
-                fontWeight: 900,
-              }}
-            >
-              Bay khắp
-              <br />
-              <span style={{ color: '#FFD400' }}>Việt Nam</span>
-              <br />
-              mọi lúc
-            </h1>
-            <p
-              className="text-base leading-relaxed max-w-sm"
-              style={{
-                color: 'rgba(255,255,255,0.70)',
-                fontWeight: 500,
-              }}
-            >
-              Trải nghiệm đặt vé máy bay hoàn chỉnh với hệ thống quản lý chuyến bay chuyên nghiệp.
-            </p>
-          </div>
-          <div
-            className="flex gap-8 mt-10 pt-8"
-            style={{ borderTop: '1px solid rgba(255,255,255,0.20)' }}
-          >
-            {[
-              ['50+', 'Đường bay'],
-              ['2M+', 'Hành khách'],
-              ['98%', 'Đúng giờ'],
-            ].map(([val, label]) => (
-              <div key={label}>
-                <div
-                  className="text-2xl font-black"
-                  style={{
-                    color: '#FFD400',
-                    fontWeight: 900,
-                  }}
-                >
-                  {val}
-                </div>
-                <div className="text-xs mt-0.5 font-koho">{label}</div>
-              </div>
-            ))}
           </div>
         </div>
       </div>
