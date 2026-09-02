@@ -762,6 +762,37 @@ export async function getPaymentsByBookingId(bookingId: string): Promise<Payment
   `) as PaymentRecord[];
 }
 
+/**
+ * Get payment history for a user with pagination.
+ */
+export async function getPaymentHistory(
+  userId: string,
+  params?: { page?: number; limit?: number; status?: string[] }
+): Promise<{ payments: PaymentRecord[]; total: number }> {
+  const page = params?.page || 1;
+  const limit = params?.limit || 20;
+  const offset = (page - 1) * limit;
+
+  const payments = (await sql`
+    SELECT p.* FROM payments p
+    INNER JOIN bookings b ON p.booking_id = b.id
+    WHERE b.user_id = ${userId}
+    ORDER BY p.created_at DESC
+    LIMIT ${limit} OFFSET ${offset}
+  `) as PaymentRecord[];
+
+  const countResult = (await sql`
+    SELECT COUNT(*) as total FROM payments p
+    INNER JOIN bookings b ON p.booking_id = b.id
+    WHERE b.user_id = ${userId}
+  `) as any[];
+
+  return {
+    payments,
+    total: parseInt(countResult[0]?.total || '0', 10),
+  };
+}
+
 // ─── Notification Queries ───────────────────────────────────────────────────
 
 export async function getNotificationsByUserId(
@@ -2014,4 +2045,40 @@ export async function getLoyaltyTransactions(
     transactions: transactions as LoyaltyTransactionRecord[],
     total: parseInt((countResult as any)[0].total, 10),
   };
+}
+
+/**
+ * Spend loyalty points for a user.
+ * Creates a redeem transaction and updates available_points.
+ */
+export async function spendLoyaltyPoints(
+  userId: string,
+  pointsToSpend: number,
+  description: string = 'Đổi điểm thưởng'
+): Promise<LoyaltyTransactionRecord> {
+  if (pointsToSpend <= 0) {
+    throw new Error('Points to spend must be greater than 0');
+  }
+
+  const loyalty = await getOrEnrollLoyalty(userId);
+
+  if (loyalty.available_points < pointsToSpend) {
+    throw new Error('Insufficient loyalty points');
+  }
+
+  // Create transaction and update available points in a single operation
+  const result = await sql`
+    INSERT INTO loyalty_transactions (user_loyalty_id, points, type, description)
+    VALUES (${loyalty.id}, ${-pointsToSpend}, 'redeem', ${description})
+    RETURNING id, user_loyalty_id, points, type, description, created_at
+  `;
+
+  // Update available points
+  await sql`
+    UPDATE user_loyalty
+    SET available_points = available_points - ${pointsToSpend}
+    WHERE id = ${loyalty.id}
+  `;
+
+  return (result as LoyaltyTransactionRecord[])[0];
 }
