@@ -98,25 +98,25 @@ const SOCIALS = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-gray-200 bg-[#f7f7f7] font-body">
-      <div className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
+    <footer className="border-t border-gray-200 dark:border-white/5 bg-[#f7f7f7] dark:bg-[#1e1e1e] font-body">
+      <div className="py-8 md:py-12">
+        <div className="max-w-7xl mx-auto px-3 md:px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 lg:gap-8">
             {FOOTER_COLS?.map((col) => (
               <div key={col?.title}>
                 <h4
-                  className="text-[13px] mb-4 flex items-center gap-1.5 text-vjdark"
+                  className="text-[12px] md:text-[13px] mb-3 md:mb-4 flex items-center gap-1.5 text-vjdark dark:text-white/90"
                   style={{ fontWeight: 700 }}
                 >
-                  <span className="w-1 h-4 rounded-full inline-block flex-shrink-0 bg-vjred" />
+                  <span className="w-1 h-3 md:h-4 rounded-full inline-block flex-shrink-0 bg-vjred" />
                   {col?.title}
                 </h4>
-                <ul className="space-y-2">
+                <ul className="space-y-1.5">
                   {col?.links?.map((link, idx) => (
                     <li key={link.label || idx}>
                       <Link
                         href={link.href || '#'}
-                        className="rounded-sm text-[12px] leading-relaxed text-vjdark/70 hover:text-vjred"
+                        className="rounded-sm text-[11px] md:text-[12px] leading-relaxed text-vjdark/70 dark:text-white/60 hover:text-vjred dark:hover:text-[#FFC400]"
                         style={{ fontWeight: 500 }}
                       >
                         {link.label}
@@ -129,13 +129,13 @@ export default function Footer() {
           </div>
 
           {/* Quick links */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <div className="flex flex-wrap gap-x-5 gap-y-2">
+          <div className="mt-6 md:mt-8 pt-4 md:pt-6 border-t border-gray-200 dark:border-white/5">
+            <div className="flex flex-wrap gap-x-3 md:gap-x-4 gap-y-1.5 md:gap-y-2">
               {QUICK_LINKS?.map((link, idx) => (
                 <Link
                   key={link.label || idx}
                   href={link.href || '#'}
-                  className="flex items-center gap-1 rounded-sm text-[12px] font-medium text-vjdark/70 hover:text-vjred"
+                  className="flex items-center gap-1 rounded-sm text-[11px] md:text-[12px] font-medium text-vjdark/70 dark:text-white/60 hover:text-vjred dark:hover:text-[#FFC400]"
                 >
                   <span className="w-1 h-1 rounded-full bg-vjred" />
                   {link.label}
@@ -146,26 +146,27 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="h-1 bg-[#e30613]" />
+      <div className="h-0.5 md:h-1 bg-[#e30613] dark:bg-[#b91c1c]" />
 
-      <div className="bg-[#242424] py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center sm:flex-row sm:justify-between gap-5 sm:gap-4 text-center sm:text-left">
-            <div className="flex flex-col sm:flex-row items-center gap-3">
-              <AppLogo size={40} />
+      <div className="bg-[#242424] dark:bg-[#151515] py-4 md:py-6">
+        <div className="max-w-7xl mx-auto px-3 md:px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center sm:flex-row sm:justify-between gap-4 sm:gap-3 text-center sm:text-left">
+            <div className="flex flex-col sm:flex-row items-center gap-2 md:gap-3">
+              <AppLogo size={32} className="hidden sm:block" />
+              <AppLogo size={28} className="sm:hidden" />
               <div>
-                <span className="text-sm font-black text-[#fff200]">Vietjet Air</span>
-                <p className="mt-0.5 text-[10px] text-white/70 font-koho">
+                <span className="text-sm md:text-base font-black text-[#fff200]">Vietjet Air</span>
+                <p className="mt-0.5 text-[9px] md:text-[10px] text-white/70 font-koho">
                   &copy; 2026 Vietjet Air. Tất cả quyền được bảo lưu.
                 </p>
               </div>
               <a
                 href="#"
-                className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 border border-white/20"
+                className="hidden md:flex items-center gap-1.5 rounded-md px-2 py-1.5 border border-white/20 dark:border-white/30"
                 style={{ background: 'rgba(255,255,255,0.08)' }}
               >
-                <MdVerified className="w-5 h-5 text-[#fff200] flex-shrink-0" />
-                <span className="text-white text-[9px] leading-tight font-koho">
+                <MdVerified className="w-4 h-4 text-[#fff200] flex-shrink-0" />
+                <span className="text-white text-[8px] md:text-[9px] leading-tight font-koho">
                   Đã thông báo
                   <br />
                   Bộ Công Thương
@@ -173,51 +174,51 @@ export default function Footer() {
               </a>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 md:gap-2 order-first sm:order-none">
               {SOCIALS?.map((social) => (
                 <Link
                   key={social?.name}
                   href={social?.href}
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-white hover:-translate-y-0.5 hover:bg-vjred"
+                  className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full text-white hover:-translate-y-0.5 hover:bg-vjred dark:hover:bg-[#E31E24]/20"
                   style={{ background: 'rgba(255,255,255,0.14)' }}
                   aria-label={social?.name}
                 >
-                  <social.Icon className="w-4 h-4" />
+                  <social.Icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 </Link>
               ))}
             </div>
 
-            <div className="flex flex-row items-center justify-center gap-2">
+            <div className="flex flex-row items-center justify-center gap-1.5 md:gap-2">
               <div
-                className="flex items-center gap-1.5 rounded-lg px-3 py-2 cursor-pointer transition-all hover:bg-white/20 border border-white/20 hover:border-white/40"
+                className="flex items-center gap-1 rounded-lg px-2.5 md:px-3 py-1.5 md:py-2 cursor-pointer transition-all hover:bg-white/20 border border-white/20 hover:border-white/40 dark:hover:border-white/60"
                 style={{ background: 'rgba(255,255,255,0.08)' }}
               >
-                <FaApple className="w-5 h-5 text-white" />
+                <FaApple className="w-4 h-4 md:w-5 md:h-5 text-white" />
                 <div>
                   <div
-                    className="text-[9px] leading-none"
+                    className="text-[8px] md:text-[9px] leading-none"
                     style={{ color: 'rgba(255,255,255,0.6)' }}
                   >
                     Tải trên
                   </div>
-                  <div className="text-white text-xs font-bold leading-tight font-koho-bold">
+                  <div className="text-white text-[10px] md:text-xs font-bold leading-tight font-koho-bold">
                     App Store
                   </div>
                 </div>
               </div>
               <div
-                className="flex items-center gap-1.5 rounded-lg px-3 py-2 cursor-pointer transition-all hover:bg-white/20 border border-white/20 hover:border-white/40"
+                className="flex items-center gap-1 rounded-lg px-2.5 md:px-3 py-1.5 md:py-2 cursor-pointer transition-all hover:bg-white/20 border border-white/20 hover:border-white/40 dark:hover:border-white/60"
                 style={{ background: 'rgba(255,255,255,0.08)' }}
               >
-                <FaGooglePlay className="w-5 h-5 text-white" />
+                <FaGooglePlay className="w-4 h-4 md:w-5 md:h-5 text-white" />
                 <div>
                   <div
-                    className="text-[9px] leading-none"
+                    className="text-[8px] md:text-[9px] leading-none"
                     style={{ color: 'rgba(255,255,255,0.6)' }}
                   >
                     Tải trên
                   </div>
-                  <div className="text-white text-xs font-bold leading-tight font-koho-bold">
+                  <div className="text-white text-[10px] md:text-xs font-bold leading-tight font-koho-bold">
                     Google Play
                   </div>
                 </div>

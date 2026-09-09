@@ -304,8 +304,8 @@ export default function UserChat() {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-4 sm:right-6 z-50 w-14 h-14 bg-primary rounded-full shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-transform touch-manipulation"
-        aria-label="Mở chat hỗ trợ"
+        className="fixed bottom-5 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-vj ring-1 ring-white/40 shadow-vj-btn-hover transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.04] active:scale-95 sm:right-6 touch-manipulation"
+        aria-label={isOpen ? 'Đóng chat hỗ trợ' : 'Mở chat hỗ trợ'}
       >
         <Icon
           name={isOpen ? 'XMarkIcon' : 'ChatBubbleLeftRightIcon'}
@@ -313,7 +313,7 @@ export default function UserChat() {
           className="text-white"
         />
         {!isOpen && unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 bg-accent text-navy text-xs font-black rounded-full flex items-center justify-center">
+          <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-navy text-xs font-black shadow-sm">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -322,43 +322,46 @@ export default function UserChat() {
       {/* Chat Window */}
       {isOpen && (
         <div
-          className="fixed z-50 bg-white shadow-2xl flex flex-col overflow-hidden border border-gray-100
-            bottom-0 right-0 left-0 rounded-t-2xl
-            sm:bottom-24 sm:right-6 sm:left-auto sm:w-96 sm:rounded-2xl"
-          style={{ maxHeight: '85vh', height: '520px' }}
+          className="fixed inset-x-0 bottom-0 z-50 flex h-[min(680px,100dvh)] flex-col overflow-hidden rounded-t-[28px] border border-white/60 bg-white shadow-2xl sm:inset-x-auto sm:bottom-24 sm:right-6 sm:h-[640px] sm:w-[400px] sm:rounded-[28px]"
         >
+          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-accent via-primary to-accent" />
           {/* Header */}
-          <div className="bg-primary px-4 py-3 flex items-center gap-3 flex-shrink-0">
-            <div className="relative w-9 h-9 bg-white/20 rounded-full flex items-center justify-center">
-              <Icon name="UserIcon" size={18} className="text-white" />
+          <div className="relative flex flex-shrink-0 items-center gap-3 overflow-hidden bg-gradient-vj px-4 py-4 text-white sm:px-5">
+            <div className="absolute -right-10 -top-16 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
+            <div className="absolute -bottom-16 -left-10 h-28 w-28 rounded-full bg-accent/20 blur-2xl" />
+            <div className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white/15 shadow-inner ring-1 ring-white/25">
+              <Icon name="ChatBubbleLeftRightIcon" size={22} className="text-accent" />
               <span
-                className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-primary ${
+                className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-[#E31E24] ${
                   adminOnline ? 'bg-green-400' : 'bg-gray-400'
                 }`}
               />
             </div>
-            <div className="flex-1">
-              <div className="text-white font-bold text-sm">Hỗ trợ Vietjet Air</div>
-              <div className="flex items-center gap-1.5">
+            <div className="relative min-w-0 flex-1">
+              <div className="truncate text-sm font-bold leading-tight">Hỗ trợ Vietjet Air</div>
+              <div className="mt-1 flex items-center gap-1.5">
                 <span
-                  className={`w-2 h-2 rounded-full inline-block ${adminOnline ? 'bg-green-400' : 'bg-gray-400'}`}
+                  className={`h-2 w-2 rounded-full ${adminOnline ? 'bg-green-400' : 'bg-gray-400'} ${
+                    adminOnline ? 'animate-pulse' : ''
+                  }`}
                 />
-                <span className="text-white/70 text-xs">
+                <span className="text-xs text-white/80">
                   {adminTyping ? (
-                    <span className="text-white/90 font-medium">Đang nhập...</span>
+                    <span className="font-medium text-white">Đang nhập...</span>
                   ) : adminOnline ? (
-                    'Trực tuyến'
+                    'Sẵn sàng hỗ trợ'
                   ) : (
-                    'Ngoại tuyến'
+                    'Hiện đang ngoại tuyến'
                   )}
                 </span>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="w-8 h-8 bg-white/10 hover:bg-white/20 active:bg-white/30 rounded-full flex items-center justify-center transition-colors touch-manipulation"
+              className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-white/10 transition-colors hover:bg-white/20 active:bg-white/25 touch-manipulation"
+              aria-label="Đóng chat hỗ trợ"
             >
-              <Icon name="XMarkIcon" size={16} className="text-white" />
+              <Icon name="XMarkIcon" size={18} className="text-white" />
             </button>
           </div>
 

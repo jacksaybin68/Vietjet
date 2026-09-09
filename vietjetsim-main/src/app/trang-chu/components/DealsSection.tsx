@@ -150,21 +150,21 @@ export default function DealsSection() {
   if (loading) return <DealsSkeleton />;
 
   return (
-    <section ref={sectionRef} id="deals" className="py-8 bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section ref={sectionRef} id="deals" className="py-4 md:py-8 bg-white dark:bg-navy-dark overflow-hidden">
+      <div className="max-w-7xl mx-auto px-3 md:px-4 sm:px-6 lg:px-8">
         {/* Header strip with parallax drift */}
         <div
           ref={headerRef}
-          className="flex items-center justify-between mb-5 reveal-left will-change-transform"
+          className="flex flex-wrap items-center justify-between mb-3 md:mb-5 reveal-left will-change-transform"
           style={{ transition: 'transform 0.1s linear' }}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
             <span className="vj-section-label flex items-center gap-1">
-              <MdLocalFireDepartment className="w-3.5 h-3.5 text-orange-300 animate-pulse" />
+              <MdLocalFireDepartment className="w-3 h-3 md:w-3.5 md:h-3.5 text-orange-300 animate-pulse" />
               Ưu đãi nóng
             </span>
             <h2
-              className="text-xl sm:text-2xl font-black tracking-tight text-vj-text"
+              className="text-lg md:text-xl sm:text-2xl font-black tracking-tight text-vj-text dark:text-white"
               style={{ fontWeight: 900 }}
             >
               Vé giá rẻ hôm nay
@@ -172,7 +172,7 @@ export default function DealsSection() {
           </div>
           <Link
             href="/tim-ve"
-            className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-primary transition-all duration-200 border px-3 py-1.5 rounded-md hover:shadow-md hover:scale-105 active:scale-95"
+            className="hidden md:flex items-center gap-1.5 text-[11px] md:text-xs font-bold text-primary dark:text-[#FFC400] transition-all duration-200 border px-2.5 md:px-3 py-1 md:py-1.5 rounded-md hover:shadow-md hover:scale-105 active:scale-95"
             style={{
               borderColor: 'rgba(236,32,41,0.25)',
               fontWeight: 700,
@@ -187,12 +187,12 @@ export default function DealsSection() {
             }}
           >
             Xem tất cả
-            <MdArrowForward className="w-3.5 h-3.5" />
+            <MdArrowForward className="w-3 h-3 md:w-3.5 md:h-3.5" />
           </Link>
         </div>
 
         {/* Deal cards — staggered fade-in + per-image parallax */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pb-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 pb-2">
           {DEALS?.map((deal, i) => (
             <Link
               key={deal?.route}
@@ -202,10 +202,10 @@ export default function DealsSection() {
                 transitionDuration: '0.65s',
                 transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
               }}
-              className="vj-deal-card reveal-up"
+              className="vj-deal-card reveal-up group"
             >
               {/* Image wrapper — overflow hidden so parallax stays clipped */}
-              <div className="relative h-44 overflow-hidden">
+              <div className="relative h-36 md:h-44 overflow-hidden">
                 <div
                   ref={(el) => {
                     imageRefs.current[i] = el;
@@ -223,7 +223,7 @@ export default function DealsSection() {
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
                 <span
-                  className="absolute top-0 left-0 text-xs font-black px-3 py-1.5 text-white shadow-sm bg-primary-solid"
+                  className="absolute top-0 left-0 text-[10px] md:text-xs font-black px-2 md:px-3 py-1 md:py-1.5 text-white shadow-sm bg-primary-solid"
                   style={{
                     clipPath: 'polygon(0 0, 100% 0, 88% 100%, 0 100%)',
                     letterSpacing: '0.03em',
@@ -234,7 +234,7 @@ export default function DealsSection() {
                   {deal?.badge}
                 </span>
                 <span
-                  className="absolute top-2 right-2 text-xs font-black px-2.5 py-1 rounded-md shadow-sm text-navy"
+                  className="absolute top-1.5 right-1.5 md:top-2 md:right-2 text-[10px] md:text-xs font-black px-2 md:px-2.5 py-0.5 md:py-1 rounded-md shadow-sm text-navy"
                   style={{
                     background:
                       'linear-gradient(26.73deg, rgb(249,165,26) 13.7%, rgb(251,182,18) 29.8%, rgb(255,221,0) 66.81%)',
@@ -243,35 +243,35 @@ export default function DealsSection() {
                 >
                   -{deal?.discount}
                 </span>
-                <div className="absolute bottom-2 left-3 right-3 flex items-center gap-1.5">
-                  <span className="text-white font-black text-sm font-body">{deal?.fromCity}</span>
-                  <FaPlane className="w-3.5 h-3.5 text-yellow-300 flex-shrink-0" />
-                  <span className="text-white font-black text-sm font-body">{deal?.toCity}</span>
+                <div className="absolute bottom-1.5 left-2 right-2 md:bottom-2 md:left-3 md:right-3 flex items-center gap-1 md:gap-1.5">
+                  <span className="text-white font-black text-[11px] md:text-sm font-body">{deal?.fromCity}</span>
+                  <FaPlane className="w-2.5 h-2.5 md:w-3.5 md:h-3.5 text-yellow-300 flex-shrink-0" />
+                  <span className="text-white font-black text-[11px] md:text-sm font-body">{deal?.toCity}</span>
                 </div>
               </div>
 
-              <div className="p-4">
-                <div className="text-xs font-bold tracking-widest uppercase mb-1.5 text-vj-muted">
+              <div className="p-3 md:p-4">
+                <div className="text-[10px] md:text-xs font-bold tracking-widest uppercase mb-1 text-vj-muted dark:text-white/60">
                   {deal?.route}
                 </div>
-                <div className="text-xs mb-3 flex items-center gap-1 font-koho text-vj-gray">
-                  <MdCalendarToday className="w-3.5 h-3.5" />
+                <div className="text-[10px] md:text-xs mb-2 md:mb-3 flex items-center gap-1 font-koho text-vj-gray dark:text-white/60">
+                  <MdCalendarToday className="w-3 h-3 md:w-3.5 md:h-3.5" />
                   <span>{deal?.date}</span>
                 </div>
                 <div className="flex items-end justify-between gap-1">
                   <div>
-                    <div className="text-xs line-through leading-none mb-1 text-vj-muted">
+                    <div className="text-[10px] md:text-xs line-through leading-none mb-0.5 text-vj-muted dark:text-white/50">
                       {deal?.original?.toLocaleString('vi-VN')}đ
                     </div>
                     <div
-                      className="text-lg font-black leading-none text-primary"
+                      className="text-base md:text-lg font-black leading-none text-primary dark:text-[#FFC400]"
                       style={{ fontWeight: 900 }}
                     >
                       {deal?.price?.toLocaleString('vi-VN')}đ
                     </div>
                   </div>
                   <div
-                    className="text-white text-xs font-bold px-3 py-2 rounded-lg hover:shadow-md transition-all duration-200 hover:brightness-110 bg-primary-solid flex-shrink-0"
+                    className="text-white dark:text-navy-dark text-[10px] md:text-xs font-bold px-2 md:px-3 py-1.5 md:py-2 rounded-lg hover:shadow-md transition-all duration-200 hover:brightness-110 bg-primary-solid flex-shrink-0"
                     style={{ letterSpacing: '0.02em', fontWeight: 700 }}
                   >
                     Đặt ngay
@@ -282,12 +282,25 @@ export default function DealsSection() {
           ))}
         </div>
 
-        <div className="sm:hidden mt-4 text-center reveal-up" style={{ transitionDelay: '450ms' }}>
-          <Link href="/tim-ve" className="vj-btn vj-btn-outline vj-btn-sm inline-flex">
+        <div className="md:hidden mt-3 text-center reveal-up" style={{ transitionDelay: '450ms' }}>
+          <Link href="/tim-ve" className="inline-flex items-center gap-1.5 text-[11px] font-bold text-primary dark:text-[#FFC400] transition-all duration-200 border px-3 py-1.5 rounded-md hover:shadow-md hover:scale-105 active:scale-95"
+            style={{
+              borderColor: 'rgba(236,32,41,0.25)',
+              fontWeight: 700,
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background = '#ED1D23';
+              (e.currentTarget as HTMLElement).style.color = 'white';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = 'transparent';
+              (e.currentTarget as HTMLElement).style.color = '#ED1D23';
+            }}
+          >
             Xem tất cả ưu đãi
-            <MdArrowForward className="w-3.5 h-3.5" />
+            <MdArrowForward className="w-3 h-3" />
           </Link>
-        </div>
+        </div
       </div>
     </section>
   );

@@ -6,7 +6,7 @@ import { ErrorBoundary } from '@/shared/components/feedback';
 
 export default function FlightBookingPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--background)] dark:bg-[var(--dark-bg)]">
       <Header />
       <ErrorBoundary variant="booking">
         <FlightBookingClient />
