@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
-import Icon from '@/components/ui/AppIcon';
-import Pagination from '@/components/ui/Pagination';
+import { Icon } from '@/shared/components/ui';
+import { Pagination } from '@/shared/components/ui';
 
 interface Announcement {
   id: string;

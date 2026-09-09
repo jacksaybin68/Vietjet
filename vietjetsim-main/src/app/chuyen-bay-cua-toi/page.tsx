@@ -1,234 +1,271 @@
 'use client';
 
+// Last updated: 2026-09-09 - Fixed MdFlight import
+
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Icon from '@/components/ui/AppIcon';
+import { MdFlight as FlightIcon, MdSearch, MdLogin, MdCheckCircle, MdPhone, MdEmail } from 'react-icons/md';
 import { useToast } from '@/hooks/useToast';
-import { ToastContainer } from '@/components/ui/Toast';
+import { ToastContainer } from '@/shared/components/feedback';
+
+const TABS = [
+  { id: 'booking', label: 'Mã đặt chỗ' },
+  { id: 'eticket', label: 'Mã vé điện tử' },
+];
 
 export default function MyFlightsPage() {
   const toast = useToast();
+  const [tab, setTab] = useState<'booking' | 'eticket'>('booking');
   const [bookingCode, setBookingCode] = useState('');
+  const [eticketCode, setEticketCode] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!bookingCode.trim()) {
-      toast.error('Lỗi', 'Vui lòng nhập mã đặt chỗ');
-      return;
-    }
-    if (!firstName.trim()) {
-      toast.error('Lỗi', 'Vui lòng nhập họ');
+    const code = tab === 'booking' ? bookingCode : eticketCode;
+    if (!code.trim()) {
+      toast.error(
+        'Lỗi',
+        tab === 'booking' ? 'Vui lòng nhập mã đặt chỗ' : 'Vui lòng nhập mã vé điện tử'
+      );
       return;
     }
     if (!lastName.trim()) {
+      toast.error('Lỗi', 'Vui lòng nhập họ');
+      return;
+    }
+    if (!firstName.trim()) {
       toast.error('Lỗi', 'Vui lòng nhập tên đệm và tên');
       return;
     }
-
     setLoading(true);
-    
-    // Simulate API call
-    await new Promise((r) => setTimeout(r, 1500));
-    
-    // Redirect to booking detail page
-    window.location.href = `/dat-ve/${bookingCode.toUpperCase()}`;
+    await new Promise((r) => setTimeout(r, 1200));
+    window.location.href = `/dat-ve/${code.trim().toUpperCase()}`;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-stone-50 to-stone-100">
+    <div className="min-h-screen bg-white">
       <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
 
-      {/* Header */}
-      <header className="bg-white border-b border-stone-200 sticky top-0 z-40">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-red rounded-xl flex items-center justify-center">
-              <Icon name="PaperAirplaneIcon" size={20} className="text-white" />
-            </div>
-            <div>
-              <h1 className="font-black text-lg text-[#1A2948]">Chuyến bay của tôi</h1>
-              <p className="text-xs text-stone-500">Tra cứu thông tin đặt chỗ</p>
-            </div>
-          </div>
-          <Link
-            href="/"
-            className="text-sm text-stone-600 hover:text-primary font-medium transition-colors"
-          >
-            ← Trang chủ
-          </Link>
+      {/* Red top banner with gradient overlay */}
+      <div className="relative overflow-hidden bg-gradient-vj pt-[80px] pb-[120px] text-center">
+        <div className="absolute inset-0 opacity-10">
+          <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+          </svg>
         </div>
-      </header>
+        <div className="relative mx-auto max-w-[1200px] px-4">
+          <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-white/15 shadow-[0_0_0_1px_rgba(255,255,255,0.18)] backdrop-blur-sm">
+            <FlightIcon className="text-4xl" />
+          </div>
+          <h1 className="mb-3 text-3xl sm:text-4xl font-heading-800 leading-none tracking-[-0.02em] text-white">
+            CHUYẾN BAY CỦA TÔI
+          </h1>
+          <p className="mx-auto max-w-[900px] text-base leading-relaxed text-white/90 sm:text-lg">
+            Xem chi tiết hành trình đã đặt, đổi lịch trình, mua thêm hành lý, chỗ ngồi và dịch vụ tiện ích.
+            Vui lòng điền thông tin bên dưới để tra cứu.
+          </p>
+        </div>
+      </div>
 
-      <main className="max-w-2xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-3xl border border-stone-200 overflow-hidden shadow-lg">
-          {/* Header Banner */}
-          <div className="bg-gradient-red p-8 text-center">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Icon name="TicketIcon" size={32} className="text-white" />
-            </div>
-            <h2 className="text-2xl font-black text-white mb-2">CHUYẾN BAY CỦA TÔI</h2>
-            <p className="text-white/90 text-sm max-w-md mx-auto leading-relaxed">
-              Bạn muốn xem chuyến bay đã đặt, đổi lịch trình bay hay mua thêm dịch vụ hành lý, chỗ
-              ngồi, suất ăn..., vui lòng điền thông tin bên dưới:
-            </p>
+      <main className="mx-auto max-w-[900px] px-4 py-10">
+        <div className="vj-card">
+          {/* Tabs - styled as segmented control */}
+          <div className="flex border-b border-vj-text-muted/20 bg-vj-text/5">
+            {TABS.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setTab(t.id as 'booking' | 'eticket')}
+                className={`flex-1 py-5 text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
+                  tab === t.id
+                    ? 'bg-white text-vj-red border-b-2 border-vjred'
+                    : 'text-vj-text-muted hover:text-vj-red hover:bg-vj-text/10'
+                }`}
+              >
+                {t.id === 'booking' ? '📋' : '🎫'} {t.label}
+              </button>
+            ))}
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSearch} className="p-8 space-y-6">
-            {/* Booking Code */}
-            <div>
-              <label className="block text-sm font-bold text-[#1A2948] mb-2">
-                Mã đặt chỗ<span className="text-red-500 ml-1">*</span>
-              </label>
-              <div className="relative">
-                <Icon
-                  name="TicketIcon"
-                  size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"
-                />
-                <input
-                  type="text"
-                  value={bookingCode}
-                  onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
-                  placeholder="Ví dụ: VJ8K3M2"
-                  className="w-full pl-12 pr-4 py-3.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                  maxLength={10}
-                />
+          <form onSubmit={handleSearch} className="p-8">
+            <div className="grid gap-6 sm:grid-cols-2">
+              {/* Code field */}
+              <div className="sm:col-span-2">
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-vj-text-muted">
+                  {tab === 'booking' ? 'Mã đặt chỗ (PNR)' : 'Mã vé điện tử'}
+                  <span className="ml-1 text-vj-red">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={tab === 'booking' ? bookingCode : eticketCode}
+                    onChange={(e) =>
+                      tab === 'booking'
+                        ? setBookingCode(e.target.value.toUpperCase())
+                        : setEticketCode(e.target.value)
+                    }
+                    placeholder={tab === 'booking' ? 'Ví dụ: VJ8K3M2' : 'Ví dụ: 7382701234567'}
+                    className="w-full vj-input-field px-5 py-3 text-sm text-vjtext placeholder-vj-text-muted/50 focus:border-vj-red focus:ring-2 focus:ring-vj-red/20 transition-all duration-200"
+                    maxLength={tab === 'booking' ? 10 : 14}
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-vj-text-muted/50">
+                    {tab === 'booking'
+                      ? `${bookingCode.length}/7`
+                      : `${eticketCode.length}/13`}
+                  </span>
+                </div>
+                <p className="mt-1.5 text-[12px] text-vj-text-muted/60">
+                  {tab === 'booking'
+                    ? 'Mã đặt chỗ gồm 6–7 ký tự, có trong email xác nhận đặt vé.'
+                    : 'Mã vé điện tử gồm 13 chữ số, có trên vé điện tử.'}
+                </p>
               </div>
-            </div>
 
-            {/* First Name */}
-            <div>
-              <label className="block text-sm font-bold text-[#1A2948] mb-2">
-                Họ<span className="text-red-500 ml-1">*</span>
-              </label>
-              <div className="relative">
-                <Icon
-                  name="UserIcon"
-                  size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"
-                />
-                <input
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Ví dụ: NGUYEN"
-                  className="w-full pl-12 pr-4 py-3.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                />
-              </div>
-            </div>
-
-            {/* Last Name */}
-            <div>
-              <label className="block text-sm font-bold text-[#1A2948] mb-2">
-                Tên đệm và tên<span className="text-red-500 ml-1">*</span>
-              </label>
-              <div className="relative">
-                <Icon
-                  name="UserIcon"
-                  size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"
-                />
+              {/* Họ */}
+              <div>
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-vj-text-muted">
+                  Họ<span className="ml-1 text-vj-red">*</span>
+                </label>
                 <input
                   type="text"
                   value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
+                  onChange={(e) => setLastName(e.target.value.toUpperCase())}
+                  placeholder="Ví dụ: NGUYEN"
+                  className="w-full vj-input-field px-5 py-3 text-sm text-vjtext placeholder-vj-text-muted/50 focus:border-vj-red focus:ring-2 focus:ring-vj-red/20 transition-all duration-200"
+                />
+              </div>
+
+              {/* Tên đệm và tên */}
+              <div>
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-vj-text-muted">
+                  Tên đệm và tên<span className="ml-1 text-vj-red">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value.toUpperCase())}
                   placeholder="Ví dụ: VAN AN"
-                  className="w-full pl-12 pr-4 py-3.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                  className="w-full vj-input-field px-5 py-3 text-sm text-vjtext placeholder-vj-text-muted/50 focus:border-vj-red focus:ring-2 focus:ring-vj-red/20 transition-all duration-200"
                 />
               </div>
             </div>
 
-            {/* Info Box */}
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-              <div className="flex items-start gap-3">
-                <Icon
-                  name="InformationCircleIcon"
-                  size={18}
-                  className="text-blue-500 mt-0.5 flex-shrink-0"
-                />
-                <div className="text-sm text-blue-700">
-                  <p className="font-semibold mb-1">Lưu ý quan trọng</p>
-                  <ul className="text-xs space-y-1 text-blue-600">
-                    <li>• Mã đặt chỗ (PNR) gồm 6-7 ký tự được gửi qua email sau khi đặt vé</li>
-                    <li>• Họ và tên phải khớp chính xác với thông tin khi đặt vé</li>
-                    <li>• Nhập họ và tên bằng tiếng Việt không dấu hoặc tiếng Anh</li>
+            {/* Info box */}
+            <div className="mt-6 rounded-xl border border-vj-yellow/20 bg-vj-yellow/5 px-5 py-4 text-sm text-vj-yellow-dark">
+              <div className="flex items-start gap-2">
+                <span className="text-lg">💡</span>
+                <div>
+                  <p className="font-semibold">Lưu ý quan trọng:</p>
+                  <ul className="mt-2 space-y-1 leading-6 list-disc pl-5">
+                    <li>• Họ và tên phải khớp chính xác với thông tin khi đặt vé (không dấu, chữ hoa).</li>
+                    <li>• Mã PNR có trong email xác nhận sau khi thanh toán thành công.</li>
+                    <li>• Nếu không tìm thấy, vui lòng kiểm tra lại ký tự hoặc liên hệ hỗ trợ.</li>
                   </ul>
                 </div>
               </div>
             </div>
 
-            {/* Submit Button */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
+              className="mt-6 w-full vj-btn-primary py-4 text-sm font-bold uppercase tracking-wide text-white flex items-center justify-center gap-3"
             >
               {loading ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                   Đang tìm kiếm...
                 </>
               ) : (
                 <>
-                  <Icon name="MagnifyingGlassIcon" size={18} />
-                  Tìm kiếm
+                  <MdSearch className="text-lg" />
+                  Tìm kiếm hành trình
                 </>
               )}
             </button>
-
-            {/* Alternative Actions */}
-            <div className="pt-4 border-t border-stone-100">
-              <p className="text-sm text-stone-500 text-center mb-3">Hoặc</p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Link
-                  href="/dang-nhap"
-                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-stone-50 border border-stone-200 rounded-xl font-semibold text-stone-700 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all text-sm"
-                >
-                  <Icon name="ArrowRightOnRectangleIcon" size={16} />
-                  Đăng nhập tài khoản
-                </Link>
-                <Link
-                  href="/lam-thu-tuc"
-                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-stone-50 border border-stone-200 rounded-xl font-semibold text-stone-700 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all text-sm"
-                >
-                  <Icon name="CheckCircleIcon" size={16} />
-                  Check-in trực tuyến
-                </Link>
-              </div>
-            </div>
           </form>
-        </div>
 
-        {/* Help Section */}
-        <div className="mt-6 bg-white rounded-2xl border border-stone-200 p-6">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <Icon name="QuestionMarkCircleIcon" size={20} className="text-amber-600" />
+          {/* Divider + alternatives */}
+          <div className="border-t border-vj-text-muted/10 bg-vj-text/5 px-8 py-8">
+            <p className="mb-5 text-center text-xs font-semibold uppercase tracking-wide text-vj-text-muted/50">
+              Hoặc thực hiện một trong các thao tác dưới đây
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/dang-nhap"
+                className="group flex flex-1 items-center justify-center gap-3 rounded-xl border border-vj-red/20 bg-white py-4 text-sm font-semibold text-vj-text transition-all hover:border-vj-red hover:bg-vj-red/5 hover:text-vj-red"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-vj-red/10 text-vj-red group-hover:bg-vj-red/20 group-hover:text-vj-red transition-colors">
+                  <MdLogin className="text-lg" />
+                </div>
+                <div className="text-left">
+                  <div className="text-sm font-bold">Đăng nhập tài khoản</div>
+                  <div className="text-[11px] text-vj-text-muted/50 group-hover:text-vj-red/70">
+                    Xem lịch sử & quản lý đặt chỗ
+                  </div>
+                </div>
+              </Link>
+              <Link
+                href="/lam-thu-tuc"
+                className="group flex flex-1 items-center justify-center gap-3 rounded-xl border border-vj-yellow/20 bg-white py-4 text-sm font-semibold text-vj-text transition-all hover:border-vj-yellow hover:bg-vj-yellow/5 hover:text-vj-yellow"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-vj-yellow/10 text-vj-yellow group-hover:bg-vj-yellow/20 group-hover:text-vj-yellow transition-colors">
+                  <MdCheckCircle className="text-lg" />
+                </div>
+                <div className="text-left">
+                  <div className="text-sm font-bold">Check-in trực tuyến</div>
+                  <div className="text-[11px] text-vj-text-muted/50 group-hover:text-vj-yellow/70">
+                    Chọn chỗ và in vé ngay
+                  </div>
+                </div>
+              </Link>
             </div>
-            <div>
-              <h3 className="font-bold text-[#1A2948] mb-2">Cần hỗ trợ?</h3>
-              <p className="text-sm text-stone-600 mb-3">
-                Nếu bạn không tìm thấy mã đặt chỗ hoặc gặp vấn đề, vui lòng liên hệ:
+          </div>
+
+          {/* Help */}
+          <div className="mt-8 overflow-hidden rounded-xl bg-vj-card">
+            <div className="bg-gradient-to-r from-vj-red to-vj-red-dark px-6 py-4 text-white">
+              <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
+                <MdPhone className="text-lg" /> Cần hỗ trợ?
+              </h2>
+            </div>
+            <div className="px-6 py-5">
+              <p className="mb-4 text-sm text-vj-text-muted/60 leading-relaxed">
+                Nếu không tìm thấy mã đặt chỗ hoặc gặp sự cố khi tra cứu, vui lòng liên hệ bộ phận hỗ trợ của chúng tôi:
               </p>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-4">
                 <a
                   href="tel:19001886"
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
+                  className="group flex items-center gap-3 rounded-xl border border-vj-text-muted/30 px-4 py-3 hover:border-vj-red transition-colors"
                 >
-                  <Icon name="PhoneIcon" size={14} />
-                  1900 1886
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-vj-red/10 text-vj-red">
+                    <MdPhone className="text-lg" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-vj-text-muted/40">Tổng đài hỗ trợ</div>
+                    <div className="font-bold text-vj-red">1900 1886</div>
+                  </div>
                 </a>
                 <a
                   href="mailto:support@vietjetair.com"
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
+                  className="group flex items-center gap-3 rounded-xl border border-vj-text-muted/30 px-4 py-3 hover:border-vj-red transition-colors"
                 >
-                  <Icon name="EnvelopeIcon" size={14} />
-                  support@vietjetair.com
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-vj-red/10 text-vj-red">
+                    <MdEmail className="text-lg" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-vj-text-muted/40">Email hỗ trợ</div>
+                    <div className="font-bold text-vj-red">support@vietjetair.com</div>
+                  </div>
                 </a>
               </div>
             </div>

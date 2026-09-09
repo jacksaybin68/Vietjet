@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import Icon from '@/components/ui/AppIcon';
-import Pagination from '@/components/ui/Pagination';
+import { Icon } from '@/shared/components/ui';
+import { Pagination } from '@/shared/components/ui';
 
 interface ToastAPI {
   success: (title: string, message?: string, options?: object) => void;
@@ -495,7 +495,9 @@ function DiscountModal({
     e.preventDefault();
     setIsSaving(true);
     try {
-      const url = discount ? `/api/quan-tri/ma-giam-gia/${discount.id}` : '/api/quan-tri/ma-giam-gia';
+      const url = discount
+        ? `/api/quan-tri/ma-giam-gia/${discount.id}`
+        : '/api/quan-tri/ma-giam-gia';
       const method = discount ? 'PATCH' : 'POST';
 
       const res = await fetch(url, {

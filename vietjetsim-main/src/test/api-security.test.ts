@@ -2,7 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
 import { signAccessToken } from '@/lib/auth';
 import { verifyAdminRequest } from '@/lib/admin-auth';
-import { GET as getAdminFlights, POST as createAdminFlight } from '@/app/api/quan-tri/chuyen-bay/route';
+import {
+  GET as getAdminFlights,
+  POST as createAdminFlight,
+} from '@/app/api/quan-tri/chuyen-bay/route';
 import { GET as getUserBookings, POST as createUserBooking } from '@/app/api/dat-ve/route';
 import * as db from '@/lib/db';
 
@@ -23,7 +26,9 @@ describe('API & RBAC Security Logic', () => {
   });
 
   // Generates valid test JWTs with different roles
-  const makeToken = (role: 'user' | 'admin_ops' | 'admin_finance' | 'super_admin' | 'admin_support') => {
+  const makeToken = (
+    role: 'user' | 'admin_ops' | 'admin_finance' | 'super_admin' | 'admin_support'
+  ) => {
     return signAccessToken({
       userId: `test-${role}-id`,
       email: `${role}@test.com`,
@@ -36,7 +41,7 @@ describe('API & RBAC Security Logic', () => {
     it('should reject unauthenticated requests (no token) with 401', async () => {
       const req = new NextRequest('http://localhost:3000/api/quan-tri/chuyen-bay');
       const result = await verifyAdminRequest(req);
-      
+
       expect(result.error).toBe('Unauthorized');
       expect(result.response?.status).toBe(401);
     });
@@ -46,7 +51,7 @@ describe('API & RBAC Security Logic', () => {
         headers: { cookie: 'access_token=invalid-jwt-signature' },
       });
       const result = await verifyAdminRequest(req);
-      
+
       expect(result.error).toBe('Invalid token');
       expect(result.response?.status).toBe(401);
     });
@@ -57,7 +62,7 @@ describe('API & RBAC Security Logic', () => {
         headers: { cookie: `access_token=${token}` },
       });
       const result = await verifyAdminRequest(req);
-      
+
       expect(result.error).toBe('Forbidden');
       expect(result.response?.status).toBe(403);
     });
@@ -68,7 +73,7 @@ describe('API & RBAC Security Logic', () => {
         headers: { cookie: `access_token=${token}` },
       });
       const result = await verifyAdminRequest(req, 'flight:list');
-      
+
       expect(result.error).toBeUndefined();
       expect(result.payload.role).toBe('admin_ops');
     });
@@ -79,7 +84,7 @@ describe('API & RBAC Security Logic', () => {
         headers: { cookie: `access_token=${token}` },
       });
       const result = await verifyAdminRequest(req, 'flight:create');
-      
+
       expect(result.error).toBe('Insufficient permissions');
       expect(result.response?.status).toBe(403);
     });
@@ -89,10 +94,10 @@ describe('API & RBAC Security Logic', () => {
       const req = new NextRequest('http://localhost:3000/api/quan-tri/chuyen-bay', {
         headers: { cookie: `access_token=${token}` },
       });
-      
+
       // super_admin accessing sensitive security administration
       const result = await verifyAdminRequest(req, 'rbac:manage');
-      
+
       expect(result.error).toBeUndefined();
       expect(result.payload.role).toBe('super_admin');
     });
@@ -103,7 +108,7 @@ describe('API & RBAC Security Logic', () => {
       it('GET - block unauthenticated guest', async () => {
         const req = new NextRequest('http://localhost:3000/api/quan-tri/chuyen-bay');
         const res = (await getAdminFlights(req))!;
-        
+
         expect(res.status).toBe(401);
       });
 
@@ -113,7 +118,7 @@ describe('API & RBAC Security Logic', () => {
           headers: { cookie: `access_token=${token}` },
         });
         const res = (await getAdminFlights(req))!;
-        
+
         expect(res.status).toBe(403);
       });
 
@@ -149,7 +154,7 @@ describe('API & RBAC Security Logic', () => {
             available: 180,
           }),
         });
-        
+
         const res = (await createAdminFlight(req))!;
         expect(res.status).toBe(403);
       });
@@ -159,7 +164,7 @@ describe('API & RBAC Security Logic', () => {
       it('GET - block unauthenticated guest with 401', async () => {
         const req = new NextRequest('http://localhost:3000/api/dat-ve');
         const res = await getUserBookings(req);
-        
+
         expect(res.status).toBe(401);
       });
 
@@ -168,7 +173,7 @@ describe('API & RBAC Security Logic', () => {
         const req = new NextRequest('http://localhost:3000/api/dat-ve', {
           headers: { cookie: `access_token=${token}` },
         });
-        
+
         // Mock getBookingsByUserId db return values
         const mockBookings: any = [{ id: 'b1', total_price: 2000000 }];
         vi.spyOn(db, 'getBookingsByUserId').mockResolvedValueOnce({
@@ -178,7 +183,7 @@ describe('API & RBAC Security Logic', () => {
 
         const res = await getUserBookings(req);
         expect(res.status).toBe(200);
-        
+
         const data = await res.json();
         expect(data.bookings).toEqual(mockBookings);
       });

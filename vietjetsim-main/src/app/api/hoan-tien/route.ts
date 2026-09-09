@@ -81,8 +81,7 @@ export async function POST(request: NextRequest) {
     const normalizedBankInfo =
       bank_info && typeof bank_info === 'object'
         ? {
-            bank_name:
-              typeof bank_info.bank_name === 'string' ? bank_info.bank_name.trim() : '',
+            bank_name: typeof bank_info.bank_name === 'string' ? bank_info.bank_name.trim() : '',
             account_number:
               typeof bank_info.account_number === 'string' ? bank_info.account_number.trim() : '',
             account_holder:
@@ -92,7 +91,9 @@ export async function POST(request: NextRequest) {
             route: typeof bank_info.route === 'string' ? bank_info.route.trim() : '',
             flight_date:
               typeof bank_info.flight_date === 'string' ? bank_info.flight_date.trim() : '',
-            amount: Number.isFinite(Number(bank_info.amount)) ? Number(bank_info.amount) : refundAmount,
+            amount: Number.isFinite(Number(bank_info.amount))
+              ? Number(bank_info.amount)
+              : refundAmount,
           }
         : {
             bank_name: typeof bank_name === 'string' ? bank_name.trim() : '',

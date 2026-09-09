@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import Icon from '@/components/ui/AppIcon';
-import Pagination from '@/components/ui/Pagination';
+import { Icon } from '@/shared/components/ui';
+import { Pagination } from '@/shared/components/ui';
 import { useAuth, isAdminRole } from '@/contexts/AuthContext';
 
 interface ToastAPI {
@@ -1052,8 +1052,8 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
                   }
                   className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm form-input"
                 >
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
+                  <option value="user">Người dùng</option>
+                  <option value="admin">Quản trị viên</option>
                 </select>
               </div>
               <div className="flex gap-3 pt-2">

@@ -2,17 +2,17 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import Icon from '@/components/ui/AppIcon';
-import AppImage from '@/components/ui/AppImage';
+import { Icon } from '@/shared/components/ui';
+import { AppImage } from '@/shared/components/ui';
 import {
   BookingsTableSkeleton,
   UpcomingBookingsSkeleton,
   ProfileSkeleton,
-} from '@/components/ui/SkeletonLoader';
-import Pagination from '@/components/ui/Pagination';
+} from '@/shared/components/ui';
+import { Pagination } from '@/shared/components/ui';
 
 // ─── Dynamic imports for heavy tab components (code-split) ──────────────
-const UserChat = dynamic(() => import('@/components/chat/UserChat'), {
+const UserChat = dynamic(() => import('@/features/chat').then((module) => module.UserChat), {
   loading: () => (
     <div className="fixed bottom-6 right-6 w-80 h-12 bg-white rounded-2xl shadow-lg animate-pulse" />
   ),
@@ -92,7 +92,7 @@ const UserDashboardDesktopSidebar = dynamic(() => import('./UserDashboardDesktop
 // Supabase removed - using API routes instead
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
-import { ToastContainer } from '@/components/ui/Toast';
+import { ToastContainer } from '@/shared/components/feedback';
 import { getCsrfHeaders } from '@/hooks/useCsrf';
 
 type Tab =
@@ -470,17 +470,17 @@ export default function UserDashboardClient() {
                 })()
               : r.bank_info || {};
           return {
-          id: r.id,
-          bookingId: r.booking_id,
-          amount: Number(bankInfo.amount || 0),
-          reason: r.reason,
-          note: bankInfo.note || r.note || '',
-          bankName: bankInfo.bank_name || '',
-          accountHolder: bankInfo.account_holder || '',
-          accountNumber: bankInfo.account_number || '',
-          status: r.status as 'pending' | 'approved' | 'rejected',
-          date: new Date(r.created_at).toLocaleDateString('vi-VN'),
-          adminNote: r.admin_note || '',
+            id: r.id,
+            bookingId: r.booking_id,
+            amount: Number(bankInfo.amount || 0),
+            reason: r.reason,
+            note: bankInfo.note || r.note || '',
+            bankName: bankInfo.bank_name || '',
+            accountHolder: bankInfo.account_holder || '',
+            accountNumber: bankInfo.account_number || '',
+            status: r.status as 'pending' | 'approved' | 'rejected',
+            date: new Date(r.created_at).toLocaleDateString('vi-VN'),
+            adminNote: r.admin_note || '',
           };
         })
       );
@@ -1570,7 +1570,9 @@ export default function UserDashboardClient() {
                                 value={refundAmount}
                                 onChange={(e) => {
                                   const val = e.target.value.replace(/\D/g, '');
-                                  setRefundAmount(val ? parseInt(val, 10).toLocaleString('vi-VN') : '');
+                                  setRefundAmount(
+                                    val ? parseInt(val, 10).toLocaleString('vi-VN') : ''
+                                  );
                                 }}
                                 placeholder="VD: 1.250.000"
                                 required

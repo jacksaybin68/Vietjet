@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import Icon from '@/components/ui/AppIcon';
+import { Icon } from '@/shared/components/ui';
 import { useToast } from '@/hooks/useToast';
-import Pagination from '@/components/ui/Pagination';
+import { Pagination } from '@/shared/components/ui';
 
 interface Payment {
   id: string;
@@ -136,9 +136,12 @@ export default function PaymentHistoryTab() {
   const fetchPayments = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/thanh-toan/lich-su?limit=${limit}&offset=${(page - 1) * limit}`, {
-        credentials: 'include',
-      });
+      const res = await fetch(
+        `/api/thanh-toan/lich-su?limit=${limit}&offset=${(page - 1) * limit}`,
+        {
+          credentials: 'include',
+        }
+      );
       const data = await res.json();
 
       if (res.ok) {

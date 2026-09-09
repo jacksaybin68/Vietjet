@@ -157,7 +157,10 @@ export async function POST(request: NextRequest) {
   try {
     const token = request.cookies.get('access_token')?.value;
     if (!token) {
-      return NextResponse.json({ error: 'Unauthorized', message: 'No access token found' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Unauthorized', message: 'No access token found' },
+        { status: 401 }
+      );
     }
 
     const payload = verifyAccessToken(token);

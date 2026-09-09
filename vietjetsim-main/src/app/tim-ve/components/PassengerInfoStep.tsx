@@ -1,8 +1,8 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Flight, Passenger } from './FlightBookingClient';
-import Icon from '@/components/ui/AppIcon';
-import { PassengerInfoSkeleton } from '@/components/ui/SkeletonLoader';
+import { Icon } from '@/shared/components/ui';
+import { PassengerInfoSkeleton } from '@/shared/components/ui';
 
 interface Props {
   flight: Flight;

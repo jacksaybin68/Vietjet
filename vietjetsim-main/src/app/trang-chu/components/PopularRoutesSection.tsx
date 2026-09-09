@@ -1,8 +1,8 @@
 'use client';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
-import AppImage from '@/components/ui/AppImage';
-import { PopularRoutesSkeleton } from '@/components/ui/SkeletonLoader';
+import { AppImage } from '@/shared/components/ui';
+import { PopularRoutesSkeleton } from '@/shared/components/ui';
 import {
   FaPlane,
   FaSuitcaseRolling,
@@ -13,7 +13,7 @@ import {
 import { MdCheckCircle, MdArrowForward } from 'react-icons/md';
 
 const SERVICES = [
-  { label: 'Đặt vé máy bay', href: '/tim-ve', Icon: FaPlane, iconBg: '#EC2029' },
+  { label: 'Đặt vé máy bay', href: '/tim-ve', Icon: FaPlane, iconBg: '#E30613' },
   {
     label: 'Mua hành lý & bữa ăn',
     href: '/tim-ve',
@@ -114,7 +114,7 @@ const POPULAR_ROUTES = [
 ];
 
 const TAG_COLORS: Record<string, { bg: string; text: string }> = {
-  'Phổ biến nhất': { bg: 'rgba(236,32,41,0.10)', text: '#EC2029' },
+  'Phổ biến nhất': { bg: 'rgba(227, 6, 19, 0.10)', text: '#E30613' },
   'Giá tốt': { bg: 'rgba(16,185,129,0.12)', text: '#059669' },
   Hot: { bg: 'rgba(249,115,22,0.12)', text: '#ea580c' },
   'Nghỉ dưỡng': { bg: 'rgba(14,165,233,0.12)', text: '#0284c7' },
@@ -283,7 +283,7 @@ export default function PopularRoutesSection() {
                       <span className="text-sm font-black text-vj-text" style={{ fontWeight: 900 }}>
                         {route?.fromCode}
                       </span>
-                      <MdArrowForward className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 text-[#EC2029]" />
+                      <MdArrowForward className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 text-vjred" />
                       <span className="text-sm font-black text-vj-text" style={{ fontWeight: 900 }}>
                         {route?.toCode}
                       </span>
@@ -291,7 +291,7 @@ export default function PopularRoutesSection() {
                         className="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
                         style={{
                           background: TAG_COLORS[route?.tag]?.bg ?? 'rgba(236,32,41,0.10)',
-                          color: TAG_COLORS[route?.tag]?.text ?? '#EC2029',
+                          color: TAG_COLORS[route?.tag]?.text ?? '#E30613',
                         }}
                       >
                         {route?.tag}

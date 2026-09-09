@@ -1,8 +1,8 @@
 'use client';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Flight } from './FlightBookingClient';
-import Icon from '@/components/ui/AppIcon';
-import { FlightResultsSkeleton } from '@/components/ui/SkeletonLoader';
+import { Icon } from '@/shared/components/ui';
+import { FlightResultsSkeleton } from '@/shared/components/ui';
 import { getErrorMessage } from '@/lib/utils';
 
 // ─── Fallback mock data (used when API is unavailable) ──────────────────────
@@ -287,9 +287,9 @@ function parseHour(time: string): number {
 }
 
 const ALL_AIRLINES: string[] = [];
-let MIN_PRICE = 0;
-let MAX_PRICE = 0;
-let MAX_DURATION = 0;
+const MIN_PRICE = 0;
+const MAX_PRICE = 0;
+const MAX_DURATION = 0;
 
 interface Filters {
   airlines: string[];
@@ -663,7 +663,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                 </div>
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-stone-400 w-7">Min</span>
+                    <span className="text-[10px] text-stone-400 w-7">Thấp</span>
                     <input
                       id="min-price"
                       name="minPrice"
@@ -681,7 +681,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                     />
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-stone-400 w-7">Max</span>
+                    <span className="text-[10px] text-stone-400 w-7">Cao</span>
                     <input
                       id="max-price"
                       name="maxPrice"

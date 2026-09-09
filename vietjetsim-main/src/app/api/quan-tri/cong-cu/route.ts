@@ -41,11 +41,10 @@ const TOOLS: Record<
     description: 'Huỷ tự động các đặt vé ở trạng thái pending quá 30 phút',
     category: 'booking',
     execute: async (_params, adminId) => {
-      const { getAllBookings, updateBookingStatus } = require('@/lib/db');
-      const bookings = await getAllBookings(1, 1000);
+      const bookings = await getAllBookings({ page: 1, limit: 1000 });
       const now = new Date();
       let count = 0;
-      for (const b of bookings.data) {
+      for (const b of bookings.bookings) {
         if (b.status === 'pending') {
           const createdAt = new Date(b.created_at);
           const diffMs = now.getTime() - createdAt.getTime();

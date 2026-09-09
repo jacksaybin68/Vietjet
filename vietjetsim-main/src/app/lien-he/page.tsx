@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Icon from '@/components/ui/AppIcon';
+import { Icon } from '@/shared/components/ui';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({

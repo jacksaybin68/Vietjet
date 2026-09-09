@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import Icon from '@/components/ui/AppIcon';
+import { Icon } from '@/shared/components/ui';
 import { useToast } from '@/hooks/useToast';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -382,7 +382,8 @@ export default function WalletTab({ user }: WalletTabProps) {
   const [withdrawMethodId, setWithdrawMethodId] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const linkedBanks = methods.filter((method) => method.type === 'bank');
-  const defaultLinkedBank = linkedBanks.find((method) => method.isDefault) || linkedBanks[0] || null;
+  const defaultLinkedBank =
+    linkedBanks.find((method) => method.isDefault) || linkedBanks[0] || null;
   const activeTopupMethods = methods;
   const selectedTopupMethod =
     activeTopupMethods.find((method) => method.id === topupMethodId) ||
@@ -414,28 +415,29 @@ export default function WalletTab({ user }: WalletTabProps) {
       }
       if (methodsRes.ok && methodsData.methods) {
         const normalizedMethods = methodsData.methods.map((m: any) => ({
-            id: m.id,
-            type: m.type,
-            cardBrand: m.card_brand,
-            lastFour: m.last_four,
-            cardHolderName: m.card_holder_name,
-            expiryMonth: m.expiry_month,
-            expiryYear: m.expiry_year,
-            bankId: m.bank_id,
-            bankName: m.bank_name,
-            bankCode: m.bank_code,
-            isDefault: m.is_default,
-            isActive: m.is_active,
-            createdAt: m.created_at,
-          }));
+          id: m.id,
+          type: m.type,
+          cardBrand: m.card_brand,
+          lastFour: m.last_four,
+          cardHolderName: m.card_holder_name,
+          expiryMonth: m.expiry_month,
+          expiryYear: m.expiry_year,
+          bankId: m.bank_id,
+          bankName: m.bank_name,
+          bankCode: m.bank_code,
+          isDefault: m.is_default,
+          isActive: m.is_active,
+          createdAt: m.created_at,
+        }));
         setMethods(normalizedMethods);
-        const defaultMethod = normalizedMethods.find((m: PaymentMethod) => m.isDefault) || normalizedMethods[0];
+        const defaultMethod =
+          normalizedMethods.find((m: PaymentMethod) => m.isDefault) || normalizedMethods[0];
         if (defaultMethod) {
           setTopupMethodId(defaultMethod.id);
         }
-        const defaultBankMethod = normalizedMethods.find(
-          (m: PaymentMethod) => m.type === 'bank' && m.isDefault
-        ) || normalizedMethods.find((m: PaymentMethod) => m.type === 'bank');
+        const defaultBankMethod =
+          normalizedMethods.find((m: PaymentMethod) => m.type === 'bank' && m.isDefault) ||
+          normalizedMethods.find((m: PaymentMethod) => m.type === 'bank');
         if (defaultBankMethod) {
           setWithdrawMethodId(defaultBankMethod.id);
         }
@@ -498,7 +500,10 @@ export default function WalletTab({ user }: WalletTabProps) {
   const handleWithdraw = async () => {
     const amount = parseFormattedAmount(withdrawAmount);
     if (!selectedWithdrawBank) {
-      toast.error('Thiếu tài khoản ngân hàng', 'Vui lòng liên kết tài khoản ngân hàng trước khi rút.');
+      toast.error(
+        'Thiếu tài khoản ngân hàng',
+        'Vui lòng liên kết tài khoản ngân hàng trước khi rút.'
+      );
       return;
     }
     if (!amount || amount <= 0) {
@@ -534,7 +539,10 @@ export default function WalletTab({ user }: WalletTabProps) {
         setTransactions((prev) => [data.transaction, ...prev].slice(0, 10));
       }
       setWithdrawAmount('');
-      toast.success('Rút tiền thành công', `Đã rút ${amount.toLocaleString('vi-VN')} VND về tài khoản liên kết.`);
+      toast.success(
+        'Rút tiền thành công',
+        `Đã rút ${amount.toLocaleString('vi-VN')} VND về tài khoản liên kết.`
+      );
     } catch {
       toast.error('Rút tiền thất bại', 'Vui lòng thử lại sau.');
     } finally {
@@ -906,11 +914,16 @@ export default function WalletTab({ user }: WalletTabProps) {
             </h3>
           </div>
           {transactions.length === 0 ? (
-            <p className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">Chưa có giao dịch.</p>
+            <p className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">
+              Chưa có giao dịch.
+            </p>
           ) : (
             <div className="space-y-2">
               {transactions.map((tx) => (
-                <div key={tx.id} className="flex items-center justify-between bg-stone-50 rounded-xl p-3">
+                <div
+                  key={tx.id}
+                  className="flex items-center justify-between bg-stone-50 rounded-xl p-3"
+                >
                   <div>
                     <p className="text-sm font-semibold text-[#1A2948]">
                       {tx.description || 'Giao dịch ví'}

@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import Icon from '@/components/ui/AppIcon';
+import { Icon } from '@/shared/components/ui';
 
 interface NotificationToggle {
   id: string;
@@ -157,7 +157,7 @@ export default function NotificationSettingsTab() {
               <button
                 onClick={() => toggleAlert(alert.id)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none flex-shrink-0 ${alert.enabled ? 'bg-[#D0021B]' : 'bg-stone-300'}`}
-                aria-label={`Toggle ${alert.label}`}
+                aria-label={`Bật hoặc tắt ${alert.label}`}
               >
                 <span
                   className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${alert.enabled ? 'translate-x-6' : 'translate-x-1'}`}
@@ -206,7 +206,7 @@ export default function NotificationSettingsTab() {
               <button
                 onClick={() => toggleDelivery(method.id)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none flex-shrink-0 ${method.enabled ? 'bg-[#FFC72C]' : 'bg-stone-300'}`}
-                aria-label={`Toggle ${method.label}`}
+                aria-label={`Bật hoặc tắt ${method.label}`}
               >
                 <span
                   className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${method.enabled ? 'translate-x-6' : 'translate-x-1'}`}

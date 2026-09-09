@@ -10,7 +10,7 @@ import {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password, full_name, phone } = body;
+    const { email, password, full_name, phone, dob } = body;
 
     // Validation: Require password, full_name, and AT LEAST ONE of email or phone
     if (!password || !full_name || (!email && !phone)) {
@@ -47,9 +47,9 @@ export async function POST(request: NextRequest) {
 
     // Create user in Neon PostgreSQL
     const newUser = await sql`
-      INSERT INTO user_profiles (email, password_hash, full_name, role, phone)
-      VALUES (${email || null}, ${password_hash}, ${full_name}, 'user', ${phone || null})
-      RETURNING id, email, full_name, role, phone, created_at, updated_at
+      INSERT INTO user_profiles (email, password_hash, full_name, role, phone, dob)
+      VALUES (${email || null}, ${password_hash}, ${full_name}, 'user', ${phone || null}, ${dob || null})
+      RETURNING id, email, full_name, role, phone, dob, created_at, updated_at
     `;
 
     const userRecord = newUser[0];
@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
       full_name: userRecord.full_name,
       role: userRecord.role || 'user',
       phone: userRecord.phone,
+      dob: userRecord.dob,
       created_at: userRecord.created_at,
       updated_at: userRecord.updated_at,
     };

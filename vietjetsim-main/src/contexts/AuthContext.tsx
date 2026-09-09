@@ -87,7 +87,7 @@ export interface AuthContextType {
   signUp: (
     email: string,
     password: string,
-    metadata?: { fullName?: string; phone?: string; avatarUrl?: string }
+    metadata?: { fullName?: string; phone?: string; avatarUrl?: string; dob?: string }
   ) => Promise<any>;
   signIn: (email: string, password: string) => Promise<any>;
   signOut: () => Promise<void>;
@@ -234,7 +234,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signUp = async (
     email: string,
     password: string,
-    metadata: { fullName?: string; phone?: string; avatarUrl?: string } = {}
+    metadata: { fullName?: string; phone?: string; avatarUrl?: string; dob?: string } = {}
   ) => {
     const data = await fetchAuth('/dang-ky', {
       method: 'POST',
@@ -244,6 +244,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         full_name: metadata.fullName || '',
         phone: metadata.phone || '',
         avatar_url: metadata.avatarUrl || '',
+        dob: metadata.dob || '',
       }),
     });
 
