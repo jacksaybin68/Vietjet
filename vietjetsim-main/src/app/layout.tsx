@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import '../styles/tailwind.css';
 import { PageTransition } from '@/shared/components/layouts';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import NextTopLoader from 'nextjs-toploader';
 import { NavigationOptimizer } from '@/shared/components/layouts';
 export const viewport: Viewport = {
@@ -55,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" suppressHydrationWarning>
+    <html lang="vi" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         {/* KoHo is VietJet's primary body font; Be Vietnam Pro for headings */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -99,7 +100,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body>
+      <body className="bg-white dark:bg-navy-dark text-vj-text dark:text-white/90">
         {/* Rocket Extension message handler - Suppress unknown message type warnings */}
         <script
           dangerouslySetInnerHTML={{
@@ -119,9 +120,11 @@ export default function RootLayout({
         />
         <NextTopLoader color="#E30613" showSpinner={false} />
         <NavigationOptimizer />
-        <AuthProvider>
-          <PageTransition>{children}</PageTransition>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <PageTransition>{children}</PageTransition>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
