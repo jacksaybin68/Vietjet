@@ -1,14 +1,14 @@
 import React from 'react';
 import type { Metadata, Viewport } from 'next';
 import '../styles/tailwind.css';
-import PageTransition from '@/components/PageTransition';
+import { PageTransition } from '@/shared/components/layouts';
 import { AuthProvider } from '@/contexts/AuthContext';
 import NextTopLoader from 'nextjs-toploader';
-import NavigationOptimizer from '@/components/NavigationOptimizer';
+import { NavigationOptimizer } from '@/shared/components/layouts';
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#EC2029',
+  themeColor: '#E30613',
 };
 
 export const metadata: Metadata = {
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [{ url: '/favicon.ico', type: 'image/x-icon' }],
-    apple: [{ url: '/apple-touch-icon.png' }],
+    apple: [{ url: '/logo.png' }],
   },
   verification: {
     google: 'your-google-site-verification-code',
@@ -65,12 +65,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
 
-        <script
-          type="module"
-          async
-          src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2FVietjet Air1812back.builtwithrocket.new&_be=https%3A%2F%2Fappanalytics.rocket.new&_v=0.1.17"
-        />
-        <script type="module" defer src="https://static.rocket.new/rocket-shot.js?v=0.0.2" />
+        {/* External scripts optimized */}
 
         {/* JSON-LD Schema for SEO */}
         <script
@@ -122,7 +117,7 @@ export default function RootLayout({
         `,
           }}
         />
-        <NextTopLoader color="#EC2029" showSpinner={false} />
+        <NextTopLoader color="#E30613" showSpinner={false} />
         <NavigationOptimizer />
         <AuthProvider>
           <PageTransition>{children}</PageTransition>

@@ -1,13 +1,13 @@
 'use client';
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Icon from '@/components/ui/AppIcon';
+import { Icon } from '@/shared/components/ui';
 import FlightResultsStep from './FlightResultsStep';
 import PassengerInfoStep from './PassengerInfoStep';
 import SeatSelectionStep from './SeatSelectionStep';
 import { useToast } from '@/hooks/useToast';
-import { ToastContainer } from '@/components/ui/Toast';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import { ToastContainer } from '@/shared/components/feedback';
+import { ErrorBoundary } from '@/shared/components/feedback';
 
 export type Flight = {
   id: string;
@@ -183,7 +183,11 @@ function FlightBookingClientInner() {
                       fontWeight: 900,
                     }}
                   >
-                    {step > s.id ? <Icon name="CheckIcon" size={14} className="sm:!w-4 sm:!h-4" /> : s.id}
+                    {step > s.id ? (
+                      <Icon name="CheckIcon" size={14} className="sm:!w-4 sm:!h-4" />
+                    ) : (
+                      s.id
+                    )}
                   </div>
                   <span
                     className={`text-xs sm:text-sm font-semibold hidden xs:block transition-colors`}

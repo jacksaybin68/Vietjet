@@ -3,11 +3,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Icon from '@/components/ui/AppIcon';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import { Icon } from '@/shared/components/ui';
+import { Header } from '@/shared/components/navigation';
+import { Footer } from '@/shared/components/navigation';
 import { useToast } from '@/hooks/useToast';
-import { ToastContainer } from '@/components/ui/Toast';
+import { ToastContainer } from '@/shared/components/feedback';
 
 interface BookingDetail {
   id: string;

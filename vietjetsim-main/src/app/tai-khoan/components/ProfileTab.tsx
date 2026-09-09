@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import Icon from '@/components/ui/AppIcon';
+import { Icon } from '@/shared/components/ui';
 import { useToast } from '@/hooks/useToast';
 
 /** Get display info for a role (label + badge color) */

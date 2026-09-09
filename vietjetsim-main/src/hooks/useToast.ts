@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { ToastItem, ToastType, ToastAction } from '@/components/ui/Toast';
+import type { ToastAction, ToastItem, ToastType } from '@/shared/components/feedback';
 
 let toastIdCounter = 0;
 

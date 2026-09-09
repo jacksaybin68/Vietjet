@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
-import Icon from '@/components/ui/AppIcon';
-import Pagination from '@/components/ui/Pagination';
+import { Icon } from '@/shared/components/ui';
+import { Pagination } from '@/shared/components/ui';
 
 interface AuditLog {
   id: string;
@@ -414,7 +414,7 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
                               )}
                               {log.user_agent && (
                                 <div className="mt-3 pt-3 border-t border-stone-100">
-                                  <p className="text-stone-400 font-medium mb-1">User Agent</p>
+                                  <p className="text-stone-400 font-medium mb-1">Trình duyệt</p>
                                   <p className="text-xs text-stone-500 truncate">
                                     {log.user_agent}
                                   </p>

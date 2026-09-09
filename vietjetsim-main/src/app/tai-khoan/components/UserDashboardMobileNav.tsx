@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import Icon from '@/components/ui/AppIcon';
+import { Icon } from '@/shared/components/ui';
 
 interface UserDashboardTab {
   id: string;

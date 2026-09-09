@@ -1,8 +1,8 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Icon from '@/components/ui/AppIcon';
-import BreadcrumbNav from '@/components/ui/BreadcrumbNav';
+import { Icon } from '@/shared/components/ui';
+import { BreadcrumbNav } from '@/shared/components/navigation';
 import OverviewTab from './OverviewTab';
 import FlightsTab from './FlightsTab';
 import UsersTab from './UsersTab';
@@ -25,8 +25,8 @@ import AuditLogsTab from './AuditLogsTab';
 import TransactionsTab from './TransactionsTab';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
-import { ToastContainer } from '@/components/ui/Toast';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import { ToastContainer } from '@/shared/components/feedback';
+import { ErrorBoundary } from '@/shared/components/feedback';
 
 export type AdminTab =
   | 'overview'

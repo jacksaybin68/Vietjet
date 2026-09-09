@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import Icon from '@/components/ui/AppIcon';
+import { Icon } from '@/shared/components/ui';
 
 export default function GlobalError({
   error,

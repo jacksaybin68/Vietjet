@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { PopularRoutesSkeleton, DealsSkeleton } from '@/components/ui/SkeletonLoader';
+import { PopularRoutesSkeleton, DealsSkeleton } from '@/shared/components/ui';
 
 export default function Loading() {
   return (

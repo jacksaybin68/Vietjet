@@ -1,8 +1,10 @@
 'use client';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
-import AppImage from '@/components/ui/AppImage';
-import { DealsSkeleton } from '@/components/ui/SkeletonLoader';
+import { AppImage } from '@/shared/components/ui';
+import { DealsSkeleton } from '@/shared/components/ui';
+import { DealCard } from '@/features/flights';
+import type { Deal } from '@/types/deals';
 import { FaPlane } from 'react-icons/fa';
 import { MdCalendarToday, MdArrowForward, MdLocalFireDepartment } from 'react-icons/md';
 
@@ -83,13 +85,10 @@ export default function DealsSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [loading, setLoading] = useState(true);
+  // imageRefs used for per‑image parallax (kept for backward compatibility)
+  // Instant render without artificial skeleton delay
+  const [loading, setLoading] = useState(false);
   const rafRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1100);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Intersection observer for staggered reveal
   useEffect(() => {
@@ -179,12 +178,12 @@ export default function DealsSection() {
               fontWeight: 700,
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = '#EC2029';
+              (e.currentTarget as HTMLElement).style.background = '#ED1D23';
               (e.currentTarget as HTMLElement).style.color = 'white';
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.background = 'transparent';
-              (e.currentTarget as HTMLElement).style.color = '#EC2029';
+              (e.currentTarget as HTMLElement).style.color = '#ED1D23';
             }}
           >
             Xem tất cả

@@ -1,7 +1,7 @@
 import React from 'react';
 import AdminDashboardClient from './components/AdminDashboardClient';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import { ErrorBoundary } from '@/shared/components/feedback';
+import { ProtectedRoute } from '@/features/auth';
 
 export default function AdminDashboardPage() {
   return (

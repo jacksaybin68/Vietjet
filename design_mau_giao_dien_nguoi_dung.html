@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vietjet Air - Bay là thích ngay!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        vjred: '#E30613',
+                        vjyellow: '#FFF200',
+                        vjdark: '#1E293B',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-vjdark font-sans">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="text-vjred font-black text-3xl tracking-tighter">Vietjet Air</div>
+            <nav class="hidden md:flex space-x-6 text-sm font-bold">
+                <a href="#" class="hover:text-vjred">Chuyến bay</a>
+                <a href="#" class="hover:text-vjred">Khách sạn</a>
+                <a href="#" class="hover:text-vjred">Quản lý đặt vé</a>
+                <a href="#" class="hover:text-vjred">Khuyến mãi</a>
+            </nav>
+            <div class="flex items-center space-x-4">
+                <span class="text-sm font-bold cursor-pointer">VN/EN</span>
+                <button class="bg-vjred text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-red-700">Đăng nhập</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="relative bg-vjred text-white py-24">
+        <div class="container mx-auto px-4">
+            <h1 class="text-5xl md:text-6xl font-black mb-4">Bay là thích ngay!</h1>
+            <p class="text-xl">Khám phá hàng ngàn điểm đến với mức giá cực kỳ ưu đãi.</p>
+        </div>
+        
+        <!-- Search Widget -->
+        <div class="container mx-auto px-4 mt-8">
+            <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-vjyellow max-w-5xl mx-auto">
+                <div class="flex space-x-4 border-b pb-4 mb-6">
+                    <button class="font-bold text-vjred border-b-2 border-vjred">Khứ hồi</button>
+                    <button class="font-bold text-gray-500 hover:text-vjred">Một chiều</button>
+                    <button class="font-bold text-gray-500 hover:text-vjred">Nhiều chặng</button>
+                </div>
+                <form class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="relative">
+                        <label class="block text-xs font-bold text-gray-500 uppercase">Nơi đi</label>
+                        <input type="text" placeholder="Điểm đi" class="mt-1 w-full border border-gray-300 rounded-xl p-3 focus:ring-vjred focus:border-vjred">
+                    </div>
+                    <div class="relative">
+                        <label class="block text-xs font-bold text-gray-500 uppercase">Nơi đến</label>
+                        <input type="text" placeholder="Điểm đến" class="mt-1 w-full border border-gray-300 rounded-xl p-3 focus:ring-vjred focus:border-vjred">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase">Ngày đi</label>
+                            <input type="date" class="mt-1 w-full border border-gray-300 rounded-xl p-3 focus:ring-vjred focus:border-vjred">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase">Ngày về</label>
+                            <input type="date" class="mt-1 w-full border border-gray-300 rounded-xl p-3 focus:ring-vjred focus:border-vjred">
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <label class="block text-xs font-bold text-gray-500 uppercase">Hành khách</label>
+                        <input type="text" placeholder="1 Người lớn" class="mt-1 w-full border border-gray-300 rounded-xl p-3 focus:ring-vjred focus:border-vjred">
+                    </div>
+                    <div class="lg:col-span-4 mt-2">
+                        <button type="submit" class="w-full bg-vjyellow text-vjred font-black py-4 rounded-xl text-lg hover:bg-yellow-500 transition duration-150">TÌM CHUYẾN BAY</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Promo Grid -->
+    <section class="container mx-auto px-4 py-16">
+        <h2 class="text-3xl font-black mb-8 text-center">Đường bay hot</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:scale-105 transition">
+                <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80" class="w-full h-48 object-cover">
+                <div class="p-4">
+                    <h3 class="font-bold text-lg">TP.HCM - Hà Nội</h3>
+                    <p class="text-vjred font-black text-xl">Chỉ từ 99k</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:scale-105 transition">
+                <img src="https://images.unsplash.com/photo-1506461883276-594a12b11533?auto=format&fit=crop&w=400&q=80" class="w-full h-48 object-cover">
+                <div class="p-4">
+                    <h3 class="font-bold text-lg">Hà Nội - Đà Nẵng</h3>
+                    <p class="text-vjred font-black text-xl">Chỉ từ 0đ</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:scale-105 transition">
+                <img src="https://images.unsplash.com/photo-1503899036084-c55fdd92da26?auto=format&fit=crop&w=400&q=80" class="w-full h-48 object-cover">
+                <div class="p-4">
+                    <h3 class="font-bold text-lg">TP.HCM - Tokyo</h3>
+                    <p class="text-vjred font-black text-xl">Chỉ từ 999k</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-vjdark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h4 class="font-bold text-lg mb-4 text-vjyellow">Tổng đài</h4>
+                    <p>1900 1886</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4 text-vjyellow">Ứng dụng</h4>
+                    <p>Tải ngay Vietjet App</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4 text-vjyellow">Thanh toán</h4>
+                    <p>Visa, Mastercard, JCB</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4 text-vjyellow">Bản quyền</h4>
+                    <p>&copy; 2026 Vietjet Air</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
