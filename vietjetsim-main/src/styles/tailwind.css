@@ -1123,6 +1123,27 @@ h6 {
   vertical-align: middle;
 }
 
+/* Badge styles - Dark mode */
+.dark .badge-success {
+  background: #166534;
+  color: #6ee7b7;
+}
+
+.dark .badge-error {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+
+.dark .badge-info {
+  background: #1e3a8a;
+  color: #60a5fa;
+}
+
+.dark .badge-warning {
+  background: #78350f;
+  color: #fbbf24;
+}
+
 /* Primary 50 background */
 .bg-primary-50 {
   background-color: #fff1f1;

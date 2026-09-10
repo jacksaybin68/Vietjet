@@ -8,7 +8,7 @@ import { ProtectedRoute } from '@/features/auth';
 export default function UserDashboardPage() {
   return (
     <ProtectedRoute requiredRole="user">
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-[var(--surface)] dark:bg-[var(--dark-surface)]">
         <Header />
         <ErrorBoundary variant="api">
           <UserDashboardClient />
