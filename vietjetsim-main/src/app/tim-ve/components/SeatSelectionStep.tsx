@@ -324,7 +324,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                         <div
                           className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center ${svc.color}`}
                         >
-                          <Icon name={svc.icon as any} size={12} sm:size={16} />
+                          <Icon name={svc.icon as any} size={16} />
                         </div>
                         <span className="font-bold text-[var(--foreground)] dark:text-[var(--foreground)] font-koho">{svc.title}</span>
                       </div>
@@ -361,7 +361,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                         : 'bg-[var(--surface)] dark:bg-[var(--dark-surface)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] border-[var(--border)] dark:border-[var(--dark-border)] hover:border-orange-400 hover:text-orange-600'
                     }`}
                   >
-                    <Icon name="FireIcon" size={10} sm:size={12} />
+                    <Icon name="FireIcon" size={12} />
                     Bản đồ nhiệt
                   </button>
                 </div>
@@ -444,7 +444,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                 {/* Airplane nose - responsive */}
                 <div className="text-center mb-3 sm:mb-4">
                   <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-primary/5 dark:bg-primary/10 text-[var(--foreground)] text-[10px] sm:text-xs px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-primary/10 dark:border-primary/20 font-semibold font-koho">
-                    <Icon name="PaperAirplaneIcon" size={10} sm:size={12} className="text-primary" />
+                    <Icon name="PaperAirplaneIcon" size={12} className="text-primary" />
                     Mũi máy bay
                   </div>
                 </div>
@@ -605,13 +605,13 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
               <div className="h-1 w-full bg-gradient-to-r from-accent/60 via-accent to-accent/60" />
               <div className="p-4 sm:p-5">
                 <h3 className="font-black text-[var(--foreground)] mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2 font-koho">
-                  <Icon name="TicketIcon" size={14} sm:size={16} className="text-primary" />
+                  <Icon name="TicketIcon" size={16} className="text-primary" />
                   Chỗ đã chọn
                 </h3>
 
                 {selected.length === 0 ? (
                   <div className="text-center py-6 sm:py-8 text-[var(--foreground-subtle)]">
-                    <Icon name="TicketIcon" size={24} sm:size={32} className="mx-auto mb-1.5 sm:mb-2 text-[var(--foreground-muted)]" />
+                    <Icon name="TicketIcon" size={32} className="mx-auto mb-1.5 sm:mb-2 text-[var(--foreground-muted)]" />
                     <div className="text-[11px] sm:text-sm">Chưa chọn chỗ ngồi</div>
                   </div>
                 ) : (
@@ -643,7 +643,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                             onClick={() => setSelected((prev) => prev.filter((s) => s !== seat))}
                             className="text-[var(--foreground-subtle)] hover:text-primary transition-colors"
                           >
-                            <Icon name="XMarkIcon" size={12} sm:size={14} />
+                            <Icon name="XMarkIcon" size={14} />
                           </button>
                         </div>
                       );
@@ -690,7 +690,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                     }`}
                   >
                     <span className="flex items-center gap-0.5 sm:gap-1 font-semibold">
-                      <Icon name="ClockIcon" size={10} sm:size={12} />
+                      <Icon name="ClockIcon" size={12} />
                       Giữ chỗ còn
                     </span>
                     <span className="font-mono font-bold">{formatTime(timeLeft)}</span>
