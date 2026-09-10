@@ -1,10 +1,10 @@
-'use client';
+       'use client';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import AppImage from '@/components/ui/AppImage';
-import AppLogo from '@/components/ui/AppLogo';
-import Icon from '@/components/ui/AppIcon';
+import AppImage from '@/shared/components/ui/AppImage';
+import AppLogo from '@/shared/components/ui/AppLogo';
+import Icon from '@/shared/components/ui/AppIcon';
 import { useAuth } from '@/contexts/AuthContext';
 
 type AuthTab = 'login' | 'register';
@@ -248,6 +248,7 @@ export default function SignUpLoginPage() {
                       id="login-email"
                       name="email"
                       type="text"
+                      autoComplete="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder=" "
@@ -267,6 +268,7 @@ export default function SignUpLoginPage() {
                       id="login-password"
                       name="password"
                       type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder=" "
@@ -343,6 +345,7 @@ export default function SignUpLoginPage() {
                             id="surname"
                             name="surname"
                             type="text"
+                            autoComplete="family-name"
                             value={surname}
                             onChange={(e) => setSurname(e.target.value)}
                             placeholder=" "
@@ -356,6 +359,7 @@ export default function SignUpLoginPage() {
                             id="given_name"
                             name="given_name"
                             type="text"
+                            autoComplete="given-name"
                             value={givenName}
                             onChange={(e) => setGivenName(e.target.value)}
                             placeholder=" "
@@ -381,6 +385,7 @@ export default function SignUpLoginPage() {
                             id="phone"
                             name="phone"
                             type="tel"
+                            autoComplete="tel"
                             value={phone}
                             onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                             placeholder="912 345 678"
@@ -400,6 +405,7 @@ export default function SignUpLoginPage() {
                           id="email"
                           name="email"
                           type="email"
+                          autoComplete="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder=" "
@@ -418,6 +424,7 @@ export default function SignUpLoginPage() {
                           id="password"
                           name="password"
                           type={showPassword ? 'text' : 'password'}
+                          autoComplete="new-password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           placeholder=" "

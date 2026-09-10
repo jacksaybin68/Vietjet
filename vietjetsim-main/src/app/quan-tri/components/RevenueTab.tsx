@@ -15,8 +15,8 @@ import {
   Cell,
   Legend,
 } from 'recharts';
-import Icon from '@/components/ui/AppIcon';
-import { RevenueTabSkeleton } from '@/components/ui/SkeletonLoader';
+import { Icon } from '@/shared/components/ui';
+import { RevenueTabSkeleton } from '@/shared/components/ui';
 
 const MONTHLY_REVENUE = [
   { month: 'T10/25', revenue: 285000000, tickets: 312 },

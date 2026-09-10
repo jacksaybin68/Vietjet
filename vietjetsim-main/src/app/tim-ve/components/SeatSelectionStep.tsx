@@ -1,8 +1,8 @@
 'use client';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Flight, Passenger } from './FlightBookingClient';
-import Icon from '@/components/ui/AppIcon';
-import { SeatMapSkeleton } from '@/components/ui/SkeletonLoader';
+import { Icon } from '@/shared/components/ui';
+import { SeatMapSkeleton } from '@/shared/components/ui';
 
 interface Props {
   flight: Flight;
@@ -240,24 +240,24 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
       {seatsLoading ? (
         <SeatMapSkeleton />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Seat Map */}
-          <div className="lg:col-span-2 space-y-4">
-            {/* Hold Timeout Counter */}
+          <div className="lg:col-span-2 space-y-3 sm:space-y-4">
+            {/* Hold Timeout Counter - responsive */}
             {holdTimer !== null && (
               <div
-                className={`rounded-xl px-4 py-3 flex items-center justify-between border ${
+                className={`rounded-xl px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between border ${
                   timerUrgent
-                    ? 'bg-red-50 border-red-300 text-red-700'
+                    ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700 text-red-700 dark:text-red-400'
                     : timerWarning
-                      ? 'bg-orange-50 border-orange-300 text-orange-700'
-                      : 'bg-[#1A2948]/5 border-[#1A2948]/20 text-[#1A2948]'
+                      ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-700 text-orange-700 dark:text-orange-400'
+                      : 'bg-primary/5 dark:bg-primary/10 border-primary/20 dark:border-primary/40 text-primary dark:text-primary'
                 }`}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <Icon
                     name="ClockIcon"
-                    size={16}
+                    size={14}
                     className={
                       timerUrgent
                         ? 'text-red-500'
@@ -266,30 +266,30 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                           : 'text-primary'
                     }
                   />
-                  <span className="text-sm font-semibold font-koho">
+                  <span className="text-[10px] sm:text-sm font-semibold font-koho">
                     {timerUrgent ? '⚠️ Ghế sắp hết hạn giữ!' : 'Thời gian giữ chỗ còn lại'}
                   </span>
                 </div>
                 <div
-                  className={`font-mono font-bold text-lg tabular-nums ${timerUrgent ? 'text-red-600' : timerWarning ? 'text-orange-600' : 'text-primary'}`}
+                  className={`font-mono font-bold text-base sm:text-lg tabular-nums ${timerUrgent ? 'text-red-600' : timerWarning ? 'text-orange-600' : 'text-primary'}`}
                 >
                   {formatTime(timeLeft)}
                 </div>
               </div>
             )}
 
-            {/* Extra Services */}
+            {/* Extra Services - responsive */}
             <div
-              className="bg-white rounded-2xl border border-stone-200 overflow-hidden mb-6"
+              className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden mb-4 sm:mb-6"
               style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
             >
               <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
-              <div className="p-5 sm:p-6">
-                <h2 className="font-black text-[#1A2948] flex items-center gap-2 font-koho mb-4">
-                  <span className="inline-block w-1 h-5 bg-primary rounded-full" />
+              <div className="p-4 sm:p-5">
+                <h2 className="font-black text-[var(--foreground)] dark:text-[var(--foreground)] flex items-center gap-1.5 sm:gap-2 font-koho mb-3 sm:mb-4">
+                  <span className="inline-block w-1 h-4 sm:h-5 bg-primary rounded-full" />
                   Dịch vụ bổ sung
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                   {[
                     {
                       id: 'baggage',
@@ -297,7 +297,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                       icon: 'BriefcaseIcon',
                       price: 'Từ 150.000₫',
                       color: 'bg-blue-50 text-blue-600',
-                      border: 'border-blue-100',
+                      border: 'border-blue-100 dark:border-blue-800',
                     },
                     {
                       id: 'meal',
@@ -305,7 +305,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                       icon: 'SparklesIcon',
                       price: 'Từ 100.000₫',
                       color: 'bg-orange-50 text-orange-600',
-                      border: 'border-orange-100',
+                      border: 'border-orange-100 dark:border-orange-800',
                     },
                     {
                       id: 'insurance',
@@ -313,24 +313,28 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                       icon: 'ShieldCheckIcon',
                       price: '60.000₫',
                       color: 'bg-emerald-50 text-emerald-600',
-                      border: 'border-emerald-100',
+                      border: 'border-emerald-100 dark:border-emerald-800',
                     },
                   ].map((svc) => (
                     <div
                       key={svc.id}
-                      className={`border ${svc.border} rounded-xl p-3 flex flex-col justify-between cursor-pointer hover:shadow-md transition-all`}
+                      className={`border ${svc.border} rounded-xl p-2.5 sm:p-3 flex flex-col justify-between cursor-pointer hover:shadow-md transition-all`}
                     >
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                         <div
-                          className={`w-8 h-8 rounded-lg flex items-center justify-center ${svc.color}`}
+                          className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center ${svc.color}`}
                         >
                           <Icon name={svc.icon as any} size={16} />
                         </div>
-                        <span className="font-bold text-[#1A2948] font-koho">{svc.title}</span>
+                        <span className="font-bold text-[var(--foreground)] dark:text-[var(--foreground)] font-koho">
+                          {svc.title}
+                        </span>
                       </div>
                       <div className="mt-auto">
-                        <div className="text-[10px] text-gray-400">Giá ưu đãi</div>
-                        <div className="text-sm font-black text-[#EC2029] font-koho">
+                        <div className="text-[8px] sm:text-[10px] text-[var(--foreground-subtle)]">
+                          Giá ưu đãi
+                        </div>
+                        <div className="text-[11px] sm:text-sm font-black text-primary font-koho">
                           {svc.price}
                         </div>
                       </div>
@@ -341,134 +345,138 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
             </div>
 
             <div
-              className="bg-white rounded-2xl border border-stone-200 overflow-hidden"
+              className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden"
               style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
             >
               {/* Red accent top bar */}
               <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
-              <div className="p-5 sm:p-6">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="font-black text-[#1A2948] flex items-center gap-2 font-koho">
-                    <span className="inline-block w-1 h-5 bg-primary rounded-full" />
+              <div className="p-4 sm:p-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1.5 sm:mb-2">
+                  <h2 className="font-black text-[var(--foreground)] dark:text-[var(--foreground)] flex items-center gap-1.5 sm:gap-2 font-koho">
+                    <span className="inline-block w-1 h-4 sm:h-5 bg-primary rounded-full" />
                     Chọn chỗ ngồi
                   </h2>
                   {/* Heatmap toggle */}
                   <button
                     onClick={() => setShowHeatmap((v) => !v)}
-                    className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
+                    className={`flex items-center gap-1 text-[10px] sm:gap-1.5 sm:text-xs font-semibold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border transition-all ${
                       showHeatmap
                         ? 'bg-orange-500 text-white border-orange-500'
-                        : 'bg-white text-stone-600 border-stone-300 hover:border-orange-400 hover:text-orange-600'
+                        : 'bg-[var(--surface)] dark:bg-[var(--dark-surface)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] border-[var(--border)] dark:border-[var(--dark-border)] hover:border-orange-400 hover:text-orange-600'
                     }`}
                   >
                     <Icon name="FireIcon" size={12} />
                     Bản đồ nhiệt
                   </button>
                 </div>
-                <p className="text-sm text-stone-500 mb-5">
+                <p className="text-[11px] sm:text-sm text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mb-4 sm:mb-5">
                   Chọn {passengerCount} chỗ ngồi ({selected.length}/{passengerCount} đã chọn)
                 </p>
 
-                {/* Seat Type Legend */}
-                <div className="rounded-xl border border-stone-100 bg-stone-50 p-3 mb-5">
-                  <div className="text-xs font-bold text-[#1A2948] uppercase tracking-wide mb-2 font-koho">
+                {/* Seat Type Legend - responsive */}
+                <div className="rounded-xl border border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] p-2.5 sm:p-3 mb-4 sm:mb-5">
+                  <div className="text-[10px] sm:text-xs font-bold text-[var(--foreground)] dark:text-[var(--foreground)] uppercase tracking-wide mb-1.5 sm:mb-2 font-koho">
                     Chú thích loại ghế
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded seat seat-available border-2 border-stone-300 bg-white flex-shrink-0" />
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-available border-2 border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--surface)] dark:bg-[var(--dark-surface)] flex-shrink-0" />
                       <div>
-                        <div className="font-semibold text-stone-700">Phổ thông</div>
-                        <div className="text-stone-400">45k–70k₫</div>
+                        <div className="font-semibold text-[var(--foreground)]">Phổ thông</div>
+                        <div className="text-[var(--foreground-subtle)]">45k–70k₫</div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded seat seat-business flex-shrink-0" />
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-business flex-shrink-0" />
                       <div>
-                        <div className="font-semibold text-stone-700">Thương gia</div>
-                        <div className="text-stone-400">350k₫+</div>
+                        <div className="font-semibold text-[var(--foreground)]">Thương gia</div>
+                        <div className="text-[var(--foreground-subtle)]">350k₫+</div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded bg-orange-100 border-2 border-orange-400 flex-shrink-0" />
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-orange-100 border-2 border-orange-400 flex-shrink-0" />
                       <div>
-                        <div className="font-semibold text-stone-700">Ưa chuộng</div>
-                        <div className="text-stone-400">Đặt nhiều</div>
+                        <div className="font-semibold text-[var(--foreground)]">Ưa chuộng</div>
+                        <div className="text-[var(--foreground-subtle)]">Đặt nhiều</div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded seat seat-selected flex-shrink-0" />
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-selected flex-shrink-0" />
                       <div>
-                        <div className="font-semibold text-stone-700">Đã chọn</div>
-                        <div className="text-stone-400">Của bạn</div>
+                        <div className="font-semibold text-[var(--foreground)]">Đã chọn</div>
+                        <div className="text-[var(--foreground-subtle)]">Của bạn</div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded seat seat-occupied flex-shrink-0" />
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-occupied flex-shrink-0" />
                       <div>
-                        <div className="font-semibold text-stone-700">Đã đặt</div>
-                        <div className="text-stone-400">Không có</div>
+                        <div className="font-semibold text-[var(--foreground)]">Đã đặt</div>
+                        <div className="text-[var(--foreground-subtle)]">Không có</div>
                       </div>
                     </div>
                     {showHeatmap && (
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded bg-green-50 border-2 border-green-400 flex-shrink-0" />
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-green-50 border-2 border-green-400 flex-shrink-0" />
                         <div>
-                          <div className="font-semibold text-stone-700">Ít người</div>
-                          <div className="text-stone-400">Còn nhiều</div>
+                          <div className="font-semibold text-[var(--foreground)]">Ít người</div>
+                          <div className="text-[var(--foreground-subtle)]">Còn nhiều</div>
                         </div>
                       </div>
                     )}
                   </div>
 
-                  {/* Heatmap scale */}
+                  {/* Heatmap scale - responsive */}
                   {showHeatmap && (
-                    <div className="mt-3 pt-3 border-t border-stone-200">
-                      <div className="text-xs font-bold text-[#1A2948] mb-1.5 font-koho">
+                    <div className="mt-2.5 sm:mt-3 pt-2.5 sm:pt-3 border-t border-[var(--border)] dark:border-[var(--dark-border)]">
+                      <div className="text-[10px] sm:text-xs font-bold text-[var(--foreground)] mb-1 sm:mb-1.5 font-koho">
                         Mức độ lấp đầy
                       </div>
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs text-stone-400">Thấp</span>
-                        <div className="flex gap-0.5 flex-1">
-                          <div className="h-3 flex-1 rounded-l bg-green-200" />
-                          <div className="h-3 flex-1 bg-yellow-200" />
-                          <div className="h-3 flex-1 bg-orange-200" />
-                          <div className="h-3 flex-1 rounded-r bg-red-300" />
+                      <div className="flex items-center gap-0.5 sm:gap-1">
+                        <span className="text-[8px] sm:text-xs text-[var(--foreground-subtle)]">
+                          Thấp
+                        </span>
+                        <div className="flex gap-0.25 sm:gap-0.5 flex-1">
+                          <div className="h-2 sm:h-3 flex-1 rounded-l bg-green-200" />
+                          <div className="h-2 sm:h-3 flex-1 bg-yellow-200" />
+                          <div className="h-2 sm:h-3 flex-1 bg-orange-200" />
+                          <div className="h-2 sm:h-3 flex-1 rounded-r bg-red-300" />
                         </div>
-                        <span className="text-xs text-stone-400">Cao</span>
+                        <span className="text-[8px] sm:text-xs text-[var(--foreground-subtle)]">
+                          Cao
+                        </span>
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* Airplane nose */}
-                <div className="text-center mb-4">
-                  <div className="inline-flex items-center gap-2 bg-[#1A2948]/5 text-[#1A2948] text-xs px-4 py-1.5 rounded-full border border-[#1A2948]/10 font-semibold font-koho">
+                {/* Airplane nose - responsive */}
+                <div className="text-center mb-3 sm:mb-4">
+                  <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-primary/5 dark:bg-primary/10 text-[var(--foreground)] text-[10px] sm:text-xs px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-primary/10 dark:border-primary/20 font-semibold font-koho">
                     <Icon name="PaperAirplaneIcon" size={12} className="text-primary" />
                     Mũi máy bay
                   </div>
                 </div>
 
-                {/* Seat map with tooltip */}
+                {/* Seat map with tooltip - responsive */}
                 <div className="overflow-x-auto">
-                  <div className="min-w-[340px] seat-map-container relative">
+                  <div className="min-w-[300px] sm:min-w-[340px] seat-map-container relative">
                     {/* Col headers */}
-                    <div className="flex items-center mb-2 pl-8">
+                    <div className="flex items-center mb-1.5 sm:mb-2 pl-7 sm:pl-8">
                       {cols.map((col, i) => (
                         <React.Fragment key={col}>
-                          {i === 3 && <div className="w-6" />}
-                          <div className="w-8 text-center text-xs font-bold text-[#1A2948]">
+                          {i === 3 && <div className="w-5 sm:w-6" />}
+                          <div className="w-7 sm:w-8 text-center text-[10px] sm:text-xs font-bold text-[var(--foreground)] dark:text-[var(--foreground)]">
                             {col}
                           </div>
                         </React.Fragment>
                       ))}
                     </div>
 
-                    {/* Rows */}
-                    <div className="space-y-1.5 max-h-[480px] overflow-y-auto pr-1">
+                    {/* Rows - responsive */}
+                    <div className="space-y-1 max-h-[400px] sm:max-h-[480px] overflow-y-auto pr-1">
                       {rows.map((row) => (
                         <div key={row} className="flex items-center gap-0">
-                          <span className="w-7 text-xs text-stone-400 font-medium text-right mr-1">
+                          <span className="w-6 sm:w-7 text-[10px] sm:text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] font-medium text-right mr-0.5 sm:mr-1">
                             {row}
                           </span>
                           {cols.map((col, i) => {
@@ -477,13 +485,13 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                             const isSelected = selected.includes(seatId);
                             return (
                               <React.Fragment key={col}>
-                                {i === 3 && <div className="w-5" />}
+                                {i === 3 && <div className="w-4 sm:w-5" />}
                                 <button
                                   onClick={() => toggleSeat(seatId)}
                                   onMouseEnter={(e) => handleMouseEnter(e, seatId)}
                                   onMouseLeave={handleMouseLeave}
                                   disabled={info.status === 'occupied'}
-                                  className={`w-8 h-8 rounded text-xs font-bold seat mx-0.5 transition-all relative ${getHeatmapClass(
+                                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded text-[10px] sm:text-xs font-bold seat mx-0.25 sm:mx-0.5 transition-all relative ${getHeatmapClass(
                                     seatId,
                                     info.status,
                                     info.occupancyLevel,
@@ -500,29 +508,29 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                       ))}
                     </div>
 
-                    {/* Tooltip */}
+                    {/* Tooltip - responsive */}
                     {tooltip && tooltipSeat && (
                       <div
                         ref={tooltipRef}
                         className="absolute z-50 pointer-events-none"
                         style={{
-                          left: Math.min(tooltip.x - 80, 220),
-                          top: tooltip.y - 160,
+                          left: Math.min(tooltip.x - 70, 200),
+                          top: tooltip.y - 140,
                         }}
                       >
-                        <div className="bg-[#1A2948] text-white rounded-xl shadow-xl p-3 w-44 text-xs">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-black text-sm font-koho">
+                        <div className="bg-[var(--vj-navy)] dark:bg-[var(--dark-surface)] text-white rounded-xl shadow-xl p-2.5 sm:p-3 w-40 sm:w-44 text-[10px] sm:text-xs">
+                          <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                            <span className="font-black text-sm sm:text-base font-koho">
                               Ghế {tooltip.seatId}
                             </span>
                             <span
-                              className={`px-1.5 py-0.5 rounded text-xs font-bold ${
+                              className={`px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold ${
                                 tooltipSeat.status === 'business'
-                                  ? 'bg-accent text-[#1A2948]'
+                                  ? 'bg-accent text-[var(--vj-navy)]'
                                   : tooltipSeat.status === 'hot'
                                     ? 'bg-orange-400 text-white'
                                     : tooltipSeat.status === 'occupied'
-                                      ? 'bg-stone-600 text-stone-300'
+                                      ? 'bg-[var(--foreground-muted)] dark:bg-[var(--dark-border)] text-white dark:text-[var(--foreground-muted)]'
                                       : 'bg-primary text-white'
                               }`}
                             >
@@ -537,7 +545,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                           </div>
                           {tooltipSeat.status !== 'occupied' && (
                             <>
-                              <div className="space-y-1 border-t border-white/10 pt-2">
+                              <div className="space-y-0.5 sm:space-y-1 border-t border-white/10 pt-1.5 sm:pt-2">
                                 <div className="flex justify-between">
                                   <span className="text-white/60">Giá gốc</span>
                                   <span>{tooltipSeat.basePrice.toLocaleString('vi-VN')}₫</span>
@@ -550,15 +558,15 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                                   <span className="text-white/60">Phí dịch vụ</span>
                                   <span>{tooltipSeat.fee.toLocaleString('vi-VN')}₫</span>
                                 </div>
-                                <div className="flex justify-between font-bold border-t border-white/10 pt-1 text-accent">
+                                <div className="flex justify-between font-bold border-t border-white/10 pt-0.5 sm:pt-1 text-accent">
                                   <span>Tổng</span>
                                   <span>{tooltipSeat.price.toLocaleString('vi-VN')}₫</span>
                                 </div>
                               </div>
-                              <div className="mt-2 pt-2 border-t border-white/10">
-                                <div className="flex items-center gap-1">
+                              <div className="mt-1.5 sm:mt-2 pt-1.5 sm:pt-2 border-t border-white/10">
+                                <div className="flex items-center gap-0.5 sm:gap-1">
                                   <div
-                                    className={`w-2 h-2 rounded-full ${
+                                    className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
                                       tooltipSeat.occupancyLevel === 'low'
                                         ? 'bg-green-400'
                                         : tooltipSeat.occupancyLevel === 'medium'
@@ -582,10 +590,12 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                             </>
                           )}
                           {tooltipSeat.status === 'occupied' && (
-                            <div className="text-white/50 text-center py-1">Ghế đã được đặt</div>
+                            <div className="text-white/50 text-center py-0.5 sm:py-1">
+                              Ghế đã được đặt
+                            </div>
                           )}
                           {/* Arrow */}
-                          <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-[#1A2948] rotate-45" />
+                          <div className="absolute bottom-[-5px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[var(--vj-navy)] dark:bg-[var(--dark-surface)] rotate-45" />
                         </div>
                       </div>
                     )}
@@ -595,53 +605,57 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
             </div>
           </div>
 
-          {/* Summary */}
+          {/* Summary - responsive */}
           <div className="lg:col-span-1">
             <div
-              className="bg-white rounded-2xl border border-stone-200 overflow-hidden sticky top-[230px]"
+              className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden sticky top-[180px] sm:top-[200px] lg:top-[230px]"
               style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
             >
               {/* Yellow accent top bar */}
               <div className="h-1 w-full bg-gradient-to-r from-accent/60 via-accent to-accent/60" />
-              <div className="p-5">
-                <h3 className="font-black text-[#1A2948] mb-4 flex items-center gap-2 font-koho">
+              <div className="p-4 sm:p-5">
+                <h3 className="font-black text-[var(--foreground)] mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2 font-koho">
                   <Icon name="TicketIcon" size={16} className="text-primary" />
                   Chỗ đã chọn
                 </h3>
 
                 {selected.length === 0 ? (
-                  <div className="text-center py-8 text-stone-400">
-                    <Icon name="TicketIcon" size={32} className="mx-auto mb-2 text-stone-300" />
-                    <div className="text-sm">Chưa chọn chỗ ngồi</div>
+                  <div className="text-center py-6 sm:py-8 text-[var(--foreground-subtle)]">
+                    <Icon
+                      name="TicketIcon"
+                      size={32}
+                      className="mx-auto mb-1.5 sm:mb-2 text-[var(--foreground-muted)]"
+                    />
+                    <div className="text-[11px] sm:text-sm">Chưa chọn chỗ ngồi</div>
                   </div>
                 ) : (
-                  <div className="space-y-2 mb-4">
+                  <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
                     {selected.map((seat, i) => {
                       const info = SEATS[seat];
                       return (
                         <div
                           key={seat}
-                          className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-xl px-3 py-2.5"
+                          className="flex items-center justify-between bg-primary/5 dark:bg-primary/10 border border-primary/10 dark:border-primary/20 rounded-xl px-2.5 sm:px-3 py-2 sm:py-2.5"
                         >
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-gradient-red rounded text-white text-xs font-black flex items-center justify-center shadow-sm">
+                          <div className="flex items-center gap-1.5 sm:gap-2">
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-red rounded text-white text-[10px] sm:text-xs font-black flex items-center justify-center shadow-sm">
                               {i + 1}
                             </div>
                             <div>
-                              <div className="font-black text-[#1A2948] text-sm font-koho">
+                              <div className="font-black text-[var(--foreground)] text-[11px] sm:text-sm font-koho">
                                 Ghế {seat}
                               </div>
-                              <div className="text-xs text-stone-500">
+                              <div className="text-[9px] sm:text-xs text-[var(--foreground-muted)]">
                                 {passengers[i]?.name || `Hành khách ${i + 1}`}
                               </div>
-                              <div className="text-xs text-primary font-bold">
+                              <div className="text-[9px] sm:text-xs text-primary font-bold">
                                 {info.price.toLocaleString('vi-VN')}₫
                               </div>
                             </div>
                           </div>
                           <button
                             onClick={() => setSelected((prev) => prev.filter((s) => s !== seat))}
-                            className="text-stone-400 hover:text-primary transition-colors"
+                            className="text-[var(--foreground-subtle)] hover:text-primary transition-colors"
                           >
                             <Icon name="XMarkIcon" size={14} />
                           </button>
@@ -651,22 +665,22 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                   </div>
                 )}
 
-                {/* Price */}
-                <div className="border-t border-stone-100 pt-4 mb-4 space-y-2 text-sm">
+                {/* Price - responsive */}
+                <div className="border-t border-[var(--border)] dark:border-[var(--dark-border)] pt-3 sm:pt-4 mb-3 sm:mb-4 space-y-1.5 sm:space-y-2 text-[11px] sm:text-sm">
                   <div className="flex justify-between">
-                    <span className="text-stone-500">Vé máy bay</span>
-                    <span className="font-semibold text-stone-800">
+                    <span className="text-[var(--foreground-muted)]">Vé máy bay</span>
+                    <span className="font-semibold text-[var(--foreground)]">
                       {(flight.price * passengerCount).toLocaleString('vi-VN')}₫
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-stone-500">Phí chọn chỗ</span>
-                    <span className="font-semibold text-stone-800">
+                    <span className="text-[var(--foreground-muted)]">Phí chọn chỗ</span>
+                    <span className="font-semibold text-[var(--foreground)]">
                       {selected.reduce((sum, s) => sum + SEATS[s].price, 0).toLocaleString('vi-VN')}
                       ₫
                     </span>
                   </div>
-                  <div className="flex justify-between font-black text-[#1A2948] pt-1 border-t border-stone-100 font-koho">
+                  <div className="flex justify-between font-black text-[var(--foreground)] pt-1 border-t border-[var(--border)] dark:border-[var(--dark-border)] font-koho">
                     <span>Tổng cộng</span>
                     <span className="text-primary">
                       {(
@@ -678,10 +692,10 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                   </div>
                 </div>
 
-                {/* Compact hold timer in sidebar */}
+                {/* Compact hold timer in sidebar - responsive */}
                 {holdTimer !== null && (
                   <div
-                    className={`rounded-lg px-3 py-2 mb-3 flex items-center justify-between text-xs ${
+                    className={`rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 mb-2.5 sm:mb-3 flex items-center justify-between text-[10px] sm:text-xs ${
                       timerUrgent
                         ? 'bg-red-50 text-red-600 border border-red-200'
                         : timerWarning
@@ -689,7 +703,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                           : 'bg-primary/5 text-primary border border-primary/10'
                     }`}
                   >
-                    <span className="flex items-center gap-1 font-semibold">
+                    <span className="flex items-center gap-0.5 sm:gap-1 font-semibold">
                       <Icon name="ClockIcon" size={12} />
                       Giữ chỗ còn
                     </span>

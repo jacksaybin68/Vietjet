@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import Icon from '@/components/ui/AppIcon';
+import { Icon } from '@/shared/components/ui';
 
 interface NotificationToggle {
   id: string;
@@ -102,7 +102,7 @@ export default function NotificationSettingsTab() {
     <div className="space-y-6">
       {/* Header */}
       <div
-        className="bg-white rounded-2xl border border-stone-200 p-6"
+        className="bg-white rounded-2xl border border-[var(--border)] p-6"
         style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
       >
         <div className="flex items-center gap-3 mb-1">
@@ -114,29 +114,29 @@ export default function NotificationSettingsTab() {
           </div>
           <div>
             <h2 className="text-lg font-bold text-[#1A2948]">Cài đặt thông báo</h2>
-            <p className="text-sm text-stone-500">Tuỳ chỉnh loại thông báo và phương thức nhận</p>
+            <p className="text-sm text-[var(--foreground-muted)]">Tuỳ chỉnh loại thông báo và phương thức nhận</p>
           </div>
         </div>
       </div>
 
       {/* Alert Type Toggles */}
       <div
-        className="bg-white rounded-2xl border border-stone-200 overflow-hidden"
+        className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden"
         style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
       >
-        <div className="px-6 py-4 border-b border-stone-100">
+        <div className="px-6 py-4 border-b border-[var(--border)]">
           <h3 className="text-base font-bold text-[#1A2948]">Loại thông báo</h3>
-          <p className="text-sm text-stone-500 mt-0.5">Chọn những loại thông báo bạn muốn nhận</p>
+          <p className="text-sm text-[var(--foreground-muted)] mt-0.5">Chọn những loại thông báo bạn muốn nhận</p>
         </div>
-        <div className="divide-y divide-stone-100">
+        <div className="divide-y divide-[var(--border)]">
           {alerts.map((alert) => (
             <div
               key={alert.id}
-              className="flex items-center justify-between px-6 py-4 hover:bg-stone-50 transition-colors"
+              className="flex items-center justify-between px-6 py-4 hover:bg-[var(--surface-2)] transition-colors"
             >
               <div className="flex items-center gap-4">
                 <div
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${alert.enabled ? 'bg-red-50' : 'bg-stone-100'}`}
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${alert.enabled ? 'bg-red-50' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)]'}`}
                 >
                   <Icon
                     name={alert.icon as any}
@@ -146,18 +146,18 @@ export default function NotificationSettingsTab() {
                 </div>
                 <div>
                   <p
-                    className={`text-sm font-semibold ${alert.enabled ? 'text-[#1A2948]' : 'text-stone-400'}`}
+                    className={`text-sm font-semibold ${alert.enabled ? 'text-[#1A2948]' : 'text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]'}`}
                   >
                     {alert.label}
                   </p>
-                  <p className="text-xs text-stone-500 mt-0.5 max-w-xs">{alert.description}</p>
+                  <p className="text-xs text-[var(--foreground-muted)] mt-0.5 max-w-xs">{alert.description}</p>
                 </div>
               </div>
               {/* Toggle Switch */}
               <button
                 onClick={() => toggleAlert(alert.id)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none flex-shrink-0 ${alert.enabled ? 'bg-[#D0021B]' : 'bg-stone-300'}`}
-                aria-label={`Toggle ${alert.label}`}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none flex-shrink-0 ${alert.enabled ? 'bg-[#D0021B]' : 'bg-[var(--surface-3)]'}`}
+                aria-label={`Bật hoặc tắt ${alert.label}`}
               >
                 <span
                   className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${alert.enabled ? 'translate-x-6' : 'translate-x-1'}`}
@@ -170,22 +170,22 @@ export default function NotificationSettingsTab() {
 
       {/* Delivery Methods */}
       <div
-        className="bg-white rounded-2xl border border-stone-200 overflow-hidden"
+        className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden"
         style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
       >
-        <div className="px-6 py-4 border-b border-stone-100">
+        <div className="px-6 py-4 border-b border-[var(--border)]">
           <h3 className="text-base font-bold text-[#1A2948]">Phương thức nhận thông báo</h3>
-          <p className="text-sm text-stone-500 mt-0.5">Chọn cách bạn muốn nhận thông báo</p>
+          <p className="text-sm text-[var(--foreground-muted)] mt-0.5">Chọn cách bạn muốn nhận thông báo</p>
         </div>
-        <div className="divide-y divide-stone-100">
+        <div className="divide-y divide-[var(--border)]">
           {deliveryMethods.map((method) => (
             <div
               key={method.id}
-              className="flex items-center justify-between px-6 py-4 hover:bg-stone-50 transition-colors"
+              className="flex items-center justify-between px-6 py-4 hover:bg-[var(--surface-2)] transition-colors"
             >
               <div className="flex items-center gap-4">
                 <div
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${method.enabled ? 'bg-amber-50' : 'bg-stone-100'}`}
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${method.enabled ? 'bg-amber-50' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)]'}`}
                 >
                   <Icon
                     name={method.icon as any}
@@ -195,18 +195,18 @@ export default function NotificationSettingsTab() {
                 </div>
                 <div>
                   <p
-                    className={`text-sm font-semibold ${method.enabled ? 'text-[#1A2948]' : 'text-stone-400'}`}
+                    className={`text-sm font-semibold ${method.enabled ? 'text-[#1A2948]' : 'text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]'}`}
                   >
                     {method.label}
                   </p>
-                  <p className="text-xs text-stone-500 mt-0.5">{method.description}</p>
+                  <p className="text-xs text-[var(--foreground-muted)] mt-0.5">{method.description}</p>
                 </div>
               </div>
               {/* Toggle Switch */}
               <button
                 onClick={() => toggleDelivery(method.id)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none flex-shrink-0 ${method.enabled ? 'bg-[#FFC72C]' : 'bg-stone-300'}`}
-                aria-label={`Toggle ${method.label}`}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none flex-shrink-0 ${method.enabled ? 'bg-[#FFC72C]' : 'bg-[var(--surface-3)]'}`}
+                aria-label={`Bật hoặc tắt ${method.label}`}
               >
                 <span
                   className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${method.enabled ? 'translate-x-6' : 'translate-x-1'}`}
@@ -219,7 +219,7 @@ export default function NotificationSettingsTab() {
 
       {/* Quiet Hours */}
       <div
-        className="bg-white rounded-2xl border border-stone-200 p-6"
+        className="bg-white rounded-2xl border border-[var(--border)] p-6"
         style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
       >
         <div className="flex items-center gap-3 mb-4">
@@ -228,15 +228,15 @@ export default function NotificationSettingsTab() {
           </div>
           <div>
             <h3 className="text-base font-bold text-[#1A2948]">Giờ yên tĩnh</h3>
-            <p className="text-xs text-stone-500">
+            <p className="text-xs text-[var(--foreground-muted)]">
               Tạm dừng thông báo trong khoảng thời gian nhất định
             </p>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-stone-600 mb-1.5">Từ</label>
-            <select className="w-full border border-stone-200 rounded-xl px-3 py-2.5 text-sm text-[#1A2948] focus:outline-none focus:ring-2 focus:ring-red-200 bg-stone-50">
+            <label className="block text-xs font-semibold text-[var(--foreground-muted)] mb-1.5">Từ</label>
+            <select className="w-full border border-[var(--border)] rounded-xl px-3 py-2.5 text-sm text-[#1A2948] focus:outline-none focus:ring-2 focus:ring-red-200 bg-[var(--surface-2)]">
               <option>22:00</option>
               <option>21:00</option>
               <option>23:00</option>
@@ -244,8 +244,8 @@ export default function NotificationSettingsTab() {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-stone-600 mb-1.5">Đến</label>
-            <select className="w-full border border-stone-200 rounded-xl px-3 py-2.5 text-sm text-[#1A2948] focus:outline-none focus:ring-2 focus:ring-red-200 bg-stone-50">
+            <label className="block text-xs font-semibold text-[var(--foreground-muted)] mb-1.5">Đến</label>
+            <select className="w-full border border-[var(--border)] rounded-xl px-3 py-2.5 text-sm text-[#1A2948] focus:outline-none focus:ring-2 focus:ring-red-200 bg-[var(--surface-2)]">
               <option>07:00</option>
               <option>06:00</option>
               <option>08:00</option>

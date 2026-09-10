@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import Icon from '@/components/ui/AppIcon';
+import { Icon } from '@/shared/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { getCsrfHeaders } from '@/hooks/useCsrf';
 
@@ -177,28 +177,28 @@ function MetadataBadge({ type, metadata }: { type: string; metadata?: Record<str
       cancellation: '❌ Huỷ chuyến',
     };
     return (
-      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-100">
+      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-800">
         {labels[metadata.delay_type] || metadata.delay_type}
       </span>
     );
   }
   if (type === 'promo' && metadata.promo_code) {
     return (
-      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-100 tracking-wide">
+      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-900/10 text-purple-700 dark:text-purple-300 border border-purple-100 dark:border-purple-800 tracking-wide">
         {metadata.promo_code}
       </span>
     );
   }
   if (type === 'promo' && metadata.expires_hours) {
     return (
-      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-100">
+      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-900/10 text-amber-700 dark:text-amber-300 border border-[var(--accent)]/20 dark:border-amber-800">
         ⏱ Còn {metadata.expires_hours}h
       </span>
     );
   }
   if (type === 'booking' && metadata.booking_id) {
     return (
-      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-100">
+      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/10 text-green-700 dark:text-green-300 border border-green-100 dark:border-green-800">
         #{metadata.booking_id}
       </span>
     );
@@ -293,7 +293,7 @@ function NotifCard({ notif, onMarkRead, onDismiss, onArchive, onSnooze }: NotifC
           transition: swiping ? 'none' : 'transform 0.25s ease-out',
         }}
         className={`flex gap-4 p-5 cursor-pointer transition-colors relative z-10 ${
-          notif.read ? 'bg-white hover:bg-stone-50' : 'bg-blue-50/30 hover:bg-blue-50/50'
+          notif.read ? 'bg-white hover:bg-[var(--surface-2)]' : 'bg-blue-50/30 hover:bg-blue-50/50'
         } ${isSnoozed ? 'opacity-60' : ''}`}
       >
         {/* Icon */}
@@ -315,13 +315,13 @@ function NotifCard({ notif, onMarkRead, onDismiss, onArchive, onSnooze }: NotifC
                 />
               )}
               <span
-                className={`text-sm font-bold truncate ${notif.read ? 'text-stone-600' : 'text-navy'}`}
+                className={`text-sm font-bold truncate ${notif.read ? 'text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]' : 'text-[var(--vj-navy)] dark:text-white'}`}
               >
                 {notif.title}
               </span>
             </div>
             <span
-              className="flex-shrink-0 text-xs text-stone-400 whitespace-nowrap"
+              className="flex-shrink-0 text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] whitespace-nowrap"
               title={formatFullDate(notif.timestamp)}
             >
               {formatRelativeTime(notif.timestamp)}
@@ -329,7 +329,7 @@ function NotifCard({ notif, onMarkRead, onDismiss, onArchive, onSnooze }: NotifC
           </div>
 
           {/* Body */}
-          <p className="text-xs text-stone-500 mt-1 leading-relaxed line-clamp-2">{notif.body}</p>
+          <p className="text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-1 leading-relaxed line-clamp-2">{notif.body}</p>
 
           {/* Badges row */}
           <div className="flex items-center gap-2 mt-2 flex-wrap">
@@ -341,7 +341,7 @@ function NotifCard({ notif, onMarkRead, onDismiss, onArchive, onSnooze }: NotifC
             </span>
             <MetadataBadge type={notif.type} metadata={notif.metadata} />
             {isSnoozed && (
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 flex items-center gap-1">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-900/10 text-amber-600 dark:text-amber-400 flex items-center gap-1">
                 <Icon name="ClockIcon" size={11} />
                 Đã nhắc lại
               </span>
@@ -352,14 +352,14 @@ function NotifCard({ notif, onMarkRead, onDismiss, onArchive, onSnooze }: NotifC
           <div className="flex items-center gap-1.5 mt-3" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => onArchive(notif.id)}
-              className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border border-stone-200 text-stone-500 bg-white hover:bg-stone-50 hover:border-stone-300 transition-all"
+              className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border border-[var(--border)] text-[var(--foreground-muted)] bg-white hover:bg-[var(--surface-2)] hover:border-[var(--border)] transition-all"
             >
               <Icon name="ArchiveBoxIcon" size={13} />
               <span className="hidden sm:inline">Lưu trữ</span>
             </button>
             <button
               onClick={() => onDismiss(notif.id)}
-              className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border border-stone-200 text-stone-500 bg-white hover:bg-red-50 hover:border-red-200 hover:text-red-500 transition-all"
+              className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border border-[var(--border)] text-[var(--foreground-muted)] bg-white hover:bg-red-50 hover:border-red-200 hover:text-red-500 transition-all"
             >
               <Icon name="XMarkIcon" size={13} />
               <span className="hidden sm:inline">Xoá</span>
@@ -370,13 +370,13 @@ function NotifCard({ notif, onMarkRead, onDismiss, onArchive, onSnooze }: NotifC
                   e.stopPropagation();
                   setShowSnoozeMenu((s) => !s);
                 }}
-                className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border border-stone-200 text-stone-500 bg-white hover:bg-amber-50 hover:border-amber-200 hover:text-amber-600 transition-all"
+                className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border border-[var(--border)] text-[var(--foreground-muted)] bg-white hover:bg-amber-50 hover:border-[var(--accent)]/30 hover:text-amber-600 transition-all"
               >
                 <Icon name="ClockIcon" size={13} />
                 <span className="hidden sm:inline">Nhắc lại</span>
               </button>
               {showSnoozeMenu && (
-                <div className="absolute left-0 bottom-full mb-1 bg-white border border-stone-200 rounded-xl shadow-lg z-20 overflow-hidden min-w-[120px]">
+                <div className="absolute left-0 bottom-full mb-1 bg-white border border-[var(--border)] rounded-xl shadow-lg z-20 overflow-hidden min-w-[120px]">
                   {SNOOZE_OPTIONS.map((opt) => (
                     <button
                       key={opt.ms}
@@ -385,7 +385,7 @@ function NotifCard({ notif, onMarkRead, onDismiss, onArchive, onSnooze }: NotifC
                         onSnooze(notif.id, opt.ms);
                         setShowSnoozeMenu(false);
                       }}
-                      className="w-full text-left text-xs font-semibold px-4 py-2.5 hover:bg-amber-50 hover:text-amber-700 text-stone-600 transition-colors"
+                      className="w-full text-left text-xs font-semibold px-4 py-2.5 hover:bg-amber-50 hover:text-amber-700 text-[var(--foreground-muted)] transition-colors"
                     >
                       {opt.label}
                     </button>
@@ -411,7 +411,7 @@ function StatsBar({ notifications }: { notifications: Notification[] }) {
   if (total === 0) return null;
 
   return (
-    <div className="grid grid-cols-3 gap-2 px-5 py-3 bg-stone-50 border-b border-stone-100">
+    <div className="grid grid-cols-3 gap-2 px-5 py-3 bg-[var(--surface-2)] border-b border-[var(--border)]">
       {[
         {
           key: 'booking',
@@ -440,7 +440,7 @@ function StatsBar({ notifications }: { notifications: Notification[] }) {
       ].map((item) => (
         <div
           key={item.key}
-          className="flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-stone-100"
+          className="flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-[var(--border)]"
         >
           <div
             className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -450,7 +450,7 @@ function StatsBar({ notifications }: { notifications: Notification[] }) {
           </div>
           <div className="min-w-0">
             <div className="text-xs font-bold text-navy">{item.count}</div>
-            <div className="text-xs text-stone-400 truncate">{item.label}</div>
+            <div className="text-xs text-[var(--foreground-muted)] truncate">{item.label}</div>
           </div>
         </div>
       ))}
@@ -609,7 +609,7 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
 
   return (
     <div
-      className="bg-white rounded-2xl border border-stone-200 overflow-hidden"
+      className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden"
       style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
     >
       <div
@@ -618,23 +618,21 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
       />
 
       {/* Header */}
-      <div className="px-5 py-4 border-b border-stone-100">
+      <div className="px-5 py-4 border-b border-[var(--border)]">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center"
-              style={{ background: '#FFF5F5' }}
+              className="w-8 h-8 rounded-xl flex items-center justify-center bg-red-50 dark:bg-red-900/10"
             >
-              <Icon name="BellIcon" size={16} style={{ color: '#D0021B' }} />
+              <Icon name="BellIcon" size={16} className="text-red-500 dark:text-red-400" />
             </div>
             <div>
-              <h2 className="font-bold text-base leading-tight text-navy">Trung tâm thông báo</h2>
-              <p className="text-xs text-stone-400">Cập nhật đặt vé, chuyến bay & khuyến mãi</p>
+              <h2 className="font-bold text-base leading-tight text-[var(--foreground)] dark:text-[var(--foreground)]">Trung tâm thông báo</h2>
+              <p className="text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]">Cập nhật đặt vé, chuyến bay & khuyến mãi</p>
             </div>
             {unreadCount > 0 && (
               <span
-                className="text-white text-xs font-bold px-2 py-0.5 rounded-full"
-                style={{ background: '#D0021B' }}
+                className="text-white text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--primary)]"
               >
                 {unreadCount}
               </span>
@@ -644,7 +642,7 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllRead}
-                className="text-xs font-semibold text-stone-500 hover:text-primary transition-colors flex items-center gap-1"
+                className="text-xs font-semibold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] hover:text-primary transition-colors flex items-center gap-1"
               >
                 <Icon name="CheckCircleIcon" size={13} />
                 <span className="hidden sm:inline">Đánh dấu tất cả đã đọc</span>
@@ -652,7 +650,7 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
             )}
             <button
               onClick={loadNotifications}
-              className="text-stone-400 hover:text-primary transition-colors"
+              className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] hover:text-primary transition-colors"
               title="Tải lại"
             >
               <Icon name="ArrowPathIcon" size={14} />
@@ -665,14 +663,14 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
           <Icon
             name="MagnifyingGlassIcon"
             size={14}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]"
           />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm kiếm thông báo..."
-            className="w-full pl-8 pr-4 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-900 placeholder-stone-400 focus:outline-none transition-all"
+            className="w-full pl-8 pr-4 py-2 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-xs text-[var(--foreground)] placeholder-[var(--foreground-muted)] focus:outline-none transition-all"
           />
         </div>
 
@@ -691,7 +689,7 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex-shrink-0 ${
                   activeType === type
                     ? 'text-white shadow-sm'
-                    : 'text-stone-500 bg-stone-50 hover:bg-stone-100'
+                    : 'text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] hover:bg-[var(--surface)] dark:hover:bg-[var(--dark-surface)]'
                 }`}
                 style={activeType === type ? { background: conf.color } : {}}
               >
@@ -699,7 +697,7 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
                 {conf.label}
                 {typeUnread > 0 && (
                   <span
-                    className={`text-xs font-bold px-1.5 py-0 rounded-full ${activeType === type ? 'bg-white/30 text-white' : 'bg-red-100 text-red-600'}`}
+                    className={`text-xs font-bold px-1.5 py-0 rounded-full ${activeType === type ? 'bg-white/30 text-white' : 'bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400'}`}
                   >
                     {typeUnread}
                   </span>
@@ -714,7 +712,7 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
           <select
             value={timestampFilter}
             onChange={(e) => setTimestampFilter(e.target.value as TimestampFilter)}
-            className="text-xs border border-stone-200 rounded-lg px-2 py-1.5 bg-white text-stone-600 focus:outline-none"
+            className="text-xs border border-[var(--border)] dark:border-[var(--dark-border)] rounded-lg px-2 py-1.5 bg-[var(--surface)] dark:bg-[var(--dark-surface)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] focus:outline-none"
           >
             <option value="all">Tất cả thời gian</option>
             <option value="today">Hôm nay</option>
@@ -725,10 +723,9 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
             onClick={() => setShowUnreadOnly((v) => !v)}
             className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl border transition-all ${
               showUnreadOnly
-                ? 'text-white border-transparent'
-                : 'text-stone-500 border-stone-200 hover:bg-stone-50'
+                ? 'text-white border-transparent bg-[var(--primary)]'
+                : 'text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] border-[var(--border)] dark:border-[var(--dark-border)] hover:bg-[var(--surface-2)] dark:hover:bg-[var(--dark-surface-2)]'
             }`}
-            style={showUnreadOnly ? { background: '#D0021B', borderColor: '#D0021B' } : {}}
           >
             <Icon name="BellIcon" size={12} />
             Chưa đọc
@@ -737,8 +734,8 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
             onClick={() => setShowArchived((v) => !v)}
             className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl border transition-all ${
               showArchived
-                ? 'bg-stone-200 text-stone-700 border-stone-300'
-                : 'text-stone-500 border-stone-200 hover:bg-stone-50'
+                ? 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] border-[var(--border)] dark:border-[var(--dark-border)]'
+                : 'text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] border-[var(--border)] dark:border-[var(--dark-border)] hover:bg-[var(--surface-2)] dark:hover:bg-[var(--dark-surface-2)]'
             }`}
           >
             <Icon name="ArchiveBoxIcon" size={12} />
@@ -757,11 +754,11 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center py-16 text-center px-5">
-          <div className="w-14 h-14 bg-stone-50 rounded-2xl flex items-center justify-center mb-3">
-            <Icon name="BellSlashIcon" size={28} className="text-stone-300" />
+          <div className="w-14 h-14 bg-[var(--surface-2)] rounded-2xl flex items-center justify-center mb-3">
+            <Icon name="BellSlashIcon" size={28} className="text-[var(--foreground-subtle)]" />
           </div>
-          <p className="font-bold text-stone-600 text-sm">Không có thông báo</p>
-          <p className="text-xs text-stone-400 mt-1 max-w-xs">
+          <p className="font-bold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] text-sm">Không có thông báo</p>
+          <p className="text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] mt-1 max-w-xs">
             {searchQuery || activeType !== 'all' || showUnreadOnly
               ? 'Không tìm thấy thông báo phù hợp với bộ lọc.'
               : 'Bạn đã xem hết tất cả thông báo.'}
@@ -774,15 +771,14 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
                 setShowUnreadOnly(false);
                 setTimestampFilter('all');
               }}
-              className="mt-3 text-xs font-semibold text-white px-4 py-2 rounded-xl transition-all"
-              style={{ background: '#D0021B' }}
+              className="mt-3 text-xs font-semibold text-white px-4 py-2 rounded-xl transition-all bg-[var(--primary)]"
             >
               Đặt lại bộ lọc
             </button>
           )}
         </div>
       ) : (
-        <div className="divide-y divide-stone-50">
+        <div className="divide-y divide-[var(--border)] dark:divide-[var(--dark-border)]">
           {filtered.map((notif) => (
             <NotifCard
               key={notif.id}
@@ -798,15 +794,14 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
 
       {/* Footer */}
       {filtered.length > 0 && (
-        <div className="px-5 py-3 border-t border-stone-100 bg-stone-50 flex items-center justify-between">
-          <span className="text-xs text-stone-400">
+        <div className="px-5 py-3 border-t border-[var(--border)] bg-[var(--surface-2)] flex items-center justify-between">
+          <span className="text-xs text-[var(--foreground-muted)]">
             {filtered.length} thông báo · {unreadCount} chưa đọc
           </span>
           {unreadCount > 0 && (
             <button
               onClick={handleMarkAllRead}
-              className="text-xs font-semibold transition-colors"
-              style={{ color: '#D0021B' }}
+              className="text-xs font-semibold transition-colors text-[var(--primary)]"
             >
               Đánh dấu tất cả đã đọc
             </button>

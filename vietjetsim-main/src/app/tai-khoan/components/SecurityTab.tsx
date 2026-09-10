@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import Icon from '@/components/ui/AppIcon';
+import { Icon } from '@/shared/components/ui';
 import { useToast } from '@/hooks/useToast';
 
 interface UserSession {
@@ -106,16 +106,16 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
-        <div className="p-6 border-b border-stone-100 flex items-center justify-between">
+      <div className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+        <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
           <h3 className="text-lg font-bold font-[KoHo,sans-serif] text-[#1A2948]">
             Thiết lập xác thực hai yếu tố (2FA)
           </h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-stone-100 transition-colors"
+            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] transition-colors"
           >
-            <Icon name="XMarkIcon" size={20} className="text-stone-500" />
+            <Icon name="XMarkIcon" size={20} className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]" />
           </button>
         </div>
 
@@ -128,14 +128,14 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
               <h4 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948]">
                 Quét mã QR với ứng dụng xác thực
               </h4>
-              <p className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">
+              <p className="text-sm text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
                 Sử dụng ứng dụng Google Authenticator, Authy hoặc Microsoft Authenticator để quét mã
                 QR bên dưới.
               </p>
 
               {/* QR Code placeholder */}
               <div className="flex justify-center my-4">
-                <div className="w-48 h-48 bg-stone-100 rounded-xl flex items-center justify-center border-2 border-dashed border-stone-300">
+                <div className="w-48 h-48 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl flex items-center justify-center border-2 border-dashed border-[var(--border)] dark:border-[var(--dark-border)]">
                   {uri ? (
                     <img
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(uri)}`}
@@ -143,13 +143,13 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
                       className="w-44 h-44 rounded-lg"
                     />
                   ) : (
-                    <Icon name="QrCodeIcon" size={48} className="text-stone-300" />
+                    <Icon name="QrCodeIcon" size={48} className="text-[var(--foreground-subtle)]" />
                   )}
                 </div>
               </div>
 
-              <div className="bg-stone-50 rounded-xl p-4 text-left">
-                <p className="text-xs text-stone-500 font-semibold mb-1 font-[Be Vietnam Pro,sans-serif]">
+              <div className="bg-[var(--surface-2)] rounded-xl p-4 text-left">
+                <p className="text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] font-semibold mb-1 font-[Be Vietnam Pro,sans-serif]">
                   Hoặc nhập mã thủ công:
                 </p>
                 <p className="text-sm font-mono text-[#1A2948] break-all font-[Be Vietnam Pro,sans-serif]">
@@ -171,7 +171,7 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
                 </button>
                 <button
                   onClick={onClose}
-                  className="px-6 py-3 bg-stone-100 text-stone-600 rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-stone-200 transition-all"
+                  className="px-6 py-3 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-[var(--surface-3)] transition-all"
                 >
                   Hủy
                 </button>
@@ -187,7 +187,7 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
               <h4 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948]">
                 Nhập mã xác thực
               </h4>
-              <p className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">
+              <p className="text-sm text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
                 Nhập mã 6 chữ số từ ứng dụng xác thực của bạn để xác minh.
               </p>
 
@@ -195,7 +195,7 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
                 type="text"
                 value={token}
                 onChange={(e) => setToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                className="w-full text-center text-3xl tracking-[0.5em] px-4 py-4 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#EC2029]/20 focus:border-[#EC2029] font-[KoHo,sans-serif]"
+                className="w-full text-center text-3xl tracking-[0.5em] px-4 py-4 bg-[var(--surface-2)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#EC2029]/20 focus:border-[#EC2029] font-[KoHo,sans-serif]"
                 placeholder="000000"
                 maxLength={6}
               />
@@ -214,7 +214,7 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
                 </button>
                 <button
                   onClick={onClose}
-                  className="px-6 py-3 bg-stone-100 text-stone-600 rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-stone-200 transition-all"
+                  className="px-6 py-3 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-[var(--surface-3)] transition-all"
                 >
                   Hủy
                 </button>
@@ -230,7 +230,7 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
               <h4 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948]">
                 Mã dự phòng
               </h4>
-              <p className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">
+              <p className="text-sm text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
                 Lưu giữ các mã dưới đây ở nơi an toàn. Bạn có thể dùng chúng để đăng nhập nếu mất
                 quyền truy cập vào ứng dụng xác thực.
               </p>
@@ -239,7 +239,7 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
                 {backupCodes.map((code, i) => (
                   <div
                     key={i}
-                    className="bg-stone-100 rounded-lg px-3 py-2 text-center font-mono text-sm font-bold text-[#1A2948] font-[Be Vietnam Pro,sans-serif]"
+                    className="bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-lg px-3 py-2 text-center font-mono text-sm font-bold text-[#1A2948] font-[Be Vietnam Pro,sans-serif]"
                   >
                     {code}
                   </div>
@@ -378,9 +378,9 @@ export default function SecurityTab() {
   if (loading) {
     return (
       <div className="space-y-4 p-4">
-        <div className="h-32 bg-stone-100 rounded-2xl animate-pulse" />
-        <div className="h-48 bg-stone-100 rounded-2xl animate-pulse" />
-        <div className="h-32 bg-stone-100 rounded-2xl animate-pulse" />
+        <div className="h-32 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse" />
+        <div className="h-48 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse" />
+        <div className="h-32 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse" />
       </div>
     );
   }
@@ -392,14 +392,14 @@ export default function SecurityTab() {
         <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[#1A2948]">
           Bảo mật tài khoản
         </h2>
-        <p className="text-sm text-stone-500 mt-1 font-[Be Vietnam Pro,sans-serif]">
+        <p className="text-sm text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
           Quản lý bảo mật và thiết bị đăng nhập
         </p>
       </div>
 
       {/* 2FA Section */}
-      <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-vj-card">
-        <div className="p-5 border-b border-stone-100">
+      <div className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden shadow-vj-card">
+        <div className="p-5 border-b border-[var(--border)]">
           <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948] flex items-center gap-2">
             <Icon name="ShieldCheckIcon" size={20} className="text-[#EC2029]" />
             Xác thực hai yếu tố (2FA)
@@ -411,7 +411,7 @@ export default function SecurityTab() {
               <p className="text-sm font-semibold text-[#1A2948] font-[KoHo,sans-serif]">
                 {twoFA?.isEnabled ? 'Đã kích hoạt' : 'Chưa kích hoạt'}
               </p>
-              <p className="text-xs text-stone-500 mt-0.5 font-[Be Vietnam Pro,sans-serif]">
+              <p className="text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-0.5 font-[Be Vietnam Pro,sans-serif]">
                 {twoFA?.isEnabled
                   ? 'Tài khoản được bảo vệ bằng ứng dụng xác thực.'
                   : 'Bảo vệ tài khoản bằng ứng dụng xác thực (Google Authenticator, Authy).'}
@@ -422,14 +422,14 @@ export default function SecurityTab() {
                 <>
                   <button
                     onClick={() => setShow2FASetup(true)}
-                    className="px-4 py-2 bg-stone-100 text-stone-600 rounded-lg text-sm font-semibold font-[KoHo,sans-serif] hover:bg-stone-200 transition-all"
+                    className="px-4 py-2 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] rounded-lg text-sm font-semibold font-[KoHo,sans-serif] hover:bg-[var(--surface-3)] transition-all"
                   >
                     Cập nhật
                   </button>
                   <button
                     onClick={handleDisable2FA}
                     disabled={actionLoading === 'disable2fa'}
-                    className="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-semibold font-[KoHo,sans-serif] hover:bg-red-100 transition-all disabled:opacity-50"
+                    className="px-4 py-2 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 rounded-lg text-sm font-semibold font-[KoHo,sans-serif] hover:bg-red-100 dark:hover:bg-red-900/20 transition-all disabled:opacity-50"
                   >
                     Tắt 2FA
                   </button>
@@ -448,8 +448,8 @@ export default function SecurityTab() {
       </div>
 
       {/* Active Sessions */}
-      <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-vj-card">
-        <div className="p-5 border-b border-stone-100 flex items-center justify-between">
+      <div className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden shadow-vj-card">
+        <div className="p-5 border-b border-[var(--border)] flex items-center justify-between">
           <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948] flex items-center gap-2">
             <Icon name="DevicePhoneMobileIcon" size={20} className="text-[#1A2948]" />
             Thiết bị đã đăng nhập
@@ -458,21 +458,21 @@ export default function SecurityTab() {
             <button
               onClick={handleLogoutAll}
               disabled={actionLoading === 'all'}
-              className="text-xs text-red-500 hover:text-red-600 font-semibold font-[Be Vietnam Pro,sans-serif] disabled:opacity-50"
+              className="text-xs text-red-500 dark:text-red-400 hover:text-red-600 font-semibold font-[Be Vietnam Pro,sans-serif] disabled:opacity-50"
             >
               {actionLoading === 'all' ? 'Đang xử lý...' : 'Đăng xuất tất cả'}
             </button>
           )}
         </div>
-        <div className="divide-y divide-stone-100">
+        <div className="divide-y divide-[var(--border)]">
           {sessions.length === 0 ? (
-            <div className="p-6 text-center text-stone-500 text-sm font-[Be Vietnam Pro,sans-serif]">
+            <div className="p-6 text-center text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] text-sm font-[Be Vietnam Pro,sans-serif]">
               Không có phiên đăng nhập nào.
             </div>
           ) : (
             sessions.map((session) => (
               <div key={session.id} className="p-4 flex items-center gap-4">
-                <div className="w-10 h-10 bg-stone-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl flex items-center justify-center flex-shrink-0">
                   <Icon
                     name={
                       session.device_type === 'Mobile'
@@ -482,7 +482,7 @@ export default function SecurityTab() {
                           : 'ComputerDesktopIcon'
                     }
                     size={20}
-                    className="text-stone-500"
+                    className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]"
                   />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -497,7 +497,7 @@ export default function SecurityTab() {
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-stone-500 mt-0.5 font-[Be Vietnam Pro,sans-serif]">
+                  <p className="text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-0.5 font-[Be Vietnam Pro,sans-serif]">
                     {session.ip_address || 'Địa chỉ không xác định'} ·{' '}
                     {formatDate(session.last_active)}
                   </p>
@@ -506,7 +506,7 @@ export default function SecurityTab() {
                   <button
                     onClick={() => handleLogoutSession(session.id)}
                     disabled={actionLoading === session.id}
-                    className="text-xs text-red-500 hover:text-red-600 font-semibold font-[Be Vietnam Pro,sans-serif] disabled:opacity-50"
+                    className="text-xs text-red-500 dark:text-red-400 hover:text-red-600 font-semibold font-[Be Vietnam Pro,sans-serif] disabled:opacity-50"
                   >
                     {actionLoading === session.id ? '...' : 'Đăng xuất'}
                   </button>
@@ -518,16 +518,16 @@ export default function SecurityTab() {
       </div>
 
       {/* Login History */}
-      <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-vj-card">
-        <div className="p-5 border-b border-stone-100">
+      <div className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden shadow-vj-card">
+        <div className="p-5 border-b border-[var(--border)]">
           <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948] flex items-center gap-2">
-            <Icon name="ClockIcon" size={20} className="text-stone-400" />
+            <Icon name="ClockIcon" size={20} className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]" />
             Lịch sử đăng nhập
           </h3>
         </div>
-        <div className="divide-y divide-stone-100">
+        <div className="divide-y divide-[var(--border)]">
           {history.length === 0 ? (
-            <div className="p-6 text-center text-stone-500 text-sm font-[Be Vietnam Pro,sans-serif]">
+            <div className="p-6 text-center text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] text-sm font-[Be Vietnam Pro,sans-serif]">
               Chưa có lịch sử đăng nhập.
             </div>
           ) : (
@@ -549,7 +549,7 @@ export default function SecurityTab() {
                     {item.success ? 'Đăng nhập thành công' : 'Đăng nhập thất bại'}
                     {item.device_type ? ` từ ${item.device_type}` : ''}
                   </div>
-                  <div className="text-xs text-stone-500 mt-0.5 font-[Be Vietnam Pro,sans-serif]">
+                  <div className="text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-0.5 font-[Be Vietnam Pro,sans-serif]">
                     {item.ip_address || 'Không rõ IP'} · {formatDate(item.created_at)}
                   </div>
                 </div>

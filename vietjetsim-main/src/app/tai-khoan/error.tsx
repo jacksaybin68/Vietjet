@@ -1,6 +1,6 @@
 'use client';
 
-import Icon from '@/components/ui/AppIcon';
+import { Icon } from '@/shared/components/ui';
 
 export default function UserDashboardError({
   error,

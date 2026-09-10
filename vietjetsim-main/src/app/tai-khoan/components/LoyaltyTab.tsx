@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import Icon from '@/components/ui/AppIcon';
+import { Icon } from '@/shared/components/ui';
 import { useToast } from '@/hooks/useToast';
 import { getTierColor } from '@/lib/loyalty';
-import Pagination from '@/components/ui/Pagination';
+import { Pagination } from '@/shared/components/ui';
 
 interface LoyaltyTransaction {
   id: string;
@@ -35,14 +35,14 @@ interface Tier {
 }
 
 const TYPE_CONFIG: Record<string, { label: string; color: string; bg: string; icon: string }> = {
-  earn: { label: 'Tích điểm', color: '#10B981', bg: '#D1FAE5', icon: 'ArrowTrendingUpIcon' },
-  redeem: { label: 'Đổi điểm', color: '#EC2029', bg: '#FEE2E2', icon: 'GiftIcon' },
-  expire: { label: 'Hết hạn', color: '#6B7280', bg: '#F3F4F6', icon: 'ClockIcon' },
-  bonus: { label: 'Thưởng', color: '#F59E0B', bg: '#FEF3C7', icon: 'StarIcon' },
+  earn: { label: 'Tích điểm', color: 'var(--vj-green)', bg: 'var(--vj-green-light)', icon: 'ArrowTrendingUpIcon' },
+  redeem: { label: 'Đổi điểm', color: 'var(--primary)', bg: 'var(--surface-2)', icon: 'GiftIcon' },
+  expire: { label: 'Hết hạn', color: 'var(--foreground-muted)', bg: 'var(--surface-2)', icon: 'ClockIcon' },
+  bonus: { label: 'Thưởng', color: 'var(--accent)', bg: 'var(--accent-secondary)', icon: 'StarIcon' },
   adjust: {
     label: 'Điều chỉnh',
-    color: '#8B5CF6',
-    bg: '#EDE9FE',
+    color: 'var(--vj-purple)',
+    bg: 'var(--vj-purple-light)',
     icon: 'AdjustmentsHorizontalIcon',
   },
 };
@@ -112,35 +112,35 @@ function RedeemModal({
   };
 
   const inputClass =
-    'w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#EC2029]/20 focus:border-[#EC2029] font-[Be Vietnam Pro,sans-serif]';
+    'w-full px-4 py-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#EC2029]/20 focus:border-[#EC2029] font-[Be Vietnam Pro,sans-serif]';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
-        <div className="p-6 border-b border-stone-100 flex items-center justify-between">
-          <h3 className="text-lg font-bold font-[KoHo,sans-serif] text-[#1A2948]">
+        <div className="p-6 border-b border-[var(--border)] dark:border-[var(--dark-border)] flex items-center justify-between">
+          <h3 className="text-lg font-bold font-[KoHo,sans-serif] text-[var(--foreground)] dark:text-[var(--foreground)]">
             Đổi điểm thưởng
           </h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-stone-100 transition-colors"
+            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--surface-2)] dark:hover:bg-[var(--dark-surface-2)] transition-colors"
           >
-            <Icon name="XMarkIcon" size={20} className="text-stone-500" />
+            <Icon name="XMarkIcon" size={20} className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]" />
           </button>
         </div>
 
         <form onSubmit={handleRedeem} className="p-6 space-y-5">
-          <div className="bg-[#FFD400]/10 rounded-xl p-4 text-center">
-            <div className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">
+          <div className="bg-[var(--accent)]/10 dark:bg-[var(--accent)]/20 rounded-xl p-4 text-center">
+            <div className="text-sm text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
               Điểm khả dụng
             </div>
-            <div className="text-3xl font-bold font-[KoHo,sans-serif] text-[#1A2948] mt-1">
+            <div className="text-3xl font-bold font-[KoHo,sans-serif] text-[var(--foreground)] dark:text-[var(--foreground)] mt-1">
               {formatPoints(availablePoints)}
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-1.5 text-[#1A2948] font-[KoHo,sans-serif]">
+            <label className="block text-sm font-semibold mb-1.5 text-[var(--foreground)] dark:text-[var(--foreground)] font-[KoHo,sans-serif]">
               Số điểm muốn đổi
             </label>
             <input
@@ -159,7 +159,7 @@ function RedeemModal({
                   type="button"
                   onClick={() => setPoints(p.toString())}
                   disabled={p > availablePoints}
-                  className="flex-1 py-1.5 bg-stone-100 hover:bg-stone-200 rounded-lg text-xs font-semibold text-[#1A2948] transition-colors disabled:opacity-40 font-[Be Vietnam Pro,sans-serif]"
+                  className="flex-1 py-1.5 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] hover:bg-[var(--surface)] dark:hover:bg-[var(--dark-surface)] rounded-lg text-xs font-semibold text-[var(--foreground)] dark:text-[var(--foreground)] transition-colors disabled:opacity-40 font-[Be Vietnam Pro,sans-serif]"
                 >
                   {formatPoints(p)}
                 </button>
@@ -167,7 +167,7 @@ function RedeemModal({
             </div>
           </div>
 
-          <div className="text-xs text-stone-500 font-[Be Vietnam Pro,sans-serif]">
+          <div className="text-xs text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
             Quy đổi: 1,000 điểm = 10,000 VND giảm giá vé máy bay.
           </div>
 
@@ -187,7 +187,7 @@ function RedeemModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-3 bg-stone-100 text-stone-600 rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-stone-200 transition-all"
+              className="px-6 py-3 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-[var(--surface)] dark:hover:bg-[var(--dark-surface)] transition-all"
             >
               Hủy
             </button>
@@ -254,9 +254,9 @@ export default function LoyaltyTab() {
   if (loading) {
     return (
       <div className="space-y-4 p-4">
-        <div className="h-56 bg-stone-100 rounded-2xl animate-pulse" />
-        <div className="h-40 bg-stone-100 rounded-2xl animate-pulse" />
-        <div className="h-24 bg-stone-100 rounded-2xl animate-pulse" />
+        <div className="h-56 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse" />
+        <div className="h-40 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse" />
+        <div className="h-24 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse" />
       </div>
     );
   }
@@ -266,15 +266,15 @@ export default function LoyaltyTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[#1A2948]">Điểm thưởng</h2>
-          <p className="text-sm text-stone-500 mt-1 font-[Be Vietnam Pro,sans-serif]">
+          <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[var(--foreground)] dark:text-[var(--foreground)]">Điểm thưởng</h2>
+          <p className="text-sm text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
             Chương trình tích điểm Vietjet Air Rewards
           </p>
         </div>
         <button
           onClick={() => setShowRedeem(true)}
           disabled={!loyalty || loyalty.available_points < 500}
-          className="flex items-center gap-2 px-4 py-2 bg-[#FFD400] text-[#1A2948] rounded-lg text-sm font-bold font-[KoHo,sans-serif] hover:bg-[#E5C100] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-[var(--vj-navy)] rounded-lg text-sm font-bold font-[KoHo,sans-serif] hover:bg-[var(--accent-dark)] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         >
           <Icon name="GiftIcon" size={16} />
           Đổi điểm
@@ -359,8 +359,8 @@ export default function LoyaltyTab() {
       </div>
 
       {/* Tiers Overview */}
-      <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-vj-card">
-        <div className="p-5 border-b border-stone-100">
+      <div className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden shadow-vj-card">
+        <div className="p-5 border-b border-[var(--border)]">
           <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948]">
             Hạng thành viên
           </h3>
@@ -372,8 +372,8 @@ export default function LoyaltyTab() {
             return (
               <div
                 key={tier.id}
-                className={`flex-1 min-w-[140px] p-4 text-center border-r border-stone-100 last:border-r-0 ${
-                  isCurrentTier ? 'bg-stone-50' : ''
+                className={`flex-1 min-w-[140px] p-4 text-center border-r border-[var(--border)] last:border-r-0 ${
+                  isCurrentTier ? 'bg-[var(--surface-2)]' : ''
                 }`}
               >
                 <div
@@ -392,7 +392,7 @@ export default function LoyaltyTab() {
                 >
                   {tier.name}
                 </div>
-                <div className="text-xs text-stone-500 mt-1 font-[Be Vietnam Pro,sans-serif]">
+                <div className="text-xs text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
                   {formatPoints(tier.min_lifetime_points)} điểm
                 </div>
                 {isCurrentTier && (
@@ -407,20 +407,20 @@ export default function LoyaltyTab() {
       </div>
 
       {/* Transaction History */}
-      <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-vj-card">
-        <div className="p-5 border-b border-stone-100">
+      <div className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden shadow-vj-card">
+        <div className="p-5 border-b border-[var(--border)]">
           <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948]">
             Lịch sử điểm
           </h3>
         </div>
 
-        <div className="divide-y divide-stone-100">
+        <div className="divide-y divide-[var(--border)] dark:divide-[var(--dark-border)]">
           {transactions.length === 0 ? (
             <div className="p-8 text-center">
-              <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Icon name="StarIcon" size={28} className="text-stone-400" />
+              <div className="w-16 h-16 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-full flex items-center justify-center mx-auto mb-3">
+                <Icon name="StarIcon" size={28} className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]" />
               </div>
-              <p className="text-stone-500 text-sm font-[Be Vietnam Pro,sans-serif]">
+              <p className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] text-sm font-[Be Vietnam Pro,sans-serif]">
                 Chưa có lịch sử tích điểm.
               </p>
             </div>
@@ -440,7 +440,7 @@ export default function LoyaltyTab() {
                     <div className="font-semibold text-sm text-[#1A2948] font-[KoHo,sans-serif]">
                       {config.label}
                     </div>
-                    <div className="text-xs text-stone-500 mt-0.5 font-[Be Vietnam Pro,sans-serif]">
+                    <div className="text-xs text-[var(--foreground-muted)] mt-0.5 font-[Be Vietnam Pro,sans-serif]">
                       {tx.description || config.label} · {formatDate(tx.created_at)}
                     </div>
                   </div>
@@ -459,7 +459,7 @@ export default function LoyaltyTab() {
         </div>
 
         {transactions.length >= limit && (
-          <div className="p-4 border-t border-stone-100">
+          <div className="p-4 border-t border-[var(--border)]">
             <Pagination
               currentPage={page}
               totalPages={Math.max(1, Math.ceil(transactions.length / limit))}

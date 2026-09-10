@@ -90,7 +90,9 @@ export async function POST(request: NextRequest) {
         );
       }
       const methods = await getSavedPaymentMethods(user.userId);
-      const linkedBank = methods.find((method) => method.id === paymentMethodId && method.type === 'bank');
+      const linkedBank = methods.find(
+        (method) => method.id === paymentMethodId && method.type === 'bank'
+      );
       if (!linkedBank) {
         return NextResponse.json(
           { error: 'Bad Request', message: 'Linked bank account not found' },

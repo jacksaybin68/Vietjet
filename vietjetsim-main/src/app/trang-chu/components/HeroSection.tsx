@@ -1,481 +1,413 @@
 'use client';
-import React, { useState, useEffect, useRef } from 'react';
+
+// Last updated: 2026-09-09 - Fixed JSX parsing errors and passenger selector
+
+import { FormEvent, useRef, useState } from 'react';
 import Link from 'next/link';
-import AppImage from '@/components/ui/AppImage';
-import Icon from '@/components/ui/AppIcon';
-import { FlightSearchFormSkeleton } from '@/components/ui/SkeletonLoader';
 import {
-  MdFlightTakeoff,
-  MdFlightLand,
-  MdSwapVert,
-  MdPerson,
-  MdLocalOffer,
-  MdKeyboardArrowDown,
-  MdCheck,
   MdCalendarToday,
-  MdLocalFireDepartment,
+  MdFlightLand,
+  MdFlightTakeoff,
+  MdLogin,
+  MdPercent,
+  MdPerson,
+  MdPeople,
+  MdSwapHoriz,
 } from 'react-icons/md';
-import { FaPlane } from 'react-icons/fa';
 
-const AIRPORTS = [
-  { code: 'HAN', name: 'Hà Nội', city: 'Nội Bài' },
-  { code: 'SGN', name: 'TP. Hồ Chí Minh', city: 'Tân Sơn Nhất' },
-  { code: 'DAD', name: 'Đà Nẵng', city: 'Đà Nẵng' },
-  { code: 'PQC', name: 'Phú Quốc', city: 'Phú Quốc' },
-  { code: 'CXR', name: 'Nha Trang', city: 'Cam Ranh' },
-  { code: 'HPH', name: 'Hải Phòng', city: 'Cát Bi' },
-  { code: 'HUI', name: 'Huế', city: 'Phú Bài' },
-  { code: 'VDH', name: 'Đồng Hới', city: 'Đồng Hới' },
-];
-
-const HOT_DEALS = [
-  { from: 'Hà Nội', to: 'TP.HCM', price: 299000, fromCode: 'HAN', toCode: 'SGN' },
-  { from: 'TP.HCM', to: 'Phú Quốc', price: 179000, fromCode: 'SGN', toCode: 'PQC' },
-  { from: 'Hà Nội', to: 'Đà Nẵng', price: 249000, fromCode: 'HAN', toCode: 'DAD' },
-  { from: 'TP.HCM', to: 'Nha Trang', price: 159000, fromCode: 'SGN', toCode: 'CXR' },
-  { from: 'Hà Nội', to: 'Phú Quốc', price: 329000, fromCode: 'HAN', toCode: 'PQC' },
-  { from: 'TP.HCM', to: 'Đà Nẵng', price: 199000, fromCode: 'SGN', toCode: 'DAD' },
-];
-
-const BANNERS = [
-  {
-    id: 1,
-    image: '/images/hero/banner-3-loc-vang.jpg',
-    alt: 'Bay Vietjet Air nhận lộc vàng - khuyến mãi vé máy bay hấp dẫn',
-    title: 'BAY VIETJET AIR NHẬN LỘC VÀNG',
-    subtitle: 'Mua vé từ 03/03/2026 đến 19/05/2026 để nhận thưởng',
-    hideOverlay: false,
-  },
-  {
-    id: 2,
-    image: '/images/hero/banner-1-hongkong.jpg',
-    alt: 'Khám phá điểm đến mới cùng Vietjet Air - hơn 50 đường bay',
-    title: 'KHÁM PHÁ ĐIỂM ĐẾN MỚI',
-    subtitle: 'Hơn 50 đường bay nội địa và quốc tế',
-    hideOverlay: false,
-  },
-  {
-    id: 3,
-    image: '/images/hero/banner-2-skyboss.jpg',
-    alt: 'Trải nghiệm dịch vụ cao cấp trên máy bay Vietjet Air',
-    title: 'DỊCH VỤ SKYBOSS CAO CẤP',
-    subtitle: 'Tận hưởng sự thoải mái tối đa và tiện ích đặc quyền',
-    hideOverlay: false,
-  },
+const airports = [
+  { code: 'HAN', city: 'Hà Nội', airport: 'Nội Bài' },
+  { code: 'SGN', city: 'TP. Hồ Chí Minh', airport: 'Tân Sơn Nhất' },
+  { code: 'DAD', city: 'Đà Nẵng', airport: 'Đà Nẵng' },
+  { code: 'PQC', city: 'Phú Quốc', airport: 'Phú Quốc' },
+  { code: 'CXR', city: 'Nha Trang', airport: 'Cam Ranh' },
+  { code: 'HPH', city: 'Hải Phòng', airport: 'Cát Bi' },
+  { code: 'HUI', city: 'Huế', airport: 'Phú Bài' },
+  { code: 'VDO', city: 'Quảng Ninh', airport: 'Vân Đồn' },
+  { code: 'VCA', city: 'Cần Thơ', airport: 'Cần Thơ Quốc tế' },
+  { code: 'PXU', city: 'Pleiku', airport: 'Pleiku' },
+  { code: 'BMV', city: 'Buôn Ma Thuột', airport: 'Buôn Ma Thuột' },
+  { code: 'DLI', city: 'Đà Lạt', airport: 'Liên Khuông' },
+  { code: 'VCS', city: 'Côn Đảo', airport: 'Côn Đảo' },
+  { code: 'THD', city: 'Thanh Hóa', airport: 'Tho Xuân' },
+  { code: 'VDH', city: 'Đông Hội', airport: 'Đông Hội' },
+  { code: 'VII', city: 'Vinh', airport: 'Vinh' },
+  { code: 'SYH', city: 'Kon Tum', airport: 'Kon Tum' },
 ];
 
 export default function HeroSection() {
-  const [tripType, setTripType] = useState<'one-way' | 'round-trip' | 'multi'>('round-trip');
+  const [roundTrip, setRoundTrip] = useState(true);
   const [from, setFrom] = useState('HAN');
   const [to, setTo] = useState('SGN');
-  const [departDate, setDepartDate] = useState('2026-04-15');
-  const [returnDate, setReturnDate] = useState('2026-04-22');
-  const [passengers, setPassengers] = useState(1);
-  const [showFromDropdown, setShowFromDropdown] = useState(false);
-  const [showToDropdown, setShowToDropdown] = useState(false);
-  const [activeBanner, setActiveBanner] = useState(0);
-  const [showPassengerDropdown, setShowPassengerDropdown] = useState(false);
-  const [formLoading, setFormLoading] = useState(true);
-  const [promoCode, setPromoCode] = useState('');
-  const [findLowest, setFindLowest] = useState(false);
-  const bannerRef = useRef<NodeJS.Timeout | null>(null);
+  const [pax, setPax] = useState({ adults: 1, children: 0, infants: 0 });
+  const [paxOpen, setPaxOpen] = useState(false);
+  const paxRef = useRef<HTMLDivElement>(null);
 
-  const fromAirport = AIRPORTS.find((a) => a.code === from)!;
-  const toAirport = AIRPORTS.find((a) => a.code === to)!;
-
-  useEffect(() => {
-    bannerRef.current = setInterval(() => {
-      setActiveBanner((prev) => (prev + 1) % BANNERS.length);
-    }, 4500);
-    return () => {
-      if (bannerRef.current) clearInterval(bannerRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setFormLoading(false), 600);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const swapAirports = () => {
-    setFrom(to);
-    setTo(from);
+  const airport = (code: string) => airports.find((item) => item.code === code)!;
+  const search = (event: FormEvent) => {
+    event.preventDefault();
+    window.location.href = `/tim-ve?from=${from}&to=${to}&pax=${pax.adults}`;
   };
+  const adj = (key: keyof typeof pax, delta: number) =>
+    setPax((p) => ({ ...p, [key]: Math.max(key === 'adults' ? 1 : 0, p[key] + delta) }));
 
   return (
-    <section className="relative pt-[128px]">
-      {/* Full-width banner */}
-      <div className="relative w-full h-[600px] sm:h-[720px] lg:h-[880px] overflow-hidden">
-        {BANNERS.map((banner, i) => (
-          <div
-            key={banner.id}
-            className={`absolute inset-0 transition-opacity duration-700 ${
-              i === activeBanner ? 'opacity-100' : 'opacity-0'
-            }`}
+    <section
+      className="relative min-h-[565px] overflow-hidden bg-cover bg-center py-10 lg:min-h-[610px] lg:py-14 dark:py-12 dark:lg:py-16"
+      style={{
+        backgroundImage:
+          "linear-gradient(110deg,rgba(227,30,36,.90),rgba(128,117,214,.56) 50%,rgba(37,99,212,.40)),url('/images/hero/banner-1-hongkong.jpg')",
+      }}
+    >
+      <div className="mx-auto max-w-[1240px] px-4">
+
+        <div className="max-w-xl pt-5 font-[var(--vj-font)] text-white lg:pt-10 animate-fade-in-up">
+          <p className="mb-2 text-[11px] font-bold uppercase tracking-[.14em] text-[#FFF200] sm:text-[13px]">
+            Vietjet Air
+          </p>
+          <h1 className="font-[var(--vj-font-heading)] text-4xl font-black leading-[1.05] tracking-[-0.04em] drop-shadow-md sm:text-5xl lg:text-6xl">
+            Bay là thích ngay!
+          </h1>
+          <p className="mt-3 max-w-md text-sm font-normal leading-6 text-white/95 sm:text-base lg:text-xl">
+            Sẵn sàng cho hành trình mới với vé bay linh hoạt và nhiều ưu đãi.
+          </p>
+
+          <form
+            onSubmit={search}
+            className="mt-6 w-full max-w-[540px] bg-[#EC2029] dark:bg-[#B91C1C] border-2 border-[#EC2029] dark:border-[#B91C1C] rounded-lg shadow-sm p-4 sm:p-6 font-[var(--vj-font)]"
           >
-            <AppImage
-              src={banner.image}
-              alt={banner.alt}
-              fill
-              priority={i === 0 || i === 1}
-              className={`object-cover object-center transition-opacity duration-700`}
-              sizes="100vw"
-            />
-
-            <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  'linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.35) 40%, rgba(0,0,0,0.65) 100%)',
-              }}
-            />
-          </div>
-        ))}
-
-        {/* Dot indicators */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-30">
-          {BANNERS.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveBanner(i)}
-              className={`rounded-full transition-all duration-500 shadow-sm ${
-                i === activeBanner
-                  ? 'bg-white w-10 h-2.5 scale-110'
-                  : 'bg-white/40 w-2.5 h-2.5 hover:bg-white/70 hover:scale-125'
-              }`}
-              aria-label={`Banner ${i + 1}`}
-            />
-          ))}
-        </div>
-
-        {/* Cloud background fade effect at bottom */}
-        <div
-          className="absolute bottom-0 left-0 right-0 h-24 lg:h-32 pointer-events-none z-10"
-          style={{
-            background:
-              'linear-gradient(to top, rgba(230,243,255,0.9) 0%, rgba(255,255,255,0) 100%)',
-          }}
-        />
-
-        {/* ===== RIGHT-ALIGNED SEARCH FORM OVERLAY ===== */}
-        <div className="absolute inset-x-0 top-0 bottom-0 flex items-center justify-center z-20 px-4 sm:px-8 lg:px-16 max-w-[1400px] mx-auto pointer-events-none">
-          {formLoading ? (
-            <div className="w-full max-w-md pointer-events-auto">
-              <FlightSearchFormSkeleton />
-            </div>
-          ) : (
-            <div
-              className="w-full max-w-[400px] rounded-2xl overflow-visible shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] border border-white/20 relative pointer-events-auto"
-              style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(10px)' }}
-            >
-              {/* Mascot */}
-              <div className="absolute -right-24 top-[50%] transform -translate-y-1/2 w-24 hidden md:flex flex-col items-center pointer-events-none z-50">
-                <div
-                  className="bg-white px-3 py-1.5 rounded-lg shadow-md border border-gray-100 mb-1.5 relative animate-bounce"
-                  style={{ zIndex: 2 }}
-                >
-                  <span className="text-xs font-bold text-gray-800 whitespace-nowrap">
-                    Xin chào!
-                  </span>
-                  <div className="absolute -bottom-1.5 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-white"></div>
-                </div>
-                <div className="w-20 h-24 relative drop-shadow-[0_4px_8px_rgba(0,0,0,0.2)]">
-                  <div className="absolute inset-0 bg-[#EC2029] rounded-[2rem_2rem_0.5rem_0.5rem] border-2 border-white flex items-center justify-center text-3xl">
-                    👨‍✈️
-                  </div>
-                </div>
+            <div className="mb-4 flex flex-nowrap items-center gap-2">
+              {/* Column 1 (3.5): Primary text - logo replaced */}
+              <div className="text-[11px] font-bold text-white sm:text-[12px] md:text-[13px]" style={{ flex: '3.5 1 auto', width: '58.33%' }}>
+                Mua hành lý, suût ăn chọn ghế ngồi và hơn thế nữa, từ 3.99 USD
               </div>
 
-              {/* Red Header Bar with Fare Types */}
+              {/* Column 2 (1.5): Highlighted call-to-action */}
               <div
-                className="flex rounded-t-2xl overflow-hidden p-2.5 gap-2"
+                className="text-[11px] font-bold text-black sm:text-[12px] md:text-[13px]"
                 style={{
-                  background: '#D1161B',
+                  flex: '1.5 1 auto',
+                  width: '25%',
+                  background: '#FFD400',
+                  color: '#000000',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
                 }}
               >
-                <div className="flex-1 px-3 py-2">
-                  <span className="text-white text-xs sm:text-sm font-bold block leading-tight">
-                    Mua hành lý, suất ăn, chọn chỗ...
-                  </span>
-                </div>
-                <div className="flex-none bg-[#FFDD00] rounded-md px-3 py-2 flex items-center justify-center shadow-inner text-[#B30000] text-xs font-black leading-tight cursor-pointer hover:bg-yellow-300 transition-colors">
-                  Đổi thưởng
-                </div>
-                <div className="flex-none bg-[#B30000] rounded-md px-3 py-2 flex items-center justify-center text-white text-xs font-bold leading-tight cursor-pointer hover:bg-[#8F0000] transition-colors">
-                  Gửi hàng
-                </div>
+                Đổi thưởng &amp; Mua Skypoint
               </div>
 
-              {/* Quick Trip Type Selectors (Khứ hồi / Một chiều - Radio buttons) */}
-              <div
-                className="px-4 pt-2 pb-2 flex items-center gap-3 border-b border-white/20"
-                style={{ background: '#D1161B' }}
-              >
-                {[
-                  { key: 'round-trip', label: 'Khứ hồi' },
-                  { key: 'one-way', label: 'Một chiều' },
-                ].map((tab) => (
-                  <label
-                    key={tab.key}
-                    className="flex items-center gap-1.5 cursor-pointer text-white"
-                  >
-                    <input
-                      type="radio"
-                      name="tripType"
-                      checked={tripType === tab.key}
-                      onChange={() => setTripType(tab.key as typeof tripType)}
-                      className="accent-[#FFDD00] w-4 h-4 cursor-pointer"
-                    />
-                    <span className="text-xs sm:text-sm font-bold whitespace-nowrap">{tab.label}</span>
-                  </label>
-                ))}
-                <div className="flex-1 text-right">
-                  <span className="text-xs sm:text-sm font-bold text-white hover:text-yellow-300 cursor-pointer flex items-center justify-end gap-1 whitespace-nowrap">
-                    Nhiều chặng{' '}
-                    <Icon
-                      name="ArrowTopRightOnSquareIcon"
-                      size={14}
-                      className="inline relative -top-0.5"
-                    />
-                  </span>
-                </div>
-                <div className="flex items-center gap-1 text-white font-bold cursor-pointer text-xs sm:text-sm whitespace-nowrap">
-                  VND <Icon name="ChevronDownIcon" size={14} />
-                </div>
-              </div>
-
-              {/* Form body */}
-               <div className="px-4 pt-10 pb-10 bg-[#D1161B] rounded-b-2xl overflow-hidden">
-                {/* Search Fields Wrapper (White rounded block) — flex+gap so spacing can't be overridden by descendant margin resets */}
-                <div className="flex flex-col gap-2 text-gray-800">
-                  {/* From / To — two standalone rounded bars with a visible gap, matching the Passenger bar style */}
-                  <div className="flex flex-col relative gap-2">
-                    {/* From — 3-column split: airport info takes 2 parts, depart date takes 1 part */}
-                    <div className="w-full relative bg-white rounded-xl group">
-                      <div className="grid grid-cols-3">
-                        <div
-                          className="col-span-2 flex items-center cursor-pointer p-0 min-w-0"
-                          onClick={() => {
-                            setShowFromDropdown(!showFromDropdown);
-                            setShowToDropdown(false);
-                            setShowPassengerDropdown(false);
-                          }}
-                        >
-                          <div className="w-10 sm:w-12 h-16 flex items-center justify-center flex-shrink-0">
-                            <MdFlightTakeoff className="w-4 h-4 sm:w-5 sm:h-5 text-gray-800" />
-                          </div>
-                          <div className="flex-1 min-w-0 pr-2 h-16 flex flex-col justify-center gap-0.5">
-                            <div className="text-[11px] font-semibold uppercase tracking-wider font-koho">
-                              Điểm khởi hành
-                            </div>
-                            <div className="font-black text-base truncate">
-                              {fromAirport?.name} ({fromAirport?.code})
-                            </div>
-                          </div>
-                        </div>
-                        {/* Depart Date — 1 part, mirrors "Ngày về" on the To row */}
-                        <div className="col-span-1 border-l border-gray-200 h-16 flex flex-col justify-center px-3 min-w-0">
-                          <div className="text-[11px] text-gray-500 font-semibold mb-0.5">
-                            Ngày đi
-                          </div>
-                          <div className="font-bold text-xs sm:text-sm text-gray-800 truncate">
-                            {departDate.split('-').reverse().join('/')}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Swap button — centered in the gap between the two standalone bars */}
-                    <div className="absolute left-[16px] top-1/2 -translate-y-1/2 z-10 hidden sm:flex">
-                      <button
-                        onClick={swapAirports}
-                        className="w-6 h-6 sm:w-7 sm:h-7 bg-[#D1161B] text-white rounded-md flex items-center justify-center transition-all shadow-md group hover:bg-[#8F0000]"
-                      >
-                        <MdSwapVert className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                      </button>
-                    </div>
-
-                    {/* To — 3-column split: airport info takes 2 parts, return date takes 1 part (full width when one-way) */}
-                    <div className="w-full relative bg-white group rounded-xl">
-                      <div
-                        className={`grid ${tripType !== 'one-way' ? 'grid-cols-3' : 'grid-cols-1'}`}
-                      >
-                        <div
-                          className={`${tripType !== 'one-way' ? 'col-span-2' : ''} flex items-center cursor-pointer p-0 min-w-0`}
-                          onClick={() => {
-                            setShowToDropdown(!showToDropdown);
-                            setShowFromDropdown(false);
-                            setShowPassengerDropdown(false);
-                          }}
-                        >
-                          <div className="w-10 sm:w-12 h-16 flex items-center justify-center flex-shrink-0 text-gray-800">
-                            <FaPlane className="rotate-90 w-4 h-4" />
-                          </div>
-                          <div className="flex-1 min-w-0 pr-2 h-16 flex flex-col justify-center gap-0.5">
-                            <div className="text-[11px] font-semibold uppercase tracking-wider font-koho text-gray-500">
-                              Điểm đến
-                            </div>
-                            <div className="font-black text-base truncate">
-                              {toAirport?.name} ({toAirport?.code})
-                            </div>
-                          </div>
-                        </div>
-                        {/* Return Date — 1 part */}
-                        {tripType !== 'one-way' && (
-                          <div className="col-span-1 border-l border-gray-200 h-16 flex flex-col justify-center px-3 min-w-0">
-                            <div className="text-[11px] text-gray-500 font-semibold mb-0.5">
-                              Ngày về
-                            </div>
-                            <div className="font-bold text-xs sm:text-sm text-gray-800 truncate">
-                              {returnDate.split('-').reverse().join('/')}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      {showToDropdown && (
-                        <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 overflow-hidden max-h-52 overflow-y-auto mt-1">
-                          {AIRPORTS.map((airport) => (
-                            <button
-                              key={airport.code}
-                              onClick={() => {
-                                setTo(airport.code);
-                                setShowToDropdown(false);
-                              }}
-                              className="w-full text-left px-4 py-2 hover:bg-red-50 transition-colors flex items-center justify-between font-koho"
-                            >
-                              <div>
-                                <span className="text-sm font-black text-[#EC2029]">
-                                  {airport.code}
-                                </span>
-                                <span className="text-xs ml-2 text-gray-500">{airport.name}</span>
-                              </div>
-                              {airport.code === to && (
-                                <MdCheck className="w-4 h-4 text-[#EC2029]" />
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Passenger row */}
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <div className="w-full relative min-w-0">
-                      <div
-                        className="flex items-center h-14 pr-14 sm:pr-16 bg-white rounded-xl cursor-pointer hover:border-[#EC2029] transition-colors"
-                        onClick={() => {
-                          setShowPassengerDropdown(!showPassengerDropdown);
-                          setShowFromDropdown(false);
-                          setShowToDropdown(false);
-                        }}
-                      >
-                        <div className="w-10 sm:w-12 h-14 flex items-center justify-center flex-shrink-0">
-                          <MdPerson className="w-4 h-4 text-gray-800" />
-                        </div>
-                        <div className="flex-1 min-w-0 flex items-center gap-2">
-                          <span className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider font-koho">
-                            Hành khách
-                          </span>
-                          <span className="text-base font-bold text-gray-800">
-                            {passengers} người lớn
-                          </span>
-                        </div>
-                      </div>
-                      {/* Mascot logo — separated from the clickable bar so it never gets clipped by the rounded corner */}
-                      <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 flex-shrink-0 hidden sm:block pointer-events-none">
-                        <img
-                          src="/assets/images/app_logo.png"
-                          className="w-9 h-9 object-contain drop-shadow"
-                          alt="Vietjet"
-                        />
-                      </div>
-                      {showPassengerDropdown && (
-                        <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 p-4 mt-1">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-semibold font-body-vj">Người lớn</span>
-                            <div className="flex items-center gap-3">
-                              <button
-                                onClick={() => setPassengers(Math.max(1, passengers - 1))}
-                                className="w-7 h-7 rounded-full border-2 flex items-center justify-center font-bold transition-colors hover:bg-red-50"
-                                style={{ borderColor: '#EC2029', color: '#EC2029' }}
-                              >
-                                -
-                              </button>
-                              <span className="w-6 text-center font-bold font-body-vj">
-                                {passengers}
-                              </span>
-                              <button
-                                onClick={() => setPassengers(Math.min(9, passengers + 1))}
-                                className="w-7 h-7 rounded-full border-2 flex items-center justify-center font-bold transition-colors hover:bg-red-50"
-                                style={{ borderColor: '#EC2029', color: '#EC2029' }}
-                              >
-                                +
-                              </button>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => setShowPassengerDropdown(false)}
-                            className="mt-3 w-full py-2 rounded-lg text-sm font-bold text-white transition-colors"
-                            style={{ background: '#EC2029' }}
-                          >
-                            Xác nhận
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Promo code + Find lowest — standalone white rounded bars, consistent with the bars above */}
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <div className="flex-1 flex items-center gap-2 h-14 px-3 sm:px-4 rounded-xl bg-white hover:border-[#EC2029] transition-colors">
-                      <MdLocalOffer className="w-4 h-4 flex-shrink-0 text-gray-800" />
-                      <input
-                        id="promo-code"
-                        name="promoCode"
-                        type="text"
-                        placeholder="Mã khuyến mãi"
-                        value={promoCode}
-                        onChange={(e) => setPromoCode(e.target.value)}
-                        className="flex-1 text-sm bg-transparent border-none outline-none"
-                        style={{
-                          color: '#333333',
-                          fontWeight: 500,
-                        }}
-                      />
-                    </div>
-                    <label className="flex items-center gap-2 h-14 px-3 cursor-pointer font-koho flex-shrink-0">
-                      <input
-                        id="find-lowest"
-                        name="findLowest"
-                        type="checkbox"
-                        checked={findLowest}
-                        onChange={(e) => setFindLowest(e.target.checked)}
-                        className="rounded"
-                        style={{ accentColor: '#EC2029' }}
-                      />
-
-                      <span className="text-xs font-semibold text-white ml-2">Tìm vé rẻ nhất</span>
-                    </label>
-                  </div>
-
-                  {/* Search button — same h-14 height for a consistent stack of bars */}
-                  <Link
-                    href={`/tim-ve?from=${from}&to=${to}&depart=${departDate}&return=${returnDate}&pax=${passengers}`}
-                    className="flex items-center justify-center gap-2 w-full h-14 text-center font-black text-lg rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98]"
-                    style={{
-                      background:
-                        'linear-gradient(26.73deg, rgb(249,165,26) 13.7%, rgb(251,182,18) 29.8%, rgb(255,221,0) 66.81%)',
-                      color: '#1A2948',
-                      fontWeight: 900,
-                    }}
-                  >
-                    Tìm chuyến bay
-                  </Link>
-                </div>
+              {/* Column 3 (1): Secondary link */}
+              <div className="text-right text-[11px] font-bold text-white sm:text-[12px] md:text-[13px]" style={{ flex: '1 1 auto', width: '16.67%' }}>
+                Giao hàng nhanh
               </div>
             </div>
-          )}
+
+            <div className="mt-4 flex flex-wrap items-center gap-2 md:gap-4 text-[13px] font-bold text-white md:text-[14px] lg:text-[15px]">
+              <div className="flex flex-wrap items-center gap-2 md:gap-4">
+                <label className="flex cursor-pointer items-center gap-1.5">
+                  <input
+                    checked={roundTrip}
+                    onChange={() => setRoundTrip(true)}
+                    type="radio"
+                    name="trip"
+                    className="h-4 w-4 accent-[#f3c84d]"
+                  />
+                  <span className="text-[12px] md:text-[14px]">Khứ hồi</span>
+                </label>
+                <label className="flex cursor-pointer items-center gap-1.5">
+                  <input
+                    checked={!roundTrip}
+                    onChange={() => setRoundTrip(false)}
+                    type="radio"
+                    name="trip"
+                    className="h-4 w-4 accent-[#f3c84d]"
+                  />
+                  <span className="text-[12px] md:text-[14px]">Một chiều</span>
+                </label>
+                <span className="cursor-pointer text-[12px] md:text-[14px] font-bold text-white/90">
+                  Nhiều chặng ↗
+                </span>
+                <span className="text-[12px] md:text-[14px] font-bold text-white">VND ▾</span>
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-2 md:space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-[4fr_1fr] gap-2 md:gap-3">
+                <div className="flex h-[50px] md:h-[58px] items-center rounded-xl bg-white dark:bg-navy-dark border-2 border-[#EC2029] dark:border-[#444] px-3 md:px-4 text-left shadow-sm">
+                  <MdFlightTakeoff className="text-[24px] md:text-[32px] text-[#1A2948] dark:text-white/80" />
+                  <div className="ml-2 md:ml-3 min-w-0 flex-1">
+                    <div className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.08em] text-[#1A2948] dark:text-white/70">
+                      Điểm khởi hành
+                    </div>
+                    <select
+                      value={from}
+                      onChange={(e) => setFrom(e.target.value)}
+                      className="mt-1 w-full appearance-none bg-transparent text-[14px] md:text-[19px] font-bold text-[#1A2948] dark:text-white outline-none sm:text-[16px] md:text-[20px]"
+                    >
+                      {airports.map((item) => (
+                        <option key={item.code} value={item.code} className="bg-white dark:bg-navy-dark text-[#1A2948] dark:text-white">
+                          {item.city} ({item.code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex h-[50px] md:h-[58px] items-center rounded-xl bg-white dark:bg-navy-dark border-2 border-[#EC2029] dark:border-[#444] px-3 md:px-4 text-left shadow-sm">
+                  <MdCalendarToday className="text-[16px] md:text-[20px] text-[#1A2948] dark:text-white/80" />
+                  <div className="ml-2 md:ml-3 min-w-0 flex-1">
+                    <div className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.08em] text-[#1A2948] dark:text-white/70">
+                      Ngày đi
+                    </div>
+                    <input
+                      type="date"
+                      defaultValue="2026-04-15"
+                      className="mt-1 w-full bg-transparent text-[12px] md:text-[15px] font-bold text-[#1A2948] dark:text-white outline-none sm:text-[14px] md:text-[16px]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-[4fr_1fr] gap-2 md:gap-3">
+                <div className="flex h-[50px] md:h-[58px] items-center rounded-xl bg-white dark:bg-navy-dark border-2 border-[#EC2029] dark:border-[#444] px-3 md:px-4 text-left shadow-sm">
+                  <MdFlightLand className="text-[24px] md:text-[32px] text-[#1A2948] dark:text-white/80" />
+                  <div className="ml-2 md:ml-3 min-w-0 flex-1">
+                    <div className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.08em] text-[#1A2948] dark:text-white/70">
+                      Điểm đến
+                    </div>
+                    <select
+                      value={to}
+                      onChange={(e) => setTo(e.target.value)}
+                      className="mt-1 w-full appearance-none bg-transparent text-[14px] md:text-[19px] font-bold text-[#1A2948] dark:text-white outline-none sm:text-[16px] md:text-[20px]"
+                    >
+                      {airports.map((item) => (
+                        <option key={item.code} value={item.code} className="bg-white dark:bg-navy-dark text-[#1A2948] dark:text-white">
+                          {item.city} ({item.code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex h-[50px] md:h-[58px] items-center rounded-xl bg-white dark:bg-navy-dark border-2 border-[#EC2029] dark:border-[#444] px-3 md:px-4 text-left shadow-sm">
+                  <MdCalendarToday className="text-[16px] md:text-[20px] text-[#1A2948] dark:text-white/80" />
+                  <div className="ml-2 md:ml-3 min-w-0 flex-1">
+                    <div className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.08em] text-[#1A2948] dark:text-white/70">
+                      Ngày về
+                    </div>
+                    <input
+                      type="date"
+                      defaultValue="2026-04-22"
+                      disabled={!roundTrip}
+                      className="mt-1 w-full bg-transparent text-[12px] md:text-[15px] font-bold text-[#1A2948] dark:text-white outline-none disabled:text-[#999] dark:disabled:text-[#666] sm:text-[14px] md:text-[16px]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Passenger Selector - Accordion */}
+              <div className="mt-2 md:mt-4">
+                <div
+                  onClick={() => setPaxOpen(!paxOpen)}
+                  className="cursor-pointer flex items-center justify-between px-3 md:px-4 py-2 md:py-3 rounded-xl bg-white dark:bg-navy-dark border-2 border-[#EC2029] dark:border-[#444] text-[12px] md:text-[14px] font-medium text-[#1A2948] dark:text-white hover:bg-[#f9f9f9] dark:hover:bg-[#2a2a2a] transition-colors duration-200 h-[46px] md:h-[58px]"
+                >
+                  <div className="flex items-center gap-2 md:gap-3">
+                    <MdPeople className="h-4 w-4 md:h-5 md:w-5 text-[#E30613] dark:text-[#FFC400]" />
+                    <div>
+                      <div className="text-[12px] md:text-[14px] font-bold text-[#1A2948] dark:text-white">Hành khách</div>
+                      <div className="text-[11px] md:text-[14px] text-[#1A2948] dark:text-white/80 font-bold">
+                        {pax.adults} người lớn{' '}
+                        {pax.children > 0 && `, ${pax.children} trẻ em `}
+                        {pax.infants > 0 && `, ${pax.infants} em bé`}
+                      </div>
+                    </div>
+                    <svg
+                      viewBox="0 0 24 24"
+                      className={`h-4 w-4 md:h-5 md:w-5 transition-transform duration-200 ${
+                        paxOpen ? 'rotate-180' : ''
+                      }`}
+                      fill="currentColor"
+                    >
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Passenger Details Panel */}
+                <div
+                  className={`mt-1 overflow-hidden transition-all duration-300 ease-in-out ${
+                    paxOpen ? 'height-auto' : 'height-0'
+                  }`}
+                  style={{
+                    height: paxOpen ? 'auto' : 0,
+                    overflow: paxOpen ? 'visible' : 'hidden',
+                  }}
+                >
+                  <div className="px-3 md:px-4 py-2 bg-[#f8fafc] dark:bg-navy-dark rounded-b-xl">
+                    <div className="grid gap-2 md:gap-4">
+                      {/* Adults Row */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 md:gap-3">
+                          <MdPerson className="h-4 w-4 md:h-5 md:w-5 text-[#1A2948] dark:text-white/80" />
+                          <div>
+                            <div className="text-[11px] md:text-[13px] font-bold text-[#1A2948] dark:text-white">
+                              Người lớn
+                            </div>
+                            <div className="text-[9px] md:text-[11px] text-[#1A2948] dark:text-white/70">
+                              {'> 12 tuổi'}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 md:gap-2">
+                          <button
+                            onClick={() =>
+                              setPax(prev => ({
+                                ...prev,
+                                adults: Math.max(1, prev.adults - 1)
+                              }))
+                            }
+                            disabled={pax.adults <= 1}
+                            className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full border border-[#d1d5db] dark:border-[#555] text-[10px] md:text-[12px] text-[#6B7280] dark:text-white/60 hover:bg-[#f3f4f6] dark:hover:bg-[#333]"
+                          >
+                            -
+                          </button>
+                          <span className="text-[14px] md:text-[16px] font-bold text-[#1A2948] dark:text-white">{pax.adults}</span>
+                          <button
+                            onClick={() =>
+                              setPax(prev => ({
+                                ...prev,
+                                adults: prev.adults + 1
+                              }))
+                            }
+                            className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full border border-[#d1d5db] dark:border-[#555] text-[10px] md:text-[12px] text-[#6B7280] dark:text-white/60 hover:bg-[#f3f4f6] dark:hover:bg-[#333]"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Children Row */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 md:gap-3">
+                          <svg
+                            viewBox="0 0 24 24"
+                            className="h-4 w-4 md:h-5 md:w-5 text-[#1A2948] dark:text-white/80"
+                            fill="currentColor"
+                          >
+                            <path d="M17 12h-5v5h5v-5zM16 5v2H3V3h13v2z" />
+                          </svg>
+                          <div>
+                            <div className="text-[11px] md:text-[13px] font-bold text-[#1A2948] dark:text-white">
+                              Trẻ em
+                            </div>
+                            <div className="text-[9px] md:text-[11px] text-[#1A2948] dark:text-white/70">
+                              {'2-12 tuổi'}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 md:gap-2">
+                          <button
+                            onClick={() =>
+                              setPax(prev => ({
+                                ...prev,
+                                children: Math.max(0, prev.children - 1)
+                              }))
+                            }
+                            disabled={pax.children <= 0}
+                            className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full border border-[#d1d5db] dark:border-[#555] text-[10px] md:text-[12px] text-[#6B7280] dark:text-white/60 hover:bg-[#f3f4f6] dark:hover:bg-[#333]"
+                          >
+                            -
+                          </button>
+                          <span className="text-[14px] md:text-[16px] font-bold text-[#1A2948] dark:text-white">{pax.children}</span>
+                          <button
+                            onClick={() =>
+                              setPax(prev => ({
+                                ...prev,
+                                children: prev.children + 1
+                              }))
+                            }
+                            className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full border border-[#d1d5db] dark:border-[#555] text-[10px] md:text-[12px] text-[#6B7280] dark:text-white/60 hover:bg-[#f3f4f6] dark:hover:bg-[#333]"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Infants Row */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 md:gap-3">
+                          <svg
+                            viewBox="0 0 24 24"
+                            className="h-4 w-4 md:h-5 md:w-5 text-[#1A2948] dark:text-white/80"
+                            fill="currentColor"
+                          >
+                            <path d="M20 9c0-1.1-.9-2-2-2h-2V3h-2v2h-2V3H6v2H4c-1.1 0-2 .9-2 2v6c0 3.31 2.69 6 6 6h6c3.31 0 6-2.69 6-6V9zm-9 3c-.59 0-1-.41-1-1s.41-1 1-1 1 .41 1 1-.41 1-1 1z" />
+                          </svg>
+                          <div>
+                            <div className="text-[11px] md:text-[13px] font-bold text-[#1A2948] dark:text-white">
+                              Em bé
+                            </div>
+                            <div className="text-[9px] md:text-[11px] text-[#1A2948] dark:text-white/70">
+                              {'< 2 tuổi'}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 md:gap-2">
+                          <button
+                            onClick={() =>
+                              setPax(prev => ({
+                                ...prev,
+                                infants: Math.max(0, prev.infants - 1)
+                              }))
+                            }
+                            disabled={pax.infants <= 0}
+                            className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full border border-[#d1d5db] dark:border-[#555] text-[10px] md:text-[12px] text-[#6B7280] dark:text-white/60 hover:bg-[#f3f4f6] dark:hover:bg-[#333]"
+                          >
+                            -
+                          </button>
+                          <span className="text-[14px] md:text-[16px] font-bold text-[#1A2948] dark:text-white">{pax.infants}</span>
+                          <button
+                            onClick={() =>
+                              setPax(prev => ({
+                                ...prev,
+                                infants: prev.infants + 1
+                              }))
+                            }
+                            className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full border border-[#d1d5db] dark:border-[#555] text-[10px] md:text-[12px] text-[#6B7280] dark:text-white/60 hover:bg-[#f3f4f6] dark:hover:bg-[#333]"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Discount Code Input */}
+              <div className="mt-2 md:mt-4 flex items-center gap-2 rounded-xl bg-white dark:bg-navy-dark border-2 border-[#EC2029] dark:border-[#444] px-3 md:px-4 h-[46px] md:h-[58px]">
+                <MdPercent className="text-[16px] md:text-[20px] text-[#1A2948] dark:text-white/80" />
+                <input
+                  type="text"
+                  placeholder="Nhập mã giảm giá"
+                  className="mt-0 w-full bg-transparent text-[13px] md:text-[17px] font-bold text-[#1A2948] dark:text-white outline-none sm:text-[15px] md:text-[18px]"
+                />
+              </div>
+
+              <label className="mt-2 flex items-center gap-2 text-[12px] md:text-[14px] font-bold text-white">
+                <input type="checkbox" className="h-4 w-4 md:h-5 md:w-5 rounded border-0 accent-[#f3c84d] dark:accent-[#FFC400]" />
+                <span>Tìm vé rẻ nhất</span>
+              </label>
+
+              <button
+                type="submit"
+                className="mt-3 md:mt-4 flex h-[44px] md:h-[50px] w-full items-center justify-center rounded-full bg-[#FFD400] dark:bg-[#FFC400]/90 text-[14px] md:text-[16px] font-bold uppercase text-[#1A2948] dark:text-navy-dark hover:bg-[#ffdd00] dark:hover:bg-[#FFC400] transition-all duration-200"
+              >
+                Tìm chuyến bay
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </section>

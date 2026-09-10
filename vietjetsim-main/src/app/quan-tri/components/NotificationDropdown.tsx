@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import Icon from '@/components/ui/AppIcon';
+import { Icon } from '@/shared/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { getCsrfHeaders } from '@/hooks/useCsrf';
 

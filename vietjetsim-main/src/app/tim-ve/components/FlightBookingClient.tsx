@@ -1,13 +1,13 @@
 'use client';
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Icon from '@/components/ui/AppIcon';
+import { Icon } from '@/shared/components/ui';
 import FlightResultsStep from './FlightResultsStep';
 import PassengerInfoStep from './PassengerInfoStep';
 import SeatSelectionStep from './SeatSelectionStep';
 import { useToast } from '@/hooks/useToast';
-import { ToastContainer } from '@/components/ui/Toast';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import { ToastContainer } from '@/shared/components/feedback';
+import { ErrorBoundary } from '@/shared/components/feedback';
 
 export type Flight = {
   id: string;
@@ -157,21 +157,21 @@ function FlightBookingClientInner() {
   };
 
   return (
-    <div className="pt-[128px] pb-12 min-h-screen bg-gray-50 font-body">
-      {/* VietJet-style sticky step bar */}
+    <div className="pt-[128px] pb-8 sm:pb-12 min-h-screen bg-[var(--surface)] dark:bg-[var(--dark-surface)] font-body">
+      {/* VietJet-style sticky step bar - responsive */}
       <div
         className="sticky top-[128px] z-30"
         style={{
           background: 'linear-gradient(20.12deg, rgba(217,26,33,1) 19.6%, rgba(111,0,0,1) 93.86%)',
         }}
       >
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-4 sm:gap-6 py-3">
+        <div className="max-w-5xl mx-auto px-3 sm:px-4 md:px-6">
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4 py-2 sm:py-3 overflow-x-auto">
             {STEPS.map((s, i) => (
               <React.Fragment key={s.id}>
-                <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-shrink-0">
                   <div
-                    className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs sm:text-sm font-black transition-all flex-shrink-0`}
+                    className={`w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center text-[10px] sm:text-xs md:text-sm font-black transition-all flex-shrink-0`}
                     style={{
                       background:
                         step > s.id
@@ -179,20 +179,24 @@ function FlightBookingClientInner() {
                           : step === s.id
                             ? 'white'
                             : 'rgba(255,255,255,0.20)',
-                      color: step > s.id ? '#1A2948' : step === s.id ? '#EC2029' : 'white',
+                      color: step > s.id ? 'var(--vj-navy)' : step === s.id ? 'var(--primary)' : 'white',
                       fontWeight: 900,
                     }}
                   >
-                    {step > s.id ? <Icon name="CheckIcon" size={14} className="sm:!w-4 sm:!h-4" /> : s.id}
+                    {step > s.id ? (
+                      <Icon name="CheckIcon" size={12} className="sm:!w-3.5 sm:!h-3.5 md:!w-4 md:!h-4" />
+                    ) : (
+                      s.id
+                    )}
                   </div>
                   <span
-                    className={`text-xs sm:text-sm font-semibold hidden xs:block transition-colors`}
+                    className={`text-[10px] sm:text-xs md:text-sm font-semibold hidden sm:block transition-colors`}
                     style={{
                       color:
                         step === s.id
                           ? 'white'
                           : step > s.id
-                            ? '#FFD400'
+                            ? 'var(--accent)'
                             : 'rgba(255,255,255,0.60)',
                       fontWeight: step === s.id ? 700 : 600,
                     }}
@@ -202,11 +206,11 @@ function FlightBookingClientInner() {
                 </div>
                 {i < STEPS.length - 1 && (
                   <div
-                    className={`flex-1 h-0.5 min-w-8 sm:min-w-12 max-w-12 sm:max-w-16 transition-colors`}
+                    className={`flex-1 h-0.5 min-w-6 sm:min-w-8 md:min-w-12 max-w-10 sm:max-w-12 md:max-w-16 transition-colors flex-shrink-0`}
                     style={{
                       background:
                         step > s.id + 1
-                          ? '#FFD400'
+                          ? 'var(--accent)'
                           : step > s.id
                             ? 'rgba(255,255,255,0.60)'
                             : 'rgba(255,255,255,0.20)',
@@ -219,8 +223,8 @@ function FlightBookingClientInner() {
         </div>
       </div>
 
-      {/* Step Content */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 mt-6">
+      {/* Step Content - responsive padding */}
+      <div className="max-w-5xl mx-auto px-3 sm:px-4 md:px-6 mt-4 sm:mt-6">
         {step === 1 && (
           <ErrorBoundary inline variant="api" retryLabel="Tìm lại chuyến bay">
             <FlightResultsStep onSelect={handleFlightSelect} />
@@ -264,13 +268,13 @@ export default function FlightBookingClient() {
 function FlightSearchSkeleton() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-      <div className="bg-white rounded-2xl shadow-lg p-8 animate-pulse">
-        <div className="h-8 bg-gray-200 rounded-lg w-1/3 mb-6" />
+      <div className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl shadow-lg p-8 animate-pulse">
+        <div className="h-8 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] rounded-lg w-1/3 mb-6" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
             <div key={i}>
-              <div className="h-4 bg-gray-200 rounded w-1/2 mb-2" />
-              <div className="h-10 bg-gray-100 rounded-lg" />
+              <div className="h-4 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] rounded w-1/2 mb-2" />
+              <div className="h-10 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] rounded-lg" />
             </div>
           ))}
         </div>
