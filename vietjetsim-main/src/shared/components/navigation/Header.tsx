@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { IconType } from 'react-icons';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { HiChevronDown, HiOutlineGlobeAlt, HiOutlineUserCircle, HiOutlineX } from 'react-icons/hi';
 import {
   RiFlightTakeoffLine,
@@ -39,6 +40,7 @@ const serviceLinks: Array<[string, string, IconType]> = [
 
 export default function Header() {
   const { user, signOut } = useAuth();
+  const pathname = usePathname();
   const [announcementVisible, setAnnouncementVisible] = useState(true);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
@@ -162,17 +164,24 @@ export default function Header() {
 
       <nav className="border-t border-black/5 dark:border-white/5" aria-label="Quản lý chuyến bay">
         <div className="mx-auto flex max-w-[1240px] overflow-x-auto px-3 md:px-4 [scrollbar-width:thin]">
-          {flightLinks.map(([label, href], index) => (
-            <Link
-              key={label}
-              href={href}
-              className={`shrink-0 border-b-2 border-transparent px-3 md:px-4 py-2 md:py-3 text-[11px] md:text-xs font-extrabold uppercase text-[#333] dark:text-white/80 hover:border-[#E31E24] hover:text-[#E31E24] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#E31E24] sm:text-sm ${
-                index === 0 ? 'ml-auto' : ''
-              }`}
-            >
-              {label}
-            </Link>
-          ))}
+          {flightLinks.map(([label, href], index) => {
+            const isActive = pathname === href || pathname.startsWith(`${href}/`);
+            return (
+              <Link
+                key={label}
+                href={href}
+                className={`shrink-0 border-b-2 px-3 md:px-4 py-2 md:py-3 text-[11px] md:text-xs font-extrabold uppercase sm:text-sm ${
+                  isActive
+                    ? 'border-[#E31E24] text-[#E31E24] dark:text-[#E31E24]'
+                    : 'border-transparent text-[#333] dark:text-white/80 hover:border-[#E31E24] hover:text-[#E31E24]'
+                } focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#E31E24] ${
+                  index === 0 ? 'ml-auto' : ''
+                }`}
+              >
+                {label}
+              </Link>
+            );
+          })}
         </div>
       </nav>
 
