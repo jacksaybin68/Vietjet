@@ -251,7 +251,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                     ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700 text-red-700 dark:text-red-400'
                     : timerWarning
                       ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-700 text-orange-700 dark:text-orange-400'
-                      : 'bg-[#1A2948]/5 dark:bg-[#1A2948]/20 border-[#1A2948]/20 dark:border-[#1A2948]/40 text-[#1A2948] dark:text-white'
+                      : 'bg-primary/5 dark:bg-primary/10 border-primary/20 dark:border-primary/40 text-primary dark:text-primary'
                 }`}
               >
                 <div className="flex items-center gap-1.5 sm:gap-2">
@@ -329,8 +329,8 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                         <span className="font-bold text-[var(--foreground)] dark:text-[var(--foreground)] font-koho">{svc.title}</span>
                       </div>
                       <div className="mt-auto">
-                        <div className="text-[8px] sm:text-[10px] text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]">Giá ưu đãi</div>
-                        <div className="text-[11px] sm:text-sm font-black text-[#EC2029] font-koho">
+                        <div className="text-[8px] sm:text-[10px] text-[var(--foreground-subtle)]">Giá ưu đãi</div>
+                        <div className="text-[11px] sm:text-sm font-black text-primary font-koho">
                           {svc.price}
                         </div>
                       </div>
@@ -376,46 +376,46 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
                     <div className="flex items-center gap-1.5 sm:gap-2">
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-available border-2 border-stone-300 bg-white flex-shrink-0" />
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-available border-2 border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--surface)] dark:bg-[var(--dark-surface)] flex-shrink-0" />
                       <div>
-                        <div className="font-semibold text-[var(--foreground)] dark:text-[var(--foreground)]">Phổ thông</div>
-                        <div className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]">45k–70k₫</div>
+                        <div className="font-semibold text-[var(--foreground)]">Phổ thông</div>
+                        <div className="text-[var(--foreground-subtle)]">45k–70k₫</div>
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2">
                       <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-business flex-shrink-0" />
                       <div>
-                        <div className="font-semibold text-[var(--foreground)] dark:text-[var(--foreground)]">Thương gia</div>
-                        <div className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]">350k₫+</div>
+                        <div className="font-semibold text-[var(--foreground)]">Thương gia</div>
+                        <div className="text-[var(--foreground-subtle)]">350k₫+</div>
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2">
                       <div className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-orange-100 border-2 border-orange-400 flex-shrink-0" />
                       <div>
-                        <div className="font-semibold text-[var(--foreground)] dark:text-[var(--foreground)]">Ưa chuộng</div>
-                        <div className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]">Đặt nhiều</div>
+                        <div className="font-semibold text-[var(--foreground)]">Ưa chuộng</div>
+                        <div className="text-[var(--foreground-subtle)]">Đặt nhiều</div>
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2">
                       <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-selected flex-shrink-0" />
                       <div>
-                        <div className="font-semibold text-[var(--foreground)] dark:text-[var(--foreground)]">Đã chọn</div>
-                        <div className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]">Của bạn</div>
+                        <div className="font-semibold text-[var(--foreground)]">Đã chọn</div>
+                        <div className="text-[var(--foreground-subtle)]">Của bạn</div>
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2">
                       <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-occupied flex-shrink-0" />
                       <div>
-                        <div className="font-semibold text-[var(--foreground)] dark:text-[var(--foreground)]">Đã đặt</div>
-                        <div className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]">Không có</div>
+                        <div className="font-semibold text-[var(--foreground)]">Đã đặt</div>
+                        <div className="text-[var(--foreground-subtle)]">Không có</div>
                       </div>
                     </div>
                     {showHeatmap && (
                       <div className="flex items-center gap-1.5 sm:gap-2">
                         <div className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-green-50 border-2 border-green-400 flex-shrink-0" />
                         <div>
-                          <div className="font-semibold text-[var(--foreground)] dark:text-[var(--foreground)]">Ít người</div>
-                          <div className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]">Còn nhiều</div>
+                          <div className="font-semibold text-[var(--foreground)]">Ít người</div>
+                          <div className="text-[var(--foreground-subtle)]">Còn nhiều</div>
                         </div>
                       </div>
                     )}
@@ -424,18 +424,18 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                   {/* Heatmap scale - responsive */}
                   {showHeatmap && (
                     <div className="mt-2.5 sm:mt-3 pt-2.5 sm:pt-3 border-t border-[var(--border)] dark:border-[var(--dark-border)]">
-                      <div className="text-[10px] sm:text-xs font-bold text-[var(--foreground)] dark:text-[var(--foreground)] mb-1 sm:mb-1.5 font-koho">
+                      <div className="text-[10px] sm:text-xs font-bold text-[var(--foreground)] mb-1 sm:mb-1.5 font-koho">
                         Mức độ lấp đầy
                       </div>
                       <div className="flex items-center gap-0.5 sm:gap-1">
-                        <span className="text-[8px] sm:text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]">Thấp</span>
+                        <span className="text-[8px] sm:text-xs text-[var(--foreground-subtle)]">Thấp</span>
                         <div className="flex gap-0.25 sm:gap-0.5 flex-1">
                           <div className="h-2 sm:h-3 flex-1 rounded-l bg-green-200" />
                           <div className="h-2 sm:h-3 flex-1 bg-yellow-200" />
                           <div className="h-2 sm:h-3 flex-1 bg-orange-200" />
                           <div className="h-2 sm:h-3 flex-1 rounded-r bg-red-300" />
                         </div>
-                        <span className="text-[8px] sm:text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]">Cao</span>
+                        <span className="text-[8px] sm:text-xs text-[var(--foreground-subtle)]">Cao</span>
                       </div>
                     </div>
                   )}
@@ -443,7 +443,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
 
                 {/* Airplane nose - responsive */}
                 <div className="text-center mb-3 sm:mb-4">
-                  <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-[#1A2948]/5 dark:bg-[#1A2948]/20 text-[var(--foreground)] dark:text-[var(--foreground)] text-[10px] sm:text-xs px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-[#1A2948]/10 dark:border-[#1A2948]/20 font-semibold font-koho">
+                  <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-primary/5 dark:bg-primary/10 text-[var(--foreground)] text-[10px] sm:text-xs px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-primary/10 dark:border-primary/20 font-semibold font-koho">
                     <Icon name="PaperAirplaneIcon" size={10} sm:size={12} className="text-primary" />
                     Mũi máy bay
                   </div>
@@ -510,7 +510,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                           top: tooltip.y - 140,
                         }}
                       >
-                        <div className="bg-[#1A2948] dark:bg-[#242424] text-white rounded-xl shadow-xl p-2.5 sm:p-3 w-40 sm:w-44 text-[10px] sm:text-xs">
+                        <div className="bg-[var(--vj-navy)] dark:bg-[var(--dark-surface)] text-white rounded-xl shadow-xl p-2.5 sm:p-3 w-40 sm:w-44 text-[10px] sm:text-xs">
                           <div className="flex items-center justify-between mb-1.5 sm:mb-2">
                             <span className="font-black text-sm sm:text-base font-koho">
                               Ghế {tooltip.seatId}
@@ -518,7 +518,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                             <span
                               className={`px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold ${
                                 tooltipSeat.status === 'business'
-                                  ? 'bg-accent text-[#1A2948]'
+                                  ? 'bg-accent text-[var(--vj-navy)]'
                                   : tooltipSeat.status === 'hot'
                                     ? 'bg-orange-400 text-white'
                                     : tooltipSeat.status === 'occupied'
@@ -585,7 +585,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                             <div className="text-white/50 text-center py-0.5 sm:py-1">Ghế đã được đặt</div>
                           )}
                           {/* Arrow */}
-                          <div className="absolute bottom-[-5px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[#1A2948] dark:bg-[#242424] rotate-45" />
+                          <div className="absolute bottom-[-5px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[var(--vj-navy)] dark:bg-[var(--dark-surface)] rotate-45" />
                         </div>
                       </div>
                     )}
@@ -604,14 +604,14 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
               {/* Yellow accent top bar */}
               <div className="h-1 w-full bg-gradient-to-r from-accent/60 via-accent to-accent/60" />
               <div className="p-4 sm:p-5">
-                <h3 className="font-black text-[var(--foreground)] dark:text-[var(--foreground)] mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2 font-koho">
+                <h3 className="font-black text-[var(--foreground)] mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2 font-koho">
                   <Icon name="TicketIcon" size={14} sm:size={16} className="text-primary" />
                   Chỗ đã chọn
                 </h3>
 
                 {selected.length === 0 ? (
-                  <div className="text-center py-6 sm:py-8 text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]">
-                    <Icon name="TicketIcon" size={24} sm:size={32} className="mx-auto mb-1.5 sm:mb-2 text-stone-300" />
+                  <div className="text-center py-6 sm:py-8 text-[var(--foreground-subtle)]">
+                    <Icon name="TicketIcon" size={24} sm:size={32} className="mx-auto mb-1.5 sm:mb-2 text-[var(--foreground-muted)]" />
                     <div className="text-[11px] sm:text-sm">Chưa chọn chỗ ngồi</div>
                   </div>
                 ) : (
@@ -621,17 +621,17 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                       return (
                         <div
                           key={seat}
-                          className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-xl px-2.5 sm:px-3 py-2 sm:py-2.5"
+                          className="flex items-center justify-between bg-primary/5 dark:bg-primary/10 border border-primary/10 dark:border-primary/20 rounded-xl px-2.5 sm:px-3 py-2 sm:py-2.5"
                         >
                           <div className="flex items-center gap-1.5 sm:gap-2">
                             <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-red rounded text-white text-[10px] sm:text-xs font-black flex items-center justify-center shadow-sm">
                               {i + 1}
                             </div>
                             <div>
-                              <div className="font-black text-[var(--foreground)] dark:text-[var(--foreground)] text-[11px] sm:text-sm font-koho">
+                              <div className="font-black text-[var(--foreground)] text-[11px] sm:text-sm font-koho">
                                 Ghế {seat}
                               </div>
-                              <div className="text-[9px] sm:text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]">
+                              <div className="text-[9px] sm:text-xs text-[var(--foreground-muted)]">
                                 {passengers[i]?.name || `Hành khách ${i + 1}`}
                               </div>
                               <div className="text-[9px] sm:text-xs text-primary font-bold">
@@ -641,7 +641,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                           </div>
                           <button
                             onClick={() => setSelected((prev) => prev.filter((s) => s !== seat))}
-                            className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] hover:text-primary transition-colors"
+                            className="text-[var(--foreground-subtle)] hover:text-primary transition-colors"
                           >
                             <Icon name="XMarkIcon" size={12} sm:size={14} />
                           </button>
@@ -654,19 +654,19 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                 {/* Price - responsive */}
                 <div className="border-t border-[var(--border)] dark:border-[var(--dark-border)] pt-3 sm:pt-4 mb-3 sm:mb-4 space-y-1.5 sm:space-y-2 text-[11px] sm:text-sm">
                   <div className="flex justify-between">
-                    <span className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]">Vé máy bay</span>
-                    <span className="font-semibold text-[var(--foreground)] dark:text-[var(--foreground)]">
+                    <span className="text-[var(--foreground-muted)]">Vé máy bay</span>
+                    <span className="font-semibold text-[var(--foreground)]">
                       {(flight.price * passengerCount).toLocaleString('vi-VN')}₫
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]">Phí chọn chỗ</span>
-                    <span className="font-semibold text-[var(--foreground)] dark:text-[var(--foreground)]">
+                    <span className="text-[var(--foreground-muted)]">Phí chọn chỗ</span>
+                    <span className="font-semibold text-[var(--foreground)]">
                       {selected.reduce((sum, s) => sum + SEATS[s].price, 0).toLocaleString('vi-VN')}
                       ₫
                     </span>
                   </div>
-                  <div className="flex justify-between font-black text-[var(--foreground)] dark:text-[var(--foreground)] pt-1 border-t border-[var(--border)] dark:border-[var(--dark-border)] font-koho">
+                  <div className="flex justify-between font-black text-[var(--foreground)] pt-1 border-t border-[var(--border)] dark:border-[var(--dark-border)] font-koho">
                     <span>Tổng cộng</span>
                     <span className="text-primary">
                       {(
