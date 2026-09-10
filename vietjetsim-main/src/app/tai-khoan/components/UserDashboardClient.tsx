@@ -730,7 +730,7 @@ export default function UserDashboardClient() {
                     style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
                   >
                     <div className="w-10 h-10 sm:w-14 sm:h-14 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 border border-[var(--primary)]/20 dark:border-[var(--primary)]/30">
-                      <Icon name="ExclamationTriangleIcon" size={20} sm:size={28} className="text-[var(--primary)]" />
+                      <Icon name="ExclamationTriangleIcon" size={28} className="text-[var(--primary)]" />
                     </div>
                     <p className="font-bold text-[10px] sm:text-sm mb-0.5 sm:mb-1 text-[var(--foreground)]">
                       Không thể tải chuyến bay
@@ -743,7 +743,7 @@ export default function UserDashboardClient() {
                       className="inline-flex items-center gap-1.5 sm:gap-2 text-white font-semibold text-[10px] sm:text-xs px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all"
                       style={{ background: 'var(--primary)' }}
                     >
-                      <Icon name="ArrowPathIcon" size={12} sm:size={14} />
+                      <Icon name="ArrowPathIcon" size={14} />
                       Thử lại
                     </button>
                   </div>
@@ -786,14 +786,14 @@ export default function UserDashboardClient() {
                               boxShadow: '0 4px 16px rgba(245, 158, 11, 0.3)',
                             }}
                           >
-                            <Icon name="PaperAirplaneIcon" size={12} sm:size={15} />
+                            <Icon name="PaperAirplaneIcon" size={15} />
                             Đặt vé ngay
                           </Link>
                           <button
                             onClick={retryUpcoming}
                             className="inline-flex items-center gap-1.5 sm:gap-2 text-amber-700 font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-sm border border-[var(--accent)]/30 dark:border-amber-700 hover:bg-amber-50 transition-all bg-[var(--surface)] dark:bg-[var(--dark-surface)]"
                           >
-                            <Icon name="ArrowPathIcon" size={12} sm:size={14} />
+                            <Icon name="ArrowPathIcon" size={14} />
                             Tải lại
                           </button>
                         </div>

@@ -45,11 +45,11 @@ interface BookingDetail {
 }
 
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> = {
-  pending: { label: 'Chờ thanh toán', color: '#d97706', bg: '#fef3c7' },
-  confirmed: { label: 'Đã xác nhận', color: '#059669', bg: '#d1fae5' },
-  completed: { label: 'Hoàn thành', color: '#2563eb', bg: '#dbeafe' },
-  cancelled: { label: 'Đã hủy', color: '#dc2626', bg: '#fee2e2' },
-  refunded: { label: 'Đã hoàn tiền', color: '#7c3aed', bg: '#ede9fe' },
+  pending: { label: 'Chờ thanh toán', color: 'var(--accent)', bg: 'var(--accent)' },
+  confirmed: { label: 'Đã xác nhận', color: 'var(--primary)', bg: 'var(--primary)' },
+  completed: { label: 'Hoàn thành', color: 'var(--blue)', bg: 'var(--blue)' },
+  cancelled: { label: 'Đã hủy', color: 'var(--primary)', bg: 'var(--primary)' },
+  refunded: { label: 'Đã hoàn tiền', color: 'var(--vj-purple)', bg: 'var(--vj-purple)' },
 };
 
 export default function BookingDetailPage() {
@@ -130,8 +130,8 @@ export default function BookingDetailPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--surface)] dark:bg-[var(--dark-surface)] px-3 sm:px-4">
         <div className="text-center max-w-md">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-            <Icon name="ExclamationCircleIcon" size={24} sm:size={32} className="text-red-600" />
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 border border-[var(--border)] dark:border-[var(--dark-border)]">
+            <Icon name="ExclamationCircleIcon" size={32} className="text-[var(--primary)]" />
           </div>
           <h2 className="text-lg sm:text-xl font-bold text-[var(--foreground)] dark:text-[var(--foreground)] mb-1.5 sm:mb-2">Không tìm thấy đặt chỗ</h2>
           <p className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mb-5 sm:mb-6">
@@ -141,7 +141,7 @@ export default function BookingDetailPage() {
             href="/tai-khoan"
             className="inline-flex items-center gap-1.5 sm:gap-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition-colors"
           >
-            <Icon name="ArrowLeftIcon" size={16} sm:size={18} />
+            <Icon name="ArrowLeftIcon" size={18} />
             Quay lại Dashboard
           </Link>
         </div>
@@ -164,14 +164,14 @@ export default function BookingDetailPage() {
               href="/tai-khoan"
               className="flex items-center gap-1.5 sm:gap-2 text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] hover:text-primary transition-colors font-medium"
             >
-              <Icon name="ArrowLeftIcon" size={16} sm:size={18} />
+              <Icon name="ArrowLeftIcon" size={18} />
               Quay lại
             </Link>
             <button
               onClick={handleCopyCode}
               className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-lg text-[10px] sm:text-sm font-semibold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] hover:border-primary hover:text-primary transition-all"
             >
-              <Icon name="ClipboardDocumentIcon" size={14} sm:size={16} />
+              <Icon name="ClipboardDocumentIcon" size={16} />
               Sao chép mã
             </button>
           </div>
@@ -182,8 +182,12 @@ export default function BookingDetailPage() {
             <div
               className="px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0"
               style={{
-                background: `${statusInfo.bg}20`,
-                borderBottom: `1px solid ${statusInfo.bg}`,
+                background: statusInfo.color.includes('var(--accent)') ? `rgba(255, 196, 0, 0.08)` :
+                           statusInfo.color.includes('var(--blue)') ? `rgba(37, 99, 212, 0.08)` :
+                           statusInfo.color.includes('var(--vj-purple)') ? `rgba(128, 117, 214, 0.08)` : `rgba(227, 30, 36, 0.08)`,
+                borderBottom: statusInfo.color.includes('var(--accent)') ? `1px solid rgba(255, 196, 0, 0.2)` :
+                              statusInfo.color.includes('var(--blue)') ? `1px solid rgba(37, 99, 212, 0.2)` :
+                              statusInfo.color.includes('var(--vj-purple)') ? `1px solid rgba(128, 117, 214, 0.2)` : `1px solid rgba(227, 30, 36, 0.2)`,
               }}
             >
               <div className="flex items-center gap-2 sm:gap-3">
@@ -231,7 +235,7 @@ export default function BookingDetailPage() {
                   </div>
                   <div className="w-full h-px bg-[var(--border)] dark:bg-[var(--dark-border)] relative">
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[var(--surface)] dark:bg-[var(--dark-surface)] px-1.5 sm:px-2">
-                      <Icon name="PaperAirplaneIcon" size={14} sm:size={16} className="text-primary rotate-90" />
+                      <Icon name="PaperAirplaneIcon" size={16} className="text-primary rotate-90" />
                     </div>
                   </div>
                   <div className="text-[10px] sm:text-xs text-primary mt-0.5 sm:mt-1">Bay thẳng</div>
@@ -266,7 +270,7 @@ export default function BookingDetailPage() {
                   >
                     <div className="flex items-center gap-2 sm:gap-3">
                       <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary/5 dark:bg-primary/10 rounded-full flex items-center justify-center">
-                        <Icon name="UserIcon" size={12} sm:size={14} className="text-primary" />
+                        <Icon name="UserIcon" size={14} className="text-primary" />
                       </div>
                       <div>
                         <div className="font-semibold text-[var(--foreground)] dark:text-[var(--foreground)] text-[11px] sm:text-sm">{p.full_name}</div>
@@ -306,10 +310,10 @@ export default function BookingDetailPage() {
 
             {/* QR Code Mock - responsive */}
             <div className="px-4 sm:px-6 py-4 sm:py-6 flex flex-col items-center border-t border-[var(--border)] dark:border-[var(--dark-border)]">
-              <div className="w-24 h-24 sm:w-32 sm:h-32 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] rounded-xl flex items-center justify-center border-2 border-dashed border-[var(--border)] dark:border-[var(--dark-border)] mb-2.5 sm:mb-3">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl flex items-center justify-center border-2 border-dashed border-[var(--border)] dark:border-[var(--dark-border)] mb-2.5 sm:mb-3">
                 <div className="text-center">
-                  <Icon name="QrCodeIcon" size={32} sm:size={48} className="text-stone-400 mx-auto" />
-                  <div className="text-[10px] sm:text-xs text-stone-400 mt-0.5 sm:mt-1">QR Check-in</div>
+                  <Icon name="QrCodeIcon" size={48} className="text-[var(--foreground-subtle)] mx-auto" />
+                  <div className="text-[10px] sm:text-xs text-[var(--foreground-subtle)] mt-0.5 sm:mt-1">QR Check-in</div>
                 </div>
               </div>
               <p className="text-[10px] sm:text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] text-center">
@@ -326,14 +330,14 @@ export default function BookingDetailPage() {
               }
               className="flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl font-semibold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] hover:border-primary hover:text-primary transition-all"
             >
-              <Icon name="ArrowDownTrayIcon" size={16} sm:size={18} />
+              <Icon name="ArrowDownTrayIcon" size={18} />
               Tải vé
             </button>
             <button
               onClick={() => router.push('/tim-ve')}
               className="flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition-all"
             >
-              <Icon name="PlusIcon" size={16} sm:size={18} />
+              <Icon name="PlusIcon" size={18} />
               Đặt vé mới
             </button>
           </div>
