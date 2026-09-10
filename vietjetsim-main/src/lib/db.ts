@@ -2130,7 +2130,7 @@ export async function searchCheckIn(
       f.flight_no, f.from_code, f.to_code, f.depart_time, f.arrive_time
     FROM bookings b
     JOIN flights f ON b.flight_id = f.id
-    WHERE b.id = ${bookingCode} OR b.booking_code = ${bookingCode}
+    WHERE (b.id::text = ${bookingCode} OR b.booking_code = ${bookingCode})
     LIMIT 1
   `;
 
@@ -2144,7 +2144,7 @@ export async function searchCheckIn(
     SELECT p.id, p.booking_id, p.name, p.dob, p.id_number, p.gender, p.created_at
     FROM passengers p
     JOIN bookings b ON p.booking_id = b.id
-    WHERE b.id = ${bookingCode} OR b.booking_code = ${bookingCode}
+    WHERE (b.id::text = ${bookingCode} OR b.booking_code = ${bookingCode})
     ORDER BY p.created_at
   `;
 
