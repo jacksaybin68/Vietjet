@@ -179,7 +179,7 @@ function FlightBookingClientInner() {
                           : step === s.id
                             ? 'white'
                             : 'rgba(255,255,255,0.20)',
-                      color: step > s.id ? '#1A2948' : step === s.id ? '#EC2029' : 'white',
+                      color: step > s.id ? 'var(--vj-navy)' : step === s.id ? 'var(--primary)' : 'white',
                       fontWeight: 900,
                     }}
                   >
@@ -196,7 +196,7 @@ function FlightBookingClientInner() {
                         step === s.id
                           ? 'white'
                           : step > s.id
-                            ? '#FFD400'
+                            ? 'var(--accent)'
                             : 'rgba(255,255,255,0.60)',
                       fontWeight: step === s.id ? 700 : 600,
                     }}
@@ -210,7 +210,7 @@ function FlightBookingClientInner() {
                     style={{
                       background:
                         step > s.id + 1
-                          ? '#FFD400'
+                          ? 'var(--accent)'
                           : step > s.id
                             ? 'rgba(255,255,255,0.60)'
                             : 'rgba(255,255,255,0.20)',
@@ -268,13 +268,13 @@ export default function FlightBookingClient() {
 function FlightSearchSkeleton() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-      <div className="bg-white rounded-2xl shadow-lg p-8 animate-pulse">
-        <div className="h-8 bg-gray-200 rounded-lg w-1/3 mb-6" />
+      <div className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl shadow-lg p-8 animate-pulse">
+        <div className="h-8 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] rounded-lg w-1/3 mb-6" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
             <div key={i}>
-              <div className="h-4 bg-gray-200 rounded w-1/2 mb-2" />
-              <div className="h-10 bg-gray-100 rounded-lg" />
+              <div className="h-4 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] rounded w-1/2 mb-2" />
+              <div className="h-10 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] rounded-lg" />
             </div>
           ))}
         </div>
