@@ -22,3 +22,6 @@ build/
 vietjetsim-main/node_modules/
 vietjetsim-main/.next/
 .aider*
+
+# Nested cloned repo (managed riêng, không commit vào repo cha)
+Vietjet/
