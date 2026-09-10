@@ -680,12 +680,9 @@ export default function UserDashboardClient() {
   const toast = useToast();
   return (
     <div
-      className="pt-[140px] pb-12 min-h-screen"
-      style={{
-        background: 'linear-gradient(180deg, #fefce8 0%, #fffbeb 50%, #fef9c3 100%)',
-      }}
+      className="pt-[120px] sm:pt-[140px] pb-8 sm:pb-12 min-h-screen bg-[var(--surface)] dark:bg-[var(--dark-surface)]"
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6">
         <UserDashboardMobileNav
           tabs={tabs}
           activeTab={activeTab}
@@ -703,8 +700,8 @@ export default function UserDashboardClient() {
           }}
         />
 
-        {/* Main layout: sidebar + content */}
-        <div className="flex gap-6 items-start">
+        {/* Main layout: sidebar + content - responsive */}
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 items-start">
           <UserDashboardDesktopSidebar
             tabs={tabs}
             activeTab={activeTab}
@@ -721,7 +718,7 @@ export default function UserDashboardClient() {
           />
 
           {/* Content area */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 w-full">
             {/* Upcoming Bookings */}
             {activeTab === 'upcoming' && (
               <div className="space-y-4">
@@ -729,43 +726,43 @@ export default function UserDashboardClient() {
                   <UpcomingBookingsSkeleton count={2} />
                 ) : upcomingError ? (
                   <div
-                    className="bg-white rounded-2xl border border-red-200 p-8 text-center"
+                    className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl sm:rounded-2xl border border-red-200 dark:border-red-800 p-6 sm:p-8 text-center"
                     style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
                   >
-                    <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                      <Icon name="ExclamationTriangleIcon" size={28} className="text-red-500" />
+                    <div className="w-10 h-10 sm:w-14 sm:h-14 bg-red-50 dark:bg-red-900/20 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                      <Icon name="ExclamationTriangleIcon" size={20} sm:size={28} className="text-red-500 dark:text-red-400" />
                     </div>
-                    <p className="font-bold text-sm mb-1" style={{ color: '#1e40af' }}>
+                    <p className="font-bold text-[10px] sm:text-sm mb-0.5 sm:mb-1 text-[var(--foreground)]">
                       Không thể tải chuyến bay
                     </p>
-                    <p className="text-xs text-stone-400 mb-4">
+                    <p className="text-[9px] sm:text-xs text-[var(--foreground-subtle)] mb-3 sm:mb-4">
                       Đã xảy ra lỗi khi tải danh sách chuyến bay sắp tới. Vui lòng thử lại.
                     </p>
                     <button
                       onClick={retryUpcoming}
-                      className="inline-flex items-center gap-2 text-white font-semibold text-xs px-5 py-2.5 rounded-xl transition-all"
-                      style={{ background: '#1e40af' }}
+                      className="inline-flex items-center gap-1.5 sm:gap-2 text-white font-semibold text-[10px] sm:text-xs px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all"
+                      style={{ background: 'var(--primary)' }}
                     >
-                      <Icon name="ArrowPathIcon" size={14} />
+                      <Icon name="ArrowPathIcon" size={12} sm:size={14} />
                       Thử lại
                     </button>
                   </div>
                 ) : upcomingBookings.length === 0 ? (
                   <div
-                    className="bg-white rounded-3xl border border-amber-100 overflow-hidden"
+                    className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl sm:rounded-3xl border border-amber-100 dark:border-amber-800 overflow-hidden"
                     style={{
                       boxShadow:
                         '0 8px 32px rgba(245, 158, 11, 0.1), 0 4px 12px rgba(251, 191, 36, 0.06)',
                     }}
                   >
                     <div
-                      className="h-2 w-full"
+                      className="h-1.5 w-full"
                       style={{
                         background: 'linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #fcd34d 100%)',
                       }}
                     />
-                    <div className="p-10 flex flex-col sm:flex-row items-center gap-8 max-w-lg mx-auto">
-                      <div className="shrink-0 w-36 h-36">
+                    <div className="p-6 sm:p-10 flex flex-col sm:flex-row items-center gap-6 sm:gap-8 max-w-lg mx-auto">
+                      <div className="shrink-0 w-28 h-28 sm:w-36 sm:h-36">
                         <img
                           src="/assets/empty-upcoming-flights.svg"
                           alt="Không có chuyến bay sắp tới"
@@ -773,30 +770,30 @@ export default function UserDashboardClient() {
                         />
                       </div>
                       <div className="text-center sm:text-left">
-                        <p className="font-black text-lg mb-2 text-amber-900">
+                        <p className="font-black text-base sm:text-lg mb-1.5 sm:mb-2 text-[var(--foreground)]">
                           Chưa có chuyến bay nào
                         </p>
-                        <p className="text-sm text-amber-600 mb-5 leading-relaxed">
+                        <p className="text-[10px] sm:text-sm text-[var(--foreground-muted)] mb-4 sm:mb-5 leading-relaxed">
                           Bạn chưa có chuyến bay nào sắp tới. Hãy đặt vé ngay để bắt đầu hành trình
                           của bạn!
                         </p>
-                        <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+                        <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center sm:justify-start">
                           <Link
                             href="/tim-ve"
-                            className="inline-flex items-center gap-2 text-white font-bold px-6 py-3 rounded-2xl text-sm transition-all hover:opacity-90 active:scale-95 shadow-lg"
+                            className="inline-flex items-center gap-1.5 sm:gap-2 text-white font-bold px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-sm transition-all hover:opacity-90 active:scale-95 shadow-lg"
                             style={{
                               background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
                               boxShadow: '0 4px 16px rgba(245, 158, 11, 0.3)',
                             }}
                           >
-                            <Icon name="PaperAirplaneIcon" size={15} />
+                            <Icon name="PaperAirplaneIcon" size={12} sm:size={15} />
                             Đặt vé ngay
                           </Link>
                           <button
                             onClick={retryUpcoming}
-                            className="inline-flex items-center gap-2 text-amber-700 font-semibold px-5 py-3 rounded-2xl text-sm border border-amber-200 hover:bg-amber-50 transition-all bg-white"
+                            className="inline-flex items-center gap-1.5 sm:gap-2 text-amber-700 font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-sm border border-amber-200 dark:border-amber-700 hover:bg-amber-50 transition-all bg-[var(--surface)] dark:bg-[var(--dark-surface)]"
                           >
-                            <Icon name="ArrowPathIcon" size={14} />
+                            <Icon name="ArrowPathIcon" size={12} sm:size={14} />
                             Tải lại
                           </button>
                         </div>
@@ -807,7 +804,7 @@ export default function UserDashboardClient() {
                   upcomingBookings.map((booking) => (
                     <Link key={booking.id} href={`/dat-ve/${booking.id}`} className="block">
                       <div
-                        className="bg-white rounded-3xl border border-amber-100 overflow-hidden card-hover-yellow"
+                        className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-3xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden card-hover-yellow"
                         style={{
                           boxShadow:
                             '0 4px 20px rgba(245, 158, 11, 0.08), 0 2px 8px rgba(251, 191, 36, 0.04)',
@@ -834,10 +831,10 @@ export default function UserDashboardClient() {
                           <div className="sm:col-span-2 p-5">
                             <div className="flex items-start justify-between mb-3">
                               <div>
-                                <div className="font-black text-sm" style={{ color: '#1A2948' }}>
+                                <div className="font-black text-sm text-[var(--foreground)]">
                                   {booking.flightNo}
                                 </div>
-                                <div className="text-xs text-stone-400 mt-0.5">{booking.date}</div>
+                                <div className="text-xs text-[var(--foreground-muted)] mt-0.5">{booking.date}</div>
                               </div>
                               <span
                                 className={`text-xs font-bold px-2 py-0.5 rounded-full ${STATUS_MAP[booking.status].cls}`}
@@ -848,32 +845,32 @@ export default function UserDashboardClient() {
                             </div>
                             <div className="flex items-center gap-4 mb-3">
                               <div>
-                                <div className="text-2xl font-black" style={{ color: '#1A2948' }}>
+                                <div className="text-2xl font-black text-[var(--foreground)]">
                                   {booking.departTime}
                                 </div>
-                                <div className="text-xs text-stone-500">
+                                <div className="text-xs text-[var(--foreground-muted)]">
                                   {booking.from} · {booking.fromCity}
                                 </div>
                               </div>
                               <div className="flex-1 flex flex-col items-center">
                                 <Icon name="PaperAirplaneIcon" size={16} className="text-primary" />
-                                <div className="text-xs text-stone-400 mt-0.5">Bay thẳng</div>
+                                <div className="text-xs text-[var(--foreground-muted)] mt-0.5">Bay thẳng</div>
                               </div>
                               <div className="text-right">
-                                <div className="text-2xl font-black" style={{ color: '#1A2948' }}>
+                                <div className="text-2xl font-black text-[var(--foreground)]">
                                   {booking.arriveTime}
                                 </div>
-                                <div className="text-xs text-stone-500">
+                                <div className="text-xs text-[var(--foreground-muted)]">
                                   {booking.to} · {booking.toCity}
                                 </div>
                               </div>
                             </div>
-                            <div className="flex items-center justify-between pt-3 border-t border-stone-100">
-                              <div className="flex items-center gap-3 text-xs text-stone-500">
+                            <div className="flex items-center justify-between pt-3 border-t border-[var(--border)] dark:border-[var(--dark-border)]">
+                              <div className="flex items-center gap-3 text-xs text-[var(--foreground-muted)]">
                                 <div className="flex items-center gap-1">
                                   <Icon name="TicketIcon" size={12} />
                                   Mã:{' '}
-                                  <span className="font-bold" style={{ color: '#1A2948' }}>
+                                  <span className="font-bold text-[var(--foreground)]">
                                     {booking.id}
                                   </span>
                                 </div>
@@ -885,20 +882,20 @@ export default function UserDashboardClient() {
                               <div
                                 className="font-black text-sm px-3 py-1 rounded-lg"
                                 style={{
-                                  color: '#1A2948',
-                                  background: '#FFF8E1',
-                                  border: '1px solid #FFC72C',
+                                  color: 'var(--foreground)',
+                                  background: 'var(--surface-2)',
+                                  border: '1px solid var(--accent)',
                                 }}
                               >
                                 {booking.price.toLocaleString('vi-VN')}₫
                               </div>
                             </div>
                             <div className="mt-3 flex items-center gap-3">
-                              <div className="w-12 h-12 bg-stone-100 rounded-lg flex items-center justify-center border border-dashed border-stone-300">
-                                <Icon name="QrCodeIcon" size={20} className="text-stone-400" />
+                              <div className="w-12 h-12 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] rounded-lg flex items-center justify-center border border-dashed border-[var(--border)] dark:border-[var(--dark-border)]">
+                                <Icon name="QrCodeIcon" size={20} className="text-[var(--foreground-muted)]" />
                               </div>
-                              <div className="text-xs text-stone-400">
-                                <div className="font-semibold text-stone-600">Check-in online</div>
+                              <div className="text-xs text-[var(--foreground-muted)]">
+                                <div className="font-semibold text-[var(--foreground)]">Check-in online</div>
                                 <div>Xuất trình QR code tại sân bay</div>
                               </div>
                               <button
@@ -907,9 +904,9 @@ export default function UserDashboardClient() {
                                 }
                                 className="ml-auto text-xs font-semibold border px-3 py-1.5 rounded-lg transition-all"
                                 style={{
-                                  color: '#1e40af',
-                                  borderColor: '#1e40af',
-                                  background: '#eff6ff',
+                                  color: 'var(--primary)',
+                                  borderColor: 'var(--primary)',
+                                  background: 'var(--surface)',
                                 }}
                               >
                                 Check-in
@@ -927,20 +924,20 @@ export default function UserDashboardClient() {
             {/* History */}
             {activeTab === 'history' && (
               <div
-                className="bg-white rounded-2xl border border-stone-200 overflow-hidden"
+                className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden"
                 style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
               >
                 <div
                   className="h-1.5 w-full"
                   style={{ background: 'linear-gradient(90deg, #EC2029 0%, #FF4D6A 100%)' }}
                 />
-                <div className="p-5 border-b border-stone-100">
+                <div className="p-5 border-b border-[var(--border)] dark:border-[var(--dark-border)]">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h2 className="font-bold" style={{ color: '#1A2948' }}>
+                      <h2 className="font-bold text-[var(--foreground)]">
                         Lịch sử đặt vé
                       </h2>
-                      <p className="text-sm text-stone-400 mt-0.5">
+                      <p className="text-sm text-[var(--foreground-muted)] mt-0.5">
                         {filteredHistory.length} / {historyBookings.length} chuyến bay
                       </p>
                     </div>
@@ -949,7 +946,7 @@ export default function UserDashboardClient() {
                         <>
                           <button
                             onClick={exportCSV}
-                            className="flex items-center gap-1.5 text-xs font-semibold text-green-700 hover:text-green-800 bg-green-50 hover:bg-green-100 border border-green-200 px-3 py-1.5 rounded-lg transition-all"
+                            className="flex items-center gap-1.5 text-xs font-semibold text-green-700 dark:text-green-300 hover:text-green-800 dark:hover:text-green-200 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border border-green-200 dark:border-green-700 px-3 py-1.5 rounded-lg transition-all"
                             title="Xuất CSV"
                           >
                             <Icon name="TableCellsIcon" size={13} />
@@ -957,7 +954,7 @@ export default function UserDashboardClient() {
                           </button>
                           <button
                             onClick={exportPDF}
-                            className="flex items-center gap-1.5 text-xs font-semibold text-red-700 hover:text-red-800 bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg transition-all"
+                            className="flex items-center gap-1.5 text-xs font-semibold text-red-700 dark:text-red-300 hover:text-red-800 dark:hover:text-red-200 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 border border-red-200 dark:border-red-700 px-3 py-1.5 rounded-lg transition-all"
                             title="Xuất PDF"
                           >
                             <Icon name="DocumentArrowDownIcon" size={13} />
@@ -969,7 +966,7 @@ export default function UserDashboardClient() {
                         <button
                           onClick={clearFilters}
                           className="flex items-center gap-1.5 text-xs font-semibold border px-3 py-1.5 rounded-lg transition-all"
-                          style={{ color: '#EC2029', borderColor: '#EC2029' }}
+                          style={{ color: 'var(--primary)', borderColor: 'var(--primary)' }}
                         >
                           <Icon name="XMarkIcon" size={12} />
                           Xoá bộ lọc
@@ -982,7 +979,7 @@ export default function UserDashboardClient() {
                     <Icon
                       name="MagnifyingGlassIcon"
                       size={16}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)]"
                     />
                     <input
                       type="text"
@@ -992,11 +989,11 @@ export default function UserDashboardClient() {
                         setHistoryPage(1);
                       }}
                       placeholder="Tìm theo mã đặt chỗ, chuyến bay, thành phố..."
-                      className="w-full pl-9 pr-9 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition-all"
+                      className="w-full pl-9 pr-9 py-2.5 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm text-[var(--foreground)] placeholder-[var(--foreground-muted)] focus:outline-none transition-all"
                       style={{ outline: 'none' }}
                       onFocus={(e) => {
-                        e.target.style.borderColor = '#EC2029';
-                        e.target.style.boxShadow = '0 0 0 2px rgba(208,2,27,0.1)';
+                        e.target.style.borderColor = 'var(--primary)';
+                        e.target.style.boxShadow = '0 0 0 2px rgba(227, 30, 36, 0.1)';
                       }}
                       onBlur={(e) => {
                         e.target.style.borderColor = '';
@@ -1009,7 +1006,7 @@ export default function UserDashboardClient() {
                           setHistorySearch('');
                           setHistoryPage(1);
                         }}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)] hover:text-[var(--foreground)] transition-colors"
                       >
                         <Icon name="XMarkIcon" size={14} />
                       </button>
@@ -1022,7 +1019,7 @@ export default function UserDashboardClient() {
                         <Icon
                           name="CalendarIcon"
                           size={14}
-                          className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)] pointer-events-none"
                         />
                         <input
                           type="date"
@@ -1031,15 +1028,15 @@ export default function UserDashboardClient() {
                             setHistoryDateFrom(e.target.value);
                             setHistoryPage(1);
                           }}
-                          className="w-full pl-8 pr-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-700 focus:outline-none transition-all"
+                          className="w-full pl-8 pr-3 py-2 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none transition-all"
                         />
                       </div>
-                      <span className="text-stone-400 text-xs flex-shrink-0">→</span>
+                      <span className="text-[var(--foreground-muted)] text-xs flex-shrink-0">→</span>
                       <div className="relative flex-1 min-w-[120px]">
                         <Icon
                           name="CalendarIcon"
                           size={14}
-                          className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)] pointer-events-none"
                         />
                         <input
                           type="date"
@@ -1048,11 +1045,11 @@ export default function UserDashboardClient() {
                             setHistoryDateTo(e.target.value);
                             setHistoryPage(1);
                           }}
-                          className="w-full pl-8 pr-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-700 focus:outline-none transition-all"
+                          className="w-full pl-8 pr-3 py-2 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none transition-all"
                         />
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 bg-stone-50 border border-stone-200 rounded-xl p-1 flex-shrink-0">
+                    <div className="flex items-center gap-1 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl p-1 flex-shrink-0">
                       {(
                         [
                           { value: 'all', label: 'Tất cả' },
@@ -1067,10 +1064,10 @@ export default function UserDashboardClient() {
                             setHistoryStatus(opt.value);
                             setHistoryPage(1);
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${historyStatus === opt.value ? 'text-white border-transparent' : 'text-stone-600 hover:text-stone-700 hover:bg-stone-100'}`}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${historyStatus === opt.value ? 'text-white border-transparent' : 'text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface)] dark:hover:bg-[var(--dark-surface)]'}`}
                           style={
                             historyStatus === opt.value
-                              ? { background: '#EC2029', borderColor: '#EC2029' }
+                              ? { background: 'var(--primary)', borderColor: 'var(--primary)' }
                               : {}
                           }
                         >
@@ -1083,28 +1080,28 @@ export default function UserDashboardClient() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-stone-100" style={{ background: '#1A2948' }}>
+                      <tr className="border-b border-[var(--border)] dark:border-[var(--dark-border)]" style={{ background: 'var(--surface-2)' }}>
                         <th
                           className="text-left text-xs font-bold uppercase tracking-wider px-4 py-2"
-                          style={{ color: '#FFC72C' }}
+                          style={{ color: 'var(--accent)' }}
                         >
                           Mã đặt chỗ
                         </th>
                         <th
                           className="text-left text-xs font-bold uppercase tracking-wider px-4 py-2"
-                          style={{ color: '#FFC72C' }}
+                          style={{ color: 'var(--accent)' }}
                         >
                           Chuyến bay
                         </th>
                         <th
                           className="text-left text-xs font-bold uppercase tracking-wider px-4 py-2 hidden sm:table-cell"
-                          style={{ color: '#FFC72C' }}
+                          style={{ color: 'var(--accent)' }}
                         >
                           Hành trình
                         </th>
                         <th
                           className="text-left text-xs font-bold uppercase tracking-wider px-4 py-2 hidden md:table-cell cursor-pointer select-none"
-                          style={{ color: '#FFC72C' }}
+                          style={{ color: 'var(--accent)' }}
                           onClick={() => toggleSort('date')}
                         >
                           <span className="inline-flex items-center gap-1">
@@ -1138,13 +1135,13 @@ export default function UserDashboardClient() {
                         </th>
                         <th
                           className="text-right text-xs font-bold uppercase tracking-wider px-4 py-2"
-                          style={{ color: '#FFC72C' }}
+                          style={{ color: 'var(--accent)' }}
                         >
                           Giá vé
                         </th>
                         <th
                           className="text-center text-xs font-bold uppercase tracking-wider px-4 py-2 cursor-pointer select-none"
-                          style={{ color: '#FFC72C' }}
+                          style={{ color: 'var(--accent)' }}
                           onClick={() => toggleSort('status')}
                         >
                           <span className="inline-flex items-center gap-1 justify-center">
@@ -1185,25 +1182,25 @@ export default function UserDashboardClient() {
                         <tr>
                           <td colSpan={6} className="px-4 py-12 text-center">
                             <div className="flex flex-col items-center gap-3">
-                              <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center">
+                              <div className="w-14 h-14 bg-red-50 dark:bg-red-900/20 rounded-2xl flex items-center justify-center">
                                 <Icon
                                   name="ExclamationTriangleIcon"
                                   size={28}
-                                  className="text-red-500"
+                                  className="text-red-500 dark:text-red-400"
                                 />
                               </div>
                               <div>
-                                <p className="font-bold text-sm mb-1" style={{ color: '#1A2948' }}>
+                                <p className="font-bold text-sm mb-1 text-[var(--foreground)]">
                                   Không thể tải lịch sử đặt vé
                                 </p>
-                                <p className="text-xs text-stone-400 max-w-xs mx-auto">
+                                <p className="text-xs text-[var(--foreground-muted)] max-w-xs mx-auto">
                                   Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại.
                                 </p>
                               </div>
                               <button
                                 onClick={retryHistory}
                                 className="inline-flex items-center gap-2 text-white font-semibold text-xs px-5 py-2.5 rounded-xl transition-all"
-                                style={{ background: '#EC2029' }}
+                                style={{ background: 'var(--primary)' }}
                               >
                                 <Icon name="ArrowPathIcon" size={14} />
                                 Thử lại
@@ -1224,12 +1221,11 @@ export default function UserDashboardClient() {
                               </div>
                               <div className="text-center sm:text-left">
                                 <p
-                                  className="font-black text-base mb-1.5"
-                                  style={{ color: '#1A2948' }}
+                                  className="font-black text-base mb-1.5 text-[var(--foreground)]"
                                 >
                                   Chưa có yêu cầu nào
                                 </p>
-                                <p className="text-xs text-stone-400 mb-4 leading-relaxed">
+                                <p className="text-xs text-[var(--foreground-muted)] mb-4 leading-relaxed">
                                   Các yêu cầu hoàn tiền bạn gửi sẽ xuất hiện tại đây. Bạn có thể
                                   theo dõi trạng thái xử lý của từng yêu cầu.
                                 </p>
@@ -1239,7 +1235,7 @@ export default function UserDashboardClient() {
                                     el?.scrollIntoView({ behavior: 'smooth' });
                                   }}
                                   className="inline-flex items-center gap-1.5 text-xs font-bold text-white px-4 py-2 rounded-xl transition-all hover:opacity-90 active:scale-95"
-                                  style={{ background: '#EC2029' }}
+                                  style={{ background: 'var(--primary)' }}
                                 >
                                   <Icon name="PlusIcon" size={13} />
                                   Gửi yêu cầu hoàn tiền
@@ -1252,13 +1248,12 @@ export default function UserDashboardClient() {
                         paginatedHistory.map((booking, i) => (
                           <tr
                             key={booking.id}
-                            className={`vj-table-row border-b border-stone-50 ${i % 2 === 0 ? '' : 'bg-stone-50/50'} cursor-pointer hover:bg-stone-100`}
+                            className={`vj-table-row border-b border-[var(--border)] dark:border-[var(--dark-border)] ${i % 2 === 0 ? '' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]'} cursor-pointer hover:bg-[var(--surface-2)] dark:hover:bg-[var(--dark-surface)]`}
                             onClick={() => (window.location.href = `/dat-ve/${booking.id}`)}
                           >
                             <td className="px-4 py-2.5">
                               <span
-                                className="font-mono font-bold text-sm"
-                                style={{ color: '#1A2948' }}
+                                className="font-mono font-bold text-sm text-[var(--foreground)]"
                               >
                                 {booking.id}
                               </span>
@@ -1269,8 +1264,7 @@ export default function UserDashboardClient() {
                                   <Icon name="PaperAirplaneIcon" size={9} className="text-white" />
                                 </div>
                                 <span
-                                  className="font-semibold text-sm"
-                                  style={{ color: '#1A2948' }}
+                                  className="font-semibold text-sm text-[var(--foreground)]"
                                 >
                                   {booking.flightNo}
                                 </span>
@@ -1278,25 +1272,25 @@ export default function UserDashboardClient() {
                             </td>
                             <td className="px-4 py-2.5 hidden sm:table-cell">
                               <div className="flex items-center gap-2 text-sm">
-                                <span className="font-bold" style={{ color: '#1A2948' }}>
+                                <span className="font-bold text-[var(--foreground)]">
                                   {booking.from}
                                 </span>
-                                <Icon name="ArrowRightIcon" size={11} className="text-stone-400" />
-                                <span className="font-bold" style={{ color: '#1A2948' }}>
+                                <Icon name="ArrowRightIcon" size={11} className="text-[var(--foreground-muted)]" />
+                                <span className="font-bold text-[var(--foreground)]">
                                   {booking.to}
                                 </span>
                               </div>
-                              <div className="text-xs text-stone-400">
+                              <div className="text-xs text-[var(--foreground-muted)]">
                                 {booking.departTime} → {booking.arriveTime}
                               </div>
                             </td>
                             <td className="px-4 py-2.5 hidden md:table-cell">
-                              <span className="text-sm text-stone-600">{booking.date}</span>
+                              <span className="text-sm text-[var(--foreground-muted)]">{booking.date}</span>
                             </td>
                             <td className="px-4 py-2.5 text-right">
                               <span
                                 className="font-bold text-sm px-2 py-0.5 rounded"
-                                style={{ color: '#1A2948', background: '#FFF8E1' }}
+                                style={{ color: 'var(--foreground)', background: 'var(--surface-2)' }}
                               >
                                 {booking.price.toLocaleString('vi-VN')}₫
                               </span>
@@ -1316,29 +1310,28 @@ export default function UserDashboardClient() {
                   </table>
                 </div>
                 {filteredHistory.length > 0 && (
-                  <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-2.5 border-t border-stone-100 bg-stone-50/50 gap-3">
+                  <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-2.5 border-t border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] gap-3">
                     <div className="flex items-center gap-3">
-                      <span className="text-xs text-stone-400">
+                      <span className="text-xs text-[var(--foreground-muted)]">
                         {filteredHistory.length > historyPageSize
                           ? `Hiển thị ${(historySafePage - 1) * historyPageSize + 1}–${Math.min(historySafePage * historyPageSize, filteredHistory.length)} / ${filteredHistory.length} chuyến bay`
                           : `${filteredHistory.length} chuyến bay`}
                       </span>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs text-stone-400">Hiển thị:</span>
+                        <span className="text-xs text-[var(--foreground-muted)]">Hiển thị:</span>
                         <select
                           value={historyPageSize}
                           onChange={(e) => {
                             setHistoryPageSize(Number(e.target.value));
                             setHistoryPage(1);
                           }}
-                          className="text-xs font-semibold border border-stone-200 rounded-lg px-2 py-1 bg-white text-stone-700 focus:outline-none cursor-pointer"
-                          style={{ color: '#1A2948' }}
+                          className="text-xs font-semibold border border-[var(--border)] dark:border-[var(--dark-border)] rounded-lg px-2 py-1 bg-[var(--surface)] dark:bg-[var(--dark-surface)] text-[var(--foreground)] focus:outline-none cursor-pointer"
                         >
                           <option value={10}>10</option>
                           <option value={25}>25</option>
                           <option value={50}>50</option>
                         </select>
-                        <span className="text-xs text-stone-400">hàng</span>
+                        <span className="text-xs text-[var(--foreground-muted)]">hàng</span>
                       </div>
                     </div>
                     {historyTotalPages > 1 && (
