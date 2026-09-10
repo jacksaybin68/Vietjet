@@ -5,11 +5,12 @@
 import { FormEvent, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
-  MdCalendarToday,
   MdFlightLand,
   MdFlightTakeoff,
   MdLogin,
-  MdPercent,
+  MdConfirmationNumber,
+  MdChildCare,
+  MdChildFriendly,
   MdPerson,
   MdPeople,
   MdSwapHoriz,
@@ -133,9 +134,9 @@ export default function HeroSection() {
             </div>
 
             <div className="mt-4 space-y-2 md:space-y-3">
-              <div className="grid grid-cols-1 md:grid-cols-[4fr_1fr] gap-2 md:gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_180px] gap-2 md:gap-3">
                 <div className="flex h-[50px] md:h-[58px] items-center rounded-xl bg-white dark:bg-navy-dark border-2 border-[#EC2029] dark:border-[#444] px-3 md:px-4 text-left shadow-sm">
-                  <MdFlightTakeoff className="text-[24px] md:text-[32px] text-[#1A2948] dark:text-white/80" />
+                  <MdFlightTakeoff className="text-[24px] md:text-[32px] text-black dark:text-white/80" />
                   <div className="ml-2 md:ml-3 min-w-0 flex-1">
                     <div className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.08em] text-[#1A2948] dark:text-white/70">
                       Điểm khởi hành
@@ -143,7 +144,7 @@ export default function HeroSection() {
                     <select
                       value={from}
                       onChange={(e) => setFrom(e.target.value)}
-                      className="mt-1 w-full appearance-none bg-transparent text-[14px] md:text-[19px] font-bold text-[#1A2948] dark:text-white outline-none sm:text-[16px] md:text-[20px]"
+                      className="mt-1 w-full appearance-none bg-transparent text-[14px] md:text-[19px] font-black text-black dark:text-white outline-none sm:text-[16px] md:text-[20px]"
                     >
                       {airports.map((item) => (
                         <option key={item.code} value={item.code} className="bg-white dark:bg-navy-dark text-[#1A2948] dark:text-white">
@@ -155,7 +156,6 @@ export default function HeroSection() {
                 </div>
 
                 <div className="flex h-[50px] md:h-[58px] items-center rounded-xl bg-white dark:bg-navy-dark border-2 border-[#EC2029] dark:border-[#444] px-3 md:px-4 text-left shadow-sm">
-                  <MdCalendarToday className="text-[16px] md:text-[20px] text-[#1A2948] dark:text-white/80" />
                   <div className="ml-2 md:ml-3 min-w-0 flex-1">
                     <div className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.08em] text-[#1A2948] dark:text-white/70">
                       Ngày đi
@@ -163,15 +163,15 @@ export default function HeroSection() {
                     <input
                       type="date"
                       defaultValue="2026-04-15"
-                      className="mt-1 w-full bg-transparent text-[12px] md:text-[15px] font-bold text-[#1A2948] dark:text-white outline-none sm:text-[14px] md:text-[16px]"
+                      className="mt-1 w-full bg-transparent text-[12px] md:text-[15px] font-black text-black dark:text-white outline-none sm:text-[14px] md:text-[16px]"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-[4fr_1fr] gap-2 md:gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_180px] gap-2 md:gap-3">
                 <div className="flex h-[50px] md:h-[58px] items-center rounded-xl bg-white dark:bg-navy-dark border-2 border-[#EC2029] dark:border-[#444] px-3 md:px-4 text-left shadow-sm">
-                  <MdFlightLand className="text-[24px] md:text-[32px] text-[#1A2948] dark:text-white/80" />
+                  <MdFlightLand className="text-[24px] md:text-[32px] text-black dark:text-white/80" />
                   <div className="ml-2 md:ml-3 min-w-0 flex-1">
                     <div className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.08em] text-[#1A2948] dark:text-white/70">
                       Điểm đến
@@ -179,7 +179,7 @@ export default function HeroSection() {
                     <select
                       value={to}
                       onChange={(e) => setTo(e.target.value)}
-                      className="mt-1 w-full appearance-none bg-transparent text-[14px] md:text-[19px] font-bold text-[#1A2948] dark:text-white outline-none sm:text-[16px] md:text-[20px]"
+                      className="mt-1 w-full appearance-none bg-transparent text-[14px] md:text-[19px] font-black text-black dark:text-white outline-none sm:text-[16px] md:text-[20px]"
                     >
                       {airports.map((item) => (
                         <option key={item.code} value={item.code} className="bg-white dark:bg-navy-dark text-[#1A2948] dark:text-white">
@@ -191,7 +191,6 @@ export default function HeroSection() {
                 </div>
 
                 <div className="flex h-[50px] md:h-[58px] items-center rounded-xl bg-white dark:bg-navy-dark border-2 border-[#EC2029] dark:border-[#444] px-3 md:px-4 text-left shadow-sm">
-                  <MdCalendarToday className="text-[16px] md:text-[20px] text-[#1A2948] dark:text-white/80" />
                   <div className="ml-2 md:ml-3 min-w-0 flex-1">
                     <div className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.08em] text-[#1A2948] dark:text-white/70">
                       Ngày về
@@ -200,7 +199,7 @@ export default function HeroSection() {
                       type="date"
                       defaultValue="2026-04-22"
                       disabled={!roundTrip}
-                      className="mt-1 w-full bg-transparent text-[12px] md:text-[15px] font-bold text-[#1A2948] dark:text-white outline-none disabled:text-[#999] dark:disabled:text-[#666] sm:text-[14px] md:text-[16px]"
+                      className="mt-1 w-full bg-transparent text-[12px] md:text-[15px] font-black text-black dark:text-white outline-none disabled:text-[#999] dark:disabled:text-[#666] sm:text-[14px] md:text-[16px]"
                     />
                   </div>
                 </div>
@@ -210,33 +209,37 @@ export default function HeroSection() {
               <div className="mt-2 md:mt-4">
                 <div
                   onClick={() => setPaxOpen(!paxOpen)}
-                  className="cursor-pointer flex items-center justify-between px-3 md:px-4 py-2 md:py-3 rounded-xl bg-white dark:bg-navy-dark border-2 border-[#EC2029] dark:border-[#444] text-[12px] md:text-[14px] font-medium text-[#1A2948] dark:text-white hover:bg-[#f9f9f9] dark:hover:bg-[#2a2a2a] transition-colors duration-200 h-[46px] md:h-[58px]"
+                  className={`cursor-pointer flex items-center justify-between px-3 md:px-4 py-2 md:py-3 bg-white dark:bg-navy-dark border-2 border-[#EC2029] dark:border-[#444] hover:bg-[#f9f9f9] dark:hover:bg-[#2a2a2a] transition-colors duration-200 h-[46px] md:h-[58px] ${
+                    paxOpen ? 'rounded-t-xl border-b-0' : 'rounded-xl'
+                  }`}
                 >
                   <div className="flex items-center gap-2 md:gap-3">
-                    <MdPeople className="h-4 w-4 md:h-5 md:w-5 text-[#E30613] dark:text-[#FFC400]" />
+                    <MdPeople className="h-4 w-4 md:h-5 md:w-5 text-black dark:text-[#FFC400]" />
                     <div>
-                      <div className="text-[12px] md:text-[14px] font-bold text-[#1A2948] dark:text-white">Hành khách</div>
-                      <div className="text-[11px] md:text-[14px] text-[#1A2948] dark:text-white/80 font-bold">
+                      <div className="text-[10px] font-bold uppercase tracking-wide text-black opacity-70 dark:text-white/70">
+                        Hành khách
+                      </div>
+                      <div className="text-[17px] font-black text-black dark:text-white leading-tight">
                         {pax.adults} người lớn{' '}
                         {pax.children > 0 && `, ${pax.children} trẻ em `}
                         {pax.infants > 0 && `, ${pax.infants} em bé`}
                       </div>
                     </div>
-                    <svg
-                      viewBox="0 0 24 24"
-                      className={`h-4 w-4 md:h-5 md:w-5 transition-transform duration-200 ${
-                        paxOpen ? 'rotate-180' : ''
-                      }`}
-                      fill="currentColor"
-                    >
-                      <path d="M6 9l6 6 6-6" />
-                    </svg>
                   </div>
+                  <svg
+                    viewBox="0 0 24 24"
+                    className={`ml-auto h-4 w-4 md:h-5 md:w-5 transition-transform duration-200 ${
+                      paxOpen ? 'rotate-180' : ''
+                    }`}
+                    fill="currentColor"
+                  >
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
                 </div>
 
-                {/* Passenger Details Panel */}
+                {/* Passenger Details Panel — liền mạch với thanh tìm kiếm */}
                 <div
-                  className={`mt-1 overflow-hidden transition-all duration-300 ease-in-out ${
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
                     paxOpen ? 'height-auto' : 'height-0'
                   }`}
                   style={{
@@ -244,12 +247,12 @@ export default function HeroSection() {
                     overflow: paxOpen ? 'visible' : 'hidden',
                   }}
                 >
-                  <div className="px-3 md:px-4 py-2 bg-[#f8fafc] dark:bg-navy-dark rounded-b-xl">
+                  <div className="px-3 md:px-4 py-2 bg-white dark:bg-navy-dark border-2 border-t-0 border-[#EC2029] dark:border-[#444] dark:border-t-0 rounded-b-xl">
                     <div className="grid gap-2 md:gap-4">
                       {/* Adults Row */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 md:gap-3">
-                          <MdPerson className="h-4 w-4 md:h-5 md:w-5 text-[#1A2948] dark:text-white/80" />
+                          <MdPerson className="h-4 w-4 md:h-5 md:w-5 scale-[0.85] text-black dark:text-white/80" />
                           <div>
                             <div className="text-[11px] md:text-[13px] font-bold text-[#1A2948] dark:text-white">
                               Người lớn
@@ -290,13 +293,10 @@ export default function HeroSection() {
                       {/* Children Row */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 md:gap-3">
-                          <svg
+                          <MdChildCare
                             viewBox="0 0 24 24"
-                            className="h-4 w-4 md:h-5 md:w-5 text-[#1A2948] dark:text-white/80"
-                            fill="currentColor"
-                          >
-                            <path d="M17 12h-5v5h5v-5zM16 5v2H3V3h13v2z" />
-                          </svg>
+                            className="h-4 w-4 md:h-5 md:w-5 scale-[0.85] text-black dark:text-white/80"
+                          />
                           <div>
                             <div className="text-[11px] md:text-[13px] font-bold text-[#1A2948] dark:text-white">
                               Trẻ em
@@ -337,13 +337,10 @@ export default function HeroSection() {
                       {/* Infants Row */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 md:gap-3">
-                          <svg
+                          <MdChildFriendly
                             viewBox="0 0 24 24"
-                            className="h-4 w-4 md:h-5 md:w-5 text-[#1A2948] dark:text-white/80"
-                            fill="currentColor"
-                          >
-                            <path d="M20 9c0-1.1-.9-2-2-2h-2V3h-2v2h-2V3H6v2H4c-1.1 0-2 .9-2 2v6c0 3.31 2.69 6 6 6h6c3.31 0 6-2.69 6-6V9zm-9 3c-.59 0-1-.41-1-1s.41-1 1-1 1 .41 1 1-.41 1-1 1z" />
-                          </svg>
+                            className="h-4 w-4 md:h-5 md:w-5 scale-[0.85] text-black dark:text-white/80"
+                          />
                           <div>
                             <div className="text-[11px] md:text-[13px] font-bold text-[#1A2948] dark:text-white">
                               Em bé
@@ -387,11 +384,11 @@ export default function HeroSection() {
 
               {/* Discount Code Input */}
               <div className="mt-2 md:mt-4 flex items-center gap-2 rounded-xl bg-white dark:bg-navy-dark border-2 border-[#EC2029] dark:border-[#444] px-3 md:px-4 h-[46px] md:h-[58px]">
-                <MdPercent className="text-[16px] md:text-[20px] text-[#1A2948] dark:text-white/80" />
+                <MdConfirmationNumber className="text-[16px] md:text-[20px] text-black dark:text-white/80" />
                 <input
                   type="text"
                   placeholder="Nhập mã giảm giá"
-                  className="mt-0 w-full bg-transparent text-[13px] md:text-[17px] font-bold text-[#1A2948] dark:text-white outline-none sm:text-[15px] md:text-[18px]"
+                  className="mt-0 w-full bg-transparent text-[13px] md:text-[17px] font-black text-black dark:text-white outline-none sm:text-[15px] md:text-[18px]"
                 />
               </div>
 
