@@ -181,27 +181,6 @@ export default function MyFlightsPage() {
         </div>
       </div>
 
-      {/* Quick actions hub */}
-      <div className="mx-auto max-w-[900px] px-4 pb-8">
-        <div className="flex flex-col gap-3 rounded-xl border border-[var(--vj-red)]/20 bg-[var(--vj-red)]/5 p-5 text-center sm:flex-row sm:justify-center sm:gap-4">
-          <span className="order-1 text-xs font-bold uppercase tracking-wide text-[var(--vj-red)] sm:order-none">
-            Hành động nhanh
-          </span>
-          <Link
-            href="/chuyen-bay-cua-toi"
-            className="flex-1 rounded-lg border border-vj-red/20 bg-[var(--surface)] dark:bg-[var(--dark-surface)] py-3 text-sm font-bold text-[var(--foreground)] dark:text-[var(--foreground)] transition-all hover:border-vj-red hover:bg-vj-red/10 text-center sm:flex-none sm:w-auto sm:px-6 sm:py-2.5"
-          >
-            ✈️ Trang chủ hành trình
-          </Link>
-          <Link
-            href="/lam-thu-tuc"
-            className="flex-1 rounded-lg border border-vj-yellow/20 bg-[var(--surface)] dark:bg-[var(--dark-surface)] py-3 text-sm font-bold text-[var(--vj-yellow)] dark:text-[var(--vj-yellow)] transition-all hover:border-vj-yellow hover:bg-vj-yellow/10 text-center sm:flex-none sm:w-auto sm:px-6 sm:py-2.5"
-          >
-            ✅ Check-in Online
-          </Link>
-        </div>
-      </div>
-
       <main className="mx-auto max-w-[900px] px-4 py-10">
         <div className="vj-card">
           {/* Tabs - styled as segmented control */}
