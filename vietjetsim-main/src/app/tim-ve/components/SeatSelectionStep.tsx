@@ -326,10 +326,14 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                         >
                           <Icon name={svc.icon as any} size={16} />
                         </div>
-                        <span className="font-bold text-[var(--foreground)] dark:text-[var(--foreground)] font-koho">{svc.title}</span>
+                        <span className="font-bold text-[var(--foreground)] dark:text-[var(--foreground)] font-koho">
+                          {svc.title}
+                        </span>
                       </div>
                       <div className="mt-auto">
-                        <div className="text-[8px] sm:text-[10px] text-[var(--foreground-subtle)]">Giá ưu đãi</div>
+                        <div className="text-[8px] sm:text-[10px] text-[var(--foreground-subtle)]">
+                          Giá ưu đãi
+                        </div>
                         <div className="text-[11px] sm:text-sm font-black text-primary font-koho">
                           {svc.price}
                         </div>
@@ -428,14 +432,18 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                         Mức độ lấp đầy
                       </div>
                       <div className="flex items-center gap-0.5 sm:gap-1">
-                        <span className="text-[8px] sm:text-xs text-[var(--foreground-subtle)]">Thấp</span>
+                        <span className="text-[8px] sm:text-xs text-[var(--foreground-subtle)]">
+                          Thấp
+                        </span>
                         <div className="flex gap-0.25 sm:gap-0.5 flex-1">
                           <div className="h-2 sm:h-3 flex-1 rounded-l bg-green-200" />
                           <div className="h-2 sm:h-3 flex-1 bg-yellow-200" />
                           <div className="h-2 sm:h-3 flex-1 bg-orange-200" />
                           <div className="h-2 sm:h-3 flex-1 rounded-r bg-red-300" />
                         </div>
-                        <span className="text-[8px] sm:text-xs text-[var(--foreground-subtle)]">Cao</span>
+                        <span className="text-[8px] sm:text-xs text-[var(--foreground-subtle)]">
+                          Cao
+                        </span>
                       </div>
                     </div>
                   )}
@@ -522,7 +530,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                                   : tooltipSeat.status === 'hot'
                                     ? 'bg-orange-400 text-white'
                                     : tooltipSeat.status === 'occupied'
-                                      ? 'bg-stone-600 text-stone-300'
+                                      ? 'bg-[var(--foreground-muted)] dark:bg-[var(--dark-border)] text-white dark:text-[var(--foreground-muted)]'
                                       : 'bg-primary text-white'
                               }`}
                             >
@@ -582,7 +590,9 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                             </>
                           )}
                           {tooltipSeat.status === 'occupied' && (
-                            <div className="text-white/50 text-center py-0.5 sm:py-1">Ghế đã được đặt</div>
+                            <div className="text-white/50 text-center py-0.5 sm:py-1">
+                              Ghế đã được đặt
+                            </div>
                           )}
                           {/* Arrow */}
                           <div className="absolute bottom-[-5px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[var(--vj-navy)] dark:bg-[var(--dark-surface)] rotate-45" />
@@ -611,7 +621,11 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
 
                 {selected.length === 0 ? (
                   <div className="text-center py-6 sm:py-8 text-[var(--foreground-subtle)]">
-                    <Icon name="TicketIcon" size={32} className="mx-auto mb-1.5 sm:mb-2 text-[var(--foreground-muted)]" />
+                    <Icon
+                      name="TicketIcon"
+                      size={32}
+                      className="mx-auto mb-1.5 sm:mb-2 text-[var(--foreground-muted)]"
+                    />
                     <div className="text-[11px] sm:text-sm">Chưa chọn chỗ ngồi</div>
                   </div>
                 ) : (
