@@ -2,7 +2,7 @@
 -- This adds a human-readable booking code (PNR) for each booking
 
 -- Add booking_code column to bookings table if not exists
-DO $$
+DO $do$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns 
@@ -24,7 +24,7 @@ BEGIN
     
     -- Create a function to generate booking codes
     CREATE OR REPLACE FUNCTION generate_booking_code()
-    RETURNS VARCHAR(20) AS $$
+    RETURNS VARCHAR(20) AS $fn$
     DECLARE
       prefix TEXT := 'VJ';
       random_part TEXT;
@@ -52,9 +52,9 @@ BEGIN
         END IF;
       END LOOP;
     END;
-    $$ LANGUAGE plpgsql;
+    $fn$ LANGUAGE plpgsql;
   END IF;
-END $$
+END $do$
 ;
 
 -- Add booking_code to API responses and search queries
