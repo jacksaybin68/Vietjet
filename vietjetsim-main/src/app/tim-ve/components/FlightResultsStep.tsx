@@ -333,7 +333,9 @@ function SearchErrorModal({ message, onRetry, onDismiss }: SearchErrorModalProps
           <h3 className="font-black text-[var(--foreground)] dark:text-[var(--foreground)] text-lg sm:text-xl mb-1.5 sm:mb-2 font-koho">
             Không tìm thấy chuyến bay
           </h3>
-          <p className="text-sm text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] leading-relaxed mb-6 sm:mb-7">{message}</p>
+          <p className="text-sm text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] leading-relaxed mb-6 sm:mb-7">
+            {message}
+          </p>
           <div className="flex flex-col gap-2.5 sm:gap-3 w-full">
             <button
               onClick={onRetry}
@@ -663,7 +665,9 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-1">
-                    <span className="text-[9px] sm:text-[10px] text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] w-5 sm:w-7">Thấp</span>
+                    <span className="text-[9px] sm:text-[10px] text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] w-5 sm:w-7">
+                      Thấp
+                    </span>
                     <input
                       id="min-price"
                       name="minPrice"
@@ -681,7 +685,9 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                     />
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="text-[9px] sm:text-[10px] text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] w-5 sm:w-7">Cao</span>
+                    <span className="text-[9px] sm:text-[10px] text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] w-5 sm:w-7">
+                      Cao
+                    </span>
                     <input
                       id="max-price"
                       name="maxPrice"
@@ -719,7 +725,9 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                     }`}
                   >
                     <div className="font-semibold">{slot.label}</div>
-                    <div className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] text-[8px] sm:text-[9px] mt-0.5">{slot.sublabel}</div>
+                    <div className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] text-[8px] sm:text-[9px] mt-0.5">
+                      {slot.sublabel}
+                    </div>
                   </button>
                 ))}
               </div>
@@ -835,7 +843,9 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
             )}
           </h2>
           <div className="flex items-center gap-1 flex-wrap">
-            <span className="text-[10px] sm:text-[11px] text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] font-semibold">Sắp xếp:</span>
+            <span className="text-[10px] sm:text-[11px] text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] font-semibold">
+              Sắp xếp:
+            </span>
             {SORT_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
@@ -866,7 +876,9 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
               <h3 className="text-base sm:text-lg font-black text-[var(--foreground)] dark:text-[var(--foreground)] mb-1.5 sm:mb-2 font-koho">
                 Lỗi tìm kiếm chuyến bay
               </h3>
-              <p className="text-sm text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] max-w-sm mx-auto mb-5 sm:mb-6">{loadError}</p>
+              <p className="text-sm text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] max-w-sm mx-auto mb-5 sm:mb-6">
+                {loadError}
+              </p>
               <button
                 onClick={() => {
                   setLoadError(null);
@@ -892,7 +904,8 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                 id: 'business',
                 name: 'Business',
                 price: basePrice + 1200000,
-                color: 'bg-[var(--surface-2)] dark:bg-red-900/20 text-[var(--primary)] dark:text-red-400 border-transparent hover:border-[var(--primary)] dark:hover:border-red-400',
+                color:
+                  'bg-[var(--surface-2)] dark:bg-red-900/20 text-[var(--primary)] dark:text-red-400 border-transparent hover:border-[var(--primary)] dark:hover:border-red-400',
                 headerClass: 'bg-[var(--primary)] text-white',
                 priceColor: 'text-[var(--primary)] dark:text-red-400',
               },
@@ -900,7 +913,8 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                 id: 'skyboss',
                 name: 'SkyBOSS',
                 price: basePrice + 800000,
-                color: 'bg-[var(--surface-2)] dark:bg-blue-900/20 text-[var(--foreground)] dark:text-blue-300 border-transparent hover:border-[var(--foreground)] dark:hover:border-blue-400',
+                color:
+                  'bg-[var(--surface-2)] dark:bg-blue-900/20 text-[var(--foreground)] dark:text-blue-300 border-transparent hover:border-[var(--foreground)] dark:hover:border-blue-400',
                 headerClass: 'bg-[var(--vj-navy)] dark:bg-[var(--dark-surface)] text-white',
                 priceColor: 'text-[var(--foreground)] dark:text-blue-300',
               },
@@ -908,7 +922,8 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                 id: 'deluxe',
                 name: 'Deluxe',
                 price: basePrice + 300000,
-                color: 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] text-[var(--foreground)] dark:text-[var(--foreground)] border-transparent hover:border-[var(--border)] dark:hover:border-[var(--dark-border)]',
+                color:
+                  'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] text-[var(--foreground)] dark:text-[var(--foreground)] border-transparent hover:border-[var(--border)] dark:hover:border-[var(--dark-border)]',
                 headerClass: 'bg-[var(--accent)] text-[var(--vj-navy)]',
                 priceColor: 'text-[var(--foreground)] dark:text-[var(--foreground)]',
               },
@@ -916,8 +931,10 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                 id: 'eco',
                 name: 'Eco',
                 price: basePrice,
-                color: 'bg-[var(--surface)] dark:bg-[var(--dark-surface)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] border-[var(--border)] dark:border-[var(--dark-border)] hover:border-[var(--primary)] dark:hover:border-[var(--primary)] hover:text-[var(--primary)] dark:hover:text-[var(--primary)]',
-                headerClass: 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] text-[var(--foreground-muted)]',
+                color:
+                  'bg-[var(--surface)] dark:bg-[var(--dark-surface)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] border-[var(--border)] dark:border-[var(--dark-border)] hover:border-[var(--primary)] dark:hover:border-[var(--primary)] hover:text-[var(--primary)] dark:hover:text-[var(--primary)]',
+                headerClass:
+                  'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] text-[var(--foreground-muted)]',
                 priceColor: 'text-[var(--foreground)] dark:text-[var(--foreground)]',
               },
             ];
@@ -944,7 +961,9 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                       <div className="text-lg sm:text-xl font-black text-[var(--foreground)] leading-none font-koho">
                         {flight.departTime}
                       </div>
-                      <div className="text-[10px] sm:text-xs font-bold text-[var(--foreground-muted)] mt-1">{flight.from}</div>
+                      <div className="text-[10px] sm:text-xs font-bold text-[var(--foreground-muted)] mt-1">
+                        {flight.from}
+                      </div>
                     </div>
                     {/* Line */}
                     <div className="flex-1 flex flex-col items-center px-1.5 sm:px-2">
@@ -971,7 +990,9 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                       <div className="text-lg sm:text-xl font-black text-[var(--foreground)] leading-none font-koho">
                         {flight.arriveTime}
                       </div>
-                      <div className="text-[10px] sm:text-xs font-bold text-[var(--foreground-muted)] mt-1">{flight.to}</div>
+                      <div className="text-[10px] sm:text-xs font-bold text-[var(--foreground-muted)] mt-1">
+                        {flight.to}
+                      </div>
                     </div>
                   </div>
                   <button className="text-[10px] sm:text-[11px] font-bold text-primary hover:underline text-left inline-flex items-center gap-1">
@@ -1269,7 +1290,9 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                             <div className="font-black text-[var(--foreground)] text-base font-koho">
                               {flight.flightNo}
                             </div>
-                            <div className="text-xs text-[var(--foreground-muted)]">{flight.airline}</div>
+                            <div className="text-xs text-[var(--foreground-muted)]">
+                              {flight.airline}
+                            </div>
                           </div>
                         </div>
                         <span
@@ -1307,7 +1330,10 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                   {/* Departure Time Row */}
                   <CompareRowLabel icon="ClockIcon" label="Giờ khởi hành" />
                   {compareFlights.map((flight) => (
-                    <div key={flight.id} className="px-4 py-4 flex flex-col justify-center bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]">
+                    <div
+                      key={flight.id}
+                      className="px-4 py-4 flex flex-col justify-center bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]"
+                    >
                       <div className="text-xl font-black text-[var(--foreground)] font-koho">
                         {flight.departTime}
                       </div>
@@ -1322,7 +1348,10 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                   {/* Arrival Time Row */}
                   <CompareRowLabel icon="MapPinIcon" label="Giờ đến" />
                   {compareFlights.map((flight) => (
-                    <div key={flight.id} className="px-4 py-4 flex flex-col justify-center bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]">
+                    <div
+                      key={flight.id}
+                      className="px-4 py-4 flex flex-col justify-center bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]"
+                    >
                       <div className="text-xl font-black text-[var(--foreground)] font-koho">
                         {flight.arriveTime}
                       </div>
@@ -1359,7 +1388,10 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                   {/* Stops Row */}
                   <CompareRowLabel icon="MapIcon" label="Điểm dừng" />
                   {compareFlights.map((flight) => (
-                    <div key={flight.id} className="px-4 py-4 flex flex-col justify-center bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]">
+                    <div
+                      key={flight.id}
+                      className="px-4 py-4 flex flex-col justify-center bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]"
+                    >
                       <div
                         className={`text-sm font-bold ${flight.stops === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}
                       >
@@ -1373,7 +1405,10 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                   {/* Availability Row */}
                   <CompareRowLabel icon="UsersIcon" label="Chỗ trống" />
                   {compareFlights.map((flight) => (
-                    <div key={flight.id} className="px-4 py-4 flex flex-col justify-center bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]">
+                    <div
+                      key={flight.id}
+                      className="px-4 py-4 flex flex-col justify-center bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]"
+                    >
                       <span
                         className={`text-sm font-bold px-2 py-0.5 rounded-full inline-block w-fit ${
                           flight.available <= 5
@@ -1390,7 +1425,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                     </div>
                   ))}
 
-                  <div className="col-span-full h-px bg-stone-200 dark:bg-stone-700" />
+                  <div className="col-span-full h-px bg-[var(--border)] dark:bg-[var(--dark-border)]" />
 
                   {/* Fare Breakdown Section Header */}
                   <div className="col-span-full bg-primary/5 dark:bg-primary/10 px-4 py-2.5 flex items-center gap-2 border-l-4 border-primary">
@@ -1474,7 +1509,9 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
 
                   {/* Total */}
                   <div className="bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] px-4 py-4 flex items-center">
-                    <span className="text-sm font-bold text-[var(--foreground)] font-koho">Tổng cộng</span>
+                    <span className="text-sm font-bold text-[var(--foreground)] font-koho">
+                      Tổng cộng
+                    </span>
                   </div>
                   {compareFlights.map((flight) => {
                     const isBest = flight.price === Math.min(...compareFlights.map((f) => f.price));
@@ -1494,7 +1531,9 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
 
                   {/* Select Buttons */}
                   <div className="px-4 py-4 flex items-center">
-                    <span className="text-xs text-[var(--foreground-muted)] italic">/ hành khách</span>
+                    <span className="text-xs text-[var(--foreground-muted)] italic">
+                      / hành khách
+                    </span>
                   </div>
                   {compareFlights.map((flight) => (
                     <div key={flight.id} className="px-4 py-4 flex items-center">
@@ -1518,7 +1557,9 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
 
               {/* Modal Footer */}
               <div className="border-t border-[var(--border)] dark:border-[var(--dark-border)] px-6 py-3 flex items-center justify-between bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] shrink-0">
-                <p className="text-xs text-[var(--foreground-muted)]">Giá đã bao gồm thuế & phí / hành khách</p>
+                <p className="text-xs text-[var(--foreground-muted)]">
+                  Giá đã bao gồm thuế & phí / hành khách
+                </p>
                 <button
                   onClick={() => setShowComparison(false)}
                   className="text-sm font-semibold text-[var(--foreground-muted)] hover:text-[var(--foreground)] flex items-center gap-1.5 transition-colors"
@@ -1618,12 +1659,18 @@ function CompareRowLabel({
   sublabel?: string;
 }) {
   return (
-    <div className="bg-stone-50 px-4 py-4 flex flex-col justify-center gap-0.5">
+    <div className="bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] px-4 py-4 flex flex-col justify-center gap-0.5">
       <div className="flex items-center gap-1.5">
         <Icon name={icon} size={13} className="text-primary shrink-0" />
-        <span className="text-xs font-semibold text-stone-600">{label}</span>
+        <span className="text-xs font-semibold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]">
+          {label}
+        </span>
       </div>
-      {sublabel && <span className="text-[10px] text-stone-400 pl-5">{sublabel}</span>}
+      {sublabel && (
+        <span className="text-[10px] text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] pl-5">
+          {sublabel}
+        </span>
+      )}
     </div>
   );
 }
