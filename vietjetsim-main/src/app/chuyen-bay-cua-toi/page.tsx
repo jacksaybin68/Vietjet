@@ -203,7 +203,7 @@ export default function MyFlightsPage() {
   const handleSearchBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!bookingCode.trim()) {
-      toast.show({ title: 'Vui lòng nhập mã đặt chỗ', message: 'Mã đặt chỗ là obrigatório (ví dụ VD-12345678)' });
+      toast.show({ title: 'Vui lòng nhập mã đặt chỗ', message: 'Mã đặt chỗ là bắt buộc (ví dụ VD-12345678)' });
       return;
     }
     setLoading(true);
@@ -227,48 +227,51 @@ export default function MyFlightsPage() {
     <div className="min-h-screen bg-[var(--background)] dark:bg-[var(--dark-bg)]">
       <Header />
 
-      {/* ===== HERO: Tra cứu đặt chỗ (theo phong cách Manage Booking của Vietjet) ===== */}
+      {/* ===== HERO: Tra cứu đặt chỗ — light theme theo spec DevTools ===== */}
       <section
-        className="relative overflow-hidden bg-[var(--vj-navy)] dark:bg-[var(--vj-navy)]"
-        style={{ background: 'linear-gradient(92deg,var(--vj-navy) 0%,#3a3a3a 55%,var(--vj-navy-2) 100%)' }}
+        className="relative overflow-hidden bg-[#fff5f5]"
+        style={{ background: 'linear-gradient(135deg, #fff5f5 0%, #ffffff 100%)' }}
       >
-        {/* Decorative flight arcs */}
-        <div className="absolute inset-0 opacity-10 pointer-events-none">
+        {/* Decorative flight arcs (slate cho nền sáng) */}
+        <div className="absolute inset-0 opacity-[0.07] pointer-events-none">
           <svg className="w-full h-full" viewBox="0 0 1440 300">
-            <path fill="none" stroke="#fff" strokeWidth="1.5" d="M100,280 C300,180 600,120 980,200 1300,90" />
-            <path fill="none" stroke="#fff" strokeWidth="1" d="M200,60 C420,140 760,90 1100,220 1420,70" />
+            <path fill="none" stroke="#1e293b" strokeWidth="1.5" d="M100,280 C300,180 600,120 980,200 1300,90" />
+            <path fill="none" stroke="#1e293b" strokeWidth="1" d="M200,60 C420,140 760,90 1100,220 1420,70" />
           </svg>
         </div>
 
         <div className="relative mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:px-8">
-          <p className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-white">
+          <p className="inline-flex items-center gap-2 rounded-full border border-[#1e293b]/15 bg-[#1e293b]/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-[#1e293b]">
             <span className="h-2 w-2 rounded-full bg-[var(--vj-yellow)]" />
             Bay là thích ngay!
           </p>
-          <h1 className="mt-5 text-3xl font-black italic leading-tight text-white sm:text-4xl lg:text-5xl">
-            Xin chào,<br /><span className="text-[var(--vj-yellow)]">Đặt chỗ của tôi</span>
+          <h1 className="mt-5 text-3xl font-black italic leading-tight text-[#1e293b] sm:text-4xl lg:text-5xl">
+            Chuyến bay của tôi
           </h1>
 
-          {/* Form tra cứu đặt chỗ */}
-          <form onSubmit={handleSearchBooking} className="mt-7 rounded-2xl border border-white/10 bg-white/95 p-5 shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
-            <div className="flex flex-wrap items-end gap-3">
-              <div className="w-full sm:w-1/3">
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[var(--vj-red)] mb-1">
-                  Mã đặt chỗ
+          {/* Form tra cứu đặt chỗ — bố cục dọc, nền sáng */}
+          <form onSubmit={handleSearchBooking} className="mt-7 rounded-2xl border border-[#1e293b]/10 bg-white/95 p-5 shadow-[0_10px_30px_rgba(30,41,59,0.12)]">
+            <div className="flex flex-col gap-4">
+              <div className="w-full">
+                <label htmlFor="booking-code" className="block text-[11px] font-bold uppercase tracking-wide text-black mb-1">
+                  Mã đặt chỗ <span className="text-[var(--vj-red)]">*</span>
                 </label>
                 <input
+                  id="booking-code"
                   type="text"
+                  required
                   value={bookingCode}
                   onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
                   placeholder="VD-12345678"
                   className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2.5 text-sm font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--vj-red)]/50 uppercase"
                 />
               </div>
-              <div className="w-full sm:w-1/3">
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[var(--vj-red)] mb-1">
-                  Họ (Surname)
+              <div className="w-full">
+                <label htmlFor="surname" className="block text-[11px] font-bold uppercase tracking-wide text-black mb-1">
+                  Họ
                 </label>
                 <input
+                  id="surname"
                   type="text"
                   value={surname}
                   onChange={(e) => setSurname(e.target.value)}
@@ -276,11 +279,12 @@ export default function MyFlightsPage() {
                   className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2.5 text-sm font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--vj-red)]/50"
                 />
               </div>
-              <div className="w-full sm:w-1/3">
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[var(--vj-red)] mb-1">
-                  Tên (opt.)
+              <div className="w-full">
+                <label htmlFor="given-name" className="block text-[11px] font-bold uppercase tracking-wide text-black mb-1">
+                  Tên đệm &amp; Tên
                 </label>
                 <input
+                  id="given-name"
                   type="text"
                   value={givenName}
                   onChange={(e) => setGivenName(e.target.value)}
@@ -291,7 +295,7 @@ export default function MyFlightsPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="h-10 px-6 rounded-xl bg-[var(--vj-yellow)] text-[var(--vj-red)] font-black inline-flex items-center gap-2 hover:bg-[var(--vj-yellow-2)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full mt-1 justify-center py-3 rounded-xl bg-[var(--vj-yellow)] text-black font-black inline-flex items-center gap-2 hover:bg-[var(--vj-yellow-2)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <MdSearch className="h-4 w-4" />
                 {loading ? 'Đang tìm…' : 'Tìm kiếm'}
@@ -300,14 +304,14 @@ export default function MyFlightsPage() {
           </form>
 
           {/* Dịch vụ nhanh */}
-          <div className="mt-5 flex flex-wrap items-center gap-3 text-white/90 text-[13px]">
-            <span className="inline-flex items-center gap-1.5"><MdCheckCircle className="h-4 w-4 text-[var(--vj-yellow)]" /> Quản lý đặt chỗ</span>
+          <div className="mt-5 flex flex-wrap items-center gap-3 text-[#1e293b]/80 text-[13px]">
+            <span className="inline-flex items-center gap-1.5"><MdCheckCircle className="h-4 w-4 text-[var(--vj-red)]" /> Quản lý đặt chỗ</span>
             <span className="opacity-40">•</span>
-            <span className="inline-flex items-center gap-1.5"><MdLuggage className="h-4 w-4 text-[var(--vj-yellow)]" /> Mua hành lý</span>
+            <span className="inline-flex items-center gap-1.5"><MdLuggage className="h-4 w-4 text-[var(--vj-red)]" /> Mua hành lý</span>
             <span className="opacity-40">•</span>
-            <span className="inline-flex items-center gap-1.5"><MdAirlineSeatReclineNormal className="h-4 w-4 text-[var(--vj-yellow)]" /> Chọn ghế</span>
+            <span className="inline-flex items-center gap-1.5"><MdAirlineSeatReclineNormal className="h-4 w-4 text-[var(--vj-red)]" /> Chọn ghế</span>
             <span className="opacity-40">•</span>
-            <span className="inline-flex items-center gap-1.5"><MdAirlineSeatReclineNormal className="h-4 w-4 text-[var(--vj-yellow)]" /> Đổi chỗ</span>
+            <span className="inline-flex items-center gap-1.5"><MdAirlineSeatReclineNormal className="h-4 w-4 text-[var(--vj-red)]" /> Đổi chỗ</span>
           </div>
         </div>
       </section>
