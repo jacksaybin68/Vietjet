@@ -14,7 +14,7 @@ import { Pagination } from '@/shared/components/ui';
 // ─── Dynamic imports for heavy tab components (code-split) ──────────────
 const UserChat = dynamic(() => import('@/features/chat').then((module) => module.UserChat), {
   loading: () => (
-    <div className="fixed bottom-6 right-6 w-80 h-12 bg-white rounded-2xl shadow-lg animate-pulse" />
+    <div className="fixed bottom-6 right-6 w-80 h-12 bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl shadow-lg animate-pulse" />
   ),
   ssr: false,
 });
@@ -22,7 +22,7 @@ const NotificationsTab = dynamic(() => import('./NotificationsTab'), {
   loading: () => (
     <div className="space-y-3 p-4">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="h-24 bg-stone-100 rounded-xl animate-pulse" />
+        <div key={i} className="h-24 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl animate-pulse" />
       ))}
     </div>
   ),
@@ -32,7 +32,7 @@ const NotificationSettingsTab = dynamic(() => import('./NotificationSettingsTab'
   loading: () => (
     <div className="p-4 space-y-4">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="h-12 bg-stone-100 rounded-lg animate-pulse" />
+        <div key={i} className="h-12 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-lg animate-pulse" />
       ))}
     </div>
   ),
@@ -42,7 +42,7 @@ const WalletTab = dynamic(() => import('./WalletTab'), {
   loading: () => (
     <div className="p-4 space-y-4">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="h-32 bg-stone-100 rounded-2xl animate-pulse" />
+        <div key={i} className="h-32 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse" />
       ))}
     </div>
   ),
@@ -52,7 +52,7 @@ const PaymentHistoryTab = dynamic(() => import('./PaymentHistoryTab'), {
   loading: () => (
     <div className="p-4 space-y-3">
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="h-20 bg-stone-100 rounded-xl animate-pulse" />
+        <div key={i} className="h-20 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl animate-pulse" />
       ))}
     </div>
   ),
@@ -62,7 +62,7 @@ const LoyaltyTab = dynamic(() => import('./LoyaltyTab'), {
   loading: () => (
     <div className="p-4 space-y-4">
       {[1, 2].map((i) => (
-        <div key={i} className="h-48 bg-stone-100 rounded-2xl animate-pulse" />
+        <div key={i} className="h-48 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse" />
       ))}
     </div>
   ),
@@ -72,7 +72,7 @@ const SecurityTab = dynamic(() => import('./SecurityTab'), {
   loading: () => (
     <div className="p-4 space-y-4">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="h-24 bg-stone-100 rounded-2xl animate-pulse" />
+        <div key={i} className="h-24 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse" />
       ))}
     </div>
   ),
@@ -726,11 +726,11 @@ export default function UserDashboardClient() {
                   <UpcomingBookingsSkeleton count={2} />
                 ) : upcomingError ? (
                   <div
-                    className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl sm:rounded-2xl border border-red-200 dark:border-red-800 p-6 sm:p-8 text-center"
+                    className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl sm:rounded-2xl border border-[var(--primary)]/20 dark:border-[var(--primary)]/30 p-6 sm:p-8 text-center"
                     style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
                   >
-                    <div className="w-10 h-10 sm:w-14 sm:h-14 bg-red-50 dark:bg-red-900/20 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3">
-                      <Icon name="ExclamationTriangleIcon" size={20} sm:size={28} className="text-red-500 dark:text-red-400" />
+                    <div className="w-10 h-10 sm:w-14 sm:h-14 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 border border-[var(--primary)]/20 dark:border-[var(--primary)]/30">
+                      <Icon name="ExclamationTriangleIcon" size={20} sm:size={28} className="text-[var(--primary)]" />
                     </div>
                     <p className="font-bold text-[10px] sm:text-sm mb-0.5 sm:mb-1 text-[var(--foreground)]">
                       Không thể tải chuyến bay
@@ -749,7 +749,7 @@ export default function UserDashboardClient() {
                   </div>
                 ) : upcomingBookings.length === 0 ? (
                   <div
-                    className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl sm:rounded-3xl border border-amber-100 dark:border-amber-800 overflow-hidden"
+                    className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl sm:rounded-3xl border border-[var(--accent)]/20 dark:border-[var(--accent)]/30 overflow-hidden"
                     style={{
                       boxShadow:
                         '0 8px 32px rgba(245, 158, 11, 0.1), 0 4px 12px rgba(251, 191, 36, 0.06)',
@@ -791,7 +791,7 @@ export default function UserDashboardClient() {
                           </Link>
                           <button
                             onClick={retryUpcoming}
-                            className="inline-flex items-center gap-1.5 sm:gap-2 text-amber-700 font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-sm border border-amber-200 dark:border-amber-700 hover:bg-amber-50 transition-all bg-[var(--surface)] dark:bg-[var(--dark-surface)]"
+                            className="inline-flex items-center gap-1.5 sm:gap-2 text-amber-700 font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-sm border border-[var(--accent)]/30 dark:border-amber-700 hover:bg-amber-50 transition-all bg-[var(--surface)] dark:bg-[var(--dark-surface)]"
                           >
                             <Icon name="ArrowPathIcon" size={12} sm:size={14} />
                             Tải lại
@@ -929,7 +929,7 @@ export default function UserDashboardClient() {
               >
                 <div
                   className="h-1.5 w-full"
-                  style={{ background: 'linear-gradient(90deg, #EC2029 0%, #FF4D6A 100%)' }}
+                  style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%)' }}
                 />
                 <div className="p-5 border-b border-[var(--border)] dark:border-[var(--dark-border)]">
                   <div className="flex items-center justify-between mb-4">
@@ -954,7 +954,7 @@ export default function UserDashboardClient() {
                           </button>
                           <button
                             onClick={exportPDF}
-                            className="flex items-center gap-1.5 text-xs font-semibold text-red-700 dark:text-red-300 hover:text-red-800 dark:hover:text-red-200 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 border border-red-200 dark:border-red-700 px-3 py-1.5 rounded-lg transition-all"
+                            className="flex items-center gap-1.5 text-xs font-semibold text-[var(--primary)] dark:text-[var(--primary-light)] hover:text-[var(--primary-dark)] dark:hover:text-[var(--primary)] bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] hover:bg-[var(--primary)]/10 dark:hover:bg-[var(--primary)]/20 border border-[var(--primary)]/20 dark:border-[var(--primary)]/30 px-3 py-1.5 rounded-lg transition-all"
                             title="Xuất PDF"
                           >
                             <Icon name="DocumentArrowDownIcon" size={13} />
@@ -1363,47 +1363,47 @@ export default function UserDashboardClient() {
               <div className="space-y-5">
                 {/* Submit refund form */}
                 <div
-                  className="bg-white rounded-2xl border border-stone-200 overflow-hidden"
+                  className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden"
                   style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
                 >
                   <div
                     className="h-1.5 w-full"
-                    style={{ background: 'linear-gradient(90deg, #EC2029 0%, #FF4D6A 100%)' }}
+                    style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%)' }}
                   />
                   <div className="p-4">
                     <div className="flex items-center gap-3 mb-1">
                       <div
                         className="w-10 h-10 rounded-2xl flex items-center justify-center"
-                        style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)' }}
+                        style={{ background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%)' }}
                       >
                         <Icon name="BanknotesIcon" size={20} className="text-white" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h2 className="font-bold text-base text-amber-900">Yêu cầu hoàn tiền</h2>
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
+                          <h2 className="font-bold text-base text-[var(--vj-navy)] dark:text-white">Yêu cầu hoàn tiền</h2>
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
                             Giao diện mới
                           </span>
                         </div>
-                        <p className="text-xs text-amber-600">
+                        <p className="text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]">
                           Điền thông tin để gửi yêu cầu hoàn tiền vé máy bay
                         </p>
                       </div>
                     </div>
                     <div
                       className="w-12 h-1 mb-4 rounded-full mt-3"
-                      style={{ background: 'linear-gradient(90deg, #f59e0b, #fbbf24)' }}
+                      style={{ background: 'linear-gradient(90deg, var(--accent), var(--accent-secondary))' }}
                     />
 
                     {refundSubmitted ? (
                       <div className="flex flex-col items-center py-10 text-center">
-                        <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center mb-4">
-                          <Icon name="CheckCircleIcon" size={36} className="text-green-500" />
+                        <div className="w-16 h-16 bg-green-50 dark:bg-green-900/10 rounded-2xl flex items-center justify-center mb-4">
+                          <Icon name="CheckCircleIcon" size={36} className="text-green-500 dark:text-green-400" />
                         </div>
-                        <h3 className="font-black text-base mb-2" style={{ color: '#1A2948' }}>
+                        <h3 className="font-black text-base mb-2 text-[var(--foreground)] dark:text-[var(--foreground)]">
                           Yêu cầu đã được gửi!
                         </h3>
-                        <p className="text-sm text-stone-400 max-w-xs mb-6">
+                        <p className="text-sm text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] max-w-xs mb-6">
                           Chúng tôi sẽ xem xét và phản hồi yêu cầu hoàn tiền của bạn trong vòng 3–5
                           ngày làm việc.
                         </p>
@@ -1418,8 +1418,7 @@ export default function UserDashboardClient() {
                             setRefundAccountNumber('');
                             setRefundAccountHolder('');
                           }}
-                          className="inline-flex items-center gap-2 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition-all hover:opacity-90"
-                          style={{ background: '#EC2029' }}
+                          className="inline-flex items-center gap-2 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition-all hover:opacity-90 bg-[var(--primary)]"
                         >
                           <Icon name="PlusIcon" size={15} />
                           Gửi yêu cầu mới
@@ -1517,7 +1516,7 @@ export default function UserDashboardClient() {
                         <div>
                           <label
                             className="block text-xs font-bold uppercase tracking-wider mb-1.5"
-                            style={{ color: '#1A2948' }}
+                            style={{ color: 'var(--vj-navy)' }}
                           >
                             Mã đặt chỗ <span className="text-red-500">*</span>
                           </label>
@@ -1525,7 +1524,7 @@ export default function UserDashboardClient() {
                             <Icon
                               name="TicketIcon"
                               size={15}
-                              className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] pointer-events-none"
                             />
                             <input
                               type="text"
@@ -1533,10 +1532,10 @@ export default function UserDashboardClient() {
                               onChange={(e) => setRefundBookingId(e.target.value.toUpperCase())}
                               placeholder="VD: VJ2B4K9"
                               required
-                              className="w-full pl-9 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition-all"
+                              className="w-full pl-9 pr-4 py-2.5 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm text-[var(--foreground)] dark:text-[var(--foreground)] placeholder-[var(--foreground-subtle)] dark:placeholder-[var(--foreground-subtle)] focus:outline-none transition-all"
                               onFocus={(e) => {
-                                e.target.style.borderColor = '#EC2029';
-                                e.target.style.boxShadow = '0 0 0 2px rgba(208,2,27,0.1)';
+                                e.target.style.borderColor = 'var(--primary)';
+                                e.target.style.boxShadow = '0 0 0 2px rgba(var(--primary-rgb), 0.1)';
                               }}
                               onBlur={(e) => {
                                 e.target.style.borderColor = '';
@@ -1548,7 +1547,7 @@ export default function UserDashboardClient() {
                           <div>
                             <label
                               className="block text-xs font-bold uppercase tracking-wider mb-1.5"
-                              style={{ color: '#1A2948' }}
+                              style={{ color: 'var(--vj-navy)' }}
                             >
                               Số tiền hoàn <span className="text-red-500">*</span>
                             </label>
@@ -1556,7 +1555,7 @@ export default function UserDashboardClient() {
                               <Icon
                                 name="BanknotesIcon"
                                 size={15}
-                                className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] pointer-events-none"
                               />
                               <input
                                 type="text"
@@ -1569,14 +1568,14 @@ export default function UserDashboardClient() {
                                 }}
                                 placeholder="VD: 1.250.000"
                                 required
-                                className="w-full pl-9 pr-14 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition-all"
+                                className="w-full pl-9 pr-14 py-2.5 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm text-[var(--foreground)] dark:text-[var(--foreground)] placeholder-[var(--foreground-subtle)] dark:placeholder-[var(--foreground-subtle)] focus:outline-none transition-all"
                               />
-                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-stone-500">
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]">
                                 VND
                               </span>
                             </div>
                           </div>
-                          <p className="text-xs text-stone-400 mt-1">
+                          <p className="text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] mt-1">
                             Nhập mã đặt chỗ từ email xác nhận hoặc lịch sử đặt vé
                           </p>
                         </div>
@@ -1585,7 +1584,7 @@ export default function UserDashboardClient() {
                         <div>
                           <label
                             className="block text-xs font-bold uppercase tracking-wider mb-1.5"
-                            style={{ color: '#1A2948' }}
+                            style={{ color: 'var(--vj-navy)' }}
                           >
                             Ghi chú thêm
                           </label>
@@ -1594,10 +1593,10 @@ export default function UserDashboardClient() {
                             onChange={(e) => setRefundNote(e.target.value)}
                             placeholder="Ghi chú cho yêu cầu hoàn vé (không bắt buộc)..."
                             rows={3}
-                            className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition-all resize-none"
+                            className="w-full px-4 py-2.5 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm text-[var(--foreground)] dark:text-[var(--foreground)] placeholder-[var(--foreground-subtle)] dark:placeholder-[var(--foreground-subtle)] focus:outline-none transition-all resize-none"
                             onFocus={(e) => {
-                              e.target.style.borderColor = '#EC2029';
-                              e.target.style.boxShadow = '0 0 0 2px rgba(208,2,27,0.1)';
+                              e.target.style.borderColor = 'var(--primary)';
+                              e.target.style.boxShadow = '0 0 0 2px rgba(var(--primary-rgb), 0.1)';
                             }}
                             onBlur={(e) => {
                               e.target.style.borderColor = '';
@@ -1607,17 +1606,17 @@ export default function UserDashboardClient() {
                         </div>
 
                         {/* Bank account info section */}
-                        <div className="rounded-xl border border-stone-200 overflow-hidden">
-                          <div className="flex items-center gap-2 px-4 py-3 bg-stone-50 border-b border-stone-200">
+                        <div className="rounded-xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden">
+                          <div className="flex items-center gap-2 px-4 py-3 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] border-b border-[var(--border)] dark:border-[var(--dark-border)]">
                             <div
                               className="w-6 h-6 rounded-lg flex items-center justify-center"
                               style={{ background: '#FFF5F5' }}
                             >
-                              <Icon name="CreditCardIcon" size={13} style={{ color: '#EC2029' }} />
+                              <Icon name="CreditCardIcon" size={13} style={{ color: 'var(--primary)' }} />
                             </div>
                             <span
                               className="text-xs font-bold uppercase tracking-wider"
-                              style={{ color: '#1A2948' }}
+                              style={{ color: 'var(--vj-navy)' }}
                             >
                               Thông tin tài khoản ngân hàng nhận tiền
                             </span>
@@ -1626,14 +1625,14 @@ export default function UserDashboardClient() {
                           <div className="p-4 space-y-3">
                             {/* Bank name */}
                             <div>
-                              <label className="block text-xs font-semibold text-stone-500 mb-1.5">
+                              <label className="block text-xs font-semibold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mb-1.5">
                                 Tên ngân hàng <span className="text-red-500">*</span>
                               </label>
                               <div className="relative">
                                 <Icon
                                   name="BuildingOffice2Icon"
                                   size={15}
-                                  className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] pointer-events-none"
                                 />
                                 <input
                                   type="text"
@@ -1641,10 +1640,10 @@ export default function UserDashboardClient() {
                                   onChange={(e) => setRefundBankName(e.target.value)}
                                   placeholder="VD: Vietcombank, Techcombank, MB Bank..."
                                   required
-                                  className="w-full pl-8 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition-all"
+                                  className="w-full pl-8 pr-4 py-2.5 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm text-[var(--foreground)] dark:text-[var(--foreground)] placeholder-[var(--foreground-subtle)] dark:placeholder-[var(--foreground-subtle)] focus:outline-none transition-all"
                                   onFocus={(e) => {
-                                    e.target.style.borderColor = '#EC2029';
-                                    e.target.style.boxShadow = '0 0 0 2px rgba(208,2,27,0.1)';
+                                    e.target.style.borderColor = 'var(--primary)';
+                                    e.target.style.boxShadow = '0 0 0 2px rgba(var(--primary-rgb), 0.1)';
                                   }}
                                   onBlur={(e) => {
                                     e.target.style.borderColor = '';
@@ -1655,14 +1654,14 @@ export default function UserDashboardClient() {
                             </div>
                             {/* Account number */}
                             <div>
-                              <label className="block text-xs font-semibold text-stone-500 mb-1.5">
+                              <label className="block text-xs font-semibold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mb-1.5">
                                 Số tài khoản <span className="text-red-500">*</span>
                               </label>
                               <div className="relative">
                                 <Icon
                                   name="HashtagIcon"
                                   size={15}
-                                  className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] pointer-events-none"
                                 />
                                 <input
                                   type="text"
@@ -1672,10 +1671,10 @@ export default function UserDashboardClient() {
                                   }
                                   placeholder="Nhập số tài khoản ngân hàng"
                                   required
-                                  className="w-full pl-8 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition-all"
+                                  className="w-full pl-8 pr-4 py-2.5 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm text-[var(--foreground)] dark:text-[var(--foreground)] placeholder-[var(--foreground-subtle)] dark:placeholder-[var(--foreground-subtle)] focus:outline-none transition-all"
                                   onFocus={(e) => {
-                                    e.target.style.borderColor = '#EC2029';
-                                    e.target.style.boxShadow = '0 0 0 2px rgba(208,2,27,0.1)';
+                                    e.target.style.borderColor = 'var(--primary)';
+                                    e.target.style.boxShadow = '0 0 0 2px rgba(var(--primary-rgb), 0.1)';
                                   }}
                                   onBlur={(e) => {
                                     e.target.style.borderColor = '';
@@ -1686,14 +1685,14 @@ export default function UserDashboardClient() {
                             </div>
                             {/* Account holder */}
                             <div>
-                              <label className="block text-xs font-semibold text-stone-500 mb-1.5">
+                              <label className="block text-xs font-semibold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mb-1.5">
                                 Tên chủ tài khoản <span className="text-red-500">*</span>
                               </label>
                               <div className="relative">
                                 <Icon
                                   name="UserIcon"
                                   size={15}
-                                  className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] pointer-events-none"
                                 />
                                 <input
                                   type="text"
@@ -1703,10 +1702,10 @@ export default function UserDashboardClient() {
                                   }
                                   placeholder="Nhập tên chủ tài khoản (in hoa)"
                                   required
-                                  className="w-full pl-8 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition-all"
+                                  className="w-full pl-8 pr-4 py-2.5 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm text-[var(--foreground)] dark:text-[var(--foreground)] placeholder-[var(--foreground-subtle)] dark:placeholder-[var(--foreground-subtle)] focus:outline-none transition-all"
                                   onFocus={(e) => {
-                                    e.target.style.borderColor = '#EC2029';
-                                    e.target.style.boxShadow = '0 0 0 2px rgba(208,2,27,0.1)';
+                                    e.target.style.borderColor = 'var(--primary)';
+                                    e.target.style.boxShadow = '0 0 0 2px rgba(var(--primary-rgb), 0.1)';
                                   }}
                                   onBlur={(e) => {
                                     e.target.style.borderColor = '';
@@ -1714,7 +1713,7 @@ export default function UserDashboardClient() {
                                   }}
                                 />
                               </div>
-                              <p className="text-xs text-stone-400 mt-1">
+                              <p className="text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] mt-1">
                                 Tên phải khớp với tên đăng ký tài khoản ngân hàng
                               </p>
                             </div>
@@ -1722,13 +1721,13 @@ export default function UserDashboardClient() {
                         </div>
 
                         {/* Notice */}
-                        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-3">
+                        <div className="bg-amber-50 border border-[var(--accent)]/30 rounded-xl px-4 py-3 flex items-start gap-3">
                           <Icon
                             name="InformationCircleIcon"
                             size={16}
-                            className="text-amber-600 mt-0.5 flex-shrink-0"
+                            className="text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0"
                           />
-                          <p className="text-xs text-amber-700 leading-relaxed">
+                          <p className="text-xs text-amber-700 dark:text-amber-300 leading-relaxed">
                             Hoàn tiền sẽ được xử lý trong <strong>3–5 ngày làm việc</strong>. Số
                             tiền hoàn lại phụ thuộc vào chính sách vé và thời điểm huỷ.
                           </p>
@@ -1748,7 +1747,7 @@ export default function UserDashboardClient() {
                               refundSubmitting
                             }
                             className="flex items-center gap-2 text-white font-bold px-6 py-2.5 rounded-xl transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                            style={{ background: '#EC2029' }}
+                            style={{ background: 'var(--primary)' }}
                           >
                             {refundSubmitting ? (
                               <>
@@ -1791,7 +1790,7 @@ export default function UserDashboardClient() {
                               setRefundAccountNumber('');
                               setRefundAccountHolder('');
                             }}
-                            className="px-6 py-2.5 border border-stone-300 font-semibold rounded-xl text-sm transition-all hover:bg-stone-50 text-stone-600"
+                            className="px-6 py-2.5 border border-[var(--border)] font-semibold rounded-xl text-sm transition-all hover:bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]"
                           >
                             Xoá trắng
                           </button>
@@ -1803,10 +1802,10 @@ export default function UserDashboardClient() {
 
                 {/* Refund history */}
                 <div
-                  className="bg-white rounded-3xl border border-amber-100 overflow-hidden"
+                  className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-3xl border border-[var(--accent)]/20 dark:border-[var(--accent)]/30 overflow-hidden"
                   style={{
                     boxShadow:
-                      '0 8px 32px rgba(245, 158, 11, 0.1), 0 4px 12px rgba(251, 191, 36, 0.06)',
+                      '0 8px 32px rgba(var(--accent-rgb), 0.1), 0 4px 12px rgba(var(--accent-rgb), 0.06)',
                   }}
                 >
                   <div
@@ -1815,35 +1814,35 @@ export default function UserDashboardClient() {
                       background: 'linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #fcd34d 100%)',
                     }}
                   />
-                  <div className="p-5 border-b border-amber-50">
+                  <div className="p-5 border-b border-[var(--accent)]/10">
                     <div className="flex items-center justify-between mb-4">
                       <div>
-                        <h3 className="font-bold text-sm text-amber-900">
+                        <h3 className="font-bold text-sm text-[var(--vj-navy)] dark:text-white">
                           Lịch sử yêu cầu hoàn tiền
                         </h3>
-                        <p className="text-xs text-amber-600 mt-0.5">
+                        <p className="text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-0.5">
                           {refundRequests.length} yêu cầu
                         </p>
                       </div>
                       <button
                         onClick={loadRefundRequests}
-                        className="flex items-center gap-1.5 text-xs font-semibold text-amber-600 hover:text-amber-700 transition-colors"
+                        className="flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)] dark:text-[var(--accent-light)] hover:text-[var(--accent-dark)] dark:hover:text-[var(--accent)] transition-colors"
                         title="Tải lại"
                       >
                         <Icon name="ArrowPathIcon" size={13} />
                       </button>
                     </div>
                     {refundError && (
-                      <div className="px-4 py-3 bg-red-50 border-b border-red-100 flex items-center gap-2">
+                      <div className="px-4 py-3 bg-red-50 dark:bg-red-900/10 border-b border-red-100 dark:border-red-800 flex items-center gap-2">
                         <Icon
                           name="ExclamationTriangleIcon"
                           size={14}
-                          className="text-red-500 flex-shrink-0"
+                          className="text-red-500 dark:text-red-400 flex-shrink-0"
                         />
-                        <p className="text-xs text-red-600 flex-1">{refundError}</p>
+                        <p className="text-xs text-red-600 dark:text-red-400 flex-1">{refundError}</p>
                         <button
                           onClick={loadRefundRequests}
-                          className="text-xs font-semibold text-red-600 underline"
+                          className="text-xs font-semibold text-red-600 dark:text-red-400 underline"
                         >
                           Thử lại
                         </button>
@@ -1863,10 +1862,10 @@ export default function UserDashboardClient() {
                           />
                         </div>
                         <div className="text-center sm:text-left">
-                          <p className="font-black text-base mb-1.5" style={{ color: '#1A2948' }}>
+                          <p className="font-black text-base mb-1.5 text-[var(--foreground)] dark:text-[var(--foreground)]">
                             Chưa có yêu cầu nào
                           </p>
-                          <p className="text-xs text-stone-400 mb-4 leading-relaxed">
+                          <p className="text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] mb-4 leading-relaxed">
                             Các yêu cầu hoàn tiền bạn gửi sẽ xuất hiện tại đây. Bạn có thể theo dõi
                             trạng thái xử lý của từng yêu cầu.
                           </p>
@@ -1876,7 +1875,7 @@ export default function UserDashboardClient() {
                               el?.scrollIntoView({ behavior: 'smooth' });
                             }}
                             className="inline-flex items-center gap-1.5 text-xs font-bold text-white px-4 py-2 rounded-xl transition-all hover:opacity-90 active:scale-95"
-                            style={{ background: '#EC2029' }}
+                            style={{ background: 'var(--primary)' }}
                           >
                             <Icon name="PlusIcon" size={13} />
                             Gửi yêu cầu hoàn tiền
@@ -1884,7 +1883,7 @@ export default function UserDashboardClient() {
                         </div>
                       </div>
                     ) : (
-                      <div className="divide-y divide-stone-50">
+                      <div className="divide-y divide-[var(--border)]">
                         {refundRequests.map((req) => (
                           <div
                             key={req.id}
@@ -1892,7 +1891,7 @@ export default function UserDashboardClient() {
                           >
                             <div className="flex items-start gap-3 min-w-0">
                               <div
-                                className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${req.status === 'approved' ? 'bg-green-50' : req.status === 'rejected' ? 'bg-red-50' : 'bg-amber-50'}`}
+                                className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${req.status === 'approved' ? 'bg-green-50 dark:bg-green-900/10' : req.status === 'rejected' ? 'bg-red-50 dark:bg-red-900/10' : 'bg-amber-50 dark:bg-amber-900/10'}`}
                               >
                                 <Icon
                                   name={
@@ -1905,37 +1904,36 @@ export default function UserDashboardClient() {
                                   size={18}
                                   className={
                                     req.status === 'approved'
-                                      ? 'text-green-500'
+                                      ? 'text-green-500 dark:text-green-400'
                                       : req.status === 'rejected'
-                                        ? 'text-red-500'
-                                        : 'text-amber-500'
+                                        ? 'text-red-500 dark:text-red-400'
+                                        : 'text-amber-500 dark:text-amber-400'
                                   }
                                 />
                               </div>
                               <div className="min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
                                   <span
-                                    className="font-mono font-bold text-sm"
-                                    style={{ color: '#1A2948' }}
+                                    className="font-mono font-bold text-sm text-[var(--foreground)] dark:text-[var(--foreground)]"
                                   >
                                     {req.bookingId}
                                   </span>
                                 </div>
-                                <div className="text-xs text-stone-500 truncate">
+                                <div className="text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] truncate">
                                   Mã đặt chỗ: {req.bookingId} · Số tiền:{' '}
                                   {req.amount.toLocaleString('vi-VN')}đ
                                 </div>
-                                <div className="text-xs text-stone-500 truncate">
+                                <div className="text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] truncate">
                                   {req.bankName} · {req.accountHolder} · STK: {req.accountNumber}
                                 </div>
-                                <div className="text-xs text-stone-500 truncate">
+                                <div className="text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] truncate">
                                   {req.reason}
                                   {req.note ? ` · ${req.note}` : ''}
                                 </div>
-                                <div className="text-xs text-stone-400 mt-0.5">{req.date}</div>
+                                <div className="text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] mt-0.5">{req.date}</div>
                                 {req.adminNote && (
                                   <div
-                                    className={`mt-1.5 text-xs px-2.5 py-1.5 rounded-lg ${req.status === 'approved' ? 'bg-green-50 text-green-700' : req.status === 'rejected' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'}`}
+                                    className={`mt-1.5 text-xs px-2.5 py-1.5 rounded-lg ${req.status === 'approved' ? 'bg-green-50 dark:bg-green-900/10 text-green-700 dark:text-green-300' : req.status === 'rejected' ? 'bg-red-50 dark:bg-red-900/10 text-red-700 dark:text-red-300' : 'bg-amber-50 dark:bg-amber-900/10 text-amber-700 dark:text-amber-300'}`}
                                   >
                                     <span className="font-semibold">Admin: </span>
                                     {req.adminNote}
@@ -1944,7 +1942,7 @@ export default function UserDashboardClient() {
                               </div>
                             </div>
                             <span
-                              className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5 ${req.status === 'approved' ? 'bg-green-100 text-green-700' : req.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}
+                              className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5 ${req.status === 'approved' ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300' : req.status === 'rejected' ? 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300' : 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300'}`}
                             >
                               {req.status === 'approved'
                                 ? 'Đã duyệt'

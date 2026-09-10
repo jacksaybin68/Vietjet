@@ -50,20 +50,20 @@ function PaymentDetailModal({ payment, onClose }: { payment: Payment; onClose: (
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
-        <div className="p-6 border-b border-stone-100 flex items-center justify-between">
+        <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
           <h3 className="text-lg font-bold font-[KoHo,sans-serif] text-[#1A2948]">
             Chi tiết giao dịch
           </h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-stone-100 transition-colors"
+            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] transition-colors"
           >
-            <Icon name="XMarkIcon" size={20} className="text-stone-500" />
+            <Icon name="XMarkIcon" size={20} className="text-[var(--foreground-muted)]" />
           </button>
         </div>
 
         <div className="p-6 space-y-4">
-          <div className="text-center pb-4 border-b border-stone-100">
+          <div className="text-center pb-4 border-b border-[var(--border)]">
             <div
               className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold mb-3"
               style={{ color: status.color, background: status.bg }}
@@ -77,7 +77,7 @@ function PaymentDetailModal({ payment, onClose }: { payment: Payment; onClose: (
 
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">
+              <span className="text-sm text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
                 Mã giao dịch
               </span>
               <span className="text-sm font-semibold text-[#1A2948] font-[Be Vietnam Pro,sans-serif]">
@@ -85,7 +85,7 @@ function PaymentDetailModal({ payment, onClose }: { payment: Payment; onClose: (
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">
+              <span className="text-sm text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
                 Mã đặt chỗ
               </span>
               <span className="text-sm font-semibold text-[#1A2948] font-[Be Vietnam Pro,sans-serif]">
@@ -93,7 +93,7 @@ function PaymentDetailModal({ payment, onClose }: { payment: Payment; onClose: (
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">
+              <span className="text-sm text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
                 Phương thức
               </span>
               <span className="text-sm font-semibold text-[#1A2948] font-[Be Vietnam Pro,sans-serif]">
@@ -101,7 +101,7 @@ function PaymentDetailModal({ payment, onClose }: { payment: Payment; onClose: (
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-stone-500 font-[Be Vietnam Pro,sans-serif]">
+              <span className="text-sm text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
                 Ngày thanh toán
               </span>
               <span className="text-sm font-semibold text-[#1A2948] font-[Be Vietnam Pro,sans-serif]">
@@ -111,7 +111,7 @@ function PaymentDetailModal({ payment, onClose }: { payment: Payment; onClose: (
           </div>
         </div>
 
-        <div className="p-4 bg-stone-50">
+        <div className="p-4 bg-[var(--surface-2)]">
           <button
             onClick={onClose}
             className="w-full py-2.5 bg-[#1A2948] text-white rounded-xl font-semibold text-sm font-[KoHo,sans-serif] hover:bg-[#2A3F6F] transition-all"
@@ -189,7 +189,7 @@ export default function PaymentHistoryTab() {
     return (
       <div className="space-y-3 p-4">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="h-20 bg-stone-100 rounded-xl animate-pulse" />
+          <div key={i} className="h-20 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl animate-pulse" />
         ))}
       </div>
     );
@@ -203,7 +203,7 @@ export default function PaymentHistoryTab() {
           <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[#1A2948]">
             Lịch sử thanh toán
           </h2>
-          <p className="text-sm text-stone-500 mt-1 font-[Be Vietnam Pro,sans-serif]">
+          <p className="text-sm text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
             Xem lại tất cả giao dịch của bạn
           </p>
         </div>
@@ -219,27 +219,27 @@ export default function PaymentHistoryTab() {
 
       {/* Summary */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl border border-stone-200 p-4 text-center shadow-vj-card">
+        <div className="bg-white rounded-2xl border border-[var(--border)] p-4 text-center shadow-vj-card">
           <div className="text-2xl font-bold font-[KoHo,sans-serif] text-[#10B981]">
             {payments.filter((p) => p.status === 'completed').length}
           </div>
-          <div className="text-xs text-stone-500 mt-1 font-[Be Vietnam Pro,sans-serif]">
+          <div className="text-xs text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
             Thành công
           </div>
         </div>
-        <div className="bg-white rounded-2xl border border-stone-200 p-4 text-center shadow-vj-card">
+        <div className="bg-white rounded-2xl border border-[var(--border)] p-4 text-center shadow-vj-card">
           <div className="text-2xl font-bold font-[KoHo,sans-serif] text-[#F59E0B]">
             {payments.filter((p) => p.status === 'pending').length}
           </div>
-          <div className="text-xs text-stone-500 mt-1 font-[Be Vietnam Pro,sans-serif]">
+          <div className="text-xs text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
             Đang xử lý
           </div>
         </div>
-        <div className="bg-white rounded-2xl border border-stone-200 p-4 text-center shadow-vj-card">
+        <div className="bg-white rounded-2xl border border-[var(--border)] p-4 text-center shadow-vj-card">
           <div className="text-2xl font-bold font-[KoHo,sans-serif] text-[#8B5CF6]">
             {payments.filter((p) => p.status === 'refunded').length}
           </div>
-          <div className="text-xs text-stone-500 mt-1 font-[Be Vietnam Pro,sans-serif]">
+          <div className="text-xs text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
             Đã hoàn tiền
           </div>
         </div>
@@ -247,24 +247,24 @@ export default function PaymentHistoryTab() {
 
       {/* Payment List */}
       {payments.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center shadow-vj-card">
-          <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-3">
-            <Icon name="ReceiptPercentIcon" size={28} className="text-stone-400" />
+        <div className="bg-white rounded-2xl border border-[var(--border)] p-8 text-center shadow-vj-card">
+          <div className="w-16 h-16 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-full flex items-center justify-center mx-auto mb-3">
+            <Icon name="ReceiptPercentIcon" size={28} className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]" />
           </div>
-          <p className="text-stone-500 text-sm font-[Be Vietnam Pro,sans-serif]">
+          <p className="text-[var(--foreground-muted)] text-sm font-[Be Vietnam Pro,sans-serif]">
             Chưa có giao dịch thanh toán nào.
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-vj-card">
-          <div className="divide-y divide-stone-100">
+        <div className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden shadow-vj-card">
+          <div className="divide-y divide-[var(--border)]">
             {payments.map((payment) => {
               const status = STATUS_CONFIG[payment.status] || STATUS_CONFIG.pending;
               return (
                 <button
                   key={payment.id}
                   onClick={() => setSelectedPayment(payment)}
-                  className="w-full p-4 flex items-center gap-4 hover:bg-stone-50 transition-colors text-left"
+                  className="w-full p-4 flex items-center gap-4 hover:bg-[var(--surface-2)] transition-colors text-left"
                 >
                   <div
                     className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -285,7 +285,7 @@ export default function PaymentHistoryTab() {
                         {status.label}
                       </span>
                     </div>
-                    <div className="text-xs text-stone-500 mt-0.5 font-[Be Vietnam Pro,sans-serif]">
+                    <div className="text-xs text-[var(--foreground-muted)] mt-0.5 font-[Be Vietnam Pro,sans-serif]">
                       {METHOD_LABELS[payment.method] || payment.method} ·{' '}
                       {formatDate(payment.created_at)}
                     </div>
@@ -298,7 +298,7 @@ export default function PaymentHistoryTab() {
                     <Icon
                       name="ChevronRightIcon"
                       size={14}
-                      className="text-stone-400 ml-auto mt-1"
+                      className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] ml-auto mt-1"
                     />
                   </div>
                 </button>
@@ -307,7 +307,7 @@ export default function PaymentHistoryTab() {
           </div>
 
           {totalPages > 1 && (
-            <div className="p-4 border-t border-stone-100">
+            <div className="p-4 border-t border-[var(--border)]">
               <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
             </div>
           )}
