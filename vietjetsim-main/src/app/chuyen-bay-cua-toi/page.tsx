@@ -5,6 +5,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Header } from '@/shared/components/navigation';
 import {
   MdFlight as FlightIcon,
   MdSearch,
@@ -161,20 +162,11 @@ export default function MyFlightsPage() {
 
   return (
     <div className="min-h-screen bg-[var(--background)] dark:bg-[var(--dark-bg)]">
+      <Header />
       <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
 
-      {/* Red top banner with gradient overlay */}
-      <div className="relative overflow-hidden bg-gradient-vj pt-[80px] pb-[120px] text-center">
-        <div className="absolute inset-0 opacity-10">
-          <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#grid)" />
-          </svg>
-        </div>
+      {/* Page header */}
+      <div className="relative overflow-hidden bg-gradient-vj pt-[100px] pb-[80px] text-center">
         <div className="relative mx-auto max-w-[1200px] px-4">
           <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-white/15 shadow-[0_0_0_1px_rgba(255,255,255,0.18)] backdrop-blur-sm">
             <FlightIcon className="text-4xl" />
