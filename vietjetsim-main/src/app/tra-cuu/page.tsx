@@ -2,9 +2,9 @@
 
 import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
-import Icon from '@/components/ui/AppIcon';
+import { Icon } from '@/shared/components/ui';
 import { useToast } from '@/hooks/useToast';
-import { ToastContainer } from '@/components/ui/Toast';
+import { ToastContainer } from '@/shared/components/feedback';
 
 interface BookingResult {
   pnr: string;

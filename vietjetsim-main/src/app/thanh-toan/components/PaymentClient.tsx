@@ -2,10 +2,10 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import Icon from '@/components/ui/AppIcon';
-import { PaymentSkeleton } from '@/components/ui/SkeletonLoader';
+import { Icon } from '@/shared/components/ui';
+import { PaymentSkeleton } from '@/shared/components/ui';
 import { useToast } from '@/hooks/useToast';
-import { ToastContainer } from '@/components/ui/Toast';
+import { ToastContainer } from '@/shared/components/feedback';
 
 type PaymentMethod = 'card' | 'bank' | 'ewallet' | 'wallet';
 

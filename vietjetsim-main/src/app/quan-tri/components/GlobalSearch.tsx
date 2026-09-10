@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Icon from '@/components/ui/AppIcon';
+import { Icon } from '@/shared/components/ui';
 
 interface SearchResult {
   type: 'flight' | 'user' | 'booking';
@@ -395,7 +395,7 @@ export default function GlobalSearch({ isOpen, onClose, onSelectResult }: Global
               <span className="ml-1">Điều hướng</span>
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-[10px]">Enter</kbd>
+              <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-[10px]">Nhập</kbd>
               <span className="ml-1">Chọn</span>
             </span>
           </div>

@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     if (error || !user) return response!;
 
     const loyaltyData = await getUserLoyaltyWithProgram(user.userId);
-    
+
     if (!loyaltyData) {
       return NextResponse.json(
         { error: 'Not Found', message: 'Loyalty data not found' },

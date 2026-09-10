@@ -1,14 +1,14 @@
 import React from 'react';
-import Header from '@/components/Header';
+import { Header } from '@/shared/components/navigation';
 import UserDashboardClient from './components/UserDashboardClient';
-import Footer from '@/components/Footer';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import { Footer } from '@/shared/components/navigation';
+import { ErrorBoundary } from '@/shared/components/feedback';
+import { ProtectedRoute } from '@/features/auth';
 
 export default function UserDashboardPage() {
   return (
     <ProtectedRoute requiredRole="user">
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-[var(--surface)] dark:bg-[var(--dark-surface)]">
         <Header />
         <ErrorBoundary variant="api">
           <UserDashboardClient />

@@ -97,8 +97,12 @@ export async function POST(request: NextRequest) {
       card_brand: normalized.card_brand,
       last_four: normalized.last_four,
       card_holder_name: normalized.card_holder_name,
-      expiry_month: normalized.expiry_month ? parseInt(String(normalized.expiry_month), 10) : undefined,
-      expiry_year: normalized.expiry_year ? parseInt(String(normalized.expiry_year), 10) : undefined,
+      expiry_month: normalized.expiry_month
+        ? parseInt(String(normalized.expiry_month), 10)
+        : undefined,
+      expiry_year: normalized.expiry_year
+        ? parseInt(String(normalized.expiry_year), 10)
+        : undefined,
       bank_id: normalized.bank_id,
       bank_name: normalized.bank_name,
       bank_code: normalized.bank_code,

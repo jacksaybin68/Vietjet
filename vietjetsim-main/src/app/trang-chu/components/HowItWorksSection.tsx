@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
-import AppImage from '@/components/ui/AppImage';
+import { AppImage } from '@/shared/components/ui';
 
 const DESTINATIONS = [
   {
@@ -72,21 +72,21 @@ const HOW_STEPS = [
     title: 'Tìm chuyến bay',
     desc: 'Nhập điểm đi, điểm đến và ngày bay. Hệ thống hiển thị tất cả chuyến bay phù hợp.',
     Icon: SearchIcon,
-    color: '#EC2029',
+    color: '#ED1D23',
   },
   {
     num: '02',
     title: 'Chọn ghế & đặt vé',
     desc: 'Lựa chọn ghế ngồi yêu thích. Điền thông tin hành khách nhanh chóng.',
     Icon: TicketIcon,
-    color: '#1A2948',
+    color: '#14213D',
   },
   {
     num: '03',
     title: 'Thanh toán & Bay',
     desc: 'Thanh toán an toàn qua thẻ hoặc ví điện tử. Nhận vé điện tử ngay lập tức.',
     Icon: PlaneIcon,
-    color: '#EC2029',
+    color: '#ED1D23',
   },
 ];
 

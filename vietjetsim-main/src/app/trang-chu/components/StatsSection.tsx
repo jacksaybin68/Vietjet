@@ -62,7 +62,7 @@ function CountUp({ target, suffix, active }: { target: number; suffix: string; a
   useEffect(() => {
     if (!active) return;
     let start = 0;
-    const duration = 1800;
+    const duration = 600;
     const step = target / (duration / 16);
     const timer = setInterval(() => {
       start += step;
@@ -109,7 +109,7 @@ export default function StatsSection() {
       ref={ref}
       className="relative overflow-hidden"
       style={{
-        background: 'linear-gradient(20.12deg, rgba(217,26,33,1) 19.6%, rgba(111,0,0,1) 93.86%)',
+        background: 'linear-gradient(20.12deg, #ED1D23 19.6%, #B30000 93.86%)',
       }}
     >
       {/* Top accent stripe */}

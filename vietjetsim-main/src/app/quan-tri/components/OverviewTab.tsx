@@ -1,8 +1,8 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import Icon from '@/components/ui/AppIcon';
+import { Icon } from '@/shared/components/ui';
 import { AdminTab } from './AdminDashboardClient';
-import { DashboardStatsSkeleton, AdminBookingsTableSkeleton } from '@/components/ui/SkeletonLoader';
+import { DashboardStatsSkeleton, AdminBookingsTableSkeleton } from '@/shared/components/ui';
 
 interface Props {
   onNavigate: (tab: AdminTab) => void;

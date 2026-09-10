@@ -1,37 +1,60 @@
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=KoHo:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+/* @import Google Fonts moved to next/font for zero render-blocking */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Official Vietjet Air Branding Colors */
-  --primary: #ec2029;
-  --primary-dark: #6f0000;
-  --primary-light: #d91a21;
-  --accent: #ffd400;
-  --accent-dark: #f9a51a;
-  --accent-secondary: #fedc00;
+  /* Tokens khớp trang mẫu: đỏ #E30613, vàng #FFF200, dark #1E293B (design_mau_giao_dien_nguoi_dung.html) */
+  --primary: #E30613;
+  --primary-dark: #B91C1C;
+  --primary-light: #F87171;
+  --primary-deep: #991B1B;
+  --accent: #FFF200;
+  --accent-dark: #E5C100;
+  --accent-secondary: #FFF9C0;
+  --orange: #F4511E;
+  --purple: #8075D6;
+  --blue: #2563D4;
   --background: #ffffff;
-  --surface: #fafafa;
-  --surface-2: #f5f5f5;
-  --foreground: #333333;
+  --surface: #F7F7F7;
+  --surface-2: #EFEFEF;
+  --foreground: #1E293B;
   --foreground-muted: #6d6e71;
   --foreground-subtle: #939598;
-  --border: #e8e8e8;
-  --dark-bg: #1a2948;
-  --dark-surface: #0f1e3a;
-  --dark-border: rgba(255, 255, 255, 0.1);
-  --vj-navy: #1a2948;
-  --vj-sky: #e8f4fd;
-  --vj-red: #ec2029;
-  --vj-red-dark: #6f0000;
-  --vj-yellow: #ffd400;
-  --vj-yellow-2: #fbb612;
-  --vj-orange: #f9a51a;
-  --vj-text: #333333;
+  --border: #ececec;
+  --dark-bg: #1E293B;
+  --dark-surface: #172033;
+  --dark-border: rgba(255, 255, 255, 0.14);
+  --vj-navy: #1E293B;
+  --vj-navy-2: #172033;
+  --vj-sky: #f7f7f7;
+  --vj-red: #E30613;
+  --vj-red-dark: #B91C1C;
+  --vj-red-deep: #991B1B;
+  --vj-yellow: #FFF200;
+  --vj-yellow-2: #E5C100;
+  --vj-orange: #F4511E;
+  --vj-purple: #8075D6;
+  --vj-blue: #2563D4;
+  --vj-text: #1E293B;
   --vj-text-gray: #6d6e71;
   --vj-text-muted: #939598;
   --vj-font: 'KoHo', 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
+  --vj-font-heading: 'Be Vietnam Pro', 'KoHo', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Dark mode tokens */
+.dark {
+  --background: #172033;
+  --surface: #1E293B;
+  --surface-2: #243044;
+  --foreground: #f0f0f0;
+  --foreground-muted: #a0a0a0;
+  --foreground-subtle: #707070;
+  --border: #2f3b52;
+  --vj-text: #f0f0f0;
+  --vj-text-gray: #b0b0b0;
+  --vj-text-muted: #808080;
 }
 
 html {
@@ -43,24 +66,80 @@ html {
 }
 
 body {
-  font-family: 'KoHo', 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--vj-font);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--foreground);
   background: var(--background);
-  font-size: 14px;
-  line-height: 1.6;
-  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.65;
+  font-weight: 400;
+  letter-spacing: 0.005em;
 }
 
-/* Headings use Be Vietnam Pro for stronger brand presence */
+/* Dark mode body styles */
+.dark body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  font-family: 'Be Vietnam Pro', 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--vj-font-heading);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+:where(a, button, input, select, textarea) {
+  transition: color 80ms ease, background-color 80ms ease, border-color 80ms ease, box-shadow 80ms ease;
+}
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px rgba(230, 6, 19, 0.38);
+}
+
+.vj-section {
+  background: var(--surface);
+  padding-block: clamp(3rem, 6vw, 5.5rem);
+}
+
+.vj-card {
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(30, 41, 59, 0.08);
+}
+
+.vj-button-primary {
+  border: 2px solid var(--primary);
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(230, 6, 19, 0.22);
+}
+
+.vj-button-primary:hover {
+  border-color: var(--primary-dark);
+  background: var(--primary-dark);
+  box-shadow: 0 8px 20px rgba(230, 6, 19, 0.3);
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Keyframe Animations */
@@ -169,10 +248,10 @@ h6 {
 @keyframes pulseRed {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(236, 32, 41, 0.4);
+    box-shadow: 0 0 0 0 rgba(237, 29, 35, 0.4);
   }
   50% {
-    box-shadow: 0 0 0 8px rgba(236, 32, 41, 0);
+    box-shadow: 0 0 0 8px rgba(237, 29, 35, 0);
   }
 }
 
@@ -359,6 +438,48 @@ h6 {
 
 .animate-fade-in-scale {
   animation: fadeInScale 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes progressBar {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes kenBurns {
+  0% {
+    transform: scale(1) translateX(0);
+  }
+  100% {
+    transform: scale(1.08) translateX(-1%);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-ken-burns {
+  animation: kenBurns 8s ease-out forwards;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
 }
 
 .animate-float {
@@ -568,7 +689,7 @@ h6 {
 }
 .seat-selected {
   background: #ec2029;
-  border: 1.5px solid #c41017;
+  border: 1.5px solid #6f0000;
   color: white;
 }
 .seat-occupied {
@@ -601,8 +722,8 @@ h6 {
   outline: none;
   border-color: #ec2029;
   box-shadow:
-    0 0 0 3px rgba(236, 32, 41, 0.14),
-    0 1px 4px rgba(236, 32, 41, 0.08);
+    0 0 0 3px rgba(237, 29, 35, 0.14),
+    0 1px 4px rgba(237, 29, 35, 0.08);
   background-color: #fff;
 }
 
@@ -706,16 +827,16 @@ h6 {
 .vj-btn-primary {
   background: #ec2029;
   color: white;
-  box-shadow: 0 2px 8px rgba(236, 32, 41, 0.28);
+  box-shadow: 0 2px 8px rgba(237, 29, 35, 0.28);
 }
 .vj-btn-primary:hover {
-  background: #d0021b;
-  box-shadow: 0 6px 20px rgba(236, 32, 41, 0.45);
+  background: #d9161b;
+  box-shadow: 0 6px 20px rgba(237, 29, 35, 0.45);
   transform: translateY(-2px) scale(1.02);
 }
 .vj-btn-primary:active {
   transform: translateY(0) scale(0.98);
-  box-shadow: 0 2px 8px rgba(236, 32, 41, 0.28);
+  box-shadow: 0 2px 8px rgba(237, 29, 35, 0.28);
 }
 
 .vj-btn-accent {
@@ -747,7 +868,7 @@ h6 {
 .vj-btn-outline:hover {
   background: #ec2029;
   color: white;
-  box-shadow: 0 4px 16px rgba(236, 32, 41, 0.3);
+  box-shadow: 0 4px 16px rgba(237, 29, 35, 0.3);
   transform: translateY(-1px) scale(1.01);
 }
 .vj-btn-outline:active {
@@ -795,7 +916,7 @@ h6 {
 }
 .card-hover-red:hover {
   transform: translateY(-6px);
-  box-shadow: 0 20px 48px rgba(236, 32, 41, 0.18);
+  box-shadow: 0 20px 48px rgba(237, 29, 35, 0.18);
   border-color: #ec2029;
 }
 
@@ -838,7 +959,7 @@ h6 {
 /* VietJet Sticky Search Bar */
 .vj-sticky-search {
   background: #ec2029;
-  border-bottom: 2px solid #c41017;
+  border-bottom: 2px solid #6f0000;
 }
 
 /* VietJet Price Badge */
@@ -896,9 +1017,9 @@ h6 {
     border-color 0.25s ease;
 }
 .vj-deal-card:hover {
-  box-shadow: 0 16px 40px rgba(236, 32, 41, 0.18);
+  box-shadow: 0 16px 40px rgba(237, 29, 35, 0.18);
   transform: translateY(-6px);
-  border-color: rgba(236, 32, 41, 0.3);
+  border-color: rgba(237, 29, 35, 0.3);
 }
 
 /* VietJet Nav Active */
@@ -927,7 +1048,7 @@ h6 {
 
 /* Gradient backgrounds */
 .bg-gradient-red {
-  background: linear-gradient(135deg, #ec2029 0%, #c41017 50%, #8b0d12 100%);
+  background: linear-gradient(135deg, #ec2029 0%, #6f0000 50%, #8b0d12 100%);
 }
 
 .bg-gradient-vj {
@@ -1002,6 +1123,27 @@ h6 {
   vertical-align: middle;
 }
 
+/* Badge styles - Dark mode */
+.dark .badge-success {
+  background: #166534;
+  color: #6ee7b7;
+}
+
+.dark .badge-error {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+
+.dark .badge-info {
+  background: #1e3a8a;
+  color: #60a5fa;
+}
+
+.dark .badge-warning {
+  background: #78350f;
+  color: #fbbf24;
+}
+
 /* Primary 50 background */
 .bg-primary-50 {
   background-color: #fff1f1;
@@ -1055,11 +1197,11 @@ h6 {
 .skeleton-accent-bar {
   background: linear-gradient(
     90deg,
-    #d0021b 0%,
+    #d9161b 0%,
     #ff4d6a 40%,
     #ffc72c 60%,
     #ff4d6a 80%,
-    #d0021b 100%
+    #d9161b 100%
   );
   background-size: 400% 100%;
   animation: skeleton-shimmer 2s ease-in-out infinite;
@@ -1174,7 +1316,7 @@ h6 {
 }
 .vj-input-field:focus-within {
   border-color: #ec2029;
-  box-shadow: 0 0 0 3px rgba(236, 32, 41, 0.08);
+  box-shadow: 0 0 0 3px rgba(237, 29, 35, 0.08);
 }
 
 /* VietJet Typography helpers */
@@ -1297,7 +1439,7 @@ h6 {
   background-color: #ffc72c;
 }
 .bg-red-dark {
-  background-color: #d0021b;
+  background-color: #d9161b;
 }
 .bg-white-10 {
   background-color: rgba(255, 255, 255, 0.1);

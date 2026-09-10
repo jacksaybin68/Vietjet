@@ -46,11 +46,11 @@ describe('Booking Database Module', () => {
         },
       ];
 
-      (sql as any).mockImplementation((strings: any) => {
-        if (strings[0].includes('SELECT COUNT(*)')) {
+      (sql as any).query.mockImplementation((queryStr: string) => {
+        if (queryStr.includes('SELECT COUNT(*)')) {
           return Promise.resolve([{ total: '2' }]);
         }
-        if (strings[0].includes('SELECT b.*')) {
+        if (queryStr.includes('SELECT b.*')) {
           return Promise.resolve(mockBookings);
         }
         return Promise.resolve([]);
@@ -58,7 +58,7 @@ describe('Booking Database Module', () => {
 
       const result = await getBookingsByUserId('user-1', { page: 1, limit: 10 });
 
-      expect(sql).toHaveBeenCalledTimes(2);
+      expect(sql.query).toHaveBeenCalledTimes(2);
       expect(result.bookings).toBeDefined();
       expect(result.bookings.length).toBe(2);
       expect(result.total).toBe(2);
@@ -105,7 +105,18 @@ describe('Booking Database Module', () => {
         total_price: 1000,
       };
 
-      (sql as any).transaction.mockResolvedValueOnce([[mockBookingRecord]]);
+      const mockId = 'booking-1';
+      const mockBookingTag: any = { id: mockId };
+      Object.defineProperty(mockBookingTag, 'raw', {
+        value: ['INSERT INTO bookings'],
+        enumerable: false,
+      });
+      (sql as any).mockReturnValueOnce(mockBookingTag);
+      (sql as any).mockReturnValueOnce({ raw: ['INSERT INTO passengers'] });
+      (sql as any).transaction.mockImplementationOnce(async (queries: any[]) => {
+        void queries;
+        return [[mockBookingRecord]];
+      });
 
       const result = await createBooking(
         { user_id: 'user-1', flight_id: 'flight-1', total_price: 1000 },

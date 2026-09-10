@@ -1,8 +1,8 @@
 'use client';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
-import AppImage from '@/components/ui/AppImage';
-import { PopularRoutesSkeleton } from '@/components/ui/SkeletonLoader';
+import { AppImage } from '@/shared/components/ui';
+import { PopularRoutesSkeleton } from '@/shared/components/ui';
 import {
   FaPlane,
   FaSuitcaseRolling,
@@ -13,7 +13,7 @@ import {
 import { MdCheckCircle, MdArrowForward } from 'react-icons/md';
 
 const SERVICES = [
-  { label: 'Đặt vé máy bay', href: '/tim-ve', Icon: FaPlane, iconBg: '#EC2029' },
+  { label: 'Đặt vé máy bay', href: '/tim-ve', Icon: FaPlane, iconBg: '#E30613' },
   {
     label: 'Mua hành lý & bữa ăn',
     href: '/tim-ve',
@@ -114,7 +114,7 @@ const POPULAR_ROUTES = [
 ];
 
 const TAG_COLORS: Record<string, { bg: string; text: string }> = {
-  'Phổ biến nhất': { bg: 'rgba(236,32,41,0.10)', text: '#EC2029' },
+  'Phổ biến nhất': { bg: 'rgba(227, 6, 19, 0.10)', text: '#E30613' },
   'Giá tốt': { bg: 'rgba(16,185,129,0.12)', text: '#059669' },
   Hot: { bg: 'rgba(249,115,22,0.12)', text: '#ea580c' },
   'Nghỉ dưỡng': { bg: 'rgba(14,165,233,0.12)', text: '#0284c7' },
@@ -200,11 +200,11 @@ export default function PopularRoutesSection() {
   if (loading) return <PopularRoutesSkeleton />;
 
   return (
-    <section ref={sectionRef} className="bg-white overflow-hidden">
+    <section ref={sectionRef} className="bg-white dark:bg-navy-dark overflow-hidden">
       {/* Service icons grid */}
-      <div className="py-5 sm:py-7 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-3 sm:grid-cols-9 gap-2 sm:gap-3">
+      <div className="py-3 md:py-5 sm:py-7 border-b border-gray-100 dark:border-white/5">
+        <div className="max-w-7xl mx-auto px-3 md:px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-9 gap-2 sm:gap-2.5 md:gap-3">
             {SERVICES?.map((service, i) => (
               <Link
                 key={service?.label}
@@ -214,16 +214,16 @@ export default function PopularRoutesSection() {
                   transitionDuration: '0.6s',
                   transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
-                className="vj-service-icon group flex flex-col items-center gap-1.5 sm:gap-2 p-2.5 sm:p-3 rounded-xl border border-transparent hover:border-[rgba(236,32,41,0.2)] hover:bg-[rgba(236,32,41,0.03)] hover:-translate-y-1 hover:shadow-md transition-all duration-300 reveal-up"
+                className="vj-service-icon group flex flex-col items-center gap-1 sm:gap-1.5 md:gap-2 p-2 sm:p-2.5 md:p-3 rounded-xl border border-transparent hover:border-[rgba(236,32,41,0.2)] dark:hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(236,32,41,0.03)] dark:hover:bg-[rgba(255,255,255,0.05)] hover:-translate-y-1 hover:shadow-md transition-all duration-300 reveal-up"
               >
                 <div
-                  className="w-11 h-11 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center text-white shadow-sm group-hover:shadow-md group-hover:scale-110 transition-all duration-300"
+                  className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center text-white shadow-sm group-hover:shadow-md group-hover:scale-110 transition-all duration-300"
                   style={{ background: service?.iconBg }}
                 >
-                  <service.Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                  <service.Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5" />
                 </div>
                 <span
-                  className="text-[10px] sm:text-[11px] font-semibold text-center leading-tight text-vj-gray"
+                  className="text-[9px] sm:text-[10px] md:text-[11px] font-semibold text-center leading-tight text-vj-gray dark:text-white/70"
                   style={{ fontWeight: 600 }}
                 >
                   {service?.label}
@@ -235,17 +235,17 @@ export default function PopularRoutesSection() {
       </div>
 
       {/* Popular Routes */}
-      <div className="py-6 sm:py-7 bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="py-4 md:py-6 sm:py-7 bg-white dark:bg-navy-dark border-b border-gray-100 dark:border-white/5">
+        <div className="max-w-7xl mx-auto px-3 md:px-4 sm:px-6 lg:px-8">
           {/* Header with parallax drift */}
           <div
             ref={routesHeaderRef}
-            className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5 reveal-left will-change-transform"
+            className="flex items-center gap-2 sm:gap-3 mb-3 md:mb-4 sm:mb-5 reveal-left will-change-transform"
             style={{ transition: 'transform 0.1s linear' }}
           >
             <span className="vj-section-label">Tuyến bay</span>
             <h2
-              className="text-base sm:text-lg lg:text-xl font-black tracking-tight text-vj-text"
+              className="text-base sm:text-lg lg:text-xl font-black tracking-tight text-vj-text dark:text-white"
               style={{ fontWeight: 900 }}
             >
               Tuyến đường phổ biến
@@ -253,7 +253,7 @@ export default function PopularRoutesSection() {
           </div>
 
           {/* Route cards — staggered fade-in with spring easing */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-2.5 md:gap-3">
             {POPULAR_ROUTES?.map((route, i) => (
               <Link
                 key={i}
@@ -263,11 +263,11 @@ export default function PopularRoutesSection() {
                   transitionDuration: '0.65s',
                   transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
-                className="reveal-up group flex items-center justify-between bg-white border border-gray-100 hover:border-[rgba(236,32,41,0.3)] rounded-xl px-3 sm:px-4 py-3 sm:py-3.5 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
+                className="reveal-up group flex items-center justify-between bg-white dark:bg-navy-dark/50 border border-gray-100 dark:border-white/5 hover:border-[rgba(236,32,41,0.3)] dark:hover:border-white/10 rounded-xl px-2.5 md:px-3 sm:px-4 py-2.5 md:py-3 sm:py-3.5 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
               >
-                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <div className="flex items-center gap-2 sm:gap-2.5 md:gap-3 min-w-0">
                   <div
-                    className="shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center group-hover:scale-110 transition-all duration-300"
+                    className="shrink-0 w-7 h-7 md:w-8 md:h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center group-hover:scale-110 transition-all duration-300"
                     style={{ background: 'rgba(236,32,41,0.10)' }}
                     onMouseEnter={(e) =>
                       (e.currentTarget.style.background = 'rgba(236,32,41,0.20)')
@@ -276,36 +276,36 @@ export default function PopularRoutesSection() {
                       (e.currentTarget.style.background = 'rgba(236,32,41,0.10)')
                     }
                   >
-                    <FaPlane className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+                    <FaPlane className="w-3 h-3 md:w-3.5 md:h-3.5 sm:w-4 sm:h-4 text-primary" />
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
-                      <span className="text-sm font-black text-vj-text" style={{ fontWeight: 900 }}>
+                      <span className="text-[11px] md:text-sm font-black text-vj-text dark:text-white" style={{ fontWeight: 900 }}>
                         {route?.fromCode}
                       </span>
-                      <MdArrowForward className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 text-[#EC2029]" />
-                      <span className="text-sm font-black text-vj-text" style={{ fontWeight: 900 }}>
+                      <MdArrowForward className="w-2.5 h-2.5 md:w-3 md:h-3 sm:w-3.5 sm:h-3.5 shrink-0 text-vjred" />
+                      <span className="text-[11px] md:text-sm font-black text-vj-text dark:text-white" style={{ fontWeight: 900 }}>
                         {route?.toCode}
                       </span>
                       <span
-                        className="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
+                        className="text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
                         style={{
                           background: TAG_COLORS[route?.tag]?.bg ?? 'rgba(236,32,41,0.10)',
-                          color: TAG_COLORS[route?.tag]?.text ?? '#EC2029',
+                          color: TAG_COLORS[route?.tag]?.text ?? '#E30613',
                         }}
                       >
                         {route?.tag}
                       </span>
                     </div>
-                    <p className="text-xs truncate mt-0.5 text-vj-gray" style={{ fontWeight: 500 }}>
+                    <p className="text-[10px] md:text-xs truncate mt-0.5 text-vj-gray dark:text-white/60" style={{ fontWeight: 500 }}>
                       {route?.from} → {route?.to} · {route?.duration}
                     </p>
                   </div>
                 </div>
                 <div className="shrink-0 text-right ml-2 sm:ml-3">
-                  <p className="text-xs mb-0.5 font-koho">Từ</p>
+                  <p className="text-[10px] md:text-xs mb-0.5 font-koho dark:text-white/70">Từ</p>
                   <p
-                    className="text-sm font-black whitespace-nowrap text-primary"
+                    className="text-[11px] md:text-sm font-black whitespace-nowrap text-primary dark:text-[#FFC400]"
                     style={{ fontWeight: 900 }}
                   >
                     {route?.price}₫
@@ -318,17 +318,17 @@ export default function PopularRoutesSection() {
       </div>
 
       {/* Promo bento grid */}
-      <div className="py-6 sm:py-7" style={{ background: '#F7F7F7' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="py-4 md:py-6 sm:py-7" style={{ background: '#F7F7F7' }} >
+        <div className="max-w-7xl mx-auto px-3 md:px-4 sm:px-6 lg:px-8">
           {/* Header with parallax drift */}
           <div
             ref={promoHeaderRef}
-            className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5 reveal-left will-change-transform"
+            className="flex items-center gap-2 sm:gap-3 mb-3 md:mb-4 sm:mb-5 reveal-left will-change-transform"
             style={{ transition: 'transform 0.1s linear' }}
           >
             <span className="vj-section-label">Dịch vụ nổi bật</span>
             <h2
-              className="text-base sm:text-lg lg:text-xl font-black tracking-tight text-vj-text"
+              className="text-base sm:text-lg lg:text-xl font-black tracking-tight text-vj-text dark:text-white"
               style={{ fontWeight: 900 }}
             >
               Trải nghiệm bay cùng Vietjet Air
@@ -336,7 +336,7 @@ export default function PopularRoutesSection() {
           </div>
 
           {/* Promo banner cards — staggered reveal + parallax image */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 md:gap-4">
             {PROMO_BANNERS?.map((banner, i) => (
               <div
                 key={banner?.id}
@@ -345,10 +345,10 @@ export default function PopularRoutesSection() {
                   transitionDuration: '0.7s',
                   transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
-                className="reveal-scale group relative rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                className="reveal-scale group relative rounded-xl md:rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer"
               >
                 {/* Image wrapper — overflow hidden for parallax containment */}
-                <div className="relative h-44 sm:h-48 overflow-hidden">
+                <div className="relative h-36 sm:h-40 md:h-44 sm:h-48 overflow-hidden">
                   <div
                     ref={(el) => {
                       promoBannerImgRefs.current[i] = el;
@@ -366,9 +366,9 @@ export default function PopularRoutesSection() {
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
+                <div className="absolute bottom-0 left-0 right-0 p-2.5 sm:p-3 md:p-4">
                   <div
-                    className="text-[10px] font-bold uppercase tracking-widest mb-1"
+                    className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest mb-1"
                     style={{
                       color: 'rgba(255,255,255,0.7)',
                       fontWeight: 700,
@@ -376,12 +376,12 @@ export default function PopularRoutesSection() {
                   >
                     {banner?.label}
                   </div>
-                  <h3 className="text-base sm:text-lg font-black text-white leading-tight font-body">
+                  <h3 className="text-sm md:text-base sm:text-lg font-black text-white leading-tight font-body">
                     {banner?.title}
                   </h3>
-                  <p className="text-xs mt-0.5 mb-2 sm:mb-3 font-koho">{banner?.subtitle}</p>
+                  <p className="text-[10px] md:text-xs mt-0.5 mb-1.5 sm:mb-2 font-koho">{banner?.subtitle}</p>
                   <span
-                    className="inline-block text-xs font-black px-3 py-1.5 rounded-lg text-navy"
+                    className="inline-block text-[10px] md:text-xs font-black px-2.5 md:px-3 py-1 md:py-1.5 rounded-lg text-navy dark:text-navy-dark"
                     style={{
                       background:
                         'linear-gradient(26.73deg, rgb(249,165,26) 13.7%, rgb(251,182,18) 29.8%, rgb(255,221,0) 66.81%)',
