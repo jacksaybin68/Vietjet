@@ -76,12 +76,30 @@ export default function HeroSection() {
             onSubmit={search}
             className="mt-6 w-full max-w-[540px] bg-[#EC2029] dark:bg-[#B91C1C] border-2 border-[#EC2029] dark:border-[#B91C1C] rounded-lg shadow-sm p-4 sm:p-6 font-[var(--vj-font)]"
           >
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-              <img src="/logo-vj.svg" alt="Vietjet Air" className="h-6 w-auto sm:h-7" />
-              <div className="hidden sm:flex gap-2 md:gap-4 text-[11px] font-bold text-white md:text-[12px] lg:text-[13px]">
-                <span className="cursor-pointer hover:text-[#FFD400]">Mua hành lý</span>
-                <span className="cursor-pointer hover:text-[#FFD400]">Đổi thưởng Skypoint</span>
-                <span className="cursor-pointer hover:text-[#FFD400]">Gửi hàng nhanh</span>
+            <div className="mb-4 flex flex-nowrap items-center gap-2">
+              {/* Column 1 (3.5): Primary text - logo replaced */}
+              <div className="text-[11px] font-bold text-white sm:text-[12px] md:text-[13px]" style={{ flex: '3.5 1 auto', width: '58.33%' }}>
+                Mua hành lý, suût ăn chọn ghế ngồi và hơn thế nữa, từ 3.99 USD
+              </div>
+
+              {/* Column 2 (1.5): Highlighted call-to-action */}
+              <div
+                className="text-[11px] font-bold text-black sm:text-[12px] md:text-[13px]"
+                style={{
+                  flex: '1.5 1 auto',
+                  width: '25%',
+                  background: '#FFD400',
+                  color: '#000000',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                }}
+              >
+                Đổi thưởng &amp; Mua Skypoint
+              </div>
+
+              {/* Column 3 (1): Secondary link */}
+              <div className="text-right text-[11px] font-bold text-white sm:text-[12px] md:text-[13px]" style={{ flex: '1 1 auto', width: '16.67%' }}>
+                Giao hàng nhanh
               </div>
             </div>
 

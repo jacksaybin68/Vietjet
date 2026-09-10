@@ -318,7 +318,7 @@ export default function PopularRoutesSection() {
       </div>
 
       {/* Promo bento grid */}
-      <div className="py-4 md:py-6 sm:py-7" style={{ background: '#F7F7F7' }} dark:style={{ background: '#242424' }}>
+      <div className="py-4 md:py-6 sm:py-7" style={{ background: '#F7F7F7' }} >
         <div className="max-w-7xl mx-auto px-3 md:px-4 sm:px-6 lg:px-8">
           {/* Header with parallax drift */}
           <div
@@ -348,7 +348,7 @@ export default function PopularRoutesSection() {
                 className="reveal-scale group relative rounded-xl md:rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer"
               >
                 {/* Image wrapper — overflow hidden for parallax containment */}
-                <div className="relative h-36 sm:h-40 md:h-44 sm:h-48 overflow-hidden"
+                <div className="relative h-36 sm:h-40 md:h-44 sm:h-48 overflow-hidden">
                   <div
                     ref={(el) => {
                       promoBannerImgRefs.current[i] = el;

@@ -4,39 +4,39 @@
 @tailwind utilities;
 
 :root {
-  /* Tokens confirmed from provided OCR; no inferred brand values. */
-  --primary: #E31E24;
+  /* Tokens khớp trang mẫu: đỏ #E30613, vàng #FFF200, dark #1E293B (design_mau_giao_dien_nguoi_dung.html) */
+  --primary: #E30613;
   --primary-dark: #B91C1C;
   --primary-light: #F87171;
   --primary-deep: #991B1B;
-  --accent: #FFC400;
-  --accent-dark: #E5A900;
-  --accent-secondary: #FFD54A;
+  --accent: #FFF200;
+  --accent-dark: #E5C100;
+  --accent-secondary: #FFF9C0;
   --orange: #F4511E;
   --purple: #8075D6;
   --blue: #2563D4;
   --background: #ffffff;
   --surface: #F7F7F7;
   --surface-2: #EFEFEF;
-  --foreground: #333;
+  --foreground: #1E293B;
   --foreground-muted: #6d6e71;
   --foreground-subtle: #939598;
   --border: #ececec;
-  --dark-bg: #242424;
-  --dark-surface: #151515;
+  --dark-bg: #1E293B;
+  --dark-surface: #172033;
   --dark-border: rgba(255, 255, 255, 0.14);
-  --vj-navy: #242424;
-  --vj-navy-2: #151515;
+  --vj-navy: #1E293B;
+  --vj-navy-2: #172033;
   --vj-sky: #f7f7f7;
-  --vj-red: #E31E24;
+  --vj-red: #E30613;
   --vj-red-dark: #B91C1C;
   --vj-red-deep: #991B1B;
-  --vj-yellow: #FFC400;
-  --vj-yellow-2: #FFD54A;
+  --vj-yellow: #FFF200;
+  --vj-yellow-2: #E5C100;
   --vj-orange: #F4511E;
   --vj-purple: #8075D6;
   --vj-blue: #2563D4;
-  --vj-text: #333;
+  --vj-text: #1E293B;
   --vj-text-gray: #6d6e71;
   --vj-text-muted: #939598;
   --vj-font: 'KoHo', 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
@@ -45,13 +45,13 @@
 
 /* Dark mode tokens */
 .dark {
-  --background: #151515;
-  --surface: #242424;
-  --surface-2: #1e1e1e;
+  --background: #172033;
+  --surface: #1E293B;
+  --surface-2: #243044;
   --foreground: #f0f0f0;
   --foreground-muted: #a0a0a0;
   --foreground-subtle: #707070;
-  --border: #333333;
+  --border: #2f3b52;
   --vj-text: #f0f0f0;
   --vj-text-gray: #b0b0b0;
   --vj-text-muted: #808080;
@@ -90,7 +90,7 @@ h4,
 h5,
 h6 {
   font-family: var(--vj-font-heading);
-  font-weight: 800;
+  font-weight: 900;
   letter-spacing: -0.02em;
   line-height: 1.15;
 }
@@ -102,7 +102,7 @@ h6 {
 :where(a, button, input, select, textarea):focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 3px;
-  box-shadow: 0 0 0 5px rgba(227, 30, 36, 0.38);
+  box-shadow: 0 0 0 5px rgba(230, 6, 19, 0.38);
 }
 
 .vj-section {
@@ -114,20 +114,20 @@ h6 {
   border: 1px solid var(--border);
   border-radius: 0.75rem;
   background: #fff;
-  box-shadow: 0 8px 24px rgba(36, 36, 36, 0.08);
+  box-shadow: 0 8px 24px rgba(30, 41, 59, 0.08);
 }
 
 .vj-button-primary {
   border: 2px solid var(--primary);
   background: var(--primary);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(227, 30, 36, 0.22);
+  box-shadow: 0 4px 12px rgba(230, 6, 19, 0.22);
 }
 
 .vj-button-primary:hover {
   border-color: var(--primary-dark);
   background: var(--primary-dark);
-  box-shadow: 0 8px 20px rgba(227, 30, 36, 0.3);
+  box-shadow: 0 8px 20px rgba(230, 6, 19, 0.3);
   transform: translateY(-1px);
 }
 

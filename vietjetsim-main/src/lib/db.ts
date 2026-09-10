@@ -2082,3 +2082,235 @@ export async function spendLoyaltyPoints(
 
   return (result as LoyaltyTransactionRecord[])[0];
 }
+
+// ─── Check-in Queries ──────────────────────────────────────────────────────────
+
+export interface CheckInSearchResult {
+  booking: {
+    id: string;
+    status: string;
+    flight_id: string;
+    total_price: number;
+    created_at: string;
+    flight_no?: string;
+    from_code?: string;
+    to_code?: string;
+    depart_time?: string;
+    arrive_time?: string;
+  };
+  passengers: Array<{
+    id: string;
+    booking_id: string;
+    name: string;
+    dob: string | null;
+    id_number: string | null;
+    gender: 'male' | 'female' | 'other';
+    created_at: string;
+  }>;
+  checkIn: {
+    id: string;
+    booking_id: string;
+    check_in_number: string;
+    seat_number: string;
+    gate: string | null;
+    terminal: string | null;
+    check_in_time: string;
+    boarding_pass_number: string;
+  } | null;
+}
+
+export async function searchCheckIn(
+  bookingCode: string,
+  lastName: string,
+  firstName: string
+): Promise<CheckInSearchResult | null> {
+  const bookingResult = await sql`
+    SELECT
+      b.id, b.status, b.flight_id, b.total_price, b.created_at,
+      f.flight_no, f.from_code, f.to_code, f.depart_time, f.arrive_time
+    FROM bookings b
+    JOIN flights f ON b.flight_id = f.id
+    WHERE b.id = ${bookingCode} OR b.booking_code = ${bookingCode}
+    LIMIT 1
+  `;
+
+  if ((bookingResult as any[]).length === 0) {
+    return null;
+  }
+
+  const booking = (bookingResult as any[])[0];
+
+  const passengersResult = await sql`
+    SELECT p.id, p.booking_id, p.name, p.dob, p.id_number, p.gender, p.created_at
+    FROM passengers p
+    JOIN bookings b ON p.booking_id = b.id
+    WHERE b.id = ${bookingCode} OR b.booking_code = ${bookingCode}
+    ORDER BY p.created_at
+  `;
+
+  const passengers = passengersResult as Array<{
+    id: string;
+    booking_id: string;
+    name: string;
+    dob: string | null;
+    id_number: string | null;
+    gender: 'male' | 'female' | 'other';
+    created_at: string;
+  }>;
+
+  // ─── Verify passenger name matches (case/diacritics-insensitive) ────────────
+  // Normalizes Vietnamese text: lowercase + strip diacritics (dấu) for comparison.
+  const normalizeName = (name: string): string =>
+    name
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  const normalizedInput = `${normalizeName(lastName)} ${normalizeName(firstName)}`.trim();
+  const normalizedDbNames = passengers.map((p) => normalizeName(p.name));
+
+  const nameMatches = normalizedDbNames.some(
+    (dbName) => {
+      // Match if the full input appears within the stored name (handles
+      // "NGUYEN VAN A" vs lastName="NGUYEN", firstName="VAN A" ordering too)
+      return dbName === normalizedInput || dbName.includes(normalizedInput);
+    }
+  );
+
+  if (!nameMatches) {
+    return null;
+  }
+
+  const checkInResult = await sql`
+    SELECT id, booking_id, check_in_number, seat_number, gate, terminal, check_in_time, boarding_pass_number
+    FROM check_in
+    WHERE booking_id = ${booking.id}
+    LIMIT 1
+  `;
+
+  const checkIn = (checkInResult as any[])[0] || null;
+
+  return {
+    booking: {
+      id: booking.id,
+      status: booking.status,
+      flight_id: booking.flight_id,
+      total_price: booking.total_price,
+      created_at: booking.created_at,
+      flight_no: booking.flight_no,
+      from_code: booking.from_code,
+      to_code: booking.to_code,
+      depart_time: booking.depart_time,
+      arrive_time: booking.arrive_time,
+    },
+    passengers,
+    checkIn: checkIn ? {
+      id: checkIn.id,
+      booking_id: checkIn.booking_id,
+      check_in_number: checkIn.check_in_number,
+      seat_number: checkIn.seat_number,
+      gate: checkIn.gate,
+      terminal: checkIn.terminal,
+      check_in_time: checkIn.check_in_time,
+      boarding_pass_number: checkIn.boarding_pass_number,
+    } : null,
+  };
+}
+
+export async function getCheckInStatusByBookingId(
+  bookingId: string
+): Promise<{
+  has_check_in: boolean;
+  check_in_id: string | null;
+  passenger_name: string | null;
+  seat_number: string | null;
+  check_in_number: string | null;
+  boarding_pass_number: string | null;
+  status: string | null;
+  check_in_time: string | null;
+} | null> {
+  const result = await sql`
+    SELECT
+      EXISTS(SELECT 1 FROM check_in WHERE booking_id = ${bookingId}) as has_check_in,
+      (SELECT id FROM check_in WHERE booking_id = ${bookingId} LIMIT 1) as check_in_id,
+      (SELECT passenger_name FROM check_in WHERE booking_id = ${bookingId} LIMIT 1) as passenger_name,
+      (SELECT seat_number FROM check_in WHERE booking_id = ${bookingId} LIMIT 1) as seat_number,
+      (SELECT check_in_number FROM check_in WHERE booking_id = ${bookingId} LIMIT 1) as check_in_number,
+      (SELECT boarding_pass_number FROM check_in WHERE booking_id = ${bookingId} LIMIT 1) as boarding_pass_number,
+      (SELECT status FROM check_in WHERE booking_id = ${bookingId} LIMIT 1) as status,
+      (SELECT check_in_time FROM check_in WHERE booking_id = ${bookingId} LIMIT 1) as check_in_time
+  `;
+
+  if ((result as any[]).length === 0) {
+    return null;
+  }
+
+  const row = (result as any[])[0];
+  return {
+    has_check_in: row.has_check_in,
+    check_in_id: row.check_in_id,
+    passenger_name: row.passenger_name,
+    seat_number: row.seat_number,
+    check_in_number: row.check_in_number,
+    boarding_pass_number: row.boarding_pass_number,
+    status: row.status,
+    check_in_time: row.check_in_time,
+  };
+}
+
+export async function createCheckIn(data: {
+  bookingId: string;
+  passengerId?: string | null;
+  seatId?: string | null;
+  seatNumber: string;
+  flightNo: string;
+  fromCode: string;
+  toCode: string;
+  departTime: string;
+  passengerName: string;
+  idNumber?: string | null;
+  baggageInfo?: string | null;
+  gate?: string | null;
+  terminal?: string | null;
+}): Promise<{
+  id: string;
+  check_in_number: string;
+  booking_id: string;
+  seat_number: string;
+  gate: string | null;
+  terminal: string | null;
+  check_in_time: string;
+  boarding_pass_number: string;
+}> {
+  const checkInNumber = `VN-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+
+  const result = await sql`
+    INSERT INTO check_in (
+      booking_id, passenger_id, seat_number, flight_no, from_code, to_code,
+      depart_time, passenger_name, id_number, baggage_info, gate, terminal,
+      check_in_number, boarding_pass_number
+    )
+    VALUES (
+      ${data.bookingId},
+      ${data.passengerId || null},
+      ${data.seatNumber},
+      ${data.flightNo},
+      ${data.fromCode},
+      ${data.toCode},
+      ${data.departTime},
+      ${data.passengerName},
+      ${data.idNumber || null},
+      ${data.baggageInfo || null},
+      ${data.gate || null},
+      ${data.terminal || null},
+      ${checkInNumber},
+      ${checkInNumber}
+    )
+    RETURNING id, check_in_number, booking_id, seat_number, gate, terminal, check_in_time, boarding_pass_number
+  `;
+
+  return (result as any[])[0];
+}

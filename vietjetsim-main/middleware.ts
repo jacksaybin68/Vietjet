@@ -5,7 +5,22 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import type { JWTPayload } from '@/lib/auth';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-do-not-use-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET || JWT_SECRET === 'dev-secret-key-do-not-use-in-production') {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'CRITICAL SECURITY ERROR: JWT_SECRET is missing or equals the development default while ' +
+        'NODE_ENV=production. Configure JWT_SECRET in your deployment environment before starting.'
+    );
+  }
+  console.warn(
+    'WARNING: JWT_SECRET is missing — falling back to the development secret. ' +
+      'This is ONLY acceptable for local development.'
+  );
+}
+
+const effectiveJwtSecret = JWT_SECRET || 'dev-secret-key-do-not-use-in-production';
 
 // ─── HMAC-SHA256 Verification (Edge Runtime Compatible) ───────────────────────
 
@@ -90,7 +105,10 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ─── Rate Limiting for Auth Endpoints ──────────────────────────────
-  if (pathname.startsWith('/api/xac-thuc/dang-nhap') || pathname.startsWith('/api/xac-thuc/dang-ky')) {
+  if (
+    pathname.startsWith('/api/xac-thuc/dang-nhap') ||
+    pathname.startsWith('/api/xac-thuc/dang-ky')
+  ) {
     const limited = rateLimit(request, RATE_LIMITS.strict);
     if (limited) return limited;
   }
@@ -105,11 +123,18 @@ export async function middleware(request: NextRequest) {
 
   if (accessToken) {
     // Verify JWT signature before trusting the payload
-    user = await verifyJwtSignature(accessToken, JWT_SECRET);
+    user = await verifyJwtSignature(accessToken, effectiveJwtSecret);
   }
 
   // Define public routes that don't require authentication
-  const publicRoutes = ['/dang-nhap', '/trang-chu'];
+  const publicRoutes = [
+    '/dang-nhap',
+    '/trang-chu',
+    '/chuyen-bay-cua-toi',
+    '/lam-thu-tuc',
+    '/dat-ve',
+    '/tim-ve',
+  ];
   const isPublicRoute =
     pathname === '/' ||
     publicRoutes.some((route) => pathname === route || pathname.startsWith(route + '/'));
@@ -117,8 +142,22 @@ export async function middleware(request: NextRequest) {
   // API routes for auth are public
   const isAuthApiRoute = pathname.startsWith('/api/xac-thuc/');
 
+  // Public API routes that don't require authentication
+  const publicApiRoutes = [
+    '/api/dat-ve',
+    '/api/checkin',
+    '/api/checkin/',
+    '/api/flights',
+    '/api/flights/',
+    '/api/airports',
+    '/api/search',
+  ];
+  const isPublicApiRoute = publicApiRoutes.some(
+    (route) => pathname === route || pathname.startsWith(route + '/')
+  );
+
   // If not authenticated and trying to access protected route
-  if (!user && !isPublicRoute && !isAuthApiRoute) {
+  if (!user && !isPublicRoute && !isAuthApiRoute && !isPublicApiRoute) {
     const redirectUrl = new URL('/dang-nhap', request.url);
     redirectUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(redirectUrl);
@@ -167,7 +206,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // For protected API routes, verify JWT and attach user to headers
-  if (pathname.startsWith('/api/') && !isAuthApiRoute) {
+  if (pathname.startsWith('/api/') && !isAuthApiRoute && !isPublicApiRoute) {
     if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized', message: 'Authentication required' },
