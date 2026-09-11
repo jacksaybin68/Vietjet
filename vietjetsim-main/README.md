@@ -207,8 +207,6 @@ The project includes `@netlify/plugin-nextjs` for seamless deployment.
 
 ## ⚠️ Important Notes
 
-- **TypeScript & ESLint** are enabled during builds (no `ignoreBuildErrors`)
-- **Server-side middleware** protects routes at the edge
 - **TypeScript & ESLint errors FAIL the build** (`ignoreBuildErrors: false` — enforced CI gate)
 - **Server-side middleware** verifies JWT at the edge (HS256-only, expiry enforced)
 - **Data isolation** is enforced in query layer (user_id scoping) + RBAC route guards
