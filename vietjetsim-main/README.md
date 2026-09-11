@@ -1,20 +1,20 @@
 # 🛫 VietjetSim — Vietnam Flight Booking Simulator
 
-A complete **Vietjet Air booking experience simulator** built with Next.js 15, TypeScript, Tailwind CSS, and Supabase. Search domestic Vietnam flights, select seats, manage bookings, and access a full admin panel.
+A complete **Vietjet Air booking experience simulator** built with Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS, and **Neon Serverless Postgres** with **custom JWT authentication**. Search domestic Vietnam flights, select seats, pay via wallet/card simulation, manage bookings, and access a full admin panel.
 
 ## 🚀 Features
 
 - **Next.js 15** (App Router) with React 19 & TypeScript
 - **Tailwind CSS** with custom Vietjet brand theme
-- **Supabase** for Auth, Database, and Realtime Chat
-- **Role-based Access Control** (User / Admin)
-- **Flight Search & Booking** with seat selection
-- **Payment Simulation** with booking management
+- **Neon Serverless Postgres** (with in-memory mock fallback for local dev)
+- **Custom JWT Auth** (15-minute access tokens + 7-day refresh tokens with rotation & reuse detection)
+- **Edge Middleware** (JWT verification via WebCrypto, rate limiting, CSRF)
+- **Role-based Access Control** (`user` / `admin`)
+- **Flight Search & Booking** with seat selection & check-in system
+- **Payment Simulation**: wallet, bank transfer, card — plus loyalty points
 - **Realtime Admin Chat** support system
+- **Notifications hub** & refund workflow with wallet credit
 - **Responsive Design** matching Vietjet's UI/UX
-- **Server-side Middleware** for route protection
-- **Error Boundaries** with variant-specific fallbacks
-- **Toast Notifications** system
 
 ## 🛠️ Installation
 
@@ -29,29 +29,28 @@ Copy the example environment file and configure:
 cp .env.local.example .env.local
 ```
 
-Edit `.env.local` with your Supabase credentials:
+Edit `.env.local`:
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+# Neon (Serverless Postgres) connection string.
+# Leave empty to use the in-memory mock database (development only).
+DATABASE_URL=
+
+# Generate with: openssl rand -hex 32
+JWT_SECRET=replace-with-random-64-hex-chars
+JWT_REFRESH_SECRET=replace-with-another-random-64-hex-chars
+
 NEXT_PUBLIC_SITE_URL=http://localhost:4028
-NEXT_PUBLIC_USE_MOCK_AUTH=false
 ```
 
-> 🔑 Get your Supabase keys from: [Supabase Dashboard](https://supabase.com/dashboard/project/_/settings/api)
+> 🔑 Get your Neon connection string from: [Neon Console](https://console.neon.tech) → Project → Connection Details
 
 ### 3. Database Setup
-Run the migrations in your Supabase SQL Editor:
-1. Go to **Supabase Dashboard → SQL Editor**
-2. Run all files in `supabase/migrations/` in order:
-   - `20260317051514_chat_module.sql`
-   - `20260317060000_chat_presence.sql`
-   - `20260317161000_refund_requests.sql`
-   - `20260317170000_fix_refund_requests_fk.sql`
-   - `20260317181346_notifications_hub.sql`
-   - `20260318100000_rbac_user_admin.sql`
-   - `20260320000000_complete_schema.sql` ⭐ **Main schema**
-
-Or run the complete schema file which includes all tables, RLS policies, indexes, and seed data.
+Run the SQL migrations in order against your Neon database (any psql client or the Neon SQL Editor):
+```bash
+psql "$DATABASE_URL" -f migrations/000_core_schema.sql
+psql "$DATABASE_URL" -f migrations/001_bank_accounts.sql
+# ... apply every file in migrations/ in filename order (000 → 012)
+```
 
 ### 4. Start Development Server
 ```bash
@@ -83,21 +82,27 @@ vietjetsim-main/
 │   │   ├── chat/               # Realtime UserChat
 │   │   └── ui/                 # Toast, Pagination, Skeleton, etc.
 │   ├── contexts/
-│   │   └── AuthContext.tsx     # Supabase auth provider
+│   │   └── AuthContext.tsx     # JWT auth provider (access/refresh cookies)
 │   ├── hooks/
 │   │   ├── useErrorHandler.ts  # Async error classification
 │   │   └── useToast.ts         # Toast notification hook
 │   ├── lib/
-│   │   ├── supabase/           # Supabase client setup
-│   │   ├── neon/               # Neon DB client
-│   │   └── rbac.ts             # Role-based access control
+│   │   ├── db.ts               # DB query layer (monolith barrel)
+│   │   ├── db/                 # Modular DB queries (Phase 3 target structure)
+│   │   ├── neon.ts             # Neon client (or in-memory mock)
+│   │   ├── auth.ts             # JWT sign/verify, password hashing
+│   │   ├── admin-auth.ts       # verifyAdminRequest helper
+│   │   ├── csrf.ts             # CSRF token utils
+│   │   └── rbac.ts             # Role-based access control (user/admin)
+│   ├── shared/                 # Shared UI & utilities
+│   ├── test/                   # Vitest unit/integration tests (12 files)
 │   ├── types/
 │   │   └── database.ts         # TypeScript interfaces
 │   └── styles/
 │       └── tailwind.css        # Global styles & animations
-├── supabase/migrations/        # Database schema migrations
-├── middleware.ts               # Server-side auth protection
-├── next.config.mjs             # Next.js configuration
+├── migrations/                 # SQL migrations (000 → 012, Neon Postgres)
+├── middleware.ts               # Edge middleware (JWT via WebCrypto, rate limit)
+├── next.config.mjs             # Next.js configuration (strict TS/ESLint builds)
 ├── tailwind.config.js          # Vietjet brand theme
 └── .env.local.example          # Environment template
 ```
@@ -113,13 +118,21 @@ vietjetsim-main/
 | `bookings` | Booking records with status tracking |
 | `passengers` | Passenger details per booking |
 | `payments` | Payment transactions & gateway responses |
+| `user_wallets` | Wallet balance per user (VND) |
+| `wallet_transactions` | Wallet ledger (topup/withdraw/payment/refund/bonus) |
+| `saved_payment_methods` | Linked cards & bank accounts |
+| `discount_codes` | Promo codes with usage limits |
+| `loyalty_*` | Loyalty tiers & points history |
 | `chat_conversations` | Support chat threads |
 | `chat_messages` | Chat message history |
 | `chat_presence` | Online/typing status |
 | `refund_requests` | Refund application tracking |
 | `notifications` | User notification hub |
 
-All tables have **Row Level Security (RLS)** policies for data isolation.
+Data isolation is enforced at the **query layer** (every user-scoped query filters by
+`user_id` from the verified JWT) plus **RBAC route guards** (`verifyAdminRequest`,
+`verifyAuthRequest`). Wallet balance updates and payment/booking writes are wrapped
+in transactions with compensating rollback on failure.
 
 ## 🔐 Default Test Accounts
 
@@ -128,7 +141,7 @@ All tables have **Row Level Security (RLS)** policies for data isolation.
 | `user@vietjetsim.vn` | `user123` | User |
 | `admin@vietjetsim.vn` | `admin123` | Admin |
 
-> ⚠️ These are mock credentials for development. Create real accounts via Supabase Auth for production.
+> ⚠️ These are mock credentials for development. Register a real account through the app and promote it via `npm run db:setup-admin` for production.
 
 ## 🎨 Styling
 
@@ -141,6 +154,21 @@ This project uses **Tailwind CSS** with a custom Vietjet brand theme:
 - **Gradients**: Brand-specific gradients for buttons, headers, cards
 - **Responsive**: Mobile-first with breakpoints for all screen sizes
 
+## 🧪 Testing
+
+```bash
+npm test          # or: npx vitest run
+```
+
+The suite (12 test files, 120+ tests) covers:
+- **Wallet & payments** (topup/withdraw/refund validation, double-entry checks)
+- **Admin refund workflow** (seat release + wallet credit)
+- **Edge JWT contract** (HS256 pinning, expiry enforcement, signature checks)
+- **RBAC** (role checks, permission gates)
+- **Auth** (bcrypt hashing, token generation/expiry)
+- **CSRF & rate limiting**
+- **Booking flow** (validation rules)
+
 ## 🔧 Available Scripts
 
 | Command | Description |
@@ -149,6 +177,12 @@ This project uses **Tailwind CSS** with a custom Vietjet brand theme:
 | `npm run build` | Build for production |
 | `npm run start` | Start dev server (alias for dev) |
 | `npm run serve` | Start production server |
+| `npm run lint` | Run ESLint checks |
+| `npm run lint:fix` | Auto-fix ESLint issues |
+| `npm run format` | Format code with Prettier |
+| `npm run type-check` | Run TypeScript type checking |
+| `npm run db:check` | Validate DB connectivity & schema |
+| `npm run db:setup-admin` | Promote a user to admin role |
 | `npm run lint` | Run ESLint checks |
 | `npm run lint:fix` | Auto-fix ESLint issues |
 | `npm run format` | Format code with Prettier |
@@ -175,19 +209,21 @@ The project includes `@netlify/plugin-nextjs` for seamless deployment.
 
 - **TypeScript & ESLint** are enabled during builds (no `ignoreBuildErrors`)
 - **Server-side middleware** protects routes at the edge
-- **Supabase RLS** ensures data isolation between users
-- **Mock auth** can be enabled via `NEXT_PUBLIC_USE_MOCK_AUTH=true` for local testing without Supabase
+- **TypeScript & ESLint errors FAIL the build** (`ignoreBuildErrors: false` — enforced CI gate)
+- **Server-side middleware** verifies JWT at the edge (HS256-only, expiry enforced)
+- **Data isolation** is enforced in query layer (user_id scoping) + RBAC route guards
+- **JWT secrets** must be 64-char random hex (`openssl rand -hex 32`); rotate via refresh token family
 
 ## 📚 Learn More
 
 - [Next.js Documentation](https://nextjs.org/docs)
-- [Supabase Documentation](https://supabase.com/docs)
+- [Neon Serverless Postgres](https://neon.tech/docs)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 
 ## 🙏 Acknowledgments
 
 - Built with [Rocket.new](https://rocket.new)
-- Powered by Next.js 15, React 19, and Supabase
+- Powered by Next.js 15, React 19, and Neon Postgres
 - Styled with Tailwind CSS & Vietjet brand guidelines
 
 Built with ❤️ on Rocket.new
