@@ -179,12 +179,17 @@ function FlightBookingClientInner() {
                           : step === s.id
                             ? 'white'
                             : 'rgba(255,255,255,0.20)',
-                      color: step > s.id ? 'var(--vj-navy)' : step === s.id ? 'var(--primary)' : 'white',
+                      color:
+                        step > s.id ? 'var(--vj-navy)' : step === s.id ? 'var(--primary)' : 'white',
                       fontWeight: 900,
                     }}
                   >
                     {step > s.id ? (
-                      <Icon name="CheckIcon" size={12} className="sm:!w-3.5 sm:!h-3.5 md:!w-4 md:!h-4" />
+                      <Icon
+                        name="CheckIcon"
+                        size={12}
+                        className="sm:!w-3.5 sm:!h-3.5 md:!w-4 md:!h-4"
+                      />
                     ) : (
                       s.id
                     )}
