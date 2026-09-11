@@ -1,8 +1,8 @@
 /**
- * Admin Route Helper — RBAC-aware authentication + authorization
+ * Admin Route Helper — Simplified auth + authorization
  *
- * Replaces the repetitive auth-check boilerplate in every admin API route.
- * Verifies JWT → checks role → optionally checks fine-grained permission.
+ * Only 2 roles in the system: 'user' and 'admin'.
+ * 'admin' has full access to all admin APIs.
  *
  * Usage (in an API route):
  *   import { verifyAdminRequest } from '@/lib/admin-auth';
@@ -17,30 +17,26 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { verifyAccessToken } from '@/lib/auth';
 import type { JWTPayload } from '@/lib/auth';
-import { hasPermission } from '@/lib/rbac';
+
+// We still import Permission type for API documentation purposes,
+// but permission checks are simplified — admin always has full access.
 import type { Permission } from '@/lib/rbac';
 
 export interface VerifyAdminResult {
-  /** Decoded JWT payload (always present on success) */
   payload: JWTPayload;
-  /** Error response to return directly */
   error?: string;
-  /** Pre-built error NextResponse */
   response?: NextResponse;
 }
 
 /**
- * Verify that a request is from an authenticated admin user with optional permission check.
- *
- * @param request - The incoming NextRequest
- * @param permission - Optional specific Permission required for this action
- * @returns VerifyAdminResult — check `.error` / `.response` for early returns
+ * Verify that a request is from an authenticated admin user.
+ * Since we only have 1 admin role with full permissions, the permission
+ * parameter is kept for backward compatibility but is not enforced.
  */
 export async function verifyAdminRequest(
   request: NextRequest,
-  permission?: Permission
+  _permission?: Permission
 ): Promise<VerifyAdminResult> {
-  // Step 1: Extract and verify token
   const token = request.cookies.get('access_token')?.value;
 
   if (!token) {
@@ -66,13 +62,8 @@ export async function verifyAdminRequest(
     };
   }
 
-  // Step 2: Check user is admin or has a system role
-  const userRole = payload.role as Parameters<typeof hasPermission>[0];
-  if (
-    userRole !== 'admin' &&
-    userRole !== 'super_admin' &&
-    !['admin_ops', 'admin_finance', 'admin_support', 'admin_content'].includes(userRole)
-  ) {
+  // Only 'admin' role is allowed
+  if (payload.role !== 'admin') {
     return {
       payload,
       error: 'Forbidden',
@@ -83,18 +74,5 @@ export async function verifyAdminRequest(
     };
   }
 
-  // Step 3: Fine-grained permission check (RBAC)
-  if (permission && !hasPermission(userRole, permission)) {
-    return {
-      payload,
-      error: 'Insufficient permissions',
-      response: NextResponse.json(
-        { error: 'Forbidden', message: `Permission required: ${permission}` },
-        { status: 403 }
-      ),
-    };
-  }
-
-  // All checks passed
   return { payload };
 }

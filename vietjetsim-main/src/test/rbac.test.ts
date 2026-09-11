@@ -8,53 +8,57 @@ import {
   hasAnyPermission,
   hasAllPermissions,
   AllRoles,
+  getRoleInfo,
 } from '@/lib/rbac';
 
 describe('RBAC Module', () => {
   describe('Permission Checks', () => {
-    it('should grant all permissions to super_admin', () => {
-      const permissions = getRolePermissions('super_admin');
-      expect(permissions.length).toBeGreaterThanOrEqual(40);
-      expect(permissions).toContain('user:list');
-      expect(permissions).toContain('flight:create');
-      expect(permissions).toContain('rbac:manage');
-    });
-
-    it('should grant user management permissions to admin role', () => {
+    it('should grant all permissions to admin', () => {
       const permissions = getRolePermissions('admin');
       expect(permissions).toContain('user:list');
       expect(permissions).toContain('user:view');
+      expect(permissions).toContain('user:create');
       expect(permissions).toContain('user:edit');
-    });
-
-    it('should grant flight management permissions to admin_ops', () => {
-      const permissions = getRolePermissions('admin_ops');
+      expect(permissions).toContain('user:delete');
+      expect(permissions).toContain('user:role_change');
       expect(permissions).toContain('flight:list');
       expect(permissions).toContain('flight:create');
       expect(permissions).toContain('flight:edit');
+      expect(permissions).toContain('flight:delete');
+      expect(permissions).toContain('flight:status_change');
+      expect(permissions).toContain('flight:price_edit');
       expect(permissions).toContain('booking:list');
-    });
-
-    it('should grant finance permissions to admin_finance', () => {
-      const permissions = getRolePermissions('admin_finance');
+      expect(permissions).toContain('booking:create');
+      expect(permissions).toContain('booking:edit');
+      expect(permissions).toContain('booking:cancel');
+      expect(permissions).toContain('booking:status_change');
       expect(permissions).toContain('payment:view');
+      expect(permissions).toContain('payment:refund');
+      expect(permissions).toContain('payment:process');
       expect(permissions).toContain('refund:list');
       expect(permissions).toContain('refund:approve');
-    });
-
-    it('should grant support permissions to admin_support', () => {
-      const permissions = getRolePermissions('admin_support');
+      expect(permissions).toContain('refund:reject');
+      expect(permissions).toContain('system:config');
+      expect(permissions).toContain('content:manage');
+      expect(permissions).toContain('announcement:crud');
+      expect(permissions).toContain('airport:manage');
       expect(permissions).toContain('chat:view');
       expect(permissions).toContain('chat:send');
-      expect(permissions).toContain('announcement:crud');
-    });
-
-    it('should grant limited permissions to admin_content', () => {
-      const permissions = getRolePermissions('admin_content');
-      expect(permissions).toContain('flight:view');
-      expect(permissions).toContain('booking:view');
-      expect(permissions).not.toContain('flight:create');
-      expect(permissions).not.toContain('user:delete');
+      expect(permissions).toContain('chat:delete');
+      expect(permissions).toContain('analytics:view');
+      expect(permissions).toContain('analytics:export');
+      expect(permissions).toContain('report:generate');
+      expect(permissions).toContain('sstk:execute');
+      expect(permissions).toContain('sstk:view_logs');
+      expect(permissions).toContain('rbac:manage');
+      expect(permissions).toContain('rbac:audit_log');
+      expect(permissions).toContain('admin:invite');
+      expect(permissions).toContain('discount:list');
+      expect(permissions).toContain('discount:view');
+      expect(permissions).toContain('discount:create');
+      expect(permissions).toContain('discount:edit');
+      expect(permissions).toContain('discount:delete');
+      expect(permissions).toContain('discount:status_change');
     });
 
     it('should grant no permissions to regular user', () => {
@@ -64,114 +68,85 @@ describe('RBAC Module', () => {
   });
 
   describe('hasPermission', () => {
-    it('should return true for super_admin with any permission', () => {
-      expect(hasPermission('super_admin', 'user:delete')).toBe(true);
-      expect(hasPermission('super_admin', 'rbac:manage')).toBe(true);
-      expect(hasPermission('super_admin', 'system:config')).toBe(true);
-    });
-
-    it('should return false for admin_content with restricted permissions', () => {
-      expect(hasPermission('admin_content', 'user:create')).toBe(false);
-      expect(hasPermission('admin_content', 'flight:delete')).toBe(false);
+    it('should return true for admin with any permission', () => {
+      expect(hasPermission('admin', 'user:delete')).toBe(true);
+      expect(hasPermission('admin', 'flight:create')).toBe(true);
+      expect(hasPermission('admin', 'rbac:manage')).toBe(true);
+      expect(hasPermission('admin', 'system:config')).toBe(true);
+      expect(hasPermission('admin', 'discount:status_change')).toBe(true);
     });
 
     it('should return false for regular user with any permission', () => {
       expect(hasPermission('user', 'flight:view')).toBe(false);
       expect(hasPermission('user', 'booking:list')).toBe(false);
+      expect(hasPermission('user', 'user:delete')).toBe(false);
     });
 
-    it('should respect custom permissions override', () => {
+    it('should accept customPermissions parameter (backward compatible, ignored)', () => {
       const customPerms: Permission[] = ['user:view', 'flight:list'];
-      expect(hasPermission('user', 'user:view', customPerms)).toBe(true);
-      expect(hasPermission('user', 'flight:list', customPerms)).toBe(true);
-      expect(hasPermission('user', 'user:edit', customPerms)).toBe(false);
+      expect(hasPermission('admin', 'user:delete', customPerms)).toBe(true);
+      expect(hasPermission('user', 'user:view', customPerms)).toBe(false);
+      expect(hasPermission('user', 'flight:list', customPerms)).toBe(false);
     });
   });
 
   describe('hasAnyPermission', () => {
-    it('should return true if user has at least one permission', () => {
-      expect(hasAnyPermission('admin_ops', ['flight:create', 'user:delete'])).toBe(true);
-      expect(hasAnyPermission('admin_content', ['flight:view', 'booking:list'])).toBe(true);
+    it('should return true for admin', () => {
+      expect(hasAnyPermission('admin', ['flight:create', 'user:delete'])).toBe(true);
     });
 
-    it('should return false if user has none of the permissions', () => {
-      expect(hasAnyPermission('admin_content', ['user:create', 'flight:delete'])).toBe(false);
+    it('should return false for user', () => {
       expect(hasAnyPermission('user', ['flight:view', 'booking:list'])).toBe(false);
     });
   });
 
   describe('hasAllPermissions', () => {
-    it('should return true if user has all permissions', () => {
-      expect(hasAllPermissions('admin_ops', ['flight:list', 'flight:create'])).toBe(true);
+    it('should return true for admin', () => {
+      expect(hasAllPermissions('admin', ['flight:list', 'flight:create', 'user:view'])).toBe(true);
     });
 
-    it('should return false if user is missing any permission', () => {
-      expect(hasAllPermissions('admin_content', ['flight:create', 'flight:delete'])).toBe(false);
+    it('should return false for user', () => {
+      expect(hasAllPermissions('user', ['flight:create', 'flight:delete'])).toBe(false);
     });
   });
 
   describe('canManageRole', () => {
-    it('should allow super_admin to manage any role', () => {
-      expect(canManageRole('super_admin', 'admin')).toBe(true);
-      expect(canManageRole('super_admin', 'admin_ops')).toBe(true);
-      expect(canManageRole('super_admin', 'admin_content')).toBe(true);
-    });
-
-    it('should allow admin to manage lower roles', () => {
-      expect(canManageRole('admin', 'admin_content')).toBe(true);
+    it('should allow admin to manage user role', () => {
       expect(canManageRole('admin', 'user')).toBe(true);
     });
 
-    it('should prevent admin from managing same or higher roles', () => {
+    it('should prevent admin from managing other admins', () => {
       expect(canManageRole('admin', 'admin')).toBe(false);
-      expect(canManageRole('admin', 'admin_ops')).toBe(false);
-      expect(canManageRole('admin', 'super_admin')).toBe(false);
     });
 
-    it('should prevent lower roles from managing higher roles', () => {
-      expect(canManageRole('admin_content', 'admin_finance')).toBe(false);
-      expect(canManageRole('admin_support', 'admin_ops')).toBe(false);
-    });
-
-    it('should prevent regular user from managing anyone', () => {
+    it('should prevent user from managing anyone', () => {
       expect(canManageRole('user', 'user')).toBe(false);
+      expect(canManageRole('user', 'admin')).toBe(false);
     });
   });
 
   describe('isAdminRole', () => {
-    it('should return true for admin roles', () => {
+    it('should return true only for admin', () => {
       expect(isAdminRole('admin')).toBe(true);
-      expect(isAdminRole('super_admin')).toBe(true);
-      expect(isAdminRole('admin_ops')).toBe(true);
-      expect(isAdminRole('admin_finance')).toBe(true);
-      expect(isAdminRole('admin_support')).toBe(true);
-      expect(isAdminRole('admin_content')).toBe(true);
     });
 
-    it('should return false for regular user', () => {
+    it('should return false for regular user and unknown roles', () => {
       expect(isAdminRole('user')).toBe(false);
       expect(isAdminRole('guest')).toBe(false);
     });
   });
 
-  describe('Role Hierarchy', () => {
-    it('should define correct role levels', () => {
-      const roleOrder: AllRoles[] = [
-        'super_admin',
-        'admin_ops', // 'admin' maps to admin_ops
-        'admin_finance',
-        'admin_support',
-        'admin_content',
-        'user',
-      ];
+  describe('getRoleInfo', () => {
+    it('should return correct info for admin', () => {
+      const info = getRoleInfo('admin');
+      expect(info.label).toBe('Quản trị viên');
+      expect(info.level).toBe(1);
+    });
 
-      for (let i = 0; i < roleOrder.length - 1; i++) {
-        const higherRole = roleOrder[i];
-        const lowerRole = roleOrder[i + 1];
-
-        expect(canManageRole(higherRole, lowerRole)).toBe(true);
-        expect(canManageRole(lowerRole, higherRole)).toBe(false);
-      }
+    it('should return correct info for user', () => {
+      const info = getRoleInfo('user');
+      expect(info.label).toBe('Người dùng');
+      expect(info.level).toBe(0);
     });
   });
 });

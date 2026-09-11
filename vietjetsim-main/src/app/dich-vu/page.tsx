@@ -13,9 +13,6 @@ interface ServiceItem {
   price: string;
   priceNote: string;
   features: string[];
-  color: string;
-  bg: string;
-  border: string;
 }
 
 const SERVICES: ServiceItem[] = [
@@ -33,9 +30,6 @@ const SERVICES: ServiceItem[] = [
       'Miễn phí cân quá tải 1kg',
       'Theo dõi hành lý realtime',
     ],
-    color: '#059669',
-    bg: '#ecfdf5',
-    border: '#a7f3d0',
   },
   {
     id: 'meal',
@@ -51,9 +45,6 @@ const SERVICES: ServiceItem[] = [
       'Ưu tiên phục vụ trước trên máy bay',
       'Có suất ăn đặc biệt (trẻ em, dị ứng)',
     ],
-    color: '#d97706',
-    bg: '#fffbeb',
-    border: '#fde68a',
   },
   {
     id: 'seat',
@@ -69,9 +60,6 @@ const SERVICES: ServiceItem[] = [
       'Ghế SkyBoss: 450.000₫ - 650.000₫',
       'Xem trước sơ đồ ghế trực quan',
     ],
-    color: '#2563eb',
-    bg: '#eff6ff',
-    border: '#bfdbfe',
   },
   {
     id: 'insurance',
@@ -87,9 +75,6 @@ const SERVICES: ServiceItem[] = [
       'Hỗ trợ hoãn/hủy chuyến bay',
       'Hỗ trợ mất hành lý & giấy tờ',
     ],
-    color: '#7c3aed',
-    bg: '#f5f3ff',
-    border: '#ddd6fe',
   },
   {
     id: 'priority',
@@ -105,9 +90,6 @@ const SERVICES: ServiceItem[] = [
       'Hành lý ký gửi ưu tiên trả trước',
       'Lối đi riêng tại sân bay (tùy sân bay)',
     ],
-    color: '#dc2626',
-    bg: '#fef2f2',
-    border: '#fecaca',
   },
   {
     id: 'lounge',
@@ -123,9 +105,6 @@ const SERVICES: ServiceItem[] = [
       'Phòng tắm & khu nghỉ ngơi',
       'Thông báo lên máy bay riêng',
     ],
-    color: '#0891b2',
-    bg: '#ecfeff',
-    border: '#a5f3fc',
   },
 ];
 
@@ -143,9 +122,9 @@ export default function ServicesPage() {
   const selected = SERVICES.find((s) => s.id === selectedService);
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-[var(--background)]">
       {/* Hero */}
-      <header className="relative overflow-hidden bg-gradient-to-r from-[#1A2948] via-[#243B6A] to-[#1A2948]">
+      <header className="relative overflow-hidden bg-gradient-to-r from-[var(--vj-red)] via-[var(--vj-red-dark)] to-[var(--vj-red)]">
         <div className="absolute inset-0 opacity-10">
           <div
             className="absolute inset-0"
@@ -181,31 +160,28 @@ export default function ServicesPage() {
             <button
               key={service.id}
               onClick={() => setSelectedService(service.id)}
-              className={`text-left bg-white rounded-2xl border-2 overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 ${
-                selectedService === service.id ? 'ring-2 ring-primary ring-offset-2' : ''
+              className={`text-left bg-[var(--surface)] rounded-2xl border-2 border-[var(--border)] overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 ${
+                selectedService === service.id
+                  ? 'ring-2 ring-[var(--vj-yellow)] border-[var(--vj-yellow)]'
+                  : ''
               }`}
-              style={{
-                borderColor: selectedService === service.id ? service.color : '#e7e5e4',
-              }}
             >
               <div className="p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center"
-                    style={{ backgroundColor: service.bg }}
-                  >
-                    <Icon name={service.icon} size={24} style={{ color: service.color }} />
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[var(--vj-red)]/10">
+                    <Icon name={service.icon} size={24} className="text-[var(--vj-red)]" />
                   </div>
-                  <span
-                    className="text-xs font-bold px-2.5 py-1 rounded-full"
-                    style={{ backgroundColor: service.bg, color: service.color }}
-                  >
+                  <span className="text-xs font-black px-2.5 py-1 rounded-full bg-[var(--vj-yellow)]/25 text-[var(--vj-red)]">
                     {service.price}
                   </span>
                 </div>
-                <h3 className="font-bold text-stone-900 text-base mb-0.5">{service.title}</h3>
-                <p className="text-xs text-stone-400 mb-2">{service.subtitle}</p>
-                <p className="text-sm text-stone-600 line-clamp-2">{service.description}</p>
+                <h3 className="font-bold text-[var(--foreground)] text-base mb-0.5">
+                  {service.title}
+                </h3>
+                <p className="text-xs text-[var(--foreground-subtle)] mb-2">{service.subtitle}</p>
+                <p className="text-sm text-[var(--foreground-muted)] line-clamp-2">
+                  {service.description}
+                </p>
               </div>
             </button>
           ))}
@@ -213,22 +189,18 @@ export default function ServicesPage() {
 
         {/* Selected Service Detail */}
         {selected && (
-          <div
-            className="bg-white rounded-2xl border-2 overflow-hidden shadow-sm mb-10"
-            style={{ borderColor: selected.border }}
-          >
+          <div className="bg-[var(--surface)] rounded-2xl border-2 border-[var(--vj-yellow)]/40 overflow-hidden shadow-sm mb-10">
             {/* Detail Header */}
-            <div className="p-6 sm:p-8" style={{ backgroundColor: `${selected.bg}40` }}>
+            <div className="p-6 sm:p-8 bg-[var(--vj-red)]/5">
               <div className="flex items-start gap-4">
-                <div
-                  className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: selected.bg }}
-                >
-                  <Icon name={selected.icon} size={28} style={{ color: selected.color }} />
+                <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 bg-[var(--vj-red)]/10">
+                  <Icon name={selected.icon} size={28} className="text-[var(--vj-red)]" />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-xl font-black text-stone-900">{selected.title}</h2>
-                  <p className="text-sm text-stone-500 mt-1">{selected.description}</p>
+                  <h2 className="text-xl font-black text-[var(--foreground)]">{selected.title}</h2>
+                  <p className="text-sm text-[var(--foreground-subtle)] mt-1">
+                    {selected.description}
+                  </p>
                 </div>
               </div>
             </div>
@@ -237,17 +209,19 @@ export default function ServicesPage() {
             <div className="p-6 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Features */}
               <div>
-                <h3 className="text-sm font-bold text-stone-500 uppercase tracking-wider mb-3">
+                <h3 className="text-sm font-bold text-[var(--foreground-subtle)] uppercase tracking-wider mb-3">
                   Tính năng nổi bật
                 </h3>
                 <ul className="space-y-2.5">
                   {selected.features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-stone-700">
+                    <li
+                      key={i}
+                      className="flex items-start gap-2.5 text-sm text-[var(--foreground)]"
+                    >
                       <Icon
                         name="CheckCircleIcon"
                         size={18}
-                        className="flex-shrink-0 mt-0.5"
-                        style={{ color: selected.color }}
+                        className="flex-shrink-0 mt-0.5 text-[var(--vj-red)]"
                       />
                       {feature}
                     </li>
@@ -257,34 +231,36 @@ export default function ServicesPage() {
 
               {/* Pricing & Quantity */}
               <div>
-                <h3 className="text-sm font-bold text-stone-500 uppercase tracking-wider mb-3">
+                <h3 className="text-sm font-bold text-[var(--foreground-subtle)] uppercase tracking-wider mb-3">
                   Giá & Số lượng
                 </h3>
-                <div className="bg-stone-50 rounded-xl p-4 border border-stone-200">
+                <div className="bg-[var(--vj-sky)] rounded-xl p-4 border border-[var(--border)]">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-stone-600 text-sm">Đơn giá</span>
+                    <span className="text-[var(--foreground-muted)] text-sm">Đơn giá</span>
                     <div>
-                      <span className="text-xl font-black" style={{ color: selected.color }}>
+                      <span className="text-xl font-black text-[var(--vj-red)]">
                         {selected.price}
                       </span>
-                      <span className="text-xs text-stone-400 ml-1">/ {selected.priceNote}</span>
+                      <span className="text-xs text-[var(--foreground-subtle)] ml-1">
+                        / {selected.priceNote}
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-stone-600 text-sm">Số lượng</span>
+                    <span className="text-[var(--foreground-muted)] text-sm">Số lượng</span>
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => handleQuantityChange(selected.id, -1)}
-                        className="w-8 h-8 rounded-lg bg-white border border-stone-200 flex items-center justify-center text-stone-600 hover:border-primary hover:text-primary transition-colors"
+                        className="w-8 h-8 rounded-lg bg-white border border-[var(--border)] flex items-center justify-center text-[var(--foreground-muted)] hover:border-primary hover:text-primary transition-colors"
                       >
                         <Icon name="MinusIcon" size={14} />
                       </button>
-                      <span className="w-8 text-center font-bold text-stone-900">
+                      <span className="w-8 text-center font-bold text-[var(--foreground)]">
                         {quantities[selected.id] || 1}
                       </span>
                       <button
                         onClick={() => handleQuantityChange(selected.id, 1)}
-                        className="w-8 h-8 rounded-lg bg-white border border-stone-200 flex items-center justify-center text-stone-600 hover:border-primary hover:text-primary transition-colors"
+                        className="w-8 h-8 rounded-lg bg-white border border-[var(--border)] flex items-center justify-center text-[var(--foreground-muted)] hover:border-primary hover:text-primary transition-colors"
                       >
                         <Icon name="PlusIcon" size={14} />
                       </button>
@@ -296,14 +272,13 @@ export default function ServicesPage() {
                 <div className="mt-4 flex gap-3">
                   <Link
                     href="/tim-ve"
-                    className="flex-1 py-3 text-center font-bold text-white rounded-xl transition-all hover:opacity-90"
-                    style={{ backgroundColor: selected.color }}
+                    className="flex-1 py-3 text-center font-black text-[var(--vj-red)] bg-[var(--vj-yellow)] rounded-xl transition-all hover:bg-[var(--vj-yellow-2)]"
                   >
                     Đặt ngay
                   </Link>
                   <button
                     onClick={() => setSelectedService(null)}
-                    className="px-4 py-3 bg-white border border-stone-200 text-stone-600 font-semibold rounded-xl hover:border-stone-300 transition-colors"
+                    className="px-4 py-3 bg-white border border-[var(--border)] text-[var(--foreground-muted)] font-semibold rounded-xl hover:border-[var(--foreground-subtle)] transition-colors"
                   >
                     Đóng
                   </button>
@@ -314,8 +289,8 @@ export default function ServicesPage() {
         )}
 
         {/* Why Choose Section */}
-        <div className="bg-white rounded-2xl border border-stone-200 p-6 sm:p-8 mb-10">
-          <h2 className="text-xl font-black text-center text-[#1A2948] mb-6 font-heading-sm">
+        <div className="bg-white rounded-2xl border border-[var(--border)] p-6 sm:p-8 mb-10">
+          <h2 className="text-xl font-black text-center text-[var(--foreground)] mb-6 font-heading-sm">
             Tại sao nên đặt dịch vụ trước?
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -324,47 +299,36 @@ export default function ServicesPage() {
                 icon: 'BanknotesIcon',
                 title: 'Tiết kiệm chi phí',
                 desc: 'Giá đặt trước rẻ hơn 15-30% so với mua tại sân bay',
-                color: '#059669',
-                bg: '#ecfdf5',
               },
               {
                 icon: 'ClockIcon',
                 title: 'Tiết kiệm thời gian',
                 desc: 'Không phải xếp hàng chờ đợi tại quầy dịch vụ',
-                color: '#2563eb',
-                bg: '#eff6ff',
               },
               {
                 icon: 'ShieldCheckIcon',
                 title: 'Đảm bảo có chỗ',
                 desc: 'Giữ suất dịch vụ chắc chắn, không lo hết chỗ',
-                color: '#7c3aed',
-                bg: '#f5f3ff',
               },
               {
                 icon: 'DevicePhoneMobileIcon',
                 title: 'Quản lý dễ dàng',
-                desc: 'Xem và thay đổi dịch vụ anytime trên app',
-                color: '#d97706',
-                bg: '#fffbeb',
+                desc: 'Xem và thay đổi dịch vụ mọi lúc trên ứng dụng',
               },
             ].map((item, i) => (
               <div key={i} className="text-center">
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3"
-                  style={{ backgroundColor: item.bg }}
-                >
-                  <Icon name={item.icon} size={24} style={{ color: item.color }} />
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 bg-[var(--vj-yellow)]/15">
+                  <Icon name={item.icon} size={24} className="text-[var(--vj-red)]" />
                 </div>
-                <h3 className="font-bold text-stone-900 text-sm mb-1">{item.title}</h3>
-                <p className="text-xs text-stone-500">{item.desc}</p>
+                <h3 className="font-bold text-[var(--foreground)] text-sm mb-1">{item.title}</h3>
+                <p className="text-xs text-[var(--foreground-subtle)]">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* CTA */}
-        <div className="bg-gradient-to-r from-[#EC2029] to-[#B91C1C] rounded-2xl p-6 sm:p-8 text-center text-white">
+        <div className="bg-gradient-to-r from-[var(--vj-red)] to-[var(--vj-red-dark)] rounded-2xl p-6 sm:p-8 text-center text-white">
           <h2 className="text-xl sm:text-2xl font-black mb-2">Bạn cần hỗ trợ thêm?</h2>
           <p className="text-white/80 text-sm mb-4">
             Liên hệ tổng đài 1900-6886 để được tư vấn dịch vụ phù hợp nhất
@@ -372,7 +336,7 @@ export default function ServicesPage() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/lien-he"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-[#EC2029] font-bold rounded-xl hover:bg-stone-100 transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-[var(--vj-red)] font-bold rounded-xl hover:bg-[var(--surface-2)] transition-colors"
             >
               <Icon name="ChatBubbleLeftRightIcon" size={18} />
               Liên hệ hỗ trợ
