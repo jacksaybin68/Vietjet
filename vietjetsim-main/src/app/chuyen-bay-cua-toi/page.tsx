@@ -294,69 +294,81 @@ export default function MyFlightsPage() {
             Chuyến bay của tôi
           </h1>
 
-          {/* Form tra cứu đặt chỗ — bố cục dọc, nền sáng */}
+          {/* Form tra cứu đặt chỗ — 2 cột: trường nhập + hình ảnh */}
           <form
             onSubmit={handleSearchBooking}
             className="mt-7 rounded-2xl border border-[#1e293b]/10 bg-white/95 p-5 shadow-[0_10px_30px_rgba(30,41,59,0.12)]"
           >
-            <div className="flex flex-col gap-4">
-              <div className="w-full">
-                <label
-                  htmlFor="booking-code"
-                  className="block text-[11px] font-bold uppercase tracking-wide text-black mb-1"
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Cột trái: Trường nhập */}
+              <div className="flex flex-col gap-3">
+                <div>
+                  <label
+                    htmlFor="booking-code"
+                    className="block text-[10px] font-bold uppercase tracking-wide text-black mb-1"
+                  >
+                    Mã đặt chỗ <span className="text-[var(--vj-red)]">*</span>
+                  </label>
+                  <input
+                    id="booking-code"
+                    type="text"
+                    required
+                    value={bookingCode}
+                    onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
+                    placeholder="VD-12345678"
+                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--vj-red)]/50 uppercase"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="surname"
+                    className="block text-[10px] font-bold uppercase tracking-wide text-black mb-1"
+                  >
+                    Họ
+                  </label>
+                  <input
+                    id="surname"
+                    type="text"
+                    value={surname}
+                    onChange={(e) => setSurname(e.target.value)}
+                    placeholder="Nguyễn"
+                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--vj-red)]/50"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="given-name"
+                    className="block text-[10px] font-bold uppercase tracking-wide text-black mb-1"
+                  >
+                    Tên đệm &amp; Tên
+                  </label>
+                  <input
+                    id="given-name"
+                    type="text"
+                    value={givenName}
+                    onChange={(e) => setGivenName(e.target.value)}
+                    placeholder="Van A"
+                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--vj-red)]/50"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full mt-1 justify-center py-2 rounded-xl bg-[var(--vj-yellow)] text-black font-black text-sm inline-flex items-center gap-2 hover:bg-[var(--vj-yellow-2)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  Mã đặt chỗ <span className="text-[var(--vj-red)]">*</span>
-                </label>
-                <input
-                  id="booking-code"
-                  type="text"
-                  required
-                  value={bookingCode}
-                  onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
-                  placeholder="VD-12345678"
-                  className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2.5 text-sm font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--vj-red)]/50 uppercase"
+                  <MdSearch className="h-4 w-4" />
+                  {loading ? 'Đang tìm…' : 'Tìm kiếm'}
+                </button>
+              </div>
+
+              {/* Cột phải: Hình ảnh */}
+              <div className="flex items-center justify-center">
+                <img
+                  src="/images/hero/banner-1-hongkong.jpg"
+                  alt="Vietjet Air"
+                  className="w-full h-auto rounded-xl object-cover max-h-[200px]"
                 />
               </div>
-              <div className="w-full">
-                <label
-                  htmlFor="surname"
-                  className="block text-[11px] font-bold uppercase tracking-wide text-black mb-1"
-                >
-                  Họ
-                </label>
-                <input
-                  id="surname"
-                  type="text"
-                  value={surname}
-                  onChange={(e) => setSurname(e.target.value)}
-                  placeholder="Nguyễn"
-                  className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2.5 text-sm font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--vj-red)]/50"
-                />
-              </div>
-              <div className="w-full">
-                <label
-                  htmlFor="given-name"
-                  className="block text-[11px] font-bold uppercase tracking-wide text-black mb-1"
-                >
-                  Tên đệm &amp; Tên
-                </label>
-                <input
-                  id="given-name"
-                  type="text"
-                  value={givenName}
-                  onChange={(e) => setGivenName(e.target.value)}
-                  placeholder="Van A"
-                  className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2.5 text-sm font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--vj-red)]/50"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full mt-1 justify-center py-3 rounded-xl bg-[var(--vj-yellow)] text-black font-black inline-flex items-center gap-2 hover:bg-[var(--vj-yellow-2)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <MdSearch className="h-4 w-4" />
-                {loading ? 'Đang tìm…' : 'Tìm kiếm'}
-              </button>
             </div>
           </form>
 
@@ -389,28 +401,6 @@ export default function MyFlightsPage() {
           </section>
         )}
 
-        {/* Onglets */}
-        <div className="flex items-center gap-1 mb-6 border-b border-[var(--border)] dark:border-[var(--dark-border)]">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id as 'booking' | 'eticket')}
-              className={`px-4 py-2.5 text-sm font-semibold transition-colors ${
-                tab === t.id
-                  ? 'text-[var(--vj-red)] dark:text-[var(--vj-red)] border-b-2 border-[var(--vj-red)]'
-                  : 'text-[var(--foreground-muted)] hover:text-[var(--foreground)] border-b-2 border-transparent'
-              }`}
-            >
-              {t.label}
-              {bookings.length > 0 && tab === t.id && (
-                <span className="ml-1.5 text-xs px-1.5 py-0.5 rounded-full bg-[var(--vj-red)]/10 text-[var(--vj-red)]">
-                  {bookings.length}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-
         {/* ===== Liste des réservations (cartes façon billet) ===== */}
         {tab === 'booking' && (
           <section>
@@ -420,7 +410,7 @@ export default function MyFlightsPage() {
                   <div key={i} className="h-24 rounded-xl bg-[var(--surface)] animate-pulse" />
                 ))}
               </div>
-            ) : bookings.length > 0 ? (
+            ) : (
               <div className="space-y-5">
                 {bookings.map((b) => {
                   const f = getFlight(b);
@@ -567,21 +557,6 @@ export default function MyFlightsPage() {
                   );
                 })}
               </div>
-            ) : (
-              <section className="vj-card mx-auto max-w-[900px] p-10 text-center">
-                <div className="mx-auto mb-4 text-6xl opacity-30">✈️</div>
-                <h3 className="text-xl font-bold text-[var(--foreground)]">Chưa có đặt chỗ nào</h3>
-                <p className="text-sm text-[var(--foreground-muted)] mt-2 mb-6">
-                  Các chuyến bay bạn đặt sẽ hiển thị ở đây. Đặt vé đầu tiên để bắt đầu hành trình
-                  của bạn.
-                </p>
-                <Link
-                  href="/tim-ve"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[var(--vj-yellow)] text-[var(--vj-red)] font-black hover:bg-[var(--vj-yellow-2)] transition-colors"
-                >
-                  <FlightIcon className="h-4 w-4" /> Đặt vé ngay
-                </Link>
-              </section>
             )}
           </section>
         )}

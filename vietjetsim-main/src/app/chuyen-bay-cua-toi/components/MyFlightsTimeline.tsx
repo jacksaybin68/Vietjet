@@ -1,14 +1,8 @@
-"use client";
+'use client';
 
 import React from 'react';
 import Link from 'next/link';
-import {
-  MdCheckCircle,
-  MdCancel,
-  MdAccessTime,
-  MdLocationOn,
-  MdFlight,
-} from 'react-icons/md';
+import { MdCheckCircle, MdCancel, MdAccessTime, MdLocationOn, MdFlight } from 'react-icons/md';
 
 interface TimelineProps {
   bookings: Array<{
@@ -32,7 +26,11 @@ const STATUS_CONFIG: Record<string, { icon: React.ElementType; color: string; bg
   pending: { icon: MdAccessTime, color: 'text-[var(--vj-yellow)]', bg: 'bg-[var(--vj-yellow)]/10' },
   confirmed: { icon: MdFlight, color: 'text-[var(--vj-red)]', bg: 'bg-[var(--vj-red)]/10' },
   completed: { icon: MdCheckCircle, color: 'text-[var(--vj-blue)]', bg: 'bg-[var(--vj-blue)]/10' },
-  cancelled: { icon: MdCancel, color: 'text-[var(--foreground-muted)]', bg: 'bg-[var(--foreground-muted)]/10' },
+  cancelled: {
+    icon: MdCancel,
+    color: 'text-[var(--foreground-muted)]',
+    bg: 'bg-[var(--foreground-muted)]/10',
+  },
   refunded: { icon: MdCancel, color: 'text-[var(--vj-purple)]', bg: 'bg-[var(--vj-purple)]/10' },
 };
 
@@ -75,9 +73,7 @@ export default function MyFlightsTimeline({ bookings }: TimelineProps) {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="font-bold text-[var(--foreground)]">
-                        {booking.flight_no}
-                      </h4>
+                      <h4 className="font-bold text-[var(--foreground)]">{booking.flight_no}</h4>
                       <span
                         className={`text-xs font-semibold px-2 py-0.5 rounded-full ${statusConfig.bg} ${statusConfig.color}`}
                       >
@@ -98,7 +94,12 @@ export default function MyFlightsTimeline({ bookings }: TimelineProps) {
                       <MdAccessTime className="h-3.5 w-3.5 flex-shrink-0" />
                       <span>{new Date(booking.depart_time).toLocaleDateString('vi-VN')}</span>
                       <span className="text-[var(--foreground-muted)]/50">·</span>
-                      <span>{new Date(booking.depart_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>
+                      <span>
+                        {new Date(booking.depart_time).toLocaleTimeString('vi-VN', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
                     </div>
 
                     {/* Check-in info */}
@@ -117,7 +118,9 @@ export default function MyFlightsTimeline({ bookings }: TimelineProps) {
                         {booking.check_in_time && (
                           <>
                             <span className="text-[var(--foreground-muted)]">·</span>
-                            <span>{new Date(booking.check_in_time).toLocaleTimeString('vi-VN')}</span>
+                            <span>
+                              {new Date(booking.check_in_time).toLocaleTimeString('vi-VN')}
+                            </span>
                           </>
                         )}
                       </div>

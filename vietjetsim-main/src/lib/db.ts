@@ -2251,13 +2251,11 @@ export async function searchCheckIn(
   const normalizedInput = `${normalizeName(lastName)} ${normalizeName(firstName)}`.trim();
   const normalizedDbNames = passengers.map((p) => normalizeName(p.name));
 
-  const nameMatches = normalizedDbNames.some(
-    (dbName) => {
-      // Match if the full input appears within the stored name (handles
-      // "NGUYEN VAN A" vs lastName="NGUYEN", firstName="VAN A" ordering too)
-      return dbName === normalizedInput || dbName.includes(normalizedInput);
-    }
-  );
+  const nameMatches = normalizedDbNames.some((dbName) => {
+    // Match if the full input appears within the stored name (handles
+    // "NGUYEN VAN A" vs lastName="NGUYEN", firstName="VAN A" ordering too)
+    return dbName === normalizedInput || dbName.includes(normalizedInput);
+  });
 
   if (!nameMatches) {
     return null;
@@ -2286,22 +2284,22 @@ export async function searchCheckIn(
       arrive_time: booking.arrive_time,
     },
     passengers,
-    checkIn: checkIn ? {
-      id: checkIn.id,
-      booking_id: checkIn.booking_id,
-      check_in_number: checkIn.check_in_number,
-      seat_number: checkIn.seat_number,
-      gate: checkIn.gate,
-      terminal: checkIn.terminal,
-      check_in_time: checkIn.check_in_time,
-      boarding_pass_number: checkIn.boarding_pass_number,
-    } : null,
+    checkIn: checkIn
+      ? {
+          id: checkIn.id,
+          booking_id: checkIn.booking_id,
+          check_in_number: checkIn.check_in_number,
+          seat_number: checkIn.seat_number,
+          gate: checkIn.gate,
+          terminal: checkIn.terminal,
+          check_in_time: checkIn.check_in_time,
+          boarding_pass_number: checkIn.boarding_pass_number,
+        }
+      : null,
   };
 }
 
-export async function getCheckInStatusByBookingId(
-  bookingId: string
-): Promise<{
+export async function getCheckInStatusByBookingId(bookingId: string): Promise<{
   has_check_in: boolean;
   check_in_id: string | null;
   passenger_name: string | null;

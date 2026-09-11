@@ -321,9 +321,7 @@ export default function UserChat() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div
-          className="fixed inset-x-0 bottom-0 z-50 flex h-[min(680px,100dvh)] flex-col overflow-hidden rounded-t-[28px] border border-white/60 bg-white shadow-2xl sm:inset-x-auto sm:bottom-24 sm:right-6 sm:h-[640px] sm:w-[400px] sm:rounded-[28px]"
-        >
+        <div className="fixed inset-x-0 bottom-0 z-50 flex h-[min(680px,100dvh)] flex-col overflow-hidden rounded-t-[28px] border border-white/60 bg-white shadow-2xl sm:inset-x-auto sm:bottom-24 sm:right-6 sm:h-[640px] sm:w-[400px] sm:rounded-[28px]">
           <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-accent via-primary to-accent" />
           {/* Header */}
           <div className="relative flex flex-shrink-0 items-center gap-3 overflow-hidden bg-gradient-vj px-4 py-4 text-white sm:px-5">

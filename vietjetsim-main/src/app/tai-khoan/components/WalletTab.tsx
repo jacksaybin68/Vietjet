@@ -178,7 +178,11 @@ function AddPaymentMethodModal({
             onClick={onClose}
             className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] transition-colors"
           >
-            <Icon name="XMarkIcon" size={20} className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]" />
+            <Icon
+              name="XMarkIcon"
+              size={20}
+              className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]"
+            />
           </button>
         </div>
 
@@ -775,7 +779,11 @@ export default function WalletTab({ user }: WalletTabProps) {
           {methods.length === 0 ? (
             <div className="p-8 text-center">
               <div className="w-16 h-16 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-full flex items-center justify-center mx-auto mb-3">
-                <Icon name="CreditCardIcon" size={28} className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]" />
+                <Icon
+                  name="CreditCardIcon"
+                  size={28}
+                  className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]"
+                />
               </div>
               <p className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] text-sm font-[Be Vietnam Pro,sans-serif]">
                 Chưa có phương thức thanh toán nào.

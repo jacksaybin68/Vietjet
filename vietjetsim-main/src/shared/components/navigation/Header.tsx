@@ -185,7 +185,10 @@ export default function Header() {
         </div>
       </nav>
 
-      <nav className="border-t border-black/5 dark:border-white/5 bg-[#fafafa] dark:bg-navy-dark/50 hidden lg:block" aria-label="Dịch vụ bổ trợ">
+      <nav
+        className="border-t border-black/5 dark:border-white/5 bg-[#fafafa] dark:bg-navy-dark/50 hidden lg:block"
+        aria-label="Dịch vụ bổ trợ"
+      >
         <div className="mx-auto flex max-w-[1240px] overflow-x-auto px-3 md:px-4 py-1.5 md:py-2 [scrollbar-width:thin]">
           {serviceLinks.map(([label, href, Icon], index) => (
             <Link

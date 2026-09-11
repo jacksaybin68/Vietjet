@@ -60,10 +60,10 @@ describe('Loyalty & Payment Integration Tests', () => {
     describe('Rate Limiting', () => {
       it('should allow up to 3 requests per minute per user', () => {
         // Create mock request
-        const mockRequest = new NextRequest(
-          new URL('http://localhost:4028/api/test'),
-          { method: 'GET', headers: new Headers({ 'x-forwarded-for': '127.0.0.1' }) }
-        );
+        const mockRequest = new NextRequest(new URL('http://localhost:4028/api/test'), {
+          method: 'GET',
+          headers: new Headers({ 'x-forwarded-for': '127.0.0.1' }),
+        });
 
         // First 3 requests should succeed (strict limit is 3/min)
         for (let i = 0; i < 3; i++) {
@@ -79,10 +79,10 @@ describe('Loyalty & Payment Integration Tests', () => {
 
       it('should return 429 response with appropriate message', async () => {
         // Create mock request
-        const mockRequest = new NextRequest(
-          new URL('http://localhost:4028/api/test'),
-          { method: 'GET', headers: new Headers({ 'x-forwarded-for': '127.0.0.1' }) }
-        );
+        const mockRequest = new NextRequest(new URL('http://localhost:4028/api/test'), {
+          method: 'GET',
+          headers: new Headers({ 'x-forwarded-for': '127.0.0.1' }),
+        });
 
         // Exhaust the rate limit
         for (let i = 0; i < 3; i++) {
@@ -102,14 +102,14 @@ describe('Loyalty & Payment Integration Tests', () => {
 
       it('should track requests per IP address', () => {
         // Create two different mock requests with different IPs
-        const mockRequest1 = new NextRequest(
-          new URL('http://localhost:4028/api/test'),
-          { method: 'GET', headers: new Headers({ 'x-forwarded-for': '192.168.1.1' }) }
-        );
-        const mockRequest2 = new NextRequest(
-          new URL('http://localhost:4028/api/test'),
-          { method: 'GET', headers: new Headers({ 'x-forwarded-for': '192.168.1.2' }) }
-        );
+        const mockRequest1 = new NextRequest(new URL('http://localhost:4028/api/test'), {
+          method: 'GET',
+          headers: new Headers({ 'x-forwarded-for': '192.168.1.1' }),
+        });
+        const mockRequest2 = new NextRequest(new URL('http://localhost:4028/api/test'), {
+          method: 'GET',
+          headers: new Headers({ 'x-forwarded-for': '192.168.1.2' }),
+        });
 
         // Exhaust rate limit for first IP
         for (let i = 0; i < 3; i++) {
@@ -130,7 +130,9 @@ describe('Loyalty & Payment Integration Tests', () => {
   describe('Payment History', () => {
     describe('Parameter parsing', () => {
       it('should parse status query parameter correctly', () => {
-        const url = new URL('http://localhost:4028/api/thanh-toan/lich-su?status=completed,pending');
+        const url = new URL(
+          'http://localhost:4028/api/thanh-toan/lich-su?status=completed,pending'
+        );
         const statusParam = url.searchParams.get('status');
         const statuses = statusParam ? statusParam.split(',') : undefined;
 

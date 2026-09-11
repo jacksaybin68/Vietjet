@@ -22,7 +22,10 @@ const NotificationsTab = dynamic(() => import('./NotificationsTab'), {
   loading: () => (
     <div className="space-y-3 p-4">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="h-24 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl animate-pulse" />
+        <div
+          key={i}
+          className="h-24 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl animate-pulse"
+        />
       ))}
     </div>
   ),
@@ -32,7 +35,10 @@ const NotificationSettingsTab = dynamic(() => import('./NotificationSettingsTab'
   loading: () => (
     <div className="p-4 space-y-4">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="h-12 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-lg animate-pulse" />
+        <div
+          key={i}
+          className="h-12 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-lg animate-pulse"
+        />
       ))}
     </div>
   ),
@@ -42,7 +48,10 @@ const WalletTab = dynamic(() => import('./WalletTab'), {
   loading: () => (
     <div className="p-4 space-y-4">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="h-32 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse" />
+        <div
+          key={i}
+          className="h-32 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse"
+        />
       ))}
     </div>
   ),
@@ -52,7 +61,10 @@ const PaymentHistoryTab = dynamic(() => import('./PaymentHistoryTab'), {
   loading: () => (
     <div className="p-4 space-y-3">
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="h-20 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl animate-pulse" />
+        <div
+          key={i}
+          className="h-20 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl animate-pulse"
+        />
       ))}
     </div>
   ),
@@ -62,7 +74,10 @@ const LoyaltyTab = dynamic(() => import('./LoyaltyTab'), {
   loading: () => (
     <div className="p-4 space-y-4">
       {[1, 2].map((i) => (
-        <div key={i} className="h-48 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse" />
+        <div
+          key={i}
+          className="h-48 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse"
+        />
       ))}
     </div>
   ),
@@ -72,7 +87,10 @@ const SecurityTab = dynamic(() => import('./SecurityTab'), {
   loading: () => (
     <div className="p-4 space-y-4">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="h-24 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse" />
+        <div
+          key={i}
+          className="h-24 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse"
+        />
       ))}
     </div>
   ),
@@ -679,9 +697,7 @@ export default function UserDashboardClient() {
 
   const toast = useToast();
   return (
-    <div
-      className="pt-[120px] sm:pt-[140px] pb-8 sm:pb-12 min-h-screen bg-[var(--surface)] dark:bg-[var(--dark-surface)]"
-    >
+    <div className="pt-[120px] sm:pt-[140px] pb-8 sm:pb-12 min-h-screen bg-[var(--surface)] dark:bg-[var(--dark-surface)]">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6">
         <UserDashboardMobileNav
           tabs={tabs}
@@ -730,7 +746,11 @@ export default function UserDashboardClient() {
                     style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
                   >
                     <div className="w-10 h-10 sm:w-14 sm:h-14 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 border border-[var(--primary)]/20 dark:border-[var(--primary)]/30">
-                      <Icon name="ExclamationTriangleIcon" size={28} className="text-[var(--primary)]" />
+                      <Icon
+                        name="ExclamationTriangleIcon"
+                        size={28}
+                        className="text-[var(--primary)]"
+                      />
                     </div>
                     <p className="font-bold text-[10px] sm:text-sm mb-0.5 sm:mb-1 text-[var(--foreground)]">
                       Không thể tải chuyến bay
@@ -834,7 +854,9 @@ export default function UserDashboardClient() {
                                 <div className="font-black text-sm text-[var(--foreground)]">
                                   {booking.flightNo}
                                 </div>
-                                <div className="text-xs text-[var(--foreground-muted)] mt-0.5">{booking.date}</div>
+                                <div className="text-xs text-[var(--foreground-muted)] mt-0.5">
+                                  {booking.date}
+                                </div>
                               </div>
                               <span
                                 className={`text-xs font-bold px-2 py-0.5 rounded-full ${STATUS_MAP[booking.status].cls}`}
@@ -854,7 +876,9 @@ export default function UserDashboardClient() {
                               </div>
                               <div className="flex-1 flex flex-col items-center">
                                 <Icon name="PaperAirplaneIcon" size={16} className="text-primary" />
-                                <div className="text-xs text-[var(--foreground-muted)] mt-0.5">Bay thẳng</div>
+                                <div className="text-xs text-[var(--foreground-muted)] mt-0.5">
+                                  Bay thẳng
+                                </div>
                               </div>
                               <div className="text-right">
                                 <div className="text-2xl font-black text-[var(--foreground)]">
@@ -892,10 +916,16 @@ export default function UserDashboardClient() {
                             </div>
                             <div className="mt-3 flex items-center gap-3">
                               <div className="w-12 h-12 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] rounded-lg flex items-center justify-center border border-dashed border-[var(--border)] dark:border-[var(--dark-border)]">
-                                <Icon name="QrCodeIcon" size={20} className="text-[var(--foreground-muted)]" />
+                                <Icon
+                                  name="QrCodeIcon"
+                                  size={20}
+                                  className="text-[var(--foreground-muted)]"
+                                />
                               </div>
                               <div className="text-xs text-[var(--foreground-muted)]">
-                                <div className="font-semibold text-[var(--foreground)]">Check-in online</div>
+                                <div className="font-semibold text-[var(--foreground)]">
+                                  Check-in online
+                                </div>
                                 <div>Xuất trình QR code tại sân bay</div>
                               </div>
                               <button
@@ -929,14 +959,15 @@ export default function UserDashboardClient() {
               >
                 <div
                   className="h-1.5 w-full"
-                  style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%)' }}
+                  style={{
+                    background:
+                      'linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%)',
+                  }}
                 />
                 <div className="p-5 border-b border-[var(--border)] dark:border-[var(--dark-border)]">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h2 className="font-bold text-[var(--foreground)]">
-                        Lịch sử đặt vé
-                      </h2>
+                      <h2 className="font-bold text-[var(--foreground)]">Lịch sử đặt vé</h2>
                       <p className="text-sm text-[var(--foreground-muted)] mt-0.5">
                         {filteredHistory.length} / {historyBookings.length} chuyến bay
                       </p>
@@ -1031,7 +1062,9 @@ export default function UserDashboardClient() {
                           className="w-full pl-8 pr-3 py-2 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none transition-all"
                         />
                       </div>
-                      <span className="text-[var(--foreground-muted)] text-xs flex-shrink-0">→</span>
+                      <span className="text-[var(--foreground-muted)] text-xs flex-shrink-0">
+                        →
+                      </span>
                       <div className="relative flex-1 min-w-[120px]">
                         <Icon
                           name="CalendarIcon"
@@ -1080,7 +1113,10 @@ export default function UserDashboardClient() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-[var(--border)] dark:border-[var(--dark-border)]" style={{ background: 'var(--surface-2)' }}>
+                      <tr
+                        className="border-b border-[var(--border)] dark:border-[var(--dark-border)]"
+                        style={{ background: 'var(--surface-2)' }}
+                      >
                         <th
                           className="text-left text-xs font-bold uppercase tracking-wider px-4 py-2"
                           style={{ color: 'var(--accent)' }}
@@ -1220,9 +1256,7 @@ export default function UserDashboardClient() {
                                 />
                               </div>
                               <div className="text-center sm:text-left">
-                                <p
-                                  className="font-black text-base mb-1.5 text-[var(--foreground)]"
-                                >
+                                <p className="font-black text-base mb-1.5 text-[var(--foreground)]">
                                   Chưa có yêu cầu nào
                                 </p>
                                 <p className="text-xs text-[var(--foreground-muted)] mb-4 leading-relaxed">
@@ -1252,9 +1286,7 @@ export default function UserDashboardClient() {
                             onClick={() => (window.location.href = `/dat-ve/${booking.id}`)}
                           >
                             <td className="px-4 py-2.5">
-                              <span
-                                className="font-mono font-bold text-sm text-[var(--foreground)]"
-                              >
+                              <span className="font-mono font-bold text-sm text-[var(--foreground)]">
                                 {booking.id}
                               </span>
                             </td>
@@ -1263,9 +1295,7 @@ export default function UserDashboardClient() {
                                 <div className="w-5 h-5 bg-gradient-red rounded flex items-center justify-center">
                                   <Icon name="PaperAirplaneIcon" size={9} className="text-white" />
                                 </div>
-                                <span
-                                  className="font-semibold text-sm text-[var(--foreground)]"
-                                >
+                                <span className="font-semibold text-sm text-[var(--foreground)]">
                                   {booking.flightNo}
                                 </span>
                               </div>
@@ -1275,7 +1305,11 @@ export default function UserDashboardClient() {
                                 <span className="font-bold text-[var(--foreground)]">
                                   {booking.from}
                                 </span>
-                                <Icon name="ArrowRightIcon" size={11} className="text-[var(--foreground-muted)]" />
+                                <Icon
+                                  name="ArrowRightIcon"
+                                  size={11}
+                                  className="text-[var(--foreground-muted)]"
+                                />
                                 <span className="font-bold text-[var(--foreground)]">
                                   {booking.to}
                                 </span>
@@ -1285,12 +1319,17 @@ export default function UserDashboardClient() {
                               </div>
                             </td>
                             <td className="px-4 py-2.5 hidden md:table-cell">
-                              <span className="text-sm text-[var(--foreground-muted)]">{booking.date}</span>
+                              <span className="text-sm text-[var(--foreground-muted)]">
+                                {booking.date}
+                              </span>
                             </td>
                             <td className="px-4 py-2.5 text-right">
                               <span
                                 className="font-bold text-sm px-2 py-0.5 rounded"
-                                style={{ color: 'var(--foreground)', background: 'var(--surface-2)' }}
+                                style={{
+                                  color: 'var(--foreground)',
+                                  background: 'var(--surface-2)',
+                                }}
                               >
                                 {booking.price.toLocaleString('vi-VN')}₫
                               </span>
@@ -1368,19 +1407,27 @@ export default function UserDashboardClient() {
                 >
                   <div
                     className="h-1.5 w-full"
-                    style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%)' }}
+                    style={{
+                      background:
+                        'linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%)',
+                    }}
                   />
                   <div className="p-4">
                     <div className="flex items-center gap-3 mb-1">
                       <div
                         className="w-10 h-10 rounded-2xl flex items-center justify-center"
-                        style={{ background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%)' }}
+                        style={{
+                          background:
+                            'linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%)',
+                        }}
                       >
                         <Icon name="BanknotesIcon" size={20} className="text-white" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h2 className="font-bold text-base text-[var(--vj-navy)] dark:text-white">Yêu cầu hoàn tiền</h2>
+                          <h2 className="font-bold text-base text-[var(--vj-navy)] dark:text-white">
+                            Yêu cầu hoàn tiền
+                          </h2>
                           <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
                             Giao diện mới
                           </span>
@@ -1392,13 +1439,20 @@ export default function UserDashboardClient() {
                     </div>
                     <div
                       className="w-12 h-1 mb-4 rounded-full mt-3"
-                      style={{ background: 'linear-gradient(90deg, var(--accent), var(--accent-secondary))' }}
+                      style={{
+                        background:
+                          'linear-gradient(90deg, var(--accent), var(--accent-secondary))',
+                      }}
                     />
 
                     {refundSubmitted ? (
                       <div className="flex flex-col items-center py-10 text-center">
                         <div className="w-16 h-16 bg-green-50 dark:bg-green-900/10 rounded-2xl flex items-center justify-center mb-4">
-                          <Icon name="CheckCircleIcon" size={36} className="text-green-500 dark:text-green-400" />
+                          <Icon
+                            name="CheckCircleIcon"
+                            size={36}
+                            className="text-green-500 dark:text-green-400"
+                          />
                         </div>
                         <h3 className="font-black text-base mb-2 text-[var(--foreground)] dark:text-[var(--foreground)]">
                           Yêu cầu đã được gửi!
@@ -1535,7 +1589,8 @@ export default function UserDashboardClient() {
                               className="w-full pl-9 pr-4 py-2.5 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm text-[var(--foreground)] dark:text-[var(--foreground)] placeholder-[var(--foreground-subtle)] dark:placeholder-[var(--foreground-subtle)] focus:outline-none transition-all"
                               onFocus={(e) => {
                                 e.target.style.borderColor = 'var(--primary)';
-                                e.target.style.boxShadow = '0 0 0 2px rgba(var(--primary-rgb), 0.1)';
+                                e.target.style.boxShadow =
+                                  '0 0 0 2px rgba(var(--primary-rgb), 0.1)';
                               }}
                               onBlur={(e) => {
                                 e.target.style.borderColor = '';
@@ -1612,7 +1667,11 @@ export default function UserDashboardClient() {
                               className="w-6 h-6 rounded-lg flex items-center justify-center"
                               style={{ background: '#FFF5F5' }}
                             >
-                              <Icon name="CreditCardIcon" size={13} style={{ color: 'var(--primary)' }} />
+                              <Icon
+                                name="CreditCardIcon"
+                                size={13}
+                                style={{ color: 'var(--primary)' }}
+                              />
                             </div>
                             <span
                               className="text-xs font-bold uppercase tracking-wider"
@@ -1643,7 +1702,8 @@ export default function UserDashboardClient() {
                                   className="w-full pl-8 pr-4 py-2.5 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm text-[var(--foreground)] dark:text-[var(--foreground)] placeholder-[var(--foreground-subtle)] dark:placeholder-[var(--foreground-subtle)] focus:outline-none transition-all"
                                   onFocus={(e) => {
                                     e.target.style.borderColor = 'var(--primary)';
-                                    e.target.style.boxShadow = '0 0 0 2px rgba(var(--primary-rgb), 0.1)';
+                                    e.target.style.boxShadow =
+                                      '0 0 0 2px rgba(var(--primary-rgb), 0.1)';
                                   }}
                                   onBlur={(e) => {
                                     e.target.style.borderColor = '';
@@ -1674,7 +1734,8 @@ export default function UserDashboardClient() {
                                   className="w-full pl-8 pr-4 py-2.5 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm text-[var(--foreground)] dark:text-[var(--foreground)] placeholder-[var(--foreground-subtle)] dark:placeholder-[var(--foreground-subtle)] focus:outline-none transition-all"
                                   onFocus={(e) => {
                                     e.target.style.borderColor = 'var(--primary)';
-                                    e.target.style.boxShadow = '0 0 0 2px rgba(var(--primary-rgb), 0.1)';
+                                    e.target.style.boxShadow =
+                                      '0 0 0 2px rgba(var(--primary-rgb), 0.1)';
                                   }}
                                   onBlur={(e) => {
                                     e.target.style.borderColor = '';
@@ -1705,7 +1766,8 @@ export default function UserDashboardClient() {
                                   className="w-full pl-8 pr-4 py-2.5 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm text-[var(--foreground)] dark:text-[var(--foreground)] placeholder-[var(--foreground-subtle)] dark:placeholder-[var(--foreground-subtle)] focus:outline-none transition-all"
                                   onFocus={(e) => {
                                     e.target.style.borderColor = 'var(--primary)';
-                                    e.target.style.boxShadow = '0 0 0 2px rgba(var(--primary-rgb), 0.1)';
+                                    e.target.style.boxShadow =
+                                      '0 0 0 2px rgba(var(--primary-rgb), 0.1)';
                                   }}
                                   onBlur={(e) => {
                                     e.target.style.borderColor = '';
@@ -1839,7 +1901,9 @@ export default function UserDashboardClient() {
                           size={14}
                           className="text-red-500 dark:text-red-400 flex-shrink-0"
                         />
-                        <p className="text-xs text-red-600 dark:text-red-400 flex-1">{refundError}</p>
+                        <p className="text-xs text-red-600 dark:text-red-400 flex-1">
+                          {refundError}
+                        </p>
                         <button
                           onClick={loadRefundRequests}
                           className="text-xs font-semibold text-red-600 dark:text-red-400 underline"
@@ -1913,9 +1977,7 @@ export default function UserDashboardClient() {
                               </div>
                               <div className="min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span
-                                    className="font-mono font-bold text-sm text-[var(--foreground)] dark:text-[var(--foreground)]"
-                                  >
+                                  <span className="font-mono font-bold text-sm text-[var(--foreground)] dark:text-[var(--foreground)]">
                                     {req.bookingId}
                                   </span>
                                 </div>
@@ -1930,7 +1992,9 @@ export default function UserDashboardClient() {
                                   {req.reason}
                                   {req.note ? ` · ${req.note}` : ''}
                                 </div>
-                                <div className="text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] mt-0.5">{req.date}</div>
+                                <div className="text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] mt-0.5">
+                                  {req.date}
+                                </div>
                                 {req.adminNote && (
                                   <div
                                     className={`mt-1.5 text-xs px-2.5 py-1.5 rounded-lg ${req.status === 'approved' ? 'bg-green-50 dark:bg-green-900/10 text-green-700 dark:text-green-300' : req.status === 'rejected' ? 'bg-red-50 dark:bg-red-900/10 text-red-700 dark:text-red-300' : 'bg-amber-50 dark:bg-amber-900/10 text-amber-700 dark:text-amber-300'}`}
