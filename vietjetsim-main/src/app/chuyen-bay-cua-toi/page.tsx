@@ -294,7 +294,7 @@ export default function MyFlightsPage() {
             Chuyến bay của tôi
           </h1>
 
-          {/* Form tra cứu đặt chỗ — 2 cột: trường nhập + hình ảnh */}
+          {/* Form tra cứy đặt chỗ — 2 cột: trường nhập + hình ảnh */}
           <form
             onSubmit={handleSearchBooking}
             className="mt-7 rounded-2xl border border-[#1e293b]/10 bg-white/95 p-5 shadow-[0_10px_30px_rgba(30,41,59,0.12)]"
@@ -371,25 +371,6 @@ export default function MyFlightsPage() {
               </div>
             </div>
           </form>
-
-          {/* Dịch vụ nhanh */}
-          <div className="mt-5 flex flex-wrap items-center gap-3 text-[#1e293b]/80 text-[13px]">
-            <span className="inline-flex items-center gap-1.5">
-              <MdCheckCircle className="h-4 w-4 text-[var(--vj-red)]" /> Quản lý đặt chỗ
-            </span>
-            <span className="opacity-40">•</span>
-            <span className="inline-flex items-center gap-1.5">
-              <MdLuggage className="h-4 w-4 text-[var(--vj-red)]" /> Mua hành lý
-            </span>
-            <span className="opacity-40">•</span>
-            <span className="inline-flex items-center gap-1.5">
-              <MdAirlineSeatReclineNormal className="h-4 w-4 text-[var(--vj-red)]" /> Chọn ghế
-            </span>
-            <span className="opacity-40">•</span>
-            <span className="inline-flex items-center gap-1.5">
-              <MdAirlineSeatReclineNormal className="h-4 w-4 text-[var(--vj-red)]" /> Đổi chỗ
-            </span>
-          </div>
         </div>
       </section>
 
