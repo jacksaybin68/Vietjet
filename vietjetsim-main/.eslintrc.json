@@ -43,6 +43,20 @@
       }
     ]
   },
+  "overrides": [
+    {
+      "files": ["src/test/**/*.ts", "src/test/**/*.test.ts", "src/test/**/*.test.tsx"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    },
+    {
+      "files": ["src/types/**/*.ts"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    }
+  ],
   "ignorePatterns": [
     "node_modules/",
     ".next/",

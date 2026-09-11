@@ -5,11 +5,13 @@ const nextConfig = {
   productionBrowserSourceMaps: false,
   distDir: process.env.DIST_DIR || '.next',
 
+  // TypeScript & ESLint errors now FAIL the build (CI gate).
+  // Previously both were ignored, which let type errors slip into production.
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
 
   images: {

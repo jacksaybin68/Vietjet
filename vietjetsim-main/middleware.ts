@@ -29,6 +29,15 @@ async function verifyJwtSignature(token: string, secret: string): Promise<JWTPay
     const [headerB64, payloadB64, signatureB64] = token.split('.');
     if (!headerB64 || !payloadB64 || !signatureB64) return null;
 
+    // Pin the algorithm to HS256 (defense-in-depth against alg-confusion attacks).
+    let header: { alg?: string };
+    try {
+      header = JSON.parse(base64UrlDecode(headerB64));
+    } catch {
+      return null;
+    }
+    if (header?.alg !== 'HS256') return null;
+
     // Re-create the signing input
     const signingInput = `${headerB64}.${payloadB64}`;
 
@@ -43,22 +52,48 @@ async function verifyJwtSignature(token: string, secret: string): Promise<JWTPay
       keyData,
       { name: 'HMAC', hash: 'SHA-256' },
       false,
-      ['sign']
+      ['verify', 'sign']
     );
 
-    // Sign the input
-    const signature = await crypto.subtle.sign('HMAC', cryptoKey, signingInputData);
-
-    // Compare signatures (timing-safe)
-    const expectedSignature = uint8ArrayToBase64Url(new Uint8Array(signature));
-    if (expectedSignature !== signatureB64) return null;
+    // Timing-safe signature verification via constant-time comparison in WebCrypto.
+    const signatureIsValid = await crypto.subtle.verify(
+      'HMAC',
+      cryptoKey,
+      base64UrlToUint8Array(signatureB64),
+      signingInputData
+    );
+    if (!signatureIsValid) return null;
 
     // Decode payload only after signature is verified
     const payloadJson = base64UrlDecode(payloadB64);
-    return JSON.parse(payloadJson) as JWTPayload;
+    const payload = JSON.parse(payloadJson) as JWTPayload;
+
+    // Enforce token expiry at the Edge: an expired access token must not grant
+    // access to protected pages/APIs even if its signature is still valid.
+    if (typeof payload.exp === 'number' && payload.exp * 1000 < Date.now()) {
+      return null;
+    }
+
+    return payload;
   } catch {
     return null;
   }
+}
+
+function base64UrlToUint8Array(str: string): Uint8Array<ArrayBuffer> {
+  // Convert base64url to base64
+  let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+  // Add padding if needed
+  while (base64.length % 4) {
+    base64 += '=';
+  }
+  const binary = atob(base64);
+  // Explicit ArrayBuffer backing so the value satisfies crypto.subtle's BufferSource
+  const bytes = new Uint8Array(new ArrayBuffer(binary.length));
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
 }
 
 function base64UrlDecode(str: string): string {
@@ -69,19 +104,11 @@ function base64UrlDecode(str: string): string {
     base64 += '=';
   }
   const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
+  const bytes = new Uint8Array(new ArrayBuffer(binary.length));
   for (let i = 0; i < binary.length; i++) {
     bytes[i] = binary.charCodeAt(i);
   }
   return new TextDecoder().decode(bytes);
-}
-
-function uint8ArrayToBase64Url(array: Uint8Array): string {
-  let binary = '';
-  for (let i = 0; i < array.length; i++) {
-    binary += String.fromCharCode(array[i]);
-  }
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
 /**

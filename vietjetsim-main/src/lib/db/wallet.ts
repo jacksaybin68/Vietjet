@@ -108,6 +108,11 @@ export async function topupWallet(
   paymentMethodId?: string | null,
   description?: string
 ): Promise<WalletTransactionRecord> {
+  // Defense-in-depth: API layer validates too, but never trust callers.
+  // A negative amount here would DRAIN the wallet (acts as an unguarded withdraw).
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error('Số tiền nạp không hợp lệ');
+  }
   const wallet = await getOrCreateWallet(userId);
   const balanceBefore = parseFloat(String(wallet.balance));
   const balanceAfter = balanceBefore + amount;
@@ -170,9 +175,10 @@ export async function spendWalletBalance(
   referenceId: string,
   description?: string
 ): Promise<WalletTransactionRecord> {
+  // Defense-in-depth: validate BEFORE reading/computing balances.
+  if (!Number.isFinite(amount) || amount <= 0) throw new Error('Số tiền thanh toán không hợp lệ');
   const wallet = await getOrCreateWallet(userId);
   const balanceBefore = parseFloat(String(wallet.balance));
-  if (amount <= 0) throw new Error('Số tiền thanh toán không hợp lệ');
   if (balanceBefore < amount) throw new Error('Số dư ví không đủ để thanh toán');
   const balanceAfter = balanceBefore - amount;
 
@@ -184,6 +190,40 @@ export async function spendWalletBalance(
     VALUES (
       ${wallet.id}, 'payment', ${-amount}, ${balanceBefore}, ${balanceAfter},
       ${description || 'Thanh toán bằng ví'}, ${referenceId}, 'completed'
+    )
+    RETURNING *
+  `;
+
+  await sql`
+    UPDATE user_wallets SET balance = ${balanceAfter}, updated_at = NOW()
+    WHERE id = ${wallet.id}
+  `;
+
+  return (result as WalletTransactionRecord[])[0];
+}
+
+export async function refundWallet(
+  userId: string,
+  amount: number,
+  referenceId: string,
+  description?: string
+): Promise<WalletTransactionRecord> {
+  // Defense-in-depth: validate BEFORE reading/computing balances.
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error('Số tiền hoàn không hợp lệ');
+  }
+  const wallet = await getOrCreateWallet(userId);
+  const balanceBefore = parseFloat(String(wallet.balance));
+  const balanceAfter = balanceBefore + amount;
+
+  const result = await sql`
+    INSERT INTO wallet_transactions (
+      wallet_id, type, amount, balance_before, balance_after,
+      description, reference_id, status
+    )
+    VALUES (
+      ${wallet.id}, 'refund', ${amount}, ${balanceBefore}, ${balanceAfter},
+      ${description || `Hoàn tiền vào ví #${referenceId}`}, ${referenceId}, 'completed'
     )
     RETURNING *
   `;

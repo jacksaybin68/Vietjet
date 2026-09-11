@@ -25,6 +25,8 @@ export interface JWTPayload {
   role: UserRole;
   fullName: string;
   phone?: string;
+  /** Unix seconds — standard JWT expiry claim (present on issued tokens). */
+  exp?: number;
 }
 
 export interface AuthTokens {
