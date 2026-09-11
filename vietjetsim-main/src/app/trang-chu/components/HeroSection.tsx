@@ -61,7 +61,6 @@ export default function HeroSection() {
       }}
     >
       <div className="mx-auto max-w-[1240px] px-4">
-
         <div className="max-w-xl pt-5 font-[var(--vj-font)] text-white lg:pt-10 animate-fade-in-up">
           <p className="mb-2 text-[11px] font-bold uppercase tracking-[.14em] text-[#FFF200] sm:text-[13px]">
             Vietjet Air
@@ -79,7 +78,10 @@ export default function HeroSection() {
           >
             <div className="mb-4 flex flex-nowrap items-center gap-2">
               {/* Column 1 (3.5): Primary text - logo replaced */}
-              <div className="text-[11px] font-bold text-white sm:text-[12px] md:text-[13px]" style={{ flex: '3.5 1 auto', width: '58.33%' }}>
+              <div
+                className="text-[11px] font-bold text-white sm:text-[12px] md:text-[13px]"
+                style={{ flex: '3.5 1 auto', width: '58.33%' }}
+              >
                 Mua hành lý, suût ăn chọn ghế ngồi và hơn thế nữa, từ 3.99 USD
               </div>
 
@@ -99,7 +101,10 @@ export default function HeroSection() {
               </div>
 
               {/* Column 3 (1): Secondary link */}
-              <div className="text-right text-[11px] font-bold text-white sm:text-[12px] md:text-[13px]" style={{ flex: '1 1 auto', width: '16.67%' }}>
+              <div
+                className="text-right text-[11px] font-bold text-white sm:text-[12px] md:text-[13px]"
+                style={{ flex: '1 1 auto', width: '16.67%' }}
+              >
                 Giao hàng nhanh
               </div>
             </div>
@@ -147,7 +152,11 @@ export default function HeroSection() {
                       className="mt-1 w-full appearance-none bg-transparent text-[14px] md:text-[19px] font-black text-black dark:text-white outline-none sm:text-[16px] md:text-[20px]"
                     >
                       {airports.map((item) => (
-                        <option key={item.code} value={item.code} className="bg-white dark:bg-navy-dark text-[#1A2948] dark:text-white">
+                        <option
+                          key={item.code}
+                          value={item.code}
+                          className="bg-white dark:bg-navy-dark text-[#1A2948] dark:text-white"
+                        >
                           {item.city} ({item.code})
                         </option>
                       ))}
@@ -182,7 +191,11 @@ export default function HeroSection() {
                       className="mt-1 w-full appearance-none bg-transparent text-[14px] md:text-[19px] font-black text-black dark:text-white outline-none sm:text-[16px] md:text-[20px]"
                     >
                       {airports.map((item) => (
-                        <option key={item.code} value={item.code} className="bg-white dark:bg-navy-dark text-[#1A2948] dark:text-white">
+                        <option
+                          key={item.code}
+                          value={item.code}
+                          className="bg-white dark:bg-navy-dark text-[#1A2948] dark:text-white"
+                        >
                           {item.city} ({item.code})
                         </option>
                       ))}
@@ -220,8 +233,7 @@ export default function HeroSection() {
                         Hành khách
                       </div>
                       <div className="text-[17px] font-black text-black dark:text-white leading-tight">
-                        {pax.adults} người lớn{' '}
-                        {pax.children > 0 && `, ${pax.children} trẻ em `}
+                        {pax.adults} người lớn {pax.children > 0 && `, ${pax.children} trẻ em `}
                         {pax.infants > 0 && `, ${pax.infants} em bé`}
                       </div>
                     </div>
@@ -265,9 +277,9 @@ export default function HeroSection() {
                         <div className="flex items-center gap-1 md:gap-2">
                           <button
                             onClick={() =>
-                              setPax(prev => ({
+                              setPax((prev) => ({
                                 ...prev,
-                                adults: Math.max(1, prev.adults - 1)
+                                adults: Math.max(1, prev.adults - 1),
                               }))
                             }
                             disabled={pax.adults <= 1}
@@ -275,12 +287,14 @@ export default function HeroSection() {
                           >
                             -
                           </button>
-                          <span className="text-[14px] md:text-[16px] font-bold text-[#1A2948] dark:text-white">{pax.adults}</span>
+                          <span className="text-[14px] md:text-[16px] font-bold text-[#1A2948] dark:text-white">
+                            {pax.adults}
+                          </span>
                           <button
                             onClick={() =>
-                              setPax(prev => ({
+                              setPax((prev) => ({
                                 ...prev,
-                                adults: prev.adults + 1
+                                adults: prev.adults + 1,
                               }))
                             }
                             className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full border border-[#d1d5db] dark:border-[#555] text-[10px] md:text-[12px] text-[#6B7280] dark:text-white/60 hover:bg-[#f3f4f6] dark:hover:bg-[#333]"
@@ -309,9 +323,9 @@ export default function HeroSection() {
                         <div className="flex items-center gap-1 md:gap-2">
                           <button
                             onClick={() =>
-                              setPax(prev => ({
+                              setPax((prev) => ({
                                 ...prev,
-                                children: Math.max(0, prev.children - 1)
+                                children: Math.max(0, prev.children - 1),
                               }))
                             }
                             disabled={pax.children <= 0}
@@ -319,12 +333,14 @@ export default function HeroSection() {
                           >
                             -
                           </button>
-                          <span className="text-[14px] md:text-[16px] font-bold text-[#1A2948] dark:text-white">{pax.children}</span>
+                          <span className="text-[14px] md:text-[16px] font-bold text-[#1A2948] dark:text-white">
+                            {pax.children}
+                          </span>
                           <button
                             onClick={() =>
-                              setPax(prev => ({
+                              setPax((prev) => ({
                                 ...prev,
-                                children: prev.children + 1
+                                children: prev.children + 1,
                               }))
                             }
                             className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full border border-[#d1d5db] dark:border-[#555] text-[10px] md:text-[12px] text-[#6B7280] dark:text-white/60 hover:bg-[#f3f4f6] dark:hover:bg-[#333]"
@@ -353,9 +369,9 @@ export default function HeroSection() {
                         <div className="flex items-center gap-1 md:gap-2">
                           <button
                             onClick={() =>
-                              setPax(prev => ({
+                              setPax((prev) => ({
                                 ...prev,
-                                infants: Math.max(0, prev.infants - 1)
+                                infants: Math.max(0, prev.infants - 1),
                               }))
                             }
                             disabled={pax.infants <= 0}
@@ -363,12 +379,14 @@ export default function HeroSection() {
                           >
                             -
                           </button>
-                          <span className="text-[14px] md:text-[16px] font-bold text-[#1A2948] dark:text-white">{pax.infants}</span>
+                          <span className="text-[14px] md:text-[16px] font-bold text-[#1A2948] dark:text-white">
+                            {pax.infants}
+                          </span>
                           <button
                             onClick={() =>
-                              setPax(prev => ({
+                              setPax((prev) => ({
                                 ...prev,
-                                infants: prev.infants + 1
+                                infants: prev.infants + 1,
                               }))
                             }
                             className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full border border-[#d1d5db] dark:border-[#555] text-[10px] md:text-[12px] text-[#6B7280] dark:text-white/60 hover:bg-[#f3f4f6] dark:hover:bg-[#333]"
@@ -393,7 +411,10 @@ export default function HeroSection() {
               </div>
 
               <label className="mt-2 flex items-center gap-2 text-[12px] md:text-[14px] font-bold text-white">
-                <input type="checkbox" className="h-4 w-4 md:h-5 md:w-5 rounded border-0 accent-[#f3c84d] dark:accent-[#FFC400]" />
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 md:h-5 md:w-5 rounded border-0 accent-[#f3c84d] dark:accent-[#FFC400]"
+                />
                 <span>Tìm vé rẻ nhất</span>
               </label>
 

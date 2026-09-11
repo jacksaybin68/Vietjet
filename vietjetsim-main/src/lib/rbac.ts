@@ -1,22 +1,21 @@
 // ──────────────────────────────────────────────────────────────────────
 // VietjetSim RBAC (Role-Based Access Control) System
+// Simplified: Only 2 roles — 'user' (regular user) and 'admin' (full access)
 // ──────────────────────────────────────────────────────────────────────
 
 import { UserRole } from './auth';
 
 // ═════════════════════════════════════════════════════════════════════
-// 1. PERMISSION DEFINITIONS — Granular permission flags
+// 1. PERMISSION DEFINITIONS
 // ═════════════════════════════════════════════════════════════════════
 
 export type Permission =
-  // ── User Management ──────────
   | 'user:list'
   | 'user:view'
   | 'user:create'
   | 'user:edit'
   | 'user:delete'
   | 'user:role_change'
-  // ── Flight Management ────────
   | 'flight:list'
   | 'flight:view'
   | 'flight:create'
@@ -24,41 +23,33 @@ export type Permission =
   | 'flight:delete'
   | 'flight:status_change'
   | 'flight:price_edit'
-  // ── Booking Management ────────
   | 'booking:list'
   | 'booking:view'
   | 'booking:create'
   | 'booking:edit'
   | 'booking:cancel'
   | 'booking:status_change'
-  // ── Payment & Refund ──────────
   | 'payment:view'
   | 'payment:refund'
   | 'payment:process'
   | 'refund:list'
   | 'refund:approve'
   | 'refund:reject'
-  // ── Content & System Config ───
   | 'system:config'
   | 'content:manage'
   | 'announcement:crud'
   | 'airport:manage'
-  // ── Chat & Support ────────────
   | 'chat:view'
   | 'chat:send'
   | 'chat:delete'
-  // ── Analytics & Reports ──────
   | 'analytics:view'
   | 'analytics:export'
   | 'report:generate'
-  // ── SSTK (Self-Service Toolkit)
   | 'sstk:execute'
   | 'sstk:view_logs'
-  // ── RBAC Administration ───────
   | 'rbac:manage'
   | 'rbac:audit_log'
   | 'admin:invite'
-  // ── Discount Management ────────
   | 'discount:list'
   | 'discount:view'
   | 'discount:create'
@@ -66,16 +57,13 @@ export type Permission =
   | 'discount:delete'
   | 'discount:status_change';
 
-/** Human-readable labels for each permission (Vietnamese) */
 export const PERMISSION_LABELS: Record<Permission, string> = {
-  // User Management
   'user:list': 'Xem danh sách người dùng',
   'user:view': 'Xem chi tiết người dùng',
   'user:create': 'Tạo người dùng mới',
   'user:edit': 'Chỉnh sửa thông tin user',
   'user:delete': 'Xóa người dùng',
   'user:role_change': 'Thay đổi role người dùng',
-  // Flight Management
   'flight:list': 'Xem danh sách chuyến bay',
   'flight:view': 'Xem chi tiết chuyến bay',
   'flight:create': 'Tạo chuyến bay mới',
@@ -83,61 +71,58 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   'flight:delete': 'Xóa chuyến bay',
   'flight:status_change': 'Thay đổi trạng thái chuyến bay',
   'flight:price_edit': 'Thay đổi giá vé',
-  // Booking Management
   'booking:list': 'Xem danh sách đặt vé',
   'booking:view': 'Xem chi tiết đặt vé',
   'booking:create': 'Tạo đặt vé (đại diện)',
   'booking:edit': 'Chỉnh sửa đặt vé',
   'booking:cancel': 'Huỷ đặt vé',
   'booking:status_change': 'Cập nhật trạng thái đặt vé',
-  // Payment & Refund
   'payment:view': 'Xem thanh toán',
   'payment:refund': 'Hoàn tiền',
   'payment:process': 'Xử lý thanh toán',
   'refund:list': 'Xem danh sách hoàn tiền',
   'refund:approve': 'Phê duyệt hoàn tiền',
   'refund:reject': 'Từ chối hoàn tiền',
-  // Content & System Config
   'system:config': 'Cấu hình hệ thống',
   'content:manage': 'Quản lý nội dung',
   'announcement:crud': 'Tạo/sửa/xóa thông báo',
   'airport:manage': 'Quản lý sân bay',
-  // Chat & Support
   'chat:view': 'Xem cuộc hội thoại',
   'chat:send': 'Gửi tin nhắn',
   'chat:delete': 'Xóa tin nhắn',
-  // Analytics & Reports
-  'analytics:view': 'Xem phân tích dữ liệu',
+  'analytics:view': 'Xem thống kê',
   'analytics:export': 'Xuất báo cáo',
-  'report:generate': 'Tạo báo cáo tổng hợp',
-  // SSTK
-  'sstk:execute': 'Thực thi công cụ SSTK',
-  'sstk:view_logs': 'Xem log thực thi SSTK',
-  // RBAC Administration
-  'rbac:manage': 'Quản lý phân quyền',
-  'rbac:audit_log': 'Xem audit log hệ thống',
+  'report:generate': 'Tạo báo cáo',
+  'sstk:execute': 'Thực thi SSTK',
+  'sstk:view_logs': 'Xem nhật ký SSTK',
+  'rbac:manage': 'Quản lý RBAC',
+  'rbac:audit_log': 'Xem nhật ký RBAC',
   'admin:invite': 'Mời admin mới',
-  // Discount Management
   'discount:list': 'Xem danh sách mã giảm giá',
   'discount:view': 'Xem chi tiết mã giảm giá',
-  'discount:create': 'Tạo mã giảm giá mới',
+  'discount:create': 'Tạo mã giảm giá',
   'discount:edit': 'Chỉnh sửa mã giảm giá',
   'discount:delete': 'Xóa mã giảm giá',
   'discount:status_change': 'Thay đổi trạng thái mã giảm giá',
 };
 
-/** Category grouping for UI display */
-export type PermissionCategory = {
+// ═════════════════════════════════════════════════════════════════════
+// 2. PERMISSION CATEGORIES
+// ═════════════════════════════════════════════════════════════════════
+
+export interface PermissionCategory {
   key: string;
+  name: string;
   label: string;
   icon: string;
   permissions: Permission[];
-};
+}
 
 export const PERMISSION_CATEGORIES: PermissionCategory[] = [
   {
-    key: 'users',
-    label: 'Quản lý Người dùng',
+    key: 'user_management',
+    name: 'user_management',
+    label: 'Quản lý người dùng',
     icon: 'UsersIcon',
     permissions: [
       'user:list',
@@ -149,9 +134,10 @@ export const PERMISSION_CATEGORIES: PermissionCategory[] = [
     ],
   },
   {
-    key: 'flights',
-    label: 'Quản lý Chuyến bay',
-    icon: 'PaperAirplaneIcon',
+    key: 'flight_management',
+    name: 'flight_management',
+    label: 'Quản lý chuyến bay',
+    icon: 'PlaneIcon',
     permissions: [
       'flight:list',
       'flight:view',
@@ -163,8 +149,9 @@ export const PERMISSION_CATEGORIES: PermissionCategory[] = [
     ],
   },
   {
-    key: 'bookings',
-    label: 'Quản lý Đặt vé',
+    key: 'booking_management',
+    name: 'booking_management',
+    label: 'Quản lý đặt vé',
     icon: 'TicketIcon',
     permissions: [
       'booking:list',
@@ -176,9 +163,10 @@ export const PERMISSION_CATEGORIES: PermissionCategory[] = [
     ],
   },
   {
-    key: 'finance',
+    key: 'payment_refund',
+    name: 'payment_refund',
     label: 'Thanh toán & Hoàn tiền',
-    icon: 'BanknotesIcon',
+    icon: 'CreditCardIcon',
     permissions: [
       'payment:view',
       'payment:refund',
@@ -189,239 +177,83 @@ export const PERMISSION_CATEGORIES: PermissionCategory[] = [
     ],
   },
   {
-    key: 'system',
-    label: 'Hệ thống & Nội dung',
+    key: 'content_system',
+    name: 'content_system',
+    label: 'Nội dung & Cấu hình',
     icon: 'Cog6ToothIcon',
     permissions: ['system:config', 'content:manage', 'announcement:crud', 'airport:manage'],
   },
   {
-    key: 'support',
-    label: 'Hỗ trợ & Chat',
+    key: 'chat_support',
+    name: 'chat_support',
+    label: 'Chat & Hỗ trợ',
     icon: 'ChatBubbleLeftRightIcon',
     permissions: ['chat:view', 'chat:send', 'chat:delete'],
   },
   {
     key: 'analytics',
-    label: 'Phân tích & Báo cáo',
-    icon: 'PresentationChartBarIcon',
+    name: 'analytics',
+    label: 'Thống kê & Báo cáo',
+    icon: 'ChartBarIcon',
     permissions: ['analytics:view', 'analytics:export', 'report:generate'],
   },
   {
-    key: 'tools',
-    label: 'Công cụ (SSTK)',
-    icon: 'WrenchScrewdriverIcon',
+    key: 'sstk',
+    name: 'sstk',
+    label: 'Self-Service Toolkit',
+    icon: 'WrenchIcon',
     permissions: ['sstk:execute', 'sstk:view_logs'],
   },
   {
-    key: 'security',
-    label: 'Bảo mật & Phân quyền',
+    key: 'rbac_admin',
+    name: 'rbac_admin',
+    label: 'Quản trị RBAC',
     icon: 'ShieldCheckIcon',
     permissions: ['rbac:manage', 'rbac:audit_log', 'admin:invite'],
+  },
+  {
+    key: 'discount',
+    name: 'discount',
+    label: 'Mã giảm giá',
+    icon: 'TagIcon',
+    permissions: [
+      'discount:list',
+      'discount:view',
+      'discount:create',
+      'discount:edit',
+      'discount:delete',
+      'discount:status_change',
+    ],
   },
 ];
 
 // ═════════════════════════════════════════════════════════════════════
-// 2. ROLE DEFINITIONS — Predefined roles with permission sets
+// 3. ROLE → PERMISSION MAPPING (Simplified: only user + admin)
 // ═════════════════════════════════════════════════════════════════════
 
-export type SystemRoleName =
-  | 'super_admin'
-  | 'admin_ops'
-  | 'admin_finance'
-  | 'admin_support'
-  | 'admin_content';
+export type AllRoles = UserRole;
 
-export interface RoleDefinition {
-  name: SystemRoleName;
-  label: string;
-  description: string;
-  color: string; // Tailwind color class for badge
-  bgColor: string; // Background color
-  level: number; // Higher = more powerful
-  permissions: Set<Permission>;
-}
-
-/**
- * Role Hierarchy (level-based):
- * super_admin (5): Full access to everything — god mode
- * admin_ops    (4): Operations — flights, bookings, users, analytics
- * admin_finance(3): Finance — payments, refunds, reports
- * admin_support(2): Support — chat, content, announcements
- * admin_content (1): Read-only + limited content editing
- */
-export const SYSTEM_ROLES: Record<SystemRoleName, RoleDefinition> = {
-  super_admin: {
-    name: 'super_admin',
-    label: 'Super Admin',
-    description: 'Toàn quyền — truy cập và điều khiển mọi tính năng của hệ thống',
-    color: 'text-white',
-    bgColor: 'bg-gradient-to-r from-red-700 to-red-900',
-    level: 5,
-    permissions: new Set<Permission>(
-      PERMISSION_CATEGORIES.flatMap((c) => c.permissions) as Permission[]
-    ),
-  },
-  admin_ops: {
-    name: 'admin_ops',
-    label: 'Admin Vận hành',
-    description: 'Quản lý chuyến bay, đặt vé, người dùng và phân tích dữ liệu',
-    color: 'text-blue-900',
-    bgColor: 'bg-gradient-to-r from-blue-600 to-blue-800',
-    level: 4,
-    permissions: new Set<Permission>([
-      'user:list',
-      'user:view',
-      'user:edit',
-      'user:role_change',
-      'flight:list',
-      'flight:view',
-      'flight:create',
-      'flight:edit',
-      'flight:status_change',
-      'flight:price_edit',
-      'booking:list',
-      'booking:view',
-      'booking:create',
-      'booking:edit',
-      'booking:cancel',
-      'booking:status_change',
-      'payment:view',
-      'payment:process',
-      'refund:list',
-      'refund:approve',
-      'refund:reject',
-      'announcement:crud',
-      'airport:manage',
-      'discount:list',
-      'discount:create',
-      'discount:edit',
-      'discount:delete',
-      'system:config',
-      'content:manage',
-      'analytics:view',
-      'analytics:export',
-      'report:generate',
-      'sstk:execute',
-      'sstk:view_logs',
-    ]),
-  },
-  admin_finance: {
-    name: 'admin_finance',
-    label: 'Admin Tài chính',
-    description: 'Quản lý thanh toán, hoàn tiền, báo cáo tài chính',
-    color: 'text-emerald-900',
-    bgColor: 'bg-gradient-to-r from-emerald-600 to-emerald-800',
-    level: 3,
-    permissions: new Set<Permission>([
-      'booking:list',
-      'booking:view',
-      'booking:status_change',
-      'payment:view',
-      'payment:refund',
-      'payment:process',
-      'refund:list',
-      'refund:approve',
-      'refund:reject',
-      'analytics:view',
-      'analytics:export',
-      'report:generate',
-      'sstk:execute',
-      'sstk:view_logs',
-    ]),
-  },
-  admin_support: {
-    name: 'admin_support',
-    label: 'Admin Hỗ trợ',
-    description: 'Quản lý chat hỗ trợ, nội dung, thông báo cho khách hàng',
-    color: 'text-purple-900',
-    bgColor: 'bg-gradient-to-r from-purple-600 to-purple-800',
-    level: 2,
-    permissions: new Set<Permission>([
-      'user:list',
-      'user:view',
-      'flight:list',
-      'flight:view',
-      'booking:list',
-      'booking:view',
-      'chat:view',
-      'chat:send',
-      'chat:delete',
-      'content:manage',
-      'announcement:crud',
-      'airport:manage',
-      'analytics:view',
-    ]),
-  },
-  admin_content: {
-    name: 'admin_content',
-    label: 'Admin Nội dung',
-    description: 'Đọc dữ liệu hệ thống, chỉnh sửa nội dung cơ bản',
-    color: 'text-amber-900',
-    bgColor: 'bg-gradient-to-r from-amber-500 to-amber-700',
-    level: 1,
-    permissions: new Set<Permission>([
-      'flight:list',
-      'flight:view',
-      'booking:list',
-      'booking:view',
-      'chat:view',
-      'content:manage',
-      'announcement:crud',
-      'analytics:view',
-    ]),
-  },
+export const ROLE_LEVELS: Record<string, number> = {
+  user: 0,
+  admin: 1,
 };
 
-// All valid role names (including legacy 'admin' and 'user')
-export type AllRoles = UserRole | SystemRoleName;
-
-// ═════════════════════════════════════════════════════════════════════
-// 3. PERMISSION CHECK ENGINE
-// ═════════════════════════════════════════════════════════════════════
+const ADMIN_PERMISSIONS = new Set<Permission>(PERMISSION_CATEGORIES.flatMap((c) => c.permissions));
 
 /**
- * Check if a given role has a specific permission.
- *
- * - For 'super_admin': always returns true (full access)
- * - For system roles: checks the role's permission set
- * - For legacy 'admin': treated as admin_ops
- * - For 'user': no admin permissions
+ * Check if a role has a specific permission.
+ * - 'admin' → always true (full access)
+ * - 'user'  → always false
  */
 export function hasPermission(
   userRole: AllRoles,
   permission: Permission,
-  customPermissions?: Permission[] | null
+  _customPermissions?: Permission[] | null
 ): boolean {
-  // Super admin has everything
-  if (userRole === 'super_admin') return true;
-
-  // Legacy admin → treat as admin_ops
-  const resolvedRole: SystemRoleName | 'user' =
-    userRole === 'admin' ? 'admin_ops' : (userRole as SystemRoleName | 'user');
-
-  // Check custom/overridden permissions from DB FIRST
-  // This allows assigning specific individual permissions to any user including 'user' role
-  if (customPermissions && Array.isArray(customPermissions)) {
-    if (customPermissions.includes(permission)) {
-      return true;
-    }
-  }
-
-  // Regular users have no base admin permissions
-  if (resolvedRole === 'user') return false;
-
-  // Check system role definition
-  const roleDef = SYSTEM_ROLES[resolvedRole as SystemRoleName];
-  if (roleDef && roleDef.permissions.has(permission)) {
-    return true;
-  }
-
+  if (userRole === 'admin') return true;
   return false;
 }
 
-/**
- * Check if a role has ALL of the required permissions.
- */
 export function hasAllPermissions(
   userRole: AllRoles,
   permissions: Permission[],
@@ -430,9 +262,6 @@ export function hasAllPermissions(
   return permissions.every((p) => hasPermission(userRole, p, customPermissions));
 }
 
-/**
- * Check if a role has ANY of the required permissions.
- */
 export function hasAnyPermission(
   userRole: AllRoles,
   permissions: Permission[],
@@ -441,30 +270,14 @@ export function hasAnyPermission(
   return permissions.some((p) => hasPermission(userRole, p, customPermissions));
 }
 
-/**
- * Get all permissions for a role.
- */
 export function getRolePermissions(
   role: AllRoles,
-  customPermissions?: Permission[] | null
+  _customPermissions?: Permission[] | null
 ): Permission[] {
-  if (role === 'super_admin') {
-    return PERMISSION_CATEGORIES.flatMap((c) => c.permissions) as Permission[];
-  }
-
-  const resolvedRole = role === 'admin' ? 'admin_ops' : (role as SystemRoleName | 'user');
-  if (resolvedRole === 'user') return [];
-
-  const roleDef = SYSTEM_ROLES[resolvedRole];
-  const basePermissions = roleDef ? Array.from(roleDef.permissions) : [];
-  const custom = customPermissions && Array.isArray(customPermissions) ? customPermissions : [];
-
-  return Array.from(new Set([...basePermissions, ...custom]));
+  if (role === 'admin') return Array.from(ADMIN_PERMISSIONS) as Permission[];
+  return [];
 }
 
-/**
- * Get role display info.
- */
 export function getRoleInfo(role: AllRoles): {
   label: string;
   description: string;
@@ -472,42 +285,119 @@ export function getRoleInfo(role: AllRoles): {
   bgColor: string;
   level: number;
 } {
-  if (role === 'user')
+  if (role === 'admin') {
     return {
-      label: 'Người dùng',
-      description: 'Người dùng thường',
-      color: 'text-gray-700',
-      bgColor: 'bg-gray-100',
-      level: 0,
+      label: 'Quản trị viên',
+      description: 'Quản trị viên toàn quyền',
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
+      level: ROLE_LEVELS.admin,
     };
-  if (role === 'admin') return SYSTEM_ROLES.admin_ops;
-
-  const def = SYSTEM_ROLES[role as SystemRoleName];
-  return def || { label: String(role), description: '', color: '', bgColor: '', level: 0 };
+  }
+  return {
+    label: 'Người dùng',
+    description: 'Người dùng thường',
+    color: 'text-gray-700',
+    bgColor: 'bg-gray-100',
+    level: ROLE_LEVELS.user,
+  };
 }
 
 /**
- * Check if targetRole can be managed by actorRole.
- * A role can only manage roles at or below its own level.
+ * Admin can only manage 'user' role. Cannot manage other admins.
  */
 export function canManageRole(actorRole: AllRoles, targetRole: AllRoles): boolean {
-  if (actorRole === 'super_admin') return true;
-
-  const actorLevel = getRoleInfo(actorRole).level;
-  const targetLevel = getRoleInfo(targetRole).level;
-  return actorLevel > targetLevel;
+  if (actorRole === 'admin' && targetRole === 'user') return true;
+  return false;
 }
+
+export function isAdminRole(role: string): boolean {
+  return role === 'admin';
+}
+
+// ─── Backward-compatibility bridge for AdminRBACPanel ───────────────────
 
 /**
- * Check if a role is an admin role (not a regular user)
+ * SYSTEM_ROLES bridge — includes simplified roles (admin, user) and legacy
+ * role names so AdminRBACPanel UI compiles and runs without rewrite.
+ * Legacy roles map to admin-level permissions for display purposes.
  */
-export function isAdminRole(role: string): boolean {
-  return (
-    role === 'admin' ||
-    role === 'super_admin' ||
-    role === 'admin_ops' ||
-    role === 'admin_finance' ||
-    role === 'admin_support' ||
-    role === 'admin_content'
-  );
-}
+export const SYSTEM_ROLES: Record<
+  string,
+  {
+    name: string;
+    label: string;
+    description: string;
+    color: string;
+    bgColor: string;
+    level: number;
+    permissions: Set<Permission>;
+  }
+> = {
+  admin: {
+    name: 'admin',
+    label: 'Quản trị viên',
+    description: 'Quản trị viên toàn quyền',
+    color: 'text-red-600',
+    bgColor: 'bg-red-50',
+    level: 1,
+    permissions: ADMIN_PERMISSIONS,
+  },
+  user: {
+    name: 'user',
+    label: 'Người dùng',
+    description: 'Người dùng thường',
+    color: 'text-gray-600',
+    bgColor: 'bg-gray-100',
+    level: 0,
+    permissions: new Set<Permission>([]),
+  },
+  // Legacy role names preserved for AdminRBACPanel compatibility
+  super_admin: {
+    name: 'super_admin',
+    label: 'Super Admin',
+    description: 'Quản trị viên cấp cao (legacy)',
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-50',
+    level: 2,
+    permissions: ADMIN_PERMISSIONS,
+  },
+  admin_ops: {
+    name: 'admin_ops',
+    label: 'Admin Vận hành',
+    description: 'Admin vận hành (legacy)',
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50',
+    level: 1,
+    permissions: ADMIN_PERMISSIONS,
+  },
+  admin_finance: {
+    name: 'admin_finance',
+    label: 'Admin Tài chính',
+    description: 'Admin tài chính (legacy)',
+    color: 'text-emerald-600',
+    bgColor: 'bg-emerald-50',
+    level: 1,
+    permissions: ADMIN_PERMISSIONS,
+  },
+  admin_support: {
+    name: 'admin_support',
+    label: 'Admin Hỗ trợ',
+    description: 'Admin hỗ trợ (legacy)',
+    color: 'text-amber-600',
+    bgColor: 'bg-amber-50',
+    level: 1,
+    permissions: ADMIN_PERMISSIONS,
+  },
+  admin_content: {
+    name: 'admin_content',
+    label: 'Admin Nội dung',
+    description: 'Admin nội dung (legacy)',
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-50',
+    level: 1,
+    permissions: ADMIN_PERMISSIONS,
+  },
+};
+
+export type SystemRoleName = keyof typeof SYSTEM_ROLES;
