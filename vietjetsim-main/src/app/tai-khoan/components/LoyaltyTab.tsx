@@ -35,10 +35,30 @@ interface Tier {
 }
 
 const TYPE_CONFIG: Record<string, { label: string; color: string; bg: string; icon: string }> = {
-  earn: { label: 'Tích điểm', color: 'var(--vj-green)', bg: 'var(--vj-green-light)', icon: 'ArrowTrendingUpIcon' },
-  redeem: { label: 'Đổi điểm', color: 'var(--primary)', bg: 'var(--surface-2)', icon: 'GiftIcon' },
-  expire: { label: 'Hết hạn', color: 'var(--foreground-muted)', bg: 'var(--surface-2)', icon: 'ClockIcon' },
-  bonus: { label: 'Thưởng', color: 'var(--accent)', bg: 'var(--accent-secondary)', icon: 'StarIcon' },
+  earn: {
+    label: 'Tích điểm',
+    color: 'var(--vj-green)',
+    bg: 'var(--vj-green-light)',
+    icon: 'ArrowTrendingUpIcon',
+  },
+  redeem: {
+    label: 'Đổi điểm',
+    color: 'var(--primary)',
+    bg: 'var(--surface-2)',
+    icon: 'GiftIcon',
+  },
+  expire: {
+    label: 'Hết hạn',
+    color: 'var(--foreground-muted)',
+    bg: 'var(--surface-2)',
+    icon: 'ClockIcon',
+  },
+  bonus: {
+    label: 'Thưởng',
+    color: 'var(--accent)',
+    bg: 'var(--accent-secondary)',
+    icon: 'StarIcon',
+  },
   adjust: {
     label: 'Điều chỉnh',
     color: 'var(--vj-purple)',
@@ -125,7 +145,11 @@ function RedeemModal({
             onClick={onClose}
             className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--surface-2)] dark:hover:bg-[var(--dark-surface-2)] transition-colors"
           >
-            <Icon name="XMarkIcon" size={20} className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]" />
+            <Icon
+              name="XMarkIcon"
+              size={20}
+              className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]"
+            />
           </button>
         </div>
 
@@ -266,7 +290,9 @@ export default function LoyaltyTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[var(--foreground)] dark:text-[var(--foreground)]">Điểm thưởng</h2>
+          <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[var(--foreground)] dark:text-[var(--foreground)]">
+            Điểm thưởng
+          </h2>
           <p className="text-sm text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
             Chương trình tích điểm Vietjet Air Rewards
           </p>
@@ -418,7 +444,11 @@ export default function LoyaltyTab() {
           {transactions.length === 0 ? (
             <div className="p-8 text-center">
               <div className="w-16 h-16 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-full flex items-center justify-center mx-auto mb-3">
-                <Icon name="StarIcon" size={28} className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]" />
+                <Icon
+                  name="StarIcon"
+                  size={28}
+                  className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]"
+                />
               </div>
               <p className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] text-sm font-[Be Vietnam Pro,sans-serif]">
                 Chưa có lịch sử tích điểm.
