@@ -6,14 +6,7 @@ import { NextResponse } from 'next/server';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-export type UserRole =
-  | 'user'
-  | 'admin'
-  | 'super_admin'
-  | 'admin_ops'
-  | 'admin_finance'
-  | 'admin_support'
-  | 'admin_content';
+export type UserRole = 'user' | 'admin';
 
 export interface User {
   id: string;

@@ -161,7 +161,9 @@ export default function ServicesPage() {
               key={service.id}
               onClick={() => setSelectedService(service.id)}
               className={`text-left bg-[var(--surface)] rounded-2xl border-2 border-[var(--border)] overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 ${
-                selectedService === service.id ? 'ring-2 ring-[var(--vj-yellow)] border-[var(--vj-yellow)]' : ''
+                selectedService === service.id
+                  ? 'ring-2 ring-[var(--vj-yellow)] border-[var(--vj-yellow)]'
+                  : ''
               }`}
             >
               <div className="p-5">
@@ -173,9 +175,13 @@ export default function ServicesPage() {
                     {service.price}
                   </span>
                 </div>
-                <h3 className="font-bold text-[var(--foreground)] text-base mb-0.5">{service.title}</h3>
+                <h3 className="font-bold text-[var(--foreground)] text-base mb-0.5">
+                  {service.title}
+                </h3>
                 <p className="text-xs text-[var(--foreground-subtle)] mb-2">{service.subtitle}</p>
-                <p className="text-sm text-[var(--foreground-muted)] line-clamp-2">{service.description}</p>
+                <p className="text-sm text-[var(--foreground-muted)] line-clamp-2">
+                  {service.description}
+                </p>
               </div>
             </button>
           ))}
@@ -183,9 +189,7 @@ export default function ServicesPage() {
 
         {/* Selected Service Detail */}
         {selected && (
-          <div
-            className="bg-[var(--surface)] rounded-2xl border-2 border-[var(--vj-yellow)]/40 overflow-hidden shadow-sm mb-10"
-          >
+          <div className="bg-[var(--surface)] rounded-2xl border-2 border-[var(--vj-yellow)]/40 overflow-hidden shadow-sm mb-10">
             {/* Detail Header */}
             <div className="p-6 sm:p-8 bg-[var(--vj-red)]/5">
               <div className="flex items-start gap-4">
@@ -194,7 +198,9 @@ export default function ServicesPage() {
                 </div>
                 <div className="flex-1">
                   <h2 className="text-xl font-black text-[var(--foreground)]">{selected.title}</h2>
-                  <p className="text-sm text-[var(--foreground-subtle)] mt-1">{selected.description}</p>
+                  <p className="text-sm text-[var(--foreground-subtle)] mt-1">
+                    {selected.description}
+                  </p>
                 </div>
               </div>
             </div>
@@ -208,8 +214,15 @@ export default function ServicesPage() {
                 </h3>
                 <ul className="space-y-2.5">
                   {selected.features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-[var(--foreground)]">
-                      <Icon name="CheckCircleIcon" size={18} className="flex-shrink-0 mt-0.5 text-[var(--vj-red)]" />
+                    <li
+                      key={i}
+                      className="flex items-start gap-2.5 text-sm text-[var(--foreground)]"
+                    >
+                      <Icon
+                        name="CheckCircleIcon"
+                        size={18}
+                        className="flex-shrink-0 mt-0.5 text-[var(--vj-red)]"
+                      />
                       {feature}
                     </li>
                   ))}
@@ -228,7 +241,9 @@ export default function ServicesPage() {
                       <span className="text-xl font-black text-[var(--vj-red)]">
                         {selected.price}
                       </span>
-                      <span className="text-xs text-[var(--foreground-subtle)] ml-1">/ {selected.priceNote}</span>
+                      <span className="text-xs text-[var(--foreground-subtle)] ml-1">
+                        / {selected.priceNote}
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
