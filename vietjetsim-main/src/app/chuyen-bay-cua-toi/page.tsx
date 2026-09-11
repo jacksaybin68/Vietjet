@@ -262,7 +262,7 @@ export default function MyFlightsPage() {
     <div className="min-h-screen bg-[var(--background)] dark:bg-[var(--dark-bg)]">
       <Header />
 
-      {/* ===== HERO: Tra cứu đặt chỗ — light theme theo spec DevTools ===== */}
+      {/* ===== HERO: Tra cứy đặt chỗ — light theme theo spec DevTools ===== */}
       <section
         className="relative overflow-hidden bg-[#fff5f5]"
         style={{ background: 'linear-gradient(135deg, #fff5f5 0%, #ffffff 100%)' }}
