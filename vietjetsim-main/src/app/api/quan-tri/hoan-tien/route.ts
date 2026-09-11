@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
 import { verifyAdminRequest } from '@/lib/admin-auth';
-import { getAllRefunds, updateRefundStatus, getBookingById } from '@/lib/db';
+import {
+  getAllRefunds,
+  updateRefundStatus,
+  getBookingById,
+  refundWallet,
+} from '@/lib/db';
 import { verifyAccessToken } from '@/lib/auth';
 
 // ─── GET: Get all refund requests (admin) ───────────────────────────────────
@@ -67,15 +72,58 @@ export async function PATCH(request: NextRequest) {
     const { admin_note } = body;
 
     // Atomic refund processing: If status is approved/completed, release seats and update booking
+    let refundSummary = '';
     if (status === 'approved' || status === 'completed') {
       try {
-        const results = await sql`SELECT booking_id FROM refund_requests WHERE id = ${refundId}`;
+        const results = await sql`
+          SELECT r.booking_id, r.amount, b.user_id
+          FROM refund_requests r
+          JOIN bookings b ON r.booking_id = b.id
+          WHERE r.id = ${refundId}
+        `;
         const refundRecord = results[0];
         if (refundRecord?.booking_id) {
+          // 1. Release seats (booked seats for this booking become available again)
           await sql`DELETE FROM seats WHERE booking_id = ${refundRecord.booking_id}`;
-          await sql`UPDATE bookings SET status = 'refunded', updated_at = NOW() WHERE id = ${refundRecord.booking_id}`;
+
+          // 2. If the booking was paid with the wallet, refund the money back into it.
+          //    Without this step the money would vanish even though the seat is released.
+          const paymentResults = await sql`
+            SELECT method, amount FROM payments
+            WHERE booking_id = ${refundRecord.booking_id} AND status = 'completed'
+            ORDER BY created_at DESC LIMIT 1
+          `;
+          const payment = paymentResults[0];
+          let walletRefunded = false;
+          if (payment?.method === 'wallet' && refundRecord.user_id) {
+            const refundAmount = Number(refundRecord.amount) || Number(payment.amount);
+            try {
+              await refundWallet(
+                refundRecord.user_id,
+                refundAmount,
+                refundRecord.booking_id,
+                `Hoàn tiền vé máy bay #${refundRecord.booking_id}`
+              );
+              walletRefunded = true;
+            } catch (walletErr) {
+              // Do not block the refund approval if wallet credit fails; log for manual processing.
+              console.error(
+                `[REFUND] Failed to credit wallet for booking ${refundRecord.booking_id}:`,
+                walletErr
+              );
+            }
+          }
+
+          // 3. Mark booking as refunded
+          await sql`
+            UPDATE bookings SET status = 'refunded', updated_at = NOW()
+            WHERE id = ${refundRecord.booking_id}
+          `;
+          refundSummary = walletRefunded
+            ? ' Seats released, wallet credited and booking marked as refunded'
+            : ' Seats released and booking marked as refunded';
           console.log(
-            `[REFUND] Seats released and booking ${refundRecord.booking_id} marked as refunded.`
+            `[REFUND] Processing refund for booking ${refundRecord.booking_id}:${refundSummary}`
           );
         }
       } catch (dbErr) {
@@ -94,7 +142,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Refund status updated to ${status} and seats released`,
+      message: `Refund status updated to ${status}.${refundSummary}`,
       refundId,
       status,
     });

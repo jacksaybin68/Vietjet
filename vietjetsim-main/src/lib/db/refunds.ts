@@ -74,7 +74,7 @@ export async function getAllRefunds(params?: {
 
 export async function updateRefundStatus(
   refundId: string,
-  status: 'pending' | 'approved' | 'rejected' | 'processed' | 'archived',
+  status: 'pending' | 'approved' | 'rejected' | 'completed' | 'processed' | 'archived',
   admin_note?: string
 ): Promise<RefundRecord> {
   const results = await sql`

@@ -93,5 +93,47 @@ describe('Wallet Database Module', () => {
       expect(sql).toHaveBeenCalledTimes(3);
       expect(result).toBeDefined();
     });
+
+    it('should reject negative topup amount (would drain wallet)', async () => {
+      await expect(topupWallet('user-1', -50, 'pm-1')).rejects.toThrow('Số tiền nạp không hợp lệ');
+      // Must fail BEFORE any DB call
+      expect(sql).not.toHaveBeenCalled();
+    });
+
+    it('should reject NaN / non-finite topup amount', async () => {
+      await expect(topupWallet('user-1', NaN, 'pm-1')).rejects.toThrow('Số tiền nạp không hợp lệ');
+      await expect(topupWallet('user-1', Infinity, 'pm-1')).rejects.toThrow(
+        'Số tiền nạp không hợp lệ'
+      );
+      expect(sql).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('refundWallet', () => {
+    it('should create a refund transaction and credit the wallet', async () => {
+      const mockWallet = { id: 'wallet-1', user_id: 'user-1', balance: 100, currency: 'VND' };
+      const mockTx = { id: 'tx-9', type: 'refund', amount: 70 };
+
+      (sql as any).mockResolvedValueOnce([mockWallet]); // getOrCreateWallet
+      (sql as any).mockResolvedValueOnce([mockTx]); // insert transaction
+      (sql as any).mockResolvedValueOnce([mockWallet]); // update user_wallets
+
+      const { refundWallet } = await import('@/lib/db');
+      const result = await refundWallet('user-1', 70, 'booking-1', 'Hoàn tiền vé');
+
+      expect(sql).toHaveBeenCalledTimes(3);
+      expect(result).toEqual(mockTx);
+    });
+
+    it('should reject non-positive refund amounts', async () => {
+      const { refundWallet } = await import('@/lib/db');
+      await expect(refundWallet('user-1', 0, 'booking-1')).rejects.toThrow(
+        'Số tiền hoàn không hợp lệ'
+      );
+      await expect(refundWallet('user-1', -100, 'booking-1')).rejects.toThrow(
+        'Số tiền hoàn không hợp lệ'
+      );
+      expect(sql).not.toHaveBeenCalled();
+    });
   });
 });

@@ -113,7 +113,7 @@ export interface RefundRecord {
   booking_id: string;
   user_id: string;
   reason: string;
-  status: 'pending' | 'approved' | 'rejected' | 'processed' | 'archived';
+  status: 'pending' | 'approved' | 'rejected' | 'completed' | 'processed' | 'archived';
   bank_info: any;
   admin_note: string | null;
   created_at: string;
@@ -716,33 +716,71 @@ export async function createPaymentAndConfirmBooking(payment: {
     if (!payment.user_id) {
       throw new Error('User id is required for wallet payment');
     }
-    await spendWalletBalance(
-      payment.user_id,
-      payment.amount,
-      payment.booking_id,
-      `Thanh toán vé máy bay #${payment.booking_id}`
-    );
+    // Atomicity note: the wallet debit happens BEFORE the booking/payment transaction.
+    // If the transaction below fails, the debit is rolled back here to prevent
+    // charging the wallet for a payment that never succeeded.
+    try {
+      await spendWalletBalance(
+        payment.user_id,
+        payment.amount,
+        payment.booking_id,
+        `Thanh toán vé máy bay #${payment.booking_id}`
+      );
+    } catch (walletErr) {
+      // Re-throw business errors (insufficient balance, invalid amount) as-is.
+      if (
+        walletErr instanceof Error &&
+        (walletErr.message.includes('Số dư') || walletErr.message.includes('Số tiền'))
+      ) {
+        throw walletErr;
+      }
+      console.error('Wallet debit failed, aborting payment:', walletErr);
+      throw new Error('Không thể trừ tiền ví. Vui lòng thử lại.');
+    }
   }
 
-  await sql.transaction([
-    sql`
+  try {
+    await sql.transaction([
+      sql`
       INSERT INTO payments (booking_id, method, status, amount)
       VALUES (${payment.booking_id}, ${payment.method}, 'completed', ${payment.amount})
     `,
-    sql`
+      sql`
       UPDATE bookings
-      SET status = 'confirmed', 
+      SET status = 'confirmed',
           discount_code_id = ${payment.discount_code_id || null},
           discount_amount = ${payment.discount_amount || 0},
           updated_at = NOW()
       WHERE id = ${payment.booking_id}
     `,
-    ...(payment.discount_code_id
-      ? [
-          sql`UPDATE discount_codes SET used_count = used_count + 1 WHERE id = ${payment.discount_code_id}`,
-        ]
-      : []),
-  ]);
+      ...(payment.discount_code_id
+        ? [
+            sql`UPDATE discount_codes SET used_count = used_count + 1 WHERE id = ${payment.discount_code_id}`,
+          ]
+        : []),
+    ]);
+  } catch (txErr) {
+    // Compensating transaction: if the payment/booking transaction fails AFTER the
+    // wallet has been debited, credit the money back so the user is never charged
+    // for a payment that did not succeed.
+    if (payment.method === 'wallet' && payment.user_id) {
+      try {
+        await refundWallet(
+          payment.user_id,
+          payment.amount,
+          payment.booking_id,
+          `Hoàn tiền do giao dịch thất bại #${payment.booking_id}`
+        );
+      } catch (refundErr) {
+        // Critical: money left the wallet but booking was not confirmed.
+        console.error(
+          `[PAYMENT][CRITICAL] Wallet debit occurred but transaction failed and auto-refund failed for booking ${payment.booking_id}. Manual reconciliation required.`,
+          { txErr, refundErr }
+        );
+      }
+    }
+    throw txErr;
+  }
 
   // Re-fetch both records (transaction guarantees consistency)
   const [pay] = (await sql`
@@ -936,7 +974,7 @@ export async function getAllRefunds(params?: {
 
 export async function updateRefundStatus(
   refundId: string,
-  status: 'pending' | 'approved' | 'rejected' | 'processed' | 'archived',
+  status: 'pending' | 'approved' | 'rejected' | 'completed' | 'processed' | 'archived',
   admin_note?: string
 ): Promise<RefundRecord> {
   const results = await sql`
@@ -1780,6 +1818,11 @@ export async function topupWallet(
   paymentMethodId?: string | null,
   description?: string
 ): Promise<WalletTransactionRecord> {
+  // Defense-in-depth: API layer validates too, but never trust callers.
+  // A negative amount here would DRAIN the wallet (acts as an unguarded withdraw).
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error('Số tiền nạp không hợp lệ');
+  }
   const wallet = await getOrCreateWallet(userId);
   const balanceBefore = parseFloat(String(wallet.balance));
   const balanceAfter = balanceBefore + amount;
@@ -1810,9 +1853,10 @@ export async function withdrawWallet(
   paymentMethodId: string,
   description?: string
 ): Promise<WalletTransactionRecord> {
+  // Validate BEFORE computing the new balance to avoid NaN arithmetic.
+  if (!Number.isFinite(amount) || amount <= 0) throw new Error('Số tiền rút không hợp lệ');
   const wallet = await getOrCreateWallet(userId);
   const balanceBefore = parseFloat(String(wallet.balance));
-  if (amount <= 0) throw new Error('Số tiền rút không hợp lệ');
   if (balanceBefore < amount) throw new Error('Số dư ví không đủ');
   const balanceAfter = balanceBefore - amount;
 
@@ -1842,9 +1886,10 @@ export async function spendWalletBalance(
   referenceId: string,
   description?: string
 ): Promise<WalletTransactionRecord> {
+  // Defense-in-depth: validate BEFORE reading/computing balances.
+  if (!Number.isFinite(amount) || amount <= 0) throw new Error('Số tiền thanh toán không hợp lệ');
   const wallet = await getOrCreateWallet(userId);
   const balanceBefore = parseFloat(String(wallet.balance));
-  if (amount <= 0) throw new Error('Số tiền thanh toán không hợp lệ');
   if (balanceBefore < amount) throw new Error('Số dư ví không đủ để thanh toán');
   const balanceAfter = balanceBefore - amount;
 
@@ -1856,6 +1901,40 @@ export async function spendWalletBalance(
     VALUES (
       ${wallet.id}, 'payment', ${-amount}, ${balanceBefore}, ${balanceAfter},
       ${description || 'Thanh toán bằng ví'}, ${referenceId}, 'completed'
+    )
+    RETURNING *
+  `;
+
+  await sql`
+    UPDATE user_wallets SET balance = ${balanceAfter}, updated_at = NOW()
+    WHERE id = ${wallet.id}
+  `;
+
+  return (result as WalletTransactionRecord[])[0];
+}
+
+export async function refundWallet(
+  userId: string,
+  amount: number,
+  referenceId: string,
+  description?: string
+): Promise<WalletTransactionRecord> {
+  // Defense-in-depth: validate BEFORE reading/computing balances.
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error('Số tiền hoàn không hợp lệ');
+  }
+  const wallet = await getOrCreateWallet(userId);
+  const balanceBefore = parseFloat(String(wallet.balance));
+  const balanceAfter = balanceBefore + amount;
+
+  const result = await sql`
+    INSERT INTO wallet_transactions (
+      wallet_id, type, amount, balance_before, balance_after,
+      description, reference_id, status
+    )
+    VALUES (
+      ${wallet.id}, 'refund', ${amount}, ${balanceBefore}, ${balanceAfter},
+      ${description || `Hoàn tiền vào ví #${referenceId}`}, ${referenceId}, 'completed'
     )
     RETURNING *
   `;

@@ -6,6 +6,7 @@ import {
   GET as getAdminFlights,
   POST as createAdminFlight,
 } from '@/app/api/quan-tri/chuyen-bay/route';
+import { PATCH as updateAdminRefund } from '@/app/api/quan-tri/hoan-tien/route';
 import { GET as getUserBookings } from '@/app/api/dat-ve/route';
 import * as db from '@/lib/db';
 
@@ -160,7 +161,8 @@ describe('API & RBAC Security Logic', () => {
         });
 
         const res = (await createAdminFlight(req))!;
-        expect(res.status).toBe(200);
+        // REST convention: resource creation returns 201 Created
+        expect(res.status).toBe(201);
       });
     });
 
@@ -190,6 +192,128 @@ describe('API & RBAC Security Logic', () => {
         const data = await res.json();
         expect(data.bookings).toEqual(mockBookings);
       });
+    });
+  });
+
+  describe('Admin Refund Processing (status → seats + wallet)', () => {
+    it('PATCH - requires admin role (403 for regular user)', async () => {
+      const req = new NextRequest('http://localhost:4028/api/quan-tri/hoan-tien', {
+        method: 'PATCH',
+        headers: { cookie: `access_token=${makeUserToken()}` },
+        body: JSON.stringify({ refundId: 'r1', status: 'approved' }),
+      });
+      const res = (await updateAdminRefund(req))!;
+      expect(res.status).toBe(403);
+    });
+
+    it('PATCH - rejects invalid status values', async () => {
+      const req = new NextRequest('http://localhost:4028/api/quan-tri/hoan-tien', {
+        method: 'PATCH',
+        headers: { cookie: `access_token=${makeAdminToken()}` },
+        body: JSON.stringify({ refundId: 'r2', status: 'hacked' }),
+      });
+      const res = (await updateAdminRefund(req))!;
+      expect(res.status).toBe(400);
+    });
+
+    it('PATCH - updates refund status to completed and returns success', async () => {
+      vi.spyOn(db, 'updateRefundStatus').mockResolvedValueOnce({
+        id: 'r3',
+        booking_id: 'b1',
+        user_id: 'u1',
+        reason: 'test',
+        bank_info: {},
+        status: 'completed',
+        admin_note: null,
+        created_at: '2026-01-01T00:00:00Z',
+        updated_at: '2026-01-01T00:00:00Z',
+      } as any);
+
+      const req = new NextRequest('http://localhost:4028/api/quan-tri/hoan-tien', {
+        method: 'PATCH',
+        headers: { cookie: `access_token=${makeAdminToken()}` },
+        body: JSON.stringify({ refundId: 'r3', status: 'completed' }),
+      });
+      const res = (await updateAdminRefund(req))!;
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(data.success).toBe(true);
+    });
+
+    it('PATCH - credits wallet when booking was paid via wallet', async () => {
+      const refundRow = { booking_id: 'b1', amount: 500000, user_id: 'u1' };
+      const paymentRow = { method: 'wallet', amount: 500000 };
+
+      vi.spyOn(db, 'updateRefundStatus').mockResolvedValueOnce({
+        id: 'r4',
+        booking_id: 'b1',
+        user_id: 'u1',
+        reason: 'test',
+        bank_info: {},
+        status: 'approved',
+        admin_note: null,
+        created_at: '2026-01-01T00:00:00Z',
+        updated_at: '2026-01-01T00:00:00Z',
+      } as any);
+
+      const { sql } = await import('@/lib/neon');
+      (sql as any).mockImplementation(async (strings: TemplateStringsArray) => {
+        const q = strings.join(' ');
+        if (q.includes('FROM refund_requests')) return [refundRow];
+        if (q.includes('FROM payments')) return [paymentRow];
+        return [];
+      });
+
+      const refundWalletSpy = vi
+        .spyOn(db, 'refundWallet')
+        .mockResolvedValueOnce({ id: 'tx-r', type: 'refund', amount: 500000 } as any);
+
+      const req = new NextRequest('http://localhost:4028/api/quan-tri/hoan-tien', {
+        method: 'PATCH',
+        headers: { cookie: `access_token=${makeAdminToken()}` },
+        body: JSON.stringify({ refundId: 'r4', status: 'approved' }),
+      });
+      const res = (await updateAdminRefund(req))!;
+      expect(res.status).toBe(200);
+      expect(refundWalletSpy).toHaveBeenCalledWith('u1', 500000, 'b1', expect.any(String));
+      const data = await res.json();
+      expect(data.message).toContain('wallet credited');
+    });
+
+    it('PATCH - does NOT credit wallet when booking was paid by card', async () => {
+      const refundRow = { booking_id: 'b2', amount: 300000, user_id: 'u2' };
+      const paymentRow = { method: 'card', amount: 300000 };
+
+      vi.spyOn(db, 'updateRefundStatus').mockResolvedValueOnce({
+        id: 'r5',
+        booking_id: 'b2',
+        user_id: 'u2',
+        reason: 'test',
+        bank_info: {},
+        status: 'approved',
+        admin_note: null,
+        created_at: '2026-01-01T00:00:00Z',
+        updated_at: '2026-01-01T00:00:00Z',
+      } as any);
+
+      const { sql } = await import('@/lib/neon');
+      (sql as any).mockImplementation(async (strings: TemplateStringsArray) => {
+        const q = strings.join(' ');
+        if (q.includes('FROM refund_requests')) return [refundRow];
+        if (q.includes('FROM payments')) return [paymentRow];
+        return [];
+      });
+
+      const refundWalletSpy = vi.spyOn(db, 'refundWallet');
+
+      const req = new NextRequest('http://localhost:4028/api/quan-tri/hoan-tien', {
+        method: 'PATCH',
+        headers: { cookie: `access_token=${makeAdminToken()}` },
+        body: JSON.stringify({ refundId: 'r5', status: 'approved' }),
+      });
+      const res = (await updateAdminRefund(req))!;
+      expect(res.status).toBe(200);
+      expect(refundWalletSpy).not.toHaveBeenCalled();
     });
   });
 });
