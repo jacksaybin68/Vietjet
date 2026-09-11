@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom CSS Variables */
+:root {
+  --background: #ffffff;
+  --dark-bg: #0f172a;
+  --foreground: #1e293b;
+  --foreground-muted: #94a3b8;
+  --foreground-subtle: #cbd5e1;
+  --border: #e2e8f0;
+  --dark-border: #334155;
+  --surface: #f8fafc;
+  --dark-surface: #1e293b;
+  
+  --vj-red: #E30613;
+  --vj-red-2: #c40005;
+  --vj-yellow: #FFD700;
+  --vj-yellow-2: #e6c200;
+  --vj-blue: #0077b6;
+  --vj-green: #2db35e;
+  --vj-purple: #7b2cbf;
+  --vj-navy: #0f172a;
+}
+
+[data-theme="dark"] {
+  --background: #0f172a;
+  --dark-bg: #0f172a;
+  --foreground: #f1f5f9;
+  --foreground-muted: #94a3b8;
+  --foreground-subtle: #64748b;
+  --border: #334155;
+  --dark-border: #334155;
+  --surface: #1e293b;
+  --dark-surface: #1e293b;
+}
+
+/* Ensure proper font loading */
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&family=KoHo:wght@300;400;500;600;700&display=swap');
+
+body {
+  font-family: 'KoHo', 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
+}
