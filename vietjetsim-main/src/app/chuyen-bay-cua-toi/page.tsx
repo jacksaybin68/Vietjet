@@ -567,23 +567,7 @@ export default function MyFlightsPage() {
                   );
                 })}
               </div>
-            ) : (
-              <section className="vj-card mx-auto max-w-[900px] p-10 text-center">
-                <div className="mx-auto mb-4 text-6xl opacity-30">✈️</div>
-                <h3 className="text-xl font-bold text-[var(--foreground)]">Chưa có đặt chỗ nào</h3>
-                <p className="text-sm text-[var(--foreground-muted)] mt-2 mb-6">
-                  Các chuyến bay bạn đặt sẽ hiển thị ở đây. Đặt vé đầu tiên để bắt đầu hành trình
-                  của bạn.
-                </p>
-                <Link
-                  href="/tim-ve"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[var(--vj-yellow)] text-[var(--vj-red)] font-black hover:bg-[var(--vj-yellow-2)] transition-colors"
-                >
-                  <FlightIcon className="h-4 w-4" /> Đặt vé ngay
-                </Link>
-              </section>
-            )}
-          </section>
+</section>
         )}
 
         {/* ===== Onglet Vé điện tử ===== */}
