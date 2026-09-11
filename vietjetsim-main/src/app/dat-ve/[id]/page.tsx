@@ -120,7 +120,9 @@ export default function BookingDetailPage() {
       <div className="min-h-screen flex items-center justify-center bg-[var(--surface)] dark:bg-[var(--dark-surface)]">
         <div className="text-center">
           <div className="w-10 h-10 sm:w-12 sm:h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-3 sm:mb-4" />
-          <p className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] font-medium">Đang tải thông tin đặt chỗ...</p>
+          <p className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] font-medium">
+            Đang tải thông tin đặt chỗ...
+          </p>
         </div>
       </div>
     );
@@ -133,7 +135,9 @@ export default function BookingDetailPage() {
           <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 border border-[var(--border)] dark:border-[var(--dark-border)]">
             <Icon name="ExclamationCircleIcon" size={32} className="text-[var(--primary)]" />
           </div>
-          <h2 className="text-lg sm:text-xl font-bold text-[var(--foreground)] dark:text-[var(--foreground)] mb-1.5 sm:mb-2">Không tìm thấy đặt chỗ</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-[var(--foreground)] dark:text-[var(--foreground)] mb-1.5 sm:mb-2">
+            Không tìm thấy đặt chỗ
+          </h2>
           <p className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mb-5 sm:mb-6">
             {error || 'Mã đặt chỗ không tồn tại hoặc đã bị xóa.'}
           </p>
@@ -182,12 +186,20 @@ export default function BookingDetailPage() {
             <div
               className="px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0"
               style={{
-                background: statusInfo.color.includes('var(--accent)') ? `rgba(255, 196, 0, 0.08)` :
-                           statusInfo.color.includes('var(--blue)') ? `rgba(37, 99, 212, 0.08)` :
-                           statusInfo.color.includes('var(--vj-purple)') ? `rgba(128, 117, 214, 0.08)` : `rgba(227, 30, 36, 0.08)`,
-                borderBottom: statusInfo.color.includes('var(--accent)') ? `1px solid rgba(255, 196, 0, 0.2)` :
-                              statusInfo.color.includes('var(--blue)') ? `1px solid rgba(37, 99, 212, 0.2)` :
-                              statusInfo.color.includes('var(--vj-purple)') ? `1px solid rgba(128, 117, 214, 0.2)` : `1px solid rgba(227, 30, 36, 0.2)`,
+                background: statusInfo.color.includes('var(--accent)')
+                  ? `rgba(255, 196, 0, 0.08)`
+                  : statusInfo.color.includes('var(--blue)')
+                    ? `rgba(37, 99, 212, 0.08)`
+                    : statusInfo.color.includes('var(--vj-purple)')
+                      ? `rgba(128, 117, 214, 0.08)`
+                      : `rgba(227, 30, 36, 0.08)`,
+                borderBottom: statusInfo.color.includes('var(--accent)')
+                  ? `1px solid rgba(255, 196, 0, 0.2)`
+                  : statusInfo.color.includes('var(--blue)')
+                    ? `1px solid rgba(37, 99, 212, 0.2)`
+                    : statusInfo.color.includes('var(--vj-purple)')
+                      ? `1px solid rgba(128, 117, 214, 0.2)`
+                      : `1px solid rgba(227, 30, 36, 0.2)`,
               }}
             >
               <div className="flex items-center gap-2 sm:gap-3">
@@ -195,7 +207,10 @@ export default function BookingDetailPage() {
                   className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full"
                   style={{ backgroundColor: statusInfo.color }}
                 />
-                <span className="font-bold text-[11px] sm:text-sm" style={{ color: statusInfo.color }}>
+                <span
+                  className="font-bold text-[11px] sm:text-sm"
+                  style={{ color: statusInfo.color }}
+                >
                   {statusInfo.label}
                 </span>
               </div>
@@ -209,14 +224,20 @@ export default function BookingDetailPage() {
               <div className="text-[10px] sm:text-xs font-bold text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] uppercase tracking-widest mb-0.5 sm:mb-1">
                 Mã đặt chỗ
               </div>
-              <div className="text-2xl sm:text-3xl font-black text-primary tracking-widest">{booking.id}</div>
+              <div className="text-2xl sm:text-3xl font-black text-primary tracking-widest">
+                {booking.id}
+              </div>
             </div>
 
             {/* Flight Info - responsive */}
             <div className="px-4 sm:px-6 py-4 sm:py-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4 sm:mb-6">
-                <div className="text-[10px] sm:text-sm font-bold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]">{booking.flight_no}</div>
-                <div className="text-[10px] sm:text-sm text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]">{formatDate(booking.depart_time)}</div>
+                <div className="text-[10px] sm:text-sm font-bold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]">
+                  {booking.flight_no}
+                </div>
+                <div className="text-[10px] sm:text-sm text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]">
+                  {formatDate(booking.depart_time)}
+                </div>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
@@ -225,7 +246,9 @@ export default function BookingDetailPage() {
                   <div className="text-2xl sm:text-3xl font-black text-[var(--foreground)] dark:text-[var(--foreground)]">
                     {formatTime(booking.depart_time)}
                   </div>
-                  <div className="text-base sm:text-lg font-bold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-0.5 sm:mt-1">{booking.from_code}</div>
+                  <div className="text-base sm:text-lg font-bold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-0.5 sm:mt-1">
+                    {booking.from_code}
+                  </div>
                 </div>
 
                 {/* Duration Line - responsive */}
@@ -238,7 +261,9 @@ export default function BookingDetailPage() {
                       <Icon name="PaperAirplaneIcon" size={16} className="text-primary rotate-90" />
                     </div>
                   </div>
-                  <div className="text-[10px] sm:text-xs text-primary mt-0.5 sm:mt-1">Bay thẳng</div>
+                  <div className="text-[10px] sm:text-xs text-primary mt-0.5 sm:mt-1">
+                    Bay thẳng
+                  </div>
                 </div>
 
                 {/* Arrival */}
@@ -246,7 +271,9 @@ export default function BookingDetailPage() {
                   <div className="text-2xl sm:text-3xl font-black text-[var(--foreground)] dark:text-[var(--foreground)]">
                     {formatTime(booking.arrive_time)}
                   </div>
-                  <div className="text-base sm:text-lg font-bold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-0.5 sm:mt-1">{booking.to_code}</div>
+                  <div className="text-base sm:text-lg font-bold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-0.5 sm:mt-1">
+                    {booking.to_code}
+                  </div>
                 </div>
               </div>
             </div>
@@ -273,15 +300,21 @@ export default function BookingDetailPage() {
                         <Icon name="UserIcon" size={14} className="text-primary" />
                       </div>
                       <div>
-                        <div className="font-semibold text-[var(--foreground)] dark:text-[var(--foreground)] text-[11px] sm:text-sm">{p.full_name}</div>
-                        <div className="text-[9px] sm:text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] capitalize">{p.passenger_type}</div>
+                        <div className="font-semibold text-[var(--foreground)] dark:text-[var(--foreground)] text-[11px] sm:text-sm">
+                          {p.full_name}
+                        </div>
+                        <div className="text-[9px] sm:text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] capitalize">
+                          {p.passenger_type}
+                        </div>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="font-bold text-[var(--foreground)] dark:text-[var(--foreground)] text-[10px] sm:text-sm">
                         Ghế {p.seat_number || 'Chưa chọn'}
                       </div>
-                      <div className="text-[9px] sm:text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] capitalize">{booking.class}</div>
+                      <div className="text-[9px] sm:text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] capitalize">
+                        {booking.class}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -291,17 +324,27 @@ export default function BookingDetailPage() {
             {/* Payment Info - responsive */}
             <div className="px-4 sm:px-6 py-4 sm:py-5 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] border-t border-[var(--border)] dark:border-[var(--dark-border)]">
               <div className="flex justify-between items-center mb-1.5 sm:mb-2">
-                <span className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] text-[10px] sm:text-sm">Giá vé</span>
-                <span className="font-semibold text-[var(--foreground)] dark:text-[var(--foreground)]">{booking.price.toLocaleString('vi-VN')}₫</span>
+                <span className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] text-[10px] sm:text-sm">
+                  Giá vé
+                </span>
+                <span className="font-semibold text-[var(--foreground)] dark:text-[var(--foreground)]">
+                  {booking.price.toLocaleString('vi-VN')}₫
+                </span>
               </div>
               {booking.payments.length > 0 && (
                 <div className="flex justify-between items-center mb-1.5 sm:mb-2">
-                  <span className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] text-[10px] sm:text-sm">Phương thức</span>
-                  <span className="font-semibold text-[var(--foreground)] dark:text-[var(--foreground)] capitalize">{booking.payments[0].method}</span>
+                  <span className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] text-[10px] sm:text-sm">
+                    Phương thức
+                  </span>
+                  <span className="font-semibold text-[var(--foreground)] dark:text-[var(--foreground)] capitalize">
+                    {booking.payments[0].method}
+                  </span>
                 </div>
               )}
               <div className="flex justify-between items-center pt-2.5 sm:pt-3 border-t border-[var(--border)] dark:border-[var(--dark-border)]">
-                <span className="font-bold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] text-[11px] sm:text-sm">Tổng thanh toán</span>
+                <span className="font-bold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] text-[11px] sm:text-sm">
+                  Tổng thanh toán
+                </span>
                 <span className="text-lg sm:text-xl font-black text-primary">
                   {booking.total_price.toLocaleString('vi-VN')}₫
                 </span>
@@ -312,8 +355,14 @@ export default function BookingDetailPage() {
             <div className="px-4 sm:px-6 py-4 sm:py-6 flex flex-col items-center border-t border-[var(--border)] dark:border-[var(--dark-border)]">
               <div className="w-24 h-24 sm:w-32 sm:h-32 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl flex items-center justify-center border-2 border-dashed border-[var(--border)] dark:border-[var(--dark-border)] mb-2.5 sm:mb-3">
                 <div className="text-center">
-                  <Icon name="QrCodeIcon" size={48} className="text-[var(--foreground-subtle)] mx-auto" />
-                  <div className="text-[10px] sm:text-xs text-[var(--foreground-subtle)] mt-0.5 sm:mt-1">QR Check-in</div>
+                  <Icon
+                    name="QrCodeIcon"
+                    size={48}
+                    className="text-[var(--foreground-subtle)] mx-auto"
+                  />
+                  <div className="text-[10px] sm:text-xs text-[var(--foreground-subtle)] mt-0.5 sm:mt-1">
+                    QR Check-in
+                  </div>
                 </div>
               </div>
               <p className="text-[10px] sm:text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] text-center">

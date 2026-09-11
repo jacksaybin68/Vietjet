@@ -329,7 +329,9 @@ function NotifCard({ notif, onMarkRead, onDismiss, onArchive, onSnooze }: NotifC
           </div>
 
           {/* Body */}
-          <p className="text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-1 leading-relaxed line-clamp-2">{notif.body}</p>
+          <p className="text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-1 leading-relaxed line-clamp-2">
+            {notif.body}
+          </p>
 
           {/* Badges row */}
           <div className="flex items-center gap-2 mt-2 flex-wrap">
@@ -621,19 +623,19 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
       <div className="px-5 py-4 border-b border-[var(--border)]">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center bg-red-50 dark:bg-red-900/10"
-            >
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-red-50 dark:bg-red-900/10">
               <Icon name="BellIcon" size={16} className="text-red-500 dark:text-red-400" />
             </div>
             <div>
-              <h2 className="font-bold text-base leading-tight text-[var(--foreground)] dark:text-[var(--foreground)]">Trung tâm thông báo</h2>
-              <p className="text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]">Cập nhật đặt vé, chuyến bay & khuyến mãi</p>
+              <h2 className="font-bold text-base leading-tight text-[var(--foreground)] dark:text-[var(--foreground)]">
+                Trung tâm thông báo
+              </h2>
+              <p className="text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]">
+                Cập nhật đặt vé, chuyến bay & khuyến mãi
+              </p>
             </div>
             {unreadCount > 0 && (
-              <span
-                className="text-white text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--primary)]"
-              >
+              <span className="text-white text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--primary)]">
                 {unreadCount}
               </span>
             )}
@@ -757,7 +759,9 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
           <div className="w-14 h-14 bg-[var(--surface-2)] rounded-2xl flex items-center justify-center mb-3">
             <Icon name="BellSlashIcon" size={28} className="text-[var(--foreground-subtle)]" />
           </div>
-          <p className="font-bold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] text-sm">Không có thông báo</p>
+          <p className="font-bold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] text-sm">
+            Không có thông báo
+          </p>
           <p className="text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] mt-1 max-w-xs">
             {searchQuery || activeType !== 'all' || showUnreadOnly
               ? 'Không tìm thấy thông báo phù hợp với bộ lọc.'

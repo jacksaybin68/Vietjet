@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
 import { verifyAdminRequest } from '@/lib/admin-auth';
-import {
-  getAllRefunds,
-  updateRefundStatus,
-  getBookingById,
-  refundWallet,
-} from '@/lib/db';
+import { getAllRefunds, updateRefundStatus, getBookingById, refundWallet } from '@/lib/db';
 import { verifyAccessToken } from '@/lib/auth';
 
 // ─── GET: Get all refund requests (admin) ───────────────────────────────────

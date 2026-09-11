@@ -280,11 +280,17 @@ export default function PopularRoutesSection() {
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
-                      <span className="text-[11px] md:text-sm font-black text-vj-text dark:text-white" style={{ fontWeight: 900 }}>
+                      <span
+                        className="text-[11px] md:text-sm font-black text-vj-text dark:text-white"
+                        style={{ fontWeight: 900 }}
+                      >
                         {route?.fromCode}
                       </span>
                       <MdArrowForward className="w-2.5 h-2.5 md:w-3 md:h-3 sm:w-3.5 sm:h-3.5 shrink-0 text-vjred" />
-                      <span className="text-[11px] md:text-sm font-black text-vj-text dark:text-white" style={{ fontWeight: 900 }}>
+                      <span
+                        className="text-[11px] md:text-sm font-black text-vj-text dark:text-white"
+                        style={{ fontWeight: 900 }}
+                      >
                         {route?.toCode}
                       </span>
                       <span
@@ -297,7 +303,10 @@ export default function PopularRoutesSection() {
                         {route?.tag}
                       </span>
                     </div>
-                    <p className="text-[10px] md:text-xs truncate mt-0.5 text-vj-gray dark:text-white/60" style={{ fontWeight: 500 }}>
+                    <p
+                      className="text-[10px] md:text-xs truncate mt-0.5 text-vj-gray dark:text-white/60"
+                      style={{ fontWeight: 500 }}
+                    >
                       {route?.from} → {route?.to} · {route?.duration}
                     </p>
                   </div>
@@ -318,7 +327,7 @@ export default function PopularRoutesSection() {
       </div>
 
       {/* Promo bento grid */}
-      <div className="py-4 md:py-6 sm:py-7" style={{ background: '#F7F7F7' }} >
+      <div className="py-4 md:py-6 sm:py-7" style={{ background: '#F7F7F7' }}>
         <div className="max-w-7xl mx-auto px-3 md:px-4 sm:px-6 lg:px-8">
           {/* Header with parallax drift */}
           <div
@@ -379,7 +388,9 @@ export default function PopularRoutesSection() {
                   <h3 className="text-sm md:text-base sm:text-lg font-black text-white leading-tight font-body">
                     {banner?.title}
                   </h3>
-                  <p className="text-[10px] md:text-xs mt-0.5 mb-1.5 sm:mb-2 font-koho">{banner?.subtitle}</p>
+                  <p className="text-[10px] md:text-xs mt-0.5 mb-1.5 sm:mb-2 font-koho">
+                    {banner?.subtitle}
+                  </p>
                   <span
                     className="inline-block text-[10px] md:text-xs font-black px-2.5 md:px-3 py-1 md:py-1.5 rounded-lg text-navy dark:text-navy-dark"
                     style={{

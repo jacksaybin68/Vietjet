@@ -193,9 +193,11 @@ export default function ProfileTab({ user }: { user: User }) {
 
   const inputBaseClass =
     'w-full px-4 py-3 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]';
-  const inputDisabledClass = 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] cursor-not-allowed';
+  const inputDisabledClass =
+    'bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] cursor-not-allowed';
   const inputErrorClass = 'border-[var(--primary)] bg-red-50 dark:bg-red-900/10';
-  const labelClass = 'block text-sm font-medium mb-1.5 font-[KoHo,sans-serif] text-[var(--foreground)] dark:text-[var(--foreground)]';
+  const labelClass =
+    'block text-sm font-medium mb-1.5 font-[KoHo,sans-serif] text-[var(--foreground)] dark:text-[var(--foreground)]';
   const errorTextClass = 'text-xs text-[var(--primary)] mt-1 font-[Be Vietnam Pro,sans-serif]';
 
   return (
@@ -203,7 +205,9 @@ export default function ProfileTab({ user }: { user: User }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[var(--foreground)] dark:text-[var(--foreground)]">Hồ sơ cá nhân</h2>
+          <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[var(--foreground)] dark:text-[var(--foreground)]">
+            Hồ sơ cá nhân
+          </h2>
           <p className="text-sm text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
             Quản lý thông tin tài khoản và mật khẩu của bạn
           </p>
@@ -230,7 +234,9 @@ export default function ProfileTab({ user }: { user: User }) {
             <div className="relative inline-block mb-4">
               <div
                 className="w-32 h-32 rounded-full overflow-hidden border-4 border-[var(--primary)]/10 mx-auto"
-                style={{ background: 'linear-gradient(135deg, var(--vj-navy) 0%, var(--vj-navy-2) 100%)' }}
+                style={{
+                  background: 'linear-gradient(135deg, var(--vj-navy) 0%, var(--vj-navy-2) 100%)',
+                }}
               >
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />

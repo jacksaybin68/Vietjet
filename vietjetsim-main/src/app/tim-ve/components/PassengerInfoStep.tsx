@@ -222,7 +222,11 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
                 >
                   {isSubmitting ? (
                     <>
-                      <svg className="animate-spin w-3.5 h-3.5 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none">
+                      <svg
+                        className="animate-spin w-3.5 h-3.5 sm:w-4 sm:h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
                         <circle
                           className="opacity-25"
                           cx="12"
@@ -291,11 +295,15 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
                       </div>
                     </div>
                   </div>
-                  <div className="text-[10px] sm:text-xs text-[var(--foreground-subtle)]">{flight.duration} · Bay thẳng</div>
+                  <div className="text-[10px] sm:text-xs text-[var(--foreground-subtle)]">
+                    {flight.duration} · Bay thẳng
+                  </div>
                 </div>
                 <div className="space-y-1.5 sm:space-y-2 text-[11px] sm:text-sm">
                   <div className="flex justify-between">
-                    <span className="text-[var(--foreground-muted)]">Giá vé ({passengerCount} người)</span>
+                    <span className="text-[var(--foreground-muted)]">
+                      Giá vé ({passengerCount} người)
+                    </span>
                     <span className="font-semibold text-[var(--foreground)]">
                       {(flight.price * passengerCount).toLocaleString('vi-VN')}₫
                     </span>

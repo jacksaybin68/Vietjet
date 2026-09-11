@@ -2,13 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import {
-  MdFlight,
-  MdCheckCircle,
-  MdPending,
-  MdAttachMoney,
-  MdPeople,
-} from 'react-icons/md';
+import { MdFlight, MdCheckCircle, MdPending, MdAttachMoney, MdPeople } from 'react-icons/md';
 
 interface StatsProps {
   totalBookings: number;
@@ -104,7 +98,9 @@ export default function MyFlightsStats({
                     <div className="h-1 flex-1 rounded-full bg-[var(--vj-red)]/20 overflow-hidden">
                       <div
                         className="h-full rounded-full bg-[var(--vj-red)] transition-all"
-                        style={{ width: `${Math.min(100, (dest.count / Math.max(1, frequentDestinations[0]?.count || 1)) * 100)}%` }}
+                        style={{
+                          width: `${Math.min(100, (dest.count / Math.max(1, frequentDestinations[0]?.count || 1)) * 100)}%`,
+                        }}
                       />
                     </div>
                   </div>

@@ -126,7 +126,8 @@ export default function DealsSection() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
-  const visible = typeof window !== 'undefined' && sectionRef.current ? sectionRef.current.isConnected : false;
+  const visible =
+    typeof window !== 'undefined' && sectionRef.current ? sectionRef.current.isConnected : false;
 
   if (!visible) return null;
 
@@ -158,10 +159,7 @@ export default function DealsSection() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {DEALS?.map((deal) => (
-            <DealCard
-              key={deal.route}
-              deal={deal}
-            />
+            <DealCard key={deal.route} deal={deal} />
           ))}
         </div>
 
