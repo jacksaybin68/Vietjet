@@ -16,13 +16,13 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const bookingCode = searchParams.get('bookingCode');
     const lastName = searchParams.get('lastName');
-    const firstName = searchParams.get('firstName');
+    const firstName = searchParams.get('firstName') || '';
 
-    if (!bookingCode || !lastName || !firstName) {
+    if (!bookingCode || !lastName) {
       return NextResponse.json(
         {
           error: 'Bad Request',
-          message: 'Missing required parameters: bookingCode, lastName, firstName',
+          message: 'Missing required parameters: bookingCode, lastName',
         },
         { status: 400 }
       );

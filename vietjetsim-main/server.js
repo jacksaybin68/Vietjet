@@ -5,7 +5,7 @@ const next = require('next');
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = '127.0.0.1';
-const port = parseInt(process.env.PORT, 10) || 3002;
+const port = 4028;
 
 // Workaround for Node.js v26.7.0 uv_interface_addresses bug
 // Disable network interface detection

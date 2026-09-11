@@ -2201,7 +2201,7 @@ export interface CheckInSearchResult {
 export async function searchCheckIn(
   bookingCode: string,
   lastName: string,
-  firstName: string
+  firstName = ''
 ): Promise<CheckInSearchResult | null> {
   const bookingResult = await sql`
     SELECT

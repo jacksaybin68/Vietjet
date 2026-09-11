@@ -67,7 +67,6 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
   );
   const [bookingCode, setBookingCode] = useState(prefillBookingId);
   const [lastName, setLastName] = useState('');
-  const [firstName, setFirstName] = useState('');
   const [loading, setLoading] = useState(false);
   const [checkInData, setCheckInData] = useState<CheckInData | null>(null);
   const [agreed, setAgreed] = useState(false);
@@ -83,17 +82,12 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
         toast.error('Lỗi', 'Vui lòng nhập họ');
         return;
       }
-      if (!firstName.trim()) {
-        toast.error('Lỗi', 'Vui lòng nhập tên đệm và tên');
-        return;
-      }
 
       setLoading(true);
       try {
         const res = await fetch(
           `/api/checkin?bookingCode=${encodeURIComponent(bookingCode.trim())}` +
-            `&lastName=${encodeURIComponent(lastName.trim())}` +
-            `&firstName=${encodeURIComponent(firstName.trim())}`,
+            `&lastName=${encodeURIComponent(lastName.trim())}`,
           { cache: 'no-store' }
         );
         const data = await res.json();
@@ -154,7 +148,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
         setLoading(false);
       }
     },
-    [bookingCode, lastName, firstName, toast]
+    [bookingCode, lastName, toast]
   );
 
   const handleCheckIn = useCallback(async () => {
@@ -233,45 +227,8 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
       <Header />
       <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
 
-      {/* ===== HERO RED — official Vietjet ===== */}
-      <section className="relative overflow-hidden bg-[var(--vj-red)]">
-        <div className="absolute inset-0 opacity-5 pointer-events-none">
-          <img
-            src="/images/hero/banner-2-skyboss.jpg"
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        </div>
-        <div className="relative mx-auto max-w-[1000px] px-4 py-12 sm:px-6 lg:px-8 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 border border-white/30 text-white mb-4">
-            <FlightIcon className="h-9 w-9" />
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight uppercase text-white italic">
-            Check-In <span className="text-[var(--vj-yellow)]">Online</span>
-          </h1>
-          <p className="mt-3 max-w-2xl mx-auto text-sm sm:text-base text-white/90">
-            Dịch vụ áp dụng cho tất cả các chuyến bay của Vietjet. Mở trước 24 giờ đến 60 phút trước
-            giờ bay.
-          </p>
-          <div className="mt-4 flex flex-wrap justify-center gap-2 text-[12px] font-semibold text-white bg-white/10 rounded-full px-4 py-1.5">
-            <span>⏰ Mở: trước 24 giờ → đóng: trước 60 phút</span>
-            <span>·</span>
-            <span>🪑 Chọn chỗ ngồi miễn phí</span>
-            <span>·</span>
-            <span>🎫 Thẻ lên máy bay mobile</span>
-          </div>
-        </div>
-        <svg
-          className="absolute left-0 right-0 bottom-0 h-6 w-full text-white"
-          viewBox="0 0 1440 24"
-          preserveAspectRatio="none"
-        >
-          <path d="M0,24L48,20C96,10,192,2,288,13C384,20,480,24,576,15C672,6,768,2,864,18C960,24,1056,16,1152,3C1248,2,1344,12,1392,20L1440,24L1440,24L1392,24C1344,24,1248,24,1152,24C1056,24,960,24,864,24C768,24,672,24,576,24C480,24,384,24,288,24C192,24,96,24,48,24L0,24Z" />
-        </svg>
-      </section>
-
       {/* ===== STEPPER horizontal ===== */}
-      <div className="mx-auto max-w-[700px] mt-[-10px] px-4">
+      <div className="mx-auto max-w-[700px] mt-4 px-4">
         <div className="flex items-center justify-between gap-2">
           {STEPS.map((s, i) => (
             <React.Fragment key={s.id}>
@@ -342,7 +299,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                   </p>
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div>
                     <label className="mb-1 block text-xs font-bold uppercase text-[var(--vj-text-gray)]">
                       Họ (Surname) <span className="text-[var(--vj-red)]">*</span>
@@ -354,18 +311,6 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       placeholder="NGUYEN"
-                      className={fieldClass}
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-bold uppercase text-[var(--vj-text-gray)]">
-                      Prénom
-                    </label>
-                    <input
-                      type="text"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      placeholder="VAN A"
                       className={fieldClass}
                     />
                   </div>
