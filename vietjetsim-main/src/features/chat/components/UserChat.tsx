@@ -20,26 +20,16 @@ interface Conversation {
   unread_by_user: number;
 }
 
-// ─── API Helpers ──────────────────────────────────────────────────────────────
+// ─── API ──────────────────────────────────────────────────────────────────────
 
-async function fetchAPI(endpoint: string, options?: RequestInit) {
-  const res = await fetch(`/api${endpoint}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
-    credentials: 'include',
-    ...options,
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.error || 'Request failed');
-  }
-
-  return data;
-}
+import {
+  listConversations,
+  getConversationMessages,
+  sendChatMessage as sendChatMessageRequest,
+  getChatPresence,
+  updateChatPresence,
+  markConversationRead,
+} from '../services';
 
 export default function UserChat() {
   const { user } = useAuth();
@@ -72,10 +62,7 @@ export default function UserChat() {
     async (convId: string) => {
       if (!user) return;
       try {
-        await fetchAPI('/chat/mark-read', {
-          method: 'POST',
-          body: JSON.stringify({ conversation_id: convId }),
-        });
+        await markConversationRead(convId);
         setMessages((prev) =>
           prev.map((m) =>
             m.sender_role === 'admin' && !m.read_at
@@ -95,11 +82,12 @@ export default function UserChat() {
     if (!user) return;
     setLoading(true);
     try {
-      const data = await fetchAPI('/chat/conversations');
-      if (data.conversation) {
-        setConversation(data.conversation);
-        setUnreadCount(data.conversation.unread_by_user || 0);
-        const msgsData = await fetchAPI(`/chat?conversation_id=${data.conversation.id}`);
+      const data = await listConversations();
+      const conversation = data.conversations?.[0];
+      if (conversation) {
+        setConversation(conversation);
+        setUnreadCount(conversation.unread_by_user || 0);
+        const msgsData = await getConversationMessages(conversation.id);
         setMessages(msgsData.messages || []);
         lastMessageCountRef.current = (msgsData.messages || []).length;
       }
@@ -110,23 +98,17 @@ export default function UserChat() {
     }
   }, [user]);
 
+  // The server derives the participant from the session cookie, so there is no
+  // payload to send: fetching the list both finds and (for a first-time user)
+  // creates the caller's conversation.
   const createConversation = useCallback(async () => {
     if (!user) return null;
     try {
-      const data = await fetchAPI('/chat/conversations', {
-        method: 'POST',
-        body: JSON.stringify({
-          user_id: user.id,
-          user_email: user.email || '',
-          user_name: user.fullName || user.email?.split('@')[0] || 'Khách hàng',
-          last_message: '',
-          unread_by_admin: 0,
-          unread_by_user: 0,
-        }),
-      });
-      if (data.conversation) {
-        setConversation(data.conversation);
-        return data.conversation as Conversation;
+      const data = await listConversations();
+      const existing = data.conversations?.[0];
+      if (existing) {
+        setConversation(existing);
+        return existing as Conversation;
       }
       return null;
     } catch (err) {
@@ -139,7 +121,7 @@ export default function UserChat() {
   const pollMessages = useCallback(async () => {
     if (!conversation?.id) return;
     try {
-      const data = await fetchAPI(`/chat?conversation_id=${conversation.id}`);
+      const data = await getConversationMessages(conversation.id);
       const newMessages = data.messages || [];
       if (newMessages.length !== lastMessageCountRef.current) {
         setMessages(newMessages);
@@ -161,7 +143,7 @@ export default function UserChat() {
   const pollPresence = useCallback(async () => {
     if (!conversation?.id) return;
     try {
-      const data = await fetchAPI(`/chat/presence?conversation_id=${conversation.id}`);
+      const data = await getChatPresence(conversation.id);
       if (data.presence) {
         setAdminOnline(data.presence.is_online ?? false);
         setAdminTyping(data.presence.is_typing ?? false);
@@ -217,17 +199,11 @@ export default function UserChat() {
     if (!conversation?.id) return;
 
     // Send typing indicator via API
-    fetchAPI('/chat/typing', {
-      method: 'POST',
-      body: JSON.stringify({ conversation_id: conversation.id, is_typing: true }),
-    }).catch(() => {});
+    updateChatPresence(conversation.id, { is_typing: true }).catch(() => {});
 
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
-      fetchAPI('/chat/typing', {
-        method: 'POST',
-        body: JSON.stringify({ conversation_id: conversation.id, is_typing: false }),
-      }).catch(() => {});
+      updateChatPresence(conversation.id, { is_typing: false }).catch(() => {});
     }, 2000);
   };
 
@@ -240,10 +216,7 @@ export default function UserChat() {
     // Clear typing indicator
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     if (conversation?.id) {
-      fetchAPI('/chat/typing', {
-        method: 'POST',
-        body: JSON.stringify({ conversation_id: conversation.id, is_typing: false }),
-      }).catch(() => {});
+      updateChatPresence(conversation.id, { is_typing: false }).catch(() => {});
     }
 
     try {
@@ -253,15 +226,7 @@ export default function UserChat() {
         if (!conv) return;
       }
 
-      await fetchAPI('/chat', {
-        method: 'POST',
-        body: JSON.stringify({
-          conversation_id: conv.id,
-          sender_id: user.id,
-          sender_role: 'user',
-          content: text,
-        }),
-      });
+      await sendChatMessageRequest(conv.id, text);
 
       // Optimistically update messages
       setMessages((prev) => [

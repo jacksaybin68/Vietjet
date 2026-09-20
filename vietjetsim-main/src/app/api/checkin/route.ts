@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthRequest } from '@/lib/auth';
+import { isAdminRole } from '@/lib/roles';
+import { getBookingById } from '@/lib/db';
 import { sql } from '@/lib/neon';
 import { searchCheckIn, createCheckIn, getCheckInStatusByBookingId } from '@/lib/db';
 import { rateLimit } from '@/lib/rate-limit';
@@ -104,6 +106,22 @@ export async function POST(request: NextRequest) {
           message: `Missing required fields: ${missingFields.join(', ')}`,
         },
         { status: 400 }
+      );
+    }
+
+    // Self-service check-in must only touch the caller's own booking; without
+    // this, any signed-in user could check in a stranger's reservation by id.
+    const booking = await getBookingById(body.bookingId);
+    if (!booking) {
+      return NextResponse.json(
+        { error: 'Not Found', message: 'Không tìm thấy đặt chỗ' },
+        { status: 404 }
+      );
+    }
+    if (!isAdminRole(user.role) && booking.user_id !== user.userId) {
+      return NextResponse.json(
+        { error: 'Forbidden', message: 'Không có quyền truy cập' },
+        { status: 403 }
       );
     }
 

@@ -4,6 +4,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import type { JWTPayload } from '@/lib/auth';
+import { isAdminRole as sharedIsAdminRole } from '@/lib/roles';
+import { isPublicApiRoute, isPublicRoute } from '@/lib/route-access';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -21,6 +23,10 @@ if (!JWT_SECRET || JWT_SECRET === 'dev-secret-key-do-not-use-in-production') {
 }
 
 const effectiveJwtSecret = JWT_SECRET || 'dev-secret-key-do-not-use-in-production';
+
+// Must match `CSRF_COOKIE_NAME` in `@/lib/csrf-client`; duplicated because the
+// Edge middleware bundle cannot import `next/headers`-dependent modules.
+const CSRF_COOKIE_NAME = 'csrf_token';
 
 // ─── HMAC-SHA256 Verification (Edge Runtime Compatible) ───────────────────────
 
@@ -112,18 +118,11 @@ function base64UrlDecode(str: string): string {
 }
 
 /**
- * Check if a role has admin-level access.
- * Supports both legacy 'admin' and RBAC system roles.
+ * Delegates to the shared role rules so middleware and API routes cannot
+ * disagree about who is an admin.
  */
 function isAdminRole(role: string): boolean {
-  return (
-    role === 'admin' ||
-    role === 'super_admin' ||
-    role === 'admin_ops' ||
-    role === 'admin_finance' ||
-    role === 'admin_support' ||
-    role === 'admin_content'
-  );
+  return sharedIsAdminRole(role);
 }
 
 export async function middleware(request: NextRequest) {
@@ -153,38 +152,14 @@ export async function middleware(request: NextRequest) {
     user = await verifyJwtSignature(accessToken, effectiveJwtSecret);
   }
 
-  // Define public routes that don't require authentication
-  const publicRoutes = [
-    '/dang-nhap',
-    '/trang-chu',
-    '/chuyen-bay-cua-toi',
-    '/lam-thu-tuc',
-    '/dat-ve',
-    '/tim-ve',
-  ];
-  const isPublicRoute =
-    pathname === '/' ||
-    publicRoutes.some((route) => pathname === route || pathname.startsWith(route + '/'));
+  const publicPage = isPublicRoute(pathname);
+  const publicApi = isPublicApiRoute(pathname);
 
   // API routes for auth are public
   const isAuthApiRoute = pathname.startsWith('/api/xac-thuc/');
 
-  // Public API routes that don't require authentication
-  const publicApiRoutes = [
-    '/api/dat-ve',
-    '/api/checkin',
-    '/api/checkin/',
-    '/api/flights',
-    '/api/flights/',
-    '/api/airports',
-    '/api/search',
-  ];
-  const isPublicApiRoute = publicApiRoutes.some(
-    (route) => pathname === route || pathname.startsWith(route + '/')
-  );
-
   // If not authenticated and trying to access protected route
-  if (!user && !isPublicRoute && !isAuthApiRoute && !isPublicApiRoute) {
+  if (!user && !publicPage && !isAuthApiRoute && !publicApi) {
     const redirectUrl = new URL('/dang-nhap', request.url);
     redirectUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(redirectUrl);
@@ -233,7 +208,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // For protected API routes, verify JWT and attach user to headers
-  if (pathname.startsWith('/api/') && !isAuthApiRoute && !isPublicApiRoute) {
+  if (pathname.startsWith('/api/') && !isAuthApiRoute && !publicApi) {
     if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized', message: 'Authentication required' },
@@ -252,6 +227,22 @@ export async function middleware(request: NextRequest) {
       request: {
         headers: requestHeaders,
       },
+    });
+  }
+
+  // Bootstrap the double-submit CSRF cookie for any browser session that does
+  // not have one yet, so mutation calls guarded by `validateCsrfOrReject`
+  // succeed without requiring an explicit token-fetch round trip.
+  if (!request.cookies.get(CSRF_COOKIE_NAME)?.value) {
+    const bytes = new Uint8Array(32);
+    crypto.getRandomValues(bytes);
+    const token = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+    response.cookies.set(CSRF_COOKIE_NAME, token, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 60 * 60 * 24,
     });
   }
 

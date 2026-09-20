@@ -7,7 +7,7 @@ This document contains essential information for advanced development on the `Vi
 ### Prerequisites
 - Node.js v20+
 - npm (Node Package Manager)
-- Supabase project credentials
+- A Neon Postgres database (optional for local dev — see below)
 
 ### Setup Steps
 1.  **Install dependencies**:
@@ -19,11 +19,11 @@ This document contains essential information for advanced development on the `Vi
     ```bash
     cp .env.local.example .env.local
     ```
-    Populate `.env.local` with your Supabase credentials:
-    - `NEXT_PUBLIC_SUPABASE_URL`
-    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+    Populate `.env.local` with your Neon credentials and JWT secrets:
+    - `DATABASE_URL` (leave empty to use the in-memory mock database)
+    - `JWT_SECRET`, `JWT_REFRESH_SECRET`
 3.  **Database Migration**:
-    Run the SQL migrations located in `supabase/migrations/` in the Supabase SQL Editor.
+    Run the SQL migrations located in `migrations/` in filename order against your Neon database (any `psql` client or the Neon SQL Editor).
 4.  **Running the Server**:
     ```bash
     npm run dev
@@ -46,8 +46,8 @@ This project uses **Vitest** as the test runner.
 
 ### Guidelines for New Tests
 - Keep tests colocated with the logic being tested or inside `src/test/` for broader integration tests.
-- Mock external dependencies like Supabase client when necessary.
-- Focus on RLS policies and API security as these are critical.
+- Mock external dependencies like the Neon client (`@/lib/neon`) when necessary.
+- Focus on RLS-equivalent query scoping (user_id filters) and API security as these are critical.
 - Use `vitest` assertions (`expect`).
 
 ### Simple Test Example
@@ -70,5 +70,5 @@ test('environment verification', () => {
 
 ### Debugging
 - Use `console.warn` and `console.error` for logging.
-- Check Supabase RLS policies if data is not loading (most common cause for "empty results").
-- Use `db:check` script (`npm run db:check`) to verify database connection settings.
+- Check query scoping (`user_id` filters) if data is not loading (most common cause for "empty results").
+- Run `npm run db:check` to verify database connection settings.

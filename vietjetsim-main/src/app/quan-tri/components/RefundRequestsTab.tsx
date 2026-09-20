@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
+import { listRefunds, updateRefund } from '@/features/admin';
+import { getApiErrorMessage } from '@/shared/services';
 
 interface ToastAPI {
   success: (title: string, message?: string, options?: object) => void;
@@ -110,17 +112,9 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/quan-tri/hoan-tien', {
-        credentials: 'include',
-      });
-      const result = await res.json();
-      if (!res.ok) {
-        console.error('Load refund requests error:', result.error);
-        setError(result.error || 'Không thể tải dữ liệu');
-        return;
-      }
+      const result = await listRefunds();
       setRequests((result.refunds || []).map(mapRow));
-    } catch (e: any) {
+    } catch (e) {
       console.error('Load refund requests error:', e);
       setError('Không thể tải dữ liệu');
     } finally {
@@ -168,22 +162,11 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
     setProcessingId(selectedRequest.id);
     try {
       const newStatus = modalAction === 'approve' ? 'approved' : 'rejected';
-      const res = await fetch(`/api/quan-tri/hoan-tien`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          refund_id: selectedRequest.id,
-          status: newStatus,
-          admin_note: adminNote.trim() || null,
-        }),
+      await updateRefund({
+        refundId: selectedRequest.id,
+        status: newStatus,
+        admin_note: adminNote.trim() || undefined,
       });
-      const result = await res.json();
-      if (!res.ok) {
-        console.error('Update refund error:', result.error);
-        onToast?.error('Lỗi xử lý', 'Không thể cập nhật trạng thái hoàn tiền. Vui lòng thử lại.');
-        return;
-      }
       // Optimistic update
       setRequests((prev) =>
         prev.map((r) =>
@@ -217,7 +200,10 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
       closeModal();
     } catch (e) {
       console.error('Update refund error:', e);
-      onToast?.error('Lỗi hệ thống', 'Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.');
+      onToast?.error(
+        'Lỗi hệ thống',
+        getApiErrorMessage(e, 'Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.')
+      );
     } finally {
       setProcessingId(null);
     }

@@ -1,6 +1,8 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
+import { getSystemSettings, updateSystemSettings } from '@/features/admin';
+import { getApiErrorMessage } from '@/shared/services';
 
 interface SystemSetting {
   id: string;
@@ -130,17 +132,9 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
     setIsLoading(true);
     setHasError(false);
     try {
-      const res = await fetch('/api/quan-tri/cai-dat', {
-        credentials: 'include',
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setSettings(data.settingsObject || {});
-        setLocalSettings(data.settingsObject || {});
-      } else {
-        setHasError(true);
-      }
+      const data = await getSystemSettings();
+      setSettings(data.settingsObject || {});
+      setLocalSettings(data.settingsObject || {});
     } catch {
       setHasError(true);
     } finally {
@@ -167,24 +161,12 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
     setIsSaving(true);
 
     try {
-      const res = await fetch('/api/quan-tri/cai-dat', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ settings: localSettings }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setSettings(localSettings);
-        setHasChanges(false);
-        onToast?.success('Lưu thành công', 'Các cài đặt đã được cập nhật.');
-      } else {
-        onToast?.error('Lỗi', data.message || 'Không thể lưu cài đặt.');
-      }
-    } catch (err: any) {
-      onToast?.error('Lỗi mạng', err.message || 'Kết nối thất bại.');
+      await updateSystemSettings({ settings: localSettings });
+      setSettings(localSettings);
+      setHasChanges(false);
+      onToast?.success('Lưu thành công', 'Các cài đặt đã được cập nhật.');
+    } catch (err) {
+      onToast?.error('Lỗi', getApiErrorMessage(err, 'Không thể lưu cài đặt.'));
     } finally {
       setIsSaving(false);
     }

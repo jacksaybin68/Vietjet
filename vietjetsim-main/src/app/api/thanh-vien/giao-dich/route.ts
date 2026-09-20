@@ -1,27 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAccessToken } from '@/lib/auth';
-import { getOrEnrollLoyalty, getLoyaltyTransactions } from '@/lib/db';
+import { verifyAuthRequest } from '@/lib/auth';
+import { getLoyaltyTransactions } from '@/lib/db';
+import { parsePaginationParams, getPaginationMeta } from '@/lib/pagination';
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get('access_token')?.value;
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { user, error, response } = await verifyAuthRequest(request);
+    if (error || !user) return response!;
 
-    const payload = verifyAccessToken(token);
-    if (!payload) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
+    const payload = user;
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const { page, limit } = parsePaginationParams(searchParams);
 
-    const loyalty = await getOrEnrollLoyalty(payload.userId);
     const result = await getLoyaltyTransactions(payload.userId, { page, limit });
 
-    return NextResponse.json({ transactions: result.transactions });
+    return NextResponse.json({
+      transactions: result.transactions,
+      pagination: getPaginationMeta(page, limit, result.total),
+    });
   } catch (error) {
     console.error('Error in GET /api/thanh-vien/giao-dich:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -2,18 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { getAllUsers, updateUserRole, findUserById, deleteUser } from '@/lib/db';
 import { canManageRole } from '@/lib/rbac';
+import { ASSIGNABLE_ROLES, isAssignableRole } from '@/lib/roles';
+import { isAccountLocked } from '@/lib/account-lock';
 import type { AllRoles } from '@/lib/rbac';
+import { parsePaginationParams, getPaginationMeta } from '@/lib/pagination';
 
 // ─── GET: Get all users (admin) ─────────────────────────────────────────────
 
 export async function GET(request: NextRequest) {
   try {
-    const { payload, error, response } = await verifyAdminRequest(request, 'user:list');
+    const { error, response } = await verifyAdminRequest(request, 'user:list');
     if (error) return response;
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '20', 10);
+    const { page, limit } = parsePaginationParams(searchParams);
     const search = searchParams.get('search') || undefined;
 
     let { users, total } = await getAllUsers(page, limit);
@@ -30,13 +32,11 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      users,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+      users: users.map((u) => ({
+        ...u,
+        status: isAccountLocked(u.locked_until) ? 'locked' : 'active',
+      })),
+      pagination: getPaginationMeta(page, limit, total),
     });
   } catch (error) {
     console.error('Error fetching users (admin):', error);
@@ -64,18 +64,13 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const validRoles = [
-      'user',
-      'admin',
-      'super_admin',
-      'admin_ops',
-      'admin_finance',
-      'admin_support',
-      'admin_content',
-    ];
-    if (!validRoles.includes(role)) {
+    // Legacy admin names stay valid as stored data but are not assignable.
+    if (!isAssignableRole(role)) {
       return NextResponse.json(
-        { error: 'Bad Request', message: `Invalid role. Must be one of: ${validRoles.join(', ')}` },
+        {
+          error: 'Bad Request',
+          message: `Invalid role. Must be one of: ${ASSIGNABLE_ROLES.join(', ')}`,
+        },
         { status: 400 }
       );
     }
@@ -89,8 +84,8 @@ export async function PATCH(request: NextRequest) {
     }
 
     // RBAC: Check if actor can manage the target role
-    const actorRole = payload.role as AllRoles;
-    const targetRole = role as AllRoles;
+    const actorRole = payload.role;
+    const targetRole = role;
     if (!canManageRole(actorRole, targetRole)) {
       return NextResponse.json(
         { error: 'Forbidden', message: 'Không có quyền thay đổi role này' },
@@ -151,8 +146,8 @@ export async function DELETE(request: NextRequest) {
     }
 
     // RBAC: Prevent deleting users with equal or higher role level
-    const actorRole = payload.role as AllRoles;
-    const targetRole = user.role as AllRoles;
+    const actorRole = payload.role;
+    const targetRole = user.role;
     if (!canManageRole(actorRole, targetRole)) {
       return NextResponse.json(
         { error: 'Forbidden', message: 'Không có quyền xóa người dùng này' },

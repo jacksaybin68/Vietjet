@@ -1,16 +1,15 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserRole } from '@/types/database';
+import { updateUser } from '@/features/admin';
+import { getApiErrorMessage } from '@/shared/services';
+import { getCsrfHeaders } from '@/lib/csrf-client';
 
-/**
- * Check if a role has admin access.
- * Simplified system: only 'admin' has admin access.
- */
-export function isAdminRole(role: string): boolean {
-  return role === 'admin';
-}
+import { isAdminRole } from '@/lib/roles';
+
+export { isAdminRole };
 
 /**
  * Get display label for a role (Vietnamese).
@@ -37,6 +36,18 @@ interface User {
   avatarUrl?: string;
   createdAt?: string;
   updatedAt?: string;
+  // Snake_case aliases some API responses still use.
+  full_name?: string;
+  avatar_url?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+/** Shape returned by the `/api/xac-thuc/*` handlers the provider wraps. */
+export interface AuthResponse {
+  user?: User;
+  success?: boolean;
+  message?: string;
 }
 
 interface Profile {
@@ -63,8 +74,8 @@ export interface AuthContextType {
     email: string,
     password: string,
     metadata?: { fullName?: string; phone?: string; avatarUrl?: string; dob?: string }
-  ) => Promise<any>;
-  signIn: (email: string, password: string) => Promise<any>;
+  ) => Promise<AuthResponse>;
+  signIn: (email: string, password: string, token?: string) => Promise<AuthResponse>;
   signOut: () => Promise<void>;
   getCurrentUser: () => Promise<User | null>;
   isEmailVerified: () => boolean;
@@ -86,20 +97,24 @@ export const useAuth = (): AuthContextType => {
 
 // ─── API Helpers ────────────────────────────────────────────────────────────
 
-async function fetchAuth(endpoint: string, options?: RequestInit) {
+async function fetchAuth(endpoint: string, options?: RequestInit): Promise<AuthResponse> {
+  const { headers, ...rest } = options ?? {};
   const res = await fetch(`/api/xac-thuc${endpoint}`, {
+    ...rest,
     headers: {
       'Content-Type': 'application/json',
-      ...options?.headers,
+      ...getCsrfHeaders(),
+      ...headers,
     },
     credentials: 'include',
-    ...options,
   });
 
   const data = await res.json();
 
   if (!res.ok) {
-    throw new Error(data.error || data.message || 'Auth request failed');
+    // Preserve the server's machine-readable fields (e.g. requires2FA) so
+    // callers can branch on them instead of string-matching the message.
+    throw Object.assign(new Error(data.error || data.message || 'Auth request failed'), data);
   }
 
   return data;
@@ -118,8 +133,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Derive display values from role
   const roleLabel = getRoleLabel(role);
   const roleLevel = getRoleLevel(role);
-  const isAdmin = role === 'admin';
-  const isUser = role === 'user';
+  const isAdmin = isAdminRole(role);
+  const isUser = !isAdmin;
 
   // Refresh user profile periodically
   useEffect(() => {
@@ -141,7 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchCurrentUser = async () => {
     try {
-      const data = await fetchAuth('/lanh-dao');
+      const data = await fetchAuth('/toi');
       if (data?.user) {
         setUser(data.user);
         setRole(data.user.role || 'user');
@@ -152,8 +167,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           role: data.user.role || 'user',
           phone: data.user.phone,
           avatarUrl: data.user.avatarUrl || data.user.avatar_url,
-          createdAt: data.user.createdAt || data.user.created_at,
-          updatedAt: data.user.updatedAt || data.user.updated_at,
+          createdAt: data.user.createdAt || data.user.created_at || '',
+          updatedAt: data.user.updatedAt || data.user.updated_at || '',
         });
       } else {
         setUser(null);
@@ -194,10 +209,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return data;
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, token?: string) => {
     const data = await fetchAuth('/dang-nhap', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, token }),
     });
 
     if (data.user) {
@@ -210,7 +225,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      await fetchAuth('/logout', { method: 'POST' });
+      await fetchAuth('/dang-xuat', { method: 'POST' });
     } catch {
       // Continue logout even if API fails
     }
@@ -269,22 +284,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const updateUserRole = async (userId: string, newRole: UserRole) => {
     try {
-      const res = await fetch('/api/quan-tri/nguoi-dung', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ userId, role: newRole }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        return { error: data.error || data.message || 'Failed to update role' };
-      }
+      await updateUser(userId, { role: newRole });
 
       // Refresh current user to sync state
       await fetchCurrentUser();
-    } catch (err: any) {
-      return { error: err.message || 'Network error' };
+    } catch (err) {
+      return { error: getApiErrorMessage(err, 'Network error') };
     }
   };
 

@@ -18,6 +18,7 @@ import {
   canManageRole,
   type SystemRoleName,
 } from '@/lib/rbac';
+import { parsePaginationParams } from '@/lib/pagination';
 
 // ─── Auth helper (shared across all endpoints) with RBAC support ─────────────
 
@@ -49,8 +50,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (section === 'audit') {
-      const page = parseInt(searchParams.get('page') || '1');
-      const limit = parseInt(searchParams.get('limit') || '30');
+      const { page, limit } = parsePaginationParams(searchParams, { limit: 30 });
       const actionFilter = searchParams.get('action') || undefined;
       const logs = await getAuditLogs({
         page,

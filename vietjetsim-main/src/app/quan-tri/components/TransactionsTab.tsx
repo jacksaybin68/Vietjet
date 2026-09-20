@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
+import { listTransactions } from '@/features/admin';
+import { getApiErrorMessage } from '@/shared/services';
 
 interface Transaction {
   id: string;
@@ -32,12 +34,12 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
   const fetchTransactions = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/quan-tri/giao-dich?status=${filterStatus}`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to fetch');
-      setTransactions(data);
-    } catch (error: any) {
-      onToast?.error('Lỗi tải dữ liệu', error.message);
+      const data = await listTransactions(
+        filterStatus && filterStatus !== 'all' ? { status: filterStatus } : {}
+      );
+      setTransactions((data ?? []) as Transaction[]);
+    } catch (error) {
+      onToast?.error('Lỗi tải dữ liệu', getApiErrorMessage(error, 'Không thể tải giao dịch'));
     } finally {
       setIsLoading(false);
     }

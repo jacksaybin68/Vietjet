@@ -6,8 +6,10 @@ import { Icon } from '@/shared/components/ui';
 import { PaymentSkeleton } from '@/shared/components/ui';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
+import { createPayment, getWalletOverview } from '@/features/payments/services';
 
-type PaymentMethod = 'card' | 'bank' | 'ewallet' | 'wallet';
+import type { PaymentMethod } from '@/features/payments/types';
+import { apiRequest, ApiRequestError } from '@/shared/services';
 
 interface BankInfo {
   id: string;
@@ -453,8 +455,10 @@ export default function PaymentClient() {
   const [isWalletLoading, setIsWalletLoading] = useState(false);
 
   useEffect(() => {
-    fetch('/api/cong-khai/cau-hinh-ngan-hang')
-      .then((res) => res.json())
+    apiRequest<{
+      bankConfig?: typeof bankConfig;
+      accounts?: typeof adminAccounts;
+    }>('/api/cong-khai/cau-hinh-ngan-hang')
       .then((data) => {
         if (data.bankConfig) setBankConfig(data.bankConfig);
         if (data.accounts && data.accounts.length > 0) {
@@ -466,11 +470,10 @@ export default function PaymentClient() {
 
     // Fetch wallet balance
     setIsWalletLoading(true);
-    fetch('/api/vi')
-      .then((res) => res.json())
+    getWalletOverview()
       .then((data) => {
-        if (data.success && data.wallet) {
-          setWalletBalance(parseFloat(data.wallet.balance));
+        if (data.wallet) {
+          setWalletBalance(parseFloat(String(data.wallet.balance)));
         }
       })
       .catch((err) => console.error('Failed to load wallet balance:', err))
@@ -530,15 +533,17 @@ export default function PaymentClient() {
     setPromoError('');
     setIsApplyingPromo(true);
     try {
-      const res = await fetch('/api/ma-giam-gia/xac-thuc', {
+      const data = await apiRequest<{
+        valid: boolean;
+        discount: typeof promoData;
+        message?: string;
+      }>('/api/ma-giam-gia/xac-thuc', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body: {
           code: promoCode,
           bookingAmount: booking?.basePrice || 0,
-        }),
+        },
       });
-      const data = await res.json();
       if (data.valid) {
         setPromoApplied(true);
         setPromoData(data.discount);
@@ -549,7 +554,11 @@ export default function PaymentClient() {
         setPromoError(data.message || 'Mã giảm giá không hợp lệ');
       }
     } catch (error) {
-      setPromoError('Có lỗi xảy ra khi kiểm tra mã giảm giá');
+      setPromoApplied(false);
+      setPromoData(null);
+      setPromoError(
+        error instanceof ApiRequestError ? error.message : 'Có lỗi xảy ra khi kiểm tra mã giảm giá'
+      );
     } finally {
       setIsApplyingPromo(false);
     }
@@ -594,23 +603,13 @@ export default function PaymentClient() {
       }
 
       // M3: Call real POST /api/thanh-toan instead of fake timeout
-      const res = await fetch('/api/thanh-toan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          booking_id: booking.bookingId,
-          method: paymentMethod,
-          amount: total,
-          discount_code_id: promoData?.id || null,
-          discount_amount: discountAmount,
-        }),
+      await createPayment({
+        booking_id: booking.bookingId,
+        method: paymentMethod,
+        amount: total,
+        discount_code_id: promoData?.id ?? undefined,
+        discount_amount: discountAmount,
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Thanh toán thất bại');
-      }
 
       setLoading(false);
       setConfirmed(true);
@@ -974,7 +973,7 @@ export default function PaymentClient() {
                       ['card', 'Thẻ tín dụng', 'CreditCardIcon'],
                       ['bank', 'Ngân hàng', 'BuildingLibraryIcon'],
                       ['wallet', 'Số dư Ví', 'WalletIcon'],
-                      ['ewallet', 'Ví MoMo/VNPay', 'DevicePhoneMobileIcon'],
+                      ['e_wallet', 'Ví MoMo/VNPay', 'DevicePhoneMobileIcon'],
                     ] as [
                       PaymentMethod,
                       string,
@@ -1440,7 +1439,7 @@ export default function PaymentClient() {
                   )}
 
                   {/* E-Wallet */}
-                  {paymentMethod === 'ewallet' && (
+                  {paymentMethod === 'e_wallet' && (
                     <div className="grid grid-cols-3 gap-3">
                       {EWALLETS.map((wallet) => (
                         <button

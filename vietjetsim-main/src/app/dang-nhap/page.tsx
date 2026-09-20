@@ -6,6 +6,7 @@ import AppImage from '@/shared/components/ui/AppImage';
 import AppLogo from '@/shared/components/ui/AppLogo';
 import Icon from '@/shared/components/ui/AppIcon';
 import { useAuth } from '@/contexts/AuthContext';
+import { isAdminRole } from '@/lib/roles';
 
 type AuthTab = 'login' | 'register';
 
@@ -24,6 +25,8 @@ export default function SignUpLoginPage() {
   const [success, setSuccess] = useState('');
   const [otpRequested, setOtpRequested] = useState(false);
   const [otpInput, setOtpInput] = useState('');
+  const [twoFAToken, setTwoFAToken] = useState('');
+  const [requires2FA, setRequires2FA] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -31,18 +34,26 @@ export default function SignUpLoginPage() {
     setLoading(true);
     setError('');
     try {
-      const data = await signIn(email, password);
+      const data = await signIn(email, password, requires2FA ? twoFAToken : undefined);
       setSuccess('Đăng nhập thành công!');
       setTimeout(() => {
         const userRole = data?.user?.role || 'user';
-        if (userRole === 'admin' || userRole === 'super_admin' || userRole.startsWith('admin_')) {
+        if (isAdminRole(userRole)) {
           router.push('/quan-tri');
         } else {
           router.push('/tai-khoan');
         }
       }, 800);
     } catch (err: any) {
-      setError(err.message || 'Email hoặc mật khẩu không đúng');
+      // The API answers 401 with requires2FA when the password was right but a
+      // second factor is still needed; ask for it instead of failing outright.
+      if (err?.requires2FA) {
+        setRequires2FA(true);
+        setError('');
+        setSuccess('Tài khoản đã bật xác thực hai yếu tố. Nhập mã từ ứng dụng xác thực.');
+      } else {
+        setError(err.message || 'Email hoặc mật khẩu không đúng');
+      }
     } finally {
       setLoading(false);
     }
@@ -284,6 +295,29 @@ export default function SignUpLoginPage() {
                       <Icon name={showPassword ? 'EyeSlashIcon' : 'EyeIcon'} size={18} />
                     </button>
                   </div>
+
+                  {requires2FA && (
+                    <div className={`form-field-float ${twoFAToken ? 'has-value' : ''}`}>
+                      <Icon
+                        name="ShieldCheckIcon"
+                        size={18}
+                        className="absolute left-3 top-1/2 z-10 -translate-y-1/2 pointer-events-none text-gray-400"
+                      />
+                      <input
+                        id="login-2fa"
+                        name="token"
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        value={twoFAToken}
+                        onChange={(e) => setTwoFAToken(e.target.value)}
+                        placeholder=" "
+                        className="form-input w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm transition-all focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20"
+                        required
+                      />
+                      <label className="form-label-float has-icon">Mã 2FA (hoặc mã dự phòng)</label>
+                    </div>
+                  )}
 
                   <div className="flex items-center justify-between">
                     <label className="flex cursor-pointer items-center gap-2 text-sm font-koho">

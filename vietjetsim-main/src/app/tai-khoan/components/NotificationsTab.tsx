@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
-import { getCsrfHeaders } from '@/hooks/useCsrf';
+import { apiRequest } from '@/shared/services';
 
 type NotificationType = 'all' | 'booking' | 'flight' | 'promo';
 
@@ -484,12 +484,15 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
     }
     setLoading(true);
     try {
-      const res = await fetch('/api/thong-bao', {
-        credentials: 'include',
-      });
-      const result = await res.json();
+      const result = await apiRequest<{
+        notifications?: {
+          type: string;
+          metadata?: { status?: string };
+          [key: string]: unknown;
+        }[];
+      }>('/api/thong-bao');
 
-      if (!res.ok || !result.notifications || result.notifications.length === 0) {
+      if (!result.notifications || result.notifications.length === 0) {
         setNotifications(STATIC_NOTIFICATIONS);
         return;
       }
@@ -547,11 +550,9 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
       setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
       if (user) {
         try {
-          await fetch('/api/thong-bao', {
+          await apiRequest('/api/thong-bao', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
-            credentials: 'include',
-            body: JSON.stringify({ notification_id: id, action: 'mark_read' }),
+            body: { notification_id: id, action: 'mark_read' },
           });
         } catch (err) {
           console.error('Mark read error:', err);
@@ -565,11 +566,9 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     if (user) {
       try {
-        await fetch('/api/thong-bao', {
+        await apiRequest('/api/thong-bao', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
-          credentials: 'include',
-          body: JSON.stringify({ action: 'mark_all_read' }),
+          body: { action: 'mark_all_read' },
         });
       } catch (err) {
         console.error('Mark all read error:', err);

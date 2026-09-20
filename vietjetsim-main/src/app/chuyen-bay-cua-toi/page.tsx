@@ -24,6 +24,8 @@ import {
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 import MyFlightsStats from './components/MyFlightsStats';
+import { listBookings } from '@/features/bookings/services';
+import { apiRequest, getApiErrorMessage } from '@/shared/services';
 
 const TABS = [
   { id: 'booking', label: 'Đặt chỗ của tôi' },
@@ -123,34 +125,30 @@ export default function MyFlightsPage() {
 
   const fetchBookings = useCallback(async () => {
     try {
-      const res = await fetch('/api/dat-ve?limit=100', { cache: 'no-store' });
-      if (res.status === 401 || res.status === 403) {
-        setBookings([]);
-        return;
-      }
-      if (!res.ok) throw new Error('Lỗi tải dữ liệu');
-      const data = await res.json();
+      const { bookings: records } = await listBookings({ limit: 100 });
 
       const bookingsWithCheckIn = await Promise.all(
-        (data.bookings || []).map(async (booking: any) => {
+        (records || []).map(async (booking) => {
           try {
-            const checkInRes = await fetch(`/api/checkin/status/${booking.id}`, {
-              cache: 'no-store',
-              credentials: 'include',
-            });
-            if (checkInRes.ok) {
-              const checkInData = await checkInRes.json();
-              return {
-                ...booking,
-                has_check_in: checkInData.checkInStatus?.has_check_in || false,
-                check_in_number: checkInData.checkInStatus?.check_in_number || null,
-                check_in_status: checkInData.checkInStatus?.status || null,
-                boarding_pass_number: checkInData.checkInStatus?.boarding_pass_number || null,
-                seat_number: checkInData.checkInStatus?.seat_number || null,
-                check_in_time: checkInData.checkInStatus?.check_in_time || null,
+            const checkInData = await apiRequest<{
+              checkInStatus?: {
+                has_check_in?: boolean;
+                check_in_number?: string | null;
+                status?: string | null;
+                boarding_pass_number?: string | null;
+                seat_number?: string | null;
+                check_in_time?: string | null;
               };
-            }
-            return booking;
+            }>(`/api/checkin/status/${booking.id}`);
+            return {
+              ...booking,
+              has_check_in: checkInData.checkInStatus?.has_check_in || false,
+              check_in_number: checkInData.checkInStatus?.check_in_number || null,
+              check_in_status: checkInData.checkInStatus?.status || null,
+              boarding_pass_number: checkInData.checkInStatus?.boarding_pass_number || null,
+              seat_number: checkInData.checkInStatus?.seat_number || null,
+              check_in_time: checkInData.checkInStatus?.check_in_time || null,
+            };
           } catch {
             return booking;
           }
@@ -238,21 +236,23 @@ export default function MyFlightsPage() {
     }
     setLoading(true);
     try {
-      const res = await fetch(
+      const data = await apiRequest<{ success: boolean }>(
         `/api/checkin?bookingCode=${encodeURIComponent(bookingCode)}&lastName=${encodeURIComponent(surname)}&firstName=${encodeURIComponent(givenName)}`
       );
-      const data = await res.json();
       if (data.success) {
         toast.success('Đặt chỗ tìm thấy!', `Mã: ${bookingCode}`);
         router.push(`/lam-thu-tuc?code=${bookingCode}`);
       } else {
         toast.show({
           title: 'Không tìm thấy đặt chỗ',
-          message: data.message || 'Vui lòng kiểm tra mã đặt chỗ và họ tên bạn',
+          message: 'Vui lòng kiểm tra mã đặt chỗ và họ tên bạn',
         });
       }
-    } catch {
-      toast.error('Lỗi mạng', 'Vui lòng thử lại sau');
+    } catch (error) {
+      toast.show({
+        title: 'Không tìm thấy đặt chỗ',
+        message: getApiErrorMessage(error, 'Vui lòng kiểm tra mã đặt chỗ và họ tên bạn'),
+      });
     } finally {
       setLoading(false);
     }

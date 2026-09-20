@@ -1,33 +1,33 @@
 // Payment-related constants
+import { API_ENDPOINTS } from '@/shared/constants';
+import type { PaymentMethod, PaymentStatus } from './types';
 
-export const PAYMENT_API_ENDPOINTS = {
-  PROCESS: '/api/payments/process',
-  HISTORY: '/api/payments/history',
-  VERIFY: '/api/payments/verify',
-  REFUND: '/api/payments/:id/refund',
-} as const;
+export const PAYMENT_API_ENDPOINTS = API_ENDPOINTS.PAYMENTS;
 
+/** Matches the `payments.status` CHECK constraint. */
 export const PAYMENT_STATUS = {
   PENDING: 'pending',
-  PROCESSING: 'processing',
-  SUCCESS: 'success',
+  COMPLETED: 'completed',
   FAILED: 'failed',
   REFUNDED: 'refunded',
-} as const;
+} as const satisfies Record<string, PaymentStatus>;
 
+/** Methods the payment API and wallet UI accept. */
 export const PAYMENT_METHODS = {
-  CREDIT_CARD: 'credit_card',
-  DEBIT_CARD: 'debit_card',
-  BANK_TRANSFER: 'bank_transfer',
+  WALLET: 'wallet',
+  CARD: 'card',
+  BANK: 'bank',
+  VIETQR: 'vietqr',
   E_WALLET: 'e_wallet',
-  INSTALLMENT: 'installment',
-} as const;
+} as const satisfies Record<string, PaymentMethod>;
 
 export const CURRENCIES = {
   VND: { code: 'VND', symbol: '₫' },
   USD: { code: 'USD', symbol: '$' },
   EUR: { code: 'EUR', symbol: '€' },
 } as const;
+
+export const PAYMENT_PAGE_SIZE = 10;
 
 export const PAYMENT_VALIDATION = {
   MIN_AMOUNT: 100000,

@@ -1,19 +1,14 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
-
-interface BankAccount {
-  id: string;
-  bank_name: string;
-  account_number: string;
-  account_holder: string;
-  bank_bin?: string;
-  branch?: string;
-  is_default: boolean;
-  is_active: boolean;
-  transfer_note_template: string;
-  created_at: string;
-}
+import {
+  createBankAccount,
+  deleteBankAccount,
+  listBankAccounts,
+  updateBankAccount,
+  type AdminBankAccount as BankAccount,
+} from '@/features/admin';
+import { getApiErrorMessage } from '@/shared/services';
 
 interface ToastAPI {
   success: (title: string, message?: string) => void;
@@ -41,13 +36,10 @@ export default function BankAccountsTab({ onToast }: { onToast?: ToastAPI }) {
   const fetchAccounts = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/quan-tri/tai-khoan-ngan-hang');
-      if (res.ok) {
-        const data = await res.json();
-        setAccounts(data.accounts || []);
-      }
+      const data = await listBankAccounts();
+      setAccounts(data.accounts || []);
     } catch (err) {
-      onToast?.error('Lỗi', 'Không thể tải danh sách tài khoản');
+      onToast?.error('Lỗi', getApiErrorMessage(err, 'Không thể tải danh sách tài khoản'));
     } finally {
       setIsLoading(false);
     }
@@ -67,8 +59,8 @@ export default function BankAccountsTab({ onToast }: { onToast?: ToastAPI }) {
         bank_bin: account.bank_bin || '',
         branch: account.branch || '',
         transfer_note_template: account.transfer_note_template || 'VJ {code}',
-        is_default: account.is_default,
-        is_active: account.is_active,
+        is_default: account.is_default ?? false,
+        is_active: account.is_active ?? true,
       });
     } else {
       setEditingAccount(null);
@@ -88,31 +80,20 @@ export default function BankAccountsTab({ onToast }: { onToast?: ToastAPI }) {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    const url = editingAccount
-      ? `/api/quan-tri/tai-khoan-ngan-hang/${editingAccount.id}`
-      : '/api/quan-tri/tai-khoan-ngan-hang';
-    const method = editingAccount ? 'PATCH' : 'POST';
-
     try {
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (res.ok) {
-        onToast?.success(
-          'Thành công',
-          editingAccount ? 'Cập nhật tài khoản thành công' : 'Thêm tài khoản mới thành công'
-        );
-        setIsModalOpen(false);
-        fetchAccounts();
+      if (editingAccount) {
+        await updateBankAccount(editingAccount.id, formData);
       } else {
-        const data = await res.json();
-        onToast?.error('Lỗi', data.error || 'Thao tác thất bại');
+        await createBankAccount(formData);
       }
+      onToast?.success(
+        'Thành công',
+        editingAccount ? 'Cập nhật tài khoản thành công' : 'Thêm tài khoản mới thành công'
+      );
+      setIsModalOpen(false);
+      fetchAccounts();
     } catch (err) {
-      onToast?.error('Lỗi', 'Kết nối máy chủ bị gián đoạn');
+      onToast?.error('Lỗi', getApiErrorMessage(err, 'Thao tác thất bại'));
     }
   };
 
@@ -120,29 +101,21 @@ export default function BankAccountsTab({ onToast }: { onToast?: ToastAPI }) {
     if (!confirm('Bạn có chắc chắn muốn xóa tài khoản này?')) return;
 
     try {
-      const res = await fetch(`/api/quan-tri/tai-khoan-ngan-hang/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        onToast?.success('Thành công', 'Đã xóa tài khoản');
-        fetchAccounts();
-      }
+      await deleteBankAccount(id);
+      onToast?.success('Thành công', 'Đã xóa tài khoản');
+      fetchAccounts();
     } catch (err) {
-      onToast?.error('Lỗi', 'Không thể xóa tài khoản');
+      onToast?.error('Lỗi', getApiErrorMessage(err, 'Không thể xóa tài khoản'));
     }
   };
 
   const toggleStatus = async (account: BankAccount, field: 'is_active' | 'is_default') => {
     try {
-      const res = await fetch(`/api/quan-tri/tai-khoan-ngan-hang/${account.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [field]: !account[field] }),
-      });
-      if (res.ok) {
-        onToast?.success('Cập nhật', 'Đã thay đổi trạng thái tài khoản');
-        fetchAccounts();
-      }
+      await updateBankAccount(account.id, { [field]: !account[field] });
+      onToast?.success('Cập nhật', 'Đã thay đổi trạng thái tài khoản');
+      fetchAccounts();
     } catch (err) {
-      onToast?.error('Lỗi', 'Không thể cập nhật trạng thái');
+      onToast?.error('Lỗi', getApiErrorMessage(err, 'Không thể cập nhật trạng thái'));
     }
   };
 

@@ -1,20 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { getAllFlights, createFlight, updateFlight, deleteFlight } from '@/lib/db';
+import { parsePaginationParams, getPaginationMeta } from '@/lib/pagination';
 
 export async function GET(request: NextRequest) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'flight:list');
     if (error) return response;
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '20', 10);
+    const { page, limit } = parsePaginationParams(searchParams);
     const from_code = searchParams.get('from_code') || undefined;
     const to_code = searchParams.get('to_code') || undefined;
-    const { flights, total } = await getAllFlights({ page, limit, from_code, to_code });
+    const search = searchParams.get('search') || undefined;
+    const { flights, total } = await getAllFlights({ page, limit, from_code, to_code, search });
     return NextResponse.json({
       flights,
-      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+      pagination: getPaginationMeta(page, limit, total),
     });
   } catch (error) {
     console.error('Error fetching admin flights:', error);

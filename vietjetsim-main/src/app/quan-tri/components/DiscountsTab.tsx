@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
+import { apiRequest, getApiErrorMessage } from '@/shared/services';
 
 interface ToastAPI {
   success: (title: string, message?: string, options?: object) => void;
@@ -48,16 +49,13 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
         limit: pageSize.toString(),
         search: searchQuery,
       });
-      const res = await fetch(`/api/quan-tri/ma-giam-gia?${params.toString()}`);
-      const data = await res.json();
-      if (res.ok) {
-        setDiscounts(data.discounts);
-        setTotal(data.pagination.total);
-      } else {
-        onToast?.error('Lỗi', data.message || 'Không thể tải danh sách mã giảm giá');
-      }
+      const data = await apiRequest<{ discounts: DiscountCode[]; pagination: { total: number } }>(
+        `/api/quan-tri/ma-giam-gia?${params.toString()}`
+      );
+      setDiscounts(data.discounts);
+      setTotal(data.pagination.total);
     } catch (error) {
-      onToast?.error('Lỗi', 'Kết nối server thất bại');
+      onToast?.error('Lỗi', getApiErrorMessage(error, 'Không thể tải danh sách mã giảm giá'));
     } finally {
       setIsLoading(false);
     }
@@ -71,16 +69,11 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
     if (!confirm(`Bạn có chắc muốn xóa mã giảm giá "${code}"?`)) return;
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/quan-tri/ma-giam-gia/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        onToast?.success('Thành công', `Đã xóa mã "${code}"`);
-        fetchDiscounts();
-      } else {
-        const data = await res.json();
-        onToast?.error('Lỗi', data.message || 'Không thể xóa mã');
-      }
+      await apiRequest(`/api/quan-tri/ma-giam-gia/${id}`, { method: 'DELETE' });
+      onToast?.success('Thành công', `Đã xóa mã "${code}"`);
+      fetchDiscounts();
     } catch (error) {
-      onToast?.error('Lỗi', 'Kết nối server thất bại');
+      onToast?.error('Lỗi', getApiErrorMessage(error, 'Không thể xóa mã'));
     } finally {
       setDeletingId(null);
     }
@@ -88,20 +81,17 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
 
   const handleToggleStatus = async (discount: DiscountCode) => {
     try {
-      const res = await fetch(`/api/quan-tri/ma-giam-gia/${discount.id}`, {
+      await apiRequest(`/api/quan-tri/ma-giam-gia/${discount.id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_active: !discount.is_active }),
+        body: { is_active: !discount.is_active },
       });
-      if (res.ok) {
-        onToast?.success(
-          'Thành công',
-          `Đã ${!discount.is_active ? 'kích hoạt' : 'tạm dừng'} mã "${discount.code}"`
-        );
-        fetchDiscounts();
-      }
+      onToast?.success(
+        'Thành công',
+        `Đã ${!discount.is_active ? 'kích hoạt' : 'tạm dừng'} mã "${discount.code}"`
+      );
+      fetchDiscounts();
     } catch (error) {
-      onToast?.error('Lỗi', 'Không thể cập nhật trạng thái');
+      onToast?.error('Lỗi', getApiErrorMessage(error, 'Không thể cập nhật trạng thái'));
     }
   };
 
@@ -500,24 +490,14 @@ function DiscountModal({
         : '/api/quan-tri/ma-giam-gia';
       const method = discount ? 'PATCH' : 'POST';
 
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        onToast?.success(
-          'Thành công',
-          discount ? 'Đã cập nhật mã giảm giá' : 'Đã tạo mã giảm giá mới'
-        );
-        onSuccess();
-      } else {
-        onToast?.error('Lỗi', data.message || 'Thao tác thất bại');
-      }
+      await apiRequest(url, { method, body: formData });
+      onToast?.success(
+        'Thành công',
+        discount ? 'Đã cập nhật mã giảm giá' : 'Đã tạo mã giảm giá mới'
+      );
+      onSuccess();
     } catch (error) {
-      onToast?.error('Lỗi', 'Kết nối server thất bại');
+      onToast?.error('Lỗi', getApiErrorMessage(error, 'Thao tác thất bại'));
     } finally {
       setIsSaving(false);
     }

@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { createHash, randomUUID } from 'crypto';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { validateCsrfOrReject } from '@/lib/csrf';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -278,7 +279,17 @@ export async function getToken(request: Request): Promise<JWTPayload | null> {
   return null;
 }
 
+/**
+ * Authenticate a request from the access-token cookie and, for mutating
+ * methods, enforce the double-submit CSRF check — mirroring
+ * `verifyAdminRequest` so user routes cannot be driven cross-site either.
+ */
 export async function verifyAuthRequest(request: Request) {
+  const csrfError = await validateCsrfOrReject(request);
+  if (csrfError) {
+    return { user: null, error: 'CSRF validation failed', response: csrfError };
+  }
+
   const user = await getToken(request);
   if (!user) {
     return {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { validateCsrfOrReject } from '@/lib/csrf';
 import { getAllDiscountCodes, createDiscountCode } from '@/lib/db';
+import { parsePaginationParams } from '@/lib/pagination';
 
 // ─── GET: List all discount codes ───────────────────────────────────────────
 export async function GET(request: NextRequest) {
@@ -10,8 +11,7 @@ export async function GET(request: NextRequest) {
     if (error) return response;
 
     const { searchParams } = new URL(request.url);
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
+    const { page, limit } = parsePaginationParams(searchParams);
     const search = searchParams.get('search') || undefined;
     const activeOnly = searchParams.get('activeOnly') === 'true';
 

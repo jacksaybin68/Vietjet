@@ -3,6 +3,7 @@ import { sql } from '@/lib/neon';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { getAllRefunds, updateRefundStatus, getBookingById, refundWallet } from '@/lib/db';
 import { verifyAccessToken } from '@/lib/auth';
+import { parsePaginationParams, getPaginationMeta } from '@/lib/pagination';
 
 // ─── GET: Get all refund requests (admin) ───────────────────────────────────
 
@@ -12,20 +13,14 @@ export async function GET(request: NextRequest) {
     if (error) return response;
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '20', 10);
+    const { page, limit } = parsePaginationParams(searchParams);
     const status = searchParams.get('status') || undefined;
 
     const { refunds, total } = await getAllRefunds({ page, limit, status });
 
     return NextResponse.json({
       refunds,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+      pagination: getPaginationMeta(page, limit, total),
     });
   } catch (error) {
     console.error('Error fetching refunds (admin):', error);
