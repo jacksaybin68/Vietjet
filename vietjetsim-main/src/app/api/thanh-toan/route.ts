@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createPayment, createPaymentAndConfirmBooking, getBookingById } from '@/lib/db';
+import { createPaymentAndConfirmBooking, getBookingById } from '@/lib/db';
 import { verifyAuthRequest } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {

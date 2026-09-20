@@ -91,9 +91,7 @@ export default function ChatTab() {
         m.sender_role === 'user' && !m.read_at ? { ...m, read_at: new Date().toISOString() } : m
       )
     );
-    markConversationRead(convId).catch((err) =>
-      console.error('Mark read error:', err)
-    );
+    markConversationRead(convId).catch((err) => console.error('Mark read error:', err));
   }, []);
 
   // Load all conversations via API

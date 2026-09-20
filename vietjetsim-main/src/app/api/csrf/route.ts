@@ -8,7 +8,6 @@ import { NextResponse } from 'next/server';
 import { generateCsrfToken } from '@/lib/csrf';
 
 const CSRF_COOKIE_NAME = 'csrf_token';
-const CSRF_TOKEN_LENGTH = 32; // bytes
 const CSRF_COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
 
 export async function GET() {

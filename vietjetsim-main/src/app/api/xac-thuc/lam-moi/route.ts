@@ -7,7 +7,7 @@ import {
   clearAuthCookiesOnResponse,
   hashToken,
 } from '@/lib/auth';
-import { rotateRefreshToken, revokeRefreshTokenFamily, getStoredRefreshToken } from '@/lib/db';
+import { rotateRefreshToken, getStoredRefreshToken } from '@/lib/db';
 import { sql } from '@/lib/neon';
 import { isAccountLocked } from '@/lib/account-lock';
 import { setCsrfCookieOnResponse } from '@/lib/csrf';

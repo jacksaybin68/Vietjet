@@ -36,7 +36,9 @@ export function listConversations(): Promise<{ conversations: ChatConversation[]
   return apiRequest(CHAT.CONVERSATIONS);
 }
 
-export function getConversationMessages(conversationId: string): Promise<{ messages: ChatMessage[] }> {
+export function getConversationMessages(
+  conversationId: string
+): Promise<{ messages: ChatMessage[] }> {
   return apiRequest(`${CHAT.MESSAGES}?conversationId=${encodeURIComponent(conversationId)}`);
 }
 
@@ -50,7 +52,9 @@ export function sendChatMessage(
   });
 }
 
-export function getChatPresence(conversationId: string): Promise<{ presence: ChatPresence | null }> {
+export function getChatPresence(
+  conversationId: string
+): Promise<{ presence: ChatPresence | null }> {
   return apiRequest(`${CHAT.PRESENCE}?conversationId=${encodeURIComponent(conversationId)}`);
 }
 
