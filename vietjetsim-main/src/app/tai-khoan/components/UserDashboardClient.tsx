@@ -111,7 +111,7 @@ const UserDashboardDesktopSidebar = dynamic(() => import('./UserDashboardDesktop
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
-import { getCsrfHeaders } from '@/hooks/useCsrf';
+import { apiRequest, ApiRequestError } from '@/shared/services';
 import { listBookings } from '@/features/bookings/services';
 
 type Tab =
@@ -1509,43 +1509,44 @@ export default function UserDashboardClient() {
                             if (user) {
                               insertData.user_id = user.id;
                             }
-                            const res = await fetch('/api/hoan-tien', {
+                            const responseJson = await apiRequest<{
+                              refund?: {
+                                id: string;
+                                booking_id: string;
+                                reason?: string;
+                                bank_info?: string | Record<string, unknown>;
+                                created_at?: string;
+                              };
+                            }>('/api/hoan-tien', {
                               method: 'POST',
-                              headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
-                              body: JSON.stringify(insertData),
+                              body: insertData,
                             });
-                            const responseJson = await res.json();
-                            const insertErr = res.ok
-                              ? null
-                              : { message: responseJson.error || 'Failed to submit' };
-                            if (insertErr) {
-                              setRefundError(insertErr.message);
-                              return;
-                            }
-                            if (responseJson?.refund) {
-                              const bankInfo =
-                                typeof responseJson.refund.bank_info === 'string'
+                            const refund = responseJson?.refund;
+                            if (refund) {
+                              const parsedBankInfo =
+                                typeof refund.bank_info === 'string'
                                   ? (() => {
                                       try {
-                                        return JSON.parse(responseJson.refund.bank_info);
+                                        return JSON.parse(refund.bank_info as string);
                                       } catch {
                                         return {};
                                       }
                                     })()
-                                  : responseJson.refund.bank_info || {};
+                                  : refund.bank_info || {};
+                              const bankInfo = parsedBankInfo as Record<string, string>;
                               setRefundRequests((prev) => [
                                 {
-                                  id: responseJson.refund.id,
-                                  bookingId: responseJson.refund.booking_id,
+                                  id: refund.id,
+                                  bookingId: refund.booking_id,
                                   amount: Number(bankInfo.amount || 0),
-                                  reason: responseJson.refund.reason || refundReason,
+                                  reason: refund.reason || refundReason,
                                   note: bankInfo.note || refundNote || '',
                                   bankName: bankInfo.bank_name || refundBankName,
                                   accountHolder: bankInfo.account_holder || refundAccountHolder,
                                   accountNumber: bankInfo.account_number || refundAccountNumber,
                                   status: 'pending',
                                   date: new Date(
-                                    responseJson.refund.created_at || Date.now()
+                                    refund.created_at || Date.now()
                                   ).toLocaleDateString('vi-VN'),
                                 },
                                 ...prev,
@@ -1557,8 +1558,12 @@ export default function UserDashboardClient() {
                               'Chúng tôi sẽ xem xét và phản hồi trong 3–5 ngày làm việc.'
                             );
                             await loadRefundRequests();
-                          } catch (err: any) {
-                            setRefundError('Không thể gửi yêu cầu. Vui lòng thử lại.');
+                          } catch (err) {
+                            setRefundError(
+                              err instanceof ApiRequestError
+                                ? err.message
+                                : 'Không thể gửi yêu cầu. Vui lòng thử lại.'
+                            );
                           } finally {
                             setRefundSubmitting(false);
                           }
