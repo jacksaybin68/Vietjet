@@ -455,8 +455,10 @@ export default function PaymentClient() {
   const [isWalletLoading, setIsWalletLoading] = useState(false);
 
   useEffect(() => {
-    fetch('/api/cong-khai/cau-hinh-ngan-hang')
-      .then((res) => res.json())
+    apiRequest<{
+      bankConfig?: typeof bankConfig;
+      accounts?: typeof adminAccounts;
+    }>('/api/cong-khai/cau-hinh-ngan-hang')
       .then((data) => {
         if (data.bankConfig) setBankConfig(data.bankConfig);
         if (data.accounts && data.accounts.length > 0) {
