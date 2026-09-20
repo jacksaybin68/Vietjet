@@ -1,8 +1,8 @@
 /**
  * Admin Route Helper — Simplified auth + authorization
  *
- * Only 2 roles in the system: 'user' and 'admin'.
- * 'admin' has full access to all admin APIs.
+ * Roles collapse to 'user' and 'admin'; admin-family legacy names count as
+ * admin (see `lib/roles.ts`). Admins have full access to all admin APIs.
  *
  * Usage (in an API route):
  *   import { verifyAdminRequest } from '@/lib/admin-auth';
@@ -18,6 +18,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { verifyAccessToken } from '@/lib/auth';
 import type { JWTPayload } from '@/lib/auth';
 import { validateCsrfOrReject } from '@/lib/csrf';
+import { isAdminRole } from '@/lib/roles';
 
 // We still import Permission type for API documentation purposes,
 // but permission checks are simplified — admin always has full access.
@@ -79,8 +80,7 @@ export async function verifyAdminRequest(
     };
   }
 
-  // Only 'admin' role is allowed
-  if (payload.role !== 'admin') {
+  if (!isAdminRole(payload.role)) {
     return {
       payload,
       error: 'Forbidden',
