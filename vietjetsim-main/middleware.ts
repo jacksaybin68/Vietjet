@@ -5,6 +5,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import type { JWTPayload } from '@/lib/auth';
 import { isAdminRole as sharedIsAdminRole } from '@/lib/roles';
+import { isPublicApiRoute, isPublicRoute } from '@/lib/route-access';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -151,38 +152,14 @@ export async function middleware(request: NextRequest) {
     user = await verifyJwtSignature(accessToken, effectiveJwtSecret);
   }
 
-  // Define public routes that don't require authentication
-  const publicRoutes = [
-    '/dang-nhap',
-    '/trang-chu',
-    '/chuyen-bay-cua-toi',
-    '/lam-thu-tuc',
-    '/dat-ve',
-    '/tim-ve',
-  ];
-  const isPublicRoute =
-    pathname === '/' ||
-    publicRoutes.some((route) => pathname === route || pathname.startsWith(route + '/'));
+  const publicPage = isPublicRoute(pathname);
+  const publicApi = isPublicApiRoute(pathname);
 
   // API routes for auth are public
   const isAuthApiRoute = pathname.startsWith('/api/xac-thuc/');
 
-  // Public API routes that don't require authentication
-  const publicApiRoutes = [
-    '/api/dat-ve',
-    '/api/checkin',
-    '/api/checkin/',
-    '/api/flights',
-    '/api/flights/',
-    '/api/airports',
-    '/api/search',
-  ];
-  const isPublicApiRoute = publicApiRoutes.some(
-    (route) => pathname === route || pathname.startsWith(route + '/')
-  );
-
   // If not authenticated and trying to access protected route
-  if (!user && !isPublicRoute && !isAuthApiRoute && !isPublicApiRoute) {
+  if (!user && !publicPage && !isAuthApiRoute && !publicApi) {
     const redirectUrl = new URL('/dang-nhap', request.url);
     redirectUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(redirectUrl);
@@ -231,7 +208,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // For protected API routes, verify JWT and attach user to headers
-  if (pathname.startsWith('/api/') && !isAuthApiRoute && !isPublicApiRoute) {
+  if (pathname.startsWith('/api/') && !isAuthApiRoute && !publicApi) {
     if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized', message: 'Authentication required' },
