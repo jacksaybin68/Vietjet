@@ -311,9 +311,7 @@ export function canManageRole(actorRole: AllRoles, targetRole: AllRoles): boolea
   return false;
 }
 
-export function isAdminRole(role: string): boolean {
-  return role === 'admin';
-}
+export { isAdminRole } from './roles';
 
 // ─── Backward-compatibility bridge for AdminRBACPanel ───────────────────
 

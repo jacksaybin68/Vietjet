@@ -7,13 +7,9 @@ import { updateUser } from '@/features/admin';
 import { getApiErrorMessage } from '@/shared/services';
 import { getCsrfHeaders } from '@/lib/csrf-client';
 
-/**
- * Check if a role has admin access.
- * Simplified system: only 'admin' has admin access.
- */
-export function isAdminRole(role: string): boolean {
-  return role === 'admin';
-}
+import { isAdminRole } from '@/lib/roles';
+
+export { isAdminRole };
 
 /**
  * Get display label for a role (Vietnamese).
@@ -135,8 +131,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Derive display values from role
   const roleLabel = getRoleLabel(role);
   const roleLevel = getRoleLevel(role);
-  const isAdmin = role === 'admin';
-  const isUser = role === 'user';
+  const isAdmin = isAdminRole(role);
+  const isUser = !isAdmin;
 
   // Refresh user profile periodically
   useEffect(() => {
