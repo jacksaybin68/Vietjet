@@ -16,6 +16,11 @@ npm run lint:fix   # eslint . --fix
 Lint/format rules live in `eslint.config.mjs` (flat config, prettier printWidth 100,
 single quotes, `trailingComma: 'es5'`). Run `npx eslint <file> --fix` before finishing.
 
+Lint is NOT part of `npm run build`: Next 15/16 removed the `eslint` key from
+`next.config.mjs` (setting it logs "Unrecognized key(s) in object: 'eslint'"), and CI
+enforces lint as its own step. Only `typescript.ignoreBuildErrors: false` remains as a
+build-time gate, so always run `npm run lint` in addition to the build.
+
 ## Architecture
 
 Feature modules under `src/features/<name>/` own `types/`, `constants.ts`, `services/`,
@@ -89,3 +94,13 @@ Vitest, tests in `src/test/` (`src/test/setup.ts` is the setup file). Route hand
 tested by importing them directly and passing a real `NextRequest` with a real JWT from
 `signAccessToken` in `@/lib/auth`. `@/lib/neon` is mocked there. Prefer this over
 mocking business logic.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
