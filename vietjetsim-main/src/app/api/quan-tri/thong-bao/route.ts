@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
 import { verifyAdminRequest } from '@/lib/admin-auth';
+import { parsePaginationParams, getOffset } from '@/lib/pagination';
 
 // ─── GET: Get all announcements with pagination and filters ──────────────────
 
@@ -10,12 +11,11 @@ export async function GET(request: NextRequest) {
     if (error) return response;
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '20', 10);
+    const { page, limit } = parsePaginationParams(searchParams);
     const search = searchParams.get('q') || '';
     const type = searchParams.get('type') || '';
     const isActive = searchParams.get('is_active');
-    const offset = (page - 1) * limit;
+    const offset = getOffset(page, limit);
 
     // Build dynamic query based on filters
     let announcements;

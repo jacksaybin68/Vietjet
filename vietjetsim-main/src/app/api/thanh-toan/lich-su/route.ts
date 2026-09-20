@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPaymentHistory } from '@/lib/db';
 import { verifyAuthRequest } from '@/lib/auth';
+import { parsePaginationParams, getPaginationMeta } from '@/lib/pagination';
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,20 +9,14 @@ export async function GET(request: NextRequest) {
     if (error || !user) return response!;
 
     const { searchParams } = new URL(request.url);
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
+    const { page, limit } = parsePaginationParams(searchParams);
 
     const result = await getPaymentHistory(user.userId, { page, limit });
 
     return NextResponse.json({
       success: true,
       payments: result.payments,
-      pagination: {
-        page,
-        limit,
-        total: result.total,
-        totalPages: Math.ceil(result.total / limit),
-      },
+      pagination: getPaginationMeta(page, limit, result.total),
     });
   } catch (error: any) {
     console.error('Payment History API Error:', error);

@@ -5,6 +5,7 @@ import { canManageRole } from '@/lib/rbac';
 import { ASSIGNABLE_ROLES, isAssignableRole } from '@/lib/roles';
 import { isAccountLocked } from '@/lib/account-lock';
 import type { AllRoles } from '@/lib/rbac';
+import { parsePaginationParams, getPaginationMeta } from '@/lib/pagination';
 
 // ─── GET: Get all users (admin) ─────────────────────────────────────────────
 
@@ -14,8 +15,7 @@ export async function GET(request: NextRequest) {
     if (error) return response;
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '20', 10);
+    const { page, limit } = parsePaginationParams(searchParams);
     const search = searchParams.get('search') || undefined;
 
     let { users, total } = await getAllUsers(page, limit);
@@ -36,12 +36,7 @@ export async function GET(request: NextRequest) {
         ...u,
         status: isAccountLocked(u.locked_until) ? 'locked' : 'active',
       })),
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+      pagination: getPaginationMeta(page, limit, total),
     });
   } catch (error) {
     console.error('Error fetching users (admin):', error);
