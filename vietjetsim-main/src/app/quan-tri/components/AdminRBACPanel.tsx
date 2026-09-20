@@ -3,6 +3,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
 import {
+  listRbacRoles,
+  listRbacAudit,
+  assignRbacRole,
+  removeRbacRole,
+  type AdminRbacAuditRow,
+  type AdminRoleRow,
+} from '@/features/admin';
+import { getApiErrorMessage } from '@/shared/services';
+import {
   PERMISSION_CATEGORIES,
   PERMISSION_LABELS,
   SYSTEM_ROLES,
@@ -18,34 +27,13 @@ interface ToastAPI {
   info: (title: string, message?: string) => void;
 }
 
-interface AdminRoleRow {
-  id: string;
-  user_id: string;
-  email: string;
-  full_name: string;
-  role_name: string;
-  custom_permissions: string | null;
-  created_at: string;
-}
-
-interface AuditLogRow {
-  id: string;
-  admin_email: string;
-  action: string;
-  target_type: string;
-  target_id?: string;
-  details_json: string;
-  status: 'success' | 'error' | 'denied';
-  created_at: string;
-}
-
 type TabId = 'roles' | 'matrix' | 'audit' | 'config';
 
 export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
   const [activeTab, setActiveTab] = useState<TabId>('matrix');
   const [loading, setLoading] = useState(true);
   const [adminRoles, setAdminRoles] = useState<AdminRoleRow[]>([]);
-  const [auditLogs, setAuditLogs] = useState<AuditLogRow[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AdminRbacAuditRow[]>([]);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedUserEmail, setSelectedUserEmail] = useState('');
   const [assignRoleName, setAssignRoleName] = useState<SystemRoleName>('admin_ops');
@@ -56,18 +44,9 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [rolesRes, logsRes] = await Promise.all([
-        fetch('/api/quan-tri/phan-quyen?section=roles'),
-        fetch('/api/quan-tri/phan-quyen?section=audit&limit=50'),
-      ]);
-      if (rolesRes.ok) {
-        const d = await rolesRes.json();
-        setAdminRoles(d.roles || []);
-      }
-      if (logsRes.ok) {
-        const d = await logsRes.json();
-        setAuditLogs(d.logs || []);
-      }
+      const [rolesData, logsData] = await Promise.all([listRbacRoles(), listRbacAudit(50)]);
+      setAdminRoles(rolesData.roles || []);
+      setAuditLogs(logsData.logs || []);
     } catch (err) {
       console.error('RBAC fetch error:', err);
     } finally {
@@ -86,27 +65,16 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
     setIsAssigning(true);
 
     try {
-      // Find user by email first (simplified — in real app would have a lookup)
-      const res = await fetch('/api/quan-tri/phan-quyen', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'assign_role',
-          targetUserId: selectedUserEmail, // In production: resolve email → userId first
-          roleName: assignRoleName,
-        }),
+      const data = await assignRbacRole({
+        targetUserId: selectedUserEmail,
+        roleName: assignRoleName,
       });
-      const data = await res.json();
-      if (data.success) {
-        onToast?.success('Gán role thành công', data.message);
-        setShowAssignModal(false);
-        setSelectedUserEmail('');
-        fetchData();
-      } else {
-        onToast?.error('Lỗi', data.message || 'Không thể gán role');
-      }
-    } catch (err: any) {
-      onToast?.error('Lỗi mạng', err.message);
+      onToast?.success('Gán role thành công', data.message);
+      setShowAssignModal(false);
+      setSelectedUserEmail('');
+      fetchData();
+    } catch (err) {
+      onToast?.error('Lỗi mạng', getApiErrorMessage(err, 'Không thể gán role'));
     } finally {
       setIsAssigning(false);
     }
@@ -118,20 +86,11 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
     if (!confirm(`Xác nhận xóa quyền admin của "${email}"?`)) return;
 
     try {
-      const res = await fetch('/api/quan-tri/phan-quyen', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'remove_role', targetUserId: userId }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        onToast?.success('Đã xóa role', data.message);
-        fetchData();
-      } else {
-        onToast?.error('Lỗi', data.message);
-      }
-    } catch (err: any) {
-      onToast?.error('Lỗi', err.message);
+      const data = await removeRbacRole(userId);
+      onToast?.success('Đã xóa role', data.message);
+      fetchData();
+    } catch (err) {
+      onToast?.error('Lỗi', getApiErrorMessage(err, 'Không thể xóa role'));
     }
   };
 

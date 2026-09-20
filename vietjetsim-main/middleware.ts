@@ -22,6 +22,10 @@ if (!JWT_SECRET || JWT_SECRET === 'dev-secret-key-do-not-use-in-production') {
 
 const effectiveJwtSecret = JWT_SECRET || 'dev-secret-key-do-not-use-in-production';
 
+// Must match `CSRF_COOKIE_NAME` in `@/lib/csrf-client`; duplicated because the
+// Edge middleware bundle cannot import `next/headers`-dependent modules.
+const CSRF_COOKIE_NAME = 'csrf_token';
+
 // ─── HMAC-SHA256 Verification (Edge Runtime Compatible) ───────────────────────
 
 async function verifyJwtSignature(token: string, secret: string): Promise<JWTPayload | null> {
@@ -252,6 +256,22 @@ export async function middleware(request: NextRequest) {
       request: {
         headers: requestHeaders,
       },
+    });
+  }
+
+  // Bootstrap the double-submit CSRF cookie for any browser session that does
+  // not have one yet, so mutation calls guarded by `validateCsrfOrReject`
+  // succeed without requiring an explicit token-fetch round trip.
+  if (!request.cookies.get(CSRF_COOKIE_NAME)?.value) {
+    const bytes = new Uint8Array(32);
+    crypto.getRandomValues(bytes);
+    const token = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+    response.cookies.set(CSRF_COOKIE_NAME, token, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 60 * 60 * 24,
     });
   }
 

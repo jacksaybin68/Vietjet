@@ -11,7 +11,8 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20', 10);
     const from_code = searchParams.get('from_code') || undefined;
     const to_code = searchParams.get('to_code') || undefined;
-    const { flights, total } = await getAllFlights({ page, limit, from_code, to_code });
+    const search = searchParams.get('search') || undefined;
+    const { flights, total } = await getAllFlights({ page, limit, from_code, to_code, search });
     return NextResponse.json({
       flights,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },

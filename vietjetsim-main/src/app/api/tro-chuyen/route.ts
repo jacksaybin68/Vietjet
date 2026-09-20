@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/auth';
+import { validateCsrfOrReject } from '@/lib/csrf';
 import { isAdminRole } from '@/lib/rbac';
 import {
   getConversationMessages,
@@ -75,6 +76,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const csrfError = await validateCsrfOrReject(request);
+    if (csrfError) return csrfError;
+
     const token = request.cookies.get('access_token')?.value;
 
     if (!token) {

@@ -8,6 +8,9 @@ import {
   hashToken,
 } from '@/lib/auth';
 import { rotateRefreshToken, revokeRefreshTokenFamily, getStoredRefreshToken } from '@/lib/db';
+import { sql } from '@/lib/neon';
+import { isAccountLocked } from '@/lib/account-lock';
+import { setCsrfCookieOnResponse } from '@/lib/csrf';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,6 +25,22 @@ export async function POST(request: NextRequest) {
 
     if (!payload) {
       return NextResponse.json({ error: 'Invalid or expired refresh token' }, { status: 401 });
+    }
+
+    // A locked account must not be able to extend its session, otherwise the
+    // lock only takes effect once the refresh token expires.
+    const account = await sql`
+      SELECT locked_until FROM user_profiles WHERE id = ${payload.userId}
+    `;
+    const lockedUntil = (account as Array<{ locked_until: string | null }>)[0]?.locked_until ?? null;
+
+    if (isAccountLocked(lockedUntil)) {
+      const lockedResponse = NextResponse.json(
+        { error: 'Tài khoản đã bị khoá. Vui lòng liên hệ quản trị viên.' },
+        { status: 403 }
+      );
+      clearAuthCookiesOnResponse(lockedResponse);
+      return lockedResponse;
     }
 
     // Hash the incoming token and look it up in DB
@@ -93,6 +112,7 @@ export async function POST(request: NextRequest) {
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
     });
+    setCsrfCookieOnResponse(response);
 
     return response;
   } catch (error) {

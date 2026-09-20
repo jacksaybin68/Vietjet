@@ -1,6 +1,6 @@
 import { apiRequest } from '@/shared/services';
 import { API_ENDPOINTS } from '@/shared/constants';
-import type { FlightRecord } from '@/lib/db/types';
+import type { FlightRecord } from '@/lib/db';
 import type { Flight, FlightSearchParams, FlightSearchResponse } from '../types';
 
 /** Airport code → Vietnamese city name, falling back to the raw code. */

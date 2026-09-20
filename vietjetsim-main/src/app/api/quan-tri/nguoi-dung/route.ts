@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { getAllUsers, updateUserRole, findUserById, deleteUser } from '@/lib/db';
 import { canManageRole } from '@/lib/rbac';
+import { isAccountLocked } from '@/lib/account-lock';
 import type { AllRoles } from '@/lib/rbac';
 
 // ─── GET: Get all users (admin) ─────────────────────────────────────────────
@@ -30,7 +31,10 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      users,
+      users: users.map((u) => ({
+        ...u,
+        status: isAccountLocked(u.locked_until) ? 'locked' : 'active',
+      })),
       pagination: {
         page,
         limit,

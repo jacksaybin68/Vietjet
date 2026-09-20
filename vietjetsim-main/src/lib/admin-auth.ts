@@ -17,6 +17,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { verifyAccessToken } from '@/lib/auth';
 import type { JWTPayload } from '@/lib/auth';
+import { validateCsrfOrReject } from '@/lib/csrf';
 
 // We still import Permission type for API documentation purposes,
 // but permission checks are simplified — admin always has full access.
@@ -57,6 +58,13 @@ export async function verifyAdminRequest(
         { status: 401 }
       ),
     };
+  }
+
+  // CSRF is checked before the role gate so a cross-site request can never
+  // trigger admin side effects, even with a valid stolen cookie.
+  const csrfError = await validateCsrfOrReject(request);
+  if (csrfError) {
+    return { payload: {} as JWTPayload, error: 'CSRF validation failed', response: csrfError };
   }
 
   const payload = verifyAccessToken(token);

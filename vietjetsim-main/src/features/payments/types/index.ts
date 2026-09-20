@@ -1,4 +1,4 @@
-import type { PaymentRecord } from '@/lib/db/types';
+import type { PaymentRecord } from '@/lib/db';
 
 export type { PaymentRecord };
 

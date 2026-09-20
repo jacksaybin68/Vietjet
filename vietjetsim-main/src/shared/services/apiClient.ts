@@ -22,6 +22,13 @@ export interface ApiRequestOptions extends Omit<RequestInit, 'method' | 'body'> 
   skipCsrf?: boolean;
 }
 
+/** Substitute `:name` placeholders in an endpoint template with path values. */
+export function withPathParams(template: string, params: Record<string, string>): string {
+  return template.replace(/:([A-Za-z_][A-Za-z0-9_]*)/g, (match, name: string) =>
+    name in params ? encodeURIComponent(params[name]) : match
+  );
+}
+
 /**
  * Human-readable message for a failed {@link apiRequest} call. Falls back to
  * `fallback` for unexpected errors (network failures, thrown strings, …).

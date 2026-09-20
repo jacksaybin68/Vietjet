@@ -2,7 +2,7 @@ import type {
   SavedPaymentMethodRecord,
   WalletRecord,
   WalletTransactionRecord,
-} from '@/lib/db/wallet';
+} from '@/lib/db';
 
 export type { SavedPaymentMethodRecord, WalletRecord, WalletTransactionRecord };
 

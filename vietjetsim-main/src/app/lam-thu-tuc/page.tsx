@@ -18,6 +18,7 @@ import {
   MdPassword,
 } from 'react-icons/md';
 import { AppImage } from '@/shared/components/ui';
+import { getCsrfHeaders } from '@/lib/csrf-client';
 
 interface CheckInData {
   bookingId: string;
@@ -162,7 +163,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
     try {
       const res = await fetch('/api/checkin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         credentials: 'include',
         body: JSON.stringify({
           bookingId: checkInData.bookingId,

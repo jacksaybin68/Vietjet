@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { findUserById, updateUserRole, deleteUser } from '@/lib/db';
 import { canManageRole } from '@/lib/rbac';
+import { LOCKED_UNTIL_SENTINEL } from '@/lib/account-lock';
 import { sql } from '@/lib/neon';
 import type { AllRoles } from '@/lib/rbac';
 
@@ -100,14 +101,23 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     if (status) {
-      // Logic for status update (active/locked)
+      if (status !== 'active' && status !== 'locked') {
+        return NextResponse.json(
+          { error: 'Bad Request', message: 'status must be "active" or "locked"' },
+          { status: 400 }
+        );
+      }
+
+      // There is no `status` column; `locked_until` is the lock flag. A future
+      // timestamp locks the account, NULL unlocks it. Login and token refresh
+      // both reject while it is in the future.
       const results = await sql`
-         UPDATE user_profiles 
-         SET updated_at = NOW() -- Add status column if it exists or use role for now?
-         -- Note: if user_profiles doesn't have 'status', we might need to add it via schema
-         WHERE id = ${id}
-         RETURNING *
-       `;
+        UPDATE user_profiles
+        SET locked_until = ${status === 'locked' ? LOCKED_UNTIL_SENTINEL : null},
+            updated_at = NOW()
+        WHERE id = ${id}
+        RETURNING *
+      `;
       updatedUser = (results as any[])[0];
     }
 

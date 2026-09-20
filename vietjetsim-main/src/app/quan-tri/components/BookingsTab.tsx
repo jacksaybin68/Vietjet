@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
+import { createAdminInvoice } from '@/features/admin';
+import { getApiErrorMessage } from '@/shared/services';
 
 type BookingStatus = 'confirmed' | 'pending' | 'cancelled' | 'completed';
 
@@ -350,42 +352,28 @@ export default function BookingsTab() {
     if (!selectedBooking) return;
     setIsProcessingInvoice(true);
     try {
-      const res = await fetch('/api/quan-tri/dat-ve/hoa-don', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          booking_id: selectedBooking.id,
-          amount: invoiceForm.amount || selectedBooking.amount,
-          method: invoiceForm.method,
-          status: invoiceForm.status,
-        }),
+      await createAdminInvoice({
+        booking_id: selectedBooking.id,
+        amount: invoiceForm.amount || selectedBooking.amount,
+        method: invoiceForm.method,
+        status: invoiceForm.status,
       });
 
-      const data = await res.json();
-      if (res.ok) {
-        // Update local state
-        const newStatus = invoiceForm.status === 'completed' ? 'confirmed' : selectedBooking.status;
-        setBookings((prev) =>
-          prev.map((b) =>
-            b.id === selectedBooking.id
-              ? { ...b, status: newStatus as BookingStatus, payMethod: invoiceForm.method }
-              : b
-          )
-        );
-        setSelectedBooking((prev) =>
-          prev
-            ? { ...prev, status: newStatus as BookingStatus, payMethod: invoiceForm.method }
-            : null
-        );
-        setShowInvoiceModal(false);
-        // Assuming toast is available via props if integrated like other tabs, but BookingsTab doesn't have it in props yet.
-        // For consistency with other parts of the app:
-        alert('Tạo hóa đơn & Xác nhận thành công!');
-      } else {
-        alert('Lỗi: ' + data.message);
-      }
+      const newStatus = invoiceForm.status === 'completed' ? 'confirmed' : selectedBooking.status;
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.id === selectedBooking.id
+            ? { ...b, status: newStatus as BookingStatus, payMethod: invoiceForm.method }
+            : b
+        )
+      );
+      setSelectedBooking((prev) =>
+        prev ? { ...prev, status: newStatus as BookingStatus, payMethod: invoiceForm.method } : null
+      );
+      setShowInvoiceModal(false);
+      alert('Tạo hóa đơn & Xác nhận thành công!');
     } catch (error) {
-      alert('Lỗi kết nối hệ thống');
+      alert(getApiErrorMessage(error, 'Lỗi kết nối hệ thống'));
     } finally {
       setIsProcessingInvoice(false);
     }

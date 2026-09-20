@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/auth';
+import { validateCsrfOrReject } from '@/lib/csrf';
 import { getChatPresence, updateChatPresence } from '@/lib/db';
 import { isAdminRole } from '@/lib/rbac';
 
@@ -36,6 +37,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const csrfError = await validateCsrfOrReject(request);
+    if (csrfError) return csrfError;
+
     const token = request.cookies.get('access_token')?.value;
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

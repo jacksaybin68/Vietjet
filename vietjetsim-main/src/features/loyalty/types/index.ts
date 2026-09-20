@@ -1,4 +1,4 @@
-import type { LoyaltyTierRecord, LoyaltyTransactionRecord } from '@/lib/db/loyalty';
+import type { LoyaltyTierRecord, LoyaltyTransactionRecord } from '@/lib/db';
 
 export type { LoyaltyTierRecord, LoyaltyTransactionRecord };
 

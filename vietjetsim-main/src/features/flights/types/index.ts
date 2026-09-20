@@ -1,4 +1,4 @@
-import type { FlightRecord } from '@/lib/db/types';
+import type { FlightRecord } from '@/lib/db';
 
 /** Flight shape consumed by the booking UI (camelCase, display-ready). */
 export type Flight = {

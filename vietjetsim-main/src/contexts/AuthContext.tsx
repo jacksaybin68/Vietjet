@@ -3,6 +3,8 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserRole } from '@/types/database';
+import { updateUser } from '@/features/admin';
+import { getApiErrorMessage } from '@/shared/services';
 
 /**
  * Check if a role has admin access.
@@ -141,7 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchCurrentUser = async () => {
     try {
-      const data = await fetchAuth('/lanh-dao');
+      const data = await fetchAuth('/toi');
       if (data?.user) {
         setUser(data.user);
         setRole(data.user.role || 'user');
@@ -210,7 +212,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      await fetchAuth('/logout', { method: 'POST' });
+      await fetchAuth('/dang-xuat', { method: 'POST' });
     } catch {
       // Continue logout even if API fails
     }
@@ -269,22 +271,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const updateUserRole = async (userId: string, newRole: UserRole) => {
     try {
-      const res = await fetch('/api/quan-tri/nguoi-dung', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ userId, role: newRole }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        return { error: data.error || data.message || 'Failed to update role' };
-      }
+      await updateUser(userId, { role: newRole });
 
       // Refresh current user to sync state
       await fetchCurrentUser();
-    } catch (err: any) {
-      return { error: err.message || 'Network error' };
+    } catch (err) {
+      return { error: getApiErrorMessage(err, 'Network error') };
     }
   };
 

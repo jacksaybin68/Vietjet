@@ -9,6 +9,7 @@ import { ToastContainer } from '@/shared/components/feedback';
 import { createPayment, getWalletOverview } from '@/features/payments/services';
 
 import type { PaymentMethod } from '@/features/payments/types';
+import { getCsrfHeaders } from '@/lib/csrf-client';
 
 interface BankInfo {
   id: string;
@@ -532,7 +533,7 @@ export default function PaymentClient() {
     try {
       const res = await fetch('/api/ma-giam-gia/xac-thuc', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify({
           code: promoCode,
           bookingAmount: booking?.basePrice || 0,

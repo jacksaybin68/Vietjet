@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePathname } from 'next/navigation';
 import { Icon } from '@/shared/components/ui';
+import { getCsrfHeaders } from '@/lib/csrf-client';
 
 interface Message {
   id: string;
@@ -71,7 +72,7 @@ export default function OpenClawAssistant() {
     try {
       const response = await fetch('/api/tro-ly-ai/tro-chuyen', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify({
           message: text,
           history: messages.map((m) => ({

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from '@/lib/auth';
+import { validateCsrfOrReject } from '@/lib/csrf';
 import {
   getSavedPaymentMethods,
   deleteSavedPaymentMethod,
@@ -11,6 +12,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const csrfError = await validateCsrfOrReject(request);
+    if (csrfError) return csrfError;
+
     const token = await getToken(request);
     if (!token?.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -28,6 +32,9 @@ export async function DELETE(
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const csrfError = await validateCsrfOrReject(request);
+    if (csrfError) return csrfError;
+
     const token = await getToken(request);
     if (!token?.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

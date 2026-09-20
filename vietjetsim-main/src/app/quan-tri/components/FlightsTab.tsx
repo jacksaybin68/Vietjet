@@ -2,6 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
+import {
+  listAdminFlights,
+  createAdminFlight,
+  updateAdminFlight,
+  deleteAdminFlight,
+  type AdminFlight,
+} from '@/features/admin';
+import { getApiErrorMessage } from '@/shared/services';
 
 interface ToastAPI {
   success: (title: string, message?: string, options?: object) => void;
@@ -133,6 +141,23 @@ const STATUS_TABS: { value: 'all' | FlightStatus; label: string; color: string }
   { value: 'cancelled', label: 'Đã huỷ', color: 'text-red-700 bg-red-100' },
 ];
 
+/** Map the raw API flight shape onto this tab's display model. */
+function toFlightRow(f: AdminFlight): Flight {
+  return {
+    id: f.id,
+    flightNo: f.flight_no,
+    from: f.from_code,
+    to: f.to_code,
+    departTime: f.depart_time ? new Date(f.depart_time).toTimeString().slice(0, 5) : '',
+    arriveTime: f.arrive_time ? new Date(f.arrive_time).toTimeString().slice(0, 5) : '',
+    date: f.depart_time ? f.depart_time.split('T')[0] : '',
+    price: Number(f.price) || 0,
+    capacity: Number(f.available ?? f.available_seats ?? 0) || 0,
+    booked: Math.floor(Math.random() * (Number(f.available ?? f.available_seats ?? 1) || 1)),
+    status: (f.status as FlightStatus) || 'active',
+  };
+}
+
 export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
   const [flights, setFlights] = useState<Flight[]>(INITIAL_FLIGHTS);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -158,23 +183,9 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
     setIsLoading(true);
     setHasError(false);
     try {
-      const res = await fetch('/api/quan-tri/chuyen-bay?limit=100');
-      if (!res.ok) throw new Error('Failed to fetch');
-      const data = await res.json();
+      const data = await listAdminFlights({ limit: 100 });
       if (data.flights && Array.isArray(data.flights)) {
-        const mapped = data.flights.map((f: any) => ({
-          id: f.id,
-          flightNo: f.flight_no,
-          from: f.from_code,
-          to: f.to_code,
-          departTime: f.depart_time ? new Date(f.depart_time).toTimeString().slice(0, 5) : '',
-          arriveTime: f.arrive_time ? new Date(f.arrive_time).toTimeString().slice(0, 5) : '',
-          date: f.depart_time ? f.depart_time.split('T')[0] : '',
-          price: Number(f.price) || 0,
-          capacity: Number(f.available) || 0,
-          booked: Math.floor(Math.random() * (Number(f.available) || 1)),
-          status: f.status || 'active',
-        }));
+        const mapped = data.flights.map(toFlightRow);
         setFlights(mapped.length > 0 ? mapped : INITIAL_FLIGHTS);
       }
     } catch (err) {
@@ -315,34 +326,25 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
         class: 'Economy', // Default class for new flights
         available: parseInt(newFlight.capacity),
       };
-      const res = await fetch('/api/quan-tri/chuyen-bay', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+      await createAdminFlight(payload);
+      onToast?.success(
+        'Thêm chuyến bay thành công',
+        `Chuyến bay ${payload.flight_no} đã được tạo.`
+      );
+      setShowAddModal(false);
+      setNewFlight({
+        flightNo: '',
+        from: 'HAN',
+        to: 'SGN',
+        departTime: '',
+        arriveTime: '',
+        date: '',
+        price: '',
+        capacity: '',
       });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        onToast?.success(
-          'Thêm chuyến bay thành công',
-          `Chuyến bay ${payload.flight_no} đã được tạo.`
-        );
-        setShowAddModal(false);
-        setNewFlight({
-          flightNo: '',
-          from: 'HAN',
-          to: 'SGN',
-          departTime: '',
-          arriveTime: '',
-          date: '',
-          price: '',
-          capacity: '',
-        });
-        fetchFlights();
-      } else {
-        onToast?.error('Lỗi khi thêm chuyến bay', data.message || 'Vui lòng thử lại.');
-      }
-    } catch (err: any) {
-      onToast?.error('Lỗi mạng', err.message || 'Kết nối thất bại.');
+      fetchFlights();
+    } catch (err) {
+      onToast?.error('Lỗi khi thêm chuyến bay', getApiErrorMessage(err, 'Vui lòng thử lại.'));
     } finally {
       setIsAdding(false);
     }
@@ -350,20 +352,11 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
 
   const handleStatusChange = async (id: string, status: FlightStatus) => {
     try {
-      const res = await fetch(`/api/quan-tri/chuyen-bay/${encodeURIComponent(id)}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setFlights((prev) => prev.map((f) => (f.id === id ? { ...f, status } : f)));
-        onToast?.success('Cập nhật trạng thái thành công');
-      } else {
-        onToast?.error('Cập nhật thất bại', data.message);
-      }
-    } catch (err: any) {
-      onToast?.error('Lỗi mạng', err.message);
+      await updateAdminFlight(id, { status });
+      setFlights((prev) => prev.map((f) => (f.id === id ? { ...f, status } : f)));
+      onToast?.success('Cập nhật trạng thái thành công');
+    } catch (err) {
+      onToast?.error('Cập nhật thất bại', getApiErrorMessage(err, 'Không thể cập nhật trạng thái'));
     }
   };
 
@@ -373,21 +366,14 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
 
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/quan-tri/chuyen-bay?flight_id=${encodeURIComponent(id)}`, {
-        method: 'DELETE',
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setFlights((prev) => prev.filter((f) => f.id !== id));
-        onToast?.error(
-          'Đã xoá chuyến bay',
-          `Chuyến bay ${flight?.flightNo ?? ''} đã bị xoá khỏi hệ thống.`
-        );
-      } else {
-        onToast?.error('Lỗi khi xoá', data.message);
-      }
-    } catch (err: any) {
-      onToast?.error('Lỗi mạng', err.message);
+      await deleteAdminFlight(id);
+      setFlights((prev) => prev.filter((f) => f.id !== id));
+      onToast?.error(
+        'Đã xoá chuyến bay',
+        `Chuyến bay ${flight?.flightNo ?? ''} đã bị xoá khỏi hệ thống.`
+      );
+    } catch (err) {
+      onToast?.error('Lỗi khi xoá', getApiErrorMessage(err, 'Không thể xoá chuyến bay'));
     } finally {
       setDeletingId(null);
     }
@@ -417,16 +403,13 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
         status: editingFlight.status,
       };
 
-      const res = await fetch(`/api/quan-tri/chuyen-bay/${encodeURIComponent(editingFlight.id)}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      const data = (await updateAdminFlight(editingFlight.id, payload)) as {
+        success: boolean;
+        flight?: AdminFlight;
+        changes?: { label: string }[];
+      };
 
-      const data = await res.json();
-
-      if (data.success) {
-        // Update local state with server response or optimistic update
+      // Update local state with server response or optimistic update
         setFlights((prev) =>
           prev.map((f) =>
             f.id === editingFlight.id
@@ -438,7 +421,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   departTime: editingFlight.departTime,
                   arriveTime: editingFlight.arriveTime,
                   date: editingFlight.date,
-                  status: data.flight?.status || editingFlight.status,
+                  status: (data.flight?.status as FlightStatus) || editingFlight.status,
                 }
               : f
           )
@@ -455,34 +438,16 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
 
         // Refresh flight list from server
         try {
-          const listRes = await fetch('/api/quan-tri/chuyen-bay?limit=100');
-          if (listRes.ok) {
-            const listData = await listRes.json();
-            if (listData.flights && Array.isArray(listData.flights)) {
-              const mapped = listData.flights.map((f: any) => ({
-                id: f.id,
-                flightNo: f.flight_no,
-                from: f.from_code,
-                to: f.to_code,
-                departTime: f.depart_time ? new Date(f.depart_time).toTimeString().slice(0, 5) : '',
-                arriveTime: f.arrive_time ? new Date(f.arrive_time).toTimeString().slice(0, 5) : '',
-                date: f.depart_time ? f.depart_time.split('T')[0] : '',
-                price: Number(f.price) || 0,
-                capacity: Number(f.available) || 0,
-                booked: Math.floor(Math.random() * (Number(f.available) || 1)),
-                status: f.status || 'active',
-              }));
-              setFlights(mapped.length > 0 ? mapped : (prev) => prev);
-            }
+          const listData = await listAdminFlights({ limit: 100 });
+          if (listData.flights && Array.isArray(listData.flights)) {
+            const mapped = listData.flights.map(toFlightRow);
+            setFlights((prev) => (mapped.length > 0 ? mapped : prev));
           }
-        } catch {
-          /* keep local state */
-        }
-      } else {
-        onToast?.error('Lỗi cập nhật', data.message || 'Không thể lưu thay đổi. Vui lòng thử lại.');
+      } catch {
+        /* keep local state */
       }
-    } catch (err: any) {
-      onToast?.error('Lỗi mạng', err.message || 'Kết nối đến server thất bại.');
+    } catch (err) {
+      onToast?.error('Lỗi cập nhật', getApiErrorMessage(err, 'Không thể lưu thay đổi.'));
     } finally {
       setIsSavingEdit(false);
     }

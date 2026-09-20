@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from '@/lib/auth';
+import { validateCsrfOrReject } from '@/lib/csrf';
 import { getSavedPaymentMethods, addSavedPaymentMethod } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
@@ -36,6 +37,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const csrfError = await validateCsrfOrReject(request);
+    if (csrfError) return csrfError;
+
     const token = await getToken(request);
     if (!token?.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

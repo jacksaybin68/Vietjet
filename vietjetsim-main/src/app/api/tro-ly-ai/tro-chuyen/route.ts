@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { researchVietjetFlights } from '@/lib/openclaw/flight-researcher';
+import { validateCsrfOrReject } from '@/lib/csrf';
 
 export async function POST(req: NextRequest) {
   try {
+    const csrfError = await validateCsrfOrReject(req);
+    if (csrfError) return csrfError;
+
     const { message, history = [] } = await req.json();
 
     if (!message) {
