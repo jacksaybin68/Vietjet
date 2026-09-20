@@ -11,7 +11,10 @@ import { GET as getUserBookings } from '@/app/api/dat-ve/route';
 import { POST as sendChatMessage } from '@/app/api/tro-chuyen/route';
 import { POST as postCheckIn } from '@/app/api/checkin/route';
 import { POST as postWallet } from '@/app/api/vi/route';
-import { PATCH as patchNotification, DELETE as deleteNotification } from '@/app/api/thong-bao/[id]/route';
+import {
+  PATCH as patchNotification,
+  DELETE as deleteNotification,
+} from '@/app/api/thong-bao/[id]/route';
 import { POST as createBooking } from '@/app/api/dat-ve/route';
 import { POST as createRefund } from '@/app/api/hoan-tien/route';
 import { PUT as updateProfile } from '@/app/api/nguoi-dung/profile/route';

@@ -13,7 +13,7 @@
 
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { createHash, randomBytes } from 'crypto';
+import { randomBytes } from 'crypto';
 import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from './csrf-client';
 
 // ─── Constants ──────────────────────────────────────────────────────────────

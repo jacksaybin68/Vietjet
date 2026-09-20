@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import {
   verifyAccessToken,
   clearAuthCookiesOnResponse,
@@ -6,7 +6,7 @@ import {
 } from '@/lib/auth';
 import { invalidateUserRefreshTokens } from '@/lib/db';
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Verify the user has a valid access token before allowing logout
     const accessToken = await getAccessTokenFromCookies();

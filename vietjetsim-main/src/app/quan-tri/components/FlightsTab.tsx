@@ -410,39 +410,39 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
       };
 
       // Update local state with server response or optimistic update
-        setFlights((prev) =>
-          prev.map((f) =>
-            f.id === editingFlight.id
-              ? {
-                  ...f,
-                  flightNo: data.flight?.flight_no || editingFlight.flightNo,
-                  from: data.flight?.from_code || editingFlight.from,
-                  to: data.flight?.to_code || editingFlight.to,
-                  departTime: editingFlight.departTime,
-                  arriveTime: editingFlight.arriveTime,
-                  date: editingFlight.date,
-                  status: (data.flight?.status as FlightStatus) || editingFlight.status,
-                }
-              : f
-          )
-        );
-        setEditingFlight(null);
+      setFlights((prev) =>
+        prev.map((f) =>
+          f.id === editingFlight.id
+            ? {
+                ...f,
+                flightNo: data.flight?.flight_no || editingFlight.flightNo,
+                from: data.flight?.from_code || editingFlight.from,
+                to: data.flight?.to_code || editingFlight.to,
+                departTime: editingFlight.departTime,
+                arriveTime: editingFlight.arriveTime,
+                date: editingFlight.date,
+                status: (data.flight?.status as FlightStatus) || editingFlight.status,
+              }
+            : f
+        )
+      );
+      setEditingFlight(null);
 
-        const changedFields = (data.changes || []).map((c: any) => c.label).join(', ');
-        onToast?.success(
-          'Cập nhật chuyến bay thành công',
-          changedFields
-            ? `Đã cập nhật: ${changedFields}.`
-            : `Chuyến bay ${editingFlight.flightNo} đã được cập nhật.`
-        );
+      const changedFields = (data.changes || []).map((c: any) => c.label).join(', ');
+      onToast?.success(
+        'Cập nhật chuyến bay thành công',
+        changedFields
+          ? `Đã cập nhật: ${changedFields}.`
+          : `Chuyến bay ${editingFlight.flightNo} đã được cập nhật.`
+      );
 
-        // Refresh flight list from server
-        try {
-          const listData = await listAdminFlights({ limit: 100 });
-          if (listData.flights && Array.isArray(listData.flights)) {
-            const mapped = listData.flights.map(toFlightRow);
-            setFlights((prev) => (mapped.length > 0 ? mapped : prev));
-          }
+      // Refresh flight list from server
+      try {
+        const listData = await listAdminFlights({ limit: 100 });
+        if (listData.flights && Array.isArray(listData.flights)) {
+          const mapped = listData.flights.map(toFlightRow);
+          setFlights((prev) => (mapped.length > 0 ? mapped : prev));
+        }
       } catch {
         /* keep local state */
       }
