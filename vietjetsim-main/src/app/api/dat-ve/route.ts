@@ -1,20 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAccessToken } from '@/lib/auth';
-import { validateCsrfOrReject } from '@/lib/csrf';
+import { verifyAuthRequest } from '@/lib/auth';
 import { getBookingsByUserId, createBooking } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get('access_token')?.value;
+    const { user, error, response } = await verifyAuthRequest(request);
+    if (error || !user) return response!;
 
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const payload = verifyAccessToken(token);
-    if (!payload) {
-      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
-    }
+    const payload = user;
 
     const { searchParams } = new URL(request.url);
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
@@ -49,20 +42,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  // Validate CSRF token
-  const csrfError = await validateCsrfOrReject(request);
-  if (csrfError) return csrfError;
-
   try {
-    const token = request.cookies.get('access_token')?.value;
-    let userId: string | null = null;
+    const { user, error, response } = await verifyAuthRequest(request);
+    if (error || !user) return response!;
 
-    if (token) {
-      const payload = verifyAccessToken(token);
-      if (payload) {
-        userId = payload.userId;
-      }
-    }
+    const userId = user.userId;
 
     const body = await request.json();
     const { flight_id, total_price, passengers, seats } = body;
@@ -80,14 +64,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'flight_id, total_price (> 0), and passengers are required' },
         { status: 400 }
-      );
-    }
-
-    // Guest booking is not allowed - authentication is required
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Authentication required. Please login to book flights.' },
-        { status: 401 }
       );
     }
 

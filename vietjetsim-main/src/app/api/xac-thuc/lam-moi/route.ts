@@ -32,7 +32,8 @@ export async function POST(request: NextRequest) {
     const account = await sql`
       SELECT locked_until FROM user_profiles WHERE id = ${payload.userId}
     `;
-    const lockedUntil = (account as Array<{ locked_until: string | null }>)[0]?.locked_until ?? null;
+    const lockedUntil =
+      (account as Array<{ locked_until: string | null }>)[0]?.locked_until ?? null;
 
     if (isAccountLocked(lockedUntil)) {
       const lockedResponse = NextResponse.json(

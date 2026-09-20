@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { UserRole } from '@/types/database';
 import { updateUser } from '@/features/admin';
 import { getApiErrorMessage } from '@/shared/services';
+import { getCsrfHeaders } from '@/lib/csrf-client';
 
 /**
  * Check if a role has admin access.
@@ -89,13 +90,15 @@ export const useAuth = (): AuthContextType => {
 // ─── API Helpers ────────────────────────────────────────────────────────────
 
 async function fetchAuth(endpoint: string, options?: RequestInit) {
+  const { headers, ...rest } = options ?? {};
   const res = await fetch(`/api/xac-thuc${endpoint}`, {
+    ...rest,
     headers: {
       'Content-Type': 'application/json',
-      ...options?.headers,
+      ...getCsrfHeaders(),
+      ...headers,
     },
     credentials: 'include',
-    ...options,
   });
 
   const data = await res.json();

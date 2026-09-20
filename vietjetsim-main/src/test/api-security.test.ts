@@ -11,6 +11,10 @@ import { GET as getUserBookings } from '@/app/api/dat-ve/route';
 import { POST as sendChatMessage } from '@/app/api/tro-chuyen/route';
 import { POST as postCheckIn } from '@/app/api/checkin/route';
 import { POST as postWallet } from '@/app/api/vi/route';
+import { PATCH as patchNotification, DELETE as deleteNotification } from '@/app/api/thong-bao/[id]/route';
+import { POST as createBooking } from '@/app/api/dat-ve/route';
+import { POST as createRefund } from '@/app/api/hoan-tien/route';
+import { PUT as updateProfile } from '@/app/api/nguoi-dung/profile/route';
 import * as db from '@/lib/db';
 
 vi.mock('@/lib/neon', () => {
@@ -413,6 +417,55 @@ describe('API & RBAC Security Logic', () => {
         body: JSON.stringify({ action: 'topup', amount: 100000 }),
       });
       const res = (await postWallet(req))!;
+      expect(res.status).toBe(403);
+    });
+
+    it('notification PATCH - rejects a missing CSRF token with 403', async () => {
+      const req = new NextRequest('http://localhost:4028/api/thong-bao/n1', {
+        method: 'PATCH',
+        headers: { cookie: `access_token=${makeUserToken()}` },
+        body: JSON.stringify({ is_read: true }),
+      });
+      const res = (await patchNotification(req, { params: Promise.resolve({ id: 'n1' }) }))!;
+      expect(res.status).toBe(403);
+    });
+
+    it('notification DELETE - rejects a missing CSRF token with 403', async () => {
+      const req = new NextRequest('http://localhost:4028/api/thong-bao/n1', {
+        method: 'DELETE',
+        headers: { cookie: `access_token=${makeUserToken()}` },
+      });
+      const res = (await deleteNotification(req, { params: Promise.resolve({ id: 'n1' }) }))!;
+      expect(res.status).toBe(403);
+    });
+
+    it('booking POST - rejects a missing CSRF token with 403', async () => {
+      const req = new NextRequest('http://localhost:4028/api/dat-ve', {
+        method: 'POST',
+        headers: { cookie: `access_token=${makeUserToken()}` },
+        body: JSON.stringify({ flight_id: 'f1', total_price: 100, passengers: [{}] }),
+      });
+      const res = (await createBooking(req))!;
+      expect(res.status).toBe(403);
+    });
+
+    it('refund POST - rejects a missing CSRF token with 403', async () => {
+      const req = new NextRequest('http://localhost:4028/api/hoan-tien', {
+        method: 'POST',
+        headers: { cookie: `access_token=${makeUserToken()}` },
+        body: JSON.stringify({ booking_id: 'b1', reason: 'x' }),
+      });
+      const res = (await createRefund(req))!;
+      expect(res.status).toBe(403);
+    });
+
+    it('profile PUT - rejects a missing CSRF token with 403', async () => {
+      const req = new NextRequest('http://localhost:4028/api/nguoi-dung/profile', {
+        method: 'PUT',
+        headers: { cookie: `access_token=${makeUserToken()}` },
+        body: JSON.stringify({ full_name: 'New Name' }),
+      });
+      const res = (await updateProfile(req))!;
       expect(res.status).toBe(403);
     });
   });
