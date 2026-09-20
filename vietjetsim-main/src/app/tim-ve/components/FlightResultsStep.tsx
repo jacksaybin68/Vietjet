@@ -4,6 +4,7 @@ import { Flight } from './FlightBookingClient';
 import { Icon } from '@/shared/components/ui';
 import { FlightResultsSkeleton } from '@/shared/components/ui';
 import { getErrorMessage } from '@/lib/utils';
+import { searchFlightsForUi } from '@/features/flights/services';
 
 // ─── Fallback mock data (used when API is unavailable) ──────────────────────
 
@@ -169,64 +170,6 @@ const FALLBACK_FLIGHTS: Flight[] = [
     stops: 0,
   },
 ];
-
-// ─── Airport code → City name mapping ───────────────────────────────────────
-
-const AIRPORT_CITIES: Record<string, string> = {
-  HAN: 'Hà Nội',
-  SGN: 'TP.HCM',
-  DAD: 'Đà Nẵng',
-  PQC: 'Phú Quốc',
-  CXR: 'Nha Trang',
-  HPH: 'Hải Phòng',
-  HUI: 'Huế',
-  VCL: 'Chu Lai',
-  PUI: 'Phù Cát',
-  VCS: 'Côn Đảo',
-  VCA: 'Phú Cat',
-  DLI: 'Lâm Đồng',
-  BMV: 'Buôn Ma Thuột',
-};
-
-function getAirportCity(code: string): string {
-  return AIRPORT_CITIES[code] || code;
-}
-
-// ─── DB FlightRecord → UI Flight mapper ─────────────────────────────────────
-
-function mapDbFlightToFlight(row: any): Flight {
-  const depTime = new Date(row.depart_time);
-  const arrTime = new Date(row.arrive_time);
-  const diffMs = arrTime.getTime() - depTime.getTime();
-  const durationMin = Math.round(diffMs / 60000);
-  const durH = Math.floor(durationMin / 60);
-  const durM = durationMin % 60;
-  const duration = `${durH}h ${durM}m`;
-
-  // Derive airline prefix from flight_no
-  const fn = (row.flight_no || '').toUpperCase().replace(/\s+/g, '');
-  let airline = 'Vietjet Air';
-  if (fn.startsWith('VJ')) airline = 'Vietjet Air';
-  else if (fn.startsWith('VN') || fn.startsWith('VNA')) airline = 'VietnamSim';
-  else if (fn.startsWith('QH') || fn.startsWith('BL')) airline = 'BambooSim';
-
-  return {
-    id: row.id || fn,
-    from: (row.from_code || '').toUpperCase(),
-    to: (row.to_code || '').toUpperCase(),
-    fromCity: getAirportCity(row.from_code || ''),
-    toCity: getAirportCity(row.to_code || ''),
-    departTime: `${String(depTime.getHours()).padStart(2, '0')}:${String(depTime.getMinutes()).padStart(2, '0')}`,
-    arriveTime: `${String(arrTime.getHours()).padStart(2, '0')}:${String(arrTime.getMinutes()).padStart(2, '0')}`,
-    duration,
-    price: Number(row.price) || 0,
-    class: row.class === 'business' ? 'business' : 'economy',
-    airline,
-    flightNo: row.flight_no || '',
-    available: Number(row.available) || 0,
-    stops: 0,
-  };
-}
 
 const CLASS_LABELS: Record<string, string> = { economy: 'Phổ thông', business: 'Thương gia' };
 
@@ -414,34 +357,29 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
 
     try {
       // Read search params from sessionStorage (set by FlightBookingClient)
-      let searchUrl = '/api/chuyen-bay';
-      let sessionHasData = false;
       let fromCode = '';
       let toCode = '';
+      let departDate: string | undefined;
       try {
         const stored = sessionStorage.getItem('vjsim_booking');
         if (stored) {
           const bookingData = JSON.parse(stored);
-          sessionHasData = !!(bookingData.from && bookingData.to);
           fromCode = bookingData.from || '';
           toCode = bookingData.to || '';
-          if (bookingData.from && bookingData.to) {
-            const params = new URLSearchParams();
-            params.set('from', bookingData.from);
-            params.set('to', bookingData.to);
-            if (bookingData.date) params.set('date', bookingData.date);
-            searchUrl = `/api/chuyen-bay?${params.toString()}`;
-          }
+          departDate = bookingData.date || undefined;
         }
       } catch {
         /* no session data — use default */
       }
 
-      const res = await fetch(searchUrl);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-
-      const apiFlights: Flight[] = (data.flights || []).map(mapDbFlightToFlight);
+      const apiFlights =
+        fromCode && toCode
+          ? await searchFlightsForUi({
+              from_code: fromCode,
+              to_code: toCode,
+              depart_date: departDate,
+            })
+          : [];
 
       if (apiFlights.length > 0) {
         setFlights(apiFlights);

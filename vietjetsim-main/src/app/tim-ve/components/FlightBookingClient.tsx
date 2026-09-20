@@ -8,6 +8,7 @@ import SeatSelectionStep from './SeatSelectionStep';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 import { ErrorBoundary } from '@/shared/components/feedback';
+import { createBooking } from '@/features/bookings/services';
 
 export type Flight = {
   id: string;
@@ -100,6 +101,10 @@ function FlightBookingClientInner() {
   const handleSeatConfirm = async (seats: string[], seatPrices: number[]) => {
     try {
       const flightId = booking.selectedFlight?.id;
+      if (!flightId) {
+        toast.error('Lỗi đặt chỗ', 'Vui lòng chọn chuyến bay trước.');
+        return;
+      }
       const passengers = booking.passengers;
       const basePrice = booking.selectedFlight?.price || 0;
 
@@ -108,19 +113,12 @@ function FlightBookingClientInner() {
       const seatsFee = seatPrices.reduce((sum, price) => sum + price, 0);
       const totalPrice = basePrice * passengerCount + taxAndFee + seatsFee;
 
-      const res = await fetch('/api/dat-ve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          flight_id: flightId,
-          total_price: totalPrice,
-          passengers: passengers,
-          seats: seats,
-        }),
+      const data = await createBooking({
+        flight_id: flightId,
+        total_price: totalPrice,
+        passengers: passengers,
+        seats: seats,
       });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to create booking');
 
       const bookingId = data.booking.id;
 

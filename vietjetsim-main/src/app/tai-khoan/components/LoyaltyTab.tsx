@@ -5,62 +5,51 @@ import { Icon } from '@/shared/components/ui';
 import { useToast } from '@/hooks/useToast';
 import { getTierColor } from '@/lib/loyalty';
 import { Pagination } from '@/shared/components/ui';
-
-interface LoyaltyTransaction {
-  id: string;
-  points: number;
-  type: 'earn' | 'redeem' | 'expire' | 'bonus' | 'adjust';
-  description: string | null;
-  expires_at: string | null;
-  expired: boolean;
-  created_at: string;
-}
+import { getMembership, listLoyaltyTransactions, redeemPoints } from '@/features/loyalty/services';
+import { LOYALTY_TRANSACTION_LABELS, MIN_POINTS_TO_REDEEM } from '@/features/loyalty/constants';
+import type { LoyaltyTransactionRecord } from '@/features/loyalty/types';
 
 interface LoyaltyData {
-  id: string;
-  total_points: number;
-  available_points: number;
-  lifetime_points: number;
+  availablePoints: number;
+  totalPoints: number;
+  lifetimePoints: number;
   tier: string;
-  joined_at: string;
+  enrolledAt: string;
 }
 
 interface Tier {
   id: string;
   name: string;
-  min_lifetime_points: number;
-  points_multiplier: number;
+  minLifetimePoints: number;
+  pointsMultiplier: number;
   benefits: string | null;
-  tier_order: number;
+  tierOrder: number;
 }
 
-const TYPE_CONFIG: Record<string, { label: string; color: string; bg: string; icon: string }> = {
+// Visual treatment per transaction type; labels come from
+// LOYALTY_TRANSACTION_LABELS so they stay in sync with the domain constants.
+const TYPE_CONFIG: Record<string, { color: string; bg: string; icon: string }> = {
   earn: {
-    label: 'Tích điểm',
     color: 'var(--vj-green)',
     bg: 'var(--vj-green-light)',
     icon: 'ArrowTrendingUpIcon',
   },
   redeem: {
-    label: 'Đổi điểm',
     color: 'var(--primary)',
     bg: 'var(--surface-2)',
     icon: 'GiftIcon',
   },
   expire: {
-    label: 'Hết hạn',
     color: 'var(--foreground-muted)',
     bg: 'var(--surface-2)',
     icon: 'ClockIcon',
   },
   bonus: {
-    label: 'Thưởng',
     color: 'var(--accent)',
     bg: 'var(--accent-secondary)',
     icon: 'StarIcon',
   },
   adjust: {
-    label: 'Điều chỉnh',
     color: 'var(--vj-purple)',
     bg: 'var(--vj-purple-light)',
     icon: 'AdjustmentsHorizontalIcon',
@@ -99,8 +88,8 @@ function RedeemModal({
       toast.error('Lỗi', 'Vui lòng nhập số điểm hợp lệ.');
       return;
     }
-    if (pts < 500) {
-      toast.error('Lỗi', 'Tối thiểu 500 điểm để đổi.');
+    if (pts < MIN_POINTS_TO_REDEEM) {
+      toast.error('Lỗi', `Tối thiểu ${MIN_POINTS_TO_REDEEM} điểm để đổi.`);
       return;
     }
     if (pts > availablePoints) {
@@ -110,22 +99,13 @@ function RedeemModal({
 
     setLoading(true);
     try {
-      const res = await fetch('/api/thanh-vien/doi-diem', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ points: pts, description: 'Đổi điểm thưởng Vietjet Air' }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        toast.error('Lỗi', data.error || 'Đổi điểm thất bại.');
-        return;
-      }
+      await redeemPoints({ points: pts, description: 'Đổi điểm thưởng Vietjet Air' });
       toast.success('Thành công', `Đã đổi ${formatPoints(pts)} điểm.`);
       onSuccess();
       onClose();
-    } catch {
-      toast.error('Lỗi', 'Đổi điểm thất bại.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Đổi điểm thất bại.';
+      toast.error('Lỗi', message);
     } finally {
       setLoading(false);
     }
@@ -226,32 +206,30 @@ export default function LoyaltyTab() {
   const toast = useToast();
   const [loyalty, setLoyalty] = useState<LoyaltyData | null>(null);
   const [tiers, setTiers] = useState<Tier[]>([]);
-  const [transactions, setTransactions] = useState<LoyaltyTransaction[]>([]);
+  const [transactions, setTransactions] = useState<LoyaltyTransactionRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [showRedeem, setShowRedeem] = useState(false);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
 
   const fetchData = useCallback(async () => {
     try {
-      const [loyaltyRes, txRes] = await Promise.all([
-        fetch('/api/thanh-vien', { credentials: 'include' }),
-        fetch(`/api/thanh-vien/giao-dich?limit=${limit}&offset=${(page - 1) * limit}`, {
-          credentials: 'include',
-        }),
+      const [membership, txData] = await Promise.all([
+        getMembership(),
+        listLoyaltyTransactions({ page, limit }),
       ]);
 
-      const loyaltyData = await loyaltyRes.json();
-      const txData = await txRes.json();
-
-      if (loyaltyRes.ok && loyaltyData.loyalty) {
-        setLoyalty(loyaltyData.loyalty);
-        setTiers(loyaltyData.tiers || []);
-      }
-
-      if (txRes.ok) {
-        setTransactions(txData.transactions || []);
-      }
+      setLoyalty({
+        availablePoints: membership.membership.currentPoints,
+        totalPoints: membership.membership.totalPoints,
+        lifetimePoints: membership.membership.lifetimePoints,
+        tier: membership.membership.tier,
+        enrolledAt: membership.membership.enrolledAt,
+      });
+      setTiers(membership.tiers || []);
+      setTransactions(txData.transactions || []);
+      setTotalPages(Math.max(1, txData.pagination?.totalPages || 1));
     } catch {
       toast.error('Lỗi', 'Không thể tải dữ liệu loyalty.');
     } finally {
@@ -270,9 +248,9 @@ export default function LoyaltyTab() {
     currentTierIndex >= 0 && currentTierIndex < tiers.length - 1
       ? tiers[currentTierIndex + 1]
       : null;
-  const currentTierMin = tiers[currentTierIndex]?.min_lifetime_points || 0;
-  const range = nextTier ? nextTier.min_lifetime_points - currentTierMin : 1;
-  const progress = loyalty ? loyalty.lifetime_points - currentTierMin : 0;
+  const currentTierMin = tiers[currentTierIndex]?.minLifetimePoints || 0;
+  const range = nextTier ? nextTier.minLifetimePoints - currentTierMin : 1;
+  const progress = loyalty ? loyalty.lifetimePoints - currentTierMin : 0;
   const progressPercent = nextTier ? Math.min(100, Math.round((progress / range) * 100)) : 100;
 
   if (loading) {
@@ -299,7 +277,7 @@ export default function LoyaltyTab() {
         </div>
         <button
           onClick={() => setShowRedeem(true)}
-          disabled={!loyalty || loyalty.available_points < 500}
+          disabled={!loyalty || loyalty.availablePoints < MIN_POINTS_TO_REDEEM}
           className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-[var(--vj-navy)] rounded-lg text-sm font-bold font-[KoHo,sans-serif] hover:bg-[var(--accent-dark)] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         >
           <Icon name="GiftIcon" size={16} />
@@ -326,7 +304,7 @@ export default function LoyaltyTab() {
               {loyalty?.tier || 'Bronze'}
             </div>
             <span className="text-sm text-white/70 font-[Be Vietnam Pro,sans-serif]">
-              Thành viên từ {loyalty?.joined_at ? formatDate(loyalty.joined_at) : 'N/A'}
+              Thành viên từ {loyalty?.enrolledAt ? formatDate(loyalty.enrolledAt) : 'N/A'}
             </span>
           </div>
 
@@ -336,7 +314,7 @@ export default function LoyaltyTab() {
               Điểm khả dụng
             </div>
             <div className="text-4xl font-bold font-[KoHo,sans-serif]">
-              {formatPoints(loyalty?.available_points || 0)}
+              {formatPoints(loyalty?.availablePoints || 0)}
               <span className="text-lg ml-1 text-white/70">điểm</span>
             </div>
           </div>
@@ -348,7 +326,7 @@ export default function LoyaltyTab() {
                 Tổng điểm
               </div>
               <div className="text-lg font-bold font-[KoHo,sans-serif]">
-                {formatPoints(loyalty?.total_points || 0)}
+                {formatPoints(loyalty?.totalPoints || 0)}
               </div>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
@@ -356,7 +334,7 @@ export default function LoyaltyTab() {
                 Điểm tích lũy trọn đời
               </div>
               <div className="text-lg font-bold font-[KoHo,sans-serif]">
-                {formatPoints(loyalty?.lifetime_points || 0)}
+                {formatPoints(loyalty?.lifetimePoints || 0)}
               </div>
             </div>
           </div>
@@ -369,8 +347,8 @@ export default function LoyaltyTab() {
                   {nextTier.name}
                 </span>
                 <span className="text-xs text-white/60 font-[Be Vietnam Pro,sans-serif]">
-                  {formatPoints(loyalty?.lifetime_points || 0)} /{' '}
-                  {formatPoints(nextTier.min_lifetime_points)} điểm
+                  {formatPoints(loyalty?.lifetimePoints || 0)} /{' '}
+                  {formatPoints(nextTier.minLifetimePoints)} điểm
                 </span>
               </div>
               <div className="w-full bg-white/20 rounded-full h-2">
@@ -419,7 +397,7 @@ export default function LoyaltyTab() {
                   {tier.name}
                 </div>
                 <div className="text-xs text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
-                  {formatPoints(tier.min_lifetime_points)} điểm
+                  {formatPoints(tier.minLifetimePoints)} điểm
                 </div>
                 {isCurrentTier && (
                   <div className="mt-2 text-xs font-bold text-[#EC2029] font-[Be Vietnam Pro,sans-serif]">
@@ -457,6 +435,7 @@ export default function LoyaltyTab() {
           ) : (
             transactions.map((tx) => {
               const config = TYPE_CONFIG[tx.type] || TYPE_CONFIG.earn;
+              const label = LOYALTY_TRANSACTION_LABELS[tx.type] || tx.type;
               const isPositive = tx.points > 0;
               return (
                 <div key={tx.id} className="p-4 flex items-center gap-4">
@@ -468,10 +447,10 @@ export default function LoyaltyTab() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-sm text-[#1A2948] font-[KoHo,sans-serif]">
-                      {config.label}
+                      {label}
                     </div>
                     <div className="text-xs text-[var(--foreground-muted)] mt-0.5 font-[Be Vietnam Pro,sans-serif]">
-                      {tx.description || config.label} · {formatDate(tx.created_at)}
+                      {tx.description || label} · {formatDate(tx.created_at)}
                     </div>
                   </div>
                   <div
@@ -490,18 +469,14 @@ export default function LoyaltyTab() {
 
         {transactions.length >= limit && (
           <div className="p-4 border-t border-[var(--border)]">
-            <Pagination
-              currentPage={page}
-              totalPages={Math.max(1, Math.ceil(transactions.length / limit))}
-              onPageChange={setPage}
-            />
+            <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
           </div>
         )}
       </div>
 
       {showRedeem && loyalty && (
         <RedeemModal
-          availablePoints={loyalty.available_points}
+          availablePoints={loyalty.availablePoints}
           onClose={() => setShowRedeem(false)}
           onSuccess={fetchData}
         />

@@ -17,26 +17,13 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
-
-const CSRF_COOKIE_NAME = 'csrf_token';
-const CSRF_HEADER_NAME = 'x-csrf-token';
-
-/**
- * Get CSRF token from document.cookie
- */
-export function getCsrfTokenFromDocument(): string | null {
-  if (typeof document === 'undefined') return null;
-
-  const match = document.cookie.match(new RegExp('(^| )' + CSRF_COOKIE_NAME + '=([^;]+)'));
-  return match ? match[2] : null;
-}
+import { getCsrfHeaders as readCsrfHeaders, getCsrfTokenFromDocument } from '@/lib/csrf-client';
 
 /**
  * Get headers object with CSRF token for fetch requests
  */
 export function getCsrfHeaders(): HeadersInit {
-  const token = getCsrfTokenFromDocument();
-  return token ? { [CSRF_HEADER_NAME]: token } : {};
+  return readCsrfHeaders();
 }
 
 interface UseCsrfReturn {

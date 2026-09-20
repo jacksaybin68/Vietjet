@@ -6,8 +6,9 @@ import { Icon } from '@/shared/components/ui';
 import { PaymentSkeleton } from '@/shared/components/ui';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
+import { createPayment, getWalletOverview } from '@/features/payments/services';
 
-type PaymentMethod = 'card' | 'bank' | 'ewallet' | 'wallet';
+import type { PaymentMethod } from '@/features/payments/types';
 
 interface BankInfo {
   id: string;
@@ -466,11 +467,10 @@ export default function PaymentClient() {
 
     // Fetch wallet balance
     setIsWalletLoading(true);
-    fetch('/api/vi')
-      .then((res) => res.json())
+    getWalletOverview()
       .then((data) => {
-        if (data.success && data.wallet) {
-          setWalletBalance(parseFloat(data.wallet.balance));
+        if (data.wallet) {
+          setWalletBalance(parseFloat(String(data.wallet.balance)));
         }
       })
       .catch((err) => console.error('Failed to load wallet balance:', err))
@@ -594,23 +594,13 @@ export default function PaymentClient() {
       }
 
       // M3: Call real POST /api/thanh-toan instead of fake timeout
-      const res = await fetch('/api/thanh-toan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          booking_id: booking.bookingId,
-          method: paymentMethod,
-          amount: total,
-          discount_code_id: promoData?.id || null,
-          discount_amount: discountAmount,
-        }),
+      await createPayment({
+        booking_id: booking.bookingId,
+        method: paymentMethod,
+        amount: total,
+        discount_code_id: promoData?.id ?? undefined,
+        discount_amount: discountAmount,
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Thanh toán thất bại');
-      }
 
       setLoading(false);
       setConfirmed(true);
@@ -974,7 +964,7 @@ export default function PaymentClient() {
                       ['card', 'Thẻ tín dụng', 'CreditCardIcon'],
                       ['bank', 'Ngân hàng', 'BuildingLibraryIcon'],
                       ['wallet', 'Số dư Ví', 'WalletIcon'],
-                      ['ewallet', 'Ví MoMo/VNPay', 'DevicePhoneMobileIcon'],
+                      ['e_wallet', 'Ví MoMo/VNPay', 'DevicePhoneMobileIcon'],
                     ] as [
                       PaymentMethod,
                       string,
@@ -1440,7 +1430,7 @@ export default function PaymentClient() {
                   )}
 
                   {/* E-Wallet */}
-                  {paymentMethod === 'ewallet' && (
+                  {paymentMethod === 'e_wallet' && (
                     <div className="grid grid-cols-3 gap-3">
                       {EWALLETS.map((wallet) => (
                         <button

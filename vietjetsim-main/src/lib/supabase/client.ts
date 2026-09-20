@@ -6,7 +6,6 @@
  * Supabase credentials are not available.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface SupabaseClient {
   auth: {
     getSession: () => Promise<{ data: { session: any | null }; error: Error | null }>;

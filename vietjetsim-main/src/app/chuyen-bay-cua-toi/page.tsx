@@ -24,6 +24,7 @@ import {
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 import MyFlightsStats from './components/MyFlightsStats';
+import { listBookings } from '@/features/bookings/services';
 
 const TABS = [
   { id: 'booking', label: 'Đặt chỗ của tôi' },
@@ -123,16 +124,10 @@ export default function MyFlightsPage() {
 
   const fetchBookings = useCallback(async () => {
     try {
-      const res = await fetch('/api/dat-ve?limit=100', { cache: 'no-store' });
-      if (res.status === 401 || res.status === 403) {
-        setBookings([]);
-        return;
-      }
-      if (!res.ok) throw new Error('Lỗi tải dữ liệu');
-      const data = await res.json();
+      const { bookings: records } = await listBookings({ limit: 100 });
 
       const bookingsWithCheckIn = await Promise.all(
-        (data.bookings || []).map(async (booking: any) => {
+        (records || []).map(async (booking) => {
           try {
             const checkInRes = await fetch(`/api/checkin/status/${booking.id}`, {
               cache: 'no-store',

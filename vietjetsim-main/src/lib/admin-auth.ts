@@ -22,11 +22,20 @@ import type { JWTPayload } from '@/lib/auth';
 // but permission checks are simplified — admin always has full access.
 import type { Permission } from '@/lib/rbac';
 
-export interface VerifyAdminResult {
+export interface VerifyAdminSuccess {
   payload: JWTPayload;
-  error?: string;
-  response?: NextResponse;
+  error?: undefined;
+  response?: undefined;
 }
+
+export interface VerifyAdminFailure {
+  payload: JWTPayload;
+  error: string;
+  /** Always present on failure — lets `if (error) return response;` narrow safely. */
+  response: NextResponse;
+}
+
+export type VerifyAdminResult = VerifyAdminSuccess | VerifyAdminFailure;
 
 /**
  * Verify that a request is from an authenticated admin user.
