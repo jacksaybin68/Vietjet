@@ -11,6 +11,7 @@ import { rotateRefreshToken, getStoredRefreshToken } from '@/lib/db';
 import { sql } from '@/lib/neon';
 import { isAccountLocked } from '@/lib/account-lock';
 import { setCsrfCookieOnResponse } from '@/lib/csrf';
+import { touchUserSession } from '@/lib/security-db';
 
 export async function POST(request: NextRequest) {
   try {
@@ -114,6 +115,16 @@ export async function POST(request: NextRequest) {
       refreshToken: newRefreshToken,
     });
     setCsrfCookieOnResponse(response);
+
+    const sessionId = request.cookies.get('session_id')?.value;
+    if (sessionId) {
+      // Best-effort: activity tracking must not fail the refresh itself.
+      try {
+        await touchUserSession(payload.userId, sessionId);
+      } catch (touchErr) {
+        console.error('Failed to update session activity:', touchErr);
+      }
+    }
 
     return response;
   } catch (error) {

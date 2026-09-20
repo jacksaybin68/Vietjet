@@ -27,12 +27,24 @@ export async function POST() {
 
     const response = NextResponse.json({ success: true, message: 'Logged out successfully' });
     clearAuthCookiesOnResponse(response);
+    clearSessionCookie(response);
     return response;
   } catch (error) {
     console.error('Logout error:', error);
     // Even on error, clear cookies to best-effort terminate the session
     const response = NextResponse.json({ success: true, message: 'Logged out successfully' });
     clearAuthCookiesOnResponse(response);
+    clearSessionCookie(response);
     return response;
   }
+}
+
+function clearSessionCookie(response: NextResponse) {
+  response.cookies.set('session_id', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 0,
+  });
 }

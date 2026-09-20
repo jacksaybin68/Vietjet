@@ -50,6 +50,18 @@ Shared infrastructure lives in `src/shared/` (`services/apiClient.ts`, `constant
   comparison survives future role additions.
 - Chat conversation access must go through `userOwnsConversation(conversationId, userId)`
   for non-admins; do not fetch all conversations just to check ownership.
+- **2FA is enforced at login, not at the API layer.** `user_2fa` rows whose
+  `is_enabled` is false are incomplete enrollments and must never block a
+  login; `/api/xac-thuc/dang-nhap` answers 401 with `requires2FA: true` when a
+  code is needed. Backup codes are stored as SHA-256 digests in
+  `backup_codes` and spent with a conditional UPDATE, so they are single-use
+  even under concurrent requests. Use `src/lib/two-factor.ts` for TOTP and
+  code handling rather than calling `otplib` directly.
+- **Login identity is `session_id`, not `user_sessions.is_current`.**
+  `is_current` describes the viewer, so the sessions API computes it by
+  comparing each row against the `session_id` cookie. `user_sessions` and
+  `login_history` live in `src/lib/security-db.ts`; deletes are always scoped
+  by `user_id` so a foreign session id is a silent no-op.
 
 ## Testing
 
