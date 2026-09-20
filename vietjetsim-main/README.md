@@ -66,43 +66,50 @@ vietjetsim-main/
 ├── src/
 │   ├── app/                    # Next.js App Router
 │   │   ├── layout.tsx          # Root layout with AuthProvider
-│   │   ├── homepage/           # Landing page (Hero, Routes, Deals)
-│   │   ├── flight-booking/     # Flight search & booking flow
-│   │   ├── sign-up-login/      # Authentication pages
-│   │   ├── user-dashboard/     # User booking management
-│   │   ├── admin-dashboard/    # Admin panel (flights, users, revenue)
-│   │   ├── payment/            # Payment processing
+│   │   ├── page.tsx            # Homepage (Hero, Routes, Deals)
+│   │   ├── trang-chu/          # Landing page
+│   │   ├── tim-ve/             # Flight search flow
+│   │   ├── dat-ve/             # Booking detail & checkout
+│   │   ├── thanh-toan/         # Payment processing
+│   │   ├── dang-nhap/          # Sign in / sign up
+│   │   ├── tai-khoan/          # User dashboard
+│   │   ├── quan-tri/           # Admin panel (flights, users, revenue)
+│   │   ├── chuyen-bay-cua-toi/ # My bookings
+│   │   ├── lam-thu-tuc/        # Check-in
+│   │   ├── tra-cuu/            # Booking lookup
 │   │   └── api/                # API routes
-│   ├── components/
-│   │   ├── Header.tsx          # 3-tier Vietjet-style header
-│   │   ├── Footer.tsx
-│   │   ├── ErrorBoundary.tsx   # Variant-aware error handling
-│   │   ├── PageTransition.tsx  # Animated page transitions
-│   │   ├── auth/               # ProtectedRoute, RoleBadge
-│   │   ├── chat/               # Realtime UserChat
-│   │   └── ui/                 # Toast, Pagination, Skeleton, etc.
 │   ├── contexts/
 │   │   └── AuthContext.tsx     # JWT auth provider (access/refresh cookies)
+│   ├── features/               # Feature modules (auth, bookings, flights, …)
+│   │   └── <name>/             # types/, constants.ts, services/, components/
 │   ├── hooks/
-│   │   ├── useErrorHandler.ts  # Async error classification
+│   │   ├── useCsrf.ts          # CSRF token hook + refresh helper
 │   │   └── useToast.ts         # Toast notification hook
 │   ├── lib/
-│   │   ├── db.ts               # DB query layer (monolith barrel)
-│   │   ├── db/                 # Modular DB queries (Phase 3 target structure)
-│   │   ├── neon.ts             # Neon client (or in-memory mock)
+│   │   ├── db.ts               # DB query layer (Neon SQL, user-scoped queries)
+│   │   ├── neon.ts             # Neon client (falls back to in-memory mock)
 │   │   ├── auth.ts             # JWT sign/verify, password hashing
 │   │   ├── admin-auth.ts       # verifyAdminRequest helper
-│   │   ├── csrf.ts             # CSRF token utils
-│   │   └── rbac.ts             # Role-based access control (user/admin)
-│   ├── shared/                 # Shared UI & utilities
-│   ├── test/                   # Vitest unit/integration tests (12 files)
+│   │   ├── csrf.ts             # CSRF token utils (server)
+│   │   ├── csrf-client.ts      # CSRF cookie/header helpers (client)
+│   │   ├── rate-limit.ts       # Edge-compatible rate limiter
+│   │   ├── route-access.ts     # Public route/API classification
+│   │   ├── pagination.ts       # Shared page/limit parsing & metadata
+│   │   ├── rbac.ts             # Role-based access control (user/admin)
+│   │   └── roles.ts            # Role helpers (isAdminRole)
+│   ├── shared/                 # Shared UI, services, constants
+│   │   ├── services/apiClient.ts  # apiRequest: cookies + CSRF + errors
+│   │   ├── constants/          # API_ENDPOINTS, ROUTES, validation messages
+│   │   └── components/         # ui/, layouts/, navigation/, feedback/
+│   ├── test/                   # Vitest unit/integration tests
 │   ├── types/
 │   │   └── database.ts         # TypeScript interfaces
 │   └── styles/
 │       └── tailwind.css        # Global styles & animations
-├── migrations/                 # SQL migrations (000 → 012, Neon Postgres)
+├── migrations/                 # SQL migrations (Neon Postgres)
 ├── middleware.ts               # Edge middleware (JWT via WebCrypto, rate limit)
 ├── next.config.mjs             # Next.js configuration (strict TS/ESLint builds)
+├── vitest.config.mts           # Vitest config (jsdom, `@/` alias)
 ├── tailwind.config.js          # Vietjet brand theme
 └── .env.local.example          # Environment template
 ```
@@ -160,14 +167,18 @@ This project uses **Tailwind CSS** with a custom Vietjet brand theme:
 npm test          # or: npx vitest run
 ```
 
-The suite (12 test files, 120+ tests) covers:
+The suite (23 test files, 225 tests) covers:
 - **Wallet & payments** (topup/withdraw/refund validation, double-entry checks)
 - **Admin refund workflow** (seat release + wallet credit)
 - **Edge JWT contract** (HS256 pinning, expiry enforcement, signature checks)
 - **RBAC** (role checks, permission gates)
 - **Auth** (bcrypt hashing, token generation/expiry)
-- **CSRF & rate limiting**
-- **Booking flow** (validation rules)
+- **CSRF, API security & route access** (private vs. unauthenticated routes)
+- **Login hardening** (account lockout, 2FA, session tracking)
+- **Booking flow** (validation rules) & **pagination helpers**
+
+Route handlers are exercised directly with a real `NextRequest` and a real JWT;
+`@/lib/neon` is mocked so no live database is needed.
 
 ## 🔧 Available Scripts
 
@@ -175,18 +186,15 @@ The suite (12 test files, 120+ tests) covers:
 |---------|-------------|
 | `npm run dev` | Start dev server on port 4028 |
 | `npm run build` | Build for production |
-| `npm run start` | Start dev server (alias for dev) |
-| `npm run serve` | Start production server |
+| `npm run start` | Start production server on port 4028 |
+| `npm run serve` | Start production server (default port) |
 | `npm run lint` | Run ESLint checks |
 | `npm run lint:fix` | Auto-fix ESLint issues |
 | `npm run format` | Format code with Prettier |
 | `npm run type-check` | Run TypeScript type checking |
+| `npm test` | Run the Vitest suite |
 | `npm run db:check` | Validate DB connectivity & schema |
 | `npm run db:setup-admin` | Promote a user to admin role |
-| `npm run lint` | Run ESLint checks |
-| `npm run lint:fix` | Auto-fix ESLint issues |
-| `npm run format` | Format code with Prettier |
-| `npm run type-check` | Run TypeScript type checking |
 
 ## 📱 Deployment
 

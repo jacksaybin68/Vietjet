@@ -24,6 +24,12 @@ than calling `fetch('/api/...')` directly, so mapping logic and types stay in on
 Shared infrastructure lives in `src/shared/` (`services/apiClient.ts`, `constants/`,
 `components/ui`).
 
+Neon Postgres via `src/lib/neon.ts` (`sql` template tag) is the only datastore. When
+`DATABASE_URL` is unset, that module falls back to an in-memory mock for local dev/CI —
+tests rely on it, so keep the fallback intact. There is no Supabase dependency: the auth
+layer is custom JWT (`src/lib/auth.ts`) and data isolation comes from `user_id`-scoped
+queries plus RBAC guards, not database-level policies.
+
 ## Critical conventions
 
 - **Use `apiRequest` from `@/shared/services` for app API calls.** It sends
@@ -42,6 +48,12 @@ Shared infrastructure lives in `src/shared/` (`services/apiClient.ts`, `constant
   return response;` narrows correctly and avoids returning `undefined` from a handler.
 - All state-changing admin APIs must be gated by `verifyAdminRequest`; middleware
   (`middleware.ts`) also blocks non-admins from `/quan-tri` and `/api/quan-tri`.
+- **Public routes/APIs are declared in `src/lib/route-access.ts`**, which
+  `middleware.ts` imports (`src/lib/route-access.test.ts` pins the classification).
+  `isPublicApiRoute` lists only endpoints that must answer without a session
+  (flight search, booking-code check-in, public bank config); anything else is
+  treated as private, so don't add an entry without confirming the handler is
+  genuinely anonymous.
 - Filesystem routes (`/api/editor/files`) must stay admin-only and reject paths
   outside the project root plus secret-bearing files (`.env*`, `*.pem`, `*.key`, `.git`).
 - **Never trust identity from request bodies or headers** (`x-user-id`). Resolve the
@@ -50,6 +62,9 @@ Shared infrastructure lives in `src/shared/` (`services/apiClient.ts`, `constant
   comparison survives future role additions.
 - Chat conversation access must go through `userOwnsConversation(conversationId, userId)`
   for non-admins; do not fetch all conversations just to check ownership.
+- **Paginated handlers use `src/lib/pagination.ts`** (`parsePaginationParams`,
+  `getOffset`, `getPaginationMeta`) rather than raw `parseInt(searchParams.get('page'))`.
+  The raw idiom turns malformed input into `NaN` and skips the 100-row limit cap.
 - **Every booking-scoped route must verify ownership, not just authentication.**
   `booking.user_id === user.userId` (or `isAdminRole(user.role)`) before reading or
   mutating. `/api/checkin` (POST) and `/api/checkin/status/[bookingId]` previously
