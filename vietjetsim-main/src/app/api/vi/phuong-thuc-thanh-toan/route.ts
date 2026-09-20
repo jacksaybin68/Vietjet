@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getToken } from '@/lib/auth';
-import { validateCsrfOrReject } from '@/lib/csrf';
+import { verifyAuthRequest } from '@/lib/auth';
 import { getSavedPaymentMethods, addSavedPaymentMethod } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    const token = await getToken(request);
-    if (!token?.userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { user, error, response } = await verifyAuthRequest(request);
+    if (error || !user) return response!;
 
-    const methods = await getSavedPaymentMethods(token.userId);
+    const methods = await getSavedPaymentMethods(user.userId);
 
     return NextResponse.json({
       methods: methods.map((m) => ({
@@ -37,13 +34,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const csrfError = await validateCsrfOrReject(request);
-    if (csrfError) return csrfError;
-
-    const token = await getToken(request);
-    if (!token?.userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { user, error, response } = await verifyAuthRequest(request);
+    if (error || !user) return response!;
 
     const body = await request.json();
     const {
@@ -97,7 +89,7 @@ export async function POST(request: NextRequest) {
     }
 
     const method = await addSavedPaymentMethod({
-      user_id: token.userId,
+      user_id: user.userId,
       type,
       card_brand: normalized.card_brand,
       last_four: normalized.last_four,
