@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { getCsrfHeaders } from '@/lib/csrf-client';
+import { apiRequest } from '@/shared/services';
 
 // Dynamically import Monaco Editor to avoid SSR window issues
 const Editor = dynamic(() => import('@monaco-editor/react'), { ssr: false });
@@ -53,8 +53,9 @@ export default function VSCodeWebEditorPage() {
   const loadTree = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch('/api/editor/files?action=tree');
-      const data = await res.json();
+      const data = await apiRequest<{ ok: boolean; tree: typeof fileTree }>(
+        '/api/editor/files?action=tree'
+      );
       if (data.ok) {
         setFileTree(data.tree);
       }
@@ -80,8 +81,9 @@ export default function VSCodeWebEditorPage() {
     }
 
     try {
-      const res = await fetch(`/api/editor/files?path=${encodeURIComponent(filePath)}`);
-      const data = await res.json();
+      const data = await apiRequest<{ ok: boolean; content: string }>(
+        `/api/editor/files?path=${encodeURIComponent(filePath)}`
+      );
       if (data.ok) {
         const newTab: OpenTab = {
           path: filePath,
@@ -126,17 +128,14 @@ export default function VSCodeWebEditorPage() {
     setIsClaudeSending(true);
 
     try {
-      const response = await fetch('/api/claude/chat', {
+      const data = await apiRequest<{ content: string }>('/api/claude/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
-        body: JSON.stringify({
+        body: {
           prompt,
           context: activeTab ? `Tệp: ${activeTab.path}\n\n${activeTab.content}` : '',
           history: claudeMessages,
-        }),
+        },
       });
-      const data = await response.json();
-      if (!response.ok || data.error) throw new Error(data.error || 'Claude API request failed');
       setClaudeMessages((prev) => [...prev, { role: 'assistant', content: data.content }]);
     } catch (error) {
       setClaudeMessages((prev) => [
@@ -175,15 +174,13 @@ export default function VSCodeWebEditorPage() {
     if (!activeTab || isSaving) return;
     try {
       setIsSaving(true);
-      const res = await fetch('/api/editor/files', {
+      const data = await apiRequest<{ ok: boolean; error?: string }>('/api/editor/files', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
-        body: JSON.stringify({
+        body: {
           path: activeTab.path,
           content: activeTab.content,
-        }),
+        },
       });
-      const data = await res.json();
       if (data.ok) {
         setOpenTabs((prev) =>
           prev.map((t) =>
