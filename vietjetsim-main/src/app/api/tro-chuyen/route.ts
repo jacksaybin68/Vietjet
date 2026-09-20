@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAccessToken } from '@/lib/auth';
-import { validateCsrfOrReject } from '@/lib/csrf';
+import { verifyAuthRequest } from '@/lib/auth';
 import { isAdminRole } from '@/lib/rbac';
 import { getConversationMessages, sendChatMessage, userOwnsConversation } from '@/lib/db';
 
@@ -8,23 +7,10 @@ import { getConversationMessages, sendChatMessage, userOwnsConversation } from '
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get('access_token')?.value;
+    const { user, error, response } = await verifyAuthRequest(request);
+    if (error || !user) return response!;
 
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized', message: 'No access token found' },
-        { status: 401 }
-      );
-    }
-
-    const payload = verifyAccessToken(token);
-
-    if (!payload) {
-      return NextResponse.json(
-        { error: 'Unauthorized', message: 'Invalid or expired token' },
-        { status: 401 }
-      );
-    }
+    const payload = user;
 
     const { searchParams } = new URL(request.url);
     const conversationId = searchParams.get('conversationId');
@@ -68,26 +54,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const csrfError = await validateCsrfOrReject(request);
-    if (csrfError) return csrfError;
+    const { user, error, response } = await verifyAuthRequest(request);
+    if (error || !user) return response!;
 
-    const token = request.cookies.get('access_token')?.value;
-
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized', message: 'No access token found' },
-        { status: 401 }
-      );
-    }
-
-    const payload = verifyAccessToken(token);
-
-    if (!payload) {
-      return NextResponse.json(
-        { error: 'Unauthorized', message: 'Invalid or expired token' },
-        { status: 401 }
-      );
-    }
+    const payload = user;
 
     const body = await request.json();
     const { conversation_id, content } = body;

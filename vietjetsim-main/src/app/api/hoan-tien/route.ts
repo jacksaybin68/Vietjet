@@ -1,19 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAccessToken } from '@/lib/auth';
+import { verifyAuthRequest } from '@/lib/auth';
 import { getRefundsByUserId, createRefund, getBookingById } from '@/lib/db';
-import { validateCsrfOrReject } from '@/lib/csrf';
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get('access_token')?.value;
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { user, error, response } = await verifyAuthRequest(request);
+    if (error || !user) return response!;
 
-    const payload = verifyAccessToken(token);
-    if (!payload) {
-      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
-    }
+    const payload = user;
 
     const { searchParams } = new URL(request.url);
     const page = Math.max(1, Number.parseInt(searchParams.get('page') || '1', 10) || 1);
@@ -32,19 +26,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const csrfError = await validateCsrfOrReject(request);
-  if (csrfError) return csrfError;
-
   try {
-    const token = request.cookies.get('access_token')?.value;
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { user, error, response } = await verifyAuthRequest(request);
+    if (error || !user) return response!;
 
-    const payload = verifyAccessToken(token);
-    if (!payload) {
-      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
-    }
+    const payload = user;
 
     const body = await request.json();
     const {
