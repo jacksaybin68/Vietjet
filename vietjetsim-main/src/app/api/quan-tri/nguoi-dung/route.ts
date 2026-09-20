@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { getAllUsers, updateUserRole, findUserById, deleteUser } from '@/lib/db';
 import { canManageRole } from '@/lib/rbac';
+import { ASSIGNABLE_ROLES, isAssignableRole } from '@/lib/roles';
 import { isAccountLocked } from '@/lib/account-lock';
 import type { AllRoles } from '@/lib/rbac';
 
@@ -9,7 +10,7 @@ import type { AllRoles } from '@/lib/rbac';
 
 export async function GET(request: NextRequest) {
   try {
-    const { payload, error, response } = await verifyAdminRequest(request, 'user:list');
+    const { error, response } = await verifyAdminRequest(request, 'user:list');
     if (error) return response;
 
     const { searchParams } = new URL(request.url);
@@ -68,18 +69,13 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const validRoles = [
-      'user',
-      'admin',
-      'super_admin',
-      'admin_ops',
-      'admin_finance',
-      'admin_support',
-      'admin_content',
-    ];
-    if (!validRoles.includes(role)) {
+    // Legacy admin names stay valid as stored data but are not assignable.
+    if (!isAssignableRole(role)) {
       return NextResponse.json(
-        { error: 'Bad Request', message: `Invalid role. Must be one of: ${validRoles.join(', ')}` },
+        {
+          error: 'Bad Request',
+          message: `Invalid role. Must be one of: ${ASSIGNABLE_ROLES.join(', ')}`,
+        },
         { status: 400 }
       );
     }
@@ -93,8 +89,8 @@ export async function PATCH(request: NextRequest) {
     }
 
     // RBAC: Check if actor can manage the target role
-    const actorRole = payload.role as AllRoles;
-    const targetRole = role as AllRoles;
+    const actorRole = payload.role;
+    const targetRole = role;
     if (!canManageRole(actorRole, targetRole)) {
       return NextResponse.json(
         { error: 'Forbidden', message: 'Không có quyền thay đổi role này' },
@@ -155,8 +151,8 @@ export async function DELETE(request: NextRequest) {
     }
 
     // RBAC: Prevent deleting users with equal or higher role level
-    const actorRole = payload.role as AllRoles;
-    const targetRole = user.role as AllRoles;
+    const actorRole = payload.role;
+    const targetRole = user.role;
     if (!canManageRole(actorRole, targetRole)) {
       return NextResponse.json(
         { error: 'Forbidden', message: 'Không có quyền xóa người dùng này' },

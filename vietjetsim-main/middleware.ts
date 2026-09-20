@@ -4,6 +4,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import type { JWTPayload } from '@/lib/auth';
+import { isAdminRole as sharedIsAdminRole } from '@/lib/roles';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -116,18 +117,11 @@ function base64UrlDecode(str: string): string {
 }
 
 /**
- * Check if a role has admin-level access.
- * Supports both legacy 'admin' and RBAC system roles.
+ * Delegates to the shared role rules so middleware and API routes cannot
+ * disagree about who is an admin.
  */
 function isAdminRole(role: string): boolean {
-  return (
-    role === 'admin' ||
-    role === 'super_admin' ||
-    role === 'admin_ops' ||
-    role === 'admin_finance' ||
-    role === 'admin_support' ||
-    role === 'admin_content'
-  );
+  return sharedIsAdminRole(role);
 }
 
 export async function middleware(request: NextRequest) {

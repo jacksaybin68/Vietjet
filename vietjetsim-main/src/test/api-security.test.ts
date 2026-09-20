@@ -103,6 +103,26 @@ describe('API & RBAC Security Logic', () => {
       expect(result.payload.role).toBe('admin');
     });
 
+    it('should admit legacy admin-family roles that middleware also admits', async () => {
+      // Both checks must agree, otherwise these accounts can open /quan-tri and
+      // then 403 on every API call behind it.
+      for (const role of ['super_admin', 'admin_ops', 'admin_finance']) {
+        const token = signAccessToken({
+          userId: 'legacy-admin',
+          email: 'legacy@vietjetsim.vn',
+          role: role as 'admin',
+          fullName: 'Legacy Admin',
+        });
+        const req = new NextRequest('http://localhost:4028/api/quan-tri/chuyen-bay', {
+          headers: { cookie: `access_token=${token}` },
+        });
+
+        const result = await verifyAdminRequest(req);
+
+        expect(result.error).toBeUndefined();
+      }
+    });
+
     it('should allow admin to access sensitive security administration', async () => {
       const token = makeAdminToken();
       const req = new NextRequest('http://localhost:4028/api/quan-tri/chuyen-bay', {
