@@ -6,6 +6,7 @@ import AppImage from '@/shared/components/ui/AppImage';
 import AppLogo from '@/shared/components/ui/AppLogo';
 import Icon from '@/shared/components/ui/AppIcon';
 import { useAuth } from '@/contexts/AuthContext';
+import { isAdminRole } from '@/lib/roles';
 
 type AuthTab = 'login' | 'register';
 
@@ -35,7 +36,7 @@ export default function SignUpLoginPage() {
       setSuccess('Đăng nhập thành công!');
       setTimeout(() => {
         const userRole = data?.user?.role || 'user';
-        if (userRole === 'admin' || userRole === 'super_admin' || userRole.startsWith('admin_')) {
+        if (isAdminRole(userRole)) {
           router.push('/quan-tri');
         } else {
           router.push('/tai-khoan');
