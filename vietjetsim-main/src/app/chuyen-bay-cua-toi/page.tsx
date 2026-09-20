@@ -25,6 +25,7 @@ import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 import MyFlightsStats from './components/MyFlightsStats';
 import { listBookings } from '@/features/bookings/services';
+import { apiRequest } from '@/shared/services';
 
 const TABS = [
   { id: 'booking', label: 'Đặt chỗ của tôi' },
@@ -129,23 +130,25 @@ export default function MyFlightsPage() {
       const bookingsWithCheckIn = await Promise.all(
         (records || []).map(async (booking) => {
           try {
-            const checkInRes = await fetch(`/api/checkin/status/${booking.id}`, {
-              cache: 'no-store',
-              credentials: 'include',
-            });
-            if (checkInRes.ok) {
-              const checkInData = await checkInRes.json();
-              return {
-                ...booking,
-                has_check_in: checkInData.checkInStatus?.has_check_in || false,
-                check_in_number: checkInData.checkInStatus?.check_in_number || null,
-                check_in_status: checkInData.checkInStatus?.status || null,
-                boarding_pass_number: checkInData.checkInStatus?.boarding_pass_number || null,
-                seat_number: checkInData.checkInStatus?.seat_number || null,
-                check_in_time: checkInData.checkInStatus?.check_in_time || null,
+            const checkInData = await apiRequest<{
+              checkInStatus?: {
+                has_check_in?: boolean;
+                check_in_number?: string | null;
+                status?: string | null;
+                boarding_pass_number?: string | null;
+                seat_number?: string | null;
+                check_in_time?: string | null;
               };
-            }
-            return booking;
+            }>(`/api/checkin/status/${booking.id}`);
+            return {
+              ...booking,
+              has_check_in: checkInData.checkInStatus?.has_check_in || false,
+              check_in_number: checkInData.checkInStatus?.check_in_number || null,
+              check_in_status: checkInData.checkInStatus?.status || null,
+              boarding_pass_number: checkInData.checkInStatus?.boarding_pass_number || null,
+              seat_number: checkInData.checkInStatus?.seat_number || null,
+              check_in_time: checkInData.checkInStatus?.check_in_time || null,
+            };
           } catch {
             return booking;
           }

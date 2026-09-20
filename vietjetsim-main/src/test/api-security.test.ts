@@ -423,6 +423,30 @@ describe('API & RBAC Security Logic', () => {
       expect(res.status).toBe(403);
     });
 
+    it('check-in POST - refuses to check in a booking owned by someone else', async () => {
+      const getBookingSpy = vi
+        .spyOn(db, 'getBookingById')
+        .mockResolvedValue({ id: 'b1', user_id: 'someone-else' } as never);
+
+      const req = new NextRequest('http://localhost:4028/api/checkin', {
+        method: 'POST',
+        headers: withCsrf(makeUserToken()),
+        body: JSON.stringify({
+          bookingId: 'b1',
+          seatNumber: '1A',
+          flightNo: 'VJ100',
+          fromCode: 'SGN',
+          toCode: 'HAN',
+          departTime: '2026-01-01T10:00:00Z',
+          passengerName: 'Nguyen Van A',
+        }),
+      });
+      const res = (await postCheckIn(req))!;
+
+      expect(res.status).toBe(403);
+      getBookingSpy.mockRestore();
+    });
+
     it('check-in POST - rejects a missing CSRF token with 403', async () => {
       const req = new NextRequest('http://localhost:4028/api/checkin', {
         method: 'POST',
