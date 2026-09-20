@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { findUserById, updateUserRole, deleteUser } from '@/lib/db';
 import { canManageRole } from '@/lib/rbac';
+import { ASSIGNABLE_ROLES, isAssignableRole } from '@/lib/roles';
+import { LOCKED_UNTIL_SENTINEL } from '@/lib/account-lock';
 import { sql } from '@/lib/neon';
-import type { AllRoles } from '@/lib/rbac';
 
 // ─── GET: Get specific user ──────────────────────────────────────────────────
 
@@ -55,8 +56,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     // RBAC: Check if actor can manage the target
-    const actorRole = payload.role as AllRoles;
-    const targetRole = targetUser.role as AllRoles;
+    const actorRole = payload.role;
+    const targetRole = targetUser.role;
 
     if (!canManageRole(actorRole, targetRole)) {
       return NextResponse.json(
@@ -72,42 +73,47 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     if (role) {
       // Logic for role update
-      const validRoles = [
-        'user',
-        'admin',
-        'super_admin',
-        'admin_ops',
-        'admin_finance',
-        'admin_support',
-        'admin_content',
-      ];
-      if (!validRoles.includes(role)) {
+      // Only the two real roles are assignable; legacy admin names remain valid
+      // as stored data (they still grant admin) but cannot be handed out.
+      if (!isAssignableRole(role)) {
         return NextResponse.json(
-          { error: 'Bad Request', message: 'Invalid role' },
+          {
+            error: 'Bad Request',
+            message: `Invalid role. Must be one of: ${ASSIGNABLE_ROLES.join(', ')}`,
+          },
           { status: 400 }
         );
       }
 
       // Also check if actor can manage the NEW role (don't promote to higher level than themselves)
-      if (!canManageRole(actorRole, role as AllRoles)) {
+      if (!canManageRole(actorRole, role)) {
         return NextResponse.json(
           { error: 'Forbidden', message: 'Không thể gán role cao hơn role hiện tại của bạn' },
           { status: 403 }
         );
       }
 
-      updatedUser = await updateUserRole(id, role as any);
+      updatedUser = await updateUserRole(id, role);
     }
 
     if (status) {
-      // Logic for status update (active/locked)
+      if (status !== 'active' && status !== 'locked') {
+        return NextResponse.json(
+          { error: 'Bad Request', message: 'status must be "active" or "locked"' },
+          { status: 400 }
+        );
+      }
+
+      // There is no `status` column; `locked_until` is the lock flag. A future
+      // timestamp locks the account, NULL unlocks it. Login and token refresh
+      // both reject while it is in the future.
       const results = await sql`
-         UPDATE user_profiles 
-         SET updated_at = NOW() -- Add status column if it exists or use role for now?
-         -- Note: if user_profiles doesn't have 'status', we might need to add it via schema
-         WHERE id = ${id}
-         RETURNING *
-       `;
+        UPDATE user_profiles
+        SET locked_until = ${status === 'locked' ? LOCKED_UNTIL_SENTINEL : null},
+            updated_at = NOW()
+        WHERE id = ${id}
+        RETURNING *
+      `;
       updatedUser = (results as any[])[0];
     }
 
@@ -151,8 +157,8 @@ export async function DELETE(
     }
 
     // RBAC: Check hierarchy
-    const actorRole = payload.role as AllRoles;
-    const targetRole = user.role as AllRoles;
+    const actorRole = payload.role;
+    const targetRole = user.role;
     if (!canManageRole(actorRole, targetRole)) {
       return NextResponse.json(
         { error: 'Forbidden', message: 'Không có quyền xóa người dùng này' },

@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       const transaction = await spendLoyaltyPoints(
         user.userId,
         points,
-        description || 'Đổi điểm thư้ng'
+        description || 'Đổi điểm thưởng'
       );
 
       const loyalty = await getOrEnrollLoyalty(user.userId);

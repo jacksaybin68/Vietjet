@@ -10,6 +10,7 @@ import {
   AllRoles,
   getRoleInfo,
 } from '@/lib/rbac';
+import { isAssignableRole, normalizeRole } from '@/lib/roles';
 
 describe('RBAC Module', () => {
   describe('Permission Checks', () => {
@@ -126,13 +127,63 @@ describe('RBAC Module', () => {
   });
 
   describe('isAdminRole', () => {
-    it('should return true only for admin', () => {
+    it('should return true for admin', () => {
       expect(isAdminRole('admin')).toBe(true);
     });
 
-    it('should return false for regular user and unknown roles', () => {
+    it('should treat legacy admin-family roles as admins', () => {
+      // Accounts holding these exist in the database, and middleware has always
+      // let them into /quan-tri, so the API must not disagree.
+      for (const role of [
+        'super_admin',
+        'admin_ops',
+        'admin_finance',
+        'admin_support',
+        'admin_content',
+      ]) {
+        expect(isAdminRole(role)).toBe(true);
+      }
+    });
+
+    it('should return false for regular user, unknown, and empty roles', () => {
       expect(isAdminRole('user')).toBe(false);
       expect(isAdminRole('guest')).toBe(false);
+      expect(isAdminRole(null)).toBe(false);
+      expect(isAdminRole(undefined)).toBe(false);
+      expect(isAdminRole('')).toBe(false);
+    });
+  });
+
+  describe('canManageRole ordering', () => {
+    it('lets a super admin manage a plain admin', () => {
+      expect(canManageRole('super_admin', 'admin')).toBe(true);
+    });
+
+    it('stops an admin from managing a super admin', () => {
+      expect(canManageRole('admin', 'super_admin')).toBe(false);
+    });
+
+    it('stops anyone from managing an equal-ranked role', () => {
+      expect(canManageRole('admin_ops', 'admin_finance')).toBe(false);
+    });
+  });
+
+  describe('normalizeRole and role assignment', () => {
+    it('collapses legacy admin names onto admin', () => {
+      expect(normalizeRole('super_admin')).toBe('admin');
+      expect(normalizeRole('admin')).toBe('admin');
+      expect(normalizeRole('user')).toBe('user');
+      expect(normalizeRole('bogus')).toBe('user');
+    });
+
+    it('accepts only user and admin as assignable roles', () => {
+      expect(isAssignableRole('admin')).toBe(true);
+      expect(isAssignableRole('user')).toBe(true);
+      // Legacy names remain valid stored data but must not be handed out.
+      expect(isAssignableRole('super_admin')).toBe(false);
+      expect(isAssignableRole('admin_ops')).toBe(false);
+      expect(isAssignableRole(undefined)).toBe(false);
+      expect(isAssignableRole(42)).toBe(false);
     });
   });
 

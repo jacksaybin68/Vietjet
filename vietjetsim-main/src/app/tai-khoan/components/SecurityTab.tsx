@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { useToast } from '@/hooks/useToast';
+import { apiRequest, getApiErrorMessage } from '@/shared/services';
 
 interface UserSession {
   id: string;
@@ -44,24 +45,17 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
   const initSetup = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/nguoi-dung/bao-mat/2fa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ action: 'setup' }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        toast.error('Lỗi', data.error || 'Không thể khởi tạo 2FA.');
-        onClose();
-        return;
-      }
+      const data = await apiRequest<{
+        secret: string;
+        uri: string;
+        backupCodes: string[];
+      }>('/api/nguoi-dung/bao-mat/2fa', { method: 'POST', body: { action: 'setup' } });
       setSecret(data.secret);
       setUri(data.uri);
       setBackupCodes(data.backupCodes || []);
       setStep('setup');
-    } catch {
-      toast.error('Lỗi', 'Không thể khởi tạo 2FA.');
+    } catch (error) {
+      toast.error('Lỗi', getApiErrorMessage(error, 'Không thể khởi tạo 2FA.'));
       onClose();
     } finally {
       setLoading(false);
@@ -79,20 +73,13 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
     }
     setLoading(true);
     try {
-      const res = await fetch('/api/nguoi-dung/bao-mat/2fa', {
+      await apiRequest('/api/nguoi-dung/bao-mat/2fa', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ action: 'verify', token }),
+        body: { action: 'verify', token },
       });
-      const data = await res.json();
-      if (!res.ok) {
-        toast.error('Lỗi', data.error || 'Mã xác thực không đúng.');
-        return;
-      }
       setStep('done');
-    } catch {
-      toast.error('Lỗi', 'Xác thực thất bại.');
+    } catch (error) {
+      toast.error('Lỗi', getApiErrorMessage(error, 'Xác thực thất bại.'));
     } finally {
       setLoading(false);
     }
@@ -280,27 +267,17 @@ export default function SecurityTab() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [sessionRes, historyRes, twoFARes] = await Promise.all([
-        fetch('/api/nguoi-dung/bao-mat/phien?type=sessions', { credentials: 'include' }),
-        fetch('/api/nguoi-dung/bao-mat/phien?type=history', { credentials: 'include' }),
-        fetch('/api/nguoi-dung/bao-mat/2fa', { credentials: 'include' }),
+      const [sessionData, historyData, twoFAData] = await Promise.all([
+        apiRequest<{ sessions: UserSession[] }>('/api/nguoi-dung/bao-mat/phien?type=sessions'),
+        apiRequest<{ history: LoginHistory[] }>('/api/nguoi-dung/bao-mat/phien?type=history'),
+        apiRequest<{ twoFA: TwoFAData }>('/api/nguoi-dung/bao-mat/2fa'),
       ]);
 
-      const sessionData = await sessionRes.json();
-      const historyData = await historyRes.json();
-      const twoFAData = await twoFARes.json();
-
-      if (sessionRes.ok && sessionData.sessions) {
-        setSessions(sessionData.sessions);
-      }
-      if (historyRes.ok && historyData.history) {
-        setHistory(historyData.history);
-      }
-      if (twoFARes.ok && twoFAData.twoFA) {
-        setTwoFA(twoFAData.twoFA);
-      }
-    } catch {
-      toast.error('Lỗi', 'Không thể tải dữ liệu bảo mật.');
+      setSessions(sessionData.sessions ?? []);
+      setHistory(historyData.history ?? []);
+      if (twoFAData.twoFA) setTwoFA(twoFAData.twoFA);
+    } catch (error) {
+      toast.error('Lỗi', getApiErrorMessage(error, 'Không thể tải dữ liệu bảo mật.'));
     } finally {
       setLoading(false);
     }
@@ -315,16 +292,13 @@ export default function SecurityTab() {
 
     setActionLoading(sessionId);
     try {
-      const res = await fetch(`/api/nguoi-dung/bao-mat/phien?sessionId=${sessionId}`, {
+      await apiRequest(`/api/nguoi-dung/bao-mat/phien?sessionId=${encodeURIComponent(sessionId)}`, {
         method: 'DELETE',
-        credentials: 'include',
       });
-      if (res.ok) {
-        setSessions((prev) => prev.filter((s) => s.id !== sessionId));
-        toast.success('Đã đăng xuất', 'Thiết bị đã được đăng xuất.');
-      }
-    } catch {
-      toast.error('Lỗi', 'Không thể đăng xuất thiết bị.');
+      setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+      toast.success('Đã đăng xuất', 'Thiết bị đã được đăng xuất.');
+    } catch (error) {
+      toast.error('Lỗi', getApiErrorMessage(error, 'Không thể đăng xuất thiết bị.'));
     } finally {
       setActionLoading(null);
     }
@@ -335,16 +309,11 @@ export default function SecurityTab() {
 
     setActionLoading('all');
     try {
-      const res = await fetch('/api/nguoi-dung/bao-mat/phien?action=logoutAll', {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      if (res.ok) {
-        setSessions((prev) => prev.filter((s) => s.is_current));
-        toast.success('Đã đăng xuất', 'Tất cả thiết bị đã được đăng xuất.');
-      }
-    } catch {
-      toast.error('Lỗi', 'Không thể đăng xuất tất cả.');
+      await apiRequest('/api/nguoi-dung/bao-mat/phien?action=logoutAll', { method: 'DELETE' });
+      setSessions((prev) => prev.filter((s) => s.is_current));
+      toast.success('Đã đăng xuất', 'Tất cả thiết bị đã được đăng xuất.');
+    } catch (error) {
+      toast.error('Lỗi', getApiErrorMessage(error, 'Không thể đăng xuất tất cả.'));
     } finally {
       setActionLoading(null);
     }
@@ -355,16 +324,11 @@ export default function SecurityTab() {
 
     setActionLoading('disable2fa');
     try {
-      const res = await fetch('/api/nguoi-dung/bao-mat/2fa', {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      if (res.ok) {
-        setTwoFA(null);
-        toast.success('Đã tắt 2FA', 'Xác thực hai yếu tố đã được tắt.');
-      }
-    } catch {
-      toast.error('Lỗi', 'Không thể tắt 2FA.');
+      await apiRequest('/api/nguoi-dung/bao-mat/2fa', { method: 'DELETE' });
+      setTwoFA(null);
+      toast.success('Đã tắt 2FA', 'Xác thực hai yếu tố đã được tắt.');
+    } catch (error) {
+      toast.error('Lỗi', getApiErrorMessage(error, 'Không thể tắt 2FA.'));
     } finally {
       setActionLoading(null);
     }

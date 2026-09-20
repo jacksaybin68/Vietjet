@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
+import { listSstkTools, listSstkLogs, executeSstkTool } from '@/features/admin';
+import { getApiErrorMessage } from '@/shared/services';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -86,13 +88,11 @@ export default function SstkTab({ onToast }: { onToast?: ToastAPI }) {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch('/api/quan-tri/cong-cu');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setTools(data.tools || []);
-      setCategories(data.categories || []);
-    } catch (err: any) {
-      setError(err.message || 'Không thể tải công cụ SSTK');
+      const data = await listSstkTools();
+      setTools(data.tools as typeof tools);
+      setCategories(data.categories as typeof categories);
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Không thể tải công cụ SSTK'));
     } finally {
       setLoading(false);
     }
@@ -102,11 +102,8 @@ export default function SstkTab({ onToast }: { onToast?: ToastAPI }) {
 
   const fetchLogs = useCallback(async () => {
     try {
-      const res = await fetch('/api/quan-tri/cong-cu?action=logs');
-      if (res.ok) {
-        const data = await res.json();
-        setLogs(data.data || []);
-      }
+      const data = await listSstkLogs();
+      setLogs(data.data as typeof logs);
     } catch {
       /* silent */
     }
@@ -123,12 +120,7 @@ export default function SstkTab({ onToast }: { onToast?: ToastAPI }) {
     setExecutingKey(toolKey);
     setLastResult(null);
     try {
-      const res = await fetch('/api/quan-tri/cong-cu', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ toolKey, params: params || {} }),
-      });
-      const data = await res.json();
+      const data = await executeSstkTool({ toolKey, params: params || {} });
       if (data.success) {
         setLastResult(data as ToolResult);
         onToast?.success(data.label, data.summary);
@@ -144,8 +136,8 @@ export default function SstkTab({ onToast }: { onToast?: ToastAPI }) {
         });
       }
       fetchLogs(); // refresh logs
-    } catch (err: any) {
-      onToast?.error('Lỗi mạng', err.message);
+    } catch (err) {
+      onToast?.error('Lỗi mạng', getApiErrorMessage(err, 'Không thể thực thi công cụ'));
     } finally {
       setExecutingKey(null);
       setShowParamsModal(null);

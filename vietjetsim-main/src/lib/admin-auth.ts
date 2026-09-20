@@ -1,8 +1,8 @@
 /**
  * Admin Route Helper — Simplified auth + authorization
  *
- * Only 2 roles in the system: 'user' and 'admin'.
- * 'admin' has full access to all admin APIs.
+ * Roles collapse to 'user' and 'admin'; admin-family legacy names count as
+ * admin (see `lib/roles.ts`). Admins have full access to all admin APIs.
  *
  * Usage (in an API route):
  *   import { verifyAdminRequest } from '@/lib/admin-auth';
@@ -17,16 +17,27 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { verifyAccessToken } from '@/lib/auth';
 import type { JWTPayload } from '@/lib/auth';
+import { validateCsrfOrReject } from '@/lib/csrf';
+import { isAdminRole } from '@/lib/roles';
 
 // We still import Permission type for API documentation purposes,
 // but permission checks are simplified — admin always has full access.
 import type { Permission } from '@/lib/rbac';
 
-export interface VerifyAdminResult {
+export interface VerifyAdminSuccess {
   payload: JWTPayload;
-  error?: string;
-  response?: NextResponse;
+  error?: undefined;
+  response?: undefined;
 }
+
+export interface VerifyAdminFailure {
+  payload: JWTPayload;
+  error: string;
+  /** Always present on failure — lets `if (error) return response;` narrow safely. */
+  response: NextResponse;
+}
+
+export type VerifyAdminResult = VerifyAdminSuccess | VerifyAdminFailure;
 
 /**
  * Verify that a request is from an authenticated admin user.
@@ -50,6 +61,13 @@ export async function verifyAdminRequest(
     };
   }
 
+  // CSRF is checked before the role gate so a cross-site request can never
+  // trigger admin side effects, even with a valid stolen cookie.
+  const csrfError = await validateCsrfOrReject(request);
+  if (csrfError) {
+    return { payload: {} as JWTPayload, error: 'CSRF validation failed', response: csrfError };
+  }
+
   const payload = verifyAccessToken(token);
   if (!payload) {
     return {
@@ -62,8 +80,7 @@ export async function verifyAdminRequest(
     };
   }
 
-  // Only 'admin' role is allowed
-  if (payload.role !== 'admin') {
+  if (!isAdminRole(payload.role)) {
     return {
       payload,
       error: 'Forbidden',

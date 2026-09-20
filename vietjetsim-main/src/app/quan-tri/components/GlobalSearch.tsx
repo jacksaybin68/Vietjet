@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
+import { listAdminFlights, listUsers, listAdminBookings } from '@/features/admin';
 
 interface SearchResult {
   type: 'flight' | 'user' | 'booking';
@@ -46,64 +47,45 @@ export default function GlobalSearch({ isOpen, onClose, onSelectResult }: Global
 
     setIsLoading(true);
     try {
-      const [flightsRes, usersRes, bookingsRes] = await Promise.all([
-        fetch(`/api/quan-tri/chuyen-bay?q=${encodeURIComponent(searchQuery)}&limit=5`, {
-          credentials: 'include',
-        }),
-        fetch(`/api/quan-tri/nguoi-dung?q=${encodeURIComponent(searchQuery)}&limit=5`, {
-          credentials: 'include',
-        }),
-        fetch(`/api/quan-tri/dat-ve?q=${encodeURIComponent(searchQuery)}&limit=5`, {
-          credentials: 'include',
-        }),
+      // Failures are tolerated per source: a search still returns whatever the
+      // other two endpoints produced.
+      const [flights, users, bookings] = await Promise.all([
+        listAdminFlights({ search: searchQuery, limit: 5 }).catch(() => null),
+        listUsers({ search: searchQuery, limit: 5 }).catch(() => null),
+        listAdminBookings({ search: searchQuery, limit: 5 }).catch(() => null),
       ]);
 
       const newResults: SearchResult[] = [];
 
-      if (flightsRes.ok) {
-        const flightsData = await flightsRes.json();
-        if (flightsData.flights && Array.isArray(flightsData.flights)) {
-          flightsData.flights.slice(0, 5).forEach((flight: any) => {
-            newResults.push({
-              type: 'flight',
-              id: flight.id,
-              title: flight.flight_no || flight.flightNo || 'Unknown',
-              subtitle: `${flight.from_code || flight.from || ''} → ${flight.to_code || flight.to || ''}`,
-              status: flight.status,
-            });
-          });
-        }
-      }
+      flights?.flights?.slice(0, 5).forEach((flight) => {
+        newResults.push({
+          type: 'flight',
+          id: flight.id,
+          title: flight.flight_no || 'Unknown',
+          subtitle: `${flight.from_code || ''} → ${flight.to_code || ''}`,
+          status: flight.status,
+        });
+      });
 
-      if (usersRes.ok) {
-        const usersData = await usersRes.json();
-        if (usersData.users && Array.isArray(usersData.users)) {
-          usersData.users.slice(0, 5).forEach((user: any) => {
-            newResults.push({
-              type: 'user',
-              id: user.id,
-              title: user.full_name || user.name || user.email || 'Unknown',
-              subtitle: user.email || '',
-              status: user.role || user.status,
-            });
-          });
-        }
-      }
+      users?.users?.slice(0, 5).forEach((user) => {
+        newResults.push({
+          type: 'user',
+          id: user.id,
+          title: user.full_name || user.email || 'Unknown',
+          subtitle: user.email || '',
+          status: user.role || user.status,
+        });
+      });
 
-      if (bookingsRes.ok) {
-        const bookingsData = await bookingsRes.json();
-        if (bookingsData.bookings && Array.isArray(bookingsData.bookings)) {
-          bookingsData.bookings.slice(0, 5).forEach((booking: any) => {
-            newResults.push({
-              type: 'booking',
-              id: booking.id,
-              title: booking.id || booking.booking_id || 'Unknown',
-              subtitle: booking.route || `${booking.flight_no || ''}`,
-              status: booking.status,
-            });
-          });
-        }
-      }
+      bookings?.bookings?.slice(0, 5).forEach((booking) => {
+        newResults.push({
+          type: 'booking',
+          id: booking.id,
+          title: booking.id || 'Unknown',
+          subtitle: booking.flight_no || booking.user_email || '',
+          status: booking.status,
+        });
+      });
 
       setResults(newResults);
       setSelectedIndex(0);

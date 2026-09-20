@@ -20,6 +20,7 @@ export interface UserRecord {
     | 'admin_content';
   phone: string | null;
   avatar_url: string | null;
+  locked_until?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -348,6 +349,7 @@ export async function getAllFlights(params?: {
   from_code?: string;
   to_code?: string;
   class?: string;
+  search?: string;
 }): Promise<{ flights: FlightRecord[]; total: number }> {
   const page = params?.page || 1;
   const limit = params?.limit || 50;
@@ -367,6 +369,10 @@ export async function getAllFlights(params?: {
   if (params?.class) {
     values.push(params.class);
     whereClause += ` AND class = $${values.length}`;
+  }
+  if (params?.search) {
+    values.push(`%${params.search}%`);
+    whereClause += ` AND (flight_no ILIKE $${values.length} OR from_code ILIKE $${values.length} OR to_code ILIKE $${values.length})`;
   }
 
   values.push(limit, offset);
@@ -649,6 +655,7 @@ export async function getAllBookings(params?: {
   page?: number;
   limit?: number;
   status?: string;
+  search?: string;
 }): Promise<{
   bookings: Array<BookingRecord & { user_email: string; user_name: string; flight_no: string }>;
   total: number;
@@ -664,6 +671,10 @@ export async function getAllBookings(params?: {
     filterValues.push(params.status);
     whereClause += ` AND b.status = $${filterValues.length}`;
   }
+  if (params?.search) {
+    filterValues.push(`%${params.search}%`);
+    whereClause += ` AND (b.id::text ILIKE $${filterValues.length} OR b.booking_code ILIKE $${filterValues.length} OR u.email ILIKE $${filterValues.length} OR u.full_name ILIKE $${filterValues.length} OR f.flight_no ILIKE $${filterValues.length})`;
+  }
 
   const bookingsQuery = `
     SELECT b.*, u.email as user_email, u.full_name as user_name, f.flight_no
@@ -675,7 +686,14 @@ export async function getAllBookings(params?: {
     LIMIT $${filterValues.length + 1} OFFSET $${filterValues.length + 2}
   `;
 
-  const countQuery = `SELECT COUNT(*) as total FROM bookings b ${whereClause}`;
+  // The search clause references `u` and `f`, so the count must join too.
+  const countQuery = `
+    SELECT COUNT(*) as total
+    FROM bookings b
+    JOIN user_profiles u ON b.user_id = u.id
+    JOIN flights f ON b.flight_id = f.id
+    ${whereClause}
+  `;
 
   const bookingsResult = await sql.query(bookingsQuery, [...filterValues, limit, offset]);
   const countResult = await sql.query(countQuery, filterValues);
@@ -1053,6 +1071,19 @@ export async function getAllConversations(params?: {
   return { conversations: conversations as ChatConversationRecord[], total };
 }
 
+/** Whether `userId` is the owner of an active conversation. */
+export async function userOwnsConversation(
+  conversationId: string,
+  userId: string
+): Promise<boolean> {
+  const results = await sql`
+    SELECT 1 FROM chat_conversations
+    WHERE id = ${conversationId} AND user_id = ${userId}
+    LIMIT 1
+  `;
+  return (results as unknown[]).length > 0;
+}
+
 export async function getConversationMessages(
   conversationId: string,
   params?: { page?: number; limit?: number }
@@ -1095,6 +1126,37 @@ export async function sendChatMessage(message: {
   await sql.query(updateQuery, [message.content, message.conversation_id]);
 
   return (results as ChatMessageRecord[])[0];
+}
+
+/**
+ * Mark every message authored by the opposite side of `readerRole` as read,
+ * and reset the matching unread counter on the conversation. Returns how many
+ * messages flipped so callers can update badges without a refetch.
+ */
+export async function markConversationRead(
+  conversationId: string,
+  readerRole: 'user' | 'admin'
+): Promise<number> {
+  const senderRole = readerRole === 'user' ? 'admin' : 'user';
+
+  const result = await sql`
+    UPDATE chat_messages
+    SET read_at = NOW()
+    WHERE conversation_id = ${conversationId}
+      AND sender_role = ${senderRole}
+      AND read_at IS NULL
+    RETURNING id
+  `;
+
+  const unreadField = readerRole === 'user' ? 'unread_by_user' : 'unread_by_admin';
+  await sql.query(
+    `UPDATE chat_conversations
+     SET ${unreadField} = 0, updated_at = NOW()
+     WHERE id = $1`,
+    [conversationId]
+  );
+
+  return (result as unknown[]).length;
 }
 
 export async function getChatPresence(
@@ -1627,6 +1689,19 @@ export async function getDiscountCodeByCode(code: string): Promise<DiscountCodeR
     SELECT * FROM discount_codes WHERE code = ${code.toUpperCase()}
   `;
   return (results as DiscountCodeRecord[])[0] || null;
+}
+
+/** How many bookings a user has already placed with a given discount code. */
+export async function countUserDiscountUsage(
+  userId: string,
+  discountCodeId: string
+): Promise<number> {
+  const results = await sql`
+    SELECT COUNT(*)::int AS count
+    FROM bookings
+    WHERE user_id = ${userId} AND discount_code_id = ${discountCodeId}
+  `;
+  return Number((results as any[])[0]?.count ?? 0);
 }
 
 export async function getDiscountCodeById(id: string): Promise<DiscountCodeRecord | null> {

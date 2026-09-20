@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getToken } from '@/lib/auth';
+import { verifyAuthRequest } from '@/lib/auth';
 import {
   getSavedPaymentMethods,
   deleteSavedPaymentMethod,
@@ -11,13 +11,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const token = await getToken(request);
-    if (!token?.userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { user, error, response } = await verifyAuthRequest(request);
+    if (error || !user) return response!;
 
     const { id } = await params;
-    await deleteSavedPaymentMethod(id, token.userId);
+    await deleteSavedPaymentMethod(id, user.userId);
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -28,17 +26,15 @@ export async function DELETE(
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const token = await getToken(request);
-    if (!token?.userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { user, error, response } = await verifyAuthRequest(request);
+    if (error || !user) return response!;
 
     const { id } = await params;
     const body = await request.json();
     const { action } = body;
 
     if (action === 'set_default' || action === 'setDefault') {
-      await setDefaultPaymentMethod(id, token.userId);
+      await setDefaultPaymentMethod(id, user.userId);
       return NextResponse.json({ success: true });
     }
 

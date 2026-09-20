@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Icon } from '@/shared/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
-import { getCsrfHeaders } from '@/hooks/useCsrf';
+import { apiRequest } from '@/shared/services';
 
 interface Notification {
   id: string;
@@ -55,15 +55,12 @@ export default function NotificationDropdown({
 
     setIsLoading(true);
     try {
-      const res = await fetch('/api/thong-bao?limit=10', {
-        credentials: 'include',
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(data.notifications || []);
-        setUnreadCount(data.unread_count || 0);
-      }
+      const data = await apiRequest<{
+        notifications?: Notification[];
+        unread_count?: number;
+      }>('/api/thong-bao?limit=10');
+      setNotifications(data.notifications || []);
+      setUnreadCount(data.unread_count || 0);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
     } finally {
@@ -73,19 +70,14 @@ export default function NotificationDropdown({
 
   const markAsRead = async (notificationId: string) => {
     try {
-      const res = await fetch(`/api/thong-bao/${notificationId}`, {
+      await apiRequest(`/api/thong-bao/${notificationId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
-        credentials: 'include',
-        body: JSON.stringify({ is_read: true }),
+        body: { is_read: true },
       });
-
-      if (res.ok) {
-        setNotifications((prev) =>
-          prev.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n))
-        );
-        setUnreadCount((prev) => Math.max(0, prev - 1));
-      }
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n))
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
       console.error('Failed to mark notification as read:', error);
     }
@@ -96,16 +88,9 @@ export default function NotificationDropdown({
 
     setIsMarkingAllRead(true);
     try {
-      const res = await fetch('/api/thong-bao/danh-dau-tat-ca', {
-        method: 'POST',
-        headers: { ...getCsrfHeaders() },
-        credentials: 'include',
-      });
-
-      if (res.ok) {
-        setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-        setUnreadCount(0);
-      }
+      await apiRequest('/api/thong-bao/danh-dau-tat-ca', { method: 'POST' });
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      setUnreadCount(0);
     } catch (error) {
       console.error('Failed to mark all as read:', error);
     } finally {

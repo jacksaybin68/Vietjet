@@ -18,6 +18,7 @@ import {
   MdPassword,
 } from 'react-icons/md';
 import { AppImage } from '@/shared/components/ui';
+import { apiRequest, ApiRequestError } from '@/shared/services';
 
 interface CheckInData {
   bookingId: string;
@@ -85,20 +86,22 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
 
       setLoading(true);
       try {
-        const res = await fetch(
+        const data = await apiRequest<{
+          success: boolean;
+          hasCheckIn?: boolean;
+          checkIn?: {
+            check_in_number?: string;
+            seat_number?: string;
+            gate?: string;
+            terminal?: string;
+            boarding_pass_number?: string;
+          };
+          booking: { id: string; status?: string; flight?: Record<string, string> };
+          passengers?: { name?: string }[];
+        }>(
           `/api/checkin?bookingCode=${encodeURIComponent(bookingCode.trim())}` +
-            `&lastName=${encodeURIComponent(lastName.trim())}`,
-          { cache: 'no-store' }
+            `&lastName=${encodeURIComponent(lastName.trim())}`
         );
-        const data = await res.json();
-
-        if (!res.ok || !data.success) {
-          toast.error(
-            'Không tìm thấy',
-            data?.message || 'Mã đặt chỗ hoặc họ tên hành khách không đúng'
-          );
-          return;
-        }
 
         if (data.hasCheckIn) {
           toast.info(
@@ -142,8 +145,13 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
           boardingPassNumber: data.checkIn?.boarding_pass_number || undefined,
         });
         setStep('confirm');
-      } catch {
-        toast.error('Lỗi', 'Không thể kết nối máy chủ. Vui lòng thử lại.');
+      } catch (error) {
+        toast.error(
+          'Không tìm thấy',
+          error instanceof ApiRequestError
+            ? error.message
+            : 'Không thể kết nối máy chủ. Vui lòng thử lại.'
+        );
       } finally {
         setLoading(false);
       }
@@ -160,11 +168,18 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
 
     setLoading(true);
     try {
-      const res = await fetch('/api/checkin', {
+      const data = await apiRequest<{
+        success?: boolean;
+        checkInNumber?: string;
+        checkIn?: {
+          gate?: string | null;
+          terminal?: string | null;
+          check_in_number?: string | null;
+          boarding_pass_number?: string | null;
+        };
+      }>('/api/checkin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
+        body: {
           bookingId: checkInData.bookingId,
           seatNumber: checkInData.seat,
           flightNo: checkInData.flightNo,
@@ -174,27 +189,8 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
           passengerName: checkInData.passengerName,
           gate: checkInData.gate || null,
           terminal: checkInData.terminal || null,
-        }),
+        },
       });
-      const data = await res.json();
-
-      if (res.status === 401 || res.status === 403) {
-        toast.error('Yêu cầu đăng nhập', 'Vui lòng đăng nhập để thực hiện check-in online.');
-        router.push('/dang-nhap?next=/lam-thu-tuc');
-        return;
-      }
-
-      if (res.status === 400 && data.checkInNumber) {
-        // Already checked in — show existing boarding pass
-        setStep('success');
-        toast.info('Đã check-in trước đó', `Mã thẻ lên máy bay: ${data.checkInNumber}`);
-        return;
-      }
-
-      if (!res.ok || !data.success) {
-        toast.error('Check-in thất bại', data?.message || 'Vui lòng thử lại sau.');
-        return;
-      }
 
       setCheckInData((prev) =>
         prev
@@ -210,7 +206,29 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
       );
       setStep('success');
       toast.success('Check-in thành công!', 'Thẻ lên máy bay đã sẵn sàng.');
-    } catch {
+    } catch (error) {
+      if (error instanceof ApiRequestError && (error.status === 401 || error.status === 403)) {
+        toast.error('Yêu cầu đăng nhập', 'Vui lòng đăng nhập để thực hiện check-in online.');
+        router.push('/dang-nhap?next=/lam-thu-tuc');
+        return;
+      }
+
+      // 400 with a check-in number means the booking was already checked in.
+      const payload =
+        error instanceof ApiRequestError
+          ? (error.payload as { checkInNumber?: string } | undefined)
+          : undefined;
+      if (error instanceof ApiRequestError && error.status === 400 && payload?.checkInNumber) {
+        setStep('success');
+        toast.info('Đã check-in trước đó', `Mã thẻ lên máy bay: ${payload.checkInNumber}`);
+        return;
+      }
+
+      if (error instanceof ApiRequestError) {
+        toast.error('Check-in thất bại', error.message);
+        return;
+      }
+
       toast.error('Lỗi', 'Không thể kết nối máy chủ. Vui lòng thử lại.');
     } finally {
       setLoading(false);

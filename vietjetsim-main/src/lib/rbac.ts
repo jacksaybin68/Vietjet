@@ -3,6 +3,7 @@
 // Simplified: Only 2 roles — 'user' (regular user) and 'admin' (full access)
 // ──────────────────────────────────────────────────────────────────────
 
+import { isAdminRole, roleLevel } from './roles';
 import { UserRole } from './auth';
 
 // ═════════════════════════════════════════════════════════════════════
@@ -250,8 +251,7 @@ export function hasPermission(
   permission: Permission,
   _customPermissions?: Permission[] | null
 ): boolean {
-  if (userRole === 'admin') return true;
-  return false;
+  return isAdminRole(userRole);
 }
 
 export function hasAllPermissions(
@@ -274,8 +274,8 @@ export function getRolePermissions(
   role: AllRoles,
   _customPermissions?: Permission[] | null
 ): Permission[] {
-  if (role === 'admin') return Array.from(ADMIN_PERMISSIONS) as Permission[];
-  return [];
+  if (!isAdminRole(role)) return [];
+  return Array.from(ADMIN_PERMISSIONS) as Permission[];
 }
 
 export function getRoleInfo(role: AllRoles): {
@@ -306,14 +306,22 @@ export function getRoleInfo(role: AllRoles): {
 /**
  * Admin can only manage 'user' role. Cannot manage other admins.
  */
-export function canManageRole(actorRole: AllRoles, targetRole: AllRoles): boolean {
-  if (actorRole === 'admin' && targetRole === 'user') return true;
-  return false;
+/**
+ * Roles are strictly ordered, so an actor may manage anyone strictly below
+ * them and nobody at or above their own level. Without the ordering, a legacy
+ * `super_admin` could not touch a plain `admin` even though they outrank them.
+ *
+ * Takes plain strings because callers pass roles straight from the JWT and the
+ * database, which can still hold legacy names that `AllRoles` does not cover.
+ */
+export function canManageRole(
+  actorRole: string | null | undefined,
+  targetRole: string | null | undefined
+): boolean {
+  return roleLevel(actorRole) > roleLevel(targetRole);
 }
 
-export function isAdminRole(role: string): boolean {
-  return role === 'admin';
-}
+export { isAdminRole, normalizeRole, roleLevel } from './roles';
 
 // ─── Backward-compatibility bridge for AdminRBACPanel ───────────────────
 

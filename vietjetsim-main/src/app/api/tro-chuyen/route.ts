@@ -1,34 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAccessToken } from '@/lib/auth';
+import { verifyAuthRequest } from '@/lib/auth';
 import { isAdminRole } from '@/lib/rbac';
-import {
-  getConversationMessages,
-  sendChatMessage,
-  getOrCreateConversation,
-  getAllConversations,
-} from '@/lib/db';
+import { getConversationMessages, sendChatMessage, userOwnsConversation } from '@/lib/db';
 
 // ─── GET: Get messages for a conversation ────────────────────────────────────
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get('access_token')?.value;
+    const { user, error, response } = await verifyAuthRequest(request);
+    if (error || !user) return response!;
 
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized', message: 'No access token found' },
-        { status: 401 }
-      );
-    }
-
-    const payload = verifyAccessToken(token);
-
-    if (!payload) {
-      return NextResponse.json(
-        { error: 'Unauthorized', message: 'Invalid or expired token' },
-        { status: 401 }
-      );
-    }
+    const payload = user;
 
     const { searchParams } = new URL(request.url);
     const conversationId = searchParams.get('conversationId');
@@ -43,11 +25,8 @@ export async function GET(request: NextRequest) {
 
     // ─── H6: Ownership check (IDOR prevention) ─────────────────────────
     // Regular users can only access their own conversations; admins can access all.
-    if (payload.role === 'user') {
-      const { conversations } = await getAllConversations();
-      const ownsConversation = conversations.some(
-        (c) => c.id === conversationId && c.user_id === payload.userId
-      );
+    if (!isAdminRole(payload.role)) {
+      const ownsConversation = await userOwnsConversation(conversationId, payload.userId);
       if (!ownsConversation) {
         return NextResponse.json(
           { error: 'Forbidden', message: 'You are not a participant in this conversation' },
@@ -75,23 +54,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get('access_token')?.value;
+    const { user, error, response } = await verifyAuthRequest(request);
+    if (error || !user) return response!;
 
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized', message: 'No access token found' },
-        { status: 401 }
-      );
-    }
-
-    const payload = verifyAccessToken(token);
-
-    if (!payload) {
-      return NextResponse.json(
-        { error: 'Unauthorized', message: 'Invalid or expired token' },
-        { status: 401 }
-      );
-    }
+    const payload = user;
 
     const body = await request.json();
     const { conversation_id, content } = body;
@@ -111,11 +77,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify conversation ownership
-    if (payload.role === 'user') {
-      const { conversations } = await getAllConversations();
-      const ownsConversation = conversations.some(
-        (c) => c.id === conversation_id && c.user_id === payload.userId
-      );
+    if (!isAdminRole(payload.role)) {
+      const ownsConversation = await userOwnsConversation(conversation_id, payload.userId);
       if (!ownsConversation) {
         return NextResponse.json(
           { error: 'Forbidden', message: 'You are not a participant in this conversation' },

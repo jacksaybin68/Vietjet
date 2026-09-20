@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
+import { listAuditLogs } from '@/features/admin';
 
 interface AuditLog {
   id: string;
@@ -53,29 +54,20 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
       setHasError(false);
 
       try {
-        const params = new URLSearchParams({
-          page: page.toString(),
-          limit: PAGE_SIZE.toString(),
-        });
-        if (searchQuery) params.append('q', searchQuery);
-        if (actionFilter) params.append('action', actionFilter);
-        if (dateFrom) params.append('date_from', dateFrom);
-        if (dateTo) params.append('date_to', dateTo);
-
-        const res = await fetch(`/api/quan-tri/nhat-ky-kiem-toan?${params}`, {
-          credentials: 'include',
+        const data = await listAuditLogs({
+          page,
+          limit: PAGE_SIZE,
+          search: searchQuery || undefined,
+          action: actionFilter || undefined,
+          date_from: dateFrom || undefined,
+          date_to: dateTo || undefined,
         });
 
-        if (res.ok) {
-          const data = await res.json();
-          setLogs(data.logs || []);
-          setTotalCount(data.pagination?.total || 0);
-          setCurrentPage(page);
-          if (data.filters?.actions) {
-            setAvailableActions(data.filters.actions);
-          }
-        } else {
-          setHasError(true);
+        setLogs((data.logs || []) as unknown as AuditLog[]);
+        setTotalCount(data.pagination?.total || 0);
+        setCurrentPage(page);
+        if (data.filters?.actions) {
+          setAvailableActions(data.filters.actions);
         }
       } catch {
         setHasError(true);

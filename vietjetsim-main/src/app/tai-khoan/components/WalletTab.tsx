@@ -3,6 +3,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { useToast } from '@/hooks/useToast';
+import {
+  getWalletOverview,
+  listPaymentMethods,
+  mutateWallet,
+  addPaymentMethod,
+  deletePaymentMethod,
+  setDefaultPaymentMethod,
+} from '@/features/payments/services';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -121,40 +129,31 @@ function AddPaymentMethodModal({
         payload.bankId = bankId;
       }
 
-      const res = await fetch('/api/vi/phuong-thuc-thanh-toan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        toast.error('Lỗi', data.error || 'Không thể thêm phương thức thanh toán');
-        return;
-      }
+      const res = await addPaymentMethod(payload);
 
       const method: PaymentMethod = {
-        id: data.paymentMethod.id,
-        type: data.paymentMethod.type,
-        cardBrand: data.paymentMethod.card_brand,
-        lastFour: data.paymentMethod.last_four,
-        cardHolderName: data.paymentMethod.card_holder_name,
-        expiryMonth: data.paymentMethod.expiry_month,
-        expiryYear: data.paymentMethod.expiry_year,
-        bankId: data.paymentMethod.bank_id,
-        bankName: data.paymentMethod.bank_name,
-        bankCode: data.paymentMethod.bank_code,
-        isDefault: data.paymentMethod.is_default,
-        isActive: data.paymentMethod.is_active,
-        createdAt: data.paymentMethod.created_at,
+        id: res.id,
+        type: res.type,
+        cardBrand: res.card_brand,
+        lastFour: res.last_four,
+        cardHolderName: res.card_holder_name,
+        expiryMonth: res.expiry_month,
+        expiryYear: res.expiry_year,
+        bankId: res.bank_id,
+        bankName: res.bank_name,
+        bankCode: res.bank_code,
+        isDefault: res.is_default,
+        isActive: res.is_active,
+        createdAt: res.created_at,
       };
 
       toast.success('Thành công', 'Phương thức thanh toán đã được thêm.');
       onSuccess(method);
       onClose();
-    } catch {
-      toast.error('Lỗi', 'Đã xảy ra lỗi khi thêm phương thức thanh toán.');
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Đã xảy ra lỗi khi thêm phương thức thanh toán.';
+      toast.error('Lỗi', message);
     } finally {
       setLoading(false);
     }
@@ -405,46 +404,39 @@ export default function WalletTab({ user }: WalletTabProps) {
 
   const fetchData = useCallback(async () => {
     try {
-      const [walletRes, methodsRes] = await Promise.all([
-        fetch('/api/vi', { credentials: 'include' }),
-        fetch('/api/vi/phuong-thuc-thanh-toan', { credentials: 'include' }),
+      const [walletData, methodRecords] = await Promise.all([
+        getWalletOverview(),
+        listPaymentMethods(),
       ]);
 
-      const walletData = await walletRes.json();
-      const methodsData = await methodsRes.json();
+      setWallet(walletData.wallet);
+      setTransactions(walletData.transactions || []);
 
-      if (walletRes.ok && walletData.wallet) {
-        setWallet(walletData.wallet);
-        setTransactions(walletData.transactions || []);
+      const normalizedMethods = methodRecords.map((m) => ({
+        id: m.id,
+        type: m.type,
+        cardBrand: m.card_brand,
+        lastFour: m.last_four,
+        cardHolderName: m.card_holder_name,
+        expiryMonth: m.expiry_month,
+        expiryYear: m.expiry_year,
+        bankId: m.bank_id,
+        bankName: m.bank_name,
+        bankCode: m.bank_code,
+        isDefault: m.is_default,
+        isActive: m.is_active,
+        createdAt: m.created_at,
+      }));
+      setMethods(normalizedMethods);
+      const defaultMethod = normalizedMethods.find((m) => m.isDefault) || normalizedMethods[0];
+      if (defaultMethod) {
+        setTopupMethodId(defaultMethod.id);
       }
-      if (methodsRes.ok && methodsData.methods) {
-        const normalizedMethods = methodsData.methods.map((m: any) => ({
-          id: m.id,
-          type: m.type,
-          cardBrand: m.card_brand,
-          lastFour: m.last_four,
-          cardHolderName: m.card_holder_name,
-          expiryMonth: m.expiry_month,
-          expiryYear: m.expiry_year,
-          bankId: m.bank_id,
-          bankName: m.bank_name,
-          bankCode: m.bank_code,
-          isDefault: m.is_default,
-          isActive: m.is_active,
-          createdAt: m.created_at,
-        }));
-        setMethods(normalizedMethods);
-        const defaultMethod =
-          normalizedMethods.find((m: PaymentMethod) => m.isDefault) || normalizedMethods[0];
-        if (defaultMethod) {
-          setTopupMethodId(defaultMethod.id);
-        }
-        const defaultBankMethod =
-          normalizedMethods.find((m: PaymentMethod) => m.type === 'bank' && m.isDefault) ||
-          normalizedMethods.find((m: PaymentMethod) => m.type === 'bank');
-        if (defaultBankMethod) {
-          setWithdrawMethodId(defaultBankMethod.id);
-        }
+      const defaultBankMethod =
+        normalizedMethods.find((m) => m.type === 'bank' && m.isDefault) ||
+        normalizedMethods.find((m) => m.type === 'bank');
+      if (defaultBankMethod) {
+        setWithdrawMethodId(defaultBankMethod.id);
       }
     } catch {
       toast.error('Lỗi', 'Không thể tải dữ liệu ví.');
@@ -470,23 +462,12 @@ export default function WalletTab({ user }: WalletTabProps) {
 
     setTopupLoading(true);
     try {
-      const res = await fetch('/api/vi', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          action: 'topup',
-          amount: amount,
-          paymentMethodId: selectedTopupMethod.id,
-          description: 'Nạp tiền vào ví Vietjet Air',
-        }),
+      const data = await mutateWallet({
+        action: 'topup',
+        amount,
+        paymentMethodId: selectedTopupMethod.id,
+        description: 'Nạp tiền vào ví Vietjet Air',
       });
-
-      const data = await res.json();
-      if (!res.ok) {
-        toast.error('Lỗi', data.error || 'Nạp tiền thất bại.');
-        return;
-      }
 
       setWallet((prev) => (prev ? { ...prev, balance: data.wallet.balance } : null));
       if (data.transaction) {
@@ -494,8 +475,9 @@ export default function WalletTab({ user }: WalletTabProps) {
       }
       setTopupAmount('');
       toast.success('Thành công', `Đã nạp ${amount.toLocaleString('vi-VN')} VND vào ví.`);
-    } catch {
-      toast.error('Lỗi', 'Nạp tiền thất bại. Vui lòng thử lại.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Nạp tiền thất bại. Vui lòng thử lại.';
+      toast.error('Lỗi', message);
     } finally {
       setTopupLoading(false);
     }
@@ -521,22 +503,12 @@ export default function WalletTab({ user }: WalletTabProps) {
 
     setWithdrawLoading(true);
     try {
-      const res = await fetch('/api/vi', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          action: 'withdraw',
-          amount,
-          paymentMethodId: selectedWithdrawBank.id,
-          description: `Rút tiền về ${selectedWithdrawBank.bankName} - ${selectedWithdrawBank.bankId}`,
-        }),
+      const data = await mutateWallet({
+        action: 'withdraw',
+        amount,
+        paymentMethodId: selectedWithdrawBank.id,
+        description: `Rút tiền về ${selectedWithdrawBank.bankName} - ${selectedWithdrawBank.bankId}`,
       });
-      const data = await res.json();
-      if (!res.ok) {
-        toast.error('Rút tiền thất bại', data.message || data.error || 'Không thể rút tiền.');
-        return;
-      }
 
       setWallet((prev) => (prev ? { ...prev, balance: data.wallet.balance } : null));
       if (data.transaction) {
@@ -547,8 +519,9 @@ export default function WalletTab({ user }: WalletTabProps) {
         'Rút tiền thành công',
         `Đã rút ${amount.toLocaleString('vi-VN')} VND về tài khoản liên kết.`
       );
-    } catch {
-      toast.error('Rút tiền thất bại', 'Vui lòng thử lại sau.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Không thể rút tiền.';
+      toast.error('Rút tiền thất bại', message);
     } finally {
       setWithdrawLoading(false);
     }
@@ -556,17 +529,9 @@ export default function WalletTab({ user }: WalletTabProps) {
 
   const handleSetDefault = async (methodId: string) => {
     try {
-      const res = await fetch(`/api/vi/phuong-thuc-thanh-toan/${methodId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ action: 'setDefault' }),
-      });
-
-      if (res.ok) {
-        setMethods((prev) => prev.map((m) => ({ ...m, isDefault: m.id === methodId })));
-        toast.success('Thành công', 'Đã đặt làm phương thức mặc định.');
-      }
+      await setDefaultPaymentMethod(methodId);
+      setMethods((prev) => prev.map((m) => ({ ...m, isDefault: m.id === methodId })));
+      toast.success('Thành công', 'Đã đặt làm phương thức mặc định.');
     } catch {
       toast.error('Lỗi', 'Không thể cập nhật.');
     }
@@ -577,15 +542,9 @@ export default function WalletTab({ user }: WalletTabProps) {
 
     setDeletingId(methodId);
     try {
-      const res = await fetch(`/api/vi/phuong-thuc-thanh-toan/${methodId}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-
-      if (res.ok) {
-        setMethods((prev) => prev.filter((m) => m.id !== methodId));
-        toast.success('Đã xóa', 'Phương thức thanh toán đã được xóa.');
-      }
+      await deletePaymentMethod(methodId);
+      setMethods((prev) => prev.filter((m) => m.id !== methodId));
+      toast.success('Đã xóa', 'Phương thức thanh toán đã được xóa.');
     } catch {
       toast.error('Lỗi', 'Không thể xóa phương thức.');
     } finally {

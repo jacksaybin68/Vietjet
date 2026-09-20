@@ -2,19 +2,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
-
-interface Announcement {
-  id: string;
-  title: string;
-  content: string;
-  type: 'info' | 'warning' | 'promotion' | 'system';
-  target_role: string;
-  is_active: boolean;
-  start_date: string | null;
-  end_date: string | null;
-  created_at: string;
-  created_by_name?: string;
-}
+import {
+  createAnnouncement,
+  deleteAnnouncement,
+  listAnnouncements,
+  updateAnnouncement,
+  type AdminAnnouncement as Announcement,
+} from '@/features/admin';
+import { getApiErrorMessage } from '@/shared/services';
 
 interface ToastAPI {
   success: (title: string, message?: string, options?: object) => void;
@@ -70,25 +65,10 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
     setIsLoading(true);
     setHasError(false);
     try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: PAGE_SIZE.toString(),
-      });
-      if (search) params.append('q', search);
-      if (type) params.append('type', type);
-
-      const res = await fetch(`/api/quan-tri/thong-bao?${params}`, {
-        credentials: 'include',
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setAnnouncements(data.announcements || []);
-        setTotalCount(data.pagination?.total || 0);
-        setCurrentPage(page);
-      } else {
-        setHasError(true);
-      }
+      const data = await listAnnouncements({ page, limit: PAGE_SIZE, search, type });
+      setAnnouncements(data.announcements || []);
+      setTotalCount(data.pagination?.total || 0);
+      setCurrentPage(page);
     } catch {
       setHasError(true);
     } finally {
@@ -126,25 +106,13 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch('/api/quan-tri/thong-bao', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        onToast?.success('Tạo thông báo thành công', `Thông báo "${formData.title}" đã được tạo.`);
-        setShowAddModal(false);
-        resetForm();
-        fetchAnnouncements(1, searchQuery, typeFilter);
-      } else {
-        onToast?.error('Lỗi', data.message || 'Không thể tạo thông báo.');
-      }
-    } catch (err: any) {
-      onToast?.error('Lỗi mạng', err.message || 'Kết nối thất bại.');
+      await createAnnouncement(formData);
+      onToast?.success('Tạo thông báo thành công', `Thông báo "${formData.title}" đã được tạo.`);
+      setShowAddModal(false);
+      resetForm();
+      fetchAnnouncements(1, searchQuery, typeFilter);
+    } catch (err) {
+      onToast?.error('Lỗi', getApiErrorMessage(err, 'Không thể tạo thông báo.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -157,25 +125,13 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch(`/api/quan-tri/thong-bao/${editingAnnouncement.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        onToast?.success('Cập nhật thành công', `Thông báo đã được cập nhật.`);
-        setEditingAnnouncement(null);
-        resetForm();
-        fetchAnnouncements(currentPage, searchQuery, typeFilter);
-      } else {
-        onToast?.error('Lỗi', data.message || 'Không thể cập nhật thông báo.');
-      }
-    } catch (err: any) {
-      onToast?.error('Lỗi mạng', err.message || 'Kết nối thất bại.');
+      await updateAnnouncement(editingAnnouncement.id, formData);
+      onToast?.success('Cập nhật thành công', `Thông báo đã được cập nhật.`);
+      setEditingAnnouncement(null);
+      resetForm();
+      fetchAnnouncements(currentPage, searchQuery, typeFilter);
+    } catch (err) {
+      onToast?.error('Lỗi', getApiErrorMessage(err, 'Không thể cập nhật thông báo.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -187,21 +143,11 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
     setDeletingId(announcement.id);
 
     try {
-      const res = await fetch(`/api/quan-tri/thong-bao/${announcement.id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        onToast?.success('Xoá thành công', `Thông báo đã bị xoá.`);
-        fetchAnnouncements(currentPage, searchQuery, typeFilter);
-      } else {
-        onToast?.error('Lỗi', data.message || 'Không thể xoá thông báo.');
-      }
-    } catch (err: any) {
-      onToast?.error('Lỗi mạng', err.message || 'Kết nối thất bại.');
+      await deleteAnnouncement(announcement.id);
+      onToast?.success('Xoá thành công', `Thông báo đã bị xoá.`);
+      fetchAnnouncements(currentPage, searchQuery, typeFilter);
+    } catch (err) {
+      onToast?.error('Lỗi', getApiErrorMessage(err, 'Không thể xoá thông báo.'));
     } finally {
       setDeletingId(null);
     }
@@ -209,26 +155,14 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
 
   const handleToggleActive = async (announcement: Announcement) => {
     try {
-      const res = await fetch(`/api/quan-tri/thong-bao/${announcement.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ is_active: !announcement.is_active }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        onToast?.success(
-          announcement.is_active ? 'Đã tắt thông báo' : 'Đã bật thông báo',
-          `Thông báo "${announcement.title}" đã ${announcement.is_active ? 'tắt' : 'bật'}.`
-        );
-        fetchAnnouncements(currentPage, searchQuery, typeFilter);
-      } else {
-        onToast?.error('Lỗi', data.message || 'Không thể cập nhật thông báo.');
-      }
-    } catch (err: any) {
-      onToast?.error('Lỗi mạng', err.message || 'Kết nối thất bại.');
+      await updateAnnouncement(announcement.id, { is_active: !announcement.is_active });
+      onToast?.success(
+        announcement.is_active ? 'Đã tắt thông báo' : 'Đã bật thông báo',
+        `Thông báo "${announcement.title}" đã ${announcement.is_active ? 'tắt' : 'bật'}.`
+      );
+      fetchAnnouncements(currentPage, searchQuery, typeFilter);
+    } catch (err) {
+      onToast?.error('Lỗi', getApiErrorMessage(err, 'Không thể cập nhật thông báo.'));
     }
   };
 

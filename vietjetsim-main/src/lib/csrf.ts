@@ -12,12 +12,12 @@
  */
 
 import { cookies } from 'next/headers';
-import { createHash, randomBytes } from 'crypto';
+import { NextResponse } from 'next/server';
+import { randomBytes } from 'crypto';
+import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from './csrf-client';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const CSRF_COOKIE_NAME = 'csrf_token';
-const CSRF_HEADER_NAME = 'x-csrf-token';
 const CSRF_TOKEN_LENGTH = 32; // bytes
 const CSRF_COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
 
@@ -60,6 +60,36 @@ export async function getCsrfTokenFromCookies(): Promise<string | null> {
   return cookieStore.get(CSRF_COOKIE_NAME)?.value ?? null;
 }
 
+/**
+ * Ensure the double-submit cookie is present on a response.
+ *
+ * Without this, a freshly logged-in client has no CSRF cookie and every
+ * mutation guarded by {@link validateCsrfOrReject} fails with 403. Returns the
+ * token that was written so callers can reuse it.
+ */
+export function setCsrfCookieOnResponse(response: NextResponse, token?: string): string {
+  const value = token ?? generateCsrfToken();
+  response.cookies.set(CSRF_COOKIE_NAME, value, CSRF_COOKIE_OPTIONS);
+  return value;
+}
+
+/**
+ * Read the CSRF cookie for `request`. Prefers the request's own `Cookie`
+ * header so the double-submit check works for any Request (including in tests
+ * and non-Next runtimes); falls back to `cookies()` for callers that only pass
+ * a bare Request in a server component context.
+ */
+async function readCsrfCookie(request: Request): Promise<string | undefined> {
+  const header = request.headers.get('cookie');
+  if (header) {
+    const match = header.match(new RegExp(`(?:^|;\\s*)${CSRF_COOKIE_NAME}=([^;]*)`));
+    if (match) return decodeURIComponent(match[1]);
+  }
+
+  const cookieStore = await cookies();
+  return cookieStore.get(CSRF_COOKIE_NAME)?.value;
+}
+
 // ─── Validation ─────────────────────────────────────────────────────────────
 
 /**
@@ -72,9 +102,7 @@ export async function getCsrfTokenFromCookies(): Promise<string | null> {
  * @returns true if valid, false otherwise
  */
 export async function validateCsrfToken(request: Request): Promise<boolean> {
-  // Get token from cookie
-  const cookieStore = await cookies();
-  const cookieToken = cookieStore.get(CSRF_COOKIE_NAME)?.value;
+  const cookieToken = await readCsrfCookie(request);
 
   if (!cookieToken) {
     return false;
@@ -136,8 +164,6 @@ function timingSafeEqual(a: string, b: string): boolean {
 
 // ─── Response Helpers ────────────────────────────────────────────────────────
 
-import { NextResponse } from 'next/server';
-
 /**
  * Create a response with CSRF token set in cookie
  * Call this on GET requests to public forms/pages
@@ -175,35 +201,9 @@ export async function validateCsrfOrReject(request: Request): Promise<NextRespon
 }
 
 // ─── Client-Side Helpers ────────────────────────────────────────────────────
+//
+// `getCsrfTokenFromDocument`, `getCsrfHeaders` and `csrfFetch` live in
+// `@/lib/csrf-client` so client components can import them without pulling in
+// `next/headers`.
 
-/**
- * Get CSRF token from document.cookie (client-side)
- */
-export function getCsrfTokenFromDocument(): string | null {
-  if (typeof document === 'undefined') return null;
-
-  const match = document.cookie.match(new RegExp('(^| )' + CSRF_COOKIE_NAME + '=([^;]+)'));
-  return match ? match[2] : null;
-}
-
-/**
- * Get headers object with CSRF token for fetch requests
- */
-export function getCsrfHeaders(): HeadersInit {
-  const token = getCsrfTokenFromDocument();
-  return token ? { [CSRF_HEADER_NAME]: token } : {};
-}
-
-/**
- * Fetch wrapper that automatically includes CSRF token
- */
-export async function csrfFetch(url: string, options: RequestInit = {}): Promise<Response> {
-  const headers = getCsrfHeaders();
-  return fetch(url, {
-    ...options,
-    headers: {
-      ...headers,
-      ...options.headers,
-    },
-  });
-}
+export { CSRF_COOKIE_NAME, CSRF_HEADER_NAME, getCsrfHeaders } from './csrf-client';

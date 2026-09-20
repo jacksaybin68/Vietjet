@@ -111,7 +111,8 @@ const UserDashboardDesktopSidebar = dynamic(() => import('./UserDashboardDesktop
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
-import { getCsrfHeaders } from '@/hooks/useCsrf';
+import { apiRequest, ApiRequestError } from '@/shared/services';
+import { listBookings } from '@/features/bookings/services';
 
 type Tab =
   | 'upcoming'
@@ -230,6 +231,18 @@ const AIRPORT_CITIES: Record<string, string> = {
 };
 
 /** Booking shape expected by the UI (upcoming cards + history table) */
+interface RefundApiRow {
+  id: string;
+  booking_id: string;
+  amount?: number | string;
+  reason?: string;
+  note?: string;
+  admin_note?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  bank_info?: string | Record<string, string>;
+}
+
 type UiBooking = {
   id: string;
   flightNo: string;
@@ -440,10 +453,9 @@ export default function UserDashboardClient() {
     setUpcomingLoading(true);
     try {
       // Fetch confirmed + pending bookings as "upcoming"
-      const res = await fetch('/api/dat-ve?status=confirmed,pending&limit=20');
-      const json = await res.json();
-      if (res.ok && Array.isArray(json.bookings) && json.bookings.length > 0) {
-        const mapped = json.bookings.map(mapDbBookingToUi);
+      const { bookings } = await listBookings({ status: ['confirmed', 'pending'], limit: 20 });
+      if (Array.isArray(bookings) && bookings.length > 0) {
+        const mapped = bookings.map(mapDbBookingToUi);
         setUpcomingBookings(mapped);
       } else {
         // API empty or error → use fallback
@@ -467,42 +479,37 @@ export default function UserDashboardClient() {
     setRefundLoading(true);
     setRefundError(null);
     try {
-      const res = await fetch('/api/hoan-tien');
-      const json = await res.json();
+      const json = await apiRequest<{ refunds?: RefundApiRow[] }>('/api/hoan-tien');
       const data = json.refunds || [];
-      const error = res.ok ? null : { message: 'Failed to load' };
-      if (error) {
-        setRefundError(error.message);
-        return;
-      }
       setRefundRequests(
-        (data || []).map((r: any) => {
-          const bankInfo =
+        data.map((r) => {
+          const parsedBankInfo =
             typeof r.bank_info === 'string'
               ? (() => {
                   try {
-                    return JSON.parse(r.bank_info);
+                    return JSON.parse(r.bank_info as string);
                   } catch {
                     return {};
                   }
                 })()
               : r.bank_info || {};
+          const bankInfo = parsedBankInfo as Record<string, string>;
           return {
             id: r.id,
             bookingId: r.booking_id,
             amount: Number(bankInfo.amount || 0),
-            reason: r.reason,
+            reason: r.reason || '',
             note: bankInfo.note || r.note || '',
             bankName: bankInfo.bank_name || '',
             accountHolder: bankInfo.account_holder || '',
             accountNumber: bankInfo.account_number || '',
-            status: r.status as 'pending' | 'approved' | 'rejected',
+            status: r.status,
             date: new Date(r.created_at).toLocaleDateString('vi-VN'),
             adminNote: r.admin_note || '',
           };
         })
       );
-    } catch (e: any) {
+    } catch {
       setRefundError('Không thể tải dữ liệu');
     } finally {
       setRefundLoading(false);
@@ -515,11 +522,10 @@ export default function UserDashboardClient() {
     setHistoryError(false);
     try {
       // Fetch all bookings (no status filter) — we'll separate upcoming vs history on the client
-      const res = await fetch('/api/dat-ve?limit=50');
-      const json = await res.json();
-      if (res.ok && Array.isArray(json.bookings) && json.bookings.length > 0) {
+      const { bookings } = await listBookings({ limit: 50 });
+      if (Array.isArray(bookings) && bookings.length > 0) {
         // History = everything that is NOT confirmed/pending
-        const mapped = json.bookings
+        const mapped = bookings
           .map(mapDbBookingToUi)
           .filter((b: UiBooking) => b.status !== 'confirmed' && b.status !== 'pending');
         setHistoryBookings(mapped.length > 0 ? mapped : (FALLBACK_HISTORY as any));
@@ -681,10 +687,11 @@ export default function UserDashboardClient() {
     if (!user) return;
     const fetchUnreadCount = async () => {
       try {
-        const res = await fetch('/api/thong-bao');
-        const json = await res.json();
-        const count = json.notifications?.filter((n: any) => !n.is_read).length || 0;
-        setNotifUnreadCount(count ?? 0);
+        const json = await apiRequest<{ notifications?: { is_read?: boolean }[] }>(
+          '/api/thong-bao'
+        );
+        const count = json.notifications?.filter((n) => !n.is_read).length || 0;
+        setNotifUnreadCount(count);
       } catch {
         /* ignore */
       }
@@ -1510,43 +1517,44 @@ export default function UserDashboardClient() {
                             if (user) {
                               insertData.user_id = user.id;
                             }
-                            const res = await fetch('/api/hoan-tien', {
+                            const responseJson = await apiRequest<{
+                              refund?: {
+                                id: string;
+                                booking_id: string;
+                                reason?: string;
+                                bank_info?: string | Record<string, unknown>;
+                                created_at?: string;
+                              };
+                            }>('/api/hoan-tien', {
                               method: 'POST',
-                              headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
-                              body: JSON.stringify(insertData),
+                              body: insertData,
                             });
-                            const responseJson = await res.json();
-                            const insertErr = res.ok
-                              ? null
-                              : { message: responseJson.error || 'Failed to submit' };
-                            if (insertErr) {
-                              setRefundError(insertErr.message);
-                              return;
-                            }
-                            if (responseJson?.refund) {
-                              const bankInfo =
-                                typeof responseJson.refund.bank_info === 'string'
+                            const refund = responseJson?.refund;
+                            if (refund) {
+                              const parsedBankInfo =
+                                typeof refund.bank_info === 'string'
                                   ? (() => {
                                       try {
-                                        return JSON.parse(responseJson.refund.bank_info);
+                                        return JSON.parse(refund.bank_info as string);
                                       } catch {
                                         return {};
                                       }
                                     })()
-                                  : responseJson.refund.bank_info || {};
+                                  : refund.bank_info || {};
+                              const bankInfo = parsedBankInfo as Record<string, string>;
                               setRefundRequests((prev) => [
                                 {
-                                  id: responseJson.refund.id,
-                                  bookingId: responseJson.refund.booking_id,
+                                  id: refund.id,
+                                  bookingId: refund.booking_id,
                                   amount: Number(bankInfo.amount || 0),
-                                  reason: responseJson.refund.reason || refundReason,
+                                  reason: refund.reason || refundReason,
                                   note: bankInfo.note || refundNote || '',
                                   bankName: bankInfo.bank_name || refundBankName,
                                   accountHolder: bankInfo.account_holder || refundAccountHolder,
                                   accountNumber: bankInfo.account_number || refundAccountNumber,
                                   status: 'pending',
                                   date: new Date(
-                                    responseJson.refund.created_at || Date.now()
+                                    refund.created_at || Date.now()
                                   ).toLocaleDateString('vi-VN'),
                                 },
                                 ...prev,
@@ -1558,8 +1566,12 @@ export default function UserDashboardClient() {
                               'Chúng tôi sẽ xem xét và phản hồi trong 3–5 ngày làm việc.'
                             );
                             await loadRefundRequests();
-                          } catch (err: any) {
-                            setRefundError('Không thể gửi yêu cầu. Vui lòng thử lại.');
+                          } catch (err) {
+                            setRefundError(
+                              err instanceof ApiRequestError
+                                ? err.message
+                                : 'Không thể gửi yêu cầu. Vui lòng thử lại.'
+                            );
                           } finally {
                             setRefundSubmitting(false);
                           }

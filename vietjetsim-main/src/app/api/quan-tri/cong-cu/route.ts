@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminRequest } from '@/lib/admin-auth';
+import { isAdminRole } from '@/lib/roles';
 import { sql } from '@/lib/neon';
 import {
   getAllFlights,
@@ -113,7 +114,7 @@ const TOOLS: Record<
       let marked = 0;
       const users = usersResult.users || [];
       for (const u of users) {
-        if ((successBookingsByUser[u.id] || 0) >= 5 && u.role === 'user') {
+        if ((successBookingsByUser[u.id] || 0) >= 5 && !isAdminRole(u.role)) {
           // Only log the action — do NOT change role to admin.
           // Role changes must go through the RBAC admin panel with explicit approval.
           await insertSstkLog(

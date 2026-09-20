@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { getAllBookings, getBookingById, updateBookingStatus } from '@/lib/db';
 import { verifyAccessToken } from '@/lib/auth';
+import { parsePaginationParams } from '@/lib/pagination';
 
 // ─── GET: Get all bookings (admin) ──────────────────────────────────────────
 
@@ -11,11 +12,11 @@ export async function GET(request: NextRequest) {
     if (error) return response;
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '20', 10);
+    const { page, limit } = parsePaginationParams(searchParams);
     const status = searchParams.get('status') || undefined;
+    const search = searchParams.get('search') || undefined;
 
-    const { bookings, total } = await getAllBookings({ page, limit, status });
+    const { bookings, total } = await getAllBookings({ page, limit, status, search });
 
     return NextResponse.json({
       bookings,

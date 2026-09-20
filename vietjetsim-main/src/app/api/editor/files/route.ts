@@ -1,15 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { verifyAdminRequest } from '@/lib/admin-auth';
 
-const PROJECT_ROOT = process.cwd();
+const PROJECT_ROOT = path.resolve(process.cwd());
 
-// Safe paths allowed to be browsed and edited
+// Files/dirs the editor must never read or write.
+const IGNORED_NAMES = new Set(['node_modules', '.next', '.git', '.env', '.env.local']);
+const SENSITIVE_PATTERNS = [
+  /^\.env($|\.)/,
+  /(^|\/)\.git($|\/)/,
+  /\.pem$/,
+  /\.key$/,
+  /(^|\/)secrets?($|\.)/i,
+];
+
+function isSensitive(relativePath: string): boolean {
+  const normalized = relativePath.replace(/\\/g, '/');
+  return SENSITIVE_PATTERNS.some((pattern) => pattern.test(normalized));
+}
+
+// Resolve `relativePath` inside the project root, rejecting traversal and
+// secret-bearing files (env files, keys, .git, …).
 function getSafePath(relativePath: string): string | null {
+  if (!relativePath || isSensitive(relativePath)) return null;
+
   const resolved = path.resolve(PROJECT_ROOT, relativePath);
-  if (!resolved.startsWith(PROJECT_ROOT)) {
-    return null;
-  }
+  const rootWithSep = PROJECT_ROOT + path.sep;
+  if (resolved !== PROJECT_ROOT && !resolved.startsWith(rootWithSep)) return null;
+
   return resolved;
 }
 
@@ -20,10 +39,9 @@ function getFileTree(dir: string, baseDir: string = ''): any[] {
 
   for (const entry of entries) {
     if (
-      entry.name === 'node_modules' ||
-      entry.name === '.next' ||
-      entry.name === '.git' ||
-      entry.name.startsWith('.DS_Store')
+      IGNORED_NAMES.has(entry.name) ||
+      entry.name.startsWith('.DS_Store') ||
+      isSensitive(path.join(baseDir, entry.name))
     ) {
       continue;
     }
@@ -55,6 +73,9 @@ function getFileTree(dir: string, baseDir: string = ''): any[] {
 
 // GET: Read file or get directory tree
 export async function GET(req: NextRequest) {
+  const { error, response } = await verifyAdminRequest(req, 'system:config');
+  if (error) return response;
+
   const { searchParams } = new URL(req.url);
   const action = searchParams.get('action');
   const filePath = searchParams.get('path');
@@ -88,6 +109,9 @@ export async function GET(req: NextRequest) {
 
 // POST: Save file content
 export async function POST(req: NextRequest) {
+  const { error, response } = await verifyAdminRequest(req, 'system:config');
+  if (error) return response;
+
   try {
     const { path: filePath, content } = await req.json();
     if (!filePath || content === undefined) {

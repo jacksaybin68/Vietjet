@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAccessToken } from '@/lib/auth';
+import { verifyAuthRequest } from '@/lib/auth';
+import { isAdminRole } from '@/lib/rbac';
 import { getOrCreateConversation, getAllConversations } from '@/lib/db';
 
 // ─── GET: Get conversations ─────────────────────────────────────────────────
@@ -8,26 +9,13 @@ import { getOrCreateConversation, getAllConversations } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get('access_token')?.value;
+    const { user, error, response } = await verifyAuthRequest(request);
+    if (error || !user) return response!;
 
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized', message: 'No access token found' },
-        { status: 401 }
-      );
-    }
-
-    const payload = verifyAccessToken(token);
-
-    if (!payload) {
-      return NextResponse.json(
-        { error: 'Unauthorized', message: 'Invalid or expired token' },
-        { status: 401 }
-      );
-    }
+    const payload = user;
 
     // Admin can view all conversations
-    if (payload.role === 'admin') {
+    if (isAdminRole(payload.role)) {
       const { conversations } = await getAllConversations();
       return NextResponse.json({ conversations });
     }
@@ -53,23 +41,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get('access_token')?.value;
+    const { user, error, response } = await verifyAuthRequest(request);
+    if (error || !user) return response!;
 
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized', message: 'No access token found' },
-        { status: 401 }
-      );
-    }
-
-    const payload = verifyAccessToken(token);
-
-    if (!payload) {
-      return NextResponse.json(
-        { error: 'Unauthorized', message: 'Invalid or expired token' },
-        { status: 401 }
-      );
-    }
+    const payload = user;
 
     // Users can only create their own conversation
     const conversation = await getOrCreateConversation(
