@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
 import { getCheckInStatusByBookingId } from '@/lib/db';
 import { rateLimit } from '@/lib/rate-limit';
+import { verifyAuthRequest } from '@/lib/auth';
+import { isAdminRole } from '@/lib/roles';
 
 // GET /api/checkin/status/[bookingId] - Get check-in status for a booking
 export async function GET(
@@ -15,6 +17,11 @@ export async function GET(
       return rateLimitResponse;
     }
 
+    // Passengers look this up from their own dashboard. Requiring a session and
+    // ownership stops anyone from enumerating check-in details via booking codes.
+    const { user, error: authError, response: authResponse } = await verifyAuthRequest(request);
+    if (authError || !user) return authResponse!;
+
     const { bookingId } = await params;
     if (!bookingId) {
       return NextResponse.json(
@@ -25,7 +32,7 @@ export async function GET(
 
     // Resolve booking by id or booking_code (PNR)
     const bookingResult = await sql`
-      SELECT id FROM bookings
+      SELECT id, user_id FROM bookings
       WHERE id = ${bookingId} OR booking_code = ${bookingId}
       LIMIT 1
     `;
@@ -39,7 +46,14 @@ export async function GET(
         { status: 404 }
       );
     }
-    const resolvedId = (bookingResult as any[])[0].id;
+    const resolvedBooking = (bookingResult as any[])[0];
+    if (!isAdminRole(user.role) && resolvedBooking.user_id !== user.userId) {
+      return NextResponse.json(
+        { error: 'Forbidden', message: 'Không có quyền truy cập' },
+        { status: 403 }
+      );
+    }
+    const resolvedId = resolvedBooking.id;
 
     const status = await getCheckInStatusByBookingId(resolvedId);
     if (!status) {
