@@ -8,6 +8,7 @@ import { Header } from '@/shared/components/navigation';
 import { Footer } from '@/shared/components/navigation';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
+import { apiRequest, ApiRequestError, getApiErrorMessage } from '@/shared/services';
 
 interface BookingDetail {
   id: string;
@@ -65,19 +66,14 @@ export default function BookingDetailPage() {
   useEffect(() => {
     const fetchBooking = async () => {
       try {
-        const res = await fetch(`/api/dat-ve/${bookingId}`);
-        if (!res.ok) {
-          if (res.status === 404) throw new Error('Không tìm thấy đặt chỗ');
-          if (res.status === 401) {
-            router.push('/dang-nhap');
-            return;
-          }
-          throw new Error('Lỗi khi tải thông tin');
-        }
-        const data = await res.json();
+        const data = await apiRequest<{ booking: BookingDetail }>(`/api/dat-ve/${bookingId}`);
         setBooking(data.booking);
-      } catch (err: any) {
-        setError(err.message || 'Đã có lỗi xảy ra');
+      } catch (err) {
+        if (err instanceof ApiRequestError && err.status === 401) {
+          router.push('/dang-nhap');
+          return;
+        }
+        setError(getApiErrorMessage(err, 'Đã có lỗi xảy ra'));
       } finally {
         setLoading(false);
       }

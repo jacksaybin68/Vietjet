@@ -231,6 +231,18 @@ const AIRPORT_CITIES: Record<string, string> = {
 };
 
 /** Booking shape expected by the UI (upcoming cards + history table) */
+interface RefundApiRow {
+  id: string;
+  booking_id: string;
+  amount?: number | string;
+  reason?: string;
+  note?: string;
+  admin_note?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  bank_info?: string | Record<string, string>;
+}
+
 type UiBooking = {
   id: string;
   flightNo: string;
@@ -467,42 +479,37 @@ export default function UserDashboardClient() {
     setRefundLoading(true);
     setRefundError(null);
     try {
-      const res = await fetch('/api/hoan-tien');
-      const json = await res.json();
+      const json = await apiRequest<{ refunds?: RefundApiRow[] }>('/api/hoan-tien');
       const data = json.refunds || [];
-      const error = res.ok ? null : { message: 'Failed to load' };
-      if (error) {
-        setRefundError(error.message);
-        return;
-      }
       setRefundRequests(
-        (data || []).map((r: any) => {
-          const bankInfo =
+        data.map((r) => {
+          const parsedBankInfo =
             typeof r.bank_info === 'string'
               ? (() => {
                   try {
-                    return JSON.parse(r.bank_info);
+                    return JSON.parse(r.bank_info as string);
                   } catch {
                     return {};
                   }
                 })()
               : r.bank_info || {};
+          const bankInfo = parsedBankInfo as Record<string, string>;
           return {
             id: r.id,
             bookingId: r.booking_id,
             amount: Number(bankInfo.amount || 0),
-            reason: r.reason,
+            reason: r.reason || '',
             note: bankInfo.note || r.note || '',
             bankName: bankInfo.bank_name || '',
             accountHolder: bankInfo.account_holder || '',
             accountNumber: bankInfo.account_number || '',
-            status: r.status as 'pending' | 'approved' | 'rejected',
+            status: r.status,
             date: new Date(r.created_at).toLocaleDateString('vi-VN'),
             adminNote: r.admin_note || '',
           };
         })
       );
-    } catch (e: any) {
+    } catch {
       setRefundError('Không thể tải dữ liệu');
     } finally {
       setRefundLoading(false);
@@ -680,10 +687,11 @@ export default function UserDashboardClient() {
     if (!user) return;
     const fetchUnreadCount = async () => {
       try {
-        const res = await fetch('/api/thong-bao');
-        const json = await res.json();
-        const count = json.notifications?.filter((n: any) => !n.is_read).length || 0;
-        setNotifUnreadCount(count ?? 0);
+        const json = await apiRequest<{ notifications?: { is_read?: boolean }[] }>(
+          '/api/thong-bao'
+        );
+        const count = json.notifications?.filter((n) => !n.is_read).length || 0;
+        setNotifUnreadCount(count);
       } catch {
         /* ignore */
       }

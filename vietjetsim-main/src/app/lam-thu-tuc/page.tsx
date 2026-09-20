@@ -86,20 +86,22 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
 
       setLoading(true);
       try {
-        const res = await fetch(
+        const data = await apiRequest<{
+          success: boolean;
+          hasCheckIn?: boolean;
+          checkIn?: {
+            check_in_number?: string;
+            seat_number?: string;
+            gate?: string;
+            terminal?: string;
+            boarding_pass_number?: string;
+          };
+          booking: { id: string; status?: string; flight?: Record<string, string> };
+          passengers?: { name?: string }[];
+        }>(
           `/api/checkin?bookingCode=${encodeURIComponent(bookingCode.trim())}` +
-            `&lastName=${encodeURIComponent(lastName.trim())}`,
-          { cache: 'no-store' }
+            `&lastName=${encodeURIComponent(lastName.trim())}`
         );
-        const data = await res.json();
-
-        if (!res.ok || !data.success) {
-          toast.error(
-            'Không tìm thấy',
-            data?.message || 'Mã đặt chỗ hoặc họ tên hành khách không đúng'
-          );
-          return;
-        }
 
         if (data.hasCheckIn) {
           toast.info(
@@ -143,8 +145,13 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
           boardingPassNumber: data.checkIn?.boarding_pass_number || undefined,
         });
         setStep('confirm');
-      } catch {
-        toast.error('Lỗi', 'Không thể kết nối máy chủ. Vui lòng thử lại.');
+      } catch (error) {
+        toast.error(
+          'Không tìm thấy',
+          error instanceof ApiRequestError
+            ? error.message
+            : 'Không thể kết nối máy chủ. Vui lòng thử lại.'
+        );
       } finally {
         setLoading(false);
       }
