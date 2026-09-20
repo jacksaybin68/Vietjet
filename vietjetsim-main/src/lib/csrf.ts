@@ -12,6 +12,7 @@
  */
 
 import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 import { createHash, randomBytes } from 'crypto';
 import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from './csrf-client';
 
@@ -59,6 +60,36 @@ export async function getCsrfTokenFromCookies(): Promise<string | null> {
   return cookieStore.get(CSRF_COOKIE_NAME)?.value ?? null;
 }
 
+/**
+ * Ensure the double-submit cookie is present on a response.
+ *
+ * Without this, a freshly logged-in client has no CSRF cookie and every
+ * mutation guarded by {@link validateCsrfOrReject} fails with 403. Returns the
+ * token that was written so callers can reuse it.
+ */
+export function setCsrfCookieOnResponse(response: NextResponse, token?: string): string {
+  const value = token ?? generateCsrfToken();
+  response.cookies.set(CSRF_COOKIE_NAME, value, CSRF_COOKIE_OPTIONS);
+  return value;
+}
+
+/**
+ * Read the CSRF cookie for `request`. Prefers the request's own `Cookie`
+ * header so the double-submit check works for any Request (including in tests
+ * and non-Next runtimes); falls back to `cookies()` for callers that only pass
+ * a bare Request in a server component context.
+ */
+async function readCsrfCookie(request: Request): Promise<string | undefined> {
+  const header = request.headers.get('cookie');
+  if (header) {
+    const match = header.match(new RegExp(`(?:^|;\\s*)${CSRF_COOKIE_NAME}=([^;]*)`));
+    if (match) return decodeURIComponent(match[1]);
+  }
+
+  const cookieStore = await cookies();
+  return cookieStore.get(CSRF_COOKIE_NAME)?.value;
+}
+
 // ─── Validation ─────────────────────────────────────────────────────────────
 
 /**
@@ -71,9 +102,7 @@ export async function getCsrfTokenFromCookies(): Promise<string | null> {
  * @returns true if valid, false otherwise
  */
 export async function validateCsrfToken(request: Request): Promise<boolean> {
-  // Get token from cookie
-  const cookieStore = await cookies();
-  const cookieToken = cookieStore.get(CSRF_COOKIE_NAME)?.value;
+  const cookieToken = await readCsrfCookie(request);
 
   if (!cookieToken) {
     return false;
@@ -134,8 +163,6 @@ function timingSafeEqual(a: string, b: string): boolean {
 }
 
 // ─── Response Helpers ────────────────────────────────────────────────────────
-
-import { NextResponse } from 'next/server';
 
 /**
  * Create a response with CSRF token set in cookie

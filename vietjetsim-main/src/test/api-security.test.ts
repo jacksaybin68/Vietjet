@@ -8,6 +8,9 @@ import {
 } from '@/app/api/quan-tri/chuyen-bay/route';
 import { PATCH as updateAdminRefund } from '@/app/api/quan-tri/hoan-tien/route';
 import { GET as getUserBookings } from '@/app/api/dat-ve/route';
+import { POST as sendChatMessage } from '@/app/api/tro-chuyen/route';
+import { POST as postCheckIn } from '@/app/api/checkin/route';
+import { POST as postWallet } from '@/app/api/vi/route';
 import * as db from '@/lib/db';
 
 vi.mock('@/lib/neon', () => {
@@ -40,6 +43,17 @@ describe('API & RBAC Security Logic', () => {
       role: 'user',
       fullName: 'Test User',
     });
+
+  const CSRF_TOKEN = 'test-csrf-token';
+
+  /**
+   * Cookie + header pair required by the double-submit CSRF check on every
+   * mutating admin request.
+   */
+  const withCsrf = (accessToken: string) => ({
+    cookie: `access_token=${accessToken}; csrf_token=${CSRF_TOKEN}`,
+    'x-csrf-token': CSRF_TOKEN,
+  });
 
   describe('verifyAdminRequest Authentication & Authorization Helper', () => {
     it('should reject unauthenticated requests (no token) with 401', async () => {
@@ -129,11 +143,38 @@ describe('API & RBAC Security Logic', () => {
         expect(res.status).toBe(200);
       });
 
-      it('POST - allow admin to create flight', async () => {
+      it('POST - rejects a missing CSRF token with 403', async () => {
         const token = makeAdminToken();
         const req = new NextRequest('http://localhost:4028/api/quan-tri/chuyen-bay', {
           method: 'POST',
           headers: { cookie: `access_token=${token}` },
+          body: JSON.stringify({ flight_no: 'VJ101' }),
+        });
+
+        const res = (await createAdminFlight(req))!;
+        expect(res.status).toBe(403);
+      });
+
+      it('POST - rejects a CSRF header that does not match the cookie', async () => {
+        const token = makeAdminToken();
+        const req = new NextRequest('http://localhost:4028/api/quan-tri/chuyen-bay', {
+          method: 'POST',
+          headers: {
+            cookie: `access_token=${token}; csrf_token=${CSRF_TOKEN}`,
+            'x-csrf-token': 'forged-token',
+          },
+          body: JSON.stringify({ flight_no: 'VJ101' }),
+        });
+
+        const res = (await createAdminFlight(req))!;
+        expect(res.status).toBe(403);
+      });
+
+      it('POST - allow admin to create flight', async () => {
+        const token = makeAdminToken();
+        const req = new NextRequest('http://localhost:4028/api/quan-tri/chuyen-bay', {
+          method: 'POST',
+          headers: withCsrf(token),
           body: JSON.stringify({
             flight_no: 'VJ101',
             from_code: 'HAN',
@@ -163,6 +204,20 @@ describe('API & RBAC Security Logic', () => {
         const res = (await createAdminFlight(req))!;
         // REST convention: resource creation returns 201 Created
         expect(res.status).toBe(201);
+      });
+
+      it('GET - forwards the search term to getAllFlights', async () => {
+        const token = makeAdminToken();
+        const req = new NextRequest(
+          'http://localhost:4028/api/quan-tri/chuyen-bay?search=VJ101&limit=5',
+          { headers: { cookie: `access_token=${token}` } }
+        );
+
+        const spy = vi.spyOn(db, 'getAllFlights').mockResolvedValueOnce({ flights: [], total: 0 });
+
+        const res = (await getAdminFlights(req))!;
+        expect(res.status).toBe(200);
+        expect(spy).toHaveBeenCalledWith(expect.objectContaining({ search: 'VJ101', limit: 5 }));
       });
     });
 
@@ -199,7 +254,7 @@ describe('API & RBAC Security Logic', () => {
     it('PATCH - requires admin role (403 for regular user)', async () => {
       const req = new NextRequest('http://localhost:4028/api/quan-tri/hoan-tien', {
         method: 'PATCH',
-        headers: { cookie: `access_token=${makeUserToken()}` },
+        headers: withCsrf(makeUserToken()),
         body: JSON.stringify({ refundId: 'r1', status: 'approved' }),
       });
       const res = (await updateAdminRefund(req))!;
@@ -209,7 +264,7 @@ describe('API & RBAC Security Logic', () => {
     it('PATCH - rejects invalid status values', async () => {
       const req = new NextRequest('http://localhost:4028/api/quan-tri/hoan-tien', {
         method: 'PATCH',
-        headers: { cookie: `access_token=${makeAdminToken()}` },
+        headers: withCsrf(makeAdminToken()),
         body: JSON.stringify({ refundId: 'r2', status: 'hacked' }),
       });
       const res = (await updateAdminRefund(req))!;
@@ -231,7 +286,7 @@ describe('API & RBAC Security Logic', () => {
 
       const req = new NextRequest('http://localhost:4028/api/quan-tri/hoan-tien', {
         method: 'PATCH',
-        headers: { cookie: `access_token=${makeAdminToken()}` },
+        headers: withCsrf(makeAdminToken()),
         body: JSON.stringify({ refundId: 'r3', status: 'completed' }),
       });
       const res = (await updateAdminRefund(req))!;
@@ -270,7 +325,7 @@ describe('API & RBAC Security Logic', () => {
 
       const req = new NextRequest('http://localhost:4028/api/quan-tri/hoan-tien', {
         method: 'PATCH',
-        headers: { cookie: `access_token=${makeAdminToken()}` },
+        headers: withCsrf(makeAdminToken()),
         body: JSON.stringify({ refundId: 'r4', status: 'approved' }),
       });
       const res = (await updateAdminRefund(req))!;
@@ -308,12 +363,57 @@ describe('API & RBAC Security Logic', () => {
 
       const req = new NextRequest('http://localhost:4028/api/quan-tri/hoan-tien', {
         method: 'PATCH',
-        headers: { cookie: `access_token=${makeAdminToken()}` },
+        headers: withCsrf(makeAdminToken()),
         body: JSON.stringify({ refundId: 'r5', status: 'approved' }),
       });
       const res = (await updateAdminRefund(req))!;
       expect(res.status).toBe(200);
       expect(refundWalletSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('CSRF protection on user mutation routes', () => {
+    it('chat POST - rejects a missing CSRF token with 403', async () => {
+      const req = new NextRequest('http://localhost:4028/api/tro-chuyen', {
+        method: 'POST',
+        headers: { cookie: `access_token=${makeUserToken()}` },
+        body: JSON.stringify({ conversation_id: 'c1', content: 'hi' }),
+      });
+      const res = (await sendChatMessage(req))!;
+      expect(res.status).toBe(403);
+    });
+
+    it('chat POST - rejects a forged CSRF header with 403', async () => {
+      const req = new NextRequest('http://localhost:4028/api/tro-chuyen', {
+        method: 'POST',
+        headers: {
+          cookie: `access_token=${makeUserToken()}; csrf_token=${CSRF_TOKEN}`,
+          'x-csrf-token': 'forged',
+        },
+        body: JSON.stringify({ conversation_id: 'c1', content: 'hi' }),
+      });
+      const res = (await sendChatMessage(req))!;
+      expect(res.status).toBe(403);
+    });
+
+    it('check-in POST - rejects a missing CSRF token with 403', async () => {
+      const req = new NextRequest('http://localhost:4028/api/checkin', {
+        method: 'POST',
+        headers: { cookie: `access_token=${makeUserToken()}` },
+        body: JSON.stringify({ bookingId: 'b1' }),
+      });
+      const res = (await postCheckIn(req))!;
+      expect(res.status).toBe(403);
+    });
+
+    it('wallet POST - rejects a missing CSRF token with 403', async () => {
+      const req = new NextRequest('http://localhost:4028/api/vi', {
+        method: 'POST',
+        headers: { cookie: `access_token=${makeUserToken()}` },
+        body: JSON.stringify({ action: 'topup', amount: 100000 }),
+      });
+      const res = (await postWallet(req))!;
+      expect(res.status).toBe(403);
     });
   });
 });

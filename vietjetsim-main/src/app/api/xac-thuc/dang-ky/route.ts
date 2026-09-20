@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
+import { setCsrfCookieOnResponse } from '@/lib/csrf';
 import {
   hashPassword,
   generateTokens,
@@ -83,6 +84,7 @@ export async function POST(request: NextRequest) {
     );
 
     setAuthCookiesOnResponse(response, tokens);
+    setCsrfCookieOnResponse(response);
 
     return response;
   } catch (error) {

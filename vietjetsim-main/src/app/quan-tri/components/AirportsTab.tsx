@@ -2,15 +2,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
-
-interface Airport {
-  id: string;
-  code: string;
-  name: string;
-  city: string;
-  country: string;
-  created_at: string;
-}
+import {
+  createAirport,
+  deleteAirport,
+  listAirports,
+  updateAirport,
+  type Airport,
+} from '@/features/admin';
+import { getApiErrorMessage } from '@/shared/services';
 
 interface ToastAPI {
   success: (title: string, message?: string, options?: object) => void;
@@ -43,24 +42,10 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
     setIsLoading(true);
     setHasError(false);
     try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: PAGE_SIZE.toString(),
-      });
-      if (search) params.append('q', search);
-
-      const res = await fetch(`/api/quan-tri/san-bay?${params}`, {
-        credentials: 'include',
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setAirports(data.airports || []);
-        setTotalCount(data.pagination?.total || 0);
-        setCurrentPage(page);
-      } else {
-        setHasError(true);
-      }
+      const data = await listAirports({ page, limit: PAGE_SIZE, search });
+      setAirports(data.airports || []);
+      setTotalCount(data.pagination?.total || 0);
+      setCurrentPage(page);
     } catch {
       setHasError(true);
     } finally {
@@ -90,25 +75,13 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch('/api/quan-tri/san-bay', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        onToast?.success('Thêm sân bay thành công', `Sân bay ${formData.code} đã được tạo.`);
-        setShowAddModal(false);
-        resetForm();
-        fetchAirports(1, searchQuery);
-      } else {
-        onToast?.error('Lỗi', data.message || 'Không thể thêm sân bay.');
-      }
-    } catch (err: any) {
-      onToast?.error('Lỗi mạng', err.message || 'Kết nối thất bại.');
+      await createAirport(formData);
+      onToast?.success('Thêm sân bay thành công', `Sân bay ${formData.code} đã được tạo.`);
+      setShowAddModal(false);
+      resetForm();
+      fetchAirports(1, searchQuery);
+    } catch (err) {
+      onToast?.error('Lỗi', getApiErrorMessage(err, 'Không thể thêm sân bay.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -121,25 +94,13 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch(`/api/quan-tri/san-bay/${editingAirport.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        onToast?.success('Cập nhật thành công', `Sân bay ${formData.code} đã được cập nhật.`);
-        setEditingAirport(null);
-        resetForm();
-        fetchAirports(currentPage, searchQuery);
-      } else {
-        onToast?.error('Lỗi', data.message || 'Không thể cập nhật sân bay.');
-      }
-    } catch (err: any) {
-      onToast?.error('Lỗi mạng', err.message || 'Kết nối thất bại.');
+      await updateAirport(editingAirport.id, formData);
+      onToast?.success('Cập nhật thành công', `Sân bay ${formData.code} đã được cập nhật.`);
+      setEditingAirport(null);
+      resetForm();
+      fetchAirports(currentPage, searchQuery);
+    } catch (err) {
+      onToast?.error('Lỗi', getApiErrorMessage(err, 'Không thể cập nhật sân bay.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -151,21 +112,11 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
     setDeletingId(airport.id);
 
     try {
-      const res = await fetch(`/api/quan-tri/san-bay/${airport.id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        onToast?.success('Xoá thành công', `Sân bay ${airport.code} đã bị xoá.`);
-        fetchAirports(currentPage, searchQuery);
-      } else {
-        onToast?.error('Lỗi', data.message || 'Không thể xoá sân bay.');
-      }
-    } catch (err: any) {
-      onToast?.error('Lỗi mạng', err.message || 'Kết nối thất bại.');
+      await deleteAirport(airport.id);
+      onToast?.success('Xoá thành công', `Sân bay ${airport.code} đã bị xoá.`);
+      fetchAirports(currentPage, searchQuery);
+    } catch (err) {
+      onToast?.error('Lỗi', getApiErrorMessage(err, 'Không thể xoá sân bay.'));
     } finally {
       setDeletingId(null);
     }

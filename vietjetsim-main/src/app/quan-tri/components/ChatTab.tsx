@@ -3,6 +3,12 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Icon } from '@/shared/components/ui';
+import {
+  listConversations,
+  getConversationMessages,
+  sendChatMessage,
+  markConversationRead,
+} from '@/features/chat/services';
 
 interface Conversation {
   id: string;
@@ -78,12 +84,15 @@ export default function ChatTab() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Mark user messages as read (local UI update only)
+  // Mark user messages as read, optimistically in the UI and persisted server-side.
   const markUserMessagesRead = useCallback((convId: string) => {
     setMessages((prev) =>
       prev.map((m) =>
         m.sender_role === 'user' && !m.read_at ? { ...m, read_at: new Date().toISOString() } : m
       )
+    );
+    markConversationRead(convId).catch((err) =>
+      console.error('Mark read error:', err)
     );
   }, []);
 
@@ -91,13 +100,8 @@ export default function ChatTab() {
   const loadConversations = useCallback(async () => {
     setLoadingConvs(true);
     try {
-      const res = await fetch('/api/tro-chuyen/cuoc-hoi-thoai');
-      const json = await res.json();
-      if (!res.ok) {
-        console.error('Load conversations error:', json.error || json.message);
-        return;
-      }
-      setConversations(json.conversations || []);
+      const json = await listConversations();
+      setConversations((json.conversations || []) as unknown as Conversation[]);
     } catch (err) {
       console.error('Load conversations error:', err);
     } finally {
@@ -109,13 +113,8 @@ export default function ChatTab() {
   const loadMessages = useCallback(async (convId: string) => {
     setLoadingMsgs(true);
     try {
-      const res = await fetch(`/api/tro-chuyen?conversationId=${convId}`);
-      const json = await res.json();
-      if (!res.ok) {
-        console.error('Load messages error:', json.error || json.message);
-        return;
-      }
-      setMessages(json.messages || []);
+      const json = await getConversationMessages(convId);
+      setMessages((json.messages || []) as unknown as Message[]);
     } catch (err) {
       console.error('Load messages error:', err);
     } finally {
@@ -143,23 +142,10 @@ export default function ChatTab() {
     setInputText('');
     setSending(true);
     try {
-      const res = await fetch('/api/tro-chuyen', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          conversation_id: selectedConv.id,
-          content: text,
-        }),
-      });
-      const json = await res.json();
-      if (!res.ok) {
-        console.error('Send error:', json.error || json.message);
-        setInputText(text);
-        return;
-      }
+      const json = await sendChatMessage(selectedConv.id, text);
       // Optimistically add the returned message to local state
       if (json.message) {
-        setMessages((prev) => [...prev, json.message]);
+        setMessages((prev) => [...prev, json.message as unknown as Message]);
       }
     } catch (err) {
       console.error('Send error:', err);

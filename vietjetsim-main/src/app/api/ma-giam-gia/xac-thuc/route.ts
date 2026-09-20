@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDiscountCodeByCode, sql } from '@/lib/db';
+import { getDiscountCodeByCode, countUserDiscountUsage } from '@/lib/db';
+import { getToken } from '@/lib/auth';
+import { validateCsrfOrReject } from '@/lib/csrf';
 
 export async function POST(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id');
-    const { code, bookingAmount } = await request.json();
+    const csrfError = await validateCsrfOrReject(request);
+    if (csrfError) return csrfError;
+
+    // Identity comes from the signed session cookie, never a client header.
+    const session = await getToken(request);
+    const userId = session?.userId ?? null;
+
+    const body = await request.json().catch(() => null);
+    const code = typeof body?.code === 'string' ? body.code.trim() : '';
+    const rawAmount = Number(body?.bookingAmount);
+    const bookingAmount = Number.isFinite(rawAmount) && rawAmount > 0 ? rawAmount : 0;
 
     if (!code) {
       return NextResponse.json(
@@ -57,17 +68,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Check usage per user limit
+    // 4. Check usage per user limit against this user's own bookings
     if (userId && discount.usage_per_user_limit !== null) {
-      // We need to check how many times THIS user has used THIS code.
-      // This requires a join with bookings or a separate table.
-      // Since we don't have a separate table yet, we can check bookings table.
-      // Note: This assumes we store the used discount code in the booking or payment.
-      // Wait, let's check if 'bookings' table has a 'discount_code' column.
-      // I should have added it in the migration!
+      const usedByUser = await countUserDiscountUsage(userId, discount.id);
+      if (usedByUser >= discount.usage_per_user_limit) {
+        return NextResponse.json(
+          { valid: false, message: 'Bạn đã sử dụng mã giảm giá này rồi' },
+          { status: 400 }
+        );
+      }
     }
 
     // 5. Check minimum booking amount
+    if (bookingAmount <= 0) {
+      return NextResponse.json(
+        { valid: false, message: 'Giá trị đơn hàng không hợp lệ' },
+        { status: 400 }
+      );
+    }
+
     if (bookingAmount < Number(discount.min_booking_amount)) {
       return NextResponse.json(
         {

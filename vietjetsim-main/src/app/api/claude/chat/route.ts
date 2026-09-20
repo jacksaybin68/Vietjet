@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { validateCsrfOrReject } from '@/lib/csrf';
 
 const DEFAULT_MODEL = 'claude-3-5-sonnet-latest';
 const MAX_HISTORY_ITEMS = 20;
@@ -21,6 +22,9 @@ function isChatMessage(value: unknown): value is ChatMessage {
 
 export async function POST(req: NextRequest) {
   try {
+    const csrfError = await validateCsrfOrReject(req);
+    if (csrfError) return csrfError;
+
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
       return NextResponse.json(

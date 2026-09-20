@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
 import { useAuth, isAdminRole } from '@/contexts/AuthContext';
+import { deleteUser, listUsers, updateUser } from '@/features/admin';
+import { getApiErrorMessage } from '@/shared/services';
 
 interface ToastAPI {
   success: (title: string, message?: string, options?: object) => void;
@@ -152,9 +154,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
     setIsLoading(true);
     setHasError(false);
     try {
-      const res = await fetch('/api/quan-tri/nguoi-dung?limit=100');
-      if (!res.ok) throw new Error('Failed to fetch users');
-      const data = await res.json();
+      const data = await listUsers({ limit: 100 });
       if (data.users && Array.isArray(data.users)) {
         const mapped = data.users.map((u: any) => ({
           id: u.id,
@@ -268,27 +268,18 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
     setTogglingId(id);
     try {
       const newStatus = user.status === 'active' ? 'locked' : 'active';
-      const res = await fetch(`/api/quan-tri/nguoi-dung/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, status: newStatus } : u)));
-        if (selectedUser?.id === id) {
-          setSelectedUser((prev) => (prev ? { ...prev, status: newStatus } : null));
-        }
-        if (newStatus === 'locked') {
-          onToast?.warning('Tài khoản đã bị khoá', `${user.name} không thể đăng nhập.`);
-        } else {
-          onToast?.success('Tài khoản đã được mở khoá', `${user.name} có thể đăng nhập trở lại.`);
-        }
-      } else {
-        onToast?.error('Lỗi', data.message || 'Không thể thay đổi trạng thái.');
+      await updateUser(id, { status: newStatus });
+      setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, status: newStatus } : u)));
+      if (selectedUser?.id === id) {
+        setSelectedUser((prev) => (prev ? { ...prev, status: newStatus } : null));
       }
-    } catch (err: any) {
-      onToast?.error('Lỗi mạng', err.message);
+      if (newStatus === 'locked') {
+        onToast?.warning('Tài khoản đã bị khoá', `${user.name} không thể đăng nhập.`);
+      } else {
+        onToast?.success('Tài khoản đã được mở khoá', `${user.name} có thể đăng nhập trở lại.`);
+      }
+    } catch (err) {
+      onToast?.error('Lỗi', getApiErrorMessage(err, 'Không thể thay đổi trạng thái.'));
     } finally {
       setTogglingId(null);
     }
@@ -300,21 +291,11 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
     if (!confirm('Bạn có chắc muốn xoá người dùng này?')) return;
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/quan-tri/nguoi-dung?userId=${id}`, {
-        method: 'DELETE',
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setUsers((prev) => prev.filter((u) => u.id !== id));
-        onToast?.error(
-          'Đã xoá người dùng',
-          `${user?.name ?? 'Người dùng'} đã bị xoá khỏi hệ thống.`
-        );
-      } else {
-        onToast?.error('Lỗi khi xoá', data.message || 'Không thể xoá người dùng.');
-      }
-    } catch (err: any) {
-      onToast?.error('Lỗi mạng', err.message);
+      await deleteUser(id);
+      setUsers((prev) => prev.filter((u) => u.id !== id));
+      onToast?.error('Đã xoá người dùng', `${user?.name ?? 'Người dùng'} đã bị xoá khỏi hệ thống.`);
+    } catch (err) {
+      onToast?.error('Lỗi khi xoá', getApiErrorMessage(err, 'Không thể xoá người dùng.'));
     } finally {
       setDeletingId(null);
     }
@@ -342,20 +323,14 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
     if (!confirm(`Bạn có chắc muốn ${actionLabel} tài khoản "${targetUser.name}"?`)) return;
     setSwitchingRoleId(targetUser.id);
     try {
-      const res = await fetch(`/api/quan-tri/nguoi-dung/${targetUser.id}/role`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ newRole }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Lỗi khi cập nhật vai trò');
+      await updateUser(targetUser.id, { role: newRole });
       setUsers((prev) => prev.map((u) => (u.id === targetUser.id ? { ...u, role: newRole } : u)));
       if (selectedUser?.id === targetUser.id) {
         setSelectedUser((prev) => (prev ? { ...prev, role: newRole } : null));
       }
       onToast?.success('Cập nhật vai trò thành công', `${targetUser.name} đã được ${actionLabel}.`);
-    } catch (err: any) {
-      onToast?.error('Lỗi cập nhật vai trò', err.message || 'Vui lòng thử lại sau.');
+    } catch (err) {
+      onToast?.error('Lỗi cập nhật vai trò', getApiErrorMessage(err, 'Vui lòng thử lại sau.'));
     } finally {
       setSwitchingRoleId(null);
     }

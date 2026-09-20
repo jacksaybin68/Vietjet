@@ -9,6 +9,8 @@ import {
 } from '@/lib/auth';
 import { storeRefreshToken } from '@/lib/db';
 import type { User } from '@/lib/auth';
+import { isAccountLocked } from '@/lib/account-lock';
+import { setCsrfCookieOnResponse } from '@/lib/csrf';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +24,8 @@ export async function POST(request: NextRequest) {
     // Find user in Neon PostgreSQL
     // Identifier can be either email or phone number
     const results = await sql`
-      SELECT id, email, password_hash, full_name, role, phone, avatar_url, created_at, updated_at
+      SELECT id, email, password_hash, full_name, role, phone, avatar_url, created_at, updated_at,
+             locked_until
       FROM user_profiles
       WHERE email = ${email} OR phone = ${email}
     `;
@@ -38,6 +41,16 @@ export async function POST(request: NextRequest) {
 
     console.log(`[AUTH] User found, comparing password for: ${email}`);
     const userRecord = results[0];
+
+    // Locked accounts cannot authenticate, even with the correct password.
+    if (isAccountLocked(userRecord.locked_until)) {
+      console.warn(`[AUTH] Login blocked: account locked for identifier: ${email}`);
+      return NextResponse.json(
+        { error: 'Tài khoản đã bị khoá. Vui lòng liên hệ quản trị viên.' },
+        { status: 403 }
+      );
+    }
+
     const isValidPassword = await comparePassword(password, userRecord.password_hash);
 
     if (!isValidPassword) {
@@ -84,6 +97,9 @@ export async function POST(request: NextRequest) {
 
     // Set cookies on response
     setAuthCookiesOnResponse(response, tokens);
+    // Establish the double-submit CSRF cookie alongside the session cookies, otherwise
+    // CSRF-guarded mutations fail after a fresh login.
+    setCsrfCookieOnResponse(response);
 
     return response;
   } catch (error) {

@@ -1,4 +1,4 @@
-import type { BookingRecord, BookingDetail } from '@/lib/db/types';
+import type { BookingRecord, BookingDetail } from '@/lib/db';
 
 export type { BookingRecord, BookingDetail };
 

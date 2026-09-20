@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { getCsrfHeaders } from '@/lib/csrf-client';
 
 // Dynamically import Monaco Editor to avoid SSR window issues
 const Editor = dynamic(() => import('@monaco-editor/react'), { ssr: false });
@@ -127,7 +128,7 @@ export default function VSCodeWebEditorPage() {
     try {
       const response = await fetch('/api/claude/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify({
           prompt,
           context: activeTab ? `Tệp: ${activeTab.path}\n\n${activeTab.content}` : '',
