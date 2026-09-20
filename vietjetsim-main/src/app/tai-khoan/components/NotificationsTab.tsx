@@ -484,12 +484,15 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
     }
     setLoading(true);
     try {
-      const res = await fetch('/api/thong-bao', {
-        credentials: 'include',
-      });
-      const result = await res.json();
+      const result = await apiRequest<{
+        notifications?: {
+          type: string;
+          metadata?: { status?: string };
+          [key: string]: unknown;
+        }[];
+      }>('/api/thong-bao');
 
-      if (!res.ok || !result.notifications || result.notifications.length === 0) {
+      if (!result.notifications || result.notifications.length === 0) {
         setNotifications(STATIC_NOTIFICATIONS);
         return;
       }

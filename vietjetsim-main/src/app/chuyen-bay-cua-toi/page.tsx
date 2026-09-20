@@ -25,7 +25,7 @@ import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 import MyFlightsStats from './components/MyFlightsStats';
 import { listBookings } from '@/features/bookings/services';
-import { apiRequest } from '@/shared/services';
+import { apiRequest, getApiErrorMessage } from '@/shared/services';
 
 const TABS = [
   { id: 'booking', label: 'Đặt chỗ của tôi' },
@@ -236,21 +236,23 @@ export default function MyFlightsPage() {
     }
     setLoading(true);
     try {
-      const res = await fetch(
+      const data = await apiRequest<{ success: boolean }>(
         `/api/checkin?bookingCode=${encodeURIComponent(bookingCode)}&lastName=${encodeURIComponent(surname)}&firstName=${encodeURIComponent(givenName)}`
       );
-      const data = await res.json();
       if (data.success) {
         toast.success('Đặt chỗ tìm thấy!', `Mã: ${bookingCode}`);
         router.push(`/lam-thu-tuc?code=${bookingCode}`);
       } else {
         toast.show({
           title: 'Không tìm thấy đặt chỗ',
-          message: data.message || 'Vui lòng kiểm tra mã đặt chỗ và họ tên bạn',
+          message: 'Vui lòng kiểm tra mã đặt chỗ và họ tên bạn',
         });
       }
-    } catch {
-      toast.error('Lỗi mạng', 'Vui lòng thử lại sau');
+    } catch (error) {
+      toast.show({
+        title: 'Không tìm thấy đặt chỗ',
+        message: getApiErrorMessage(error, 'Vui lòng kiểm tra mã đặt chỗ và họ tên bạn'),
+      });
     } finally {
       setLoading(false);
     }
