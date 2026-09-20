@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthRequest } from '@/lib/auth';
 import { getBookingsByUserId, createBooking } from '@/lib/db';
+import { parsePaginationParams, getPaginationMeta } from '@/lib/pagination';
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,8 +11,7 @@ export async function GET(request: NextRequest) {
     const payload = user;
 
     const { searchParams } = new URL(request.url);
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
+    const { page, limit } = parsePaginationParams(searchParams);
     const statusParam = searchParams.get('status');
     const requestedStatuses = statusParam
       ? statusParam
@@ -28,12 +28,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       bookings,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+      pagination: getPaginationMeta(page, limit, total),
     });
   } catch (error) {
     console.error('Error fetching bookings:', error);

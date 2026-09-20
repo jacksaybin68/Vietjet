@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthRequest } from '@/lib/auth';
 import { sql } from '@/lib/neon';
+import { parsePaginationParams, getOffset } from '@/lib/pagination';
 
 async function getUnreadNotificationCount(userId: string): Promise<number> {
   const result = await sql`
@@ -18,14 +19,10 @@ export async function GET(request: NextRequest) {
     const payload = user;
 
     const { searchParams } = new URL(request.url);
-    const page = Math.max(1, Number.parseInt(searchParams.get('page') || '1', 10) || 1);
-    const limit = Math.min(
-      100,
-      Math.max(1, Number.parseInt(searchParams.get('limit') || '20', 10) || 20)
-    );
+    const { page, limit } = parsePaginationParams(searchParams);
     const type = searchParams.get('type') || undefined;
     const unreadOnly = searchParams.get('unread') === 'true';
-    const offset = (page - 1) * limit;
+    const offset = getOffset(page, limit);
 
     let notifications: {
       id: string;

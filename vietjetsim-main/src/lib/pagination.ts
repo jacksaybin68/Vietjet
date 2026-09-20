@@ -24,17 +24,23 @@ export interface PaginatedResponse<T> {
 }
 
 /**
- * Parse pagination params from request, with defaults
+ * Parse pagination params from request, with defaults.
+ *
+ * Non-numeric input falls back to the default rather than leaking `NaN` into
+ * SQL: `Math.max(1, NaN)` is still `NaN`, so the raw `parseInt` idiom used by
+ * the route handlers did exactly that for `?page=abc`.
  */
 export function parsePaginationParams(
   searchParams: URLSearchParams,
   defaults: Partial<PaginationParams> = {}
 ): PaginationParams {
-  const page = Math.max(1, parseInt(searchParams.get('page') || String(defaults.page || 1), 10));
-  const limit = Math.min(
-    100,
-    Math.max(1, parseInt(searchParams.get('limit') || String(defaults.limit || 20), 10))
-  );
+  const rawPage = parseInt(searchParams.get('page') || '', 10);
+  const rawLimit = parseInt(searchParams.get('limit') || '', 10);
+
+  const page = Number.isFinite(rawPage) ? Math.max(1, rawPage) : (defaults.page ?? 1);
+  const limit = Number.isFinite(rawLimit)
+    ? Math.min(100, Math.max(1, rawLimit))
+    : (defaults.limit ?? 20);
 
   return { page, limit };
 }
