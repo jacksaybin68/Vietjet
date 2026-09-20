@@ -4,15 +4,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { useToast } from '@/hooks/useToast';
 import { Pagination } from '@/shared/components/ui';
+import { listPayments } from '@/features/payments/services';
+import type { PaymentRecord } from '@/features/payments/types';
 
-interface Payment {
-  id: string;
-  booking_id: string;
-  method: string;
-  status: 'pending' | 'completed' | 'failed' | 'refunded';
-  amount: number;
-  booking_status: string;
-  created_at: string;
+interface Payment extends PaymentRecord {
+  booking_status?: string;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
@@ -136,20 +132,10 @@ export default function PaymentHistoryTab() {
   const fetchPayments = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(
-        `/api/thanh-toan/lich-su?limit=${limit}&offset=${(page - 1) * limit}`,
-        {
-          credentials: 'include',
-        }
-      );
-      const data = await res.json();
-
-      if (res.ok) {
-        setPayments(data.payments || []);
-        setTotalPages(Math.max(1, Math.ceil((data.payments?.length || 0) / limit)));
-      } else {
-        toast.error('Lỗi', 'Không thể tải lịch sử thanh toán.');
-      }
+      // The API paginates by `page`; sending `offset` would leave it at page 1.
+      const data = await listPayments({ page, limit });
+      setPayments(data.payments || []);
+      setTotalPages(Math.max(1, data.pagination?.totalPages || 1));
     } catch {
       toast.error('Lỗi', 'Không thể tải lịch sử thanh toán.');
     } finally {

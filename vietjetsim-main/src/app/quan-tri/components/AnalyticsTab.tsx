@@ -1,12 +1,23 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import { apiRequest } from '@/shared/services';
+import { API_ENDPOINTS } from '@/shared/constants';
 
 interface Stats {
   totalFlights: number;
   totalBookings: number;
   totalUsers: number;
   totalRevenue: number;
+}
+
+interface RevenueResponse {
+  revenue: {
+    totalRevenue: number;
+    totalBookings: number;
+    completedBookings: number;
+    pendingBookings: number;
+  };
 }
 
 export default function AnalyticsTab() {
@@ -19,37 +30,21 @@ export default function AnalyticsTab() {
     setError(null);
 
     try {
-      const [flightsRes, bookingsRes, usersRes] = await Promise.all([
-        fetch('/api/chuyen-bay'),
-        fetch('/api/dat-ve'),
-        fetch('/api/quan-tri/nguoi-dung'),
+      const [flightsData, usersData, revenueData] = await Promise.all([
+        apiRequest<{ flights: unknown[]; pagination: { total: number } }>(
+          `${API_ENDPOINTS.ADMIN.FLIGHTS}?limit=1`
+        ),
+        apiRequest<{ users: unknown[]; pagination: { total: number } }>(
+          `${API_ENDPOINTS.ADMIN.USERS}?limit=1`
+        ),
+        apiRequest<RevenueResponse>(API_ENDPOINTS.ADMIN.REVENUE),
       ]);
-
-      if (!flightsRes.ok || !bookingsRes.ok || !usersRes.ok) {
-        throw new Error('Không thể tải dữ liệu thống kê');
-      }
-
-      const [flightsData, bookingsData, usersData] = await Promise.all([
-        flightsRes.json(),
-        bookingsRes.json(),
-        usersRes.json(),
-      ]);
-
-      const flights = flightsData.flights || flightsData.data || [];
-      const bookings = bookingsData.bookings || bookingsData.data || [];
-      const users = usersData.users || usersData.data || [];
-
-      const totalRevenue = bookings.reduce(
-        (sum: number, b: { total_price?: number; amount?: number }) =>
-          sum + (b.total_price || b.amount || 0),
-        0
-      );
 
       setStats({
-        totalFlights: flights.length,
-        totalBookings: bookings.length,
-        totalUsers: users.length,
-        totalRevenue,
+        totalFlights: flightsData.pagination?.total ?? flightsData.flights?.length ?? 0,
+        totalBookings: revenueData.revenue?.totalBookings ?? 0,
+        totalUsers: usersData.pagination?.total ?? usersData.users?.length ?? 0,
+        totalRevenue: revenueData.revenue?.totalRevenue ?? 0,
       });
     } catch (err) {
       console.error('Error fetching stats:', err);

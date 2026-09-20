@@ -112,6 +112,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 import { getCsrfHeaders } from '@/hooks/useCsrf';
+import { listBookings } from '@/features/bookings/services';
 
 type Tab =
   | 'upcoming'
@@ -440,10 +441,9 @@ export default function UserDashboardClient() {
     setUpcomingLoading(true);
     try {
       // Fetch confirmed + pending bookings as "upcoming"
-      const res = await fetch('/api/dat-ve?status=confirmed,pending&limit=20');
-      const json = await res.json();
-      if (res.ok && Array.isArray(json.bookings) && json.bookings.length > 0) {
-        const mapped = json.bookings.map(mapDbBookingToUi);
+      const { bookings } = await listBookings({ status: ['confirmed', 'pending'], limit: 20 });
+      if (Array.isArray(bookings) && bookings.length > 0) {
+        const mapped = bookings.map(mapDbBookingToUi);
         setUpcomingBookings(mapped);
       } else {
         // API empty or error → use fallback
@@ -515,11 +515,10 @@ export default function UserDashboardClient() {
     setHistoryError(false);
     try {
       // Fetch all bookings (no status filter) — we'll separate upcoming vs history on the client
-      const res = await fetch('/api/dat-ve?limit=50');
-      const json = await res.json();
-      if (res.ok && Array.isArray(json.bookings) && json.bookings.length > 0) {
+      const { bookings } = await listBookings({ limit: 50 });
+      if (Array.isArray(bookings) && bookings.length > 0) {
         // History = everything that is NOT confirmed/pending
-        const mapped = json.bookings
+        const mapped = bookings
           .map(mapDbBookingToUi)
           .filter((b: UiBooking) => b.status !== 'confirmed' && b.status !== 'pending');
         setHistoryBookings(mapped.length > 0 ? mapped : (FALLBACK_HISTORY as any));

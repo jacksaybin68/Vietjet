@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
         id: loyaltyData.loyalty.id,
         tier: loyaltyData.loyalty.tier,
         currentPoints: loyaltyData.loyalty.available_points,
+        totalPoints: loyaltyData.loyalty.total_points,
         lifetimePoints: loyaltyData.loyalty.lifetime_points,
         enrolledAt: loyaltyData.loyalty.joined_at,
       },
@@ -31,10 +32,12 @@ export async function GET(request: NextRequest) {
         minPointsToRedeem: loyaltyData.program.min_points_to_redeem,
       },
       tiers: loyaltyData.tiers.map((tier) => ({
+        id: tier.id,
         name: tier.name,
         minLifetimePoints: tier.min_lifetime_points,
         pointsMultiplier: tier.points_multiplier,
         benefits: tier.benefits,
+        tierOrder: tier.tier_order,
       })),
     });
   } catch (error: any) {

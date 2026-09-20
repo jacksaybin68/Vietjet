@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
         bank_name: m.bank_name,
         bank_code: m.bank_code,
         is_default: m.is_default,
+        is_active: m.is_active,
         created_at: m.created_at,
       })),
     });
