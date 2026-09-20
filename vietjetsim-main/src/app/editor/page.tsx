@@ -177,7 +177,7 @@ export default function VSCodeWebEditorPage() {
       setIsSaving(true);
       const res = await fetch('/api/editor/files', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify({
           path: activeTab.path,
           content: activeTab.content,

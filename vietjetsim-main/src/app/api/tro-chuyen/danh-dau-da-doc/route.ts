@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthRequest } from '@/lib/auth';
 import { isAdminRole } from '@/lib/rbac';
-import { markConversationRead, getAllConversations } from '@/lib/db';
+import { markConversationRead, userOwnsConversation } from '@/lib/db';
 
 // ─── POST: Mark the other party's messages in a conversation as read ─────────
 
@@ -24,10 +24,7 @@ export async function POST(request: NextRequest) {
 
     // Regular users may only touch their own conversation (IDOR prevention).
     if (readerRole === 'user') {
-      const { conversations } = await getAllConversations();
-      const owns = conversations.some(
-        (c) => c.id === conversationId && c.user_id === user.userId
-      );
+      const owns = await userOwnsConversation(conversationId, user.userId);
       if (!owns) {
         return NextResponse.json(
           { error: 'Forbidden', message: 'You are not a participant in this conversation' },
