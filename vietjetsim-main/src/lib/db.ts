@@ -1071,6 +1071,19 @@ export async function getAllConversations(params?: {
   return { conversations: conversations as ChatConversationRecord[], total };
 }
 
+/** Whether `userId` is the owner of an active conversation. */
+export async function userOwnsConversation(
+  conversationId: string,
+  userId: string
+): Promise<boolean> {
+  const results = await sql`
+    SELECT 1 FROM chat_conversations
+    WHERE id = ${conversationId} AND user_id = ${userId}
+    LIMIT 1
+  `;
+  return (results as unknown[]).length > 0;
+}
+
 export async function getConversationMessages(
   conversationId: string,
   params?: { page?: number; limit?: number }

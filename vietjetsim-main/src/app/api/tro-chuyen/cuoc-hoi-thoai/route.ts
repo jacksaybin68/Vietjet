@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/auth';
 import { validateCsrfOrReject } from '@/lib/csrf';
+import { isAdminRole } from '@/lib/rbac';
 import { getOrCreateConversation, getAllConversations } from '@/lib/db';
 
 // ─── GET: Get conversations ─────────────────────────────────────────────────
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Admin can view all conversations
-    if (payload.role === 'admin') {
+    if (isAdminRole(payload.role)) {
       const { conversations } = await getAllConversations();
       return NextResponse.json({ conversations });
     }
