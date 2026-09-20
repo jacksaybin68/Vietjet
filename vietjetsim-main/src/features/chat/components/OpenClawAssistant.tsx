@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePathname } from 'next/navigation';
 import { Icon } from '@/shared/components/ui';
-import { getCsrfHeaders } from '@/lib/csrf-client';
+import { apiRequest } from '@/shared/services';
 
 interface Message {
   id: string;
@@ -70,19 +70,19 @@ export default function OpenClawAssistant() {
     setIsTyping(true);
 
     try {
-      const response = await fetch('/api/tro-ly-ai/tro-chuyen', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
-        body: JSON.stringify({
-          message: text,
-          history: messages.map((m) => ({
-            role: m.sender === 'user' ? 'user' : 'assistant',
-            content: m.content,
-          })),
-        }),
-      });
-
-      const data = await response.json();
+      const data = await apiRequest<{ id?: string; content?: string; error?: string }>(
+        '/api/tro-ly-ai/tro-chuyen',
+        {
+          method: 'POST',
+          body: {
+            message: text,
+            history: messages.map((m) => ({
+              role: m.sender === 'user' ? 'user' : 'assistant',
+              content: m.content,
+            })),
+          },
+        }
+      );
 
       if (data.error) throw new Error(data.error);
 
@@ -91,7 +91,7 @@ export default function OpenClawAssistant() {
         {
           id: data.id || Date.now().toString(),
           sender: 'ai',
-          content: data.content,
+          content: data.content ?? '',
           created_at: new Date().toISOString(),
         },
       ]);
