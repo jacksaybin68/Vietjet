@@ -75,7 +75,7 @@ export interface AuthContextType {
     password: string,
     metadata?: { fullName?: string; phone?: string; avatarUrl?: string; dob?: string }
   ) => Promise<AuthResponse>;
-  signIn: (email: string, password: string) => Promise<AuthResponse>;
+  signIn: (email: string, password: string, token?: string) => Promise<AuthResponse>;
   signOut: () => Promise<void>;
   getCurrentUser: () => Promise<User | null>;
   isEmailVerified: () => boolean;
@@ -112,7 +112,9 @@ async function fetchAuth(endpoint: string, options?: RequestInit): Promise<AuthR
   const data = await res.json();
 
   if (!res.ok) {
-    throw new Error(data.error || data.message || 'Auth request failed');
+    // Preserve the server's machine-readable fields (e.g. requires2FA) so
+    // callers can branch on them instead of string-matching the message.
+    throw Object.assign(new Error(data.error || data.message || 'Auth request failed'), data);
   }
 
   return data;
@@ -207,10 +209,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return data;
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, token?: string) => {
     const data = await fetchAuth('/dang-nhap', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, token }),
     });
 
     if (data.user) {
