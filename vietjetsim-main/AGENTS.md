@@ -50,6 +50,11 @@ Shared infrastructure lives in `src/shared/` (`services/apiClient.ts`, `constant
   comparison survives future role additions.
 - Chat conversation access must go through `userOwnsConversation(conversationId, userId)`
   for non-admins; do not fetch all conversations just to check ownership.
+- **Every booking-scoped route must verify ownership, not just authentication.**
+  `booking.user_id === user.userId` (or `isAdminRole(user.role)`) before reading or
+  mutating. `/api/checkin` (POST) and `/api/checkin/status/[bookingId]` previously
+  accepted any booking id / booking code, letting a signed-in user read or check in
+  someone else's reservation. The status route requires a session for the same reason.
 - **2FA is enforced at login, not at the API layer.** `user_2fa` rows whose
   `is_enabled` is false are incomplete enrollments and must never block a
   login; `/api/xac-thuc/dang-nhap` answers 401 with `requires2FA: true` when a
