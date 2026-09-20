@@ -9,7 +9,7 @@ import { ToastContainer } from '@/shared/components/feedback';
 import { createPayment, getWalletOverview } from '@/features/payments/services';
 
 import type { PaymentMethod } from '@/features/payments/types';
-import { getCsrfHeaders } from '@/lib/csrf-client';
+import { apiRequest, ApiRequestError } from '@/shared/services';
 
 interface BankInfo {
   id: string;
@@ -531,15 +531,17 @@ export default function PaymentClient() {
     setPromoError('');
     setIsApplyingPromo(true);
     try {
-      const res = await fetch('/api/ma-giam-gia/xac-thuc', {
+      const data = await apiRequest<{
+        valid: boolean;
+        discount: typeof promoData;
+        message?: string;
+      }>('/api/ma-giam-gia/xac-thuc', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
-        body: JSON.stringify({
+        body: {
           code: promoCode,
           bookingAmount: booking?.basePrice || 0,
-        }),
+        },
       });
-      const data = await res.json();
       if (data.valid) {
         setPromoApplied(true);
         setPromoData(data.discount);
@@ -550,7 +552,11 @@ export default function PaymentClient() {
         setPromoError(data.message || 'Mã giảm giá không hợp lệ');
       }
     } catch (error) {
-      setPromoError('Có lỗi xảy ra khi kiểm tra mã giảm giá');
+      setPromoApplied(false);
+      setPromoData(null);
+      setPromoError(
+        error instanceof ApiRequestError ? error.message : 'Có lỗi xảy ra khi kiểm tra mã giảm giá'
+      );
     } finally {
       setIsApplyingPromo(false);
     }
