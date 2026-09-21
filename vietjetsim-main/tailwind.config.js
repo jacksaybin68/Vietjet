@@ -102,14 +102,15 @@ module.exports = {
         'gradient-vj-gold':
           'linear-gradient(60.29deg, #F9A51A -4.93%, #FBB612 18.27%, #FFDD00 71.59%)',
         'gradient-vj-yellow': 'linear-gradient(60.29deg, #F9A51A -4.93%, #FFDD00 71.59%)',
-        'gradient-hero': 'linear-gradient(to bottom, rgba(36,36,36,0.2) 0%, rgba(36,36,36,0.72) 100%)',
+        'gradient-hero':
+          'linear-gradient(to bottom, rgba(36,36,36,0.2) 0%, rgba(36,36,36,0.72) 100%)',
         'gradient-red': 'linear-gradient(135deg, #F32732 0%, #EC2029 50%, #6F0000 100%)',
         'gradient-navy': 'linear-gradient(135deg, #3D3D3D 0%, #151515 100%)',
         'gradient-yellow': 'linear-gradient(60.29deg, #F9A51A -4.93%, #FFDD00 71.59%)',
       },
       animation: {
         'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-        'marquee': 'marquee 20s linear infinite',
+        marquee: 'marquee 20s linear infinite',
       },
       keyframes: {
         marquee: {

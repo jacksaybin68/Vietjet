@@ -12,7 +12,7 @@ const path = require('path');
 // Load environment variables
 const envPath = path.join(__dirname, '..', '.env.local');
 const envContent = fs.readFileSync(envPath, 'utf-8');
-envContent.split('\n').forEach(line => {
+envContent.split('\n').forEach((line) => {
   const [key, ...valueParts] = line.split('=');
   if (key && valueParts.length > 0 && !key.startsWith('#')) {
     process.env[key.trim()] = valueParts.join('=').trim();
@@ -36,11 +36,12 @@ async function resetAdminPassword() {
   try {
     // Check if admin exists
     console.log(`📋 Checking if admin account (${ADMIN_EMAIL}) exists...`);
-    const existingAdmins = await sql`SELECT id, email, full_name, role FROM user_profiles WHERE email = ${ADMIN_EMAIL}`;
-    
+    const existingAdmins =
+      await sql`SELECT id, email, full_name, role FROM user_profiles WHERE email = ${ADMIN_EMAIL}`;
+
     if (existingAdmins.length === 0) {
       console.log('❌ Admin account not found. Creating new one...');
-      
+
       // Create new admin
       const passwordHash = await bcrypt.hash(NEW_PASSWORD, 12);
       const result = await sql`
@@ -48,7 +49,7 @@ async function resetAdminPassword() {
         VALUES (${ADMIN_EMAIL}, ${passwordHash}, 'Administrator', 'admin')
         RETURNING id, email, full_name, role, created_at
       `;
-      
+
       const admin = result[0];
       console.log('\n✅ New admin account created!');
       console.log('═'.repeat(50));
@@ -59,17 +60,17 @@ async function resetAdminPassword() {
       console.log('═'.repeat(50));
     } else {
       console.log(`   Found: ${existingAdmins[0].email} (${existingAdmins[0].role})`);
-      
+
       // Reset password
       console.log('\n🔐 Hashing new password...');
       const passwordHash = await bcrypt.hash(NEW_PASSWORD, 12);
-      
+
       await sql`
         UPDATE user_profiles 
         SET password_hash = ${passwordHash}, updated_at = NOW()
         WHERE email = ${ADMIN_EMAIL}
       `;
-      
+
       console.log('✅ Password updated successfully!');
       console.log('═'.repeat(50));
       console.log('📧 Email:    ' + ADMIN_EMAIL);
@@ -78,7 +79,6 @@ async function resetAdminPassword() {
     }
 
     console.log('\n🌐 Login URL: http://localhost:3000/dang-nhap\n');
-
   } catch (error) {
     console.error('❌ Error:', error);
     process.exit(1);

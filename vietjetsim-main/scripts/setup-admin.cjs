@@ -2,7 +2,7 @@
 /**
  * Setup Admin Account Script (CommonJS)
  * Run: node scripts/setup-admin.cjs
- * 
+ *
  * This script creates an admin account with the following credentials:
  * - Email: admin@vietjetsim.vn
  * - Password: Admin@123 (will be hashed with bcrypt)
@@ -17,7 +17,7 @@ const path = require('path');
 // Load environment variables
 const envPath = path.join(__dirname, '..', '.env.local');
 const envContent = fs.readFileSync(envPath, 'utf-8');
-envContent.split('\n').forEach(line => {
+envContent.split('\n').forEach((line) => {
   const [key, ...valueParts] = line.split('=');
   if (key && valueParts.length > 0 && !key.startsWith('#')) {
     process.env[key.trim()] = valueParts.join('=').trim();
@@ -43,8 +43,9 @@ async function setupAdminAccount() {
   try {
     // Check if admin already exists
     console.log(`📋 Checking if admin account (${ADMIN_EMAIL}) exists...`);
-    const existingAdmins = await sql`SELECT id, email, role FROM user_profiles WHERE email = ${ADMIN_EMAIL}`;
-    
+    const existingAdmins =
+      await sql`SELECT id, email, role FROM user_profiles WHERE email = ${ADMIN_EMAIL}`;
+
     if (existingAdmins.length > 0) {
       console.log(`⚠️  Admin account already exists!`);
       console.log(`   ID: ${existingAdmins[0].id}`);
@@ -57,7 +58,7 @@ async function setupAdminAccount() {
     // Create new admin account
     console.log('🔐 Hashing password...');
     const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 12);
-    
+
     console.log('💾 Creating admin account in database...');
     const result = await sql`
       INSERT INTO user_profiles (email, password_hash, full_name, role)
@@ -66,7 +67,7 @@ async function setupAdminAccount() {
     `;
 
     const admin = result[0];
-    
+
     console.log('\n✅ Admin account created successfully!');
     console.log('═'.repeat(50));
     console.log('📧 Email:    ' + admin.email);
@@ -78,7 +79,6 @@ async function setupAdminAccount() {
     console.log('═'.repeat(50));
     console.log('\n⚠️  IMPORTANT: Change this password after first login!');
     console.log('🌐 Login URL: http://localhost:3000/dang-nhap\n');
-
   } catch (error) {
     console.error('❌ Error setting up admin account:', error);
     process.exit(1);
