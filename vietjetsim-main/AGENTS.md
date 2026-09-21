@@ -131,6 +131,12 @@ Components are rendered outside an `<AppRouterContext>`, so any component callin
 `useRouter` throws "invariant expected app router to be mounted" without it. Add to that
 mock rather than wrapping individual tests in a router provider.
 
+`npm run test:smoke` (`scripts/smoke-test.cjs`) is a dependency-free HTTP smoke test
+against a running server; CI runs it in the `smoke` job on port 4028 with no
+`DATABASE_URL`, so it exercises the mock DB path. It asserts routing, redirects, the CSRF
+handshake and auth guards, not happy-path writes — the mock DB cannot register users, so
+persistence flows are out of scope. Point it elsewhere with `SMOKE_BASE_URL`.
+
 ## UI design system
 
 Brand red is `#EC2029` (hover `#D91A21`, dark `#6F0000`); the CTA/action yellow is

@@ -199,6 +199,7 @@ Route handlers are exercised directly with a real `NextRequest` and a real JWT;
 | `npm run format` | Format code with Prettier |
 | `npm run type-check` | Run TypeScript type checking |
 | `npm test` | Run the Vitest suite |
+| `npm run test:smoke` | HTTP smoke test against a running server (defaults to `http://localhost:4028`, override with `SMOKE_BASE_URL`) |
 | `npm run db:check` | Validate DB connectivity & schema |
 | `npm run db:setup-admin` | Promote a user to admin role |
 | `npm run db:seed-demo` | Reset the two README demo accounts to their documented passwords |

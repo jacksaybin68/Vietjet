@@ -13,6 +13,7 @@
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:smoke": "node scripts/smoke-test.cjs",
     "db:check": "ts-node src/lib/dbCheck.ts",
     "db:setup-admin": "node scripts/setup-admin.cjs",
     "db:seed-demo": "node scripts/seed-demo-accounts.cjs"
