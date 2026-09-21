@@ -237,6 +237,15 @@ export async function updateUserProfile(
   return (results as any)[0] as UserRecord;
 }
 
+/** Replace a user's password hash. Callers must hash with `hashPassword` first. */
+export async function updateUserPassword(userId: string, passwordHash: string): Promise<void> {
+  await sql`
+    UPDATE user_profiles
+    SET password_hash = ${passwordHash}, updated_at = NOW()
+    WHERE id = ${userId}
+  `;
+}
+
 export async function getAllUsers(
   page: number = 1,
   limit: number = 20

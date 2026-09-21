@@ -1,15 +1,27 @@
 'use client';
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Icon } from '@/shared/components/ui';
 import { PaymentSkeleton } from '@/shared/components/ui';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 import { createPayment, getWalletOverview } from '@/features/payments/services';
+import { TAX_AND_FEE_RATE, ANCILLARY_OPTIONS, type AncillaryId } from '@/features/bookings';
 
 import type { PaymentMethod } from '@/features/payments/types';
 import { apiRequest, ApiRequestError } from '@/shared/services';
+
+interface BankAccount {
+  id: number;
+  admin_bank_name: string;
+  admin_bank_account_number: string;
+  admin_bank_account_holder: string;
+  bank_bin?: string;
+  branch?: string;
+  logo_url?: string;
+  is_default?: boolean;
+  transfer_note_template?: string;
+}
 
 interface BankInfo {
   id: string;
@@ -210,50 +222,6 @@ function ConfettiCanvas() {
   );
 }
 
-function SuccessToast({ onDismiss }: { onDismiss: () => void }) {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const showTimer = setTimeout(() => setVisible(true), 300);
-    const hideTimer = setTimeout(() => {
-      setVisible(false);
-      setTimeout(onDismiss, 400);
-    }, 4500);
-    return () => {
-      clearTimeout(showTimer);
-      clearTimeout(hideTimer);
-    };
-  }, [onDismiss]);
-
-  return (
-    <div
-      className={`fixed top-6 right-6 z-[60] flex items-center gap-3 bg-white border border-green-200 rounded-2xl px-5 py-4 transition-all duration-400 ${
-        visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-      }`}
-      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.08)' }}
-    >
-      <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-        <Icon name="CheckIcon" size={18} className="text-green-600" />
-      </div>
-      <div>
-        <div className="font-bold text-stone-900 text-sm">Thanh toán thành công!</div>
-        <div className="text-xs text-stone-500 mt-0.5">
-          Vé điện tử đã được gửi đến email của bạn
-        </div>
-      </div>
-      <button
-        onClick={() => {
-          setVisible(false);
-          setTimeout(onDismiss, 400);
-        }}
-        className="ml-2 text-stone-400 hover:text-stone-600 transition-colors"
-      >
-        <Icon name="XMarkIcon" size={16} />
-      </button>
-    </div>
-  );
-}
-
 function AnimatedCheckmark() {
   const [animate, setAnimate] = useState(false);
   useEffect(() => {
@@ -333,7 +301,9 @@ function PaymentProcessingOverlay() {
           <div className="font-black text-[#1A2948] text-lg mb-1 font-koho">
             Đang xử lý thanh toán
           </div>
-          <div className="text-sm text-stone-500">Vui lòng không đóng trang này...</div>
+          <div className="text-sm text-[var(--foreground-muted)]">
+            Vui lòng không đóng trang này...
+          </div>
         </div>
         {/* Progress dots */}
         <div className="flex items-center gap-2">
@@ -345,8 +315,8 @@ function PaymentProcessingOverlay() {
             />
           ))}
         </div>
-        <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 border border-green-200 rounded-xl px-4 py-2">
-          <Icon name="ShieldCheckIcon" size={14} className="text-green-600 flex-shrink-0" />
+        <div className="flex items-center gap-2 text-xs text-[var(--vj-green)] bg-[rgb(var(--vj-green-rgb))]/10 border border-[rgb(var(--vj-green-rgb))]/30 rounded-xl px-4 py-2">
+          <Icon name="ShieldCheckIcon" size={14} className="text-[var(--vj-green)] flex-shrink-0" />
           Kết nối bảo mật SSL 256-bit
         </div>
       </div>
@@ -373,22 +343,22 @@ function ErrorModal({ title, message, onRetry, onDismiss }: ErrorModalProps) {
         <div className="h-1.5 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
         <div className="p-8 flex flex-col items-center text-center">
           {/* Error icon */}
-          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-5 border-4 border-red-100">
+          <div className="w-16 h-16 bg-[rgb(var(--primary-rgb))]/10 rounded-full flex items-center justify-center mb-5 border-4 border-primary/20">
             <Icon name="ExclamationTriangleIcon" size={32} className="text-primary" />
           </div>
           <h3 className="font-black text-[#1A2948] text-xl mb-2 font-koho">{title}</h3>
-          <p className="text-sm text-stone-500 leading-relaxed mb-7">{message}</p>
+          <p className="text-sm text-[var(--foreground-muted)] leading-relaxed mb-7">{message}</p>
           <div className="flex flex-col gap-3 w-full">
             <button
               onClick={onRetry}
-              className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white font-bold py-3.5 rounded-xl transition-all shadow-[0_4px_16px_rgba(236,32,41,0.3)] hover:shadow-[0_8px_24px_rgba(236,32,41,0.4)] hover:-translate-y-0.5"
+              className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white font-bold py-3.5 rounded-xl transition-all shadow-vj-btn hover:shadow-vj-btn-hover hover:-translate-y-0.5"
             >
               <Icon name="ArrowPathIcon" size={16} />
               Thử lại
             </button>
             <button
               onClick={onDismiss}
-              className="w-full py-3 rounded-xl border border-stone-200 text-stone-600 font-semibold text-sm hover:bg-stone-50 transition-all"
+              className="w-full py-3 rounded-xl border border-[var(--border)] dark:border-[var(--dark-border)] text-[var(--foreground-muted)] font-semibold text-sm hover:bg-[var(--surface)] dark:bg-[var(--dark-surface)] transition-all"
             >
               Đóng
             </button>
@@ -436,31 +406,16 @@ export default function PaymentClient() {
   const [pageLoading, setPageLoading] = useState(true);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [showErrorModal, setShowErrorModal] = useState(false);
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const toast = useToast();
-  const [bankConfig, setBankConfig] = useState<{
-    admin_bank_name: string;
-    admin_bank_account_holder: string;
-    admin_bank_account_number: string;
-    bank_bin?: string;
-  }>({
-    admin_bank_name: 'Vietcombank',
-    admin_bank_account_holder: 'CONG TY VIETJET SIM',
-    admin_bank_account_number: '1234 5678 9012',
-  });
-  const [adminAccounts, setAdminAccounts] = useState<any[]>([]);
-  const [selectedAdminAccount, setSelectedAdminAccount] = useState<any>(null);
+  const [adminAccounts, setAdminAccounts] = useState<BankAccount[]>([]);
+  const [selectedAdminAccount, setSelectedAdminAccount] = useState<BankAccount | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
-  const [isWalletLoading, setIsWalletLoading] = useState(false);
 
   useEffect(() => {
     apiRequest<{
-      bankConfig?: typeof bankConfig;
-      accounts?: typeof adminAccounts;
+      accounts?: BankAccount[];
     }>('/api/cong-khai/cau-hinh-ngan-hang')
       .then((data) => {
-        if (data.bankConfig) setBankConfig(data.bankConfig);
         if (data.accounts && data.accounts.length > 0) {
           setAdminAccounts(data.accounts);
           setSelectedAdminAccount(data.accounts[0]);
@@ -469,15 +424,13 @@ export default function PaymentClient() {
       .catch((err) => console.error('Failed to load bank config:', err));
 
     // Fetch wallet balance
-    setIsWalletLoading(true);
     getWalletOverview()
       .then((data) => {
         if (data.wallet) {
           setWalletBalance(parseFloat(String(data.wallet.balance)));
         }
       })
-      .catch((err) => console.error('Failed to load wallet balance:', err))
-      .finally(() => setIsWalletLoading(false));
+      .catch((err) => console.error('Failed to load wallet balance:', err));
   }, []);
 
   useEffect(() => {
@@ -509,9 +462,13 @@ export default function PaymentClient() {
     arriveTime: string;
     date: string;
     passengers: { name: string; seat: string }[];
-    basePrice: number;
+    /** Air fare across all passengers (written by FlightBookingClient). */
+    fareSubtotal: number;
     tax: number;
     seatFee: number;
+    ancillaryFee?: number;
+    ancillaries?: AncillaryId[];
+    total: number;
   } | null>(null);
 
   useEffect(() => {
@@ -526,7 +483,7 @@ export default function PaymentClient() {
   }, []);
 
   const discountAmount = promoApplied && promoData ? promoData.discountAmount : 0;
-  const total = booking ? booking.basePrice + booking.tax + booking.seatFee - discountAmount : 0;
+  const total = booking ? booking.total - discountAmount : 0;
 
   const applyPromo = async () => {
     if (!promoCode.trim()) return;
@@ -541,7 +498,7 @@ export default function PaymentClient() {
         method: 'POST',
         body: {
           code: promoCode,
-          bookingAmount: booking?.basePrice || 0,
+          bookingAmount: booking?.fareSubtotal || 0,
         },
       });
       if (data.valid) {
@@ -630,9 +587,11 @@ export default function PaymentClient() {
       toast.success('Thanh toán thành công!', 'Vé điện tử đã được gửi đến email của bạn.', {
         duration: 6000,
       });
-    } catch (err: any) {
+    } catch (err) {
       setLoading(false);
-      const errMsg = err.message || 'Thanh toán thất bại. Vui lòng kiểm tra thông tin và thử lại.';
+      const errMsg =
+        (err instanceof Error && err.message) ||
+        'Thanh toán thất bại. Vui lòng kiểm tra thông tin và thử lại.';
       setPaymentError(errMsg);
       setShowErrorModal(true);
     }
@@ -710,7 +669,7 @@ export default function PaymentClient() {
           <div className="max-w-lg w-full mx-auto px-4">
             {/* Success state */}
             <div
-              className="bg-white rounded-3xl border border-stone-200 overflow-hidden"
+              className="bg-white rounded-3xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden"
               style={{
                 boxShadow: '0 32px 72px rgba(0,0,0,0.18), 0 12px 28px rgba(0,0,0,0.10)',
                 animation: 'fadeInUp 0.5s ease-out',
@@ -736,7 +695,7 @@ export default function PaymentClient() {
               <div className="p-6">
                 {/* Booking code with copy button */}
                 <div className="text-center mb-6">
-                  <div className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2">
+                  <div className="text-xs font-bold text-[var(--foreground-subtle)] uppercase tracking-widest mb-2">
                     Mã đặt chỗ
                   </div>
                   <div className="flex items-center justify-center gap-3">
@@ -748,8 +707,8 @@ export default function PaymentClient() {
                       title="Sao chép mã đặt chỗ"
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
                         copied
-                          ? 'bg-green-100 text-green-700 border border-green-300'
-                          : 'bg-stone-100 text-stone-600 border border-stone-200 hover:bg-primary-50 hover:text-primary hover:border-primary'
+                          ? 'bg-[rgb(var(--vj-green-rgb))]/15 text-[var(--vj-green)] border border-[rgb(var(--vj-green-rgb))]/40'
+                          : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)] border border-[var(--border)] dark:border-[var(--dark-border)] hover:bg-primary-50 hover:text-primary hover:border-primary'
                       }`}
                     >
                       {copied ? (
@@ -769,37 +728,51 @@ export default function PaymentClient() {
 
                 {/* Dashed divider */}
                 <div className="relative my-5">
-                  <div className="border-t-2 border-dashed border-stone-200" />
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-stone-50 rounded-full -ml-2 border border-stone-200" />
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-stone-50 rounded-full -mr-2 border border-stone-200" />
+                  <div className="border-t-2 border-dashed border-[var(--border)] dark:border-[var(--dark-border)]" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-full -ml-2 border border-[var(--border)] dark:border-[var(--dark-border)]" />
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-full -mr-2 border border-[var(--border)] dark:border-[var(--dark-border)]" />
                 </div>
 
                 {/* Flight info */}
-                <div className="bg-stone-50 rounded-2xl p-4 mb-4">
+                <div className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl p-4 mb-4">
                   {booking && (
                     <>
                       <div className="flex items-center justify-between mb-3">
-                        <div className="text-xs font-bold text-stone-400">{booking.flightNo}</div>
-                        <div className="text-xs text-stone-400">{booking.date}</div>
+                        <div className="text-xs font-bold text-[var(--foreground-subtle)]">
+                          {booking.flightNo}
+                        </div>
+                        <div className="text-xs text-[var(--foreground-subtle)]">
+                          {booking.date}
+                        </div>
                       </div>
                       <div className="flex items-center gap-4">
                         <div>
-                          <div className="text-2xl font-black text-stone-900">
+                          <div className="text-2xl font-black text-[var(--foreground)]">
                             {booking.departTime}
                           </div>
-                          <div className="text-xs font-semibold text-stone-500">{booking.from}</div>
-                          <div className="text-xs text-stone-400">{booking.fromCity}</div>
+                          <div className="text-xs font-semibold text-[var(--foreground-muted)]">
+                            {booking.from}
+                          </div>
+                          <div className="text-xs text-[var(--foreground-subtle)]">
+                            {booking.fromCity}
+                          </div>
                         </div>
                         <div className="flex-1 flex flex-col items-center">
                           <Icon name="PaperAirplaneIcon" size={20} className="text-primary" />
-                          <div className="text-xs text-stone-400 mt-1">Bay thẳng</div>
+                          <div className="text-xs text-[var(--foreground-subtle)] mt-1">
+                            Bay thẳng
+                          </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-2xl font-black text-stone-900">
+                          <div className="text-2xl font-black text-[var(--foreground)]">
                             {booking.arriveTime}
                           </div>
-                          <div className="text-xs font-semibold text-stone-500">{booking.to}</div>
-                          <div className="text-xs text-stone-400">{booking.toCity}</div>
+                          <div className="text-xs font-semibold text-[var(--foreground-muted)]">
+                            {booking.to}
+                          </div>
+                          <div className="text-xs text-[var(--foreground-subtle)]">
+                            {booking.toCity}
+                          </div>
                         </div>
                       </div>
                     </>
@@ -810,27 +783,31 @@ export default function PaymentClient() {
                 {booking?.passengers.map((p: { name: string; seat: string }, i: number) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between py-3 border-b border-stone-100"
+                    className="flex items-center justify-between py-3 border-b border-[var(--border)] dark:border-[var(--dark-border)]"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-primary-50 rounded-full flex items-center justify-center">
                         <Icon name="UserIcon" size={14} className="text-primary" />
                       </div>
                       <div>
-                        <div className="font-semibold text-stone-900 text-sm">{p.name}</div>
-                        <div className="text-xs text-stone-400">Hành khách {i + 1}</div>
+                        <div className="font-semibold text-[var(--foreground)] text-sm">
+                          {p.name}
+                        </div>
+                        <div className="text-xs text-[var(--foreground-subtle)]">
+                          Hành khách {i + 1}
+                        </div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-stone-900">Ghế {p.seat}</div>
-                      <div className="text-xs text-stone-400">Phổ thông</div>
+                      <div className="font-bold text-[var(--foreground)]">Ghế {p.seat}</div>
+                      <div className="text-xs text-[var(--foreground-subtle)]">Phổ thông</div>
                     </div>
                   </div>
                 ))}
 
                 {/* Bank Payment Info (if paid via bank transfer) */}
                 {paymentMethod === 'bank' && selectedBank && (
-                  <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <div className="mt-4 bg-[rgb(var(--blue-rgb))]/10 border border-[rgb(var(--blue-rgb))]/30 rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <div
                         className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
@@ -839,28 +816,32 @@ export default function PaymentClient() {
                         {selectedBank.code.substring(0, 2)}
                       </div>
                       <div>
-                        <span className="text-xs font-bold text-blue-700 uppercase tracking-wider block">
+                        <span className="text-xs font-bold text-[var(--blue)] uppercase tracking-wider block">
                           Thanh toán qua ngân hàng
                         </span>
-                        <span className="text-xs text-blue-600">{selectedBank.fullName}</span>
+                        <span className="text-xs text-[var(--blue)]">{selectedBank.fullName}</span>
                       </div>
                     </div>
-                    <div className="space-y-2 text-sm bg-white rounded-lg p-3 border border-blue-100">
+                    <div className="space-y-2 text-sm bg-[var(--background)] rounded-lg p-3 border border-[rgb(var(--blue-rgb))]/20">
                       <div className="flex justify-between items-center">
-                        <span className="text-stone-500 text-xs">Số tài khoản</span>
-                        <span className="font-mono font-bold text-stone-800">
+                        <span className="text-[var(--foreground-muted)] text-xs">Số tài khoản</span>
+                        <span className="font-mono font-bold text-[var(--foreground)]">
                           {bankAccountNumber}
                         </span>
                       </div>
-                      <div className="border-t border-dashed border-stone-200" />
+                      <div className="border-t border-dashed border-[var(--border)] dark:border-[var(--dark-border)]" />
                       <div className="flex justify-between items-center">
-                        <span className="text-stone-500 text-xs">Chủ tài khoản</span>
-                        <span className="font-semibold text-stone-800">{bankAccountHolder}</span>
+                        <span className="text-[var(--foreground-muted)] text-xs">
+                          Chủ tài khoản
+                        </span>
+                        <span className="font-semibold text-[var(--foreground)]">
+                          {bankAccountHolder}
+                        </span>
                       </div>
-                      <div className="border-t border-dashed border-stone-200" />
+                      <div className="border-t border-dashed border-[var(--border)] dark:border-[var(--dark-border)]" />
                       <div className="flex justify-between items-center">
-                        <span className="text-stone-500 text-xs">Mã ngân hàng</span>
-                        <span className="font-mono text-xs font-semibold text-stone-600">
+                        <span className="text-[var(--foreground-muted)] text-xs">Mã ngân hàng</span>
+                        <span className="font-mono text-xs font-semibold text-[var(--foreground-muted)]">
                           {selectedBank.code}
                         </span>
                       </div>
@@ -869,8 +850,8 @@ export default function PaymentClient() {
                 )}
 
                 {/* Total */}
-                <div className="flex justify-between items-center mt-4 pt-4 border-t border-stone-100">
-                  <span className="font-bold text-stone-700">Tổng thanh toán</span>
+                <div className="flex justify-between items-center mt-4 pt-4 border-t border-[var(--border)] dark:border-[var(--dark-border)]">
+                  <span className="font-bold text-[var(--foreground-muted)]">Tổng thanh toán</span>
                   <span className="text-xl font-black text-primary">
                     {total.toLocaleString('vi-VN')}₫
                   </span>
@@ -878,17 +859,23 @@ export default function PaymentClient() {
 
                 {/* QR Mock */}
                 <div className="mt-5 flex flex-col items-center">
-                  <div className="w-28 h-28 bg-stone-100 rounded-xl flex items-center justify-center border-2 border-dashed border-stone-300">
+                  <div className="w-28 h-28 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl flex items-center justify-center border-2 border-dashed border-[var(--border)] dark:border-[var(--dark-border)]">
                     <div className="text-center">
-                      <Icon name="QrCodeIcon" size={40} className="text-stone-400 mx-auto" />
-                      <div className="text-xs text-stone-400 mt-1">QR Check-in</div>
+                      <Icon
+                        name="QrCodeIcon"
+                        size={40}
+                        className="text-[var(--foreground-subtle)] mx-auto"
+                      />
+                      <div className="text-xs text-[var(--foreground-subtle)] mt-1">
+                        QR Check-in
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Share section */}
-                <div className="mt-5 pt-4 border-t border-stone-100">
-                  <div className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3 text-center">
+                <div className="mt-5 pt-4 border-t border-[var(--border)] dark:border-[var(--dark-border)]">
+                  <div className="text-xs font-bold text-[var(--foreground-subtle)] uppercase tracking-widest mb-3 text-center">
                     Chia sẻ chuyến bay
                   </div>
                   <div className="flex items-center justify-center gap-2">
@@ -907,7 +894,7 @@ export default function PaymentClient() {
                     <button
                       onClick={handleShareTwitter}
                       title="Chia sẻ lên X (Twitter)"
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-900 text-white text-xs font-semibold hover:bg-stone-700 transition-all hover:-translate-y-0.5 hover:shadow-md"
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--foreground)] text-white text-xs font-semibold hover:bg-[var(--foreground-muted)] transition-all hover:-translate-y-0.5 hover:shadow-md"
                     >
                       <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -919,7 +906,7 @@ export default function PaymentClient() {
                       <button
                         onClick={handleShareNative}
                         title="Chia sẻ"
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-100 text-stone-700 text-xs font-semibold hover:bg-stone-200 transition-all hover:-translate-y-0.5 hover:shadow-md border border-stone-200"
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)] text-xs font-semibold hover:bg-[var(--surface-3)] dark:bg-[var(--dark-surface-2)] transition-all hover:-translate-y-0.5 hover:shadow-md border border-[var(--border)] dark:border-[var(--dark-border)]"
                       >
                         <Icon name="ShareIcon" size={14} />
                         Chia sẻ
@@ -939,7 +926,7 @@ export default function PaymentClient() {
                   </Link>
                   <Link
                     href="/trang-chu"
-                    className="w-full border border-stone-300 text-stone-600 hover:bg-stone-50 font-semibold py-2.5 rounded-xl transition-all text-sm text-center"
+                    className="w-full border border-[var(--border)] dark:border-[var(--dark-border)] text-[var(--foreground-muted)] hover:bg-[var(--surface)] dark:bg-[var(--dark-surface)] font-semibold py-2.5 rounded-xl transition-all text-sm text-center"
                   >
                     Về trang chủ
                   </Link>
@@ -956,17 +943,17 @@ export default function PaymentClient() {
     <>
       <div className="pt-[128px] pb-12">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <h1 className="text-2xl font-bold text-stone-900 mb-6">Thanh toán</h1>
+          <h1 className="text-2xl font-bold text-[var(--foreground)] mb-6">Thanh toán</h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Payment Form */}
             <div className="lg:col-span-2 space-y-5">
               {/* Payment Method */}
               <div
-                className="bg-white rounded-2xl border border-stone-200 p-5"
+                className="bg-white rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] p-5"
                 style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
               >
-                <h2 className="font-bold text-stone-900 mb-4">Phương thức thanh toán</h2>
+                <h2 className="font-bold text-[var(--foreground)] mb-4">Phương thức thanh toán</h2>
                 <div className="grid grid-cols-3 gap-3 mb-5">
                   {(
                     [
@@ -991,7 +978,7 @@ export default function PaymentClient() {
                       className={`flex flex-col items-center gap-2 py-4 rounded-xl border-2 transition-all text-sm font-semibold ${
                         paymentMethod === val
                           ? 'border-primary bg-primary-50 text-primary'
-                          : 'border-stone-200 text-stone-600 hover:border-stone-300'
+                          : 'border-[var(--border)] dark:border-[var(--dark-border)] text-[var(--foreground-muted)] hover:border-[var(--border)] dark:border-[var(--dark-border)]'
                       }`}
                     >
                       <Icon name={icon} size={22} />
@@ -1005,14 +992,14 @@ export default function PaymentClient() {
                   {paymentMethod === 'card' && (
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5">
+                        <label className="block text-xs font-semibold text-[var(--foreground-subtle)] uppercase tracking-wider mb-1.5">
                           Số thẻ
                         </label>
                         <div className={`form-field-float ${cardNumber ? 'has-value' : ''}`}>
                           <Icon
                             name="CreditCardIcon"
                             size={18}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 z-10 pointer-events-none"
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-subtle)] z-10 pointer-events-none"
                           />
                           <input
                             id="cardNumber"
@@ -1021,7 +1008,7 @@ export default function PaymentClient() {
                             value={cardNumber}
                             onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
                             placeholder=" "
-                            className={`w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-mono form-input ${cardNumber.replace(/\s/g, '').length === 16 ? 'form-input-valid' : ''}`}
+                            className={`w-full pl-10 pr-4 py-3 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm font-mono form-input ${cardNumber.replace(/\s/g, '').length === 16 ? 'form-input-valid' : ''}`}
                             maxLength={19}
                             required
                           />
@@ -1029,7 +1016,7 @@ export default function PaymentClient() {
                         </div>
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5">
+                        <label className="block text-xs font-semibold text-[var(--foreground-subtle)] uppercase tracking-wider mb-1.5">
                           Tên chủ thẻ
                         </label>
                         <div className={`form-field-float ${cardName ? 'has-value' : ''}`}>
@@ -1040,7 +1027,7 @@ export default function PaymentClient() {
                             value={cardName}
                             onChange={(e) => setCardName(e.target.value.toUpperCase())}
                             placeholder=" "
-                            className={`w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold form-input uppercase ${cardName.trim().length >= 3 ? 'form-input-valid' : ''}`}
+                            className={`w-full px-4 py-3 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm font-semibold form-input uppercase ${cardName.trim().length >= 3 ? 'form-input-valid' : ''}`}
                             required
                           />
                           <label className="form-label-float">NGUYEN VAN A</label>
@@ -1048,7 +1035,7 @@ export default function PaymentClient() {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5">
+                          <label className="block text-xs font-semibold text-[var(--foreground-subtle)] uppercase tracking-wider mb-1.5">
                             Ngày hết hạn
                           </label>
                           <div className={`form-field-float ${expiry ? 'has-value' : ''}`}>
@@ -1062,7 +1049,7 @@ export default function PaymentClient() {
                                 setExpiry(v.length > 2 ? v.slice(0, 2) + '/' + v.slice(2) : v);
                               }}
                               placeholder=" "
-                              className={`w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm form-input ${expiry.length === 5 ? 'form-input-valid' : ''}`}
+                              className={`w-full px-4 py-3 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm form-input ${expiry.length === 5 ? 'form-input-valid' : ''}`}
                               maxLength={5}
                               required
                             />
@@ -1070,7 +1057,7 @@ export default function PaymentClient() {
                           </div>
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5">
+                          <label className="block text-xs font-semibold text-[var(--foreground-subtle)] uppercase tracking-wider mb-1.5">
                             CVV
                           </label>
                           <div className={`form-field-float ${cvv ? 'has-value' : ''}`}>
@@ -1083,7 +1070,7 @@ export default function PaymentClient() {
                                 setCvv(e.target.value.replace(/\D/g, '').substring(0, 3))
                               }
                               placeholder=" "
-                              className={`w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm form-input ${cvv.length === 3 ? 'form-input-valid' : ''}`}
+                              className={`w-full px-4 py-3 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm form-input ${cvv.length === 3 ? 'form-input-valid' : ''}`}
                               maxLength={3}
                               required
                             />
@@ -1097,13 +1084,13 @@ export default function PaymentClient() {
                   {/* Bank Transfer */}
                   {paymentMethod === 'bank' && (
                     <div className="space-y-4">
-                      <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2">
+                      <label className="block text-xs font-semibold text-[var(--foreground-subtle)] uppercase tracking-wider mb-2">
                         Chọn ngân hàng
                       </label>
                       {/* Saved Accounts */}
                       {savedAccounts.length > 0 && (
                         <div className="mb-3">
-                          <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2">
+                          <label className="block text-xs font-semibold text-[var(--foreground-subtle)] uppercase tracking-wider mb-2">
                             Tài khoản đã lưu
                           </label>
                           <div className="space-y-2">
@@ -1126,7 +1113,7 @@ export default function PaymentClient() {
                                       setBankAccountNumber(acc.accountNumber);
                                       setBankAccountHolder(acc.accountHolder);
                                     }}
-                                    className="w-full flex items-center gap-3 p-3 bg-stone-50 hover:bg-primary-50 border border-stone-200 hover:border-primary rounded-xl transition-all text-left"
+                                    className="w-full flex items-center gap-3 p-3 bg-[var(--surface)] dark:bg-[var(--dark-surface)] hover:bg-primary-50 border border-[var(--border)] dark:border-[var(--dark-border)] hover:border-primary rounded-xl transition-all text-left"
                                   >
                                     {bank && (
                                       <div
@@ -1137,17 +1124,17 @@ export default function PaymentClient() {
                                       </div>
                                     )}
                                     <div className="flex-1 min-w-0">
-                                      <div className="text-sm font-semibold text-stone-800 truncate">
+                                      <div className="text-sm font-semibold text-[var(--foreground)] truncate">
                                         {acc.accountHolder}
                                       </div>
-                                      <div className="text-xs text-stone-500 font-mono">
+                                      <div className="text-xs text-[var(--foreground-muted)] font-mono">
                                         **** {acc.accountNumber.slice(-4)}
                                       </div>
                                     </div>
                                     <Icon
                                       name="ArrowRightIcon"
                                       size={16}
-                                      className="text-stone-400"
+                                      className="text-[var(--foreground-subtle)]"
                                     />
                                   </button>
                                 );
@@ -1166,7 +1153,7 @@ export default function PaymentClient() {
                             className={`relative py-3 px-3 border rounded-xl text-sm font-semibold transition-all flex flex-col items-center gap-1.5 ${
                               selectedBank?.id === bank.id
                                 ? 'border-2 shadow-md'
-                                : 'bg-stone-50 hover:bg-primary-50 hover:border-primary border-stone-200 text-stone-700'
+                                : 'bg-[var(--surface)] dark:bg-[var(--dark-surface)] hover:bg-primary-50 hover:border-primary border-[var(--border)] dark:border-[var(--dark-border)] text-[var(--foreground-muted)]'
                             }`}
                             style={
                               selectedBank?.id === bank.id
@@ -1196,14 +1183,14 @@ export default function PaymentClient() {
                       </div>
 
                       {/* Bank Account Form */}
-                      <div className="bg-white border border-stone-200 rounded-xl p-4 space-y-3 mt-2">
-                        <h4 className="text-sm font-bold text-stone-800 flex items-center gap-2">
+                      <div className="bg-white border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl p-4 space-y-3 mt-2">
+                        <h4 className="text-sm font-bold text-[var(--foreground)] flex items-center gap-2">
                           <Icon name="BanknotesIcon" size={18} className="text-primary" />
                           Thông tin tài khoản thụ hưởng
                         </h4>
                         <div>
-                          <label className="block text-xs font-medium text-stone-500 mb-1">
-                            Số tài khoản <span className="text-red-500">*</span>
+                          <label className="block text-xs font-medium text-[var(--foreground-muted)] mb-1">
+                            Số tài khoản <span className="text-primary">*</span>
                           </label>
                           <input
                             type="text"
@@ -1212,19 +1199,19 @@ export default function PaymentClient() {
                               setBankAccountNumber(e.target.value.replace(/\D/g, ''))
                             }
                             placeholder="Nhập số tài khoản"
-                            className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                            className="w-full px-3 py-2.5 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-stone-500 mb-1">
-                            Tên chủ tài khoản <span className="text-red-500">*</span>
+                          <label className="block text-xs font-medium text-[var(--foreground-muted)] mb-1">
+                            Tên chủ tài khoản <span className="text-primary">*</span>
                           </label>
                           <input
                             type="text"
                             value={bankAccountHolder}
                             onChange={(e) => setBankAccountHolder(e.target.value)}
                             placeholder="Nhập tên chủ tài khoản"
-                            className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                            className="w-full px-3 py-2.5 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                           />
                         </div>
                       </div>
@@ -1235,9 +1222,9 @@ export default function PaymentClient() {
                           type="checkbox"
                           checked={saveAccount}
                           onChange={(e) => setSaveAccount(e.target.checked)}
-                          className="w-4 h-4 rounded border-stone-300 text-primary focus:ring-primary"
+                          className="w-4 h-4 rounded border-[var(--border)] dark:border-[var(--dark-border)] text-primary focus:ring-primary"
                         />
-                        <span className="text-sm text-stone-600">
+                        <span className="text-sm text-[var(--foreground-muted)]">
                           Lưu tài khoản này cho lần thanh toán sau
                         </span>
                       </label>
@@ -1245,14 +1232,14 @@ export default function PaymentClient() {
                       {/* Transfer Instructions Redesign */}
                       {selectedAdminAccount && (
                         <div className="space-y-4">
-                          <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2">
+                          <label className="block text-xs font-semibold text-[var(--foreground-subtle)] uppercase tracking-wider mb-2">
                             Thông tin chuyển khoản
                           </label>
 
                           {/* Account Tabs if multiple */}
                           {adminAccounts.length > 1 && (
-                            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                              {adminAccounts.map((acc, idx) => (
+                            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                              {adminAccounts.map((acc) => (
                                 <button
                                   key={acc.id}
                                   type="button"
@@ -1260,7 +1247,7 @@ export default function PaymentClient() {
                                   className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
                                     selectedAdminAccount.id === acc.id
                                       ? 'bg-primary text-white shadow-md shadow-primary/20'
-                                      : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+                                      : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)] hover:bg-[var(--surface-3)] dark:bg-[var(--dark-surface-2)]'
                                   }`}
                                 >
                                   {acc.admin_bank_name}
@@ -1269,18 +1256,18 @@ export default function PaymentClient() {
                             </div>
                           )}
 
-                          <div className="bg-white border-2 border-primary/20 rounded-3xl overflow-hidden shadow-xl shadow-stone-200/50">
-                            <div className="p-4 bg-gradient-to-br from-stone-50 to-white">
+                          <div className="bg-white border-2 border-primary/20 rounded-3xl overflow-hidden shadow-xl">
+                            <div className="p-4 bg-gradient-to-br from-[var(--surface)] to-[var(--background)]">
                               <div className="flex justify-between items-start mb-4">
                                 <div>
-                                  <div className="text-xs font-bold text-stone-400 uppercase tracking-widest bg-stone-100 px-2 py-0.5 rounded inline-block mb-1">
+                                  <div className="text-xs font-bold text-[var(--foreground-subtle)] uppercase tracking-widest bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] px-2 py-0.5 rounded inline-block mb-1">
                                     Ngân hàng thụ hưởng
                                   </div>
-                                  <h4 className="text-lg font-black text-stone-900">
+                                  <h4 className="text-lg font-black text-[var(--foreground)]">
                                     {selectedAdminAccount.admin_bank_name}
                                   </h4>
                                 </div>
-                                <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-stone-100 flex items-center justify-center p-1">
+                                <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-[var(--border)] dark:border-[var(--dark-border)] flex items-center justify-center p-1">
                                   <div className="text-[10px] font-black text-primary">
                                     {selectedAdminAccount.admin_bank_name.substring(0, 3)}
                                   </div>
@@ -1288,8 +1275,10 @@ export default function PaymentClient() {
                               </div>
 
                               {/* QR Code Section */}
-                              <div className="flex flex-col items-center justify-center py-4 bg-stone-50 rounded-2xl border border-stone-100 mb-4">
+                              <div className="flex flex-col items-center justify-center py-4 bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] mb-4">
                                 <div className="relative group cursor-pointer">
+                                  {/* QR must not be proxied/optimized: resizing corrupts scannability. */}
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
                                     src={`https://img.vietqr.io/image/${selectedAdminAccount.bank_bin || 'VCB'}-${selectedAdminAccount.admin_bank_account_number}-compact2.png?amount=${total}&addInfo=${encodeURIComponent(selectedAdminAccount.transfer_note_template?.replace('{code}', bookingCode) || bookingCode)}&accountName=${encodeURIComponent(selectedAdminAccount.admin_bank_account_holder)}`}
                                     alt="VietQR"
@@ -1301,7 +1290,7 @@ export default function PaymentClient() {
                                     </span>
                                   </div>
                                 </div>
-                                <p className="text-[10px] text-stone-400 mt-2 font-medium">
+                                <p className="text-[10px] text-[var(--foreground-subtle)] mt-2 font-medium">
                                   Sử dụng App Ngân hàng hoặc Ví để quét mã
                                 </p>
                               </div>
@@ -1309,10 +1298,10 @@ export default function PaymentClient() {
                               <div className="space-y-3">
                                 <div className="flex justify-between items-end">
                                   <div>
-                                    <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block mb-0.5">
+                                    <label className="text-[10px] font-bold text-[var(--foreground-subtle)] uppercase tracking-widest block mb-0.5">
                                       Số tài khoản
                                     </label>
-                                    <p className="text-lg font-mono font-black text-stone-900 leading-none tracking-wider">
+                                    <p className="text-lg font-mono font-black text-[var(--foreground)] leading-none tracking-wider">
                                       {selectedAdminAccount.admin_bank_account_number}
                                     </p>
                                   </div>
@@ -1366,18 +1355,22 @@ export default function PaymentClient() {
                                 </div>
 
                                 <div className="pt-2">
-                                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block mb-1">
+                                  <label className="text-[10px] font-bold text-[var(--foreground-subtle)] uppercase tracking-widest block mb-1">
                                     Chủ tài khoản
                                   </label>
-                                  <p className="text-sm font-bold text-stone-800">
+                                  <p className="text-sm font-bold text-[var(--foreground)]">
                                     {selectedAdminAccount.admin_bank_account_holder.toUpperCase()}
                                   </p>
                                 </div>
                               </div>
                             </div>
 
-                            <div className="bg-stone-900 p-3 flex items-center justify-center gap-2">
-                              <Icon name="ShieldCheckIcon" size={14} className="text-emerald-400" />
+                            <div className="bg-[var(--foreground)] p-3 flex items-center justify-center gap-2">
+                              <Icon
+                                name="ShieldCheckIcon"
+                                size={14}
+                                className="text-[var(--vj-green)]"
+                              />
                               <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">
                                 Giao dịch bảo mật VietQR
                               </span>
@@ -1392,25 +1385,27 @@ export default function PaymentClient() {
                   {paymentMethod === 'wallet' && (
                     <div className="space-y-4">
                       <div
-                        className={`bg-white border rounded-2xl p-6 flex flex-col items-center gap-4 transition-all ${walletBalance !== null && walletBalance >= total ? 'border-emerald-200 bg-emerald-50/10' : 'border-stone-200'}`}
+                        className={`bg-[var(--background)] border rounded-2xl p-6 flex flex-col items-center gap-4 transition-all ${walletBalance !== null && walletBalance >= total ? 'border-[rgb(var(--vj-green-rgb))]/40 bg-[rgb(var(--vj-green-rgb))]/10' : 'border-[var(--border)] dark:border-[var(--dark-border)]'}`}
                       >
                         <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
                           <Icon name="WalletIcon" size={32} className="text-primary" />
                         </div>
                         <div className="text-center">
-                          <h4 className="font-bold text-stone-900 mb-1">
+                          <h4 className="font-bold text-[var(--foreground)] mb-1">
                             Thanh toán bằng ví tài khoản
                           </h4>
-                          <p className="text-sm text-stone-500">
+                          <p className="text-sm text-[var(--foreground-muted)]">
                             Thanh toán nhanh chóng bằng số dư của bạn
                           </p>
                         </div>
 
-                        <div className="w-full border-t border-stone-100 pt-4 mt-2">
+                        <div className="w-full border-t border-[var(--border)] dark:border-[var(--dark-border)] pt-4 mt-2">
                           <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm text-stone-500">Số dư hiện tại:</span>
+                            <span className="text-sm text-[var(--foreground-muted)]">
+                              Số dư hiện tại:
+                            </span>
                             <span
-                              className={`text-base font-black ${walletBalance === null ? 'animate-pulse text-stone-300' : walletBalance >= total ? 'text-emerald-600' : 'text-red-500'}`}
+                              className={`text-base font-black ${walletBalance === null ? 'animate-pulse text-[var(--foreground-subtle)]' : walletBalance >= total ? 'text-[var(--vj-green)]' : 'text-primary'}`}
                             >
                               {walletBalance !== null
                                 ? walletBalance.toLocaleString('vi-VN') + '₫'
@@ -1418,8 +1413,10 @@ export default function PaymentClient() {
                             </span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span className="text-sm text-stone-500">Số tiền cần trả:</span>
-                            <span className="text-base font-black text-stone-900">
+                            <span className="text-sm text-[var(--foreground-muted)]">
+                              Số tiền cần trả:
+                            </span>
+                            <span className="text-base font-black text-[var(--foreground)]">
                               {total.toLocaleString('vi-VN')}₫
                             </span>
                           </div>
@@ -1445,7 +1442,7 @@ export default function PaymentClient() {
                         <button
                           key={wallet}
                           type="button"
-                          className="py-4 px-4 bg-stone-50 hover:bg-primary-50 hover:border-primary border border-stone-200 rounded-xl text-sm font-bold text-stone-700 transition-all flex flex-col items-center gap-2"
+                          className="py-4 px-4 bg-[var(--surface)] dark:bg-[var(--dark-surface)] hover:bg-primary-50 hover:border-primary border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm font-bold text-[var(--foreground-muted)] transition-all flex flex-col items-center gap-2"
                         >
                           <Icon name="DevicePhoneMobileIcon" size={24} className="text-primary" />
                           {wallet}
@@ -1458,7 +1455,7 @@ export default function PaymentClient() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full mt-6 flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-xl transition-all duration-200 shadow-[0_4px_16px_rgba(236,32,41,0.35)] hover:shadow-[0_10px_28px_rgba(236,32,41,0.5)] hover:-translate-y-1 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:scale-100 text-base"
+                    className="w-full mt-6 flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-xl transition-all duration-200 shadow-vj-btn hover:shadow-vj-btn-hover hover:-translate-y-1 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:scale-100 text-base"
                   >
                     {loading ? (
                       <>
@@ -1489,15 +1486,15 @@ export default function PaymentClient() {
 
                   {/* Inline payment error (shown when modal is dismissed) */}
                   {paymentError && !showErrorModal && (
-                    <div className="mt-3 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700 animate-[fadeInUp_0.3s_ease-out]">
+                    <div className="mt-3 flex items-start gap-3 bg-[rgb(var(--primary-rgb))]/10 border border-primary/30 rounded-xl p-4 text-sm text-primary animate-[fadeInUp_0.3s_ease-out]">
                       <Icon
                         name="ExclamationCircleIcon"
                         size={18}
-                        className="text-red-500 flex-shrink-0 mt-0.5"
+                        className="text-primary flex-shrink-0 mt-0.5"
                       />
                       <div>
                         <div className="font-semibold mb-0.5">Thanh toán không thành công</div>
-                        <div className="text-red-600">{paymentError}</div>
+                        <div className="text-primary">{paymentError}</div>
                       </div>
                     </div>
                   )}
@@ -1505,8 +1502,12 @@ export default function PaymentClient() {
               </div>
 
               {/* Security note */}
-              <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl p-4 text-sm text-green-700">
-                <Icon name="ShieldCheckIcon" size={20} className="text-green-600 flex-shrink-0" />
+              <div className="flex items-center gap-3 bg-[rgb(var(--vj-green-rgb))]/10 border border-[rgb(var(--vj-green-rgb))]/30 rounded-xl p-4 text-sm text-[var(--vj-green)]">
+                <Icon
+                  name="ShieldCheckIcon"
+                  size={20}
+                  className="text-[var(--vj-green)] flex-shrink-0"
+                />
                 <span>
                   Thanh toán được bảo mật bằng mã hóa SSL 256-bit. Thông tin thẻ của bạn an toàn
                   tuyệt đối.
@@ -1516,8 +1517,8 @@ export default function PaymentClient() {
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl border border-stone-200 p-5 sticky top-[140px]">
-                <h3 className="font-bold text-stone-900 mb-4">Chi tiết đơn hàng</h3>
+              <div className="bg-white rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] p-5 sticky top-[140px]">
+                <h3 className="font-bold text-[var(--foreground)] mb-4">Chi tiết đơn hàng</h3>
 
                 {/* Flight summary */}
                 <div className="bg-primary-50 rounded-xl p-4 mb-4">
@@ -1526,19 +1527,29 @@ export default function PaymentClient() {
                       <Icon name="PaperAirplaneIcon" size={12} className="text-white" />
                     </div>
                     <span className="font-bold text-primary text-sm">{booking?.flightNo}</span>
-                    <span className="text-xs text-stone-400 ml-auto">{booking?.date}</span>
+                    <span className="text-xs text-[var(--foreground-subtle)] ml-auto">
+                      {booking?.date}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-lg font-black text-stone-900">{booking?.departTime}</div>
-                      <div className="text-xs text-stone-500">
+                      <div className="text-lg font-black text-[var(--foreground)]">
+                        {booking?.departTime}
+                      </div>
+                      <div className="text-xs text-[var(--foreground-muted)]">
                         {booking?.from} · {booking?.fromCity}
                       </div>
                     </div>
-                    <Icon name="ArrowRightIcon" size={14} className="text-stone-400" />
+                    <Icon
+                      name="ArrowRightIcon"
+                      size={14}
+                      className="text-[var(--foreground-subtle)]"
+                    />
                     <div className="text-right">
-                      <div className="text-lg font-black text-stone-900">{booking?.arriveTime}</div>
-                      <div className="text-xs text-stone-500">
+                      <div className="text-lg font-black text-[var(--foreground)]">
+                        {booking?.arriveTime}
+                      </div>
+                      <div className="text-xs text-[var(--foreground-muted)]">
                         {booking?.to} · {booking?.toCity}
                       </div>
                     </div>
@@ -1549,16 +1560,16 @@ export default function PaymentClient() {
                 {booking?.passengers.map((p: { name: string; seat: string }, i: number) => (
                   <div
                     key={i}
-                    className="flex justify-between items-center py-2 text-sm border-b border-stone-100"
+                    className="flex justify-between items-center py-2 text-sm border-b border-[var(--border)] dark:border-[var(--dark-border)]"
                   >
-                    <span className="text-stone-600">{p.name}</span>
-                    <span className="font-semibold text-stone-900">Ghế {p.seat}</span>
+                    <span className="text-[var(--foreground-muted)]">{p.name}</span>
+                    <span className="font-semibold text-[var(--foreground)]">Ghế {p.seat}</span>
                   </div>
                 ))}
 
                 {/* Promo code */}
                 <div className="mt-4">
-                  <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-[var(--foreground-subtle)] uppercase tracking-wider mb-1.5">
                     Mã khuyến mãi
                   </label>
                   <div className="flex gap-2">
@@ -1574,17 +1585,17 @@ export default function PaymentClient() {
                         }}
                         placeholder=" "
                         disabled={promoApplied}
-                        className={`w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm form-input font-mono disabled:opacity-50 ${promoApplied ? 'form-input-valid' : ''}`}
+                        className={`w-full px-3 py-2 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-lg text-sm form-input font-mono disabled:opacity-50 ${promoApplied ? 'form-input-valid' : ''}`}
                       />
                       <label className="form-label-float">VJ2026</label>
                     </div>
                     <button
                       onClick={applyPromo}
                       disabled={promoApplied || !promoCode || isApplyingPromo}
-                      className="px-3 py-2 bg-accent text-stone-900 font-bold rounded-lg text-xs hover:bg-accent-dark transition-colors disabled:opacity-50 min-w-[80px] flex items-center justify-center"
+                      className="px-3 py-2 bg-accent text-[var(--foreground)] font-bold rounded-lg text-xs hover:bg-accent-dark transition-colors disabled:opacity-50 min-w-[80px] flex items-center justify-center"
                     >
                       {isApplyingPromo ? (
-                        <div className="w-4 h-4 border-2 border-stone-900/20 border-t-stone-900 rounded-full animate-spin" />
+                        <div className="w-4 h-4 border-2 border-[rgb(var(--foreground-rgb))]/20 border-t-[var(--foreground)] rounded-full animate-spin" />
                       ) : promoApplied ? (
                         '✓'
                       ) : (
@@ -1592,9 +1603,9 @@ export default function PaymentClient() {
                       )}
                     </button>
                   </div>
-                  {promoError && <p className="text-xs text-red-500 mt-1">{promoError}</p>}
+                  {promoError && <p className="text-xs text-primary mt-1">{promoError}</p>}
                   {promoApplied && promoData && (
-                    <p className="text-xs text-green-600 mt-1 font-semibold">
+                    <p className="text-xs text-[var(--vj-green)] mt-1 font-semibold">
                       ✓ Đã áp dụng mã {promoData.code}
                     </p>
                   )}
@@ -1603,32 +1614,50 @@ export default function PaymentClient() {
                 {/* Price breakdown */}
                 <div className="mt-4 space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-stone-500">Giá vé cơ bản</span>
+                    <span className="text-[var(--foreground-muted)]">Giá vé cơ bản</span>
                     <span className="font-semibold">
-                      {booking?.basePrice.toLocaleString('vi-VN')}₫
+                      {booking?.fareSubtotal.toLocaleString('vi-VN')}₫
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-stone-500">Thuế & phí sân bay</span>
+                    <span className="text-[var(--foreground-muted)]">
+                      Thuế &amp; phí sân bay ({Math.round(TAX_AND_FEE_RATE * 100)}%)
+                    </span>
                     <span className="font-semibold">
                       +{(booking?.tax ?? 0).toLocaleString('vi-VN')}₫
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-stone-500">Phí chọn chỗ</span>
+                    <span className="text-[var(--foreground-muted)]">Phí chọn chỗ</span>
                     <span className="font-semibold">
-                      +{booking?.seatFee.toLocaleString('vi-VN')}₫
+                      +{(booking?.seatFee ?? 0).toLocaleString('vi-VN')}₫
                     </span>
                   </div>
+                  {(booking?.ancillaryFee ?? 0) > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-[var(--foreground-muted)]">
+                        Dịch vụ bổ sung
+                        {booking?.ancillaries?.length
+                          ? ` (${booking.ancillaries
+                              .map((id) => ANCILLARY_OPTIONS.find((o) => o.id === id)?.title)
+                              .filter(Boolean)
+                              .join(', ')})`
+                          : ''}
+                      </span>
+                      <span className="font-semibold">
+                        +{booking!.ancillaryFee!.toLocaleString('vi-VN')}₫
+                      </span>
+                    </div>
+                  )}
                   {promoApplied && (
-                    <div className="flex justify-between text-green-600 font-medium">
+                    <div className="flex justify-between text-[var(--vj-green)] font-medium">
                       <span>
                         Giảm giá {promoData?.type === 'percentage' ? `(${promoData.value}%)` : ''}
                       </span>
                       <span className="font-bold">-{discountAmount.toLocaleString('vi-VN')}₫</span>
                     </div>
                   )}
-                  <div className="border-t border-stone-200 pt-2 flex justify-between font-bold text-stone-900">
+                  <div className="border-t border-[var(--border)] dark:border-[var(--dark-border)] pt-2 flex justify-between font-bold text-[var(--foreground)]">
                     <span>Tổng thanh toán</span>
                     <span className="text-primary text-lg">{total.toLocaleString('vi-VN')}₫</span>
                   </div>
@@ -1636,7 +1665,7 @@ export default function PaymentClient() {
 
                 <Link
                   href="/tim-ve"
-                  className="mt-4 flex items-center gap-1.5 text-xs text-stone-400 hover:text-stone-600 transition-colors"
+                  className="mt-4 flex items-center gap-1.5 text-xs text-[var(--foreground-subtle)] hover:text-[var(--foreground-muted)] transition-colors"
                 >
                   <Icon name="ArrowLeftIcon" size={12} />
                   Quay lại chọn chuyến bay

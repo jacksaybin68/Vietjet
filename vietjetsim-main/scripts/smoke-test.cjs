@@ -82,8 +82,11 @@ async function main() {
     '/hoi-dap',
     '/lien-he',
     '/tra-cuu',
+    '/chuyen-bay-cua-toi',
     '/lam-thu-tuc',
     '/dang-nhap',
+    '/quen-mat-khau',
+    '/dat-lai-mat-khau',
   ]) {
     check(`GET ${path}`, await status(path), 200);
   }
@@ -99,6 +102,14 @@ async function main() {
     'GET /hanh-ly redirects to the baggage service',
     baggage.headers.get('location'),
     '/dich-vu?service=baggage'
+  );
+
+  const checkInAlias = await request('/lam-thu-tuc-truc-tuyen?code=VD-12345678');
+  check('GET /lam-thu-tuc-truc-tuyen is a redirect', checkInAlias.status, 307);
+  check(
+    'GET /lam-thu-tuc-truc-tuyen forwards the booking code',
+    checkInAlias.headers.get('location'),
+    '/lam-thu-tuc?code=VD-12345678'
   );
 
   check('GET unknown route', await status('/khong-ton-tai-xyz'), 404);

@@ -142,6 +142,14 @@ export async function middleware(request: NextRequest) {
     const limited = rateLimit(request, RATE_LIMITS.auth);
     if (limited) return limited;
   }
+  // Password recovery issues/consumes tokens, so treat it like the login endpoints.
+  if (
+    pathname.startsWith('/api/xac-thuc/quen-mat-khau') ||
+    pathname.startsWith('/api/xac-thuc/dat-lai-mat-khau')
+  ) {
+    const limited = rateLimit(request, RATE_LIMITS.strict);
+    if (limited) return limited;
+  }
 
   // Get access token from cookies
   const accessToken = request.cookies.get('access_token')?.value;

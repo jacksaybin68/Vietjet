@@ -3,11 +3,20 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Flight, Passenger } from './FlightBookingClient';
 import { Icon } from '@/shared/components/ui';
 import { SeatMapSkeleton } from '@/shared/components/ui';
+import {
+  ANCILLARY_OPTIONS,
+  SEAT_SERVICE_FEE_RATE,
+  SEAT_TAX_RATE,
+  SEAT_TIER_PRICES,
+  TAX_AND_FEE_RATE,
+  getBookingTotals,
+  type AncillaryId,
+} from '@/features/bookings';
 
 interface Props {
   flight: Flight;
   passengers: Passenger[];
-  onConfirm: (seats: string[], seatPrices: number[]) => void;
+  onConfirm: (seats: string[], seatPrices: number[], ancillaries: AncillaryId[]) => void;
   onBack: () => void;
 }
 
@@ -64,30 +73,30 @@ function generateSeats(): Record<string, SeatInfo> {
 
       if (row <= 3) {
         status = 'business';
-        basePrice = 350000;
+        basePrice = SEAT_TIER_PRICES.business;
         occupancyLevel = 'high';
       } else if (occupied.includes(seatId)) {
         status = 'occupied';
-        basePrice = 50000;
+        basePrice = SEAT_TIER_PRICES.occupied;
         occupancyLevel = 'critical';
       } else if (hotSeats.includes(seatId)) {
         status = 'hot';
-        basePrice = 80000;
+        basePrice = SEAT_TIER_PRICES.hot;
         occupancyLevel = 'high';
       } else {
         status = 'available';
         // Price varies by row proximity to front/exit rows
-        if (row <= 10) basePrice = 70000;
-        else if (row <= 20) basePrice = 55000;
-        else basePrice = 45000;
+        if (row <= 10) basePrice = SEAT_TIER_PRICES.available;
+        else if (row <= 20) basePrice = SEAT_TIER_PRICES.available - 15000;
+        else basePrice = SEAT_TIER_PRICES.available - 25000;
         // Assign occupancy level for heatmap
         if (row <= 6) occupancyLevel = 'high';
         else if (row <= 15) occupancyLevel = 'medium';
         else occupancyLevel = 'low';
       }
 
-      const tax = Math.round(basePrice * 0.1);
-      const fee = Math.round(basePrice * 0.05);
+      const tax = Math.round(basePrice * SEAT_TAX_RATE);
+      const fee = Math.round(basePrice * SEAT_SERVICE_FEE_RATE);
       const price = basePrice + tax + fee;
 
       seats[seatId] = { status, price, basePrice, tax, fee, occupancyLevel };
@@ -114,20 +123,21 @@ function getHeatmapClass(
 
   if (!showHeatmap) {
     if (status === 'hot')
-      return 'bg-orange-100 border-2 border-orange-400 text-orange-700 hover:bg-orange-200';
+      return 'bg-[rgb(var(--orange-rgb))]/15 border-2 border-[var(--orange)] text-[var(--vj-text)] hover:bg-[rgb(var(--orange-rgb))]/25';
     return 'seat-available hover:border-primary hover:bg-primary-50';
   }
 
-  // Heatmap mode
+  // Heatmap mode: same 4-step ramp as the legend below, built from theme
+  // tokens so dark mode and the palette stay consistent.
   switch (occupancyLevel) {
     case 'critical':
-      return 'bg-red-200 border-2 border-red-500 text-red-800 cursor-not-allowed opacity-70';
+      return 'bg-[rgb(var(--primary-rgb))]/25 border-2 border-[var(--primary)] text-[var(--vj-text)] cursor-not-allowed opacity-70';
     case 'high':
-      return 'bg-orange-100 border-2 border-orange-400 text-orange-700 hover:bg-orange-200';
+      return 'bg-[rgb(var(--orange-rgb))]/15 border-2 border-[var(--orange)] text-[var(--vj-text)] hover:bg-[rgb(var(--orange-rgb))]/25';
     case 'medium':
-      return 'bg-yellow-50 border-2 border-yellow-400 text-yellow-700 hover:bg-yellow-100';
+      return 'bg-[rgb(var(--accent-rgb))]/25 border-2 border-[var(--accent-dark)] text-[var(--vj-text)] hover:bg-[rgb(var(--accent-rgb))]/40';
     case 'low':
-      return 'bg-green-50 border-2 border-green-400 text-green-700 hover:bg-green-100';
+      return 'bg-[rgb(var(--vj-green-rgb))]/15 border-2 border-[var(--vj-green)] text-[var(--vj-text)] hover:bg-[rgb(var(--vj-green-rgb))]/25';
     default:
       return 'seat-available hover:border-primary hover:bg-primary-50';
   }
@@ -141,6 +151,7 @@ function formatTime(seconds: number): string {
 
 export default function SeatSelectionStep({ flight, passengers, onConfirm, onBack }: Props) {
   const [selected, setSelected] = useState<string[]>([]);
+  const [ancillaries, setAncillaries] = useState<AncillaryId[]>([]);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [holdTimer, setHoldTimer] = useState<number | null>(null);
@@ -232,8 +243,19 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
     if (selected.length < passengerCount || isConfirming) return;
     setIsConfirming(true);
     const seatPrices = selected.map((seatId) => SEATS[seatId]?.price || 0);
-    onConfirm(selected, seatPrices);
+    onConfirm(selected, seatPrices, ancillaries);
   };
+
+  const toggleAncillary = (id: AncillaryId) => {
+    setAncillaries((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  const totals = getBookingTotals({
+    farePerPassenger: flight.price,
+    passengerCount,
+    seatFee: selected.reduce((sum, s) => sum + SEATS[s].price, 0),
+    ancillaries,
+  });
 
   return (
     <>
@@ -248,9 +270,9 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
               <div
                 className={`rounded-xl px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between border ${
                   timerUrgent
-                    ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700 text-red-700 dark:text-red-400'
+                    ? 'bg-[rgb(var(--primary-rgb))]/10 border-[rgb(var(--primary-rgb))]/40 text-primary'
                     : timerWarning
-                      ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-700 text-orange-700 dark:text-orange-400'
+                      ? 'bg-[rgb(var(--orange-rgb))]/10 border-[rgb(var(--orange-rgb))]/40 text-[var(--orange)]'
                       : 'bg-primary/5 dark:bg-primary/10 border-primary/20 dark:border-primary/40 text-primary dark:text-primary'
                 }`}
               >
@@ -260,9 +282,9 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                     size={14}
                     className={
                       timerUrgent
-                        ? 'text-red-500'
+                        ? 'text-primary'
                         : timerWarning
-                          ? 'text-orange-500'
+                          ? 'text-[var(--orange)]'
                           : 'text-primary'
                     }
                   />
@@ -271,7 +293,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                   </span>
                 </div>
                 <div
-                  className={`font-mono font-bold text-base sm:text-lg tabular-nums ${timerUrgent ? 'text-red-600' : timerWarning ? 'text-orange-600' : 'text-primary'}`}
+                  className={`font-mono font-bold text-base sm:text-lg tabular-nums ${timerUrgent ? 'text-primary' : timerWarning ? 'text-[var(--orange)]' : 'text-primary'}`}
                 >
                   {formatTime(timeLeft)}
                 </div>
@@ -279,10 +301,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
             )}
 
             {/* Extra Services - responsive */}
-            <div
-              className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden mb-4 sm:mb-6"
-              style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
-            >
+            <div className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden mb-4 sm:mb-6 shadow-vj-md">
               <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
               <div className="p-4 sm:p-5">
                 <h2 className="font-black text-[var(--foreground)] dark:text-[var(--foreground)] flex items-center gap-1.5 sm:gap-2 font-koho mb-3 sm:mb-4">
@@ -290,64 +309,61 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                   Dịch vụ bổ sung
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                  {[
-                    {
-                      id: 'baggage',
-                      title: 'Hành lý',
-                      icon: 'BriefcaseIcon',
-                      price: 'Từ 150.000₫',
-                      color: 'bg-blue-50 text-blue-600',
-                      border: 'border-blue-100 dark:border-blue-800',
-                    },
-                    {
-                      id: 'meal',
-                      title: 'Suất ăn',
-                      icon: 'SparklesIcon',
-                      price: 'Từ 100.000₫',
-                      color: 'bg-orange-50 text-orange-600',
-                      border: 'border-orange-100 dark:border-orange-800',
-                    },
-                    {
-                      id: 'insurance',
-                      title: 'Bảo hiểm',
-                      icon: 'ShieldCheckIcon',
-                      price: '60.000₫',
-                      color: 'bg-emerald-50 text-emerald-600',
-                      border: 'border-emerald-100 dark:border-emerald-800',
-                    },
-                  ].map((svc) => (
-                    <div
-                      key={svc.id}
-                      className={`border ${svc.border} rounded-xl p-2.5 sm:p-3 flex flex-col justify-between cursor-pointer hover:shadow-md transition-all`}
-                    >
-                      <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-                        <div
-                          className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center ${svc.color}`}
-                        >
-                          <Icon name={svc.icon as any} size={16} />
+                  {ANCILLARY_OPTIONS.map((svc) => {
+                    const isOn = ancillaries.includes(svc.id);
+                    return (
+                      <button
+                        key={svc.id}
+                        type="button"
+                        onClick={() => toggleAncillary(svc.id)}
+                        aria-pressed={isOn}
+                        className={`border rounded-xl p-2.5 sm:p-3 flex flex-col justify-between text-left transition-all ${
+                          isOn
+                            ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                            : 'border-[var(--border)] dark:border-[var(--dark-border)] hover:border-primary/40'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                          <div
+                            className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center ${
+                              isOn
+                                ? 'bg-primary text-white'
+                                : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)]'
+                            }`}
+                          >
+                            <Icon name={svc.icon} size={16} />
+                          </div>
+                          <span className="font-bold text-[var(--foreground)] dark:text-[var(--foreground)] font-koho">
+                            {svc.title}
+                          </span>
+                          {isOn && (
+                            <Icon
+                              name="CheckCircleIcon"
+                              size={16}
+                              className="ml-auto text-primary"
+                            />
+                          )}
                         </div>
-                        <span className="font-bold text-[var(--foreground)] dark:text-[var(--foreground)] font-koho">
-                          {svc.title}
-                        </span>
-                      </div>
-                      <div className="mt-auto">
-                        <div className="text-[8px] sm:text-[10px] text-[var(--foreground-subtle)]">
-                          Giá ưu đãi
+                        <div className="mt-auto">
+                          <div className="text-[8px] sm:text-[10px] text-[var(--foreground-subtle)]">
+                            {svc.description}
+                          </div>
+                          <div className="text-[11px] sm:text-sm font-black text-primary font-koho">
+                            {svc.price.toLocaleString('vi-VN')}₫
+                            <span className="font-body text-[9px] sm:text-[10px] font-normal text-[var(--foreground-muted)]">
+                              {' '}
+                              / khách
+                            </span>
+                          </div>
                         </div>
-                        <div className="text-[11px] sm:text-sm font-black text-primary font-koho">
-                          {svc.price}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
 
-            <div
-              className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden"
-              style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
-            >
+            <div className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden shadow-vj-md">
               {/* Red accent top bar */}
               <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
               <div className="p-4 sm:p-5">
@@ -361,8 +377,8 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                     onClick={() => setShowHeatmap((v) => !v)}
                     className={`flex items-center gap-1 text-[10px] sm:gap-1.5 sm:text-xs font-semibold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border transition-all ${
                       showHeatmap
-                        ? 'bg-orange-500 text-white border-orange-500'
-                        : 'bg-[var(--surface)] dark:bg-[var(--dark-surface)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] border-[var(--border)] dark:border-[var(--dark-border)] hover:border-orange-400 hover:text-orange-600'
+                        ? 'bg-[var(--orange)] text-white border-[var(--orange)]'
+                        : 'bg-[var(--surface)] dark:bg-[var(--dark-surface)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] border-[var(--border)] dark:border-[var(--dark-border)] hover:border-[var(--orange)] hover:text-[var(--orange)]'
                     }`}
                   >
                     <Icon name="FireIcon" size={12} />
@@ -394,7 +410,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2">
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-orange-100 border-2 border-orange-400 flex-shrink-0" />
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-[rgb(var(--orange-rgb))]/15 border-2 border-[var(--orange)] flex-shrink-0" />
                       <div>
                         <div className="font-semibold text-[var(--foreground)]">Ưa chuộng</div>
                         <div className="text-[var(--foreground-subtle)]">Đặt nhiều</div>
@@ -416,7 +432,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                     </div>
                     {showHeatmap && (
                       <div className="flex items-center gap-1.5 sm:gap-2">
-                        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-green-50 border-2 border-green-400 flex-shrink-0" />
+                        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-[rgb(var(--vj-green-rgb))]/15 border-2 border-[var(--vj-green)] flex-shrink-0" />
                         <div>
                           <div className="font-semibold text-[var(--foreground)]">Ít người</div>
                           <div className="text-[var(--foreground-subtle)]">Còn nhiều</div>
@@ -436,10 +452,10 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                           Thấp
                         </span>
                         <div className="flex gap-0.25 sm:gap-0.5 flex-1">
-                          <div className="h-2 sm:h-3 flex-1 rounded-l bg-green-200" />
-                          <div className="h-2 sm:h-3 flex-1 bg-yellow-200" />
-                          <div className="h-2 sm:h-3 flex-1 bg-orange-200" />
-                          <div className="h-2 sm:h-3 flex-1 rounded-r bg-red-300" />
+                          <div className="h-2 sm:h-3 flex-1 rounded-l bg-[rgb(var(--vj-green-rgb))]/40" />
+                          <div className="h-2 sm:h-3 flex-1 bg-[rgb(var(--accent-rgb))]/50" />
+                          <div className="h-2 sm:h-3 flex-1 bg-[rgb(var(--orange-rgb))]/40" />
+                          <div className="h-2 sm:h-3 flex-1 rounded-r bg-[rgb(var(--primary-rgb))]/40" />
                         </div>
                         <span className="text-[8px] sm:text-xs text-[var(--foreground-subtle)]">
                           Cao
@@ -528,7 +544,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                                 tooltipSeat.status === 'business'
                                   ? 'bg-accent text-[var(--vj-navy)]'
                                   : tooltipSeat.status === 'hot'
-                                    ? 'bg-orange-400 text-white'
+                                    ? 'bg-[var(--orange)] text-white'
                                     : tooltipSeat.status === 'occupied'
                                       ? 'bg-[var(--foreground-muted)] dark:bg-[var(--dark-border)] text-white dark:text-[var(--foreground-muted)]'
                                       : 'bg-primary text-white'
@@ -551,11 +567,15 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                                   <span>{tooltipSeat.basePrice.toLocaleString('vi-VN')}₫</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-white/60">Thuế (10%)</span>
+                                  <span className="text-white/60">
+                                    Thuế ({Math.round(SEAT_TAX_RATE * 100)}%)
+                                  </span>
                                   <span>{tooltipSeat.tax.toLocaleString('vi-VN')}₫</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-white/60">Phí dịch vụ</span>
+                                  <span className="text-white/60">
+                                    Phí dịch vụ ({Math.round(SEAT_SERVICE_FEE_RATE * 100)}%)
+                                  </span>
                                   <span>{tooltipSeat.fee.toLocaleString('vi-VN')}₫</span>
                                 </div>
                                 <div className="flex justify-between font-bold border-t border-white/10 pt-0.5 sm:pt-1 text-accent">
@@ -568,12 +588,12 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                                   <div
                                     className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
                                       tooltipSeat.occupancyLevel === 'low'
-                                        ? 'bg-green-400'
+                                        ? 'bg-[var(--vj-green)]'
                                         : tooltipSeat.occupancyLevel === 'medium'
-                                          ? 'bg-yellow-400'
+                                          ? 'bg-accent'
                                           : tooltipSeat.occupancyLevel === 'high'
-                                            ? 'bg-orange-400'
-                                            : 'bg-red-400'
+                                            ? 'bg-[var(--orange)]'
+                                            : 'bg-primary'
                                     }`}
                                   />
                                   <span className="text-white/60">
@@ -607,10 +627,7 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
 
           {/* Summary - responsive */}
           <div className="lg:col-span-1">
-            <div
-              className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden sticky top-[180px] sm:top-[200px] lg:top-[230px]"
-              style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
-            >
+            <div className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden sticky top-[180px] sm:top-[200px] lg:top-[230px] shadow-vj-md">
               {/* Yellow accent top bar */}
               <div className="h-1 w-full bg-gradient-to-r from-accent/60 via-accent to-accent/60" />
               <div className="p-4 sm:p-5">
@@ -670,25 +687,34 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                   <div className="flex justify-between">
                     <span className="text-[var(--foreground-muted)]">Vé máy bay</span>
                     <span className="font-semibold text-[var(--foreground)]">
-                      {(flight.price * passengerCount).toLocaleString('vi-VN')}₫
+                      {totals.fareSubtotal.toLocaleString('vi-VN')}₫
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[var(--foreground-muted)]">
+                      Thuế &amp; phí ({Math.round(TAX_AND_FEE_RATE * 100)}%)
+                    </span>
+                    <span className="font-semibold text-[var(--foreground)]">
+                      {totals.taxAndFee.toLocaleString('vi-VN')}₫
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[var(--foreground-muted)]">Phí chọn chỗ</span>
                     <span className="font-semibold text-[var(--foreground)]">
-                      {selected.reduce((sum, s) => sum + SEATS[s].price, 0).toLocaleString('vi-VN')}
-                      ₫
+                      {totals.seatFee.toLocaleString('vi-VN')}₫
                     </span>
                   </div>
+                  {totals.ancillaryFee > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-[var(--foreground-muted)]">Dịch vụ bổ sung</span>
+                      <span className="font-semibold text-[var(--foreground)]">
+                        {totals.ancillaryFee.toLocaleString('vi-VN')}₫
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between font-black text-[var(--foreground)] pt-1 border-t border-[var(--border)] dark:border-[var(--dark-border)] font-koho">
                     <span>Tổng cộng</span>
-                    <span className="text-primary">
-                      {(
-                        flight.price * passengerCount * 1.1 +
-                        selected.reduce((sum, s) => sum + SEATS[s].price, 0)
-                      ).toLocaleString('vi-VN')}
-                      ₫
-                    </span>
+                    <span className="text-primary">{totals.total.toLocaleString('vi-VN')}₫</span>
                   </div>
                 </div>
 
@@ -697,9 +723,9 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                   <div
                     className={`rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 mb-2.5 sm:mb-3 flex items-center justify-between text-[10px] sm:text-xs ${
                       timerUrgent
-                        ? 'bg-red-50 text-red-600 border border-red-200'
+                        ? 'bg-[rgb(var(--primary-rgb))]/10 text-primary border border-[rgb(var(--primary-rgb))]/30'
                         : timerWarning
-                          ? 'bg-orange-50 text-orange-600 border border-orange-200'
+                          ? 'bg-[rgb(var(--orange-rgb))]/10 text-[var(--orange)] border border-[rgb(var(--orange-rgb))]/30'
                           : 'bg-primary/5 text-primary border border-primary/10'
                     }`}
                   >

@@ -5,47 +5,52 @@
 
 :root {
   /* Brand tokens sampled from vietjetair.com production CSS/JS bundles. */
-  --primary: #EC2029;
-  --primary-dark: #D91A21;
-  --primary-light: #F5717A;
-  --primary-deep: #6F0000;
-  --accent: #FFDD00;
-  --accent-dark: #F9A51A;
-  --accent-light: #FFE97A;
-  --accent-secondary: #FBB612;
-  --orange: #F4511E;
-  --purple: #8075D6;
-  --blue: #2563D4;
+  --primary: #ec2029;
+  --primary-dark: #d91a21;
+  --primary-light: #f5717a;
+  --primary-deep: #6f0000;
+  --accent: #ffdd00;
+  --accent-dark: #f9a51a;
+  --accent-light: #ffe97a;
+  --accent-secondary: #fbb612;
+  --orange: #f4511e;
+  --purple: #8075d6;
+  --blue: #2563d4;
   --background: #ffffff;
-  --background-secondary: #F7F7F7;
-  --surface: #F7F7F7;
-  --surface-2: #EFEFEF;
-  --surface-3: #E4E4E4;
+  --background-secondary: #f7f7f7;
+  --surface: #f7f7f7;
+  --surface-2: #efefef;
+  --surface-3: #e4e4e4;
   /* Component channels for Tailwind's `/opacity` modifier: `bg-[rgb(var(--x-rgb))]/20`. */
   --primary-rgb: 236 32 41;
   --accent-rgb: 255 221 0;
+  --orange-rgb: 244 81 30;
+  --blue-rgb: 37 99 212;
+  --foreground-rgb: 51 51 51;
+  --surface-2-rgb: 239 239 239;
+  --dark-surface-2-rgb: 36 48 74;
   --foreground: #333333;
-  --foreground-muted: #6C6C6C;
+  --foreground-muted: #6c6c6c;
   --foreground-subtle: #939393;
   --border: #ececec;
-  --dark-bg: #1E293B;
+  --dark-bg: #1e293b;
   --dark-surface: #172033;
-  --dark-surface-2: #24304A;
+  --dark-surface-2: #24304a;
   --dark-border: rgba(255, 255, 255, 0.14);
-  --vj-navy: #1A2948;
+  --vj-navy: #1a2948;
   --vj-navy-2: #172033;
   --vj-sky: #f7f7f7;
-  --vj-red: #EC2029;
-  --vj-red-dark: #D91A21;
-  --vj-red-deep: #6F0000;
-  --vj-yellow: #FFDD00;
-  --vj-yellow-2: #FBB612;
-  --vj-orange: #F4511E;
-  --vj-purple: #8075D6;
-  --vj-purple-light: #EDE9FE;
-  --vj-blue: #2563D4;
-  --vj-green: #2DB35E;
-  --vj-green-light: #DCFCE7;
+  --vj-red: #ec2029;
+  --vj-red-dark: #d91a21;
+  --vj-red-deep: #6f0000;
+  --vj-yellow: #ffdd00;
+  --vj-yellow-2: #fbb612;
+  --vj-orange: #f4511e;
+  --vj-purple: #8075d6;
+  --vj-purple-light: #ede9fe;
+  --vj-blue: #2563d4;
+  --vj-green: #2db35e;
+  --vj-green-light: #dcfce7;
   /* RGB channels: Tailwind's `/N` modifier only compiles against
      `[rgb(var(--x-rgb))]/N`; `[var(--x)]/N` is silently dropped. */
   --vj-red-rgb: 236 32 41;
@@ -58,7 +63,7 @@
   --dark-surface-rgb: 23 32 51;
   --background-secondary-rgb: 247 247 247;
   --vj-text: #333333;
-  --vj-text-gray: #6C6C6C;
+  --vj-text-gray: #6c6c6c;
   --vj-text-muted: #939393;
   --vj-font: 'KoHo', 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
   --vj-font-heading: 'Be Vietnam Pro', 'KoHo', ui-sans-serif, system-ui, sans-serif;
@@ -73,11 +78,11 @@
 /* Dark mode tokens */
 .dark {
   --background: #172033;
-  --background-secondary: #1E293B;
-  --surface: #1E293B;
+  --background-secondary: #1e293b;
+  --surface: #1e293b;
   --surface-2: #243044;
-  --surface-3: #2F3B52;
-  --accent-light: #FFDD00;
+  --surface-3: #2f3b52;
+  --accent-light: #ffdd00;
   --foreground: #f0f0f0;
   --foreground-muted: #a0a0a0;
   --foreground-subtle: #707070;
@@ -86,10 +91,13 @@
   --vj-text-gray: #b0b0b0;
   --vj-text-muted: #808080;
   /* Light-tint chip backgrounds need dark counterparts or the chips glow. */
-  --vj-green-light: #0B2E1C;
-  --vj-purple-light: #241B4D;
+  --vj-green-light: #0b2e1c;
+  --vj-purple-light: #241b4d;
   --foreground-muted-rgb: 160 160 160;
   --background-secondary-rgb: 30 41 59;
+  --foreground-rgb: 240 240 240;
+  --surface-2-rgb: 36 48 68;
+  --dark-surface-2-rgb: 36 48 68;
 }
 
 html {
@@ -131,7 +139,11 @@ h6 {
 }
 
 :where(a, button, input, select, textarea) {
-  transition: color 80ms ease, background-color 80ms ease, border-color 80ms ease, box-shadow 80ms ease;
+  transition:
+    color 80ms ease,
+    background-color 80ms ease,
+    border-color 80ms ease,
+    box-shadow 80ms ease;
 }
 
 :where(a, button, input, select, textarea):focus-visible {
@@ -191,6 +203,12 @@ h6 {
 .vj-cta:disabled {
   filter: grayscale(0.5);
   opacity: 0.6;
+}
+
+/* Solid brand-red pill button — the primary submit action on the auth pages.
+   The gold `.vj-cta` stays reserved for the flight-search CTA. */
+.vj-btn-pill {
+  border-radius: 9999px;
 }
 
 /* Table rows share one hover/transition treatment across dashboard and admin tables. */
@@ -759,28 +777,28 @@ h6 {
   transform: scale(1.1);
 }
 .seat-available {
-  background: #e7e5e4;
-  border: 1.5px solid #d6d3d1;
+  background: var(--surface-3);
+  border: 1.5px solid var(--border);
 }
 .seat-selected {
   background: var(--primary);
-  border: 1.5px solid #6f0000;
+  border: 1.5px solid var(--primary-deep);
   color: white;
 }
 .seat-occupied {
-  background: #f5f5f4;
-  border: 1.5px solid #e7e5e4;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
   cursor: not-allowed;
   opacity: 0.4;
 }
 .seat-business {
-  background: #fef3c7;
-  border: 1.5px solid #FFDD00;
+  background: rgb(var(--accent-rgb) / 0.35);
+  border: 1.5px solid var(--accent);
 }
 .seat-business.seat-selected {
-  background: #FFDD00;
-  border-color: #e6bf00;
-  color: #1a2948;
+  background: var(--accent);
+  border-color: var(--accent-dark);
+  color: var(--vj-navy);
 }
 
 /* Form focus styles */
@@ -1006,7 +1024,7 @@ h6 {
 .card-hover-yellow:hover {
   transform: translateY(-6px);
   box-shadow: 0 20px 48px rgba(255, 212, 0, 0.28);
-  border-color: #FFDD00;
+  border-color: #ffdd00;
 }
 
 /* VietJet Card Hover with Blue Accent (User Dashboard) */
@@ -1039,7 +1057,7 @@ h6 {
 
 /* VietJet Price Badge */
 .vj-price-badge {
-  background: #FFDD00;
+  background: #ffdd00;
   color: #1a2948;
   clip-path: polygon(0 0, 100% 0, 100% 75%, 50% 100%, 0 75%);
   font-weight: 800;
@@ -1618,7 +1636,7 @@ h6 {
 
 .admin-badge-error {
   background: rgba(239, 68, 68, 0.15);
-  color: #F5717A;
+  color: #f5717a;
   border-radius: 8px;
   padding: 4px 12px;
   font-size: 12px;
