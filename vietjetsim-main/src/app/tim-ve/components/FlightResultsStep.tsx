@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Flight } from './FlightBookingClient';
-import { Icon } from '@/shared/components/ui';
+import { Icon, AppImage } from '@/shared/components/ui';
 import { FlightResultsSkeleton } from '@/shared/components/ui';
 import { getErrorMessage } from '@/lib/utils';
 import { searchFlightsForUi } from '@/features/flights/services';
@@ -171,8 +171,6 @@ const FALLBACK_FLIGHTS: Flight[] = [
   },
 ];
 
-const CLASS_LABELS: Record<string, string> = { economy: 'Phổ thông', business: 'Thương gia' };
-
 // Fare class config
 const FARE_CLASS_CONFIG: Record<
   string,
@@ -181,28 +179,16 @@ const FARE_CLASS_CONFIG: Record<
   economy: {
     code: 'ECO',
     label: 'Phổ thông',
-    color: 'text-emerald-700',
-    bg: 'bg-emerald-50 border-emerald-200',
+    color: 'text-[var(--vj-green)]',
+    bg: 'bg-[rgb(var(--vj-green-rgb))]/10 border-[rgb(var(--vj-green-rgb))]/30',
   },
   business: {
     code: 'BIZ',
     label: 'Thương gia',
-    color: 'text-amber-800',
-    bg: 'bg-amber-50 border-amber-300',
+    color: 'text-[var(--accent-dark)]',
+    bg: 'bg-[rgb(var(--accent-rgb))]/15 border-[rgb(var(--accent-rgb))]/40',
   },
 };
-
-function getFareBreakdown(price: number, fareClass: string) {
-  const taxRate = fareClass === 'business' ? 0.12 : 0.1;
-  const feeRate = 0.05;
-  const discountRate = fareClass === 'economy' ? 0.08 : 0.05;
-  const discount = Math.round((price * discountRate) / 1000) * 1000;
-  const priceBeforeDiscount = price + discount;
-  const taxes = Math.round((priceBeforeDiscount * taxRate) / 1000) * 1000;
-  const fees = Math.round((priceBeforeDiscount * feeRate) / 1000) * 1000;
-  const base = priceBeforeDiscount - taxes - fees;
-  return { base, taxes, fees, discount, total: price };
-}
 
 const DEPARTURE_TIME_SLOTS = [
   { label: 'Sáng sớm', sublabel: '00:00 – 06:00', start: 0, end: 6 },
@@ -228,11 +214,6 @@ function parseDurationMinutes(duration: string): number {
 function parseHour(time: string): number {
   return parseInt(time.split(':')[0]);
 }
-
-const ALL_AIRLINES: string[] = [];
-const MIN_PRICE = 0;
-const MAX_PRICE = 0;
-const MAX_DURATION = 0;
 
 interface Filters {
   airlines: string[];
@@ -270,7 +251,7 @@ function SearchErrorModal({ message, onRetry, onDismiss }: SearchErrorModalProps
       >
         <div className="h-1.5 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
         <div className="p-6 sm:p-8 flex flex-col items-center text-center">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-4 sm:mb-5 border-2 sm:border-4 border-red-100 dark:border-red-800/30">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[rgb(var(--primary-rgb))]/10 rounded-full flex items-center justify-center mb-4 sm:mb-5 border-2 sm:border-4 border-[rgb(var(--primary-rgb))]/20">
             <Icon name="MagnifyingGlassIcon" size={20} className="text-primary" />
           </div>
           <h3 className="font-black text-[var(--foreground)] dark:text-[var(--foreground)] text-lg sm:text-xl mb-1.5 sm:mb-2 font-koho">
@@ -282,7 +263,7 @@ function SearchErrorModal({ message, onRetry, onDismiss }: SearchErrorModalProps
           <div className="flex flex-col gap-2.5 sm:gap-3 w-full">
             <button
               onClick={onRetry}
-              className="w-full flex items-center justify-center gap-1.5 sm:gap-2 bg-primary hover:bg-primary-dark text-white font-bold py-2.5 sm:py-3.5 rounded-xl transition-all shadow-[0_4px_16px_rgba(236,32,41,0.3)] hover:shadow-[0_8px_24px_rgba(236,32,41,0.4)] hover:-translate-y-0.5"
+              className="w-full flex items-center justify-center gap-1.5 sm:gap-2 bg-primary hover:bg-primary-dark text-white font-bold py-2.5 sm:py-3.5 rounded-xl transition-all shadow-vj-btn hover:shadow-vj-btn-hover hover:-translate-y-0.5"
             >
               <Icon name="ArrowPathIcon" size={14} />
               Tìm lại
@@ -300,7 +281,14 @@ function SearchErrorModal({ message, onRetry, onDismiss }: SearchErrorModalProps
   );
 }
 
-export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) => void }) {
+export default function FlightResultsStep({
+  onSelect,
+  search,
+}: {
+  onSelect: (f: Flight) => void;
+  /** Route/departure filters from the search form; drive the real API lookup. */
+  search?: { from?: string; to?: string; depart?: string };
+}) {
   const [flights, setFlights] = useState<Flight[]>([]);
   const [sortBy, setSortBy] = useState<string>('price_asc');
   const [filters, setFilters] = useState<Filters>({
@@ -311,10 +299,8 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
     stops: [],
     maxDuration: Infinity,
   });
-  const [filtersOpen, setFiltersOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [hoveredFlight, setHoveredFlight] = useState<string | null>(null);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -356,21 +342,11 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
     setLoadError(null);
 
     try {
-      // Read search params from sessionStorage (set by FlightBookingClient)
-      let fromCode = '';
-      let toCode = '';
-      let departDate: string | undefined;
-      try {
-        const stored = sessionStorage.getItem('vjsim_booking');
-        if (stored) {
-          const bookingData = JSON.parse(stored);
-          fromCode = bookingData.from || '';
-          toCode = bookingData.to || '';
-          departDate = bookingData.date || undefined;
-        }
-      } catch {
-        /* no session data — use default */
-      }
+      // Route/departure come from the URL (the search form), not from a stale
+      // `vjsim_booking` entry — that key is only written once a booking exists.
+      const fromCode = search?.from || '';
+      const toCode = search?.to || '';
+      const departDate = search?.depart || undefined;
 
       const apiFlights =
         fromCode && toCode
@@ -398,7 +374,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [search?.from, search?.to, search?.depart]);
 
   useEffect(() => {
     fetchFlights();
@@ -808,7 +784,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
           <div className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden">
             <div className="h-1 w-full bg-gradient-to-r from-primary/40 via-primary to-primary/40" />
             <div className="px-6 py-8 sm:px-8 sm:py-12 text-center">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[rgb(var(--primary-rgb))]/10 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                 <Icon name="ExclamationTriangleIcon" size={24} className="text-primary" />
               </div>
               <h3 className="text-base sm:text-lg font-black text-[var(--foreground)] dark:text-[var(--foreground)] mb-1.5 sm:mb-2 font-koho">
@@ -840,24 +816,27 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
             const fareClasses = [
               {
                 id: 'business',
+                cabin: 'business' as const,
                 name: 'Business',
                 price: basePrice + 1200000,
                 color:
-                  'bg-[var(--surface-2)] dark:bg-red-900/20 text-[var(--primary)] dark:text-red-400 border-transparent hover:border-[var(--primary)] dark:hover:border-red-400',
+                  'bg-[var(--surface-2)] dark:bg-[rgb(var(--primary-rgb))]/15 text-[var(--primary)] border-transparent hover:border-[var(--primary)]',
                 headerClass: 'bg-[var(--primary)] text-white',
-                priceColor: 'text-[var(--primary)] dark:text-red-400',
+                priceColor: 'text-[var(--primary)]',
               },
               {
                 id: 'skyboss',
+                cabin: 'business' as const,
                 name: 'SkyBOSS',
                 price: basePrice + 800000,
                 color:
-                  'bg-[var(--surface-2)] dark:bg-blue-900/20 text-[var(--foreground)] dark:text-blue-300 border-transparent hover:border-[var(--foreground)] dark:hover:border-blue-400',
+                  'bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground)] border-transparent hover:border-[var(--foreground)]',
                 headerClass: 'bg-[var(--vj-navy)] dark:bg-[var(--dark-surface)] text-white',
-                priceColor: 'text-[var(--foreground)] dark:text-blue-300',
+                priceColor: 'text-[var(--foreground)]',
               },
               {
                 id: 'deluxe',
+                cabin: 'economy' as const,
                 name: 'Deluxe',
                 price: basePrice + 300000,
                 color:
@@ -867,6 +846,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
               },
               {
                 id: 'eco',
+                cabin: 'economy' as const,
                 name: 'Eco',
                 price: basePrice,
                 color:
@@ -957,16 +937,14 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                           {fc.price.toLocaleString('vi-VN')}₫
                         </div>
                         <button
-                          onClick={() =>
-                            onSelect({ ...flight, price: fc.price, class: fc.id as any })
-                          }
+                          onClick={() => onSelect({ ...flight, price: fc.price, class: fc.cabin })}
                           className={`w-[75%] py-1 sm:py-1.5 rounded text-[10px] sm:text-xs font-bold transition-all border ${fc.color}`}
                         >
                           Chọn
                         </button>
                       </div>
                       {/* Overlay effect on hover */}
-                      <div className="absolute inset-0 border-2 border-transparent group-hover:border-[#EC2029] pointer-events-none rounded-lg transition-colors" />
+                      <div className="absolute inset-0 border-2 border-transparent group-hover:border-primary pointer-events-none rounded-lg transition-colors" />
                     </div>
                   ))}
                 </div>
@@ -982,9 +960,11 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
             <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 px-6 sm:px-8 py-8 sm:py-10">
               {/* SVG Illustration */}
               <div className="shrink-0 w-28 h-28 sm:w-36 sm:h-36 flex items-center justify-center">
-                <img
+                <AppImage
                   src="/assets/empty-flight-search.svg"
                   alt="Không tìm thấy chuyến bay"
+                  width={144}
+                  height={144}
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -1201,12 +1181,12 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                         {(isCheapest || isFastest) && (
                           <div className="flex gap-1 mb-2 flex-wrap">
                             {isCheapest && (
-                              <span className="text-[10px] font-black bg-emerald-500 text-white px-2 py-0.5 rounded-full">
+                              <span className="text-[10px] font-black bg-[var(--vj-green)] text-white px-2 py-0.5 rounded-full">
                                 Rẻ nhất
                               </span>
                             )}
                             {isFastest && (
-                              <span className="text-[10px] font-black bg-blue-500 text-white px-2 py-0.5 rounded-full">
+                              <span className="text-[10px] font-black bg-[var(--blue)] text-white px-2 py-0.5 rounded-full">
                                 Nhanh nhất
                               </span>
                             )}
@@ -1251,10 +1231,10 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                     return (
                       <div
                         key={flight.id}
-                        className={`px-4 py-4 flex flex-col justify-center ${isBest ? 'bg-emerald-50/50 dark:bg-emerald-900/20' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]'}`}
+                        className={`px-4 py-4 flex flex-col justify-center ${isBest ? 'bg-[rgb(var(--vj-green-rgb))]/10' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]'}`}
                       >
                         <div
-                          className={`text-xl font-black ${isBest ? 'text-emerald-600 dark:text-emerald-400' : 'text-primary'} font-koho`}
+                          className={`text-xl font-black ${isBest ? 'text-[var(--vj-green)]' : 'text-primary'} font-koho`}
                         >
                           {flight.price.toLocaleString('vi-VN')}₫
                         </div>
@@ -1310,10 +1290,10 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                     return (
                       <div
                         key={flight.id}
-                        className={`px-4 py-4 flex flex-col justify-center ${isBest ? 'bg-blue-50/50 dark:bg-blue-900/20' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]'}`}
+                        className={`px-4 py-4 flex flex-col justify-center ${isBest ? 'bg-[rgb(var(--blue-rgb))]/10' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]'}`}
                       >
                         <div
-                          className={`text-lg font-black ${isBest ? 'text-blue-600 dark:text-blue-400' : 'text-[var(--foreground)]'} font-koho`}
+                          className={`text-lg font-black ${isBest ? 'text-[var(--blue)]' : 'text-[var(--foreground)]'} font-koho`}
                         >
                           {flight.duration}
                         </div>
@@ -1331,7 +1311,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                       className="px-4 py-4 flex flex-col justify-center bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]"
                     >
                       <div
-                        className={`text-sm font-bold ${flight.stops === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}
+                        className={`text-sm font-bold ${flight.stops === 0 ? 'text-[var(--vj-green)]' : 'text-[var(--accent-dark)]'}`}
                       >
                         {flight.stops === 0 ? 'Bay thẳng' : `${flight.stops} điểm dừng`}
                       </div>
@@ -1380,7 +1360,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                     return (
                       <div
                         key={flight.id}
-                        className={`px-4 py-3 flex flex-col justify-center ${isBest ? 'bg-emerald-50/50 dark:bg-emerald-900/20' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]'}`}
+                        className={`px-4 py-3 flex flex-col justify-center ${isBest ? 'bg-[rgb(var(--vj-green-rgb))]/10' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]'}`}
                       >
                         <div className="text-sm font-semibold text-[var(--foreground)]">
                           {flight.price.toLocaleString('vi-VN')}₫
@@ -1398,7 +1378,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                     return (
                       <div
                         key={flight.id}
-                        className={`px-4 py-3 flex flex-col justify-center ${isBest ? 'bg-emerald-50/50 dark:bg-emerald-900/20' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]'}`}
+                        className={`px-4 py-3 flex flex-col justify-center ${isBest ? 'bg-[rgb(var(--vj-green-rgb))]/10' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]'}`}
                       >
                         <div className="text-sm font-semibold text-[var(--foreground-muted)]">
                           +{flight.price.toLocaleString('vi-VN')}₫
@@ -1416,7 +1396,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                     return (
                       <div
                         key={flight.id}
-                        className={`px-4 py-3 flex flex-col justify-center ${isBest ? 'bg-emerald-50/50 dark:bg-emerald-900/20' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]'}`}
+                        className={`px-4 py-3 flex flex-col justify-center ${isBest ? 'bg-[rgb(var(--vj-green-rgb))]/10' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]'}`}
                       >
                         <div className="text-sm font-semibold text-[var(--foreground-muted)]">
                           +{flight.price.toLocaleString('vi-VN')}₫
@@ -1434,9 +1414,9 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                     return (
                       <div
                         key={flight.id}
-                        className={`px-4 py-3 flex flex-col justify-center ${isBest ? 'bg-emerald-50/50 dark:bg-emerald-900/20' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]'}`}
+                        className={`px-4 py-3 flex flex-col justify-center ${isBest ? 'bg-[rgb(var(--vj-green-rgb))]/10' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]'}`}
                       >
-                        <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                        <div className="text-sm font-semibold text-[var(--vj-green)]">
                           -{flight.price.toLocaleString('vi-VN')}₫
                         </div>
                       </div>
@@ -1456,7 +1436,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                     return (
                       <div
                         key={flight.id}
-                        className={`px-4 py-4 flex flex-col justify-center ${isBest ? 'bg-emerald-50/50 dark:bg-emerald-900/20' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]'}`}
+                        className={`px-4 py-4 flex flex-col justify-center ${isBest ? 'bg-[rgb(var(--vj-green-rgb))]/10' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]'}`}
                       >
                         <div className="text-lg font-black text-primary font-koho">
                           {flight.price.toLocaleString('vi-VN')}₫
@@ -1513,70 +1493,71 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
 
       {/* Booking Summary Sidebar */}
       <aside className="w-full lg:w-[280px] xl:w-[320px] shrink-0">
-        <div
-          className="bg-white rounded-xl border border-[#EC2029]/20 sticky top-[160px] overflow-hidden shadow-sm"
-          style={{ boxShadow: '0 4px 12px rgba(209,22,27,0.08)' }}
-        >
+        <div className="bg-[var(--background)] rounded-xl border border-primary/20 sticky top-[160px] overflow-hidden shadow-sm">
           {/* Top Bar */}
-          <div className="h-1 w-full bg-[#EC2029]" />
-          <div className="bg-[#1A2948] p-3 text-white flex items-center justify-center relative">
+          <div className="h-1 w-full bg-primary" />
+          <div className="bg-[var(--vj-navy)] p-3 text-white flex items-center justify-center relative">
             <h3 className="font-black font-koho text-sm tracking-wider uppercase">
               Thông tin đặt chỗ
             </h3>
             <div className="absolute right-0 top-0 h-full overflow-hidden flex items-center pointer-events-none">
-              <div className="w-16 h-24 bg-white/5 rounded-full transform -translate-x-1/4 -translate-y-1/2rotate-45" />
+              <div className="w-16 h-24 bg-white/5 rounded-full -translate-x-1/4 -rotate-45" />
             </div>
           </div>
 
           <div className="p-4 space-y-4">
-            <div className="border border-[#EC2029]/10 rounded-lg p-3 bg-[#EC2029]/5 border-l-4 border-l-[#EC2029]">
+            <div className="border border-[rgb(var(--primary-rgb))]/10 rounded-lg p-3 bg-[rgb(var(--primary-rgb))]/5 border-l-4 border-l-primary">
               <div className="flex justify-between items-start mb-2">
-                <span className="font-bold text-[#1A2948] font-koho text-sm uppercase">
+                <span className="font-bold text-[var(--vj-navy)] dark:text-[var(--foreground)] font-koho text-sm uppercase">
                   Chuyến đi
                 </span>
-                <button className="text-[10px] font-bold text-[#EC2029] hover:underline">
+                <button className="text-[10px] font-bold text-primary hover:underline">
                   Chi tiết
                 </button>
               </div>
-              <div className="text-xs text-gray-500 italic pb-1">Vui lòng chọn chuyến bay</div>
+              <div className="text-xs text-[var(--foreground-muted)] italic pb-1">
+                Vui lòng chọn chuyến bay
+              </div>
             </div>
 
-            <div className="border border-gray-100 rounded-lg p-3 bg-gray-50/50">
+            <div className="border border-[var(--border)] dark:border-[var(--dark-border)] rounded-lg p-3 bg-[rgb(var(--surface-2-rgb))]/50 dark:bg-[rgb(var(--dark-surface-2-rgb))]/50">
               <div className="flex justify-between items-start mb-2">
-                <span className="font-bold text-gray-600 font-koho text-sm uppercase">
+                <span className="font-bold text-[var(--foreground-muted)] font-koho text-sm uppercase">
                   Hành khách
                 </span>
               </div>
-              <div className="flex justify-between items-center text-xs text-gray-600 font-semibold border-b border-dashed border-gray-200 pb-2 mb-2">
+              <div className="flex justify-between items-center text-xs text-[var(--foreground-muted)] font-semibold border-b border-dashed border-[var(--border)] dark:border-[var(--dark-border)] pb-2 mb-2">
                 <span>Người lớn (x1)</span>
                 <span>0₫</span>
               </div>
               <div className="flex justify-between items-center mt-2">
-                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                <span className="text-[10px] text-[var(--foreground-muted)] font-bold uppercase tracking-wider">
                   Hành lý & Dịch vụ
                 </span>
-                <span className="text-xs font-semibold text-gray-400">Chưa chọn</span>
+                <span className="text-xs font-semibold text-[var(--foreground-subtle)]">
+                  Chưa chọn
+                </span>
               </div>
             </div>
 
-            <div className="border-t-2 border-dashed border-gray-200 pt-3 relative">
-              <div className="absolute -left-5 top-1.5 w-3 h-3 bg-gray-50 rounded-full border-r border-[#EC2029]/20" />
-              <div className="absolute -right-5 top-1.5 w-3 h-3 bg-gray-50 rounded-full border-l border-[#EC2029]/20" />
+            <div className="border-t-2 border-dashed border-[var(--border)] dark:border-[var(--dark-border)] pt-3 relative">
+              <div className="absolute -left-5 top-1.5 w-3 h-3 bg-[var(--surface)] rounded-full border-r border-[rgb(var(--primary-rgb))]/20" />
+              <div className="absolute -right-5 top-1.5 w-3 h-3 bg-[var(--surface)] rounded-full border-l border-[rgb(var(--primary-rgb))]/20" />
               <div className="flex justify-between items-center mb-1">
-                <span className="font-black text-gray-600 font-koho text-[11px] tracking-widest uppercase">
+                <span className="font-black text-[var(--foreground-muted)] font-koho text-[11px] tracking-widest uppercase">
                   Tóm tắt
                 </span>
               </div>
               <div className="flex justify-between items-end mt-2">
-                <span className="text-xs text-gray-500 font-bold">Tổng tiền:</span>
-                <span className="text-xl font-black text-[#EC2029] font-koho leading-none">
+                <span className="text-xs text-[var(--foreground-muted)] font-bold">Tổng tiền:</span>
+                <span className="text-xl font-black text-primary font-koho leading-none">
                   0
                   <span className="text-sm underline decoration-2 underline-offset-2 ml-0.5">
                     đ
                   </span>
                 </span>
               </div>
-              <div className="text-right text-[10px] text-gray-400 italic mt-1">
+              <div className="text-right text-[10px] text-[var(--foreground-subtle)] italic mt-1">
                 Đã bao gồm thuế, phí, phụ thu
               </div>
             </div>

@@ -9,6 +9,8 @@ export const API_ENDPOINTS = {
     LOGOUT: '/api/xac-thuc/dang-xuat',
     REFRESH: '/api/xac-thuc/lam-moi',
     ME: '/api/xac-thuc/toi',
+    FORGOT_PASSWORD: '/api/xac-thuc/quen-mat-khau',
+    RESET_PASSWORD: '/api/xac-thuc/dat-lai-mat-khau',
   },
   FLIGHTS: {
     SEARCH: '/api/chuyen-bay',

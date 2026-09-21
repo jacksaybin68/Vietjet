@@ -17,7 +17,6 @@ import {
   MdChair,
   MdPassword,
 } from 'react-icons/md';
-import { AppImage } from '@/shared/components/ui';
 import { apiRequest, ApiRequestError } from '@/shared/services';
 
 interface CheckInData {
@@ -39,6 +38,8 @@ interface CheckInData {
   boardingTime?: string;
   /** Raw ISO depart time from API (for POST payload) */
   departTimeRaw?: string;
+  /** Flight duration label, e.g. "2h 10ph" */
+  duration: string;
   /** Whether this booking is already checked in */
   hasCheckIn?: boolean;
   /** Check-in number (e.g. VN-XXXX) issued after check-in */
@@ -46,12 +47,6 @@ interface CheckInData {
   /** Boarding pass number issued after check-in */
   boardingPassNumber?: string;
 }
-
-// Couleurs officielles Vietjet (tokens du thème)
-const RED = 'var(--vj-red)';
-const RED_DARK = 'var(--vj-red-dark)';
-const GOLD = 'var(--vj-yellow)';
-const NAVY = 'var(--vj-navy)';
 
 const STEPS = [
   { id: 'search', n: 1, label: 'Tìm đặt chỗ' },
@@ -63,9 +58,9 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
   const router = useRouter();
   const toast = useToast();
 
-  const [step, setStep] = useState<'search' | 'confirm' | 'success'>(
-    prefillBookingId ? 'confirm' : 'search'
-  );
+  // The URL only carries the booking code; the surname is still required by the
+  // lookup API, so we prefill the code and stay on the search step.
+  const [step, setStep] = useState<'search' | 'confirm' | 'success'>('search');
   const [bookingCode, setBookingCode] = useState(prefillBookingId);
   const [lastName, setLastName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -117,6 +112,13 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
         const fmt = (d: Date | null) =>
           d ? d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '--:--';
 
+        // Derive the duration from the real times instead of hardcoding it.
+        let duration = '—';
+        if (departTime && arriveTime && arriveTime > departTime) {
+          const mins = Math.round((arriveTime.getTime() - departTime.getTime()) / 60000);
+          duration = `${Math.floor(mins / 60)}h ${String(mins % 60).padStart(2, '0')}ph`;
+        }
+
         setCheckInData({
           bookingId: b.id,
           flightNo: flight.flight_no || '--',
@@ -140,6 +142,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
               })
             : undefined,
           departTimeRaw: flight.depart_time || undefined,
+          duration,
           hasCheckIn: data.hasCheckIn,
           checkInNumber: data.checkIn?.check_in_number || undefined,
           boardingPassNumber: data.checkIn?.boarding_pass_number || undefined,
@@ -209,7 +212,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
     } catch (error) {
       if (error instanceof ApiRequestError && (error.status === 401 || error.status === 403)) {
         toast.error('Yêu cầu đăng nhập', 'Vui lòng đăng nhập để thực hiện check-in online.');
-        router.push('/dang-nhap?next=/lam-thu-tuc');
+        router.push('/dang-nhap?redirect=/lam-thu-tuc');
         return;
       }
 
@@ -291,7 +294,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
         {step === 'search' && (
           <div className="grid lg:grid-cols-[1.1fr_1fr] gap-6">
             {/* Thẻ form tra cứu */}
-            <div className="overflow-hidden rounded-xl border border-[var(--vj-sky)] bg-white shadow-md">
+            <div className="overflow-hidden rounded-xl border border-[var(--vj-sky)] bg-[var(--background)] dark:bg-[var(--dark-surface)] shadow-md">
               <div className="bg-[var(--vj-navy)] px-5 py-3 text-white font-black text-sm uppercase flex items-center gap-2">
                 <MdConfirmationNumber className="h-4 w-4 text-[var(--vj-yellow)]" />
                 Tra cứu đặt chỗ
@@ -313,7 +316,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                     />
                   </div>
                   <p className="mt-0.5 text-[11px] text-[var(--vj-text-muted)]">
-                    Exemple : VD-12345678 (sur votre confirmation email)
+                    Ví dụ: VD-12345678 (có trên email xác nhận của bạn)
                   </p>
                 </div>
 
@@ -322,15 +325,17 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                     <label className="mb-1 block text-xs font-bold uppercase text-[var(--vj-text-gray)]">
                       Họ (Surname) <span className="text-[var(--vj-red)]">*</span>
                     </label>
-                    <MdPassword className="pointer-events-none absolute right-3 top-7 h-4 w-4 text-[var(--vj-text-muted)]" />
-                    <input
-                      type="text"
-                      required
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      placeholder="NGUYEN"
-                      className={fieldClass}
-                    />
+                    <div className="relative">
+                      <MdPassword className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--vj-text-muted)]" />
+                      <input
+                        type="text"
+                        required
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        placeholder="NGUYEN"
+                        className={`${fieldClass} pl-9`}
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -351,10 +356,10 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
 
             {/* Card sidebar : cách thức hoạt động */}
             <div className="space-y-4">
-              <div className="rounded-xl border border-[var(--vj-sky)] bg-white shadow-sm">
+              <div className="rounded-xl border border-[var(--vj-sky)] bg-[var(--background)] dark:bg-[var(--dark-surface)] shadow-sm">
                 <h3 className="px-4 py-3 text-sm font-black text-[var(--vj-text)] uppercase border-b border-[var(--vj-sky)] flex items-center gap-2">
                   <MdInfoOutline className="h-4 w-4 text-[var(--vj-red)]" />
-                  Comment funciona
+                  Quy trình check-in
                 </h3>
                 <ol className="p-4 space-y-3 text-sm text-[var(--vj-text-gray)]">
                   {[
@@ -372,8 +377,8 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                 </ol>
               </div>
 
-              <div className="rounded-xl border border-[rgb(var(--vj-yellow-rgb))]/40 bg-[#FFF8E1] p-4 text-[13px] text-[#7a6a00]">
-                <div className="flex items-center gap-2 font-bold text-[#8a6d00]">
+              <div className="rounded-xl border border-[rgb(var(--vj-yellow-rgb))]/50 bg-[rgb(var(--vj-yellow-rgb))]/15 p-4 text-[13px] text-[var(--foreground)]">
+                <div className="flex items-center gap-2 font-bold text-[var(--vj-red)]">
                   <MdInfoOutline className="h-4 w-4 text-[var(--vj-red)]" />
                   Lưu ý quan trọng
                 </div>
@@ -391,7 +396,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
         {/* ============ BƯỚC 2: XÁC NHẬN ============ */}
         {step === 'confirm' && checkInData && (
           <div className="mx-auto max-w-[700px]">
-            <div className="overflow-hidden rounded-xl border border-[var(--vj-sky)] bg-white shadow-lg">
+            <div className="overflow-hidden rounded-xl border border-[var(--vj-sky)] bg-[var(--background)] dark:bg-[var(--dark-surface)] shadow-lg">
               <div className="bg-[var(--vj-navy)] px-5 py-3 text-white font-black text-sm uppercase flex items-center gap-2">
                 <MdChair className="h-4 w-4 text-[var(--vj-yellow)]" />
                 Xác nhận và chọn chỗ ngồi
@@ -412,13 +417,13 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                     </p>
                   </div>
                   <div className="flex-1 mx-4 text-center text-xs text-[var(--vj-text-muted)]">
-                    <p className="font-semibold">~2h 10min</p>
+                    <p className="font-semibold">{checkInData.duration}</p>
                     <div className="mt-1 relative h-px bg-[var(--border)]">
                       <div className="absolute -left-1 -top-1 h-2 w-2 rounded-full border border-[var(--vj-red)]" />
                       <FlightIcon className="absolute -top-3 left-1/2 -translate-x-1/2 text-[var(--vj-red)]" />
                       <div className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-[rgb(var(--vj-red-rgb))]/40" />
                     </div>
-                    <p className="mt-1 text-[var(--vj-text-muted)]">Trực tiếp · Sans escale</p>
+                    <p className="mt-1 text-[var(--vj-text-muted)]">Bay thẳng · Không dừng</p>
                   </div>
                   <div>
                     <p className="text-2xl font-black text-[var(--vj-text)]">{checkInData.to}</p>
@@ -441,19 +446,19 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                 </div>
                 <div>
                   <p className="text-[11px] font-bold uppercase text-[var(--vj-text-muted)]">
-                    Siège attribué
+                    Ghế đã chọn
                   </p>
                   <p className="text-2xl font-black text-[var(--vj-red)]">{checkInData.seat}</p>
                 </div>
                 <div>
                   <p className="text-[11px] font-bold uppercase text-[var(--vj-text-muted)]">
-                    Porte & Terminal
+                    Cửa ra máy bay &amp; Nhà ga
                   </p>
                   <p className="font-bold text-[var(--vj-text)]">
                     {checkInData.gate} · {checkInData.terminal}
                   </p>
                   <p className="text-xs text-[var(--vj-text-muted)]">
-                    Embarquement : {checkInData.boardingTime}
+                    Lên máy bay: {checkInData.boardingTime}
                   </p>
                 </div>
               </div>
@@ -466,7 +471,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                     id="agree"
                     checked={agreed}
                     onChange={(e) => setAgreed(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-gray-300 text-[var(--vj-red)] focus:ring-[var(--vj-red)]"
+                    className="mt-1 h-4 w-4 rounded border-[var(--border)] text-[var(--vj-red)] focus:ring-[var(--vj-red)]"
                   />
                   <label
                     htmlFor="agree"
@@ -481,7 +486,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                   <button
                     type="button"
                     onClick={() => setStep('search')}
-                    className="w-1/3 rounded-lg border border-[rgb(var(--vj-navy-rgb))]/20 bg-white py-3 text-sm font-bold uppercase text-[var(--vj-text-gray)] hover:bg-gray-50"
+                    className="w-1/3 rounded-lg border border-[rgb(var(--vj-navy-rgb))]/20 bg-[var(--background)] dark:bg-[var(--dark-surface)] py-3 text-sm font-bold uppercase text-[var(--vj-text-gray)] hover:bg-[var(--surface-2)]"
                   >
                     Quay lại
                   </button>
@@ -510,7 +515,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
             <div className="text-center">
               <MdCheckCircle className="mx-auto text-6xl text-[var(--vj-blue)]" />
               <h2 className="mt-2 text-2xl font-black text-[var(--vj-text)] uppercase">
-                Check-in !
+                Check-in thành công!
               </h2>
               <p className="text-sm text-[var(--vj-text-gray)]">
                 Thẻ lên máy bay của bạn: tải xuống và xuất trình khi lên máy bay.
@@ -518,7 +523,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
             </div>
 
             {/* Boarding pass style Vietjet */}
-            <div className="mx-auto max-w-md overflow-hidden rounded-2xl bg-white shadow-xl border border-[var(--vj-sky)]">
+            <div className="mx-auto max-w-md overflow-hidden rounded-2xl bg-[var(--background)] dark:bg-[var(--dark-surface)] shadow-xl border border-[var(--vj-sky)]">
               {/* top stamp */}
               <div className="px-5 py-4 bg-[var(--vj-navy)]">
                 <div className="flex items-center gap-2">
@@ -591,7 +596,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                 )}
                 {/* QR */}
                 <div className="mt-4 flex justify-center">
-                  <MdQrCode2 className="text-8xl text-[#111827]" />
+                  <MdQrCode2 className="text-8xl text-[var(--vj-navy)]" />
                 </div>
                 <div className="flex border-t border-dashed border-[rgb(var(--vj-navy-rgb))]/20 mt-4">
                   <p className="w-full border-b-0" />
@@ -606,7 +611,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
             <div className="flex justify-center gap-3">
               <button
                 onClick={() => window.print()}
-                className="rounded-lg border border-[rgb(var(--vj-navy-rgb))]/20 bg-white px-6 py-2.5 text-sm font-bold uppercase text-[var(--vj-text-gray)] hover:bg-gray-50"
+                className="rounded-lg border border-[rgb(var(--vj-navy-rgb))]/20 bg-[var(--background)] dark:bg-[var(--dark-surface)] px-6 py-2.5 text-sm font-bold uppercase text-[var(--vj-text-gray)] hover:bg-[var(--surface-2)]"
               >
                 In thẻ lên máy bay
               </button>

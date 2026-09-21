@@ -62,6 +62,8 @@ protocol — raw `DATABASE_URL=postgresql://localhost/...` fails with
   `middleware.ts` seeds the `csrf_token` cookie for cookieless sessions, so
   `getCsrfHeaders()` always has a value to echo back. When adding enforcement,
   migrate the client to `apiRequest` in the same change or the UI breaks with 403.
+  The password-reset routes do not use the auth helpers, so they call
+  `validateCsrfOrReject` themselves — keep that call when editing them.
 - **`verifyAdminRequest` returns a discriminated union.** Failure always carries
   `response`, so `const { error, response } = await verifyAdminRequest(...); if (error)
 return response;` narrows correctly and avoids returning `undefined` from a handler.
@@ -143,17 +145,42 @@ Brand red is `#EC2029` (hover `#D91A21`, dark `#6F0000`); the CTA/action yellow 
 `#FFDD00` with the deeper `#F9A51A`/`#FBB612` accents. Theme values live in
 `tailwind.config.js` and `src/styles/tailwind.css`. Keep pages on these tokens — a
 past palette (`#ED1D23`, `#E30613`, `#FFD400`, `#FFC400`) was removed, so reintroducing
-one of those hexes is a regression, not a neutral choice.
+one of those hexes is a regression, not a neutral choice. The same applies to off-brand
+neutrals that ignore the tokens: `/chuyen-bay-cua-toi` and `/lam-thu-tuc` once used
+`#1e293b`/`#fff5f5`/`#FFF8E1`/`#7a6a00`/`#111827` and raw `gray-50`/`gray-300`; use
+`var(--foreground*)`, `var(--surface*)` and `var(--border)` instead so dark mode works.
 
 `vj-menubar` styles the red uppercase nav row and `vj-cta` the gold pill button; prefer
-those utilities over restyling a bespoke button. Most pages render `<Header />` and
+those utilities over restyling a bespoke button. `vj-btn` + `vj-btn-primary` is the
+brand-red action button (`vj-btn-pill` rounds it); most pages render `<Header />` and
 `<Footer />` from `@/shared/components/navigation` themselves (only `/dang-nhap`,
-`/editor`, `/quan-tri` are intentionally standalone), so a new page should add both.
+`/quen-mat-khau`, `/dat-lai-mat-khau`, `/editor`, `/quan-tri` are intentionally
+standalone), so a new page should add both.
+
+The auth screens share `AuthShell` (split brand/form layout) and `AlertBanner` from
+`@/features/auth/components`; `/dang-nhap` toggles login and registration in one route
+(`?tab=register` deep-links registration, `?redirect=` restores the bounced path).
+Password recovery is `/quen-mat-khau` (request a link) → `/dat-lai-mat-khau?token=…`
+(consume it). Tokens are single-use and hashed in `account_recovery` via
+`src/lib/password-reset.ts`; a successful reset revokes refresh tokens and sessions.
+There is no mail transport, so the request endpoint echoes `resetUrl` only outside
+production.
 
 `/hanh-ly` is a redirect to `/dich-vu?service=baggage`, and `/dich-vu` reads the
 `service` query param (`baggage`, `meal`, `seat`, `insurance`, `priority`, `lounge`) to
 preselect a panel. Link services as `/dich-vu?service=<id>` rather than as subpaths like
 `/dich-vu/hanh-ly`, which do not exist and 404.
+
+`/lam-thu-tuc-truc-tuyen` is a legacy alias that 307s to `/lam-thu-tuc`; it forwards the
+whole query string, so `?code=` survives. Both are in `PUBLIC_ROUTES` — the check-in
+lookup is anonymous (booking code + surname are the credentials). `/chuyen-bay-cua-toi`
+is public too, but it reads `/api/checkin/status/[bookingId]`, which is *not* in
+`PUBLIC_API_ROUTES`, so a signed-out visitor sees the booking-code lookup and an empty
+state rather than someone else's reservations.
+
+`useToast` owns its own state: render `<ToastContainer toasts={toast.toasts}
+onDismiss={toast.dismiss} />`. Passing a literal `toasts={[]}` compiles and renders but
+silently swallows every toast.
 
 ### Tailwind gotchas that caused real regressions
 

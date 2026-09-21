@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Icon } from '@/shared/components/ui';
 import FlightResultsStep from './FlightResultsStep';
@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 import { ErrorBoundary } from '@/shared/components/feedback';
 import { createBooking } from '@/features/bookings/services';
+import { getBookingTotals, type AncillaryId } from '@/features/bookings';
 
 export type Flight = {
   id: string;
@@ -38,12 +39,13 @@ export type BookingState = {
   selectedFlight: Flight | null;
   passengers: Passenger[];
   selectedSeats: string[];
+  ancillaries: AncillaryId[];
 };
 
 const STEPS = [
-  { id: 1, label: 'Chọn chuyến bay', icon: 'MagnifyingGlassIcon' as const },
-  { id: 2, label: 'Thông tin hành khách', icon: 'UserIcon' as const },
-  { id: 3, label: 'Chọn chỗ ngồi', icon: 'TicketIcon' as const },
+  { id: 1, label: 'Chọn chuyến bay' },
+  { id: 2, label: 'Thông tin hành khách' },
+  { id: 3, label: 'Chọn chỗ ngồi' },
 ];
 
 export type SearchParams = {
@@ -75,12 +77,12 @@ function FlightBookingClientInner() {
       gender: 'male',
     })),
     selectedSeats: [],
+    ancillaries: [],
   }));
   const router = useRouter();
   const toast = useToast();
 
   const handleFlightSelect = (flight: Flight) => {
-    // #endregion
     setBooking((b) => ({ ...b, selectedFlight: flight }));
     setStep(2);
     toast.success(
@@ -98,7 +100,11 @@ function FlightBookingClientInner() {
     );
   };
 
-  const handleSeatConfirm = async (seats: string[], seatPrices: number[]) => {
+  const handleSeatConfirm = async (
+    seats: string[],
+    seatPrices: number[],
+    ancillaries: AncillaryId[]
+  ) => {
     try {
       const flightId = booking.selectedFlight?.id;
       if (!flightId) {
@@ -108,21 +114,24 @@ function FlightBookingClientInner() {
       const passengers = booking.passengers;
       const basePrice = booking.selectedFlight?.price || 0;
 
-      const passengerCount = passengers.length;
-      const taxAndFee = Math.round(basePrice * passengerCount * 0.15);
       const seatsFee = seatPrices.reduce((sum, price) => sum + price, 0);
-      const totalPrice = basePrice * passengerCount + taxAndFee + seatsFee;
+      const totals = getBookingTotals({
+        farePerPassenger: basePrice,
+        passengerCount: passengers.length,
+        seatFee: seatsFee,
+        ancillaries,
+      });
 
       const data = await createBooking({
         flight_id: flightId,
-        total_price: totalPrice,
+        total_price: totals.total,
         passengers: passengers,
         seats: seats,
       });
 
       const bookingId = data.booking.id;
 
-      setBooking((b) => ({ ...b, selectedSeats: seats }));
+      setBooking((b) => ({ ...b, selectedSeats: seats, ancillaries }));
 
       sessionStorage.setItem(
         'vjsim_booking',
@@ -137,9 +146,12 @@ function FlightBookingClientInner() {
           arriveTime: booking.selectedFlight?.arriveTime,
           date: new Date().toLocaleDateString('vi-VN'),
           passengers: passengers.map((p, i) => ({ name: p.name, seat: seats[i] })),
-          basePrice: basePrice * passengerCount,
-          tax: taxAndFee,
-          seatFee: seatsFee,
+          fareSubtotal: totals.fareSubtotal,
+          tax: totals.taxAndFee,
+          seatFee: totals.seatFee,
+          ancillaryFee: totals.ancillaryFee,
+          ancillaries,
+          total: totals.total,
         })
       );
 
@@ -149,8 +161,8 @@ function FlightBookingClientInner() {
         { duration: 3000 }
       );
       setTimeout(() => router.push(`/thanh-toan?bookingId=${bookingId}`), 800);
-    } catch (err: any) {
-      toast.error('Lỗi đặt chỗ', err.message || 'Không thể tạo booking');
+    } catch (err) {
+      toast.error('Lỗi đặt chỗ', err instanceof Error ? err.message : 'Không thể tạo booking');
     }
   };
 
@@ -230,7 +242,7 @@ function FlightBookingClientInner() {
       <div className="max-w-5xl mx-auto px-3 sm:px-4 md:px-6 mt-4 sm:mt-6">
         {step === 1 && (
           <ErrorBoundary inline variant="api" retryLabel="Tìm lại chuyến bay">
-            <FlightResultsStep onSelect={handleFlightSelect} />
+            <FlightResultsStep onSelect={handleFlightSelect} search={params} />
           </ErrorBoundary>
         )}
         {step === 2 && (
