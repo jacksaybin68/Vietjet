@@ -29,7 +29,7 @@ const MONTHLY_REVENUE = [
 
 const ROUTE_REVENUE = [
   { route: 'HAN→SGN', revenue: 1820000000, tickets: 1245, color: '#ED1C24' },
-  { route: 'SGN→PQC', revenue: 980000000, tickets: 876, color: '#FFD400' },
+  { route: 'SGN→PQC', revenue: 980000000, tickets: 876, color: '#FFDD00' },
   { route: 'HAN→DAD', revenue: 654000000, tickets: 698, color: '#3B82F6' },
   { route: 'SGN→HAN', revenue: 756000000, tickets: 634, color: '#10B981' },
   { route: 'Khác', revenue: 610000000, tickets: 394, color: '#8B5CF6' },
@@ -37,7 +37,7 @@ const ROUTE_REVENUE = [
 
 const CLASS_SPLIT = [
   { name: 'Phổ thông', value: 78, color: '#ED1C24' },
-  { name: 'Thương gia', value: 22, color: '#FFD400' },
+  { name: 'Thương gia', value: 22, color: '#FFDD00' },
 ];
 
 const formatCurrency = (val: number) => {
@@ -230,9 +230,9 @@ export default function RevenueTab() {
                 type="monotone"
                 dataKey="tickets"
                 name="Số vé"
-                stroke="#FFD400"
+                stroke="#FFDD00"
                 strokeWidth={3}
-                dot={{ fill: '#FFD400', r: 4 }}
+                dot={{ fill: '#FFDD00', r: 4 }}
                 activeDot={{ r: 6 }}
               />
             </LineChart>

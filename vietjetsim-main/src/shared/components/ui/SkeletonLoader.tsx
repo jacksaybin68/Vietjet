@@ -509,7 +509,7 @@ export function UpcomingBookingsSkeleton({ count = 2 }: { count?: number }) {
 // ─── Flight Search Form Skeleton ──────────────────────────────────────────────
 export function FlightSearchFormSkeleton() {
   return (
-    <div className="lg:col-span-2 flex flex-col" style={{ background: '#ED1D23' }}>
+    <div className="lg:col-span-2 flex flex-col" style={{ background: '#EC2029' }}>
       {/* Service tabs skeleton */}
       <div className="flex gap-0.5">
         {[0, 1, 2].map((i) => (

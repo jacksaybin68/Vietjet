@@ -260,7 +260,7 @@ export default function SstkTab({ onToast }: { onToast?: ToastAPI }) {
           <div className="flex-1 min-w-0">
             <div
               className="font-semibold text-sm"
-              style={{ color: lastResult.success ? '#166534' : '#991B1B' }}
+              style={{ color: lastResult.success ? '#166534' : '#6F0000' }}
             >
               {lastResult.label} — {STATUS_BADGE[lastResult.status]?.label || lastResult.status}
             </div>
@@ -487,7 +487,7 @@ export default function SstkTab({ onToast }: { onToast?: ToastAPI }) {
             {/* Modal header */}
             <div
               className="px-5 py-4 border-b border-gray-100"
-              style={{ background: 'linear-gradient(135deg, #EC2029 0%, #B91C1C 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #EC2029 0%, #D91A21 100%)' }}
             >
               <h3 className="text-white font-bold text-base font-heading-sm">Cấu hình tham số</h3>
               <p className="text-white/70 text-xs mt-0.5 font-koho">

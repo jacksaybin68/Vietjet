@@ -95,6 +95,29 @@ tested by importing them directly and passing a real `NextRequest` with a real J
 `signAccessToken` in `@/lib/auth`. `@/lib/neon` is mocked there. Prefer this over
 mocking business logic.
 
+`setup.ts` stubs `next/navigation` (`useRouter`/`usePathname`/`useSearchParams`/`useParams`).
+Components are rendered outside an `<AppRouterContext>`, so any component calling
+`useRouter` throws "invariant expected app router to be mounted" without it. Add to that
+mock rather than wrapping individual tests in a router provider.
+
+## UI design system
+
+Brand red is `#EC2029` (hover `#D91A21`, dark `#6F0000`); the CTA/action yellow is
+`#FFDD00` with the deeper `#F9A51A`/`#FBB612` accents. Theme values live in
+`tailwind.config.js` and `src/styles/tailwind.css`. Keep pages on these tokens — a
+past palette (`#ED1D23`, `#E30613`, `#FFD400`, `#FFC400`) was removed, so reintroducing
+one of those hexes is a regression, not a neutral choice.
+
+`vj-menubar` styles the red uppercase nav row and `vj-cta` the gold pill button; prefer
+those utilities over restyling a bespoke button. Most pages render `<Header />` and
+`<Footer />` from `@/shared/components/navigation` themselves (only `/dang-nhap`,
+`/editor`, `/quan-tri` are intentionally standalone), so a new page should add both.
+
+`/hanh-ly` is a redirect to `/dich-vu?service=baggage`, and `/dich-vu` reads the
+`service` query param (`baggage`, `meal`, `seat`, `insurance`, `priority`, `lounge`) to
+preselect a panel. Link services as `/dich-vu?service=<id>` rather than as subpaths like
+`/dich-vu/hanh-ly`, which do not exist and 404.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know

@@ -119,7 +119,7 @@ export default function SignUpLoginPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f6f8] font-body">
-      <div className="h-1 w-full bg-[#FFD400]" />
+      <div className="h-1 w-full bg-[#FFDD00]" />
       <div className="mx-auto flex min-h-[calc(100vh-4px)] max-w-7xl items-center px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid w-full overflow-hidden rounded-[2rem] border border-[#e9eaee] bg-white shadow-[0_12px_40px_rgba(26,41,72,0.12)] lg:grid-cols-[1.1fr_1fr]">
           <div className="relative hidden overflow-hidden bg-gradient-red-vj px-10 py-12 text-white lg:flex lg:flex-col">
@@ -137,13 +137,13 @@ export default function SignUpLoginPage() {
                 <AppLogo size={44} />
               </Link>
               <p className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide">
-                <span className="h-2 w-2 rounded-full bg-[#FFD400]" />
+                <span className="h-2 w-2 rounded-full bg-[#FFDD00]" />
                 Bay là thích ngay!
               </p>
               <h1 className="mt-6 text-5xl font-black italic leading-tight">
                 Vietjet
                 <br />
-                <span className="text-[#FFD400]">SkyJoy</span>
+                <span className="text-[#FFDD00]">SkyJoy</span>
               </h1>
               <p className="mt-4 max-w-sm text-sm leading-6 text-white/85">
                 Trải nghiệm tài khoản hội viên hiện đại, quản lý đặt vé, ưu đãi và lịch sử bay theo
@@ -157,7 +157,7 @@ export default function SignUpLoginPage() {
                 'Tích điểm và đổi quà SkyJoy',
               ].map((item) => (
                 <p key={item} className="flex items-center gap-2 text-white/90">
-                  <Icon name="CheckCircleIcon" size={16} className="text-[#FFD400]" />
+                  <Icon name="CheckCircleIcon" size={16} className="text-[#FFDD00]" />
                   {item}
                 </p>
               ))}

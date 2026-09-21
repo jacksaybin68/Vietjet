@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Icon } from '@/shared/components/ui';
+import { Header, Footer } from '@/shared/components/navigation';
 
 interface ServiceItem {
   id: string;
@@ -112,6 +113,14 @@ export default function ServicesPage() {
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
+  // Deep link support: /dich-vu?service=baggage preselects that service.
+  // Read from window instead of useSearchParams so the page needs no Suspense
+  // boundary during prerendering.
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get('service');
+    if (requested && SERVICES.some((s) => s.id === requested)) setSelectedService(requested);
+  }, []);
+
   const handleQuantityChange = (id: string, delta: number) => {
     setQuantities((prev) => ({
       ...prev,
@@ -123,6 +132,7 @@ export default function ServicesPage() {
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
+      <Header />
       {/* Hero */}
       <header className="relative overflow-hidden bg-gradient-to-r from-[var(--vj-red)] via-[var(--vj-red-dark)] to-[var(--vj-red)]">
         <div className="absolute inset-0 opacity-10">
@@ -351,6 +361,7 @@ export default function ServicesPage() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

@@ -39,7 +39,7 @@ const TYPE_CONFIG: Record<
     bar: 'bg-gradient-to-r from-[#1A2948] to-[#2A3F6F]',
     bg: 'bg-white border border-[#E8E8E8]',
     iconBg: 'bg-[#1A2948]',
-    iconColor: 'text-[#FFD400]',
+    iconColor: 'text-[#FFDD00]',
     defaultIcon: (
       <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
         <path
@@ -66,9 +66,9 @@ const TYPE_CONFIG: Record<
     ),
   },
   warning: {
-    bar: 'bg-gradient-to-r from-[#FFD400] to-[#FFC72C]',
+    bar: 'bg-gradient-to-r from-[#FFDD00] to-[#FFC72C]',
     bg: 'bg-white border border-[#E8E8E8]',
-    iconBg: 'bg-[#FFD400]',
+    iconBg: 'bg-[#FFDD00]',
     iconColor: 'text-[#1A2948]',
     defaultIcon: (
       <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
@@ -96,9 +96,9 @@ const TYPE_CONFIG: Record<
     ),
   },
   promo: {
-    bar: 'bg-gradient-to-r from-[#EC2029] via-[#FF4D53] to-[#FFD400]',
+    bar: 'bg-gradient-to-r from-[#EC2029] via-[#FF4D53] to-[#FFDD00]',
     bg: 'bg-white border border-[#E8E8E8]',
-    iconBg: 'bg-gradient-to-br from-[#EC2029] to-[#FFD400]',
+    iconBg: 'bg-gradient-to-br from-[#EC2029] to-[#FFDD00]',
     iconColor: 'text-white',
     defaultIcon: (
       <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
@@ -116,7 +116,7 @@ function ToastProgressBar({ duration, paused }: { duration: number; paused: bool
   return (
     <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#F0F0F0] overflow-hidden rounded-b-xl">
       <div
-        className="h-full bg-gradient-to-r from-[#EC2029] to-[#FFD400] origin-left"
+        className="h-full bg-gradient-to-r from-[#EC2029] to-[#FFDD00] origin-left"
         style={{
           animation: `toast-progress ${duration}ms linear forwards`,
           animationPlayState: paused ? 'paused' : 'running',
@@ -202,7 +202,7 @@ function ToastNotification({ toast, onDismiss }: ToastProps) {
                   className={`text-xs font-semibold px-3 py-1.5 rounded-md transition-all duration-150 active:scale-95 font-['KoHo',sans-serif]
                     ${
                       action.variant === 'accent'
-                        ? 'bg-[#FFD400] text-[#1A2948] hover:bg-[#E6BF00] shadow-sm'
+                        ? 'bg-[#FFDD00] text-[#1A2948] hover:bg-[#E6BF00] shadow-sm'
                         : action.variant === 'ghost'
                           ? 'text-[#666666] hover:text-[#1A2948] hover:bg-[#F5F5F5]'
                           : 'bg-[#EC2029] text-white hover:bg-[#C41017] shadow-sm'

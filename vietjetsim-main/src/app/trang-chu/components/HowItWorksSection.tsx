@@ -72,7 +72,7 @@ const HOW_STEPS = [
     title: 'Tìm chuyến bay',
     desc: 'Nhập điểm đi, điểm đến và ngày bay. Hệ thống hiển thị tất cả chuyến bay phù hợp.',
     Icon: SearchIcon,
-    color: '#ED1D23',
+    color: '#EC2029',
   },
   {
     num: '02',
@@ -86,7 +86,7 @@ const HOW_STEPS = [
     title: 'Thanh toán & Bay',
     desc: 'Thanh toán an toàn qua thẻ hoặc ví điện tử. Nhận vé điện tử ngay lập tức.',
     Icon: PlaneIcon,
-    color: '#ED1D23',
+    color: '#EC2029',
   },
 ];
 

@@ -179,7 +179,7 @@ function RedeemModal({
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#FFD400] text-[#1A2948] rounded-xl font-bold text-sm font-[KoHo,sans-serif] hover:bg-[#E5C100] transition-all shadow-md active:scale-95 disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#FFDD00] text-[#1A2948] rounded-xl font-bold text-sm font-[KoHo,sans-serif] hover:bg-[#F9A51A] transition-all shadow-md active:scale-95 disabled:opacity-50"
             >
               {loading ? (
                 <Icon name="ArrowPathIcon" size={18} className="animate-spin" />
@@ -387,7 +387,7 @@ export default function LoyaltyTab() {
                   <Icon
                     name="StarIcon"
                     size={18}
-                    style={{ color: colors.bg === '#FFD700' ? colors.text : colors.bg }}
+                    style={{ color: colors.bg === '#FFDD00' ? colors.text : colors.bg }}
                   />
                 </div>
                 <div

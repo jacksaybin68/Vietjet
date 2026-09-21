@@ -1160,7 +1160,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                     size={14}
                     className="text-red-500 flex-shrink-0"
                   />
-                  <p className="text-xs font-medium" style={{ color: '#991B1B' }}>
+                  <p className="text-xs font-medium" style={{ color: '#6F0000' }}>
                     Điểm đi và điểm đến không được trùng nhau!
                   </p>
                 </div>

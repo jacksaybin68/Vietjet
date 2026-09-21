@@ -205,7 +205,7 @@ export default function NotificationDropdown({
               {unreadCount > 0 && (
                 <span
                   className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                  style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171' }}
+                  style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#F5717A' }}
                 >
                   {unreadCount} mới
                 </span>

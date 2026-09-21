@@ -184,7 +184,7 @@ export default function ConfirmationModal({
               style={{
                 background: isLoading
                   ? '#E6BF00'
-                  : 'linear-gradient(135deg, #FFD400 0%, #FFC72C 100%)',
+                  : 'linear-gradient(135deg, #FFDD00 0%, #FFC72C 100%)',
                 color: '#1A2948',
                 transform: isLoading ? 'none' : undefined,
               }}
