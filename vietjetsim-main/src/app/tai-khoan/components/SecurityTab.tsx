@@ -152,7 +152,7 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
                 <button
                   onClick={initSetup}
                   disabled={loading}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#EC2029] text-white rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-[#C41017] transition-all active:scale-95 disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#EC2029] text-white rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-primary-dark transition-all active:scale-95 disabled:opacity-50"
                 >
                   {loading ? (
                     <Icon name="ArrowPathIcon" size={18} className="animate-spin" />
@@ -195,7 +195,7 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
                 <button
                   onClick={handleVerify}
                   disabled={loading || token.length !== 6}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#EC2029] text-white rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-[#C41017] transition-all active:scale-95 disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#EC2029] text-white rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-primary-dark transition-all active:scale-95 disabled:opacity-50"
                 >
                   {loading ? (
                     <Icon name="ArrowPathIcon" size={18} className="animate-spin" />
@@ -405,7 +405,7 @@ export default function SecurityTab() {
               ) : (
                 <button
                   onClick={() => setShow2FASetup(true)}
-                  className="px-5 py-2 bg-[#EC2029] text-white rounded-lg text-sm font-semibold font-[KoHo,sans-serif] hover:bg-[#C41017] transition-all active:scale-95 shadow-sm"
+                  className="px-5 py-2 bg-[#EC2029] text-white rounded-lg text-sm font-semibold font-[KoHo,sans-serif] hover:bg-primary-dark transition-all active:scale-95 shadow-sm"
                 >
                   Kích hoạt
                 </button>

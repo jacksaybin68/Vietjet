@@ -749,10 +749,10 @@ export default function UserDashboardClient() {
                   <UpcomingBookingsSkeleton count={2} />
                 ) : upcomingError ? (
                   <div
-                    className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl sm:rounded-2xl border border-[var(--primary)]/20 dark:border-[var(--primary)]/30 p-6 sm:p-8 text-center"
+                    className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl sm:rounded-2xl border border-[rgb(var(--primary-rgb))]/20 dark:border-[rgb(var(--primary-rgb))]/30 p-6 sm:p-8 text-center"
                     style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
                   >
-                    <div className="w-10 h-10 sm:w-14 sm:h-14 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 border border-[var(--primary)]/20 dark:border-[var(--primary)]/30">
+                    <div className="w-10 h-10 sm:w-14 sm:h-14 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 border border-[rgb(var(--primary-rgb))]/20 dark:border-[rgb(var(--primary-rgb))]/30">
                       <Icon
                         name="ExclamationTriangleIcon"
                         size={28}
@@ -776,7 +776,7 @@ export default function UserDashboardClient() {
                   </div>
                 ) : upcomingBookings.length === 0 ? (
                   <div
-                    className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl sm:rounded-3xl border border-[var(--accent)]/20 dark:border-[var(--accent)]/30 overflow-hidden"
+                    className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl sm:rounded-3xl border border-[rgb(var(--accent-rgb))]/20 dark:border-[rgb(var(--accent-rgb))]/30 overflow-hidden"
                     style={{
                       boxShadow:
                         '0 8px 32px rgba(245, 158, 11, 0.1), 0 4px 12px rgba(251, 191, 36, 0.06)',
@@ -818,7 +818,7 @@ export default function UserDashboardClient() {
                           </Link>
                           <button
                             onClick={retryUpcoming}
-                            className="inline-flex items-center gap-1.5 sm:gap-2 text-amber-700 font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-sm border border-[var(--accent)]/30 dark:border-amber-700 hover:bg-amber-50 transition-all bg-[var(--surface)] dark:bg-[var(--dark-surface)]"
+                            className="inline-flex items-center gap-1.5 sm:gap-2 text-amber-700 font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-sm border border-[rgb(var(--accent-rgb))]/30 dark:border-amber-700 hover:bg-amber-50 transition-all bg-[var(--surface)] dark:bg-[var(--dark-surface)]"
                           >
                             <Icon name="ArrowPathIcon" size={14} />
                             Tải lại
@@ -992,7 +992,7 @@ export default function UserDashboardClient() {
                           </button>
                           <button
                             onClick={exportPDF}
-                            className="flex items-center gap-1.5 text-xs font-semibold text-[var(--primary)] dark:text-[var(--primary-light)] hover:text-[var(--primary-dark)] dark:hover:text-[var(--primary)] bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] hover:bg-[var(--primary)]/10 dark:hover:bg-[var(--primary)]/20 border border-[var(--primary)]/20 dark:border-[var(--primary)]/30 px-3 py-1.5 rounded-lg transition-all"
+                            className="flex items-center gap-1.5 text-xs font-semibold text-[var(--primary)] dark:text-[var(--primary-light)] hover:text-[var(--primary-dark)] dark:hover:text-[var(--primary)] bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] hover:bg-[rgb(var(--primary-rgb))]/10 dark:hover:bg-[rgb(var(--primary-rgb))]/20 border border-[rgb(var(--primary-rgb))]/20 dark:border-[rgb(var(--primary-rgb))]/30 px-3 py-1.5 rounded-lg transition-all"
                             title="Xuất PDF"
                           >
                             <Icon name="DocumentArrowDownIcon" size={13} />
@@ -1795,7 +1795,7 @@ export default function UserDashboardClient() {
                         </div>
 
                         {/* Notice */}
-                        <div className="bg-amber-50 border border-[var(--accent)]/30 rounded-xl px-4 py-3 flex items-start gap-3">
+                        <div className="bg-amber-50 border border-[rgb(var(--accent-rgb))]/30 rounded-xl px-4 py-3 flex items-start gap-3">
                           <Icon
                             name="InformationCircleIcon"
                             size={16}
@@ -1876,7 +1876,7 @@ export default function UserDashboardClient() {
 
                 {/* Refund history */}
                 <div
-                  className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-3xl border border-[var(--accent)]/20 dark:border-[var(--accent)]/30 overflow-hidden"
+                  className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-3xl border border-[rgb(var(--accent-rgb))]/20 dark:border-[rgb(var(--accent-rgb))]/30 overflow-hidden"
                   style={{
                     boxShadow:
                       '0 8px 32px rgba(var(--accent-rgb), 0.1), 0 4px 12px rgba(var(--accent-rgb), 0.06)',
@@ -1888,7 +1888,7 @@ export default function UserDashboardClient() {
                       background: 'linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #fcd34d 100%)',
                     }}
                   />
-                  <div className="p-5 border-b border-[var(--accent)]/10">
+                  <div className="p-5 border-b border-[rgb(var(--accent-rgb))]/10">
                     <div className="flex items-center justify-between mb-4">
                       <div>
                         <h3 className="font-bold text-sm text-[var(--vj-navy)] dark:text-white">

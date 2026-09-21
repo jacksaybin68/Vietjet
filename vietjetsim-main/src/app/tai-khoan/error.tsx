@@ -46,7 +46,7 @@ export default function UserDashboardError({
           {/* Retry Button */}
           <button
             onClick={reset}
-            className="inline-flex items-center justify-center gap-2 bg-[#EC2029] hover:bg-[#d41b23] text-white font-semibold px-8 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg active:scale-95 font-koho"
+            className="inline-flex items-center justify-center gap-2 bg-[#EC2029] hover:bg-primary-dark text-white font-semibold px-8 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg active:scale-95 font-koho"
           >
             <Icon name="ArrowPathIcon" variant="outline" size={20} />
             Thử lại

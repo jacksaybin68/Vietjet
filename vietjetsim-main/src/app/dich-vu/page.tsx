@@ -178,10 +178,10 @@ export default function ServicesPage() {
             >
               <div className="p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[var(--vj-red)]/10">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[rgb(var(--vj-red-rgb))]/10">
                     <Icon name={service.icon} size={24} className="text-[var(--vj-red)]" />
                   </div>
-                  <span className="text-xs font-black px-2.5 py-1 rounded-full bg-[var(--vj-yellow)]/25 text-[var(--vj-red)]">
+                  <span className="text-xs font-black px-2.5 py-1 rounded-full bg-[rgb(var(--vj-yellow-rgb))]/25 text-[var(--vj-red)]">
                     {service.price}
                   </span>
                 </div>
@@ -199,11 +199,11 @@ export default function ServicesPage() {
 
         {/* Selected Service Detail */}
         {selected && (
-          <div className="bg-[var(--surface)] rounded-2xl border-2 border-[var(--vj-yellow)]/40 overflow-hidden shadow-sm mb-10">
+          <div className="bg-[var(--surface)] rounded-2xl border-2 border-[rgb(var(--vj-yellow-rgb))]/40 overflow-hidden shadow-sm mb-10">
             {/* Detail Header */}
-            <div className="p-6 sm:p-8 bg-[var(--vj-red)]/5">
+            <div className="p-6 sm:p-8 bg-[rgb(var(--vj-red-rgb))]/5">
               <div className="flex items-start gap-4">
-                <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 bg-[var(--vj-red)]/10">
+                <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 bg-[rgb(var(--vj-red-rgb))]/10">
                   <Icon name={selected.icon} size={28} className="text-[var(--vj-red)]" />
                 </div>
                 <div className="flex-1">
@@ -327,7 +327,7 @@ export default function ServicesPage() {
               },
             ].map((item, i) => (
               <div key={i} className="text-center">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 bg-[var(--vj-yellow)]/15">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 bg-[rgb(var(--vj-yellow-rgb))]/15">
                   <Icon name={item.icon} size={24} className="text-[var(--vj-red)]" />
                 </div>
                 <h3 className="font-bold text-[var(--foreground)] text-sm mb-1">{item.title}</h3>
