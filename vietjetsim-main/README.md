@@ -152,6 +152,10 @@ in transactions with compensating rollback on failure.
 
 > ⚠️ These are mock credentials for development. Register a real account through the app and promote it via `npm run db:setup-admin` for production.
 
+If these accounts already exist in your database with different passwords, migration
+`014_seed_demo_data.sql` will not touch them (`ON CONFLICT (email) DO NOTHING`). Run
+`npm run db:seed-demo` to reset them to the credentials above.
+
 ## 🎨 Styling
 
 This project uses **Tailwind CSS** with a custom Vietjet brand theme:
@@ -197,6 +201,7 @@ Route handlers are exercised directly with a real `NextRequest` and a real JWT;
 | `npm test` | Run the Vitest suite |
 | `npm run db:check` | Validate DB connectivity & schema |
 | `npm run db:setup-admin` | Promote a user to admin role |
+| `npm run db:seed-demo` | Reset the two README demo accounts to their documented passwords |
 
 ## 📱 Deployment
 
