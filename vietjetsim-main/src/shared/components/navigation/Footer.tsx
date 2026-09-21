@@ -78,14 +78,6 @@ const QUICK_LINKS = [
   { label: 'Chính sách bảo mật', href: '/gioi-thieu' },
 ];
 
-const AWARDS = [
-  { text: 'Hãng hàng không giá rẻ tốt nhất Châu Á 2019' },
-  { text: 'Doanh nghiệp hàng không tốt nhất Đông Nam Á' },
-  { text: 'Top 50 công ty niêm yết tốt nhất Việt Nam' },
-  { text: 'Thương hiệu tốt nhất Châu Á' },
-  { text: 'Công ty tốt nhất để làm việc tại Châu Á' },
-  { text: 'Kinh doanh bền vững' },
-];
 
 const SOCIALS = [
   { name: 'Facebook', Icon: FaFacebook, href: '#' },
@@ -116,7 +108,7 @@ export default function Footer() {
                     <li key={link.label || idx}>
                       <Link
                         href={link.href || '#'}
-                        className="rounded-sm text-[11px] md:text-[12px] leading-relaxed text-vjdark/70 dark:text-white/60 hover:text-vjred dark:hover:text-[#FFC400]"
+                        className="rounded-sm text-[11px] md:text-[12px] leading-relaxed text-vjdark/70 dark:text-white/60 hover:text-vjred dark:hover:text-[#FFDD00]"
                         style={{ fontWeight: 500 }}
                       >
                         {link.label}
@@ -135,7 +127,7 @@ export default function Footer() {
                 <Link
                   key={link.label || idx}
                   href={link.href || '#'}
-                  className="flex items-center gap-1 rounded-sm text-[11px] md:text-[12px] font-medium text-vjdark/70 dark:text-white/60 hover:text-vjred dark:hover:text-[#FFC400]"
+                  className="flex items-center gap-1 rounded-sm text-[11px] md:text-[12px] font-medium text-vjdark/70 dark:text-white/60 hover:text-vjred dark:hover:text-[#FFDD00]"
                 >
                   <span className="w-1 h-1 rounded-full bg-vjred" />
                   {link.label}
@@ -146,7 +138,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="h-0.5 md:h-1 bg-[#e30613] dark:bg-[#b91c1c]" />
+      <div className="h-0.5 md:h-1 bg-[#EC2029] dark:bg-[#D91A21]" />
 
       <div className="bg-[#242424] dark:bg-[#151515] py-4 md:py-6">
         <div className="max-w-7xl mx-auto px-3 md:px-4 sm:px-6 lg:px-8">
@@ -155,7 +147,7 @@ export default function Footer() {
               <AppLogo size={32} className="hidden sm:block" />
               <AppLogo size={28} className="sm:hidden" />
               <div>
-                <span className="text-sm md:text-base font-black text-[#fff200]">Vietjet Air</span>
+                <span className="text-sm md:text-base font-black text-[#FFDD00]">Vietjet Air</span>
                 <p className="mt-0.5 text-[9px] md:text-[10px] text-white/70 font-koho">
                   &copy; 2026 Vietjet Air. Tất cả quyền được bảo lưu.
                 </p>
@@ -165,7 +157,7 @@ export default function Footer() {
                 className="hidden md:flex items-center gap-1.5 rounded-md px-2 py-1.5 border border-white/20 dark:border-white/30"
                 style={{ background: 'rgba(255,255,255,0.08)' }}
               >
-                <MdVerified className="w-4 h-4 text-[#fff200] flex-shrink-0" />
+                <MdVerified className="w-4 h-4 text-[#FFDD00] flex-shrink-0" />
                 <span className="text-white text-[8px] md:text-[9px] leading-tight font-koho">
                   Đã thông báo
                   <br />
@@ -179,7 +171,7 @@ export default function Footer() {
                 <Link
                   key={social?.name}
                   href={social?.href}
-                  className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full text-white hover:-translate-y-0.5 hover:bg-vjred dark:hover:bg-[#E31E24]/20"
+                  className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full text-white hover:-translate-y-0.5 hover:bg-vjred dark:hover:bg-[#EC2029]/20"
                   style={{ background: 'rgba(255,255,255,0.14)' }}
                   aria-label={social?.name}
                 >

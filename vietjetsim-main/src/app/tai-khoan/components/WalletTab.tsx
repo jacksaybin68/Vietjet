@@ -600,7 +600,7 @@ export default function WalletTab({ user }: WalletTabProps) {
       <div
         className="rounded-2xl p-6 text-white relative overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, #EC2029 0%, #C41017 50%, #991B1B 100%)',
+          background: 'linear-gradient(135deg, #EC2029 0%, #C41017 50%, #6F0000 100%)',
         }}
       >
         <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4" />
@@ -779,7 +779,7 @@ export default function WalletTab({ user }: WalletTabProps) {
                         : method.bankName || 'Ngân hàng'}
                     </span>
                     {method.isDefault && (
-                      <span className="px-2 py-0.5 bg-[#FFD400]/20 text-[#1A2948] rounded-full text-xs font-semibold font-[Be Vietnam Pro,sans-serif]">
+                      <span className="px-2 py-0.5 bg-[#FFDD00]/20 text-[#1A2948] rounded-full text-xs font-semibold font-[Be Vietnam Pro,sans-serif]">
                         Mặc định
                       </span>
                     )}

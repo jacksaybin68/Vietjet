@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Icon } from '@/shared/components/ui';
+import { Header, Footer } from '@/shared/components/navigation';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -28,6 +29,7 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 font-body">
+      <Header />
       {/* Hero Section */}
       <div
         className="relative py-24 px-4 text-center text-white overflow-hidden"
@@ -37,7 +39,7 @@ export default function ContactPage() {
       >
         <div className="absolute inset-0 opacity-10 pointer-events-none">
           <div className="absolute top-10 left-10 w-40 h-40 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute bottom-10 right-10 w-56 h-56 bg-[#FFD400] rounded-full blur-3xl"></div>
+          <div className="absolute bottom-10 right-10 w-56 h-56 bg-[#FFDD00] rounded-full blur-3xl"></div>
         </div>
         <div className="relative z-10 max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-sm mb-6">
@@ -53,7 +55,7 @@ export default function ContactPage() {
           </p>
           <Link
             href="/trang-chu"
-            className="inline-flex items-center gap-2 mt-8 px-6 py-3 rounded-lg bg-[#FFD400] text-[#1A2948] font-bold hover:bg-[#FFE033] transition-all duration-300 shadow-lg hover:shadow-xl"
+            className="inline-flex items-center gap-2 mt-8 px-6 py-3 rounded-lg bg-[#FFDD00] text-[#1A2948] font-bold hover:bg-[#FFE033] transition-all duration-300 shadow-lg hover:shadow-xl"
           >
             <Icon name="ArrowLeftIcon" size={18} />
             Quay lại trang chủ
@@ -249,6 +251,7 @@ export default function ContactPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

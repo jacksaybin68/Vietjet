@@ -3,10 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { Icon } from '@/shared/components/ui';
+import { Header, Footer } from '@/shared/components/navigation';
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-gray-50 font-body">
+      <Header />
       {/* Hero Section */}
       <div
         className="relative py-24 px-4 text-center text-white overflow-hidden"
@@ -16,7 +18,7 @@ export default function AboutPage() {
       >
         <div className="absolute inset-0 opacity-10 pointer-events-none">
           <div className="absolute top-10 left-10 w-40 h-40 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute bottom-10 right-10 w-56 h-56 bg-[#FFD400] rounded-full blur-3xl"></div>
+          <div className="absolute bottom-10 right-10 w-56 h-56 bg-[#FFDD00] rounded-full blur-3xl"></div>
         </div>
         <div className="relative z-10 max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-sm mb-6">
@@ -30,7 +32,7 @@ export default function AboutPage() {
           </p>
           <Link
             href="/trang-chu"
-            className="inline-flex items-center gap-2 mt-8 px-6 py-3 rounded-lg bg-[#FFD400] text-[#1A2948] font-bold hover:bg-[#FFE033] transition-all duration-300 shadow-lg hover:shadow-xl"
+            className="inline-flex items-center gap-2 mt-8 px-6 py-3 rounded-lg bg-[#FFDD00] text-[#1A2948] font-bold hover:bg-[#FFE033] transition-all duration-300 shadow-lg hover:shadow-xl"
           >
             <Icon name="ArrowLeftIcon" size={18} />
             Quay lại trang chủ
@@ -128,11 +130,11 @@ export default function AboutPage() {
                 key={i}
                 className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/15 transition-colors"
               >
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#EC2029] to-[#FFD400] mx-auto mb-4 flex items-center justify-center text-xl font-bold">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#EC2029] to-[#FFDD00] mx-auto mb-4 flex items-center justify-center text-xl font-bold">
                   {member.name.charAt(0)}
                 </div>
                 <h3 className="text-lg font-bold text-center mb-1">{member.name}</h3>
-                <p className="text-[#FFD400] text-sm font-semibold text-center mb-2">
+                <p className="text-[#FFDD00] text-sm font-semibold text-center mb-2">
                   {member.role}
                 </p>
                 <p className="text-white/60 text-xs text-center">{member.desc}</p>
@@ -141,14 +143,15 @@ export default function AboutPage() {
           </div>
           <div className="mt-10 pt-6 border-t border-white/10 text-center">
             <p className="text-sm text-white/70">
-              Cảm ơn <span className="text-[#FFD400] font-semibold">Vietjet Air</span> vì cảm hứng
+              Cảm ơn <span className="text-[#FFDD00] font-semibold">Vietjet Air</span> vì cảm hứng
               thiết kế và{' '}
-              <span className="text-[#FFD400] font-semibold">cộng đồng mã nguồn mở</span> vì các
+              <span className="text-[#FFDD00] font-semibold">cộng đồng mã nguồn mở</span> vì các
               công cụ tuyệt vời.
             </p>
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

@@ -2,18 +2,16 @@
 
 // Last updated: 2026-09-09 - Fixed JSX parsing errors and passenger selector
 
-import { FormEvent, useRef, useState } from 'react';
-import Link from 'next/link';
+import { FormEvent, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   MdFlightLand,
   MdFlightTakeoff,
-  MdLogin,
   MdConfirmationNumber,
   MdChildCare,
   MdChildFriendly,
   MdPerson,
   MdPeople,
-  MdSwapHoriz,
 } from 'react-icons/md';
 
 const airports = [
@@ -37,20 +35,17 @@ const airports = [
 ];
 
 export default function HeroSection() {
+  const router = useRouter();
   const [roundTrip, setRoundTrip] = useState(true);
   const [from, setFrom] = useState('HAN');
   const [to, setTo] = useState('SGN');
   const [pax, setPax] = useState({ adults: 1, children: 0, infants: 0 });
   const [paxOpen, setPaxOpen] = useState(false);
-  const paxRef = useRef<HTMLDivElement>(null);
 
-  const airport = (code: string) => airports.find((item) => item.code === code)!;
   const search = (event: FormEvent) => {
     event.preventDefault();
-    window.location.href = `/tim-ve?from=${from}&to=${to}&pax=${pax.adults}`;
+    router.push(`/tim-ve?from=${from}&to=${to}&pax=${pax.adults}`);
   };
-  const adj = (key: keyof typeof pax, delta: number) =>
-    setPax((p) => ({ ...p, [key]: Math.max(key === 'adults' ? 1 : 0, p[key] + delta) }));
 
   return (
     <section
@@ -62,7 +57,7 @@ export default function HeroSection() {
     >
       <div className="mx-auto max-w-[1240px] px-4">
         <div className="max-w-xl pt-5 font-[var(--vj-font)] text-white lg:pt-10 animate-fade-in-up">
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-[.14em] text-[#FFF200] sm:text-[13px]">
+          <p className="mb-2 text-[11px] font-bold uppercase tracking-[.14em] text-[#FFDD00] sm:text-[13px]">
             Vietjet Air
           </p>
           <h1 className="font-[var(--vj-font-heading)] text-4xl font-black leading-[1.05] tracking-[-0.04em] drop-shadow-md sm:text-5xl lg:text-6xl">
@@ -74,7 +69,7 @@ export default function HeroSection() {
 
           <form
             onSubmit={search}
-            className="mt-6 w-full max-w-[540px] bg-[#EC2029] dark:bg-[#B91C1C] border-2 border-[#EC2029] dark:border-[#B91C1C] rounded-lg shadow-sm p-4 sm:p-6 font-[var(--vj-font)]"
+            className="mt-6 w-full max-w-[540px] bg-[#EC2029] dark:bg-[#D91A21] border-2 border-[#EC2029] dark:border-[#D91A21] rounded-lg shadow-sm p-4 sm:p-6 font-[var(--vj-font)]"
           >
             <div className="mb-4 flex flex-nowrap items-center gap-2">
               {/* Column 1 (3.5): Primary text - logo replaced */}
@@ -82,7 +77,7 @@ export default function HeroSection() {
                 className="text-[11px] font-bold text-white sm:text-[12px] md:text-[13px]"
                 style={{ flex: '3.5 1 auto', width: '58.33%' }}
               >
-                Mua hành lý, suût ăn chọn ghế ngồi và hơn thế nữa, từ 3.99 USD
+                Mua hành lý, suất ăn, chọn ghế ngồi và hơn thế nữa, từ 3.99 USD
               </div>
 
               {/* Column 2 (1.5): Highlighted call-to-action */}
@@ -91,7 +86,7 @@ export default function HeroSection() {
                 style={{
                   flex: '1.5 1 auto',
                   width: '25%',
-                  background: '#FFD400',
+                  background: '#FFDD00',
                   color: '#000000',
                   padding: '4px 8px',
                   borderRadius: '4px',
@@ -227,7 +222,7 @@ export default function HeroSection() {
                   }`}
                 >
                   <div className="flex items-center gap-2 md:gap-3">
-                    <MdPeople className="h-4 w-4 md:h-5 md:w-5 text-black dark:text-[#FFC400]" />
+                    <MdPeople className="h-4 w-4 md:h-5 md:w-5 text-black dark:text-[#FFDD00]" />
                     <div>
                       <div className="text-[10px] font-bold uppercase tracking-wide text-black opacity-70 dark:text-white/70">
                         Hành khách
@@ -413,14 +408,14 @@ export default function HeroSection() {
               <label className="mt-2 flex items-center gap-2 text-[12px] md:text-[14px] font-bold text-white">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 md:h-5 md:w-5 rounded border-0 accent-[#f3c84d] dark:accent-[#FFC400]"
+                  className="h-4 w-4 md:h-5 md:w-5 rounded border-0 accent-[#f3c84d] dark:accent-[#FFDD00]"
                 />
                 <span>Tìm vé rẻ nhất</span>
               </label>
 
               <button
                 type="submit"
-                className="mt-3 md:mt-4 flex h-[44px] md:h-[50px] w-full items-center justify-center rounded-full bg-[#FFD400] dark:bg-[#FFC400]/90 text-[14px] md:text-[16px] font-bold uppercase text-[#1A2948] dark:text-navy-dark hover:bg-[#ffdd00] dark:hover:bg-[#FFC400] transition-all duration-200"
+                className="vj-cta mt-3 flex h-[48px] w-full items-center justify-center text-[14px] uppercase transition-all duration-200 md:mt-4 md:h-[50px] md:text-[16px]"
               >
                 Tìm chuyến bay
               </button>

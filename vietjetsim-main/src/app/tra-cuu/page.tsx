@@ -3,6 +3,7 @@
 import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { Icon } from '@/shared/components/ui';
+import { Header, Footer } from '@/shared/components/navigation';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 
@@ -126,6 +127,7 @@ export default function TrackBookingPage() {
 
   return (
     <div className="min-h-screen bg-stone-50">
+      <Header />
       <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
 
       {/* Header */}
@@ -372,6 +374,7 @@ export default function TrackBookingPage() {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 }

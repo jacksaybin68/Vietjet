@@ -166,18 +166,18 @@ export default function DealsSection() {
         <div className="md:hidden mt-3 text-center reveal-up" style={{ transitionDelay: '450ms' }}>
           <Link
             href="/tim-ve"
-            className="inline-flex items-center gap-1.5 text-[11px] font-bold text-primary dark:text-[#FFC400] transition-all duration-200 border px-3 py-1.5 rounded-md hover:shadow-md hover:scale-105 active:scale-95"
+            className="inline-flex items-center gap-1.5 text-[11px] font-bold text-primary dark:text-[#FFDD00] transition-all duration-200 border px-3 py-1.5 rounded-md hover:shadow-md hover:scale-105 active:scale-95"
             style={{
               borderColor: 'rgba(236,32,41,0.25)',
               fontWeight: 700,
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = '#ED1D23';
+              (e.currentTarget as HTMLElement).style.background = '#EC2029';
               (e.currentTarget as HTMLElement).style.color = 'white';
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.background = 'transparent';
-              (e.currentTarget as HTMLElement).style.color = '#ED1D23';
+              (e.currentTarget as HTMLElement).style.color = '#EC2029';
             }}
           >
             Xem tất cả ưu đãi
