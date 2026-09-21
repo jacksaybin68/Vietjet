@@ -6,10 +6,10 @@ Repository memory for VietjetSim (Next.js 15 / React 19 / TypeScript / Tailwind 
 
 ```bash
 npm run dev        # next dev --turbo -p 4028
-npm run build      # next build (runs its own TS type check â€” a tsc error fails the build)
+npm run build      # next build (runs its own TS type check — a tsc error fails the build)
 npm run type-check # tsc --noEmit
 npm test           # vitest run
-npm run lint       # eslint .   (NOT `next lint` â€” that is removed in Next 15)
+npm run lint       # eslint .   (NOT `next lint` — that is removed in Next 15)
 npm run lint:fix   # eslint . --fix
 ```
 
@@ -30,7 +30,7 @@ Shared infrastructure lives in `src/shared/` (`services/apiClient.ts`, `constant
 `components/ui`).
 
 Neon Postgres via `src/lib/neon.ts` (`sql` template tag) is the only datastore. When
-`DATABASE_URL` is unset, that module falls back to an in-memory mock for local dev/CI â€”
+`DATABASE_URL` is unset, that module falls back to an in-memory mock for local dev/CI —
 tests rely on it, so keep the fallback intact. There is no Supabase dependency: the auth
 layer is custom JWT (`src/lib/auth.ts`) and data isolation comes from `user_id`-scoped
 queries plus RBAC guards, not database-level policies.
@@ -128,7 +128,7 @@ mock rather than wrapping individual tests in a router provider.
 
 Brand red is `#EC2029` (hover `#D91A21`, dark `#6F0000`); the CTA/action yellow is
 `#FFDD00` with the deeper `#F9A51A`/`#FBB612` accents. Theme values live in
-`tailwind.config.js` and `src/styles/tailwind.css`. Keep pages on these tokens â€” a
+`tailwind.config.js` and `src/styles/tailwind.css`. Keep pages on these tokens — a
 past palette (`#ED1D23`, `#E30613`, `#FFD400`, `#FFC400`) was removed, so reintroducing
 one of those hexes is a regression, not a neutral choice.
 
@@ -146,8 +146,8 @@ preselect a panel. Link services as `/dich-vu?service=<id>` rather than as subpa
 
 # This is NOT the Next.js you know
 
-This version has breaking changes â€” APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
-This block is written and re-added by `next dev` â€” verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
