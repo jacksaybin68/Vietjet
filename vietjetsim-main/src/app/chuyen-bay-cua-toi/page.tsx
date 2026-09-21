@@ -12,17 +12,13 @@ import {
   MdSearch,
   MdLogin,
   MdCheckCircle,
-  MdPhone,
-  MdEmail,
-  MdAccessTime,
-  MdLocationOn,
   MdAirlineSeatReclineNormal,
-  MdLuggage,
   MdPrint,
   MdQrCodeScanner,
 } from 'react-icons/md';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
+import { AppImage } from '@/shared/components/ui';
 import MyFlightsStats from './components/MyFlightsStats';
 import { listBookings } from '@/features/bookings/services';
 import { apiRequest, getApiErrorMessage } from '@/shared/services';
@@ -30,7 +26,7 @@ import { apiRequest, getApiErrorMessage } from '@/shared/services';
 const TABS = [
   { id: 'booking', label: 'Đặt chỗ của tôi' },
   { id: 'eticket', label: 'Vé điện tử (VDT)' },
-];
+] as const;
 
 const AIRPORTS: Record<string, string> = {
   HAN: 'Hà Nội (Nội Bài)',
@@ -121,7 +117,6 @@ export default function MyFlightsPage() {
   const [bookingCode, setBookingCode] = useState('');
   const [surname, setSurname] = useState('');
   const [givenName, setGivenName] = useState('');
-  const [eticketCode, setEticketCode] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [bookings, setBookings] = useState<RecentBooking[]>([]);
@@ -266,23 +261,20 @@ export default function MyFlightsPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Header />
 
-      {/* ===== HERO: Tra cứy đặt chỗ — light theme theo spec DevTools ===== */}
-      <section
-        className="relative overflow-hidden bg-[#fff5f5]"
-        style={{ background: 'linear-gradient(135deg, #fff5f5 0%, #ffffff 100%)' }}
-      >
-        {/* Decorative flight arcs (slate cho nền sáng) */}
-        <div className="absolute inset-0 opacity-[0.07] pointer-events-none">
+      {/* ===== HERO: Tra cứu đặt chỗ ===== */}
+      <section className="relative overflow-hidden bg-[var(--surface)]">
+        {/* Decorative flight arcs */}
+        <div className="absolute inset-0 opacity-[0.06] pointer-events-none">
           <svg className="w-full h-full" viewBox="0 0 1440 300">
             <path
               fill="none"
-              stroke="#1e293b"
+              stroke="var(--vj-navy)"
               strokeWidth="1.5"
               d="M100,280 C300,180 600,120 980,200 1300,90"
             />
             <path
               fill="none"
-              stroke="#1e293b"
+              stroke="var(--vj-navy)"
               strokeWidth="1"
               d="M200,60 C420,140 760,90 1100,220 1420,70"
             />
@@ -290,18 +282,18 @@ export default function MyFlightsPage() {
         </div>
 
         <div className="relative mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:px-8">
-          <p className="inline-flex items-center gap-2 rounded-full border border-[#1e293b]/15 bg-[#1e293b]/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-[#1e293b]">
+          <p className="inline-flex items-center gap-2 rounded-full border border-[rgb(var(--vj-red-rgb))]/20 bg-[rgb(var(--vj-red-rgb))]/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--vj-red)]">
             <span className="h-2 w-2 rounded-full bg-[var(--vj-yellow)]" />
             Bay là thích ngay!
           </p>
-          <h1 className="mt-5 text-3xl font-black italic leading-tight text-[#1e293b] sm:text-4xl lg:text-5xl">
+          <h1 className="mt-5 text-3xl font-black italic leading-tight text-[var(--foreground)] sm:text-4xl lg:text-5xl">
             Chuyến bay của tôi
           </h1>
 
-          {/* Form tra cứy đặt chỗ — 2 cột: trường nhập + hình ảnh */}
+          {/* Form tra cứu đặt chỗ — 2 cột: trường nhập + hình ảnh */}
           <form
             onSubmit={handleSearchBooking}
-            className="mt-7 rounded-2xl border border-[#1e293b]/10 bg-white/95 p-5 shadow-[0_10px_30px_rgba(30,41,59,0.12)]"
+            className="mt-7 rounded-2xl border border-[var(--border)] bg-[var(--background)] dark:bg-[var(--dark-surface)] p-5 shadow-vj-md"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Cột trái: Trường nhập */}
@@ -309,7 +301,7 @@ export default function MyFlightsPage() {
                 <div>
                   <label
                     htmlFor="booking-code"
-                    className="block text-[10px] font-bold uppercase tracking-wide text-black mb-1"
+                    className="block text-[10px] font-bold uppercase tracking-wide text-[var(--foreground)] mb-1"
                   >
                     Mã đặt chỗ <span className="text-[var(--vj-red)]">*</span>
                   </label>
@@ -320,13 +312,13 @@ export default function MyFlightsPage() {
                     value={bookingCode}
                     onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
                     placeholder="VD-12345678"
-                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50 uppercase"
+                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] dark:bg-[var(--dark-surface)] px-3 py-2 text-xs font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50 uppercase"
                   />
                 </div>
                 <div>
                   <label
                     htmlFor="surname"
-                    className="block text-[10px] font-bold uppercase tracking-wide text-black mb-1"
+                    className="block text-[10px] font-bold uppercase tracking-wide text-[var(--foreground)] mb-1"
                   >
                     Họ
                   </label>
@@ -336,13 +328,13 @@ export default function MyFlightsPage() {
                     value={surname}
                     onChange={(e) => setSurname(e.target.value)}
                     placeholder="Nguyễn"
-                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
+                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] dark:bg-[var(--dark-surface)] px-3 py-2 text-xs font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
                   />
                 </div>
                 <div>
                   <label
                     htmlFor="given-name"
-                    className="block text-[10px] font-bold uppercase tracking-wide text-black mb-1"
+                    className="block text-[10px] font-bold uppercase tracking-wide text-[var(--foreground)] mb-1"
                   >
                     Tên đệm &amp; Tên
                   </label>
@@ -352,13 +344,13 @@ export default function MyFlightsPage() {
                     value={givenName}
                     onChange={(e) => setGivenName(e.target.value)}
                     placeholder="Van A"
-                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
+                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] dark:bg-[var(--dark-surface)] px-3 py-2 text-xs font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-1 justify-center py-2 rounded-xl bg-[var(--vj-yellow)] text-black font-black text-sm inline-flex items-center gap-2 hover:bg-[var(--vj-yellow-2)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-full mt-1 justify-center py-2.5 rounded-xl bg-[var(--vj-yellow)] text-[var(--vj-red)] font-black text-sm inline-flex items-center gap-2 hover:bg-[var(--vj-yellow-2)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <MdSearch className="h-4 w-4" />
                   {loading ? 'Đang tìm…' : 'Tìm kiếm'}
@@ -367,9 +359,11 @@ export default function MyFlightsPage() {
 
               {/* Cột phải: Hình ảnh */}
               <div className="flex items-center justify-center">
-                <img
+                <AppImage
                   src="/images/hero/banner-1-hongkong.jpg"
                   alt="Vietjet Air"
+                  width={640}
+                  height={360}
                   className="w-full h-auto rounded-xl object-cover max-h-[200px]"
                 />
               </div>
@@ -386,6 +380,36 @@ export default function MyFlightsPage() {
           </section>
         )}
 
+        {/* ===== Tabs ===== */}
+        <div className="mb-6 border-b border-[var(--border)]">
+          <div role="tablist" className="flex gap-1">
+            {TABS.map((t) => {
+              const active = tab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setTab(t.id)}
+                  className={`relative px-4 py-2.5 text-sm font-bold transition-colors ${
+                    active
+                      ? 'text-[var(--vj-red)]'
+                      : 'text-[var(--foreground-muted)] hover:text-[var(--foreground)]'
+                  }`}
+                >
+                  {t.label}
+                  <span
+                    className={`absolute inset-x-0 -bottom-px h-0.5 rounded-full ${
+                      active ? 'bg-[var(--vj-red)]' : 'bg-transparent'
+                    }`}
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* ===== Liste des réservations (cartes façon billet) ===== */}
         {tab === 'booking' && (
           <section>
@@ -395,6 +419,28 @@ export default function MyFlightsPage() {
                   <div key={i} className="h-24 rounded-xl bg-[var(--surface)] animate-pulse" />
                 ))}
               </div>
+            ) : bookings.length === 0 ? (
+              <section className="vj-card p-10 text-center">
+                <div className="mx-auto mb-4 text-6xl opacity-30">🧳</div>
+                <h3 className="text-xl font-bold text-[var(--foreground)]">Chưa có đặt chỗ nào</h3>
+                <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+                  Tra cứu bằng mã đặt chỗ ở trên, hoặc đăng nhập để xem các chuyến bay của bạn.
+                </p>
+                <div className="mt-5 flex flex-wrap justify-center gap-3">
+                  <Link
+                    href="/dang-nhap?redirect=/chuyen-bay-cua-toi"
+                    className="vj-btn vj-btn-primary vj-btn-pill px-5 py-2.5 text-sm"
+                  >
+                    Đăng nhập
+                  </Link>
+                  <Link
+                    href="/tim-ve"
+                    className="vj-btn vj-btn-pill border border-[var(--border)] px-5 py-2.5 text-sm text-[var(--foreground)] hover:bg-[var(--surface-2)]"
+                  >
+                    Tìm chuyến bay
+                  </Link>
+                </div>
+              </section>
             ) : (
               <div className="space-y-5">
                 {bookings.map((b) => {
@@ -403,7 +449,7 @@ export default function MyFlightsPage() {
                   return (
                     <article
                       key={b.id}
-                      className="overflow-hidden rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] bg-white dark:bg-[var(--dark-surface)] shadow-sm hover:shadow-md transition-shadow"
+                      className="overflow-hidden rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--background)] dark:bg-[var(--dark-surface)] shadow-sm hover:shadow-md transition-shadow"
                     >
                       {/* Biller header (perforé) */}
                       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-[var(--vj-navy)] text-white">
@@ -558,7 +604,7 @@ export default function MyFlightsPage() {
                   return (
                     <div
                       key={b.id}
-                      className="rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] bg-white dark:bg-[var(--dark-surface)] p-5"
+                      className="rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--background)] dark:bg-[var(--dark-surface)] p-5"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
@@ -611,10 +657,10 @@ export default function MyFlightsPage() {
                           <MdPrint className="h-3.5 w-3.5" /> In vé
                         </button>
                         <Link
-                          href={`/lam-thu-tuc?ticket=${b.id}`}
+                          href={`/lam-thu-tuc?code=${b.id}`}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-[var(--border)] font-semibold hover:bg-[rgb(var(--vj-yellow-rgb))]/10 transition-colors"
                         >
-                          <MdQrCodeScanner className="h-3.5 w-3.5" /> Xem QR
+                          <MdQrCodeScanner className="h-3.5 w-3.5" /> Xem chi tiết
                         </Link>
                       </div>
                     </div>
@@ -635,7 +681,7 @@ export default function MyFlightsPage() {
       </div>
 
       <Footer />
-      <ToastContainer toasts={[]} onDismiss={(id: string) => {}} />
+      <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
     </div>
   );
 }
