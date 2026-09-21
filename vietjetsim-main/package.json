@@ -13,8 +13,10 @@
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:smoke": "node scripts/smoke-test.cjs",
     "db:check": "ts-node src/lib/dbCheck.ts",
-    "db:setup-admin": "node scripts/setup-admin.cjs"
+    "db:setup-admin": "node scripts/setup-admin.cjs",
+    "db:seed-demo": "node scripts/seed-demo-accounts.cjs"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -41,7 +43,6 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@netlify/plugin-nextjs": "^5.11.1",
-    "@next/swc-darwin-x64": "^16.3.4",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

@@ -78,7 +78,6 @@ const QUICK_LINKS = [
   { label: 'Chính sách bảo mật', href: '/gioi-thieu' },
 ];
 
-
 const SOCIALS = [
   { name: 'Facebook', Icon: FaFacebook, href: '#' },
   { name: 'Instagram', Icon: FaInstagram, href: '#' },

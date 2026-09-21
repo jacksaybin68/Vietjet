@@ -134,7 +134,7 @@ function RedeemModal({
         </div>
 
         <form onSubmit={handleRedeem} className="p-6 space-y-5">
-          <div className="bg-[var(--accent)]/10 dark:bg-[var(--accent)]/20 rounded-xl p-4 text-center">
+          <div className="bg-[rgb(var(--accent-rgb))]/10 dark:bg-[rgb(var(--accent-rgb))]/20 rounded-xl p-4 text-center">
             <div className="text-sm text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
               Điểm khả dụng
             </div>

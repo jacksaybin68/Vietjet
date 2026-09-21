@@ -34,13 +34,13 @@ export default function UserDashboardDesktopSidebar({
       className={`hidden lg:flex flex-col flex-shrink-0 transition-all duration-300 ${sidebarCollapsed ? 'w-20' : 'w-64'}`}
     >
       <div
-        className="bg-white border border-[var(--accent)]/20 rounded-3xl overflow-hidden sticky top-[140px]"
+        className="bg-white border border-[rgb(var(--accent-rgb))]/20 rounded-3xl overflow-hidden sticky top-[140px]"
         style={{
           boxShadow: '0 8px 32px rgba(245, 158, 11, 0.12), 0 4px 12px rgba(251, 191, 36, 0.08)',
         }}
       >
         <div
-          className="flex items-center justify-between px-5 py-5 border-b border-[var(--accent)]/20"
+          className="flex items-center justify-between px-5 py-5 border-b border-[rgb(var(--accent-rgb))]/20"
           style={{
             background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
             borderRadius: '1.5rem 1.5rem 0 0',
@@ -118,7 +118,7 @@ export default function UserDashboardDesktopSidebar({
         </nav>
 
         {!sidebarCollapsed && (
-          <div className="px-3 py-3 border-t border-[var(--accent)]/20 dark:border-[var(--accent)]/30">
+          <div className="px-3 py-3 border-t border-[rgb(var(--accent-rgb))]/20 dark:border-[rgb(var(--accent-rgb))]/30">
             <Link
               href="/dang-nhap"
               className="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-[var(--accent-dark)] dark:text-[var(--accent-light)] hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 dark:hover:text-red-400 transition-all"
@@ -129,7 +129,7 @@ export default function UserDashboardDesktopSidebar({
           </div>
         )}
         {sidebarCollapsed && (
-          <div className="px-2 py-3 border-t border-[var(--accent)]/20 dark:border-[var(--accent)]/30">
+          <div className="px-2 py-3 border-t border-[rgb(var(--accent-rgb))]/20 dark:border-[rgb(var(--accent-rgb))]/30">
             <Link
               href="/dang-nhap"
               title="Đăng xuất"

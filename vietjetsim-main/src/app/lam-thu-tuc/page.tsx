@@ -236,12 +236,12 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
   }, [agreed, checkInData, toast, router]);
 
   const fieldClass =
-    'w-full rounded-lg border border-[var(--vj-navy)]/20 bg-[var(--surface)] px-4 py-3 text-sm text-[var(--vj-text)] placeholder:text-[var(--vj-text-muted)] focus:border-[var(--vj-red)] focus:outline-none focus:ring-2 focus:ring-[var(--vj-red)]/20 font-koho';
+    'w-full rounded-lg border border-[rgb(var(--vj-navy-rgb))]/20 bg-[var(--surface)] px-4 py-3 text-sm text-[var(--vj-text)] placeholder:text-[var(--vj-text-muted)] focus:border-[var(--vj-red)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/20 font-koho';
 
   const stepIndex = STEPS.findIndex((s) => s.id === step);
 
   return (
-    <div className="min-h-screen bg-[var(--vj-sky)] flex flex-col">
+    <div className="min-h-screen bg-[var(--surface)] flex flex-col">
       <Header />
       <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
 
@@ -363,7 +363,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                     ['Tải xuống và lưu thẻ lên máy bay trên điện thoại.', '3'],
                   ].map(([txt, num]) => (
                     <li key={num} className="flex items-start gap-3">
-                      <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[var(--vj-red)]/10 text-[var(--vj-red)] text-sm font-black">
+                      <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[rgb(var(--vj-red-rgb))]/10 text-[var(--vj-red)] text-sm font-black">
                         {num}
                       </div>
                       <span>{txt}</span>
@@ -372,7 +372,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                 </ol>
               </div>
 
-              <div className="rounded-xl border border-[var(--vj-yellow)]/40 bg-[#FFF8E1] p-4 text-[13px] text-[#7a6a00]">
+              <div className="rounded-xl border border-[rgb(var(--vj-yellow-rgb))]/40 bg-[#FFF8E1] p-4 text-[13px] text-[#7a6a00]">
                 <div className="flex items-center gap-2 font-bold text-[#8a6d00]">
                   <MdInfoOutline className="h-4 w-4 text-[var(--vj-red)]" />
                   Lưu ý quan trọng
@@ -416,7 +416,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                     <div className="mt-1 relative h-px bg-[var(--border)]">
                       <div className="absolute -left-1 -top-1 h-2 w-2 rounded-full border border-[var(--vj-red)]" />
                       <FlightIcon className="absolute -top-3 left-1/2 -translate-x-1/2 text-[var(--vj-red)]" />
-                      <div className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-[var(--vj-red)]/40" />
+                      <div className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-[rgb(var(--vj-red-rgb))]/40" />
                     </div>
                     <p className="mt-1 text-[var(--vj-text-muted)]">Trực tiếp · Sans escale</p>
                   </div>
@@ -481,7 +481,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                   <button
                     type="button"
                     onClick={() => setStep('search')}
-                    className="w-1/3 rounded-lg border border-[var(--vj-navy)]/20 bg-white py-3 text-sm font-bold uppercase text-[var(--vj-text-gray)] hover:bg-gray-50"
+                    className="w-1/3 rounded-lg border border-[rgb(var(--vj-navy-rgb))]/20 bg-white py-3 text-sm font-bold uppercase text-[var(--vj-text-gray)] hover:bg-gray-50"
                   >
                     Quay lại
                   </button>
@@ -593,7 +593,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                 <div className="mt-4 flex justify-center">
                   <MdQrCode2 className="text-8xl text-[#111827]" />
                 </div>
-                <div className="flex border-t border-dashed border-[var(--vj-navy)]/20 mt-4">
+                <div className="flex border-t border-dashed border-[rgb(var(--vj-navy-rgb))]/20 mt-4">
                   <p className="w-full border-b-0" />
                 </div>
                 <p className="mt-2 text-[11px] text-[var(--vj-text-gray)]">
@@ -606,7 +606,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
             <div className="flex justify-center gap-3">
               <button
                 onClick={() => window.print()}
-                className="rounded-lg border border-[var(--vj-navy)]/20 bg-white px-6 py-2.5 text-sm font-bold uppercase text-[var(--vj-text-gray)] hover:bg-gray-50"
+                className="rounded-lg border border-[rgb(var(--vj-navy-rgb))]/20 bg-white px-6 py-2.5 text-sm font-bold uppercase text-[var(--vj-text-gray)] hover:bg-gray-50"
               >
                 In thẻ lên máy bay
               </button>

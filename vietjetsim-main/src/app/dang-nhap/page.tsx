@@ -115,10 +115,10 @@ export default function SignUpLoginPage() {
   const isNameValid = surname.trim().length >= 1 && givenName.trim().length >= 1;
   const isPhoneValid = phone.replace(/\D/g, '').length >= 9;
   const primaryButtonClass =
-    'w-full rounded-xl bg-[#EC2029] py-3.5 text-base font-black text-white shadow-[0_4px_14px_rgba(236,32,41,0.3)] transition-all hover:bg-[#D0021B] disabled:cursor-not-allowed disabled:bg-[#C41017] disabled:opacity-60';
+    'w-full rounded-xl bg-[#EC2029] py-3.5 text-base font-black text-white shadow-[0_4px_14px_rgba(236,32,41,0.3)] transition-all hover:bg-primary-dark disabled:cursor-not-allowed disabled:bg-primary-dark disabled:opacity-60';
 
   return (
-    <div className="min-h-screen bg-[#f5f6f8] font-body">
+    <div className="min-h-screen bg-[var(--surface)] font-body">
       <div className="h-1 w-full bg-[#FFDD00]" />
       <div className="mx-auto flex min-h-[calc(100vh-4px)] max-w-7xl items-center px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid w-full overflow-hidden rounded-[2rem] border border-[#e9eaee] bg-white shadow-[0_12px_40px_rgba(26,41,72,0.12)] lg:grid-cols-[1.1fr_1fr]">

@@ -110,7 +110,7 @@ export default function ToastDemo() {
                   }
                 )
               }
-              className="px-4 py-2 rounded-lg bg-[#EC2029] text-white text-sm font-semibold hover:bg-[#C41017] transition-all duration-150 active:scale-95 font-['KoHo',sans-serif] flex items-center gap-2"
+              className="px-4 py-2 rounded-lg bg-[#EC2029] text-white text-sm font-semibold hover:bg-primary-dark transition-all duration-150 active:scale-95 font-['KoHo',sans-serif] flex items-center gap-2"
             >
               <span className="w-2 h-2 rounded-full bg-white inline-block" />
               Lỗi

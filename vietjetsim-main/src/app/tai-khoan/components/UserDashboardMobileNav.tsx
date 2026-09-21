@@ -38,7 +38,7 @@ export default function UserDashboardMobileNav({
       <div className="flex items-center gap-3 mb-4 lg:hidden">
         <button
           onClick={onOpenDrawer}
-          className="flex items-center gap-2 bg-white border border-[var(--accent)]/30 rounded-2xl px-4 py-2.5 text-sm font-semibold shadow-sm"
+          className="flex items-center gap-2 bg-white border border-[rgb(var(--accent-rgb))]/30 rounded-2xl px-4 py-2.5 text-sm font-semibold shadow-sm"
           style={{ color: '#d97706' }}
         >
           <Icon name="Bars3Icon" size={18} />
@@ -47,7 +47,7 @@ export default function UserDashboardMobileNav({
         </button>
         <button
           onClick={() => onSelectTab('notifications')}
-          className="relative ml-auto flex items-center justify-center w-10 h-10 bg-white border border-[var(--accent)]/30 rounded-2xl shadow-sm"
+          className="relative ml-auto flex items-center justify-center w-10 h-10 bg-white border border-[rgb(var(--accent-rgb))]/30 rounded-2xl shadow-sm"
           title="Thông báo"
         >
           <Icon name="BellIcon" size={18} style={{ color: '#d97706' }} />
@@ -126,7 +126,7 @@ export default function UserDashboardMobileNav({
                 </button>
               ))}
             </nav>
-            <div className="px-3 py-4 border-t border-[var(--accent)]/20 dark:border-[var(--accent)]/30">
+            <div className="px-3 py-4 border-t border-[rgb(var(--accent-rgb))]/20 dark:border-[rgb(var(--accent-rgb))]/30">
               <Link
                 href="/dang-nhap"
                 className="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all text-[var(--accent-dark)] dark:text-[var(--accent-light)] hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 dark:hover:text-red-400"

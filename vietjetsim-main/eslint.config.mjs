@@ -53,6 +53,14 @@ const eslintConfig = [
       '@typescript-eslint/no-explicit-any': 'off',
     },
   },
+  {
+    // Standalone Node utility scripts are CommonJS by design and run outside the
+    // bundler, so `require()` is the only available module syntax.
+    files: ['**/*.cjs', '**/*.js'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
 ];
 
 export default eslintConfig;
