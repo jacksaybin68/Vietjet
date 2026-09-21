@@ -109,13 +109,13 @@ export default function StatsSection() {
       ref={ref}
       className="relative overflow-hidden"
       style={{
-        background: 'linear-gradient(20.12deg, #ED1D23 19.6%, #B30000 93.86%)',
+        background: 'linear-gradient(20.12deg, #EC2029 19.6%, #B30000 93.86%)',
       }}
     >
       {/* Top accent stripe */}
       <div
         className="absolute left-0 top-0 w-full h-1"
-        style={{ background: 'linear-gradient(90deg, #FFD400, #F9A51A, #FFD400)' }}
+        style={{ background: 'linear-gradient(90deg, #FFDD00, #F9A51A, #FFDD00)' }}
       />
 
       {/* Decorative plane watermark */}
@@ -151,7 +151,7 @@ export default function StatsSection() {
               fontWeight: 900,
             }}
           >
-            Vì sao chọn <span style={{ color: '#FFD400' }}>Vietjet Air</span>?
+            Vì sao chọn <span style={{ color: '#FFDD00' }}>Vietjet Air</span>?
           </h2>
         </div>
 
@@ -202,7 +202,7 @@ export default function StatsSection() {
               {/* Bottom accent on hover */}
               <div
                 className="mt-3 h-0.5 w-0 group-hover:w-10 rounded-full mx-auto transition-all duration-300"
-                style={{ background: '#FFD400' }}
+                style={{ background: '#FFDD00' }}
               />
             </div>
           ))}

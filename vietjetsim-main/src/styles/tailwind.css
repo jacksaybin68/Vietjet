@@ -4,23 +4,23 @@
 @tailwind utilities;
 
 :root {
-  /* Tokens khớp trang mẫu: đỏ #E30613, vàng #FFF200, dark #1E293B (design_mau_giao_dien_nguoi_dung.html) */
-  --primary: #E30613;
-  --primary-dark: #B91C1C;
-  --primary-light: #F87171;
-  --primary-deep: #991B1B;
-  --accent: #FFF200;
-  --accent-dark: #E5C100;
-  --accent-secondary: #FFF9C0;
+  /* Brand tokens sampled from vietjetair.com production CSS/JS bundles. */
+  --primary: #EC2029;
+  --primary-dark: #D91A21;
+  --primary-light: #F5717A;
+  --primary-deep: #6F0000;
+  --accent: #FFDD00;
+  --accent-dark: #F9A51A;
+  --accent-secondary: #FBB612;
   --orange: #F4511E;
   --purple: #8075D6;
   --blue: #2563D4;
   --background: #ffffff;
   --surface: #F7F7F7;
   --surface-2: #EFEFEF;
-  --foreground: #1E293B;
-  --foreground-muted: #6d6e71;
-  --foreground-subtle: #939598;
+  --foreground: #333333;
+  --foreground-muted: #6C6C6C;
+  --foreground-subtle: #939393;
   --border: #ececec;
   --dark-bg: #1E293B;
   --dark-surface: #172033;
@@ -28,19 +28,25 @@
   --vj-navy: #1E293B;
   --vj-navy-2: #172033;
   --vj-sky: #f7f7f7;
-  --vj-red: #E30613;
-  --vj-red-dark: #B91C1C;
-  --vj-red-deep: #991B1B;
-  --vj-yellow: #FFF200;
-  --vj-yellow-2: #E5C100;
+  --vj-red: #EC2029;
+  --vj-red-dark: #D91A21;
+  --vj-red-deep: #6F0000;
+  --vj-yellow: #FFDD00;
+  --vj-yellow-2: #FBB612;
   --vj-orange: #F4511E;
   --vj-purple: #8075D6;
   --vj-blue: #2563D4;
-  --vj-text: #1E293B;
-  --vj-text-gray: #6d6e71;
-  --vj-text-muted: #939598;
+  --vj-text: #333333;
+  --vj-text-gray: #6C6C6C;
+  --vj-text-muted: #939393;
   --vj-font: 'KoHo', 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
   --vj-font-heading: 'Be Vietnam Pro', 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  /* Gradient endpoints shared by the header menu bar and CTA buttons. */
+  --vj-grad-red-from: #d91a21;
+  --vj-grad-red-to: #6f0000;
+  --vj-grad-gold-from: #f9a51a;
+  --vj-grad-gold-mid: #fbb612;
+  --vj-grad-gold-to: #ffdd00;
 }
 
 /* Dark mode tokens */
@@ -102,7 +108,7 @@ h6 {
 :where(a, button, input, select, textarea):focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 3px;
-  box-shadow: 0 0 0 5px rgba(230, 6, 19, 0.38);
+  box-shadow: 0 0 0 5px rgba(236, 32, 41, 0.38);
 }
 
 .vj-section {
@@ -121,14 +127,41 @@ h6 {
   border: 2px solid var(--primary);
   background: var(--primary);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(230, 6, 19, 0.22);
+  box-shadow: 0 4px 12px rgba(236, 32, 41, 0.22);
 }
 
 .vj-button-primary:hover {
   border-color: var(--primary-dark);
   background: var(--primary-dark);
-  box-shadow: 0 8px 20px rgba(230, 6, 19, 0.3);
+  box-shadow: 0 8px 20px rgba(236, 32, 41, 0.3);
   transform: translateY(-1px);
+}
+
+/* Red sweep menu bar — mirrors vietjetair.com's fixed 48px header bar. */
+.vj-menubar {
+  background-image: linear-gradient(180deg, var(--vj-grad-red-from) 34.8%, #ab0303 182.34%);
+}
+
+/* Gold pill CTA — the primary "Tìm chuyến bay" action across the site. */
+.vj-cta {
+  background-image: linear-gradient(
+    60.29deg,
+    var(--vj-grad-gold-from) -4.93%,
+    var(--vj-grad-gold-mid) 18.27%,
+    var(--vj-grad-gold-to) 71.59%
+  );
+  color: #333333;
+  border-radius: 9999px;
+  font-weight: 700;
+}
+
+.vj-cta:hover {
+  filter: brightness(1.05);
+}
+
+.vj-cta:disabled {
+  filter: grayscale(0.5);
+  opacity: 0.6;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -248,10 +281,10 @@ h6 {
 @keyframes pulseRed {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(237, 29, 35, 0.4);
+    box-shadow: 0 0 0 0 rgba(236, 32, 41, 0.4);
   }
   50% {
-    box-shadow: 0 0 0 8px rgba(237, 29, 35, 0);
+    box-shadow: 0 0 0 8px rgba(236, 32, 41, 0);
   }
 }
 
@@ -700,10 +733,10 @@ h6 {
 }
 .seat-business {
   background: #fef3c7;
-  border: 1.5px solid #ffd400;
+  border: 1.5px solid #FFDD00;
 }
 .seat-business.seat-selected {
-  background: #ffd400;
+  background: #FFDD00;
   border-color: #e6bf00;
   color: #1a2948;
 }
@@ -722,8 +755,8 @@ h6 {
   outline: none;
   border-color: #ec2029;
   box-shadow:
-    0 0 0 3px rgba(237, 29, 35, 0.14),
-    0 1px 4px rgba(237, 29, 35, 0.08);
+    0 0 0 3px rgba(236, 32, 41, 0.14),
+    0 1px 4px rgba(236, 32, 41, 0.08);
   background-color: #fff;
 }
 
@@ -827,16 +860,16 @@ h6 {
 .vj-btn-primary {
   background: #ec2029;
   color: white;
-  box-shadow: 0 2px 8px rgba(237, 29, 35, 0.28);
+  box-shadow: 0 2px 8px rgba(236, 32, 41, 0.28);
 }
 .vj-btn-primary:hover {
   background: #d9161b;
-  box-shadow: 0 6px 20px rgba(237, 29, 35, 0.45);
+  box-shadow: 0 6px 20px rgba(236, 32, 41, 0.45);
   transform: translateY(-2px) scale(1.02);
 }
 .vj-btn-primary:active {
   transform: translateY(0) scale(0.98);
-  box-shadow: 0 2px 8px rgba(237, 29, 35, 0.28);
+  box-shadow: 0 2px 8px rgba(236, 32, 41, 0.28);
 }
 
 .vj-btn-accent {
@@ -868,7 +901,7 @@ h6 {
 .vj-btn-outline:hover {
   background: #ec2029;
   color: white;
-  box-shadow: 0 4px 16px rgba(237, 29, 35, 0.3);
+  box-shadow: 0 4px 16px rgba(236, 32, 41, 0.3);
   transform: translateY(-1px) scale(1.01);
 }
 .vj-btn-outline:active {
@@ -916,7 +949,7 @@ h6 {
 }
 .card-hover-red:hover {
   transform: translateY(-6px);
-  box-shadow: 0 20px 48px rgba(237, 29, 35, 0.18);
+  box-shadow: 0 20px 48px rgba(236, 32, 41, 0.18);
   border-color: #ec2029;
 }
 
@@ -931,7 +964,7 @@ h6 {
 .card-hover-yellow:hover {
   transform: translateY(-6px);
   box-shadow: 0 20px 48px rgba(255, 212, 0, 0.28);
-  border-color: #ffd400;
+  border-color: #FFDD00;
 }
 
 /* VietJet Card Hover with Blue Accent (User Dashboard) */
@@ -964,7 +997,7 @@ h6 {
 
 /* VietJet Price Badge */
 .vj-price-badge {
-  background: #ffd400;
+  background: #FFDD00;
   color: #1a2948;
   clip-path: polygon(0 0, 100% 0, 100% 75%, 50% 100%, 0 75%);
   font-weight: 800;
@@ -1017,9 +1050,9 @@ h6 {
     border-color 0.25s ease;
 }
 .vj-deal-card:hover {
-  box-shadow: 0 16px 40px rgba(237, 29, 35, 0.18);
+  box-shadow: 0 16px 40px rgba(236, 32, 41, 0.18);
   transform: translateY(-6px);
-  border-color: rgba(237, 29, 35, 0.3);
+  border-color: rgba(236, 32, 41, 0.3);
 }
 
 /* VietJet Nav Active */
@@ -1316,7 +1349,7 @@ h6 {
 }
 .vj-input-field:focus-within {
   border-color: #ec2029;
-  box-shadow: 0 0 0 3px rgba(237, 29, 35, 0.08);
+  box-shadow: 0 0 0 3px rgba(236, 32, 41, 0.08);
 }
 
 /* VietJet Typography helpers */
@@ -1543,7 +1576,7 @@ h6 {
 
 .admin-badge-error {
   background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
+  color: #F5717A;
   border-radius: 8px;
   padding: 4px 12px;
   font-size: 12px;

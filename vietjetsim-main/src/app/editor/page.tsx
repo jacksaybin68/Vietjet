@@ -267,7 +267,7 @@ export default function VSCodeWebEditorPage() {
               className="hover:bg-[#2A2D2E]"
             >
               <span style={{ fontSize: '10px', width: '12px' }}>{isExpanded ? '▼' : '▶'}</span>
-              <span style={{ color: '#E5A900' }}>📁</span>
+              <span style={{ color: '#F9A51A' }}>📁</span>
               <span>{item.name}</span>
             </div>
             {isExpanded && item.children && renderTree(item.children)}
@@ -342,7 +342,7 @@ export default function VSCodeWebEditorPage() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '13px', fontWeight: 700, color: '#E30613' }}>
+          <span style={{ fontSize: '13px', fontWeight: 700, color: '#EC2029' }}>
             ✈️ Vietjet Air
           </span>
           <span style={{ fontSize: '12px', color: '#858585' }}>VS Code Web Studio</span>
@@ -352,7 +352,7 @@ export default function VSCodeWebEditorPage() {
           <button
             onClick={() => setShowLivePreview(!showLivePreview)}
             style={{
-              background: showLivePreview ? '#E30613' : '#3C3C3C',
+              background: showLivePreview ? '#EC2029' : '#3C3C3C',
               color: '#FFF',
               border: 'none',
               padding: '4px 10px',
@@ -387,7 +387,7 @@ export default function VSCodeWebEditorPage() {
           <button
             onClick={saveCurrentFile}
             style={{
-              background: activeTab?.isDirty ? '#E30613' : '#0E639C',
+              background: activeTab?.isDirty ? '#EC2029' : '#0E639C',
               color: '#FFF',
               border: 'none',
               padding: '4px 12px',
@@ -556,14 +556,14 @@ export default function VSCodeWebEditorPage() {
                     backgroundColor: isActive ? '#1E1E1E' : '#2D2D2D',
                     color: isActive ? '#FFFFFF' : '#969696',
                     borderRight: '1px solid #252526',
-                    borderTop: isActive ? '2px solid #E30613' : '2px solid transparent',
+                    borderTop: isActive ? '2px solid #EC2029' : '2px solid transparent',
                     cursor: 'pointer',
                     userSelect: 'none',
                   }}
                 >
                   <span>{tab.name}</span>
                   {tab.isDirty && (
-                    <span style={{ color: '#E30613', fontSize: '14px', fontWeight: 'bold' }}>
+                    <span style={{ color: '#EC2029', fontSize: '14px', fontWeight: 'bold' }}>
                       ●
                     </span>
                   )}

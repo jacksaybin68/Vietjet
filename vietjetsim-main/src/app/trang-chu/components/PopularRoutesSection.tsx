@@ -13,7 +13,7 @@ import {
 import { MdCheckCircle, MdArrowForward } from 'react-icons/md';
 
 const SERVICES = [
-  { label: 'Đặt vé máy bay', href: '/tim-ve', Icon: FaPlane, iconBg: '#E30613' },
+  { label: 'Đặt vé máy bay', href: '/tim-ve', Icon: FaPlane, iconBg: '#EC2029' },
   {
     label: 'Mua hành lý & bữa ăn',
     href: '/tim-ve',
@@ -21,7 +21,7 @@ const SERVICES = [
     iconBg: '#10b981',
   },
   { label: 'Check-in ưu tiên', href: '/tim-ve', Icon: MdCheckCircle, iconBg: '#0ea5e9' },
-  { label: 'Duty Free', href: '/trang-chu', Icon: FaShoppingCart, iconBg: '#b91c1c' },
+  { label: 'Duty Free', href: '/trang-chu', Icon: FaShoppingCart, iconBg: '#D91A21' },
   { label: 'Bảo hiểm du lịch', href: '/trang-chu', Icon: FaShieldAlt, iconBg: '#f59e0b' },
   { label: 'Vietjet e-Voucher', href: '/trang-chu', Icon: FaTicketAlt, iconBg: '#7c3aed' },
 ];
@@ -114,7 +114,7 @@ const POPULAR_ROUTES = [
 ];
 
 const TAG_COLORS: Record<string, { bg: string; text: string }> = {
-  'Phổ biến nhất': { bg: 'rgba(227, 6, 19, 0.10)', text: '#E30613' },
+  'Phổ biến nhất': { bg: 'rgba(227, 6, 19, 0.10)', text: '#EC2029' },
   'Giá tốt': { bg: 'rgba(16,185,129,0.12)', text: '#059669' },
   Hot: { bg: 'rgba(249,115,22,0.12)', text: '#ea580c' },
   'Nghỉ dưỡng': { bg: 'rgba(14,165,233,0.12)', text: '#0284c7' },
@@ -297,7 +297,7 @@ export default function PopularRoutesSection() {
                         className="text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
                         style={{
                           background: TAG_COLORS[route?.tag]?.bg ?? 'rgba(236,32,41,0.10)',
-                          color: TAG_COLORS[route?.tag]?.text ?? '#E30613',
+                          color: TAG_COLORS[route?.tag]?.text ?? '#EC2029',
                         }}
                       >
                         {route?.tag}
@@ -314,7 +314,7 @@ export default function PopularRoutesSection() {
                 <div className="shrink-0 text-right ml-2 sm:ml-3">
                   <p className="text-[10px] md:text-xs mb-0.5 font-koho dark:text-white/70">Từ</p>
                   <p
-                    className="text-[11px] md:text-sm font-black whitespace-nowrap text-primary dark:text-[#FFC400]"
+                    className="text-[11px] md:text-sm font-black whitespace-nowrap text-primary dark:text-[#FFDD00]"
                     style={{ fontWeight: 900 }}
                   >
                     {route?.price}₫

@@ -54,29 +54,29 @@ interface VariantConfig {
 
 const VARIANT_CONFIG: Record<ErrorVariant, VariantConfig> = {
   network: {
-    accentColor: '#FFD400',
+    accentColor: '#FFDD00',
     bgColor: '#FFFBEB',
     retryLabel: 'Thử lại kết nối',
     title: 'Mất kết nối mạng',
     subtitle: 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet và thử lại.',
     icon: (
       <svg viewBox="0 0 64 64" fill="none" className="w-16 h-16" aria-hidden="true">
-        <circle cx="32" cy="32" r="30" fill="#FFF8DC" stroke="#FFD400" strokeWidth="2" />
+        <circle cx="32" cy="32" r="30" fill="#FFF8DC" stroke="#FFDD00" strokeWidth="2" />
         <path
           d="M16 32 Q32 16 48 32"
-          stroke="#FFD400"
+          stroke="#FFDD00"
           strokeWidth="3"
           strokeLinecap="round"
           fill="none"
         />
         <path
           d="M20 38 Q32 26 44 38"
-          stroke="#FFD400"
+          stroke="#FFDD00"
           strokeWidth="3"
           strokeLinecap="round"
           fill="none"
         />
-        <circle cx="32" cy="44" r="3" fill="#FFD400" />
+        <circle cx="32" cy="44" r="3" fill="#FFDD00" />
         <line
           x1="20"
           y1="20"
@@ -324,7 +324,7 @@ export function ErrorFallback({
       aria-live="assertive"
     >
       {/* Vietjet Air brand strip */}
-      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#EC2029] via-[#FF4D53] to-[#FFD400]" />
+      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#EC2029] via-[#FF4D53] to-[#FFDD00]" />
 
       <div className="max-w-md w-full text-center">
         {/* Illustration */}
