@@ -8,6 +8,7 @@ describe('route access classification', () => {
       expect(isPublicRoute('/tim-ve')).toBe(true);
       expect(isPublicRoute('/chuyen-bay-cua-toi')).toBe(true);
       expect(isPublicRoute('/lam-thu-tuc')).toBe(true);
+      expect(isPublicRoute('/lam-thu-tuc-truc-tuyen')).toBe(true);
       expect(isPublicRoute('/dat-ve')).toBe(true);
     });
 
@@ -16,6 +17,12 @@ describe('route access classification', () => {
       expect(isPublicRoute('/dat-ve-xyz')).toBe(false);
       expect(isPublicRoute('/tai-khoan')).toBe(false);
       expect(isPublicRoute('/quan-tri')).toBe(false);
+    });
+
+    it('allows the password recovery pages without a session', () => {
+      expect(isPublicRoute('/dang-nhap')).toBe(true);
+      expect(isPublicRoute('/quen-mat-khau')).toBe(true);
+      expect(isPublicRoute('/dat-lai-mat-khau')).toBe(true);
     });
   });
 

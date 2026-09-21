@@ -10,9 +10,15 @@
 export const PUBLIC_ROUTES = [
   '/',
   '/dang-nhap',
+  // Password recovery must be reachable without a session.
+  '/quen-mat-khau',
+  '/dat-lai-mat-khau',
   '/trang-chu',
   '/chuyen-bay-cua-toi',
   '/lam-thu-tuc',
+  // Legacy alias for the same anonymous check-in lookup; it 307s to
+  // `/lam-thu-tuc` forwarding the query string.
+  '/lam-thu-tuc-truc-tuyen',
   '/dat-ve',
   '/tim-ve',
 ] as const;
