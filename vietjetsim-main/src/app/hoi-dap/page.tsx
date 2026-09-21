@@ -144,7 +144,7 @@ export default function FAQPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-body">
+    <div className="min-h-screen bg-[var(--surface)] font-body">
       <Header />
       {/* Hero Section */}
       <div
@@ -279,7 +279,7 @@ export default function FAQPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/lien-he"
-              className="px-6 py-3 rounded-lg bg-[#EC2029] text-white font-bold hover:bg-[#C41017] transition-all shadow-vj-btn"
+              className="px-6 py-3 rounded-lg bg-[#EC2029] text-white font-bold hover:bg-primary-dark transition-all shadow-vj-btn"
             >
               Gửi tin nhắn
             </Link>

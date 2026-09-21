@@ -7,7 +7,7 @@ import { Header, Footer } from '@/shared/components/navigation';
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-gray-50 font-body">
+    <div className="min-h-screen bg-[var(--surface)] font-body">
       <Header />
       {/* Hero Section */}
       <div

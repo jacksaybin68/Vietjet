@@ -28,7 +28,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-body">
+    <div className="min-h-screen bg-[var(--surface)] font-body">
       <Header />
       {/* Hero Section */}
       <div
@@ -141,7 +141,7 @@ export default function ContactPage() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full md:w-auto px-8 py-3 rounded-lg bg-[#EC2029] text-white font-bold hover:bg-[#C41017] transition-all duration-300 shadow-vj-btn hover:shadow-vj-btn-hover flex items-center justify-center gap-2"
+                  className="w-full md:w-auto px-8 py-3 rounded-lg bg-[#EC2029] text-white font-bold hover:bg-primary-dark transition-all duration-300 shadow-vj-btn hover:shadow-vj-btn-hover flex items-center justify-center gap-2"
                 >
                   <Icon name="PaperAirplaneIcon" size={18} />
                   Gửi tin nhắn

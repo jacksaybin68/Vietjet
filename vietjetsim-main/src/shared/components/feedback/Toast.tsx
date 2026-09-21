@@ -205,7 +205,7 @@ function ToastNotification({ toast, onDismiss }: ToastProps) {
                         ? 'bg-[#FFDD00] text-[#1A2948] hover:bg-[#E6BF00] shadow-sm'
                         : action.variant === 'ghost'
                           ? 'text-[#666666] hover:text-[#1A2948] hover:bg-[#F5F5F5]'
-                          : 'bg-[#EC2029] text-white hover:bg-[#C41017] shadow-sm'
+                          : 'bg-[#EC2029] text-white hover:bg-primary-dark shadow-sm'
                     }
                   `}
                 >

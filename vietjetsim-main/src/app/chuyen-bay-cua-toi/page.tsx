@@ -91,23 +91,27 @@ const STATUS_LABELS: Record<RecentBooking['status'], { label: string; color: str
     pending: {
       label: 'Chờ thanh toán',
       color: 'text-[var(--vj-red)]',
-      bg: 'bg-[var(--vj-yellow)]/25',
+      bg: 'bg-[rgb(var(--vj-yellow-rgb))]/25',
     },
-    confirmed: { label: 'Đã xác nhận', color: 'text-[var(--vj-red)]', bg: 'bg-[var(--vj-red)]/10' },
+    confirmed: {
+      label: 'Đã xác nhận',
+      color: 'text-[var(--vj-red)]',
+      bg: 'bg-[rgb(var(--vj-red-rgb))]/10',
+    },
     completed: {
       label: 'Hoàn thành',
       color: 'text-[var(--vj-blue)]',
-      bg: 'bg-[var(--vj-blue)]/10',
+      bg: 'bg-[rgb(var(--vj-blue-rgb))]/10',
     },
     cancelled: {
       label: 'Đã hủy',
       color: 'text-[var(--foreground-muted)]',
-      bg: 'bg-[var(--foreground-muted)]/15',
+      bg: 'bg-[rgb(var(--foreground-muted-rgb))]/15',
     },
     refunded: {
       label: 'Đã hoàn tiền',
       color: 'text-[var(--vj-purple)]',
-      bg: 'bg-[var(--vj-purple)]/15',
+      bg: 'bg-[rgb(var(--vj-purple-rgb))]/15',
     },
   };
 
@@ -259,7 +263,7 @@ export default function MyFlightsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)] dark:bg-[var(--dark-bg)]">
+    <div className="min-h-screen bg-[var(--background)]">
       <Header />
 
       {/* ===== HERO: Tra cứy đặt chỗ — light theme theo spec DevTools ===== */}
@@ -316,7 +320,7 @@ export default function MyFlightsPage() {
                     value={bookingCode}
                     onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
                     placeholder="VD-12345678"
-                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--vj-red)]/50 uppercase"
+                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50 uppercase"
                   />
                 </div>
                 <div>
@@ -332,7 +336,7 @@ export default function MyFlightsPage() {
                     value={surname}
                     onChange={(e) => setSurname(e.target.value)}
                     placeholder="Nguyễn"
-                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--vj-red)]/50"
+                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
                   />
                 </div>
                 <div>
@@ -348,7 +352,7 @@ export default function MyFlightsPage() {
                     value={givenName}
                     onChange={(e) => setGivenName(e.target.value)}
                     placeholder="Van A"
-                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--vj-red)]/50"
+                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
                   />
                 </div>
                 <button
@@ -404,7 +408,7 @@ export default function MyFlightsPage() {
                       {/* Biller header (perforé) */}
                       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-[var(--vj-navy)] text-white">
                         <div className="flex items-center gap-2">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--vj-red)]/80 text-white">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[rgb(var(--vj-red-rgb))]/80 text-white">
                             <FlightIcon className="h-5 w-5" />
                           </div>
                           <div>
@@ -472,19 +476,19 @@ export default function MyFlightsPage() {
                         {/* Check-in / détails */}
                         <div className="mt-4 flex flex-wrap gap-2">
                           {b.seat_number ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg bg-[var(--vj-blue)]/10 text-[var(--vj-blue)]">
+                            <span className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg bg-[rgb(var(--vj-blue-rgb))]/10 text-[var(--vj-blue)]">
                               <MdAirlineSeatReclineNormal className="h-3.5 w-3.5" /> Ghế{' '}
                               {b.seat_number}
                             </span>
                           ) : null}
                           {b.has_check_in ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg bg-[var(--vj-green)]/10 text-[var(--vj-green)]">
+                            <span className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg bg-[rgb(var(--vj-green-rgb))]/10 text-[var(--vj-green)]">
                               <MdCheckCircle className="h-3.5 w-3.5" /> Đã check-in
                               {b.check_in_number ? ` · ${b.check_in_number}` : ''}
                             </span>
                           ) : null}
                           {b.passengers && b.passengers.length > 0 && (
-                            <span className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg bg-[var(--vj-yellow)]/25 text-[var(--vj-red)] font-bold">
+                            <span className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg bg-[rgb(var(--vj-yellow-rgb))]/25 text-[var(--vj-red)] font-bold">
                               <MdLogin className="h-3.5 w-3.5" /> {b.passengers.length} hành khach
                             </span>
                           )}
@@ -515,14 +519,14 @@ export default function MyFlightsPage() {
                           {b.has_check_in && (
                             <Link
                               href={`/lam-thu-tuc?code=${b.id}`}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-[var(--vj-yellow)]/25 text-[var(--vj-red)] font-bold hover:bg-[var(--vj-yellow)]/40 transition-colors"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-[rgb(var(--vj-yellow-rgb))]/25 text-[var(--vj-red)] font-bold hover:bg-[rgb(var(--vj-yellow-rgb))]/40 transition-colors"
                             >
                               ✅ Thẻ lên tàu
                             </Link>
                           )}
                           <Link
                             href={`/lam-thu-tuc?code=${b.id}`}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-[var(--border)] font-semibold hover:bg-[var(--vj-yellow)]/10 transition-colors"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-[var(--border)] font-semibold hover:bg-[rgb(var(--vj-yellow-rgb))]/10 transition-colors"
                           >
                             <MdPrint className="h-3.5 w-3.5" /> In vé / Đổi
                           </Link>
@@ -608,7 +612,7 @@ export default function MyFlightsPage() {
                         </button>
                         <Link
                           href={`/lam-thu-tuc?ticket=${b.id}`}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-[var(--border)] font-semibold hover:bg-[var(--vj-yellow)]/10 transition-colors"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-[var(--border)] font-semibold hover:bg-[rgb(var(--vj-yellow-rgb))]/10 transition-colors"
                         >
                           <MdQrCodeScanner className="h-3.5 w-3.5" /> Xem QR
                         </Link>

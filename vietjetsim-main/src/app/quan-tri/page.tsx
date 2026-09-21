@@ -6,7 +6,7 @@ import { ProtectedRoute } from '@/features/auth';
 export default function AdminDashboardPage() {
   return (
     <ProtectedRoute requiredRole="admin">
-      <div className="min-h-screen bg-stone-50">
+      <div className="min-h-screen bg-[var(--surface)]">
         <ErrorBoundary variant="api" retryLabel="Tải lại bảng điều khiển">
           <AdminDashboardClient />
         </ErrorBoundary>

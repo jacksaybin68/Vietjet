@@ -11,21 +11,28 @@
   --primary-deep: #6F0000;
   --accent: #FFDD00;
   --accent-dark: #F9A51A;
+  --accent-light: #FFE97A;
   --accent-secondary: #FBB612;
   --orange: #F4511E;
   --purple: #8075D6;
   --blue: #2563D4;
   --background: #ffffff;
+  --background-secondary: #F7F7F7;
   --surface: #F7F7F7;
   --surface-2: #EFEFEF;
+  --surface-3: #E4E4E4;
+  /* Component channels for Tailwind's `/opacity` modifier: `bg-[rgb(var(--x-rgb))]/20`. */
+  --primary-rgb: 236 32 41;
+  --accent-rgb: 255 221 0;
   --foreground: #333333;
   --foreground-muted: #6C6C6C;
   --foreground-subtle: #939393;
   --border: #ececec;
   --dark-bg: #1E293B;
   --dark-surface: #172033;
+  --dark-surface-2: #24304A;
   --dark-border: rgba(255, 255, 255, 0.14);
-  --vj-navy: #1E293B;
+  --vj-navy: #1A2948;
   --vj-navy-2: #172033;
   --vj-sky: #f7f7f7;
   --vj-red: #EC2029;
@@ -35,7 +42,21 @@
   --vj-yellow-2: #FBB612;
   --vj-orange: #F4511E;
   --vj-purple: #8075D6;
+  --vj-purple-light: #EDE9FE;
   --vj-blue: #2563D4;
+  --vj-green: #2DB35E;
+  --vj-green-light: #DCFCE7;
+  /* RGB channels: Tailwind's `/N` modifier only compiles against
+     `[rgb(var(--x-rgb))]/N`; `[var(--x)]/N` is silently dropped. */
+  --vj-red-rgb: 236 32 41;
+  --vj-yellow-rgb: 255 221 0;
+  --vj-navy-rgb: 26 41 72;
+  --vj-blue-rgb: 37 99 212;
+  --vj-green-rgb: 45 179 94;
+  --vj-purple-rgb: 128 117 214;
+  --foreground-muted-rgb: 108 108 108;
+  --dark-surface-rgb: 23 32 51;
+  --background-secondary-rgb: 247 247 247;
   --vj-text: #333333;
   --vj-text-gray: #6C6C6C;
   --vj-text-muted: #939393;
@@ -52,8 +73,11 @@
 /* Dark mode tokens */
 .dark {
   --background: #172033;
+  --background-secondary: #1E293B;
   --surface: #1E293B;
   --surface-2: #243044;
+  --surface-3: #2F3B52;
+  --accent-light: #FFDD00;
   --foreground: #f0f0f0;
   --foreground-muted: #a0a0a0;
   --foreground-subtle: #707070;
@@ -61,6 +85,11 @@
   --vj-text: #f0f0f0;
   --vj-text-gray: #b0b0b0;
   --vj-text-muted: #808080;
+  /* Light-tint chip backgrounds need dark counterparts or the chips glow. */
+  --vj-green-light: #0B2E1C;
+  --vj-purple-light: #241B4D;
+  --foreground-muted-rgb: 160 160 160;
+  --background-secondary-rgb: 30 41 59;
 }
 
 html {
@@ -162,6 +191,19 @@ h6 {
 .vj-cta:disabled {
   filter: grayscale(0.5);
   opacity: 0.6;
+}
+
+/* Table rows share one hover/transition treatment across dashboard and admin tables. */
+.vj-table-row {
+  transition: background-color 80ms ease;
+}
+
+.vj-table-row:hover {
+  background: var(--surface-2);
+}
+
+.dark .vj-table-row:hover {
+  background: var(--dark-surface-2);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -721,7 +763,7 @@ h6 {
   border: 1.5px solid #d6d3d1;
 }
 .seat-selected {
-  background: #ec2029;
+  background: var(--primary);
   border: 1.5px solid #6f0000;
   color: white;
 }
@@ -753,7 +795,7 @@ h6 {
 }
 .form-input:focus {
   outline: none;
-  border-color: #ec2029;
+  border-color: var(--primary);
   box-shadow:
     0 0 0 3px rgba(236, 32, 41, 0.14),
     0 1px 4px rgba(236, 32, 41, 0.08);
@@ -807,7 +849,7 @@ h6 {
   top: 0;
   transform: translateY(-50%);
   font-size: 11px;
-  color: #ec2029;
+  color: var(--primary);
   background: white;
   padding: 0 4px;
   font-weight: 600;
@@ -838,7 +880,7 @@ h6 {
 
 /* Tab active */
 .tab-active {
-  color: #ec2029;
+  color: var(--primary);
   border-bottom: 2px solid #ec2029;
 }
 
@@ -858,12 +900,12 @@ h6 {
 }
 
 .vj-btn-primary {
-  background: #ec2029;
+  background: var(--primary);
   color: white;
   box-shadow: 0 2px 8px rgba(236, 32, 41, 0.28);
 }
 .vj-btn-primary:hover {
-  background: #d9161b;
+  background: var(--primary-dark);
   box-shadow: 0 6px 20px rgba(236, 32, 41, 0.45);
   transform: translateY(-2px) scale(1.02);
 }
@@ -895,11 +937,11 @@ h6 {
 
 .vj-btn-outline {
   background: transparent;
-  color: #ec2029;
+  color: var(--primary);
   border: 1.5px solid #ec2029;
 }
 .vj-btn-outline:hover {
-  background: #ec2029;
+  background: var(--primary);
   color: white;
   box-shadow: 0 4px 16px rgba(236, 32, 41, 0.3);
   transform: translateY(-1px) scale(1.01);
@@ -950,7 +992,7 @@ h6 {
 .card-hover-red:hover {
   transform: translateY(-6px);
   box-shadow: 0 20px 48px rgba(236, 32, 41, 0.18);
-  border-color: #ec2029;
+  border-color: var(--primary);
 }
 
 /* VietJet Card Hover with Yellow Accent */
@@ -991,7 +1033,7 @@ h6 {
 
 /* VietJet Sticky Search Bar */
 .vj-sticky-search {
-  background: #ec2029;
+  background: var(--primary);
   border-bottom: 2px solid #6f0000;
 }
 
@@ -1005,7 +1047,7 @@ h6 {
 
 /* VietJet Section Label */
 .vj-section-label {
-  background: #ec2029;
+  background: var(--primary);
   color: white;
   font-style: italic;
   font-weight: 800;
@@ -1057,7 +1099,7 @@ h6 {
 
 /* VietJet Nav Active */
 .vj-nav-active {
-  color: #ec2029;
+  color: var(--primary);
   border-bottom: 2px solid #ec2029;
 }
 
@@ -1066,7 +1108,7 @@ h6 {
   position: absolute;
   top: 0;
   left: 0;
-  background: #ec2029;
+  background: var(--primary);
   color: white;
   font-size: 10px;
   font-weight: 800;
@@ -1100,7 +1142,7 @@ h6 {
 }
 .sidebar-link.active {
   background: white;
-  color: #ec2029;
+  color: var(--primary);
   font-weight: 700;
 }
 .sidebar-link:not(.active):hover {
@@ -1230,11 +1272,11 @@ h6 {
 .skeleton-accent-bar {
   background: linear-gradient(
     90deg,
-    #d9161b 0%,
+    var(--primary-dark) 0%,
     #ff4d6a 40%,
     #ffc72c 60%,
     #ff4d6a 80%,
-    #d9161b 100%
+    var(--primary-dark) 100%
   );
   background-size: 400% 100%;
   animation: skeleton-shimmer 2s ease-in-out infinite;
@@ -1348,7 +1390,7 @@ h6 {
   color: #333333;
 }
 .vj-input-field:focus-within {
-  border-color: #ec2029;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(236, 32, 41, 0.08);
 }
 
@@ -1393,7 +1435,7 @@ h6 {
 .vj-price {
   font-family: 'Be Vietnam Pro', 'KoHo', sans-serif;
   font-weight: 900;
-  color: #ec2029;
+  color: var(--primary);
 }
 
 /* VietJet italic brand text */
@@ -1401,7 +1443,7 @@ h6 {
   font-family: 'Be Vietnam Pro', 'KoHo', sans-serif;
   font-style: italic;
   font-weight: 900;
-  color: #ec2029;
+  color: var(--primary);
 }
 
 /* ─── Font utility classes (replace inline fontFamily) ─── */
@@ -1463,7 +1505,7 @@ h6 {
   color: #9ca3af;
 }
 .bg-primary-solid {
-  background-color: #ec2029;
+  background-color: var(--primary);
 }
 .bg-navy-solid {
   background-color: #1a2948;
@@ -1472,7 +1514,7 @@ h6 {
   background-color: #ffc72c;
 }
 .bg-red-dark {
-  background-color: #d9161b;
+  background-color: var(--primary-dark);
 }
 .bg-white-10 {
   background-color: rgba(255, 255, 255, 0.1);

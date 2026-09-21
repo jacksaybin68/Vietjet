@@ -939,7 +939,7 @@ export default function FlightResultsStep({ onSelect }: { onSelect: (f: Flight) 
                 </div>
 
                 {/* Right: Fare Classes - responsive */}
-                <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-0.5 sm:gap-1 p-1 sm:p-2 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]/50">
+                <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-0.5 sm:gap-1 p-1 sm:p-2 bg-[var(--surface-2)] dark:bg-[rgb(var(--dark-surface-rgb))]/50">
                   {fareClasses.map((fc) => (
                     <div
                       key={fc.id}

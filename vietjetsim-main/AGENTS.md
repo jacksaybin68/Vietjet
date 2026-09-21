@@ -64,7 +64,7 @@ protocol — raw `DATABASE_URL=postgresql://localhost/...` fails with
   migrate the client to `apiRequest` in the same change or the UI breaks with 403.
 - **`verifyAdminRequest` returns a discriminated union.** Failure always carries
   `response`, so `const { error, response } = await verifyAdminRequest(...); if (error)
-  return response;` narrows correctly and avoids returning `undefined` from a handler.
+return response;` narrows correctly and avoids returning `undefined` from a handler.
 - All state-changing admin APIs must be gated by `verifyAdminRequest`; middleware
   (`middleware.ts`) also blocks non-admins from `/quan-tri` and `/api/quan-tri`.
 - **Public routes/APIs are declared in `src/lib/route-access.ts`**, which
@@ -154,6 +154,24 @@ those utilities over restyling a bespoke button. Most pages render `<Header />` 
 `service` query param (`baggage`, `meal`, `seat`, `insurance`, `priority`, `lounge`) to
 preselect a panel. Link services as `/dich-vu?service=<id>` rather than as subpaths like
 `/dich-vu/hanh-ly`, which do not exist and 404.
+
+### Tailwind gotchas that caused real regressions
+
+- **`[var(--x)]/N` silently compiles to nothing.** Tailwind 3.4's `/opacity` modifier
+  cannot resolve a plain CSS variable, so `bg-[var(--vj-red)]/10` produces _no rule at
+  all_ — no error, no warning. Use channel variables and wrap in `rgb()`:
+  `bg-[rgb(var(--vj-red-rgb))]/10`. Channel tokens (`--vj-red-rgb: 236 32 41`) live in
+  `:root` in `tailwind.css`; add one whenever you add a translucent tint.
+- **Only `src/styles/tailwind.css` is imported** (by `src/app/layout.tsx`). A stylesheet
+  under `src/styles/` that nothing imports is dead code — dark mode once shipped a second
+  `[data-theme="dark"]` mechanism that way while `ThemeContext` toggles a `dark` class.
+  `darkMode: 'class'` with a `.dark` selector is the only supported mechanism.
+- **Use the token for brand red**: `hover:bg-primary-dark` / `var(--primary-dark)`
+  (`#D91A21`), not a bespoke `#C41017`/`#D0021B`. One-off hexes for a specific UI accent
+  are fine, but a button hover is not a place to invent a shade.
+- **Page roots share the canvas token** — `min-h-screen bg-[var(--surface)]` for content
+  pages, `bg-[var(--background)]` where the page must stay white in light mode. Avoid
+  `bg-gray-50`/`bg-stone-50`/raw hex, which ignore dark mode.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
