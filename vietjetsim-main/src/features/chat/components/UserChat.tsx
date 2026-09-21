@@ -295,7 +295,7 @@ export default function UserChat() {
             <div className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white/15 shadow-inner ring-1 ring-white/25">
               <Icon name="ChatBubbleLeftRightIcon" size={22} className="text-accent" />
               <span
-                className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-[#E31E24] ${
+                className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-[#EC2029] ${
                   adminOnline ? 'bg-green-400' : 'bg-gray-400'
                 }`}
               />

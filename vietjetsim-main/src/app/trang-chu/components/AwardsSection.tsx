@@ -31,7 +31,7 @@ export default function AwardsSection() {
                 className="w-14 h-14 rounded-full flex items-center justify-center shadow-sm"
                 style={{
                   background: 'linear-gradient(135deg, #FFF9C4 0%, #FFF176 100%)',
-                  border: '1.5px solid #FFD400',
+                  border: '1.5px solid #FFDD00',
                 }}
               >
                 <TrophyIcon className="w-7 h-7" style={{ color: '#E6BF00' }} />

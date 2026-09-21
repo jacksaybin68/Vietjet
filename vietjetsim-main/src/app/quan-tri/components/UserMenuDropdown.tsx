@@ -235,7 +235,7 @@ export default function UserMenuDropdown({ onNavigate }: UserMenuDropdownProps) 
                 <Icon name="ArrowRightOnRectangleIcon" size={16} className="text-red-400" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold" style={{ color: '#f87171' }}>
+                <p className="text-sm font-semibold" style={{ color: '#F5717A' }}>
                   {isLoggingOut ? 'Đang đăng xuất...' : 'Đăng xuất'}
                 </p>
                 <p className="text-[11px] text-red-400/60">Đăng xuất khỏi tài khoản</p>

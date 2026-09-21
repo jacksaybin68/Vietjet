@@ -68,7 +68,7 @@ export default function ToastDemo() {
         <div className="max-w-5xl mx-auto px-4">
           {/* Section header */}
           <div className="mb-8 text-center">
-            <span className="inline-block text-xs font-bold uppercase tracking-widest text-[#ED1D23] mb-2 font-['KoHo',sans-serif]">
+            <span className="inline-block text-xs font-bold uppercase tracking-widest text-[#EC2029] mb-2 font-['KoHo',sans-serif]">
               Thông báo hệ thống
             </span>
             <h2 className="text-2xl font-bold text-[#14213D] font-['KoHo',sans-serif]">
@@ -93,7 +93,7 @@ export default function ToastDemo() {
               }
               className="px-4 py-2 rounded-lg bg-[#14213D] text-white text-sm font-semibold hover:bg-[#0F1E3A] transition-all duration-150 active:scale-95 font-['KoHo',sans-serif] flex items-center gap-2"
             >
-              <span className="w-2 h-2 rounded-full bg-[#FFD400] inline-block" />
+              <span className="w-2 h-2 rounded-full bg-[#FFDD00] inline-block" />
               Thành công
             </button>
 
@@ -110,7 +110,7 @@ export default function ToastDemo() {
                   }
                 )
               }
-              className="px-4 py-2 rounded-lg bg-[#ED1D23] text-white text-sm font-semibold hover:bg-[#C41017] transition-all duration-150 active:scale-95 font-['KoHo',sans-serif] flex items-center gap-2"
+              className="px-4 py-2 rounded-lg bg-[#EC2029] text-white text-sm font-semibold hover:bg-[#C41017] transition-all duration-150 active:scale-95 font-['KoHo',sans-serif] flex items-center gap-2"
             >
               <span className="w-2 h-2 rounded-full bg-white inline-block" />
               Lỗi
@@ -123,7 +123,7 @@ export default function ToastDemo() {
                   actions: [{ label: 'Đặt ngay', onClick: () => {}, variant: 'accent' }],
                 })
               }
-              className="px-4 py-2 rounded-lg bg-[#FFD400] text-[#14213D] text-sm font-semibold hover:bg-[#E6BF00] transition-all duration-150 active:scale-95 font-['KoHo',sans-serif] flex items-center gap-2"
+              className="px-4 py-2 rounded-lg bg-[#FFDD00] text-[#14213D] text-sm font-semibold hover:bg-[#E6BF00] transition-all duration-150 active:scale-95 font-['KoHo',sans-serif] flex items-center gap-2"
             >
               <span className="w-2 h-2 rounded-full bg-[#14213D] inline-block" />
               Cảnh báo
@@ -149,7 +149,7 @@ export default function ToastDemo() {
           {/* Confirmation Modal Demo */}
           <div className="border-t border-[#E8E8E8] pt-8">
             <div className="mb-5 text-center">
-              <span className="inline-block text-xs font-bold uppercase tracking-widest text-[#ED1D23] mb-1 font-['KoHo',sans-serif]">
+              <span className="inline-block text-xs font-bold uppercase tracking-widest text-[#EC2029] mb-1 font-['KoHo',sans-serif]">
                 Hộp thoại xác nhận
               </span>
               <p className="text-sm text-[#666666] font-['KoHo',sans-serif]">
@@ -159,7 +159,7 @@ export default function ToastDemo() {
             <div className="flex flex-wrap justify-center gap-3">
               <button
                 onClick={() => openModal('seat')}
-                className="px-5 py-2.5 rounded-xl border-2 border-[#ED1D23] text-[#ED1D23] text-sm font-semibold hover:bg-[#ED1D23] hover:text-white transition-all duration-150 active:scale-95 font-['KoHo',sans-serif] flex items-center gap-2"
+                className="px-5 py-2.5 rounded-xl border-2 border-[#EC2029] text-[#EC2029] text-sm font-semibold hover:bg-[#EC2029] hover:text-white transition-all duration-150 active:scale-95 font-['KoHo',sans-serif] flex items-center gap-2"
               >
                 <svg
                   width="16"
@@ -179,7 +179,7 @@ export default function ToastDemo() {
 
               <button
                 onClick={() => openModal('booking')}
-                className="px-5 py-2.5 rounded-xl border-2 border-[#ED1D23] text-[#ED1D23] text-sm font-semibold hover:bg-[#ED1D23] hover:text-white transition-all duration-150 active:scale-95 font-['KoHo',sans-serif] flex items-center gap-2"
+                className="px-5 py-2.5 rounded-xl border-2 border-[#EC2029] text-[#EC2029] text-sm font-semibold hover:bg-[#EC2029] hover:text-white transition-all duration-150 active:scale-95 font-['KoHo',sans-serif] flex items-center gap-2"
               >
                 <svg
                   width="16"

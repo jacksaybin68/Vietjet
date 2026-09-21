@@ -25,6 +25,29 @@ vi.mock('next/headers', () => ({
   }),
 }));
 
+// ─── Mock Next.js App Router ────────────────────────────────────────────────
+// Components rendered in isolation (no <AppRouterContext> provider) throw
+// "invariant expected app router to be mounted" from useRouter/usePathname.
+// Tests exercise component markup, not navigation, so stub the router hooks.
+
+vi.mock('next/navigation', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('next/navigation')>();
+  return {
+    ...actual,
+    useRouter: () => ({
+      push: vi.fn(),
+      replace: vi.fn(),
+      back: vi.fn(),
+      forward: vi.fn(),
+      refresh: vi.fn(),
+      prefetch: vi.fn(),
+    }),
+    usePathname: () => '/',
+    useSearchParams: () => new URLSearchParams(),
+    useParams: () => ({}),
+  };
+});
+
 // ─── Mock fetch ─────────────────────────────────────────────────────────────
 
 global.fetch = vi.fn();

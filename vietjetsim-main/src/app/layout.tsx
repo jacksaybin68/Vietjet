@@ -9,7 +9,7 @@ import { NavigationOptimizer } from '@/shared/components/layouts';
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#E30613',
+  themeColor: '#EC2029',
 };
 
 export const metadata: Metadata = {
@@ -118,7 +118,7 @@ export default function RootLayout({
         `,
           }}
         />
-        <NextTopLoader color="#E30613" showSpinner={false} />
+        <NextTopLoader color="#EC2029" showSpinner={false} />
         <NavigationOptimizer />
         <ThemeProvider>
           <AuthProvider>

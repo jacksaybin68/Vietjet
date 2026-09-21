@@ -75,14 +75,14 @@ const BANKS: BankInfo[] = [
     name: 'VIB',
     fullName: 'Ngân hàng TMCP Quốc Tế Việt Nam',
     code: 'VIB',
-    color: '#FFD700',
+    color: '#FFDD00',
   },
   {
     id: 'shb',
     name: 'SHB',
     fullName: 'Ngân hàng TMCP Sài Gòn - Hà Nội',
     code: 'SHB',
-    color: '#E31E24',
+    color: '#EC2029',
   },
   {
     id: 'hdbank',
@@ -117,7 +117,7 @@ interface Particle {
 
 const CONFETTI_COLORS = [
   '#ED1C24',
-  '#FFD400',
+  '#FFDD00',
   '#ffffff',
   '#ff6b6b',
   '#ffd93d',

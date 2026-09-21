@@ -572,7 +572,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
           >
             <div
               className="px-5 py-4 border-b border-gray-100"
-              style={{ background: 'linear-gradient(135deg, #EC2029 0%, #B91C1C 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #EC2029 0%, #D91A21 100%)' }}
             >
               <h3 className="text-white font-bold font-heading-sm">Gán quyền cho Admin</h3>
               <p className="text-white/70 text-xs mt-0.5">Chọn role và nhập thông tin người dùng</p>

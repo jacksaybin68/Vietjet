@@ -79,7 +79,7 @@ export function getTierColor(tier: string): { bg: string; text: string; border: 
   const colors: Record<string, { bg: string; text: string; border: string }> = {
     Bronze: { bg: '#CD7F32', text: '#FFFFFF', border: '#A0522D' },
     Silver: { bg: '#C0C0C0', text: '#1A2948', border: '#A9A9A9' },
-    Gold: { bg: '#FFD700', text: '#1A2948', border: '#DAA520' },
+    Gold: { bg: '#FFDD00', text: '#1A2948', border: '#DAA520' },
     Platinum: { bg: '#E5E4E2', text: '#1A2948', border: '#B0C4DE' },
   };
   return colors[tier] || { bg: '#6B7280', text: '#FFFFFF', border: '#4B5563' };
