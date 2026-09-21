@@ -37,31 +37,50 @@ export interface AuthTokens {
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+const DEV_JWT_SECRET = 'dev-secret-key-do-not-use-in-production';
+const DEV_REFRESH_SECRET = 'dev-refresh-secret-key-do-not-use-in-production';
 
-if (!JWT_SECRET || !JWT_REFRESH_SECRET) {
-  throw new Error(
-    'CRITICAL: JWT_SECRET and/or JWT_REFRESH_SECRET environment variables are not set. ' +
-      'Please create a .env.local file from .env.local.example and configure both secrets.'
-  );
-}
+let warnedAboutDevSecrets = false;
 
-if (
-  JWT_SECRET === 'dev-secret-key-do-not-use-in-production' ||
-  JWT_REFRESH_SECRET === 'dev-refresh-secret-key-do-not-use-in-production'
-) {
-  if (process.env.NODE_ENV === 'production') {
+// Secrets are resolved lazily: `next build` loads route modules to collect page
+// data, and a module-load throw would abort the build in environments (CI) that
+// intentionally provide no runtime secrets. `instrumentation.ts` still validates
+// them eagerly when a real server instance starts.
+function getSecret(name: 'JWT_SECRET' | 'JWT_REFRESH_SECRET'): string {
+  const value = process.env[name];
+  if (!value) {
     throw new Error(
-      'CRITICAL SECURITY ERROR: Using default dummy JWT secrets in production is forbidden! ' +
-        'Please configure JWT_SECRET and JWT_REFRESH_SECRET environment variables.'
+      'CRITICAL: JWT_SECRET and/or JWT_REFRESH_SECRET environment variables are not set. ' +
+        'Please create a .env.local file from .env.local.example and configure both secrets.'
     );
   }
-  console.warn(
-    'WARNING: Using default JWT secret keys. This is ONLY acceptable for local development. ' +
-      'NEVER deploy with default secrets!'
-  );
+
+  if (value === DEV_JWT_SECRET || value === DEV_REFRESH_SECRET) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(
+        'CRITICAL SECURITY ERROR: Using default dummy JWT secrets in production is forbidden! ' +
+          'Please configure JWT_SECRET and JWT_REFRESH_SECRET environment variables.'
+      );
+    }
+    if (!warnedAboutDevSecrets) {
+      warnedAboutDevSecrets = true;
+      console.warn(
+        'WARNING: Using default JWT secret keys. This is ONLY acceptable for local development. ' +
+          'NEVER deploy with default secrets!'
+      );
+    }
+  }
+
+  return value;
 }
+
+export function assertAuthSecretsConfigured(): void {
+  getSecret('JWT_SECRET');
+  getSecret('JWT_REFRESH_SECRET');
+}
+
+// ─── Constants ──────────────────────────────────────────────────────────────
+
 const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '7d';
 const BCRYPT_SALT_ROUNDS = 12;
@@ -89,11 +108,14 @@ export async function comparePassword(password: string, hashedPassword: string):
 // ─── JWT Token Management ───────────────────────────────────────────────────
 
 export function signAccessToken(payload: JWTPayload): string {
-  return jwt.sign(payload, JWT_SECRET!, { expiresIn: ACCESS_TOKEN_EXPIRY, algorithm: 'HS256' });
+  return jwt.sign(payload, getSecret('JWT_SECRET'), {
+    expiresIn: ACCESS_TOKEN_EXPIRY,
+    algorithm: 'HS256',
+  });
 }
 
 export function signRefreshToken(payload: JWTPayload): string {
-  return jwt.sign(payload, JWT_REFRESH_SECRET!, {
+  return jwt.sign(payload, getSecret('JWT_REFRESH_SECRET'), {
     expiresIn: REFRESH_TOKEN_EXPIRY,
     algorithm: 'HS256',
   });
@@ -101,7 +123,9 @@ export function signRefreshToken(payload: JWTPayload): string {
 
 export function verifyAccessToken(token: string): JWTPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET!, { algorithms: ['HS256'] }) as unknown as JWTPayload;
+    return jwt.verify(token, getSecret('JWT_SECRET'), {
+      algorithms: ['HS256'],
+    }) as unknown as JWTPayload;
   } catch {
     return null;
   }
@@ -109,7 +133,7 @@ export function verifyAccessToken(token: string): JWTPayload | null {
 
 export function verifyRefreshToken(token: string): JWTPayload | null {
   try {
-    return jwt.verify(token, JWT_REFRESH_SECRET!, {
+    return jwt.verify(token, getSecret('JWT_REFRESH_SECRET'), {
       algorithms: ['HS256'],
     }) as unknown as JWTPayload;
   } catch {

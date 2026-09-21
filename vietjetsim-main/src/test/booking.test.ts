@@ -63,6 +63,35 @@ describe('Booking Database Module', () => {
       expect(result.bookings.length).toBe(2);
       expect(result.total).toBe(2);
     });
+
+    it('should tolerate a booking with no passengers or payment rows', async () => {
+      // json_agg(...) FILTER (...) yields NULL, not [], when nothing matches.
+      const mockBookings = [
+        {
+          id: 'booking-1',
+          user_id: 'user-1',
+          status: 'pending',
+          total_price: 1000,
+          payments: null,
+          passengers: null,
+        },
+      ];
+
+      (sql as any).query.mockImplementation((queryStr: string) => {
+        if (queryStr.includes('SELECT COUNT(*)')) {
+          return Promise.resolve([{ total: '1' }]);
+        }
+        if (queryStr.includes('SELECT b.*')) {
+          return Promise.resolve(mockBookings);
+        }
+        return Promise.resolve([]);
+      });
+
+      const result = await getBookingsByUserId('user-1', { page: 1, limit: 10 });
+
+      expect(result.bookings[0].passengers).toEqual([]);
+      expect(result.bookings[0].payment).toBeNull();
+    });
   });
 
   describe('getBookingById', () => {
@@ -105,26 +134,25 @@ describe('Booking Database Module', () => {
         total_price: 1000,
       };
 
-      const mockId = 'booking-1';
-      const mockBookingTag: any = { id: mockId };
-      Object.defineProperty(mockBookingTag, 'raw', {
-        value: ['INSERT INTO bookings'],
-        enumerable: false,
-      });
-      (sql as any).mockReturnValueOnce(mockBookingTag);
-      (sql as any).mockReturnValueOnce({ raw: ['INSERT INTO passengers'] });
-      (sql as any).transaction.mockImplementationOnce(async (queries: any[]) => {
-        void queries;
-        return [[mockBookingRecord]];
-      });
+      // Booking, passengers and seats are written in one statement.
+      (sql as any).mockResolvedValueOnce([mockBookingRecord]);
 
       const result = await createBooking(
         { user_id: 'user-1', flight_id: 'flight-1', total_price: 1000 },
-        [{ name: 'John Doe', dob: '1990-01-01', id_number: '123', gender: 'male' }]
+        [{ name: 'John Doe', dob: '1990-01-01', id_number: '123', gender: 'male' }],
+        ['12A']
       );
 
-      expect(sql.transaction).toHaveBeenCalledTimes(1);
+      expect(sql).toHaveBeenCalledTimes(1);
       expect(result).toEqual(mockBookingRecord);
+
+      // Regression guard: the child inserts must take the booking id from the
+      // inserting CTE. Interpolating it from another query's result passed
+      // undefined and violated passengers.booking_id NOT NULL.
+      const [strings, ...params] = (sql as any).mock.calls[0];
+      expect(strings.join(' ')).toContain('WITH new_booking AS');
+      expect(strings.join(' ')).toContain('SELECT nb.id, p.name');
+      expect(params.every((param: unknown) => param !== undefined)).toBe(true);
     });
   });
 

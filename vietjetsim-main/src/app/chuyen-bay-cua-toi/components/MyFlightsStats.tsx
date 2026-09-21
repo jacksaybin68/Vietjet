@@ -30,7 +30,7 @@ export default function MyFlightsStats({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="rounded-xl border border-[var(--border)] bg-white dark:bg-[var(--dark-surface)] p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--vj-red)]/10 text-[var(--vj-red)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgb(var(--vj-red-rgb))]/10 text-[var(--vj-red)]">
               <MdFlight className="h-5 w-5" />
             </div>
             <div>
@@ -41,7 +41,7 @@ export default function MyFlightsStats({
         </div>
         <div className="rounded-xl border border-[var(--border)] bg-white dark:bg-[var(--dark-surface)] p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--vj-blue)]/10 text-[var(--vj-blue)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgb(var(--vj-blue-rgb))]/10 text-[var(--vj-blue)]">
               <MdCheckCircle className="h-5 w-5" />
             </div>
             <div>
@@ -52,7 +52,7 @@ export default function MyFlightsStats({
         </div>
         <div className="rounded-xl border border-[var(--border)] bg-white dark:bg-[var(--dark-surface)] p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--vj-yellow)]/25 text-[var(--vj-red)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgb(var(--vj-yellow-rgb))]/25 text-[var(--vj-red)]">
               <MdAccessTime className="h-5 w-5" />
             </div>
             <div>
@@ -63,7 +63,7 @@ export default function MyFlightsStats({
         </div>
         <div className="rounded-xl border border-[var(--border)] bg-white dark:bg-[var(--dark-surface)] p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--vj-green)]/10 text-[var(--vj-green)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgb(var(--vj-green-rgb))]/10 text-[var(--vj-green)]">
               <MdAttachMoney className="h-5 w-5" />
             </div>
             <div>

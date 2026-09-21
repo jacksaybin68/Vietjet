@@ -19,7 +19,7 @@ import { Mascot } from '@/shared/components/ui';
 
 export default function Homepage() {
   return (
-    <main className="min-h-screen bg-white overflow-x-hidden">
+    <main className="min-h-screen bg-[var(--background)] overflow-x-hidden">
       <Header />
       <HeroSection />
       <PromotionalBannersSection />

@@ -336,7 +336,7 @@ function AddPaymentMethodModal({
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#EC2029] text-white rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-[#C41017] transition-all shadow-md hover:shadow-lg active:scale-95 disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#EC2029] text-white rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-primary-dark transition-all shadow-md hover:shadow-lg active:scale-95 disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -587,7 +587,7 @@ export default function WalletTab({ user }: WalletTabProps) {
         </div>
       </div>
 
-      <div className="bg-amber-50 border border-[var(--accent)]/30 rounded-2xl p-4">
+      <div className="bg-amber-50 border border-[rgb(var(--accent-rgb))]/30 rounded-2xl p-4">
         <p className="text-sm font-semibold text-amber-900 mb-2">Thiết lập ví để đặt vé</p>
         <div className="space-y-1 text-xs text-amber-800">
           <p>{methods.length > 0 ? '✓' : '•'} Bước 1: Liên kết tài khoản/thẻ thanh toán</p>
@@ -727,7 +727,7 @@ export default function WalletTab({ user }: WalletTabProps) {
           </div>
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#EC2029] text-white rounded-lg text-sm font-semibold font-[KoHo,sans-serif] hover:bg-[#C41017] transition-all active:scale-95 shadow-sm"
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#EC2029] text-white rounded-lg text-sm font-semibold font-[KoHo,sans-serif] hover:bg-primary-dark transition-all active:scale-95 shadow-sm"
           >
             <Icon name="PlusIcon" size={16} />
             Thêm mới

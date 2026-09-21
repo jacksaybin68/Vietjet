@@ -191,7 +191,7 @@ function MetadataBadge({ type, metadata }: { type: string; metadata?: Record<str
   }
   if (type === 'promo' && metadata.expires_hours) {
     return (
-      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-900/10 text-amber-700 dark:text-amber-300 border border-[var(--accent)]/20 dark:border-amber-800">
+      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-900/10 text-amber-700 dark:text-amber-300 border border-[rgb(var(--accent-rgb))]/20 dark:border-amber-800">
         ⏱ Còn {metadata.expires_hours}h
       </span>
     );
@@ -372,7 +372,7 @@ function NotifCard({ notif, onMarkRead, onDismiss, onArchive, onSnooze }: NotifC
                   e.stopPropagation();
                   setShowSnoozeMenu((s) => !s);
                 }}
-                className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border border-[var(--border)] text-[var(--foreground-muted)] bg-white hover:bg-amber-50 hover:border-[var(--accent)]/30 hover:text-amber-600 transition-all"
+                className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border border-[var(--border)] text-[var(--foreground-muted)] bg-white hover:bg-amber-50 hover:border-[rgb(var(--accent-rgb))]/30 hover:text-amber-600 transition-all"
               >
                 <Icon name="ClockIcon" size={13} />
                 <span className="hidden sm:inline">Nhắc lại</span>
