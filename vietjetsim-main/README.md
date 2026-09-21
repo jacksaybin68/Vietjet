@@ -49,7 +49,9 @@ Run the SQL migrations in order against your Neon database (any psql client or t
 ```bash
 psql "$DATABASE_URL" -f migrations/000_core_schema.sql
 psql "$DATABASE_URL" -f migrations/001_bank_accounts.sql
-# ... apply every file in migrations/ in filename order (000 → 012)
+# ... apply every file in migrations/ in filename order (000 → 014).
+# 013 wires up the booking_code default and 014 seeds demo airports, flights
+# and the demo accounts below, so a fresh database is usable immediately.
 ```
 
 ### 4. Start Development Server

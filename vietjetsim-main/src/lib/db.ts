@@ -546,8 +546,8 @@ export async function getBookingsByUserId(
         depart_time: b.depart_time,
         arrive_time: b.arrive_time,
       },
-      passengers: b.passengers[0] ? b.passengers : [],
-      payment: b.payments[0] || null,
+      passengers: Array.isArray(b.passengers) ? b.passengers : [],
+      payment: Array.isArray(b.payments) && b.payments.length > 0 ? b.payments[0] : null,
     })),
   };
 }
@@ -607,35 +607,45 @@ export async function createBooking(
   passengers: { name: string; dob?: string; id_number?: string; gender?: string }[],
   seats?: string[] // seat numbers to reserve
 ): Promise<BookingRecord> {
-  // Use a single transaction for booking + passengers + seats.
-  // Using RETURNING id from the INSERT ensures we get the correct booking_id
-  // even if multiple bookings are created concurrently.
-  const bookingInsert = sql`
-    INSERT INTO bookings (user_id, flight_id, status, total_price)
-    VALUES (${booking.user_id}, ${booking.flight_id}, 'pending', ${booking.total_price})
-    RETURNING id, user_id, flight_id, status, total_price, created_at, updated_at
-  `;
+  // One statement for the booking, passengers and seats so the whole booking is
+  // atomic. The child rows select the new booking's id from a data-modifying
+  // CTE, which is what makes this work in a single round trip: Neon's batch API
+  // runs each statement independently and cannot reference another's result, so
+  // the previous `bookingInsert.id` interpolation always passed undefined and
+  // violated `passengers.booking_id NOT NULL`.
+  const passengerRows = passengers.map((p) => ({
+    name: p.name,
+    dob: p.dob || null,
+    id_number: p.id_number || null,
+    gender: p.gender || 'male',
+  }));
 
-  const passengerInserts = passengers.map(
-    (p) => sql`
+  const rows = (await sql`
+    WITH new_booking AS (
+      INSERT INTO bookings (user_id, flight_id, status, total_price)
+      VALUES (${booking.user_id}, ${booking.flight_id}, 'pending', ${booking.total_price})
+      RETURNING id, user_id, flight_id, status, total_price, created_at, updated_at
+    ),
+    inserted_passengers AS (
       INSERT INTO passengers (booking_id, name, dob, id_number, gender)
-      VALUES (${bookingInsert.id}, ${p.name}, ${p.dob || null}, ${p.id_number || null}, ${p.gender || 'male'})
-    `
-  );
-
-  // Insert seats if provided
-  const seatInserts = (seats || []).map(
-    (seatNumber) => sql`
+      SELECT nb.id, p.name, p.dob, p.id_number, p.gender
+      FROM new_booking nb
+      CROSS JOIN jsonb_to_recordset(${JSON.stringify(passengerRows)}::jsonb)
+        AS p(name text, dob date, id_number text, gender text)
+      RETURNING 1
+    ),
+    inserted_seats AS (
       INSERT INTO seats (booking_id, flight_id, seat_number, status)
-      VALUES (${bookingInsert.id}, ${booking.flight_id}, ${seatNumber}, 'reserved')
-    `
-  );
+      SELECT nb.id, nb.flight_id, s.seat_number, 'reserved'
+      FROM new_booking nb
+      CROSS JOIN jsonb_to_recordset(${JSON.stringify((seats || []).map((n) => ({ seat_number: n })))}::jsonb)
+        AS s(seat_number text)
+      RETURNING 1
+    )
+    SELECT b.* FROM new_booking b
+  `) as BookingRecord[];
 
-  const results = await sql.transaction([bookingInsert, ...passengerInserts, ...seatInserts]);
-
-  // results[0] is the result of bookingInsert, which is an array of inserted rows
-  const bookingRows = results[0] as unknown as BookingRecord[];
-  return bookingRows[0];
+  return rows[0];
 }
 
 export async function updateBookingStatus(
