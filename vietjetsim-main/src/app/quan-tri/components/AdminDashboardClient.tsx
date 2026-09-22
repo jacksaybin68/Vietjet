@@ -13,6 +13,7 @@ import RefundRequestsTab from './RefundRequestsTab';
 import AnalyticsTab from './AnalyticsTab';
 import SstkTab from './SstkTab';
 import DiscountsTab from './DiscountsTab';
+import AgenciesTab from './AgenciesTab';
 import AdminRBACPanel from './AdminRBACPanel';
 import NotificationDropdown from './NotificationDropdown';
 import UserMenuDropdown from './UserMenuDropdown';
@@ -45,7 +46,8 @@ export type AdminTab =
   | 'audit_logs'
   | 'transactions'
   | 'banks'
-  | 'discounts';
+  | 'discounts'
+  | 'agencies';
 
 const NAV_ITEMS: {
   id: AdminTab;
@@ -74,6 +76,7 @@ const NAV_ITEMS: {
   { id: 'bookings', label: 'Đặt vé', icon: 'TicketIcon', category: 'management' },
   { id: 'airports', label: 'Sân bay', icon: 'BuildingOfficeIcon', category: 'management' },
   { id: 'discounts', label: 'Mã giảm giá', icon: 'TicketIcon', category: 'management' },
+  { id: 'agencies', label: 'Đại lý', icon: 'BuildingOfficeIcon', category: 'management' },
   { id: 'transactions', label: 'Giao dịch', icon: 'CurrencyDollarIcon', category: 'management' },
   { id: 'banks', label: 'Ngân hàng', icon: 'BanknotesIcon', category: 'management' },
   { id: 'revenue', label: 'Doanh thu', icon: 'ChartBarIcon', category: 'management' },
@@ -116,6 +119,7 @@ const TAB_LABELS: Record<AdminTab, string> = {
   transactions: 'Lịch sử giao dịch',
   banks: 'Quản lý tài khoản ngân hàng',
   discounts: 'Quản lý mã giảm giá',
+  agencies: 'Quản lý đại lý',
 };
 
 export default function AdminDashboardClient() {
@@ -640,6 +644,7 @@ export default function AdminDashboardClient() {
               </ErrorBoundary>
             )}
 
+            {activeTab === 'agencies' && <AgenciesTab onToast={toast} />}
             {activeTab === 'discounts' && (
               <ErrorBoundary inline variant="api">
                 <DiscountsTab onToast={toast} />

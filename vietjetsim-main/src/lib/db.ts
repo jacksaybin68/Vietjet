@@ -134,6 +134,24 @@ export interface DiscountCodeRecord {
   usage_per_user_limit: number | null;
   used_count: number;
   is_active: boolean;
+  /** NULL for platform-wide codes; set when an admin issued the code to an agency. */
+  agency_id: string | null;
+  issued_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AgencyRecord {
+  id: string;
+  code: string;
+  name: string;
+  contact_name: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  address: string | null;
+  commission_rate: number;
+  notes: string | null;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -1103,6 +1121,20 @@ export async function userOwnsConversation(
   return (results as unknown[]).length > 0;
 }
 
+/** Close or reopen a support thread. `closed` threads are the archive. */
+export async function setConversationStatus(
+  conversationId: string,
+  status: 'active' | 'closed'
+): Promise<ChatConversationRecord | null> {
+  const results = await sql`
+    UPDATE chat_conversations
+    SET status = ${status}, updated_at = NOW()
+    WHERE id = ${conversationId}
+    RETURNING *
+  `;
+  return (results as ChatConversationRecord[])[0] || null;
+}
+
 export async function getConversationMessages(
   conversationId: string,
   params?: { page?: number; limit?: number }
@@ -1669,6 +1701,7 @@ export async function getAllDiscountCodes(params?: {
   limit?: number;
   search?: string;
   activeOnly?: boolean;
+  agencyId?: string;
 }): Promise<{ discounts: DiscountCodeRecord[]; total: number }> {
   const page = params?.page || 1;
   const limit = params?.limit || 50;
@@ -1679,22 +1712,29 @@ export async function getAllDiscountCodes(params?: {
 
   if (params?.search) {
     values.push(`%${params.search}%`);
-    whereClause += ` AND code ILIKE $${values.length}`;
+    whereClause += ` AND d.code ILIKE $${values.length}`;
   }
 
   if (params?.activeOnly) {
-    whereClause += ` AND is_active = true AND start_date <= NOW() AND end_date >= NOW()`;
+    whereClause += ` AND d.is_active = true AND d.start_date <= NOW() AND d.end_date >= NOW()`;
+  }
+
+  if (params?.agencyId) {
+    values.push(params.agencyId);
+    whereClause += ` AND d.agency_id = $${values.length}`;
   }
 
   const queryParams = [...values, limit, offset];
   const discountsQuery = `
-    SELECT * FROM discount_codes
+    SELECT d.*, a.name AS agency_name, a.code AS agency_code
+    FROM discount_codes d
+    LEFT JOIN agencies a ON a.id = d.agency_id
     ${whereClause}
-    ORDER BY created_at DESC
+    ORDER BY d.created_at DESC
     LIMIT $${values.length + 1} OFFSET $${values.length + 2}
   `;
 
-  const countQuery = `SELECT COUNT(*) as total FROM discount_codes ${whereClause}`;
+  const countQuery = `SELECT COUNT(*) as total FROM discount_codes d ${whereClause}`;
 
   const discounts = await sql.query(discountsQuery, queryParams);
   const countResult = await sql.query(countQuery, values);
@@ -1736,11 +1776,13 @@ export async function createDiscountCode(
   const results = await sql`
     INSERT INTO discount_codes (
       code, type, value, min_booking_amount, max_discount_amount, 
-      start_date, end_date, usage_limit, usage_per_user_limit, is_active
+      start_date, end_date, usage_limit, usage_per_user_limit, is_active,
+      agency_id, issued_by
     )
     VALUES (
       ${data.code.toUpperCase()}, ${data.type}, ${data.value}, ${data.min_booking_amount}, ${data.max_discount_amount},
-      ${data.start_date}, ${data.end_date}, ${data.usage_limit}, ${data.usage_per_user_limit}, ${data.is_active}
+      ${data.start_date}, ${data.end_date}, ${data.usage_limit}, ${data.usage_per_user_limit}, ${data.is_active},
+      ${data.agency_id ?? null}, ${data.issued_by ?? null}
     )
     RETURNING *
   `;
@@ -1762,6 +1804,7 @@ export async function updateDiscountCode(
     'usage_limit',
     'usage_per_user_limit',
     'is_active',
+    'agency_id',
   ] as const;
 
   const setClauses: string[] = [];
@@ -1802,6 +1845,123 @@ export async function incrementDiscountUsedCount(id: string): Promise<void> {
     SET used_count = used_count + 1, updated_at = NOW()
     WHERE id = ${id}
   `;
+}
+
+// ─── Agency Queries ─────────────────────────────────────────────────────────
+
+export async function getAllAgencies(params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  activeOnly?: boolean;
+}): Promise<{ agencies: AgencyRecord[]; total: number }> {
+  const page = params?.page || 1;
+  const limit = params?.limit || 50;
+  const offset = (page - 1) * limit;
+
+  let whereClause = 'WHERE 1=1';
+  const values: any[] = [];
+
+  if (params?.search) {
+    values.push(`%${params.search}%`);
+    whereClause += ` AND (code ILIKE $${values.length} OR name ILIKE $${values.length} OR contact_email ILIKE $${values.length})`;
+  }
+
+  if (params?.activeOnly) {
+    whereClause += ` AND is_active = true`;
+  }
+
+  // Code count is joined so the admin list shows issued-code usage without an N+1 query.
+  const queryParams = [...values, limit, offset];
+  const agenciesQuery = `
+    SELECT a.*, COUNT(d.id)::int AS discount_count
+    FROM agencies a
+    LEFT JOIN discount_codes d ON d.agency_id = a.id
+    ${whereClause}
+    GROUP BY a.id
+    ORDER BY a.created_at DESC
+    LIMIT $${values.length + 1} OFFSET $${values.length + 2}
+  `;
+
+  const countQuery = `SELECT COUNT(*) as total FROM agencies ${whereClause}`;
+
+  const agencies = await sql.query(agenciesQuery, queryParams);
+  const countResult = await sql.query(countQuery, values);
+  const total = parseInt((countResult as any)[0].total, 10);
+
+  return { agencies: agencies as any as AgencyRecord[], total };
+}
+
+export async function getAgencyById(id: string): Promise<AgencyRecord | null> {
+  const results = await sql`SELECT * FROM agencies WHERE id = ${id}`;
+  return (results as AgencyRecord[])[0] || null;
+}
+
+export async function createAgency(
+  data: Omit<AgencyRecord, 'id' | 'created_at' | 'updated_at'>
+): Promise<AgencyRecord> {
+  const results = await sql`
+    INSERT INTO agencies (
+      code, name, contact_name, contact_email, contact_phone,
+      address, commission_rate, notes, is_active
+    )
+    VALUES (
+      ${data.code.toUpperCase()}, ${data.name}, ${data.contact_name ?? null}, ${data.contact_email ?? null},
+      ${data.contact_phone ?? null}, ${data.address ?? null}, ${data.commission_rate ?? 0},
+      ${data.notes ?? null}, ${data.is_active}
+    )
+    RETURNING *
+  `;
+  return (results as AgencyRecord[])[0];
+}
+
+export async function updateAgency(
+  id: string,
+  updates: Partial<AgencyRecord>
+): Promise<AgencyRecord> {
+  const ALLOWED_COLUMNS = [
+    'code',
+    'name',
+    'contact_name',
+    'contact_email',
+    'contact_phone',
+    'address',
+    'commission_rate',
+    'notes',
+    'is_active',
+  ] as const;
+
+  const setClauses: string[] = [];
+  const values: any[] = [];
+
+  for (const col of ALLOWED_COLUMNS) {
+    if (updates[col] !== undefined) {
+      let val = updates[col];
+      if (col === 'code' && typeof val === 'string') val = val.toUpperCase();
+      setClauses.push(`${col} = $${setClauses.length + 1}`);
+      values.push(val);
+    }
+  }
+
+  if (setClauses.length === 0) throw new Error('No fields to update');
+
+  setClauses.push(`updated_at = NOW()`);
+  values.push(id);
+
+  const query = `
+    UPDATE agencies
+    SET ${setClauses.join(', ')}
+    WHERE id = $${values.length}
+    RETURNING *
+  `;
+  const results = await sql.query(query, values);
+  return (results as any as AgencyRecord[])[0];
+}
+
+export async function deleteAgency(id: string): Promise<void> {
+  // discount_codes.agency_id is ON DELETE SET NULL, so issued codes survive as
+  // platform-wide rather than disappearing with the agency.
+  await sql`DELETE FROM agencies WHERE id = ${id}`;
 }
 
 // ─── Wallet Queries ──────────────────────────────────────────────────────────

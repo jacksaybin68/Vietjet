@@ -170,8 +170,7 @@ function SignUpLoginPageInner() {
   const inputClass = (valid: boolean) =>
     `form-input font-body-vj w-full rounded-xl border border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] py-3 pl-10 pr-4 text-sm transition-all focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20 ${valid ? 'form-input-valid' : ''}`;
 
-  const submitClass =
-    'vj-btn vj-btn-primary vj-btn-pill flex w-full items-center justify-center gap-2 py-3.5 text-base';
+  const submitClass = 'vj-auth-submit flex w-full items-center justify-center gap-2';
 
   return (
     <AuthShell
@@ -180,7 +179,10 @@ function SignUpLoginPageInner() {
       subtitle="Vui lòng điền thông tin để tiếp tục sử dụng các tiện ích thành viên."
     >
       <div className="mb-6 grid grid-cols-2 rounded-2xl bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] p-1.5">
-        {(['login', 'register'] as const).map((value) => (
+        {/* VietjetAir's SkyID modal lists "Đăng ký" before "Đăng nhập"; the
+            order is presentational only — the default tab stays login unless
+            `?tab=register` deep-links registration. */}
+        {(['register', 'login'] as const).map((value) => (
           <button
             key={value}
             type="button"
@@ -192,7 +194,7 @@ function SignUpLoginPageInner() {
                 : 'text-[var(--foreground-muted)] hover:text-primary'
             }`}
           >
-            {value === 'login' ? 'Đăng nhập' : 'Đăng ký'}
+            {value === 'register' ? 'Đăng ký' : 'Đăng nhập'}
           </button>
         ))}
       </div>
@@ -424,11 +426,21 @@ function SignUpLoginPageInner() {
                 />
                 <span>
                   Tôi đồng ý với{' '}
-                  <a href="#" className="font-semibold text-primary hover:underline">
+                  <a
+                    href="/gioi-thieu"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-semibold text-primary hover:underline"
+                  >
                     Điều khoản dịch vụ
                   </a>{' '}
                   và{' '}
-                  <a href="#" className="font-semibold text-primary hover:underline">
+                  <a
+                    href="/gioi-thieu"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-semibold text-primary hover:underline"
+                  >
                     Chính sách bảo mật
                   </a>{' '}
                   của Vietjet Air / SkyJoy.

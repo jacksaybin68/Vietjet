@@ -14,7 +14,6 @@ import FlyEverywhereSection from './components/FlyEverywhereSection';
 import AttractiveDestinationsSection from './components/AttractiveDestinationsSection';
 import TravelGuidesSection from './components/TravelGuidesSection';
 import FAQSection from './components/FAQSection';
-import { UserChat } from '@/features/chat';
 import { Mascot } from '@/shared/components/ui';
 
 export default function Homepage() {
@@ -35,7 +34,6 @@ export default function Homepage() {
       <AwardsSection />
       <StatsSection />
       <Footer />
-      <UserChat />
       <Mascot />
     </main>
   );

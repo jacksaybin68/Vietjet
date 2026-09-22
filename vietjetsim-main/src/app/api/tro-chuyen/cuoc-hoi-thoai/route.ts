@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthRequest } from '@/lib/auth';
 import { isAdminRole } from '@/lib/rbac';
-import { getOrCreateConversation, getAllConversations } from '@/lib/db';
+import { getOrCreateConversation, getAllConversations, setConversationStatus } from '@/lib/db';
 
 // ─── GET: Get conversations ─────────────────────────────────────────────────
 // For users: Get their own conversation
@@ -64,6 +64,57 @@ export async function POST(request: NextRequest) {
     console.error('Error creating conversation:', error);
     return NextResponse.json(
       { error: 'Internal Server Error', message: 'Failed to create conversation' },
+      { status: 500 }
+    );
+  }
+}
+
+// ─── PATCH: Close or reopen a thread (admin triage) ──────────────────────────
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const { user, error, response } = await verifyAuthRequest(request);
+    if (error || !user) return response!;
+
+    // Archiving is an admin triage action; a user must not be able to close
+    // their own thread to escape the support queue.
+    if (!isAdminRole(user.role)) {
+      return NextResponse.json(
+        { error: 'Forbidden', message: 'Admin access required' },
+        { status: 403 }
+      );
+    }
+
+    const body = await request.json().catch(() => ({}));
+    const conversationId = body?.conversation_id;
+    const status = body?.status;
+
+    if (!conversationId) {
+      return NextResponse.json(
+        { error: 'Bad Request', message: 'conversation_id is required' },
+        { status: 400 }
+      );
+    }
+    if (status !== 'active' && status !== 'closed') {
+      return NextResponse.json(
+        { error: 'Bad Request', message: "status must be 'active' or 'closed'" },
+        { status: 400 }
+      );
+    }
+
+    const conversation = await setConversationStatus(conversationId, status);
+    if (!conversation) {
+      return NextResponse.json(
+        { error: 'Not Found', message: 'Conversation not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true, conversation });
+  } catch (error) {
+    console.error('Error updating conversation status:', error);
+    return NextResponse.json(
+      { error: 'Internal Server Error', message: 'Failed to update conversation' },
       { status: 500 }
     );
   }

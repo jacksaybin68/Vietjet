@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Icon } from '@/shared/components/ui';
-import { Header, Footer } from '@/shared/components/navigation';
+import { Header, Footer, PageHero } from '@/shared/components/navigation';
 
 interface ServiceItem {
   id: string;
@@ -133,35 +133,12 @@ export default function ServicesPage() {
   return (
     <div className="min-h-screen bg-[var(--background)]">
       <Header />
-      {/* Hero */}
-      <header className="relative overflow-hidden bg-gradient-to-r from-[var(--vj-red)] via-[var(--vj-red-dark)] to-[var(--vj-red)]">
-        <div className="absolute inset-0 opacity-10">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-            }}
-          />
-        </div>
-        <div className="relative max-w-7xl mx-auto px-4 py-16 sm:py-20 text-center">
-          <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Icon name="Squares2X2Icon" size={32} className="text-white" />
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-white mb-2 font-heading-sm">
-            Dịch Vụ Chuyến Bay
-          </h1>
-          <p className="text-white/70 text-base sm:text-lg max-w-2xl mx-auto font-koho">
-            Nâng cao trải nghiệm bay với các dịch vụ bổ trợ đa dạng và tiện ích
-          </p>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-sm font-semibold transition-all border border-white/20"
-          >
-            <Icon name="ArrowLeftIcon" size={16} />
-            Quay lại trang chủ
-          </Link>
-        </div>
-      </header>
+      <PageHero
+        eyebrow="Dịch vụ chuyến bay"
+        iconName="Squares2X2Icon"
+        title="Dịch Vụ Chuyến Bay"
+        description="Nâng cao trải nghiệm bay với các dịch vụ bổ trợ đa dạng và tiện ích"
+      />
 
       <main className="max-w-7xl mx-auto px-4 py-10">
         {/* Services Grid */}

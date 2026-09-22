@@ -11,6 +11,8 @@ import { signAccessToken } from '@/lib/auth';
 import { GET as getMessages, POST as postMessage } from '@/app/api/tro-chuyen/route';
 import { GET as getConversations } from '@/app/api/tro-chuyen/cuoc-hoi-thoai/route';
 import { POST as markRead } from '@/app/api/tro-chuyen/danh-dau-da-doc/route';
+import { GET as getPresence, POST as postPresence } from '@/app/api/tro-chuyen/truc-tuyen/route';
+import { POST as postAi } from '@/app/api/tro-ly-ai/tro-chuyen/route';
 import * as db from '@/lib/db';
 
 vi.mock('@/lib/neon', () => {
@@ -221,6 +223,132 @@ describe('Chat API security', () => {
       expect(res.status).toBe(200);
       const data = await res.json();
       expect(data.conversations).toHaveLength(2);
+    });
+  });
+
+  describe('GET /api/tro-chuyen/truc-tuyen (presence)', () => {
+    it('rejects an unauthenticated request with 401', async () => {
+      const req = new NextRequest(
+        'http://localhost:4028/api/tro-chuyen/truc-tuyen?conversationId=c1'
+      );
+      const res = await getPresence(req);
+      expect(res.status).toBe(401);
+    });
+
+    it('denies reading presence for a conversation the user does not own (403)', async () => {
+      vi.spyOn(db, 'userOwnsConversation').mockResolvedValue(false);
+      const req = new NextRequest(
+        'http://localhost:4028/api/tro-chuyen/truc-tuyen?conversationId=c1',
+        { headers: { cookie: `access_token=${userToken()}` } }
+      );
+      const res = await getPresence(req);
+      expect(res.status).toBe(403);
+    });
+
+    it("ignores a client-supplied role and reads the caller's own row", async () => {
+      vi.spyOn(db, 'userOwnsConversation').mockResolvedValue(true);
+      const presenceSpy = vi.spyOn(db, 'getChatPresence').mockResolvedValue(null);
+      const req = new NextRequest(
+        'http://localhost:4028/api/tro-chuyen/truc-tuyen?conversationId=c1&role=admin',
+        { headers: { cookie: `access_token=${userToken()}` } }
+      );
+      const res = await getPresence(req);
+      expect(res.status).toBe(200);
+      expect(presenceSpy).toHaveBeenCalledWith('c1', 'user');
+    });
+
+    it('lets an admin read presence without an ownership lookup', async () => {
+      const ownsSpy = vi.spyOn(db, 'userOwnsConversation');
+      vi.spyOn(db, 'getChatPresence').mockResolvedValue(null);
+      const req = new NextRequest(
+        'http://localhost:4028/api/tro-chuyen/truc-tuyen?conversationId=c1',
+        { headers: { cookie: `access_token=${adminToken()}` } }
+      );
+      const res = await getPresence(req);
+      expect(res.status).toBe(200);
+      expect(ownsSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('POST /api/tro-chuyen/truc-tuyen (presence)', () => {
+    it('requires a CSRF token', async () => {
+      const updateSpy = vi.spyOn(db, 'updateChatPresence');
+      const req = new NextRequest('http://localhost:4028/api/tro-chuyen/truc-tuyen', {
+        method: 'POST',
+        headers: { cookie: `access_token=${userToken()}`, 'content-type': 'application/json' },
+        body: JSON.stringify({ conversationId: 'c1', is_online: true }),
+      });
+      const res = await postPresence(req);
+      expect(res.status).toBe(403);
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
+    it('denies updating presence for a conversation the user does not own (403)', async () => {
+      vi.spyOn(db, 'userOwnsConversation').mockResolvedValue(false);
+      const updateSpy = vi.spyOn(db, 'updateChatPresence');
+      const req = new NextRequest('http://localhost:4028/api/tro-chuyen/truc-tuyen', {
+        method: 'POST',
+        headers: withCsrf(userToken()),
+        body: JSON.stringify({ conversationId: 'c1', is_online: true }),
+      });
+      const res = await postPresence(req);
+      expect(res.status).toBe(403);
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
+    it('updates presence for the owner under their real role', async () => {
+      vi.spyOn(db, 'userOwnsConversation').mockResolvedValue(true);
+      const updateSpy = vi.spyOn(db, 'updateChatPresence').mockResolvedValue({} as never);
+      const req = new NextRequest('http://localhost:4028/api/tro-chuyen/truc-tuyen', {
+        method: 'POST',
+        headers: withCsrf(userToken()),
+        body: JSON.stringify({ conversationId: 'c1', is_online: true }),
+      });
+      const res = await postPresence(req);
+      expect(res.status).toBe(200);
+      expect(updateSpy).toHaveBeenCalledWith('user-1', 'c1', 'user', {
+        is_online: true,
+      });
+    });
+  });
+
+  describe('POST /api/tro-ly-ai/tro-chuyen (AI assistant)', () => {
+    it('rejects an unauthenticated request with 401', async () => {
+      const req = new NextRequest('http://localhost:4028/api/tro-ly-ai/tro-chuyen', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ message: 'hi' }),
+      });
+      const res = await postAi(req);
+      expect(res.status).toBe(401);
+    });
+
+    it('rejects a non-admin user with 403', async () => {
+      const req = new NextRequest('http://localhost:4028/api/tro-ly-ai/tro-chuyen', {
+        method: 'POST',
+        headers: withCsrf(userToken()),
+        body: JSON.stringify({ message: 'hi' }),
+      });
+      const res = await postAi(req);
+      expect(res.status).toBe(403);
+    });
+
+    it('allows an admin through to the assistant', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: async () => ({ reply: 'Xin chào' }),
+        })
+      );
+      const req = new NextRequest('http://localhost:4028/api/tro-ly-ai/tro-chuyen', {
+        method: 'POST',
+        headers: withCsrf(adminToken()),
+        body: JSON.stringify({ message: 'hi' }),
+      });
+      const res = await postAi(req);
+      expect(res.status).toBe(200);
+      expect((await res.json()).content).toBe('Xin chào');
     });
   });
 });

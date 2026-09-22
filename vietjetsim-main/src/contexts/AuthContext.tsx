@@ -8,6 +8,7 @@ import { getApiErrorMessage } from '@/shared/services';
 import { getCsrfHeaders } from '@/lib/csrf-client';
 
 import { isAdminRole } from '@/lib/roles';
+import { normalizePhone } from '@/lib/utils';
 
 export { isAdminRole };
 
@@ -195,7 +196,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email,
         password,
         full_name: metadata?.fullName,
-        phone: metadata?.phone,
+        phone: normalizePhone(metadata?.phone),
         avatar_url: metadata?.avatarUrl,
         dob: metadata?.dob,
       }),

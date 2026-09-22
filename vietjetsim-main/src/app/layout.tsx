@@ -4,6 +4,7 @@ import '../styles/tailwind.css';
 import { PageTransition } from '@/shared/components/layouts';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { ChatWidgets } from '@/features/chat';
 import NextTopLoader from 'nextjs-toploader';
 import { NavigationOptimizer } from '@/shared/components/layouts';
 export const viewport: Viewport = {
@@ -123,6 +124,7 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <PageTransition>{children}</PageTransition>
+            <ChatWidgets />
           </AuthProvider>
         </ThemeProvider>
       </body>

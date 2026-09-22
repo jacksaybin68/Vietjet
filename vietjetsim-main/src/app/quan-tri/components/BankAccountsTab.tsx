@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Icon } from '@/shared/components/ui';
 import {
   createBankAccount,
@@ -9,6 +9,11 @@ import {
   type AdminBankAccount as BankAccount,
 } from '@/features/admin';
 import { getApiErrorMessage } from '@/shared/services';
+import {
+  TRANSFER_NOTE_TOKENS,
+  findUnknownTransferNoteTokens,
+  renderTransferNote,
+} from '@/lib/transfer-note';
 
 interface ToastAPI {
   success: (title: string, message?: string) => void;
@@ -32,6 +37,39 @@ export default function BankAccountsTab({ onToast }: { onToast?: ToastAPI }) {
     is_default: false,
     is_active: true,
   });
+
+  const unknownTokens = findUnknownTransferNoteTokens(formData.transfer_note_template);
+
+  // Sample values so the admin sees the real shape of the note (amounts stay
+  // separator-free exactly as they will be sent to the bank).
+  const previewNote = renderTransferNote(formData.transfer_note_template, {
+    code: 'ABC123',
+    originalAmount: 1000000,
+    discountAmount: 150000,
+    amount: 850000,
+    discountCode: 'DL10',
+  });
+
+  // The order of tokens is the order they appear in the bank statement, so the
+  // chip has to land where the caret is rather than always at the end. The
+  // caret is restored after React re-renders the controlled input.
+  const templateInputRef = useRef<HTMLInputElement>(null);
+
+  const insertToken = (token: string) => {
+    const input = templateInputRef.current;
+    const current = formData.transfer_note_template;
+    const start = input?.selectionStart ?? current.length;
+    const end = input?.selectionEnd ?? current.length;
+    const next = current.slice(0, start) + token + current.slice(end);
+
+    setFormData((prev) => ({ ...prev, transfer_note_template: next }));
+
+    const caret = start + token.length;
+    requestAnimationFrame(() => {
+      templateInputRef.current?.focus();
+      templateInputRef.current?.setSelectionRange(caret, caret);
+    });
+  };
 
   const fetchAccounts = useCallback(async () => {
     setIsLoading(true);
@@ -346,17 +384,46 @@ export default function BankAccountsTab({ onToast }: { onToast?: ToastAPI }) {
                     Nội dung Chuyển khoản mẫu
                   </label>
                   <input
+                    ref={templateInputRef}
                     type="text"
                     value={formData.transfer_note_template}
                     onChange={(e) =>
                       setFormData({ ...formData, transfer_note_template: e.target.value })
                     }
                     placeholder="VD: VJ {code}"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-all font-mono"
+                    className={`w-full bg-slate-800 border rounded-xl px-4 py-3 text-white focus:outline-none transition-all font-mono ${
+                      unknownTokens.length > 0
+                        ? 'border-red-500/60 focus:border-red-500'
+                        : 'border-slate-700 focus:border-indigo-500'
+                    }`}
                   />
-                  <p className="text-[10px] text-slate-500 mt-1">
-                    Sử dụng `{`{code}`}` để tự động thay thế bằng mã đặt vé.
-                  </p>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {TRANSFER_NOTE_TOKENS.map((t) => (
+                      <button
+                        key={t.token}
+                        type="button"
+                        title={`${t.description} — VD: ${t.example}. Bấm để chèn tại vị trí con trỏ.`}
+                        onClick={() => insertToken(t.token)}
+                        className="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 text-[10px] font-mono font-bold transition-all active:scale-95"
+                      >
+                        {t.token}
+                      </button>
+                    ))}
+                  </div>
+                  {unknownTokens.length > 0 ? (
+                    <p className="text-[10px] text-red-400 mt-2 font-semibold">
+                      Biến không hợp lệ: {unknownTokens.join(', ')} — sẽ không được thay thế.
+                    </p>
+                  ) : (
+                    <p className="text-[10px] text-slate-500 mt-2">
+                      Bấm vào biến để chèn. Số tiền được ghi dạng số liền, không dấu phân cách.
+                    </p>
+                  )}
+                  {formData.transfer_note_template.trim() && unknownTokens.length === 0 && (
+                    <p className="text-[10px] text-emerald-400/80 mt-1 font-mono">
+                      Xem trước: {previewNote}
+                    </p>
+                  )}
                 </div>
               </div>
 

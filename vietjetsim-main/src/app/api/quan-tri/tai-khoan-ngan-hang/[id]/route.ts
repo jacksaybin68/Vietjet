@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
 import { verifyAdminRequest } from '@/lib/admin-auth';
+import { validateTransferNoteTemplate } from '@/lib/transfer-note';
 
 // ─── PATCH: Update a bank account ───────────────────────────────────────────
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -21,6 +22,21 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       transfer_note_template,
     } = body;
 
+    // Only validate when the client actually sends the field, so a status
+    // toggle (is_active / is_default) cannot be rejected for a stored template
+    // that predates validation.
+    let noteTemplate: string | undefined;
+    if (transfer_note_template !== undefined) {
+      const validated = validateTransferNoteTemplate(transfer_note_template);
+      if (!validated.valid) {
+        return NextResponse.json(
+          { error: 'Bad Request', message: validated.message },
+          { status: 400 }
+        );
+      }
+      noteTemplate = validated.template;
+    }
+
     // If setting as default, unset others first
     if (is_default) {
       await sql`UPDATE bank_accounts SET is_default = false WHERE is_default = true`;
@@ -36,7 +52,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         branch = COALESCE(${branch}, branch),
         is_default = COALESCE(${is_default}, is_default),
         is_active = COALESCE(${is_active}, is_active),
-        transfer_note_template = COALESCE(${transfer_note_template}, transfer_note_template),
+        transfer_note_template = COALESCE(${noteTemplate ?? null}, transfer_note_template),
         updated_at = NOW()
       WHERE id = ${id}
       RETURNING *
