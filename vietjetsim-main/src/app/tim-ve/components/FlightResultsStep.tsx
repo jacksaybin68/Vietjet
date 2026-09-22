@@ -474,7 +474,7 @@ export default function FlightResultsStep({
   }, [filters, sortBy, searchQuery, flights]);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 relative items-start">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 relative items-start">
       {/* Search error modal */}
       {showErrorModal && loadError && (
         <SearchErrorModal
@@ -488,8 +488,8 @@ export default function FlightResultsStep({
         />
       )}
 
-      {/* Flight List */}
-      <div className="flex-1 space-y-3 min-w-0">
+      {/* Filter Sidebar */}
+      <aside className="lg:col-span-3 w-full min-w-0 space-y-3">
         <div
           className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl border border-[var(--border)] dark:border-[var(--dark-border)] sticky top-[200px] sm:top-[230px] overflow-hidden"
           style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}
@@ -714,7 +714,10 @@ export default function FlightResultsStep({
             </div>
           </div>
         </div>
+      </aside>
 
+      {/* Flight List */}
+      <main className="lg:col-span-6 w-full min-w-0 space-y-3">
         {/* Search Bar - responsive */}
         <div className="relative">
           <Icon
@@ -1489,10 +1492,10 @@ export default function FlightResultsStep({
             </div>
           </div>
         )}
-      </div>
+      </main>
 
       {/* Booking Summary Sidebar */}
-      <aside className="w-full lg:w-[280px] xl:w-[320px] shrink-0">
+      <aside className="lg:col-span-3 w-full min-w-0">
         <div className="bg-[var(--background)] rounded-xl border border-primary/20 sticky top-[160px] overflow-hidden shadow-sm">
           {/* Top Bar */}
           <div className="h-1 w-full bg-primary" />
