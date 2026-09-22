@@ -39,6 +39,7 @@ export const API_ENDPOINTS = {
     CONVERSATIONS: '/api/tro-chuyen/cuoc-hoi-thoai',
     PRESENCE: '/api/tro-chuyen/truc-tuyen',
     MARK_READ: '/api/tro-chuyen/danh-dau-da-doc',
+    ASSISTANT: '/api/tro-ly-ai/tro-chuyen',
   },
   ADMIN: {
     REVENUE: '/api/quan-tri/doanh-thu',

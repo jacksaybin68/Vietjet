@@ -8,6 +8,7 @@ import {
   getConversationMessages,
   sendChatMessage,
   markConversationRead,
+  setConversationStatus,
 } from '@/features/chat/services';
 
 interface Conversation {
@@ -15,6 +16,7 @@ interface Conversation {
   user_id: string;
   user_email: string;
   user_name: string;
+  status?: 'active' | 'closed';
   last_message: string;
   last_message_at: string;
   updated_at?: string;
@@ -124,6 +126,18 @@ export default function ChatTab() {
     scrollToBottom();
   }, [messages]);
 
+  // Close/reopen a thread. Archived (`closed`) threads back the "Lưu trữ" filter.
+  const handleToggleArchive = useCallback(async (conv: Conversation) => {
+    const next = conv.status === 'closed' ? 'active' : 'closed';
+    try {
+      await setConversationStatus(conv.id, next);
+      setConversations((prev) => prev.map((c) => (c.id === conv.id ? { ...c, status: next } : c)));
+      setSelectedConv((prev) => (prev && prev.id === conv.id ? { ...prev, status: next } : prev));
+    } catch (err) {
+      console.error('Toggle archive error:', err);
+    }
+  }, []);
+
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
@@ -200,7 +214,7 @@ export default function ChatTab() {
       const matchesStatus =
         statusFilter === 'all' ||
         (statusFilter === 'unread' && conv.unread_by_admin > 0) ||
-        (statusFilter === 'archived' && false);
+        (statusFilter === 'archived' && conv.status === 'closed');
       return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
@@ -606,6 +620,26 @@ export default function ChatTab() {
                 <span className="text-xs text-gray-400 hidden lg:block">
                   {selectedConv.user_email}
                 </span>
+
+                {/* Archive / reopen */}
+                <button
+                  onClick={() => handleToggleArchive(selectedConv)}
+                  title={
+                    selectedConv.status === 'closed' ? 'Mở lại hội thoại' : 'Lưu trữ hội thoại'
+                  }
+                  className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 hover:bg-gray-100 active:bg-gray-200 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 transition-colors touch-manipulation"
+                >
+                  <Icon
+                    name={
+                      selectedConv.status === 'closed' ? 'InboxArrowDownIcon' : 'ArchiveBoxIcon'
+                    }
+                    size={14}
+                    className="text-gray-500"
+                  />
+                  <span className="hidden sm:inline">
+                    {selectedConv.status === 'closed' ? 'Mở lại' : 'Lưu trữ'}
+                  </span>
+                </button>
 
                 {/* Export dropdown */}
                 <div className="relative" ref={exportMenuRef}>

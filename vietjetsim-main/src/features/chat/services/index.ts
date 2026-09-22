@@ -74,3 +74,25 @@ export function markConversationRead(conversationId: string): Promise<{ success:
     body: { conversation_id: conversationId },
   });
 }
+
+/** Admin-only: agentic flight-research assistant. */
+export function askAssistant(
+  message: string,
+  history: Array<{ role: string; content: string }> = []
+): Promise<{ content: string; id: string }> {
+  return apiRequest(CHAT.ASSISTANT, {
+    method: 'POST',
+    body: { message, history },
+  });
+}
+
+/** Admin-only: close or reopen a support thread. */
+export function setConversationStatus(
+  conversationId: string,
+  status: 'active' | 'closed'
+): Promise<{ success: boolean; conversation: ChatConversation }> {
+  return apiRequest(CHAT.CONVERSATIONS, {
+    method: 'PATCH',
+    body: { conversation_id: conversationId, status },
+  });
+}

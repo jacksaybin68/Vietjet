@@ -14,12 +14,14 @@ export async function GET(request: NextRequest) {
     const { page, limit } = parsePaginationParams(searchParams);
     const search = searchParams.get('search') || undefined;
     const activeOnly = searchParams.get('activeOnly') === 'true';
+    const agencyId = searchParams.get('agencyId') || undefined;
 
     const { discounts, total } = await getAllDiscountCodes({
       page,
       limit,
       search,
       activeOnly,
+      agencyId,
     });
 
     return NextResponse.json({
@@ -50,7 +52,10 @@ export async function POST(request: NextRequest) {
   if (csrfError) return csrfError;
 
   try {
-    const { error, response } = await verifyAdminRequest(request, 'discount:create' as any);
+    const { error, response, payload } = await verifyAdminRequest(
+      request,
+      'discount:create' as any
+    );
     if (error) return response;
 
     const body = await request.json();
@@ -65,6 +70,7 @@ export async function POST(request: NextRequest) {
       usage_limit,
       usage_per_user_limit,
       is_active,
+      agency_id,
     } = body;
 
     // Simple validation
@@ -86,6 +92,8 @@ export async function POST(request: NextRequest) {
       usage_limit: usage_limit ? Number(usage_limit) : null,
       usage_per_user_limit: usage_per_user_limit ? Number(usage_per_user_limit) : null,
       is_active: is_active !== false,
+      agency_id: agency_id || null,
+      issued_by: payload.userId,
     });
 
     return NextResponse.json(

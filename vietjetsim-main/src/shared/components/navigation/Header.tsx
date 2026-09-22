@@ -197,7 +197,7 @@ export default function Header() {
                     href={href}
                     role="menuitem"
                     onClick={() => setAccountMenuOpen(false)}
-                    className="block px-4 py-3 text-sm font-semibold text-vj-text transition-colors hover:bg-[#fff5f5] hover:text-vj-red focus:bg-[#fff5f5] focus:text-vj-red focus:outline-none dark:text-white/80 dark:hover:bg-white/5 dark:hover:text-vj-yellow"
+                    className="block px-4 py-3 text-sm font-semibold text-vj-text transition-colors hover:bg-[rgb(var(--vj-red-rgb))]/10 hover:text-vj-red focus:bg-[rgb(var(--vj-red-rgb))]/10 focus:text-vj-red focus:outline-none dark:text-white/80 dark:hover:bg-white/5 dark:hover:text-vj-yellow"
                   >
                     {label}
                   </Link>
@@ -210,7 +210,7 @@ export default function Header() {
                       setAccountMenuOpen(false);
                       signOut();
                     }}
-                    className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-semibold text-vj-text transition-colors hover:bg-[#fff5f5] hover:text-vj-red focus:bg-[#fff5f5] focus:text-vj-red focus:outline-none dark:text-white/80 dark:hover:bg-white/5 dark:hover:text-vj-yellow"
+                    className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-semibold text-vj-text transition-colors hover:bg-[rgb(var(--vj-red-rgb))]/10 hover:text-vj-red focus:bg-[rgb(var(--vj-red-rgb))]/10 focus:text-vj-red focus:outline-none dark:text-white/80 dark:hover:bg-white/5 dark:hover:text-vj-yellow"
                   >
                     <HiOutlineLogout aria-hidden="true" className="text-base" />
                     Đăng xuất

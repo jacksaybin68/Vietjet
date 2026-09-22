@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Icon } from '@/shared/components/ui';
 
@@ -33,6 +34,7 @@ import {
 
 export default function UserChat() {
   const { user } = useAuth();
+  const pathname = usePathname();
 
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -263,6 +265,10 @@ export default function UserChat() {
   };
 
   if (!user) return null;
+
+  // The admin console has its own chat surface (ChatTab) plus the AI assistant
+  // widget — never stack the user widget on top of it.
+  if (pathname?.startsWith('/quan-tri')) return null;
 
   return (
     <>

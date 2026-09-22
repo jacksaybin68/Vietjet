@@ -118,7 +118,7 @@ function ResetPasswordPageInner() {
           </p>
           <Link
             href="/dang-nhap"
-            className="vj-btn vj-btn-primary vj-btn-pill flex w-full items-center justify-center gap-2 py-3.5 text-base"
+            className="vj-auth-submit flex w-full items-center justify-center gap-2"
           >
             Đăng nhập ngay
           </Link>
@@ -133,7 +133,7 @@ function ResetPasswordPageInner() {
           </p>
           <Link
             href="/quen-mat-khau"
-            className="vj-btn vj-btn-primary vj-btn-pill flex w-full items-center justify-center gap-2 py-3.5 text-base"
+            className="vj-auth-submit flex w-full items-center justify-center gap-2"
           >
             Yêu cầu liên kết mới
           </Link>
@@ -213,7 +213,7 @@ function ResetPasswordPageInner() {
           <button
             type="submit"
             disabled={loading || !passwordStrong || !matches}
-            className="vj-btn vj-btn-primary vj-btn-pill flex w-full items-center justify-center gap-2 py-3.5 text-base"
+            className="vj-auth-submit flex w-full items-center justify-center gap-2"
           >
             {loading ? (
               <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">

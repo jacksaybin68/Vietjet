@@ -183,6 +183,15 @@ h6 {
   background-image: linear-gradient(180deg, var(--vj-grad-red-from) 34.8%, #ab0303 182.34%);
 }
 
+/* Public page hero — reuses the brand red sweep instead of per-page inline gradients. */
+.vj-page-hero {
+  background-image: linear-gradient(
+    20.12deg,
+    var(--vj-grad-red-from) 19.6%,
+    var(--vj-grad-red-to) 93.86%
+  );
+}
+
 /* Gold pill CTA — the primary "Tìm chuyến bay" action across the site. */
 .vj-cta {
   background-image: linear-gradient(
@@ -868,9 +877,14 @@ h6 {
   transform: translateY(-50%);
   font-size: 11px;
   color: var(--primary);
-  background: white;
+  background: var(--background);
   padding: 0 4px;
   font-weight: 600;
+}
+.dark .form-field-float .form-input:focus ~ .form-label-float,
+.dark .form-field-float .form-input:not(:placeholder-shown) ~ .form-label-float,
+.dark .form-field-float.has-value .form-label-float {
+  background: var(--dark-surface);
 }
 /* Lift label when input has left icon padding */
 .form-field-float .form-label-float.has-icon {
@@ -1374,6 +1388,31 @@ h6 {
 }
 .vj-btn-letsgo:active {
   transform: scale(0.98);
+}
+
+/* SkyID auth submit. Mirrors the real SkyID (skyjoy-authen) login theme:
+   48px tall, 344px wide, 4px radius, flat 90deg gold sweep, #333 text.
+   Keep this reserved for the auth forms — other CTAs stay on .vj-cta/.vj-btn. */
+.vj-auth-submit {
+  height: 48px;
+  max-width: 344px;
+  margin-inline: auto;
+  border: none;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--vj-grad-gold-from) 0%, var(--vj-grad-gold-to) 100%);
+  color: var(--vj-text);
+  font-family: 'KoHo', 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.vj-auth-submit:hover {
+  opacity: 0.9;
+}
+
+.vj-auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* VietJet Tab Active - red gradient */

@@ -18,6 +18,7 @@ import {
   recordLoginAttempt,
 } from '@/lib/security-db';
 import { describeDevice } from '@/lib/user-agent';
+import { normalizePhone } from '@/lib/utils';
 import { hashBackupCode, normalizeBackupCode, verifyTotpToken } from '@/lib/two-factor';
 
 export async function POST(request: NextRequest) {
@@ -33,13 +34,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email và mật khẩu là bắt buộc' }, { status: 400 });
     }
 
-    // Find user in Neon PostgreSQL
-    // Identifier can be either email or phone number
+    // Find user in Neon PostgreSQL.
+    // Identifier can be either an email or a phone number. Phone rows are
+    // matched on the canonical form too, so someone who registered as
+    // `0986349061` can still sign in with `+84 986 349 061`.
+    // The cast is required: a bare parameter in `IS NOT NULL` leaves Postgres
+    // unable to infer a type and the query fails with "could not determine
+    // data type of parameter $3".
+    const phoneIdentifier = normalizePhone(email);
     const results = await sql`
       SELECT id, email, password_hash, full_name, role, phone, avatar_url, created_at, updated_at,
              locked_until
       FROM user_profiles
-      WHERE email = ${email} OR phone = ${email}
+      WHERE email = ${email}
+         OR phone = ${email}
+         OR (${phoneIdentifier}::text IS NOT NULL AND phone = ${phoneIdentifier}::text)
     `;
 
     const device = describeDevice(request.headers.get('user-agent'));
