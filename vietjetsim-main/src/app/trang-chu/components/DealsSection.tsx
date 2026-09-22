@@ -1,13 +1,9 @@
 'use client';
 'use client';
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { AppImage } from '@/shared/components/ui';
-import { DealsSkeleton } from '@/shared/components/ui';
 import { DealCard } from '@/features/flights';
-import type { Deal } from '@/types/deals';
-import { FaPlane } from 'react-icons/fa';
-import { MdCalendarToday, MdArrowForward, MdLocalFireDepartment } from 'react-icons/md';
+import { MdArrowForward, MdLocalFireDepartment } from 'react-icons/md';
 
 const DEALS = [
   {
@@ -85,12 +81,9 @@ const DEALS = [
 export default function DealsSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
-  const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [loading, setLoading] = useState(false);
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (loading) return;
     const observer = new IntersectionObserver(
       (entries) =>
         entries.forEach((e) => {
@@ -105,7 +98,7 @@ export default function DealsSection() {
       ?.querySelectorAll('.reveal-up, .reveal-left')
       ?.forEach((el) => observer?.observe(el));
     return () => observer?.disconnect();
-  }, [loading]);
+  }, []);
 
   const handleScroll = useCallback(() => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -126,27 +119,27 @@ export default function DealsSection() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
-  const visible =
-    typeof window !== 'undefined' && sectionRef.current ? sectionRef.current.isConnected : false;
-
-  if (!visible) return null;
-
   return (
     <section ref={sectionRef} className="py-8 md:py-12 lg:py-14 bg-white dark:bg-white/5">
       <div className="max-w-7xl mx-auto px-3 md:px-4 sm:px-6 lg:px-8">
         <div
           ref={headerRef}
-          className="flex items-center justify-between mb-5 md:mb-7 lg:mb-8 reveal-left"
+          className="flex items-end justify-between mb-5 md:mb-7 lg:mb-8 reveal-left gap-3"
           style={{ transition: 'transform 0.1s linear' }}
         >
-          <div className="flex items-center gap-2 sm:gap-3">
-            <span
-              className="text-[9px] md:text-[10px] lg:text-[11px] font-bold uppercase tracking-[0.18em] md:tracking-[0.22em] text-primary"
-              style={{ letterSpacing: '0.22em' }}
-            >
-              Ưu đãi hấp dẫn
-            </span>
-            <MdLocalFireDepartment className="w-3 h-3 md:w-4 md:h-4 text-orange-500" />
+          <div>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <span
+                className="text-[9px] md:text-[10px] lg:text-[11px] font-bold uppercase tracking-[0.18em] md:tracking-[0.22em] text-primary"
+                style={{ letterSpacing: '0.22em' }}
+              >
+                Khuyến mãi hot
+              </span>
+              <MdLocalFireDepartment className="w-3 h-3 md:w-4 md:h-4 text-orange-500" />
+            </div>
+            <h2 className="mt-2 text-xl font-black tracking-tight text-navy dark:text-white sm:text-2xl md:text-3xl">
+              Săn vé giá rẻ mỗi ngày
+            </h2>
           </div>
           <div className="flex items-center gap-1 md:gap-2">
             {DEALS.length > 0 && (

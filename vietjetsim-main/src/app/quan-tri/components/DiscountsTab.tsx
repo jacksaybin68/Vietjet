@@ -24,9 +24,22 @@ interface DiscountCode {
   usage_per_user_limit: number | null;
   used_count: number;
   is_active: boolean;
+  agency_id: string | null;
+  agency_name?: string | null;
+  agency_code?: string | null;
   created_at: string;
   updated_at: string;
 }
+
+interface AgencyOption {
+  id: string;
+  code: string;
+  name: string;
+  is_active: boolean;
+}
+
+/** The three tiers an admin can issue to an agency. */
+const PERCENTAGE_PRESETS = [10, 20, 30] as const;
 
 export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
   const [discounts, setDiscounts] = useState<DiscountCode[]>([]);
@@ -159,6 +172,9 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
                   Giá trị
                 </th>
                 <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                  Đại lý
+                </th>
+                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">
                   Điều kiện
                 </th>
                 <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">
@@ -179,14 +195,14 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td colSpan={7} className="px-6 py-6">
+                    <td colSpan={8} className="px-6 py-6">
                       <div className="h-6 bg-slate-800/50 rounded-xl w-full"></div>
                     </td>
                   </tr>
                 ))
               ) : discounts.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-24 text-center">
+                  <td colSpan={8} className="px-6 py-24 text-center">
                     <div className="flex flex-col items-center gap-4">
                       <Icon name="InboxIcon" size={32} className="text-slate-600" />
                       <p className="font-black text-slate-400 uppercase text-[10px] tracking-widest">
@@ -225,6 +241,24 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
                           <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">
                             Tối đa: {Number(discount.max_discount_amount).toLocaleString('vi-VN')}₫
                           </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-5">
+                        {discount.agency_name ? (
+                          <>
+                            <div className="text-[11px] font-black text-slate-200 tracking-tight">
+                              {discount.agency_name}
+                            </div>
+                            {discount.agency_code && (
+                              <div className="text-[9px] font-black text-primary/70 uppercase tracking-[0.2em] mt-1">
+                                {discount.agency_code}
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em] px-2 py-1 bg-white/5 rounded-md inline-block">
+                            Dùng chung
+                          </span>
                         )}
                       </td>
                       <td className="px-6 py-5">
@@ -478,8 +512,16 @@ function DiscountModal({
     usage_limit: discount?.usage_limit || '',
     usage_per_user_limit: discount?.usage_per_user_limit || '1',
     is_active: discount?.is_active ?? true,
+    agency_id: discount?.agency_id || '',
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [agencies, setAgencies] = useState<AgencyOption[]>([]);
+
+  useEffect(() => {
+    apiRequest<{ agencies: AgencyOption[] }>('/api/quan-tri/dai-ly?limit=100&activeOnly=true')
+      .then((data) => setAgencies(data.agencies ?? []))
+      .catch(() => setAgencies([]));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -490,7 +532,10 @@ function DiscountModal({
         : '/api/quan-tri/ma-giam-gia';
       const method = discount ? 'PATCH' : 'POST';
 
-      await apiRequest(url, { method, body: formData });
+      await apiRequest(url, {
+        method,
+        body: { ...formData, agency_id: formData.agency_id || null },
+      });
       onToast?.success(
         'Thành công',
         discount ? 'Đã cập nhật mã giảm giá' : 'Đã tạo mã giảm giá mới'
@@ -558,6 +603,44 @@ function DiscountModal({
                 value={formData.value}
                 onChange={(e) => setFormData({ ...formData, value: e.target.value })}
               />
+              {formData.type === 'percentage' && (
+                <div className="flex gap-2 mt-2 ml-1">
+                  {PERCENTAGE_PRESETS.map((pct) => (
+                    <button
+                      key={pct}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, value: String(pct) })}
+                      className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all active:scale-95 ${
+                        String(formData.value) === String(pct)
+                          ? 'bg-primary text-white border-primary'
+                          : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10'
+                      }`}
+                    >
+                      {pct}%
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="col-span-2">
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+                Phát hành cho đại lý
+              </label>
+              <select
+                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold text-slate-200 focus:outline-none focus:border-primary/50 appearance-none bg-transparent"
+                value={formData.agency_id}
+                onChange={(e) => setFormData({ ...formData, agency_id: e.target.value })}
+              >
+                <option value="">— Không gắn đại lý (dùng chung) —</option>
+                {agencies.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name} ({a.code})
+                  </option>
+                ))}
+              </select>
+              <p className="text-[10px] font-bold text-slate-600 mt-2 ml-1">
+                Mã gắn đại lý vẫn nhập được ở ô mã giảm giá khi khách đặt vé.
+              </p>
             </div>
             <div>
               <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">

@@ -110,7 +110,7 @@ export default function NotificationSettingsTab() {
             className="w-10 h-10 rounded-xl flex items-center justify-center"
             style={{ background: 'rgba(208,2,27,0.1)' }}
           >
-            <Icon name="BellIcon" className="w-5 h-5" style={{ color: '#D0021B' }} />
+            <Icon name="BellIcon" className="w-5 h-5" style={{ color: 'var(--primary)' }} />
           </div>
           <div>
             <h2 className="text-lg font-bold text-[#1A2948]">Cài đặt thông báo</h2>
@@ -145,7 +145,7 @@ export default function NotificationSettingsTab() {
                   <Icon
                     name={alert.icon as any}
                     className="w-4 h-4"
-                    style={{ color: alert.enabled ? '#D0021B' : '#a8a29e' }}
+                    style={{ color: alert.enabled ? 'var(--primary)' : '#a8a29e' }}
                   />
                 </div>
                 <div>
@@ -162,7 +162,7 @@ export default function NotificationSettingsTab() {
               {/* Toggle Switch */}
               <button
                 onClick={() => toggleAlert(alert.id)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none flex-shrink-0 ${alert.enabled ? 'bg-[#D0021B]' : 'bg-[var(--surface-3)]'}`}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none flex-shrink-0 ${alert.enabled ? 'bg-[var(--primary)]' : 'bg-[var(--surface-3)]'}`}
                 aria-label={`Bật hoặc tắt ${alert.label}`}
               >
                 <span
@@ -280,7 +280,7 @@ export default function NotificationSettingsTab() {
         <button
           onClick={handleSave}
           className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95"
-          style={{ background: '#D0021B' }}
+          style={{ background: 'var(--primary)' }}
         >
           Lưu cài đặt
         </button>

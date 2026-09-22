@@ -10,6 +10,7 @@ import { TAX_AND_FEE_RATE, ANCILLARY_OPTIONS, type AncillaryId } from '@/feature
 
 import type { PaymentMethod } from '@/features/payments/types';
 import { apiRequest, ApiRequestError } from '@/shared/services';
+import { renderTransferNote } from '@/lib/transfer-note';
 
 interface BankAccount {
   id: number;
@@ -128,13 +129,13 @@ interface Particle {
 }
 
 const CONFETTI_COLORS = [
-  '#ED1C24',
+  '#EC2029',
   '#FFDD00',
   '#ffffff',
   '#ff6b6b',
   '#ffd93d',
   '#ff8c00',
-  '#c0392b',
+  '#6f0000',
 ];
 
 function ConfettiCanvas() {
@@ -484,6 +485,28 @@ export default function PaymentClient() {
 
   const discountAmount = promoApplied && promoData ? promoData.discountAmount : 0;
   const total = booking ? booking.total - discountAmount : 0;
+
+  // Transfer content the customer must paste into their bank app. Admins
+  // control the template (Admin → Ngân hàng); the amounts are rendered without
+  // thousand separators so a receiving bank cannot misread them.
+  const transferNote = useMemo(
+    () =>
+      renderTransferNote(selectedAdminAccount?.transfer_note_template, {
+        code: bookingCode,
+        originalAmount: booking?.total ?? 0,
+        discountAmount,
+        amount: total,
+        discountCode: promoData?.code ?? '',
+      }),
+    [
+      selectedAdminAccount?.transfer_note_template,
+      bookingCode,
+      booking?.total,
+      discountAmount,
+      total,
+      promoData?.code,
+    ]
+  );
 
   const applyPromo = async () => {
     if (!promoCode.trim()) return;
@@ -1280,7 +1303,7 @@ export default function PaymentClient() {
                                   {/* QR must not be proxied/optimized: resizing corrupts scannability. */}
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
-                                    src={`https://img.vietqr.io/image/${selectedAdminAccount.bank_bin || 'VCB'}-${selectedAdminAccount.admin_bank_account_number}-compact2.png?amount=${total}&addInfo=${encodeURIComponent(selectedAdminAccount.transfer_note_template?.replace('{code}', bookingCode) || bookingCode)}&accountName=${encodeURIComponent(selectedAdminAccount.admin_bank_account_holder)}`}
+                                    src={`https://img.vietqr.io/image/${selectedAdminAccount.bank_bin || 'VCB'}-${selectedAdminAccount.admin_bank_account_number}-compact2.png?amount=${total}&addInfo=${encodeURIComponent(transferNote)}&accountName=${encodeURIComponent(selectedAdminAccount.admin_bank_account_holder)}`}
                                     alt="VietQR"
                                     className="w-48 h-48 object-contain rounded-lg transition-transform group-hover:scale-105"
                                   />
@@ -1328,21 +1351,13 @@ export default function PaymentClient() {
                                       Nội dung chuyển khoản
                                     </label>
                                     <p className="text-base font-black text-primary leading-none tracking-widest">
-                                      {selectedAdminAccount.transfer_note_template?.replace(
-                                        '{code}',
-                                        bookingCode
-                                      ) || bookingCode}
+                                      {transferNote}
                                     </p>
                                   </div>
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      const note =
-                                        selectedAdminAccount.transfer_note_template?.replace(
-                                          '{code}',
-                                          bookingCode
-                                        ) || bookingCode;
-                                      navigator.clipboard.writeText(note);
+                                      navigator.clipboard.writeText(transferNote);
                                       toast.success(
                                         'Đã chép',
                                         'Nội dung chuyển khoản đã được lưu vào bộ nhớ tạm'

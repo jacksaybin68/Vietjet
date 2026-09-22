@@ -7,6 +7,7 @@ import {
   setAuthCookiesOnResponse,
   validatePassword,
 } from '@/lib/auth';
+import { normalizePhone } from '@/lib/utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,6 +28,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: passwordCheck.errors.join('; ') }, { status: 400 });
     }
 
+    // Store the canonical spelling. Otherwise a number typed as 0986349061
+    // and one typed as 986349061 pass the uniqueness check as different
+    // strings and end up as two accounts for the same person.
+    const normalizedPhone = normalizePhone(phone);
+
     // Check if user already exists
     let existingUsers: any[] = [];
     if (email) {
@@ -36,8 +42,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (phone) {
-      existingUsers = await sql`SELECT id FROM user_profiles WHERE phone = ${phone}`;
+    if (normalizedPhone) {
+      existingUsers = await sql`SELECT id FROM user_profiles WHERE phone = ${normalizedPhone}`;
       if (existingUsers.length > 0) {
         return NextResponse.json({ error: 'Số điện thoại đã được đăng ký' }, { status: 409 });
       }
@@ -49,7 +55,7 @@ export async function POST(request: NextRequest) {
     // Create user in Neon PostgreSQL
     const newUser = await sql`
       INSERT INTO user_profiles (email, password_hash, full_name, role, phone, dob)
-      VALUES (${email || null}, ${password_hash}, ${full_name}, 'user', ${phone || null}, ${dob || null})
+      VALUES (${email || null}, ${password_hash}, ${full_name}, 'user', ${normalizedPhone}, ${dob || null})
       RETURNING id, email, full_name, role, phone, dob, created_at, updated_at
     `;
 

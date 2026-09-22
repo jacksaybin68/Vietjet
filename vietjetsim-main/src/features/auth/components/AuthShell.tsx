@@ -22,11 +22,14 @@ const PERKS = [
 /**
  * Split-screen frame shared by the login, forgot-password and reset-password
  * pages: brand panel on the left, form card on the right.
+ *
+ * The submit buttons on these pages use `.vj-auth-submit`, which mirrors the
+ * real SkyID (skyjoy-authen) login theme rather than the red `.vj-btn-primary`.
  */
 export default function AuthShell({ eyebrow, title, subtitle, children }: AuthShellProps) {
   return (
     <div className="min-h-screen bg-[var(--surface)] font-body">
-      <div className="h-1 w-full bg-[var(--accent)]" />
+      <div className="vj-menubar h-1.5 w-full" />
       <div className="mx-auto flex min-h-[calc(100vh-4px)] max-w-7xl items-center px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid w-full overflow-hidden rounded-[2rem] border border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--background)] shadow-card lg:grid-cols-[1.1fr_1fr]">
           <aside className="relative hidden overflow-hidden bg-gradient-red-vj px-10 py-12 text-white lg:flex lg:flex-col">

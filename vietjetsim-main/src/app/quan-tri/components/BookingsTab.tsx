@@ -388,14 +388,14 @@ export default function BookingsTab() {
           <title>Hóa đơn ${booking.id}</title>
           <style>
             body { font-family: sans-serif; padding: 40px; color: #333; }
-            .header { display: flex; justify-content: space-between; border-bottom: 2px solid #D0021B; padding-bottom: 20px; margin-bottom: 30px; }
-            .logo { color: #D0021B; font-size: 24px; font-weight: 900; }
+            .header { display: flex; justify-content: space-between; border-bottom: 2px solid #EC2029; padding-bottom: 20px; margin-bottom: 30px; }
+            .logo { color: #EC2029; font-size: 24px; font-weight: 900; }
             .invoice-title { font-size: 20px; font-weight: bold; }
             .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
             .label { font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 5px; }
             .value { font-weight: bold; font-size: 16px; }
             .footer { margin-top: 50px; border-top: 1px solid #eee; pt: 20px; text-align: center; color: #999; font-size: 12px; }
-            .amount { font-size: 24px; color: #D0021B; }
+            .amount { font-size: 24px; color: #EC2029; }
           </style>
         </head>
         <body>
@@ -793,7 +793,7 @@ export default function BookingsTab() {
                           <g>
                             <path
                               d="M118 36v-2l-7-4.5V28c0-.83-.67-1.5-1.5-1.5S108 27.17 108 28v1.5L101 34v2l7-2v4.5l-2 1.5V41.5l3-1 3 1V40l-2-1.5V34l7 2z"
-                              fill="#D0021B"
+                              fill="#EC2029"
                             />
                             <animateTransform
                               attributeName="transform"
@@ -826,7 +826,7 @@ export default function BookingsTab() {
                           {/* Accent dots */}
                           <circle cx="50" cy="38" r="2.5" fill="#FFC72C" opacity="0.8" />
                           <circle cx="120" cy="48" r="2" fill="#FFC72C" opacity="0.5" />
-                          <circle cx="38" cy="52" r="1.5" fill="#D0021B" opacity="0.4" />
+                          <circle cx="38" cy="52" r="1.5" fill="#EC2029" opacity="0.4" />
                         </svg>
                       </div>
                       <div className="text-center sm:text-left flex-1">

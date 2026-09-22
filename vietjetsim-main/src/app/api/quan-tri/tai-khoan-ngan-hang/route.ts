@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
 import { verifyAdminRequest } from '@/lib/admin-auth';
+import { validateTransferNoteTemplate } from '@/lib/transfer-note';
 
 // ─── GET: List all bank accounts ─────────────────────────────────────────────
 export async function GET(request: NextRequest) {
@@ -41,6 +42,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    const noteTemplate = validateTransferNoteTemplate(transfer_note_template);
+    if (!noteTemplate.valid) {
+      return NextResponse.json(
+        { error: 'Bad Request', message: noteTemplate.message },
+        { status: 400 }
+      );
+    }
+
     // If setting as default, unset others first
     if (is_default) {
       await sql`UPDATE bank_accounts SET is_default = false WHERE is_default = true`;
@@ -48,7 +57,7 @@ export async function POST(request: NextRequest) {
 
     const [account] = await sql`
       INSERT INTO bank_accounts (bank_name, account_number, account_holder, bank_bin, branch, is_default, transfer_note_template)
-      VALUES (${bank_name}, ${account_number}, ${account_holder}, ${bank_bin || null}, ${branch || null}, ${is_default || false}, ${transfer_note_template || 'VJ {code}'})
+      VALUES (${bank_name}, ${account_number}, ${account_holder}, ${bank_bin || null}, ${branch || null}, ${is_default || false}, ${noteTemplate.template})
       RETURNING *
     `;
 

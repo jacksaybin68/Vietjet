@@ -1,7 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthRequest } from '@/lib/auth';
-import { getChatPresence, updateChatPresence } from '@/lib/db';
+import { getChatPresence, updateChatPresence, userOwnsConversation } from '@/lib/db';
 import { isAdminRole } from '@/lib/rbac';
+
+/**
+ * Presence is conversation-scoped, so a caller may only touch a thread they
+ * participate in. Admins participate in every thread; a regular user must own it.
+ */
+async function isParticipant(
+  payload: { userId: string; role: string },
+  conversationId: string
+): Promise<boolean> {
+  if (isAdminRole(payload.role)) return true;
+  return userOwnsConversation(conversationId, payload.userId);
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,11 +28,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing conversationId' }, { status: 400 });
     }
 
-    const role = searchParams.get('role') as 'user' | 'admin' | null;
-    const presence = await getChatPresence(
-      conversationId,
-      role || (payload.role as 'user' | 'admin')
-    );
+    if (!(await isParticipant(payload, conversationId))) {
+      return NextResponse.json(
+        { error: 'Forbidden', message: 'You are not a participant in this conversation' },
+        { status: 403 }
+      );
+    }
+
+    // The viewer's own role decides which presence row is theirs; a `role` query
+    // param must never let a caller read the other side's row.
+    const role = isAdminRole(payload.role) ? 'admin' : 'user';
+    const presence = await getChatPresence(conversationId, role);
     return NextResponse.json({ presence });
   } catch (error) {
     console.error('Error fetching chat presence:', error);
@@ -39,6 +57,13 @@ export async function POST(request: NextRequest) {
 
     if (!conversationId) {
       return NextResponse.json({ error: 'Missing conversationId' }, { status: 400 });
+    }
+
+    if (!(await isParticipant(payload, conversationId))) {
+      return NextResponse.json(
+        { error: 'Forbidden', message: 'You are not a participant in this conversation' },
+        { status: 403 }
+      );
     }
 
     const updates: any = {};
