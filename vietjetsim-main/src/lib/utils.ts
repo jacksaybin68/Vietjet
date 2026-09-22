@@ -74,6 +74,31 @@ export function formatRelativeTime(date: Date | string): string {
 }
 
 /**
+ * Normalize a Vietnamese phone number to a single canonical form.
+ *
+ * `user_profiles.phone` carries a UNIQUE constraint, yet registration and login
+ * compared the raw string. The same person could therefore register
+ * `0986349061`, `+84 986 349 061` and `986349061` as three separate accounts,
+ * each with its own wallet — and the duplicate rows then collided only if the
+ * user happened to type the exact spelling they registered with.
+ *
+ * Canonical form is `0XXXXXXXXX`, so `+84`/`84` prefixes and all punctuation
+ * collapse to one value. Returns null when there is nothing usable, and leaves
+ * foreign-length numbers as digits so they stay distinct rather than being
+ * forced into the local shape.
+ */
+export function normalizePhone(phone: string | null | undefined): string | null {
+  if (!phone) return null;
+  const digits = String(phone).replace(/\D/g, '');
+  if (!digits) return null;
+  if (digits.startsWith('84') && digits.length > 9) return '0' + digits.slice(2);
+  if (digits.startsWith('0')) return digits;
+  // Bare local numbers are typed without the trunk zero (`986349061`).
+  if (digits.length === 9) return '0' + digits;
+  return digits;
+}
+
+/**
  * Format phone number for display
  */
 export function formatPhoneNumber(phone: string): string {

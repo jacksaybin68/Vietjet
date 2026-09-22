@@ -168,6 +168,15 @@ export async function middleware(request: NextRequest) {
 
   // If not authenticated and trying to access protected route
   if (!user && !publicPage && !isAuthApiRoute && !publicApi) {
+    // API routes must answer 401 (not redirect) so clients can branch on
+    // status — redirecting an XHR to /dang-nhap breaks the caller's error
+    // handling and lets the browser swallow the auth failure as a page load.
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json(
+        { error: 'Unauthorized', message: 'Authentication required' },
+        { status: 401 }
+      );
+    }
     const redirectUrl = new URL('/dang-nhap', request.url);
     redirectUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(redirectUrl);
@@ -224,12 +233,20 @@ export async function middleware(request: NextRequest) {
       );
     }
 
+    // Header values are ByteStrings: any character above U+00FF (e.g. Vietnamese
+    // diacritics) throws "Cannot convert argument to a ByteString" in the Edge
+    // runtime. None of the x-user-* headers are read downstream — route handlers
+    // resolve identity from the signed JWT via verifyAuthRequest — so drop
+    // non-latin-1 characters rather than corrupting them.
+    const byteString = (v: string) =>
+      Array.from(v).every((ch) => ch.codePointAt(0)! <= 0xff) ? v : '';
+
     // Add user info to request headers for downstream API routes
     const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-user-id', user.userId);
-    requestHeaders.set('x-user-email', user.email);
-    requestHeaders.set('x-user-role', user.role);
-    requestHeaders.set('x-user-fullname', user.fullName);
+    requestHeaders.set('x-user-id', byteString(user.userId));
+    requestHeaders.set('x-user-email', byteString(user.email));
+    requestHeaders.set('x-user-role', byteString(user.role));
+    requestHeaders.set('x-user-fullname', byteString(user.fullName));
 
     response = NextResponse.next({
       request: {

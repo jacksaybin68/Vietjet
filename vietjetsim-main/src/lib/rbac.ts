@@ -56,7 +56,13 @@ export type Permission =
   | 'discount:create'
   | 'discount:edit'
   | 'discount:delete'
-  | 'discount:status_change';
+  | 'discount:status_change'
+  | 'agency:list'
+  | 'agency:view'
+  | 'agency:create'
+  | 'agency:edit'
+  | 'agency:delete'
+  | 'agency:status_change';
 
 export const PERMISSION_LABELS: Record<Permission, string> = {
   'user:list': 'Xem danh sách người dùng',
@@ -105,6 +111,12 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   'discount:edit': 'Chỉnh sửa mã giảm giá',
   'discount:delete': 'Xóa mã giảm giá',
   'discount:status_change': 'Thay đổi trạng thái mã giảm giá',
+  'agency:list': 'Xem danh sách đại lý',
+  'agency:view': 'Xem chi tiết đại lý',
+  'agency:create': 'Tạo đại lý',
+  'agency:edit': 'Chỉnh sửa đại lý',
+  'agency:delete': 'Xóa đại lý',
+  'agency:status_change': 'Thay đổi trạng thái đại lý',
 };
 
 // ═════════════════════════════════════════════════════════════════════
@@ -224,6 +236,20 @@ export const PERMISSION_CATEGORIES: PermissionCategory[] = [
       'discount:edit',
       'discount:delete',
       'discount:status_change',
+    ],
+  },
+  {
+    key: 'agency',
+    name: 'agency',
+    label: 'Đại lý',
+    icon: 'BuildingOfficeIcon',
+    permissions: [
+      'agency:list',
+      'agency:view',
+      'agency:create',
+      'agency:edit',
+      'agency:delete',
+      'agency:status_change',
     ],
   },
 ];

@@ -600,7 +600,8 @@ export default function WalletTab({ user }: WalletTabProps) {
       <div
         className="rounded-2xl p-6 text-white relative overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, #EC2029 0%, #C41017 50%, #6F0000 100%)',
+          background:
+            'linear-gradient(135deg, var(--vj-grad-red-from) 0%, var(--primary) 50%, var(--vj-grad-red-to) 100%)',
         }}
       >
         <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4" />

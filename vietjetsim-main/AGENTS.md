@@ -6,10 +6,10 @@ Repository memory for VietjetSim (Next.js 15 / React 19 / TypeScript / Tailwind 
 
 ```bash
 npm run dev        # next dev --turbo -p 4028
-npm run build      # next build (runs its own TS type check — a tsc error fails the build)
+npm run build      # next build (runs its own TS type check ‚Äî a tsc error fails the build)
 npm run type-check # tsc --noEmit
 npm test           # vitest run
-npm run lint       # eslint .   (NOT `next lint` — that is removed in Next 15)
+npm run lint       # eslint .   (NOT `next lint` ‚Äî that is removed in Next 15)
 npm run lint:fix   # eslint . --fix
 ```
 
@@ -30,7 +30,7 @@ Shared infrastructure lives in `src/shared/` (`services/apiClient.ts`, `constant
 `components/ui`).
 
 Neon Postgres via `src/lib/neon.ts` (`sql` template tag) is the only datastore. When
-`DATABASE_URL` is unset, that module falls back to an in-memory mock for local dev/CI —
+`DATABASE_URL` is unset, that module falls back to an in-memory mock for local dev/CI ‚Äî
 tests rely on it, so keep the fallback intact. There is no Supabase dependency: the auth
 layer is custom JWT (`src/lib/auth.ts`) and data isolation comes from `user_id`-scoped
 queries plus RBAC guards, not database-level policies.
@@ -42,9 +42,37 @@ README demo accounts, so a freshly migrated database is usable without manual in
 relative to `CURRENT_DATE`, so date-filtered flight search only finds them on the
 following day.
 
+**Agency-issued discount codes.** `015_agency_discounts.sql` adds `agencies` and
+`discount_codes.agency_id` (nullable, `ON DELETE SET NULL`) plus `issued_by`. Admins
+manage agencies at `/quan-tri` → "Đại lý" and pick one from the "Phát hành cho đại lý"
+selector when creating a code; the percentage presets (10/20/30%) exist because those
+are the tiers the business issues. `agency_id` is *provenance only* — `/api/ma-giam-gia/xac-thuc`
+deliberately does not filter by agency, so a customer holding an agency code can enter
+it at checkout exactly like a platform-wide one. Deleting an agency therefore orphans
+its codes into platform-wide rather than invalidating them.
+
+**Phone identity is normalised before it is stored or looked up.** `user_profiles.phone`
+has carried a UNIQUE index since `007`, but registration and login compared the raw
+string, so `0986349061`, `+84 986 349 061` and `986349061` were accepted as three
+different people, each getting its own wallet. Route every write and lookup through
+`normalizePhone` in `src/lib/utils.ts` (canonical form `0XXXXXXXXX`); it also backs the
+client-side normalisation in `AuthContext.signUp`. `016_normalize_phone_and_cleanup.sql`
+canonicalises rows created before this existed, merges the duplicates it collapses
+(preferring the account that has an email, and refusing to guess when a wallet has a
+non-zero balance or both rows carry a 2FA enrollment), rewrites unrecognised `role`
+values to `user`, and drops the Neon console demo table `playing_with_neon`.
+
+**`user_profiles.id` is `text`, not `uuid`.** Child tables such as `bookings.user_id`
+and `user_wallets.user_id` are `text` too, but `admin_roles.user_id` and several others
+are not — check `information_schema.columns` before joining or declaring PL/pgSQL
+variables, or a comparison fails with `operator does not exist: text <> uuid`.
+Application-aware migration caveat: a bare parameter used only in `IS NOT NULL` makes
+Postgres refuse the whole query with `could not determine data type of parameter $N`;
+add an explicit `::text` cast.
+
 To run the app against a local database without a Neon account, note that
 `@neondatabase/serverless` speaks Neon's HTTP `/sql` protocol, not the Postgres wire
-protocol — raw `DATABASE_URL=postgresql://localhost/...` fails with
+protocol ‚Äî raw `DATABASE_URL=postgresql://localhost/...` fails with
 `Failed to parse URL from https://api.<host>/sql`. Point `DATABASE_URL` at a
 `<db>.<project>.neon.tech`-style host and run a small HTTP proxy that translates
 `{query, params}` calls to real Postgres, or use a real Neon branch.
@@ -63,7 +91,7 @@ protocol — raw `DATABASE_URL=postgresql://localhost/...` fails with
   `getCsrfHeaders()` always has a value to echo back. When adding enforcement,
   migrate the client to `apiRequest` in the same change or the UI breaks with 403.
   The password-reset routes do not use the auth helpers, so they call
-  `validateCsrfOrReject` themselves — keep that call when editing them.
+  `validateCsrfOrReject` themselves ‚Äî keep that call when editing them.
 - **`verifyAdminRequest` returns a discriminated union.** Failure always carries
   `response`, so `const { error, response } = await verifyAdminRequest(...); if (error)
 return response;` narrows correctly and avoids returning `undefined` from a handler.
@@ -92,7 +120,7 @@ return response;` narrows correctly and avoids returning `undefined` from a hand
   use a data-modifying CTE and have the child inserts `SELECT nb.id FROM new_booking nb`
   (see `createBooking`). Bulk rows go in via `jsonb_to_recordset`, which needs the
   `::jsonb` cast and a column list whose types match the target columns (`dob date`,
-  not `text` — there is no implicit text→date cast in a recordset definition).
+  not `text` ‚Äî there is no implicit text‚Üídate cast in a recordset definition).
 - **`json_agg(...) FILTER (WHERE ...)` returns SQL `NULL`, not `[]`, when nothing
   matches.** Map it with `Array.isArray(x) ? x : []` before indexing; `x[0]` throws
   on a booking with no passengers or payments.
@@ -121,6 +149,34 @@ return response;` narrows correctly and avoids returning `undefined` from a hand
   their intended roles. Keep the README table and that script's `DEMO_ACCOUNTS` in sync;
   it writes to whatever `DATABASE_URL` points at.
 
+## Chat (h·ªó tr·ª£ kh√°ch h√Ýng + tr·ª£ l√Ω AI)
+
+Chat lives in `src/features/chat` (`UserChat`, `OpenClawAssistant`, `ChatWidgets`)
+with services in `src/features/chat/services` and APIs under `src/app/api/tro-chuyen/*`.
+
+- **Both widgets mount once, from the root layout** via `<ChatWidgets />` (inside
+  `AuthProvider`). Each widget gates itself: `UserChat` renders only for a signed-in
+  user and returns `null` on `/quan-tri`; `OpenClawAssistant` renders only when
+  `isAdmin && pathname.startsWith('/quan-tri')`. Do not re-mount `UserChat` on an
+  individual page ‚Äî that renders two floating buttons.
+- **Presence (`/api/tro-chuyen/truc-tuyen`) is conversation-scoped.** Both GET and
+  POST require the caller to own the conversation (`userOwnsConversation`) unless they
+  are an admin. GET previously accepted a `role` query param that overrode the token's
+  role; never reintroduce a client-supplied role. The viewer's own role is derived with
+  `isAdminRole(payload.role)`.
+- **`/api/tro-ly-ai/tro-chuyen` is admin-only** and gated by `verifyAdminRequest`, which
+  enforces CSRF before auth. Its sole caller is the Admin console widget; call it through
+  `askAssistant()` rather than raw fetch.
+- **Archiving is a real `status` column**, not a UI-only flag. `PATCH
+  /api/tro-chuyen/cuoc-hoi-thoai` is admin-only, rejects any status other than
+  `active`/`closed`, and backs the Admin `ChatTab` "L∆∞u tr·ªØ" filter and its
+  archive/reopen button (`setConversationStatus`).
+- **The mock DB models chat in memory.** `src/lib/neon.ts` has a `runChatQuery` branch
+  plus a `.query` method that mirrors the SQL `src/lib/db.ts` issues through
+  `sql.query`, so chat works without `DATABASE_URL`. New chat SQL must be mirrored
+  there or it silently no-ops in mock mode. Restart `next dev` after editing
+  `neon.ts` ‚Äî a stale server serves the old mock and looks like a 404 on new queries.
+
 ## Testing
 
 Vitest, tests in `src/test/` (`src/test/setup.ts` is the setup file). Route handlers are
@@ -136,14 +192,31 @@ mock rather than wrapping individual tests in a router provider.
 `npm run test:smoke` (`scripts/smoke-test.cjs`) is a dependency-free HTTP smoke test
 against a running server; CI runs it in the `smoke` job on port 4028 with no
 `DATABASE_URL`, so it exercises the mock DB path. It asserts routing, redirects, the CSRF
-handshake and auth guards, not happy-path writes — the mock DB cannot register users, so
+handshake and auth guards, not happy-path writes ‚Äî the mock DB cannot register users, so
 persistence flows are out of scope. Point it elsewhere with `SMOKE_BASE_URL`.
+
+**`next dev` (Turbopack) does not run the root `middleware.ts`, but `next start` does.**
+This is the single biggest dev/prod divergence in this repo: on a dev server an unknown
+path renders 404 and protected pages/APIs reach their handlers (which answer 401 on their
+own), while a production build runs the Proxy first and redirects every non-public path
+to `/dang-nhap` before routing. Consequences to remember:
+
+- Any route that must answer without a session needs an entry in
+  `src/lib/route-access.ts` (see `isPublicApiRoute`), or production returns a 307
+  redirect where dev/tests expect 401/200/404. `/api/csrf`, `/api/xac-thuc/lam-moi` and
+  the marketing pages were each missing and only failed in production.
+- Protected `/api/*` routes return **401 JSON**, not a redirect, so XHR callers can
+  branch on status. Only page paths redirect to `/dang-nhap`.
+- Because CI's smoke job runs against `next dev`, it cannot catch a missing
+  public-route entry. When touching `middleware.ts`/`route-access.ts`, also run the
+  smoke test against a production build (`npm run build && npm start`) before trusting
+  a green CI.
 
 ## UI design system
 
 Brand red is `#EC2029` (hover `#D91A21`, dark `#6F0000`); the CTA/action yellow is
 `#FFDD00` with the deeper `#F9A51A`/`#FBB612` accents. Theme values live in
-`tailwind.config.js` and `src/styles/tailwind.css`. Keep pages on these tokens — a
+`tailwind.config.js` and `src/styles/tailwind.css`. Keep pages on these tokens ‚Äî a
 past palette (`#ED1D23`, `#E30613`, `#FFD400`, `#FFC400`) was removed, so reintroducing
 one of those hexes is a regression, not a neutral choice. The same applies to off-brand
 neutrals that ignore the tokens: `/chuyen-bay-cua-toi` and `/lam-thu-tuc` once used
@@ -157,10 +230,33 @@ brand-red action button (`vj-btn-pill` rounds it); most pages render `<Header />
 `/quen-mat-khau`, `/dat-lai-mat-khau`, `/editor`, `/quan-tri` are intentionally
 standalone), so a new page should add both.
 
+The auth screens do **not** use `vj-btn-primary`. Their submit buttons use
+`vj-auth-submit` (48px tall, 344px wide, 4px radius, flat 90¬∞ gold sweep `#F9A51A‚Üí#FFDD00`,
+`#333` text, hover only dims to `opacity: .9`), copied from the real SkyID login theme.
+That theme lives on `skyjoy-authen.vietjetair.com`, which fronts a Keycloak realm on
+`skyjoy-id.vietjetair.com`; both answer a VPN/proxy block page to this sandbox, so the
+values above come from the theme's own leaked stylesheet ‚Äî don't "correct" them to red.
+Keep auth CTAs on that one utility rather than reintroducing `.vj-btn`.
+
+Floating labels (`.form-label-float`) sit on a `var(--background)` chip when lifted, so
+in dark mode they need the `.dark` override to `var(--dark-surface)`; a hard-coded
+`background: white` there produces a white notch over a dark input.
+
+Public information pages share `<PageHero>` (`@/shared/components/navigation`), which
+renders the brand red sweep via `.vj-page-hero`. Do not re-add an inline
+`linear-gradient(20.12deg, ‚Ä¶)` hero ‚Äî `gioi-thieu`, `hoi-dap`, `lien-he` and `dich-vu`
+were consolidated onto it. `/hanh-ly` is a pure `redirect()` and correctly has no
+chrome.
+
 The auth screens share `AuthShell` (split brand/form layout) and `AlertBanner` from
 `@/features/auth/components`; `/dang-nhap` toggles login and registration in one route
-(`?tab=register` deep-links registration, `?redirect=` restores the bounced path).
-Password recovery is `/quen-mat-khau` (request a link) → `/dat-lai-mat-khau?token=…`
+(`?tab=register` deep-links registration, `?redirect=` restores the bounced path). The
+tab strip follows SkyID's order ‚Äî **ƒêƒÉng k√Ω before ƒêƒÉng nh·∫≠p** ‚Äî while the default tab
+stays login, so keep the array order and the default state in sync when editing. The
+terms/privacy links in the registration form point at `/gioi-thieu`, matching
+`Footer.tsx`; they were previously `href="#"`, which silently made a legally-required
+consent link a no-op.
+Password recovery is `/quen-mat-khau` (request a link) ‚Üí `/dat-lai-mat-khau?token=‚Ä¶`
 (consume it). Tokens are single-use and hashed in `account_recovery` via
 `src/lib/password-reset.ts`; a successful reset revokes refresh tokens and sessions.
 There is no mail transport, so the request endpoint echoes `resetUrl` only outside
@@ -172,7 +268,7 @@ preselect a panel. Link services as `/dich-vu?service=<id>` rather than as subpa
 `/dich-vu/hanh-ly`, which do not exist and 404.
 
 `/lam-thu-tuc-truc-tuyen` is a legacy alias that 307s to `/lam-thu-tuc`; it forwards the
-whole query string, so `?code=` survives. Both are in `PUBLIC_ROUTES` — the check-in
+whole query string, so `?code=` survives. Both are in `PUBLIC_ROUTES` ‚Äî the check-in
 lookup is anonymous (booking code + surname are the credentials). `/chuyen-bay-cua-toi`
 is public too, but it reads `/api/checkin/status/[bookingId]`, which is *not* in
 `PUBLIC_API_ROUTES`, so a signed-out visitor sees the booking-code lookup and an empty
@@ -182,21 +278,35 @@ state rather than someone else's reservations.
 onDismiss={toast.dismiss} />`. Passing a literal `toasts={[]}` compiles and renders but
 silently swallows every toast.
 
+- **Payments are admin-configured.** Bank accounts live in `bank_accounts` and are
+  edited at `/quan-tri` → "Ngân hàng" (`BankAccountsTab`, API
+  `/api/quan-tri/tai-khoan-ngan-hang`). `transfer_note_template` is the payment
+  content the customer must paste into their bank app; it is rendered by
+  `src/lib/transfer-note.ts` and supports `{code}`, `{amount}`, `{original}`,
+  `{discount}`, `{discount_code}`. Amounts render as separator-free digits
+  (`850000`, never `850,000`) because a receiving bank or a customer retyping the
+  amount can misread a separator. Unknown tokens are a **hard 400 on save** rather
+  than a warning — they would otherwise ship a literal `{amout}` to the customer.
+  `PATCH` only validates when the field is present, so an `is_active` toggle cannot
+  be rejected for a template that predates the token set. The public config route
+  (`/api/cong-khai/cau-hinh-ngan-hang`) is what checkout reads; it is in
+  `PUBLIC_API_ROUTES`.
+
 ### Tailwind gotchas that caused real regressions
 
 - **`[var(--x)]/N` silently compiles to nothing.** Tailwind 3.4's `/opacity` modifier
   cannot resolve a plain CSS variable, so `bg-[var(--vj-red)]/10` produces _no rule at
-  all_ — no error, no warning. Use channel variables and wrap in `rgb()`:
+  all_ ‚Äî no error, no warning. Use channel variables and wrap in `rgb()`:
   `bg-[rgb(var(--vj-red-rgb))]/10`. Channel tokens (`--vj-red-rgb: 236 32 41`) live in
   `:root` in `tailwind.css`; add one whenever you add a translucent tint.
 - **Only `src/styles/tailwind.css` is imported** (by `src/app/layout.tsx`). A stylesheet
-  under `src/styles/` that nothing imports is dead code — dark mode once shipped a second
+  under `src/styles/` that nothing imports is dead code ‚Äî dark mode once shipped a second
   `[data-theme="dark"]` mechanism that way while `ThemeContext` toggles a `dark` class.
   `darkMode: 'class'` with a `.dark` selector is the only supported mechanism.
 - **Use the token for brand red**: `hover:bg-primary-dark` / `var(--primary-dark)`
   (`#D91A21`), not a bespoke `#C41017`/`#D0021B`. One-off hexes for a specific UI accent
   are fine, but a button hover is not a place to invent a shade.
-- **Page roots share the canvas token** — `min-h-screen bg-[var(--surface)]` for content
+- **Page roots share the canvas token** ‚Äî `min-h-screen bg-[var(--surface)]` for content
   pages, `bg-[var(--background)]` where the page must stay white in light mode. Avoid
   `bg-gray-50`/`bg-stone-50`/raw hex, which ignore dark mode.
 

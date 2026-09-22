@@ -12,12 +12,6 @@ import {
 import { Pagination } from '@/shared/components/ui';
 
 // ─── Dynamic imports for heavy tab components (code-split) ──────────────
-const UserChat = dynamic(() => import('@/features/chat').then((module) => module.UserChat), {
-  loading: () => (
-    <div className="fixed bottom-6 right-6 w-80 h-12 bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl shadow-lg animate-pulse" />
-  ),
-  ssr: false,
-});
 const NotificationsTab = dynamic(() => import('./NotificationsTab'), {
   loading: () => (
     <div className="space-y-3 p-4">
@@ -1675,10 +1669,7 @@ export default function UserDashboardClient() {
                         {/* Bank account info section */}
                         <div className="rounded-xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden">
                           <div className="flex items-center gap-2 px-4 py-3 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] border-b border-[var(--border)] dark:border-[var(--dark-border)]">
-                            <div
-                              className="w-6 h-6 rounded-lg flex items-center justify-center"
-                              style={{ background: '#FFF5F5' }}
-                            >
+                            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-[rgb(var(--vj-red-rgb))]/10">
                               <Icon
                                 name="CreditCardIcon"
                                 size={13}
@@ -2062,7 +2053,6 @@ export default function UserDashboardClient() {
         }
       `}</style>
 
-      <UserChat />
       <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
     </div>
   );

@@ -62,7 +62,7 @@ export default function ForgotPasswordPage() {
 
           <Link
             href="/dang-nhap"
-            className="vj-btn vj-btn-primary vj-btn-pill flex w-full items-center justify-center gap-2 py-3.5 text-base"
+            className="vj-auth-submit flex w-full items-center justify-center gap-2"
           >
             <Icon name="ArrowLeftIcon" size={18} />
             Về trang đăng nhập
@@ -95,7 +95,7 @@ export default function ForgotPasswordPage() {
           <button
             type="submit"
             disabled={loading || !identifier.trim()}
-            className="vj-btn vj-btn-primary vj-btn-pill flex w-full items-center justify-center gap-2 py-3.5 text-base"
+            className="vj-auth-submit flex w-full items-center justify-center gap-2"
           >
             {loading ? (
               <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">

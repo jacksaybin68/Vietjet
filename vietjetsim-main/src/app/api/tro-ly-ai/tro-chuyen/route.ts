@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { researchVietjetFlights } from '@/lib/openclaw/flight-researcher';
-import { validateCsrfOrReject } from '@/lib/csrf';
+import { verifyAdminRequest } from '@/lib/admin-auth';
 
 export async function POST(req: NextRequest) {
   try {
-    const csrfError = await validateCsrfOrReject(req);
-    if (csrfError) return csrfError;
+    // Admin-only surface: the sole caller is the admin console widget. This
+    // helper enforces CSRF first, then authentication and the admin role.
+    const { error, response } = await verifyAdminRequest(req);
+    if (error) return response;
 
     const { message, history = [] } = await req.json();
 

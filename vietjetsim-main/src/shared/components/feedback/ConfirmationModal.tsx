@@ -120,7 +120,10 @@ export default function ConfirmationModal({
         {/* Red Header */}
         <div
           className="px-6 py-5 flex items-center gap-4"
-          style={{ background: 'linear-gradient(135deg, #EC2029 0%, #C41017 100%)' }}
+          style={{
+            background:
+              'linear-gradient(135deg, var(--vj-grad-red-from) 0%, var(--vj-grad-red-to) 100%)',
+          }}
         >
           {/* Icon badge */}
           <div
@@ -184,7 +187,7 @@ export default function ConfirmationModal({
               style={{
                 background: isLoading
                   ? '#E6BF00'
-                  : 'linear-gradient(135deg, #FFDD00 0%, #FFC72C 100%)',
+                  : 'linear-gradient(135deg, var(--vj-yellow) 0%, #f7c61a 100%)',
                 color: '#1A2948',
                 transform: isLoading ? 'none' : undefined,
               }}

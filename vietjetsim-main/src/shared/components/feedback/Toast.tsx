@@ -66,7 +66,7 @@ const TYPE_CONFIG: Record<
     ),
   },
   warning: {
-    bar: 'bg-gradient-to-r from-[#FFDD00] to-[#FFC72C]',
+    bar: 'bg-gradient-to-r from-[var(--vj-yellow)] to-[#f7c61a]',
     bg: 'bg-white border border-[#E8E8E8]',
     iconBg: 'bg-[#FFDD00]',
     iconColor: 'text-[#1A2948]',

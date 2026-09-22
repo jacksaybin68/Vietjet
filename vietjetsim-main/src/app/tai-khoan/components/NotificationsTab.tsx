@@ -54,8 +54,8 @@ const STATIC_NOTIFICATIONS: Notification[] = [
     timestamp: new Date(Date.now() - 1800000).toISOString(),
     read: false,
     icon: 'ExclamationTriangleIcon',
-    accent: '#D0021B',
-    accentBg: '#FFF5F5',
+    accent: 'var(--primary)',
+    accentBg: '#fff1f1',
     metadata: { flight_no: 'VJ 101', old_gate: 'B12', new_gate: 'A07', delay_type: 'gate_change' },
   },
   {
@@ -66,8 +66,8 @@ const STATIC_NOTIFICATIONS: Notification[] = [
     timestamp: new Date(Date.now() - 172800000).toISOString(),
     read: true,
     icon: 'ClockIcon',
-    accent: '#D0021B',
-    accentBg: '#FFF5F5',
+    accent: 'var(--primary)',
+    accentBg: '#fff1f1',
     metadata: {
       flight_no: 'VJ 201',
       old_time: '07:30',
@@ -116,7 +116,7 @@ const STATIC_NOTIFICATIONS: Notification[] = [
 const getNotifStyle = (type: string): { icon: string; accent: string; accentBg: string } => {
   switch (type) {
     case 'flight':
-      return { icon: 'ExclamationTriangleIcon', accent: '#D0021B', accentBg: '#FFF5F5' };
+      return { icon: 'ExclamationTriangleIcon', accent: 'var(--primary)', accentBg: '#fff1f1' };
     case 'promo':
       return { icon: 'TagIcon', accent: '#7c3aed', accentBg: '#F5F3FF' };
     case 'message':
@@ -156,7 +156,7 @@ function formatFullDate(isoString: string): string {
 const TYPE_CONFIG: Record<NotificationType, { label: string; icon: string; color: string }> = {
   all: { label: 'Tất cả', icon: 'BellIcon', color: '#1A2948' },
   booking: { label: 'Đặt vé', icon: 'TicketIcon', color: '#16a34a' },
-  flight: { label: 'Chuyến bay', icon: 'ExclamationTriangleIcon', color: '#D0021B' },
+  flight: { label: 'Chuyến bay', icon: 'ExclamationTriangleIcon', color: 'var(--primary)' },
   promo: { label: 'Khuyến mãi', icon: 'TagIcon', color: '#7c3aed' },
 };
 
@@ -274,7 +274,7 @@ function NotifCard({ notif, onMarkRead, onDismiss, onArchive, onSnooze }: NotifC
         <button
           onClick={() => onDismiss(notif.id)}
           className="flex flex-col items-center justify-center h-full w-1/2 gap-1 text-white text-xs font-semibold"
-          style={{ background: '#D0021B' }}
+          style={{ background: 'var(--primary)' }}
         >
           <Icon name="TrashIcon" size={18} />
           <span>Xoá</span>
@@ -311,7 +311,7 @@ function NotifCard({ notif, onMarkRead, onDismiss, onArchive, onSnooze }: NotifC
               {!notif.read && (
                 <span
                   className="flex-shrink-0 w-2 h-2 rounded-full animate-pulse"
-                  style={{ background: '#D0021B' }}
+                  style={{ background: 'var(--primary)' }}
                 />
               )}
               <span
@@ -427,8 +427,8 @@ function StatsBar({ notifications }: { notifications: Notification[] }) {
           key: 'flight',
           label: 'Chuyến bay',
           icon: 'ExclamationTriangleIcon',
-          color: '#D0021B',
-          bg: '#FFF5F5',
+          color: 'var(--primary)',
+          bg: '#fff1f1',
           count: counts.flight,
         },
         {
@@ -615,7 +615,9 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
     >
       <div
         className="h-1.5 w-full"
-        style={{ background: 'linear-gradient(90deg, #D0021B 0%, #FF4D6A 100%)' }}
+        style={{
+          background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%)',
+        }}
       />
 
       {/* Header */}

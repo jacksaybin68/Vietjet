@@ -91,7 +91,7 @@ const VARIANT_CONFIG: Record<ErrorVariant, VariantConfig> = {
   },
   api: {
     accentColor: '#EC2029',
-    bgColor: '#FFF5F5',
+    bgColor: 'rgb(var(--vj-red-rgb) / 0.06)',
     retryLabel: 'Tải lại dữ liệu',
     title: 'Lỗi máy chủ',
     subtitle: 'Không thể tải dữ liệu từ máy chủ. Vui lòng thử lại sau vài giây.',
@@ -122,7 +122,7 @@ const VARIANT_CONFIG: Record<ErrorVariant, VariantConfig> = {
   },
   booking: {
     accentColor: '#EC2029',
-    bgColor: '#FFF5F5',
+    bgColor: 'rgb(var(--vj-red-rgb) / 0.06)',
     retryLabel: 'Thử đặt vé lại',
     title: 'Đặt vé thất bại',
     subtitle:

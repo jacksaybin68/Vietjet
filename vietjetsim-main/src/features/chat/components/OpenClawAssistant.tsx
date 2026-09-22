@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePathname } from 'next/navigation';
 import { Icon } from '@/shared/components/ui';
-import { apiRequest } from '@/shared/services';
+import { askAssistant } from '../services';
 
 interface Message {
   id: string;
@@ -70,21 +70,13 @@ export default function OpenClawAssistant() {
     setIsTyping(true);
 
     try {
-      const data = await apiRequest<{ id?: string; content?: string; error?: string }>(
-        '/api/tro-ly-ai/tro-chuyen',
-        {
-          method: 'POST',
-          body: {
-            message: text,
-            history: messages.map((m) => ({
-              role: m.sender === 'user' ? 'user' : 'assistant',
-              content: m.content,
-            })),
-          },
-        }
+      const data = await askAssistant(
+        text,
+        messages.map((m) => ({
+          role: m.sender === 'user' ? 'user' : 'assistant',
+          content: m.content,
+        }))
       );
-
-      if (data.error) throw new Error(data.error);
 
       setMessages((prev) => [
         ...prev,

@@ -24,6 +24,17 @@ describe('route access classification', () => {
       expect(isPublicRoute('/quen-mat-khau')).toBe(true);
       expect(isPublicRoute('/dat-lai-mat-khau')).toBe(true);
     });
+
+    it('keeps the programs alias public so its own redirect can run', () => {
+      expect(isPublicRoute('/hanh-ly')).toBe(true);
+      expect(isPublicRoute('/hanh-ly/')).toBe(true);
+    });
+
+    it('keeps marketing and support pages browsable signed out', () => {
+      for (const p of ['/dich-vu', '/gioi-thieu', '/hoi-dap', '/lien-he', '/tra-cuu']) {
+        expect(isPublicRoute(p)).toBe(true);
+      }
+    });
   });
 
   describe('isPublicApiRoute', () => {
@@ -36,6 +47,11 @@ describe('route access classification', () => {
       expect(isPublicApiRoute('/api/cong-khai/cau-hinh-ngan-hang')).toBe(true);
     });
 
+    it('allows the CSRF bootstrap and refresh-token rotation without a session', () => {
+      expect(isPublicApiRoute('/api/csrf')).toBe(true);
+      expect(isPublicApiRoute('/api/xac-thuc/lam-moi')).toBe(true);
+    });
+
     it('keeps authenticated data routes private', () => {
       const privateRoutes = [
         '/api/dat-ve',
@@ -43,7 +59,6 @@ describe('route access classification', () => {
         '/api/thong-bao',
         '/api/thanh-toan',
         '/api/vi',
-        '/api/xac-thuc/lam-moi',
       ];
       for (const route of privateRoutes) {
         expect(isPublicApiRoute(route)).toBe(false);

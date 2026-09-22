@@ -31,6 +31,16 @@ function check(label, actual, expected) {
   return false;
 }
 
+async function checkOneOf(label, actual, expectedList) {
+  if (expectedList.includes(actual)) {
+    console.info(`  ok    ${label}`);
+    return true;
+  }
+  failures += 1;
+  console.error(`  FAIL  ${label} — expected one of ${expectedList.join('/')}, got ${actual}`);
+  return false;
+}
+
 async function request(path, options = {}) {
   const res = await fetch(`${BASE}${path}`, {
     redirect: 'manual',
@@ -112,7 +122,12 @@ async function main() {
     '/lam-thu-tuc?code=VD-12345678'
   );
 
-  check('GET unknown route', await status('/khong-ton-tai-xyz'), 404);
+  // Dev/Turbopack does not run the root middleware, so an unknown path reaches
+  // the router and renders 404. A production build runs the Proxy, which
+  // bounces any non-public path (including nonexistent ones) to /dang-nhap
+  // before routing — a deliberate choice that avoids leaking which routes
+  // exist. Accept either, but never 200.
+  await checkOneOf('GET unknown route', await status('/khong-ton-tai-xyz'), [404, 307]);
 
   console.info('\nPublic API');
   check('GET /api/csrf', await status('/api/csrf'), 200);
