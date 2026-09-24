@@ -65,6 +65,22 @@ export interface UserRecord {
   phone: string | null;
   avatar_url: string | null;
   locked_until?: string | null;
+  /**
+   * Columns added by `migrations/005_enhanced_user_profiles.sql` and
+   * `000_core_schema.sql`. They are nullable and not every query selects them,
+   * so they stay optional rather than forcing every call site to widen.
+   */
+  dob?: string | null;
+  gender?: 'male' | 'female' | 'other' | null;
+  address?: string | null;
+  city?: string | null;
+  country?: string | null;
+  preferred_language?: string | null;
+  email_verified?: boolean | null;
+  phone_verified?: boolean | null;
+  last_login?: string | null;
+  failed_login_attempts?: number | null;
+  bank_info?: string | Record<string, string | number> | null;
   created_at: string;
   updated_at: string;
 }

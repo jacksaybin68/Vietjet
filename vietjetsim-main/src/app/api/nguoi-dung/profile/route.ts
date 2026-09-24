@@ -26,12 +26,12 @@ export async function GET(request: NextRequest) {
         avatarUrl: user.avatar_url,
         createdAt: user.created_at,
         updatedAt: user.updated_at,
-        dob: (user as any).dob || null,
-        gender: (user as any).gender || null,
-        address: (user as any).address || null,
-        city: (user as any).city || null,
-        country: (user as any).country || null,
-        preferredLanguage: (user as any).preferred_language || 'vi',
+        dob: user.dob || null,
+        gender: user.gender || null,
+        address: user.address || null,
+        city: user.city || null,
+        country: user.country || null,
+        preferredLanguage: user.preferred_language || 'vi',
       },
     });
   } catch (error) {
@@ -89,7 +89,7 @@ export async function PUT(request: NextRequest) {
     // Update enhanced profile fields
     if (Object.keys(enhancedFields).length > 0) {
       const setParts: string[] = [];
-      const vals: any[] = [];
+      const vals: (string | number | null)[] = [];
       let idx = 1;
       for (const [k, v] of Object.entries(enhancedFields)) {
         setParts.push(`${k} = $${idx}`);
@@ -117,12 +117,12 @@ export async function PUT(request: NextRequest) {
         avatarUrl: updatedUser.avatar_url,
         createdAt: updatedUser.created_at,
         updatedAt: updatedUser.updated_at,
-        dob: (updatedUser as any).dob || null,
-        gender: (updatedUser as any).gender || null,
-        address: (updatedUser as any).address || null,
-        city: (updatedUser as any).city || null,
-        country: (updatedUser as any).country || null,
-        preferredLanguage: (updatedUser as any).preferred_language || 'vi',
+        dob: updatedUser.dob || null,
+        gender: updatedUser.gender || null,
+        address: updatedUser.address || null,
+        city: updatedUser.city || null,
+        country: updatedUser.country || null,
+        preferredLanguage: updatedUser.preferred_language || 'vi',
       },
       message: 'Profile updated successfully',
     });

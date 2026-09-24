@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminRequest } from '@/lib/admin-auth';
+import { getApiErrorMessage } from '@/shared/services';
 import {
   getAllAdminRoles,
   assignAdminRole,
@@ -78,9 +79,9 @@ export async function GET(request: NextRequest) {
       permissionLabels: PERMISSION_LABELS,
       assignedRoles: roles,
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error('[RBAC-GET]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: getApiErrorMessage(err, 'Lỗi hệ thống') }, { status: 500 });
   }
 }
 
@@ -230,8 +231,8 @@ export async function POST(request: NextRequest) {
       },
       { status: 400 }
     );
-  } catch (err: any) {
+  } catch (err) {
     console.error('[RBAC-POST]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: getApiErrorMessage(err, 'Lỗi hệ thống') }, { status: 500 });
   }
 }

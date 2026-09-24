@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { verifyAdminRequest } from '@/lib/admin-auth';
+import { getApiErrorMessage } from '@/shared/services';
 
 // NOTE: `path.resolve(process.cwd())` here and in `getSafePath()` makes the
 // filesystem access dynamic, so Turbopack reports "Dynamic filesystem access
@@ -109,8 +110,11 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({ ok: false, error: 'Invalid request' }, { status: 400 });
-  } catch (err: any) {
-    return NextResponse.json({ ok: false, error: err.message }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json(
+      { ok: false, error: getApiErrorMessage(err, 'Lỗi hệ thống') },
+      { status: 500 }
+    );
   }
 }
 
@@ -132,7 +136,10 @@ export async function POST(req: NextRequest) {
 
     fs.writeFileSync(safePath, content, 'utf8');
     return NextResponse.json({ ok: true, message: 'Saved successfully', path: filePath });
-  } catch (err: any) {
-    return NextResponse.json({ ok: false, error: err.message }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json(
+      { ok: false, error: getApiErrorMessage(err, 'Lỗi hệ thống') },
+      { status: 500 }
+    );
   }
 }

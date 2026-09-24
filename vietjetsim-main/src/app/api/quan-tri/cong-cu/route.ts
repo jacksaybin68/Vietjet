@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { isAdminRole } from '@/lib/roles';
+import { getApiErrorMessage } from '@/shared/services';
 import { sql } from '@/lib/neon';
 import {
   getAllFlights,
@@ -296,7 +297,7 @@ export async function POST(request: NextRequest) {
       ...result,
       executedAt: new Date().toISOString(),
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error('SSTK execute error:', err);
 
     // Try to log the error
@@ -307,7 +308,7 @@ export async function POST(request: NextRequest) {
         body.toolKey || 'Unknown',
         authResult,
         JSON.stringify(body.params || {}),
-        err?.message || 'Unknown error',
+        getApiErrorMessage(err, 'Unknown error'),
         'error'
       );
     } catch {
@@ -315,7 +316,10 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Internal Server Error', message: err?.message || 'Tool execution failed' },
+      {
+        error: 'Internal Server Error',
+        message: getApiErrorMessage(err, 'Tool execution failed'),
+      },
       { status: 500 }
     );
   }
