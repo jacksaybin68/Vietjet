@@ -56,6 +56,10 @@ psql "$DATABASE_URL" -f migrations/001_bank_accounts.sql
 # admin issued them to; apply it before using the "Đại lý" admin tab.
 # 016 normalizes stored phone numbers, so apply it after 014/015.
 # 017 adds the missing `bookings.discount_code_id` foreign key.
+#
+# CI runs a "Migrations" job that applies every file above to an empty
+# PostgreSQL instance and then re-applies them, so ordering mistakes and
+# non-idempotent statements fail the build instead of production.
 ```
 
 ### 4. Start Development Server
