@@ -65,7 +65,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
             </div>
             <a
               href="/dang-nhap"
-              className="bg-white dark:bg-[var(--dark-surface)] text-primary font-bold px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg hover:bg-[var(--surface-2)] dark:hover:bg-[var(--dark-surface-2)] transition-colors shadow-sm relative z-10 whitespace-nowrap mt-3 sm:mt-0 sm:ml-4"
+              className="bg-whitetext-primary font-bold px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg hover:bg-[var(--surface-2)]:bg-[var(--dark-surface-2)] transition-colors shadow-sm relative z-10 whitespace-nowrap mt-3 sm:mt-0 sm:ml-4"
             >
               Đăng nhập
             </a>
@@ -85,11 +85,11 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
             <div className="flex items-center gap-1.5 sm:gap-2">
               <span className="inline-block w-1 h-4 sm:w-1.5 sm:h-6 bg-primary rounded-full" />
-              <h2 className="font-black text-[var(--foreground)] dark:text-[var(--foreground)] text-lg sm:text-xl font-koho uppercase tracking-wide">
+              <h2 className="font-black text-[var(--foreground)]text-lg sm:text-xl font-koho uppercase tracking-wide">
                 Thông tin hành khách
               </h2>
             </div>
-            <span className="text-[10px] sm:text-xs font-bold text-white bg-[var(--vj-navy)] dark:bg-[var(--primary)] px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-md self-start sm:self-auto">
+            <span className="text-[10px] sm:text-xs font-bold text-white bg-[var(--vj-navy)]px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-md self-start sm:self-auto">
               {passengerCount} Hành khách
             </span>
           </div>
@@ -99,7 +99,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
           {passengers.map((p, i) => (
             <div
               key={i}
-              className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden shadow-vj-sm"
+              className="bg-[var(--surface)]rounded-xl sm:rounded-2xl border border-[var(--border)]overflow-hidden shadow-vj-sm"
             >
               {/* Card top accent bar */}
               <div className="h-1 w-full bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
@@ -127,7 +127,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
                           className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-2.5 rounded-xl border-2 cursor-pointer transition-all ${
                             p.gender === val
                               ? 'border-primary bg-primary/5 text-primary shadow-sm'
-                              : 'border-[var(--border)] dark:border-[var(--dark-border)] text-[var(--foreground-muted)] hover:border-primary/40 hover:text-primary'
+                              : 'border-[var(--border)]text-[var(--foreground-muted)] hover:border-primary/40 hover:text-primary'
                           }`}
                         >
                           <input
@@ -161,7 +161,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
                         value={p.name}
                         onChange={(e) => updatePassenger(i, 'name', e.target.value)}
                         placeholder=" "
-                        className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-[var(--foreground)] dark:text-[var(--foreground)] text-sm font-semibold form-input uppercase tracking-wide ${p.name.trim().length >= 2 ? 'form-input-valid' : ''}`}
+                        className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[var(--surface-2)]border border-[var(--border)]rounded-xl text-[var(--foreground)]text-sm font-semibold form-input uppercase tracking-wide ${p.name.trim().length >= 2 ? 'form-input-valid' : ''}`}
                         required
                       />
                       <label className="form-label-float font-koho">NGUYEN VAN A</label>
@@ -179,7 +179,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
                       type="date"
                       value={p.dob}
                       onChange={(e) => updatePassenger(i, 'dob', e.target.value)}
-                      className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-[var(--foreground)] text-sm form-input ${p.dob ? 'form-input-valid' : ''}`}
+                      className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[var(--surface-2)]border border-[var(--border)]rounded-xl text-[var(--foreground)] text-sm form-input ${p.dob ? 'form-input-valid' : ''}`}
                       required
                     />
                   </div>
@@ -197,7 +197,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
                         value={p.idNumber}
                         onChange={(e) => updatePassenger(i, 'idNumber', e.target.value)}
                         placeholder=" "
-                        className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-[var(--foreground)] text-sm form-input ${p.idNumber.replace(/\D/g, '').length >= 9 ? 'form-input-valid' : ''}`}
+                        className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[var(--surface-2)]border border-[var(--border)]rounded-xl text-[var(--foreground)] text-sm form-input ${p.idNumber.replace(/\D/g, '').length >= 9 ? 'form-input-valid' : ''}`}
                         required
                       />
                       <label className="form-label-float">012345678</label>
@@ -259,7 +259,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
 
       {/* Booking Summary - responsive */}
       <div className="lg:col-span-1">
-        <div className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden sticky top-[180px] sm:top-[200px] lg:top-[230px] shadow-vj-md">
+        <div className="bg-[var(--surface)]rounded-xl sm:rounded-2xl border border-[var(--border)]overflow-hidden sticky top-[180px] sm:top-[200px] lg:top-[230px] shadow-vj-md">
           {/* Yellow accent top bar for summary */}
           <div className="h-1 w-full bg-gradient-to-r from-accent/60 via-accent to-accent/60" />
           <div className="p-3 sm:p-5">
@@ -267,7 +267,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
               <Icon name="ClipboardDocumentListIcon" size={14} className="text-primary" />
               Tóm tắt đặt chỗ
             </h3>
-            <div className="bg-primary/5 dark:bg-primary/10 border border-primary/10 dark:border-primary/20 rounded-xl p-3 sm:p-4 mb-3 sm:mb-4">
+            <div className="bg-primary/5/10 border border-primary/10/20 rounded-xl p-3 sm:p-4 mb-3 sm:mb-4">
               <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
                 <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gradient-red rounded-lg flex items-center justify-center shadow-sm">
                   <Icon name="PaperAirplaneIcon" size={10} className="text-white" />
@@ -316,7 +316,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
                   {totals.taxAndFee.toLocaleString('vi-VN')}₫
                 </span>
               </div>
-              <div className="border-t border-[var(--border)] dark:border-[var(--dark-border)] pt-1.5 sm:pt-2 flex justify-between">
+              <div className="border-t border-[var(--border)]pt-1.5 sm:pt-2 flex justify-between">
                 <span className="font-black text-[var(--foreground)] font-koho">Tổng cộng</span>
                 <span className="font-black text-primary text-sm sm:text-base font-koho">
                   {totals.total.toLocaleString('vi-VN')}₫

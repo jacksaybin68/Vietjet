@@ -113,12 +113,10 @@ export default function BookingDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--surface)] dark:bg-[var(--dark-surface)]">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--surface)]">
         <div className="text-center">
           <div className="w-10 h-10 sm:w-12 sm:h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-3 sm:mb-4" />
-          <p className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] font-medium">
-            Đang tải thông tin đặt chỗ...
-          </p>
+          <p className="text-[var(--foreground-muted)]font-medium">Đang tải thông tin đặt chỗ...</p>
         </div>
       </div>
     );
@@ -126,15 +124,15 @@ export default function BookingDetailPage() {
 
   if (error || !booking) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--surface)] dark:bg-[var(--dark-surface)] px-3 sm:px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--surface)]px-3 sm:px-4">
         <div className="text-center max-w-md">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 border border-[var(--border)] dark:border-[var(--dark-border)]">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[var(--surface-2)]rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 border border-[var(--border)]">
             <Icon name="ExclamationCircleIcon" size={32} className="text-[var(--primary)]" />
           </div>
-          <h2 className="text-lg sm:text-xl font-bold text-[var(--foreground)] dark:text-[var(--foreground)] mb-1.5 sm:mb-2">
+          <h2 className="text-lg sm:text-xl font-bold text-[var(--foreground)]mb-1.5 sm:mb-2">
             Không tìm thấy đặt chỗ
           </h2>
-          <p className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mb-5 sm:mb-6">
+          <p className="text-[var(--foreground-muted)]mb-5 sm:mb-6">
             {error || 'Mã đặt chỗ không tồn tại hoặc đã bị xóa.'}
           </p>
           <Link
@@ -152,7 +150,7 @@ export default function BookingDetailPage() {
   const statusInfo = STATUS_MAP[booking.status] || STATUS_MAP.pending;
 
   return (
-    <div className="min-h-screen bg-[var(--surface)] dark:bg-[var(--dark-surface)]">
+    <div className="min-h-screen bg-[var(--surface)]">
       <Header />
       <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
 
@@ -162,14 +160,14 @@ export default function BookingDetailPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
             <Link
               href="/tai-khoan"
-              className="flex items-center gap-1.5 sm:gap-2 text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] hover:text-primary transition-colors font-medium"
+              className="flex items-center gap-1.5 sm:gap-2 text-[var(--foreground-muted)]hover:text-primary transition-colors font-medium"
             >
               <Icon name="ArrowLeftIcon" size={18} />
               Quay lại
             </Link>
             <button
               onClick={handleCopyCode}
-              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-lg text-[10px] sm:text-sm font-semibold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] hover:border-primary hover:text-primary transition-all"
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-[var(--surface)]border border-[var(--border)]rounded-lg text-[10px] sm:text-sm font-semibold text-[var(--foreground-muted)]hover:border-primary hover:text-primary transition-all"
             >
               <Icon name="ClipboardDocumentIcon" size={16} />
               Sao chép mã
@@ -177,7 +175,7 @@ export default function BookingDetailPage() {
           </div>
 
           {/* Main Card - responsive */}
-          <div className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden shadow-sm">
+          <div className="bg-[var(--surface)]rounded-xl sm:rounded-2xl border border-[var(--border)]overflow-hidden shadow-sm">
             {/* Status Banner - responsive */}
             <div
               className="px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0"
@@ -210,14 +208,14 @@ export default function BookingDetailPage() {
                   {statusInfo.label}
                 </span>
               </div>
-              <span className="text-[10px] sm:text-sm text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]">
+              <span className="text-[10px] sm:text-sm text-[var(--foreground-subtle)]">
                 Đặt lúc: {formatDate(booking.created_at)}
               </span>
             </div>
 
             {/* Booking Code - responsive */}
-            <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-[var(--border)] dark:border-[var(--dark-border)]">
-              <div className="text-[10px] sm:text-xs font-bold text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] uppercase tracking-widest mb-0.5 sm:mb-1">
+            <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-[var(--border)]">
+              <div className="text-[10px] sm:text-xs font-bold text-[var(--foreground-subtle)]uppercase tracking-widest mb-0.5 sm:mb-1">
                 Mã đặt chỗ
               </div>
               <div className="text-2xl sm:text-3xl font-black text-primary tracking-widest">
@@ -228,10 +226,10 @@ export default function BookingDetailPage() {
             {/* Flight Info - responsive */}
             <div className="px-4 sm:px-6 py-4 sm:py-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4 sm:mb-6">
-                <div className="text-[10px] sm:text-sm font-bold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]">
+                <div className="text-[10px] sm:text-sm font-bold text-[var(--foreground-muted)]">
                   {booking.flight_no}
                 </div>
-                <div className="text-[10px] sm:text-sm text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]">
+                <div className="text-[10px] sm:text-sm text-[var(--foreground-subtle)]">
                   {formatDate(booking.depart_time)}
                 </div>
               </div>
@@ -239,21 +237,21 @@ export default function BookingDetailPage() {
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
                 {/* Departure */}
                 <div className="text-center">
-                  <div className="text-2xl sm:text-3xl font-black text-[var(--foreground)] dark:text-[var(--foreground)]">
+                  <div className="text-2xl sm:text-3xl font-black text-[var(--foreground)]">
                     {formatTime(booking.depart_time)}
                   </div>
-                  <div className="text-base sm:text-lg font-bold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-0.5 sm:mt-1">
+                  <div className="text-base sm:text-lg font-bold text-[var(--foreground-muted)]mt-0.5 sm:mt-1">
                     {booking.from_code}
                   </div>
                 </div>
 
                 {/* Duration Line - responsive */}
                 <div className="flex-1 mx-4 sm:mx-6 flex flex-col items-center">
-                  <div className="text-[10px] sm:text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] mb-0.5 sm:mb-1">
+                  <div className="text-[10px] sm:text-xs text-[var(--foreground-subtle)]mb-0.5 sm:mb-1">
                     {getDuration(booking.depart_time, booking.arrive_time)}
                   </div>
-                  <div className="w-full h-px bg-[var(--border)] dark:bg-[var(--dark-border)] relative">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[var(--surface)] dark:bg-[var(--dark-surface)] px-1.5 sm:px-2">
+                  <div className="w-full h-px bg-[var(--border)]relative">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[var(--surface)]px-1.5 sm:px-2">
                       <Icon name="PaperAirplaneIcon" size={16} className="text-primary rotate-90" />
                     </div>
                   </div>
@@ -264,10 +262,10 @@ export default function BookingDetailPage() {
 
                 {/* Arrival */}
                 <div className="text-center">
-                  <div className="text-2xl sm:text-3xl font-black text-[var(--foreground)] dark:text-[var(--foreground)]">
+                  <div className="text-2xl sm:text-3xl font-black text-[var(--foreground)]">
                     {formatTime(booking.arrive_time)}
                   </div>
-                  <div className="text-base sm:text-lg font-bold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-0.5 sm:mt-1">
+                  <div className="text-base sm:text-lg font-bold text-[var(--foreground-muted)]mt-0.5 sm:mt-1">
                     {booking.to_code}
                   </div>
                 </div>
@@ -275,40 +273,40 @@ export default function BookingDetailPage() {
             </div>
 
             {/* Divider - responsive */}
-            <div className="relative border-t-2 border-dashed border-[var(--border)] dark:border-[var(--dark-border)] mx-4 sm:mx-6">
-              <div className="absolute -left-2.5 -top-2.5 w-5 h-5 sm:w-6 sm:h-6 bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-full border border-[var(--border)] dark:border-[var(--dark-border)]" />
-              <div className="absolute -right-2.5 -top-2.5 w-5 h-5 sm:w-6 sm:h-6 bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-full border border-[var(--border)] dark:border-[var(--dark-border)]" />
+            <div className="relative border-t-2 border-dashed border-[var(--border)]mx-4 sm:mx-6">
+              <div className="absolute -left-2.5 -top-2.5 w-5 h-5 sm:w-6 sm:h-6 bg-[var(--surface)]rounded-full border border-[var(--border)]" />
+              <div className="absolute -right-2.5 -top-2.5 w-5 h-5 sm:w-6 sm:h-6 bg-[var(--surface)]rounded-full border border-[var(--border)]" />
             </div>
 
             {/* Passengers - responsive */}
             <div className="px-4 sm:px-6 py-4 sm:py-5">
-              <h3 className="text-[10px] sm:text-sm font-bold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] uppercase tracking-wider mb-2.5 sm:mb-3">
+              <h3 className="text-[10px] sm:text-sm font-bold text-[var(--foreground-muted)]uppercase tracking-wider mb-2.5 sm:mb-3">
                 Hành khách
               </h3>
               <div className="space-y-2.5 sm:space-y-3">
                 {booking.passengers.map((p, i) => (
                   <div
                     key={p.id}
-                    className="flex items-center justify-between py-1.5 sm:py-2 border-b border-[var(--border)] dark:border-[var(--dark-border)] last:border-0"
+                    className="flex items-center justify-between py-1.5 sm:py-2 border-b border-[var(--border)]last:border-0"
                   >
                     <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary/5 dark:bg-primary/10 rounded-full flex items-center justify-center">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary/5/10 rounded-full flex items-center justify-center">
                         <Icon name="UserIcon" size={14} className="text-primary" />
                       </div>
                       <div>
-                        <div className="font-semibold text-[var(--foreground)] dark:text-[var(--foreground)] text-[11px] sm:text-sm">
+                        <div className="font-semibold text-[var(--foreground)]text-[11px] sm:text-sm">
                           {p.full_name}
                         </div>
-                        <div className="text-[9px] sm:text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] capitalize">
+                        <div className="text-[9px] sm:text-xs text-[var(--foreground-subtle)]capitalize">
                           {p.passenger_type}
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-[var(--foreground)] dark:text-[var(--foreground)] text-[10px] sm:text-sm">
+                      <div className="font-bold text-[var(--foreground)]text-[10px] sm:text-sm">
                         Ghế {p.seat_number || 'Chưa chọn'}
                       </div>
-                      <div className="text-[9px] sm:text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] capitalize">
+                      <div className="text-[9px] sm:text-xs text-[var(--foreground-subtle)]capitalize">
                         {booking.class}
                       </div>
                     </div>
@@ -318,27 +316,25 @@ export default function BookingDetailPage() {
             </div>
 
             {/* Payment Info - responsive */}
-            <div className="px-4 sm:px-6 py-4 sm:py-5 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] border-t border-[var(--border)] dark:border-[var(--dark-border)]">
+            <div className="px-4 sm:px-6 py-4 sm:py-5 bg-[var(--surface-2)]border-t border-[var(--border)]">
               <div className="flex justify-between items-center mb-1.5 sm:mb-2">
-                <span className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] text-[10px] sm:text-sm">
-                  Giá vé
-                </span>
-                <span className="font-semibold text-[var(--foreground)] dark:text-[var(--foreground)]">
+                <span className="text-[var(--foreground-muted)]text-[10px] sm:text-sm">Giá vé</span>
+                <span className="font-semibold text-[var(--foreground)]">
                   {booking.price.toLocaleString('vi-VN')}₫
                 </span>
               </div>
               {booking.payments.length > 0 && (
                 <div className="flex justify-between items-center mb-1.5 sm:mb-2">
-                  <span className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] text-[10px] sm:text-sm">
+                  <span className="text-[var(--foreground-muted)]text-[10px] sm:text-sm">
                     Phương thức
                   </span>
-                  <span className="font-semibold text-[var(--foreground)] dark:text-[var(--foreground)] capitalize">
+                  <span className="font-semibold text-[var(--foreground)]capitalize">
                     {booking.payments[0].method}
                   </span>
                 </div>
               )}
-              <div className="flex justify-between items-center pt-2.5 sm:pt-3 border-t border-[var(--border)] dark:border-[var(--dark-border)]">
-                <span className="font-bold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] text-[11px] sm:text-sm">
+              <div className="flex justify-between items-center pt-2.5 sm:pt-3 border-t border-[var(--border)]">
+                <span className="font-bold text-[var(--foreground-muted)]text-[11px] sm:text-sm">
                   Tổng thanh toán
                 </span>
                 <span className="text-lg sm:text-xl font-black text-primary">
@@ -348,8 +344,8 @@ export default function BookingDetailPage() {
             </div>
 
             {/* QR Code Mock - responsive */}
-            <div className="px-4 sm:px-6 py-4 sm:py-6 flex flex-col items-center border-t border-[var(--border)] dark:border-[var(--dark-border)]">
-              <div className="w-24 h-24 sm:w-32 sm:h-32 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl flex items-center justify-center border-2 border-dashed border-[var(--border)] dark:border-[var(--dark-border)] mb-2.5 sm:mb-3">
+            <div className="px-4 sm:px-6 py-4 sm:py-6 flex flex-col items-center border-t border-[var(--border)]">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 bg-[var(--surface-2)]rounded-xl flex items-center justify-center border-2 border-dashed border-[var(--border)]mb-2.5 sm:mb-3">
                 <div className="text-center">
                   <Icon
                     name="QrCodeIcon"
@@ -361,7 +357,7 @@ export default function BookingDetailPage() {
                   </div>
                 </div>
               </div>
-              <p className="text-[10px] sm:text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] text-center">
+              <p className="text-[10px] sm:text-xs text-[var(--foreground-subtle)]text-center">
                 Xuất trình mã QR này tại quầy check-in hoặc cửa lên máy bay
               </p>
             </div>
@@ -373,7 +369,7 @@ export default function BookingDetailPage() {
               onClick={() =>
                 toast.info('Tính năng đang phát triển', 'Chức năng download vé sẽ sớm khả dụng')
               }
-              className="flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl font-semibold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] hover:border-primary hover:text-primary transition-all"
+              className="flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 bg-[var(--surface)]border border-[var(--border)]rounded-xl font-semibold text-[var(--foreground-muted)]hover:border-primary hover:text-primary transition-all"
             >
               <Icon name="ArrowDownTrayIcon" size={18} />
               Tải vé

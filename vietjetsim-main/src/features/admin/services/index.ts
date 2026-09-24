@@ -2,6 +2,7 @@ import { apiRequest, withPathParams } from '@/shared/services';
 import { API_ENDPOINTS } from '@/shared/constants';
 import type {
   AdminAirportInput,
+  AdminAnalytics,
   AdminAuditLog,
   AdminRbacAuditRow,
   AdminRoleRow,
@@ -37,6 +38,18 @@ function buildQuery(query: AdminListQuery, searchParam = 'search'): string {
   if (query.type) params.set('type', query.type);
   const suffix = params.toString();
   return suffix ? `?${suffix}` : '';
+}
+
+// ─── Analytics ──────────────────────────────────────────────────────────────
+
+export async function getAdminAnalytics(): Promise<AdminAnalytics> {
+  const analytics = await apiRequest<AdminAnalytics>(EP.REVENUE);
+  return {
+    ...analytics,
+    monthly: analytics.monthly ?? [],
+    routes: analytics.routes ?? [],
+    classSplit: analytics.classSplit ?? [],
+  };
 }
 
 // ─── Airports ───────────────────────────────────────────────────────────────

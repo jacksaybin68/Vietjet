@@ -1,3 +1,51 @@
+export interface AdminRevenueStats {
+  totalRevenue: number;
+  totalBookings: number;
+  avgBookingValue: number;
+  completedBookings: number;
+  pendingBookings: number;
+}
+
+export interface AdminRecentActivity {
+  type: 'booking' | 'refund';
+  id: string;
+  booking_code?: string;
+  user_name?: string;
+  route?: string;
+  created_at: string;
+  status: string;
+  total_price?: number;
+  reason?: string;
+}
+
+export interface MonthlyRevenue {
+  month: string;
+  revenue: number;
+  tickets: number;
+}
+
+export interface RouteRevenue {
+  route: string;
+  revenue: number;
+  tickets: number;
+}
+
+export interface SeatClassCount {
+  class: string;
+  count: number;
+}
+
+/** Response contract consumed by admin overview and revenue charts. */
+export interface AdminAnalytics {
+  revenue: AdminRevenueStats;
+  statusDistribution: Array<{ status: string; count: number }>;
+  recentActivity: AdminRecentActivity[];
+  /** Aggregates absent from older API responses are normalised to empty arrays. */
+  monthly: MonthlyRevenue[];
+  routes: RouteRevenue[];
+  classSplit: SeatClassCount[];
+}
+
 export interface Pagination {
   page: number;
   limit: number;

@@ -52,7 +52,7 @@ function PaymentDetailModal({ payment, onClose }: { payment: Payment; onClose: (
           </h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] transition-colors"
+            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--surface-2)]transition-colors"
           >
             <Icon name="XMarkIcon" size={20} className="text-[var(--foreground-muted)]" />
           </button>
@@ -175,10 +175,7 @@ export default function PaymentHistoryTab() {
     return (
       <div className="space-y-3 p-4">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div
-            key={i}
-            className="h-20 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl animate-pulse"
-          />
+          <div key={i} className="h-20 bg-[var(--surface-2)]rounded-xl animate-pulse" />
         ))}
       </div>
     );
@@ -237,12 +234,8 @@ export default function PaymentHistoryTab() {
       {/* Payment List */}
       {payments.length === 0 ? (
         <div className="bg-white rounded-2xl border border-[var(--border)] p-8 text-center shadow-vj-card">
-          <div className="w-16 h-16 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-full flex items-center justify-center mx-auto mb-3">
-            <Icon
-              name="ReceiptPercentIcon"
-              size={28}
-              className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]"
-            />
+          <div className="w-16 h-16 bg-[var(--surface-2)]rounded-full flex items-center justify-center mx-auto mb-3">
+            <Icon name="ReceiptPercentIcon" size={28} className="text-[var(--foreground-subtle)]" />
           </div>
           <p className="text-[var(--foreground-muted)] text-sm font-[Be Vietnam Pro,sans-serif]">
             Chưa có giao dịch thanh toán nào.
@@ -291,7 +284,7 @@ export default function PaymentHistoryTab() {
                     <Icon
                       name="ChevronRightIcon"
                       size={14}
-                      className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] ml-auto mt-1"
+                      className="text-[var(--foreground-subtle)]ml-auto mt-1"
                     />
                   </div>
                 </button>

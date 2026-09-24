@@ -140,7 +140,7 @@ export default function NotificationSettingsTab() {
             >
               <div className="flex items-center gap-4">
                 <div
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${alert.enabled ? 'bg-red-50' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)]'}`}
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${alert.enabled ? 'bg-red-50' : 'bg-[var(--surface-2)]'}`}
                 >
                   <Icon
                     name={alert.icon as any}
@@ -150,7 +150,7 @@ export default function NotificationSettingsTab() {
                 </div>
                 <div>
                   <p
-                    className={`text-sm font-semibold ${alert.enabled ? 'text-[#1A2948]' : 'text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]'}`}
+                    className={`text-sm font-semibold ${alert.enabled ? 'text-[#1A2948]' : 'text-[var(--foreground-subtle)]'}`}
                   >
                     {alert.label}
                   </p>
@@ -193,7 +193,7 @@ export default function NotificationSettingsTab() {
             >
               <div className="flex items-center gap-4">
                 <div
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${method.enabled ? 'bg-amber-50' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)]'}`}
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${method.enabled ? 'bg-amber-50' : 'bg-[var(--surface-2)]'}`}
                 >
                   <Icon
                     name={method.icon as any}
@@ -203,7 +203,7 @@ export default function NotificationSettingsTab() {
                 </div>
                 <div>
                   <p
-                    className={`text-sm font-semibold ${method.enabled ? 'text-[#1A2948]' : 'text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]'}`}
+                    className={`text-sm font-semibold ${method.enabled ? 'text-[#1A2948]' : 'text-[var(--foreground-subtle)]'}`}
                   >
                     {method.label}
                   </p>

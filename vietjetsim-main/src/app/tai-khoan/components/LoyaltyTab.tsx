@@ -117,34 +117,30 @@ function RedeemModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
-        <div className="p-6 border-b border-[var(--border)] dark:border-[var(--dark-border)] flex items-center justify-between">
-          <h3 className="text-lg font-bold font-[KoHo,sans-serif] text-[var(--foreground)] dark:text-[var(--foreground)]">
+        <div className="p-6 border-b border-[var(--border)]flex items-center justify-between">
+          <h3 className="text-lg font-bold font-[KoHo,sans-serif] text-[var(--foreground)]">
             Đổi điểm thưởng
           </h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--surface-2)] dark:hover:bg-[var(--dark-surface-2)] transition-colors"
+            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--surface-2)]:bg-[var(--dark-surface-2)] transition-colors"
           >
-            <Icon
-              name="XMarkIcon"
-              size={20}
-              className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]"
-            />
+            <Icon name="XMarkIcon" size={20} className="text-[var(--foreground-muted)]" />
           </button>
         </div>
 
         <form onSubmit={handleRedeem} className="p-6 space-y-5">
-          <div className="bg-[rgb(var(--accent-rgb))]/10 dark:bg-[rgb(var(--accent-rgb))]/20 rounded-xl p-4 text-center">
-            <div className="text-sm text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
+          <div className="bg-[rgb(var(--accent-rgb))]/10/20 rounded-xl p-4 text-center">
+            <div className="text-sm text-[var(--foreground-muted)]font-[Be Vietnam Pro,sans-serif]">
               Điểm khả dụng
             </div>
-            <div className="text-3xl font-bold font-[KoHo,sans-serif] text-[var(--foreground)] dark:text-[var(--foreground)] mt-1">
+            <div className="text-3xl font-bold font-[KoHo,sans-serif] text-[var(--foreground)]mt-1">
               {formatPoints(availablePoints)}
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-1.5 text-[var(--foreground)] dark:text-[var(--foreground)] font-[KoHo,sans-serif]">
+            <label className="block text-sm font-semibold mb-1.5 text-[var(--foreground)]font-[KoHo,sans-serif]">
               Số điểm muốn đổi
             </label>
             <input
@@ -163,7 +159,7 @@ function RedeemModal({
                   type="button"
                   onClick={() => setPoints(p.toString())}
                   disabled={p > availablePoints}
-                  className="flex-1 py-1.5 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] hover:bg-[var(--surface)] dark:hover:bg-[var(--dark-surface)] rounded-lg text-xs font-semibold text-[var(--foreground)] dark:text-[var(--foreground)] transition-colors disabled:opacity-40 font-[Be Vietnam Pro,sans-serif]"
+                  className="flex-1 py-1.5 bg-[var(--surface-2)]hover:bg-[var(--surface)]:bg-[var(--dark-surface)] rounded-lg text-xs font-semibold text-[var(--foreground)]transition-colors disabled:opacity-40 font-[Be Vietnam Pro,sans-serif]"
                 >
                   {formatPoints(p)}
                 </button>
@@ -191,7 +187,7 @@ function RedeemModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-3 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-[var(--surface)] dark:hover:bg-[var(--dark-surface)] transition-all"
+              className="px-6 py-3 bg-[var(--surface-2)]text-[var(--foreground-muted)]rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-[var(--surface)]:bg-[var(--dark-surface)] transition-all"
             >
               Hủy
             </button>
@@ -256,9 +252,9 @@ export default function LoyaltyTab() {
   if (loading) {
     return (
       <div className="space-y-4 p-4">
-        <div className="h-56 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse" />
-        <div className="h-40 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse" />
-        <div className="h-24 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse" />
+        <div className="h-56 bg-[var(--surface-2)]rounded-2xl animate-pulse" />
+        <div className="h-40 bg-[var(--surface-2)]rounded-2xl animate-pulse" />
+        <div className="h-24 bg-[var(--surface-2)]rounded-2xl animate-pulse" />
       </div>
     );
   }
@@ -268,10 +264,10 @@ export default function LoyaltyTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[var(--foreground)] dark:text-[var(--foreground)]">
+          <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[var(--foreground)]">
             Điểm thưởng
           </h2>
-          <p className="text-sm text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
+          <p className="text-sm text-[var(--foreground-muted)]mt-1 font-[Be Vietnam Pro,sans-serif]">
             Chương trình tích điểm Vietjet Air Rewards
           </p>
         </div>
@@ -418,17 +414,13 @@ export default function LoyaltyTab() {
           </h3>
         </div>
 
-        <div className="divide-y divide-[var(--border)] dark:divide-[var(--dark-border)]">
+        <div className="divide-y divide-[var(--border)]">
           {transactions.length === 0 ? (
             <div className="p-8 text-center">
-              <div className="w-16 h-16 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-full flex items-center justify-center mx-auto mb-3">
-                <Icon
-                  name="StarIcon"
-                  size={28}
-                  className="text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)]"
-                />
+              <div className="w-16 h-16 bg-[var(--surface-2)]rounded-full flex items-center justify-center mx-auto mb-3">
+                <Icon name="StarIcon" size={28} className="text-[var(--foreground-subtle)]" />
               </div>
-              <p className="text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] text-sm font-[Be Vietnam Pro,sans-serif]">
+              <p className="text-[var(--foreground-muted)]text-sm font-[Be Vietnam Pro,sans-serif]">
                 Chưa có lịch sử tích điểm.
               </p>
             </div>

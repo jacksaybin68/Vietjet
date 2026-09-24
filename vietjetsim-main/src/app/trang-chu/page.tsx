@@ -14,7 +14,6 @@ import FlyEverywhereSection from './components/FlyEverywhereSection';
 import AttractiveDestinationsSection from './components/AttractiveDestinationsSection';
 import TravelGuidesSection from './components/TravelGuidesSection';
 import FAQSection from './components/FAQSection';
-import { Mascot } from '@/shared/components/ui';
 
 export default function Homepage() {
   return (
@@ -34,7 +33,6 @@ export default function Homepage() {
       <AwardsSection />
       <StatsSection />
       <Footer />
-      <Mascot />
     </main>
   );
 }

@@ -111,7 +111,7 @@ vietjetsim-main/
 │   └── styles/
 │       └── tailwind.css        # Global styles & animations
 ├── migrations/                 # SQL migrations (Neon Postgres)
-├── middleware.ts               # Edge middleware (JWT via WebCrypto, rate limit)
+├── src/proxy.ts                # Request proxy (JWT, rate limit; must sit at the same level as src/app)
 ├── next.config.mjs             # Next.js configuration (strict TS/ESLint builds)
 ├── vitest.config.mts           # Vitest config (jsdom, `@/` alias)
 ├── tailwind.config.js          # Vietjet brand theme
@@ -226,7 +226,7 @@ The project includes `@netlify/plugin-nextjs` for seamless deployment.
 ## ⚠️ Important Notes
 
 - **TypeScript & ESLint errors FAIL the build** (`ignoreBuildErrors: false` — enforced CI gate)
-- **Server-side middleware** verifies JWT at the edge (HS256-only, expiry enforced)
+- **Server-side proxy** verifies JWT before routing (HS256-only, expiry enforced)
 - **Data isolation** is enforced in query layer (user_id scoping) + RBAC route guards
 - **JWT secrets** must be 64-char random hex (`openssl rand -hex 32`); rotate via refresh token family
 

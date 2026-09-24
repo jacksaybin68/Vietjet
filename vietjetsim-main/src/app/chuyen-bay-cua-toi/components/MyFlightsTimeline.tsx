@@ -54,7 +54,7 @@ export default function MyFlightsTimeline({ bookings }: TimelineProps) {
   return (
     <div className="relative">
       {/* Timeline line */}
-      <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-[var(--border)] dark:bg-[var(--dark-border)]" />
+      <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-[var(--border)]" />
 
       <div className="space-y-6">
         {bookings.map((booking, index) => {

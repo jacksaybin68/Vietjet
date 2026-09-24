@@ -91,6 +91,14 @@ Object.defineProperty(window, 'ResizeObserver', {
   writable: true,
 });
 
+// ─── Mock Element.scrollIntoView ────────────────────────────────────────────
+// jsdom does not implement it, and message panes (chat, timeline) call it on mount.
+
+Object.defineProperty(Element.prototype, 'scrollIntoView', {
+  value: vi.fn(),
+  writable: true,
+});
+
 // ─── Mock matchMedia ─────────────────────────────────────────────────────────
 
 Object.defineProperty(window, 'matchMedia', {

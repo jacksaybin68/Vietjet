@@ -28,17 +28,19 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ThemeToggle } from '@/shared/components/ui';
 
 const ANNOUNCEMENTS = [
-  'Từ ngày 17/8/2026 (GMT+7), các chuyến bay đi và đến Jakarta của Vietjet sẽ được chuyển về nhà ga T3 Ultimate (CGK).',
-  '[THÔNG BÁO] Quy định an toàn mới về việc mang theo Pin sạc dự phòng khi bay cùng Vietjet.',
-  'Cập nhật thông tin vận hành quan trọng (chuyển đổi nhà ga tại sân bay Hong Kong).',
+  'Lưu ý thời gian thay đổi nhà ga và lịch bay trước khi khởi hành.',
+  'Hành lý, ghế ngồi và dịch vụ bổ sung có thể được chọn khi đặt vé.',
+  'Bạn có thể tra cứu chuyến bay bằng mã đặt chỗ và họ tên hành khách.',
 ];
 
-const FLIGHT_LINKS: Array<[string, string]> = [
-  ['Chuyến bay của tôi', '/chuyen-bay-cua-toi'],
-  ['Check-in Online', '/lam-thu-tuc'],
-  ['Dịch vụ chuyến bay', '/dich-vu'],
-  ['Săn vé giá rẻ', '/tim-ve?uu-dai=1'],
-];
+// Nav theo đúng bốn mục của vietjetair.com (site thật render uppercase qua CSS);
+// "Trang chủ" đi qua logo, CTA "Đặt vé" nằm ở nút vàng bên phải header.
+const NAV_LINKS = [
+  { label: 'Chuyến bay của tôi', href: '/chuyen-bay-cua-toi' },
+  { label: 'Online Check-in', href: '/lam-thu-tuc' },
+  { label: 'Dịch vụ chuyến bay', href: '/dich-vu' },
+  { label: 'Dịch vụ khác', href: '/dich-vu#khac' },
+] as const;
 
 interface ServiceLink {
   label: string;
@@ -48,15 +50,18 @@ interface ServiceLink {
 
 const SERVICE_LINKS: ServiceLink[] = [
   { label: 'Đặt vé', href: '/tim-ve', Icon: RiFlightTakeoffLine },
-  { label: 'Skyshop', href: '/dich-vu?service=lounge', Icon: RiShoppingBag3Line },
+  { label: 'Mua sắm', href: '/dich-vu?service=lounge', Icon: RiShoppingBag3Line },
   { label: 'Khách sạn', href: '/dich-vu?service=lounge', Icon: RiHotelLine },
   { label: 'E-Voucher', href: '/dich-vu?service=lounge', Icon: RiGiftLine },
   { label: 'E-Sim', href: '/dich-vu?service=meal', Icon: RiPhoneLine },
   { label: 'E-Visa', href: '/dich-vu?service=insurance', Icon: RiPassportLine },
-  { label: 'Mua ngoại tệ', href: '/dich-vu?service=insurance', Icon: RiMoneyDollarCircleLine },
+  { label: 'Ngoại tệ', href: '/dich-vu?service=insurance', Icon: RiMoneyDollarCircleLine },
   { label: 'Bảo hiểm', href: '/dich-vu?service=insurance', Icon: RiShieldCheckLine },
   { label: 'SkyJoy', href: '/tai-khoan', Icon: RiVipCrownLine },
 ];
+
+const isActivePath = (pathname: string, href: string) =>
+  href === '/trang-chu' ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 
 export default function Header() {
   const { user, signOut } = useAuth();
@@ -69,8 +74,10 @@ export default function Header() {
 
   const accountLinks = user
     ? [
-        ['Tài khoản', '/tai-khoan'],
+        ['Tài khoản của tôi', '/tai-khoan'],
         ['Chuyến bay của tôi', '/chuyen-bay-cua-toi'],
+        ['Ví và thanh toán', '/tai-khoan?tab=wallet'],
+        ['Cài đặt bảo mật', '/tai-khoan?tab=security'],
       ]
     : [
         ['Đăng nhập', '/dang-nhap'],
@@ -78,8 +85,9 @@ export default function Header() {
         ['Tra cứu đặt chỗ', '/tra-cuu'],
       ];
 
-  const shiftAnnouncement = (delta: number) =>
+  const shiftAnnouncement = (delta: number) => {
     setAnnouncementIndex((index) => (index + delta + ANNOUNCEMENTS.length) % ANNOUNCEMENTS.length);
+  };
 
   useEffect(() => {
     const closeMenu = (event: MouseEvent) => {
@@ -91,7 +99,6 @@ export default function Header() {
         setMobileMenuOpen(false);
       }
     };
-
     document.addEventListener('mousedown', closeMenu);
     document.addEventListener('keydown', closeOnEscape);
     return () => {
@@ -100,104 +107,116 @@ export default function Header() {
     };
   }, []);
 
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
+  useEffect(() => setMobileMenuOpen(false), [pathname]);
 
   return (
-    <header className="relative z-30 bg-white shadow-[0_2px_12px_rgba(51,51,51,.08)] dark:bg-navy-dark dark:shadow-[0_2px_12px_rgba(0,0,0,.4)]">
+    <header className="sticky top-0 z-40 border-b border-black/10 bg-[var(--vj-red)] shadow-[0_2px_16px_rgba(0,0,0,0.12)]">
       {announcementVisible && (
-        <div className="bg-vj-red text-white dark:bg-vj-red-deep" aria-live="polite">
-          <div className="mx-auto flex min-h-10 max-w-[1240px] items-center gap-2 px-3 py-2 sm:px-4">
+        <div className="vj-menubar text-white" aria-live="polite">
+          <div className="mx-auto flex min-h-9 max-w-[1240px] items-center gap-1 px-3 sm:px-4">
             <button
               type="button"
               aria-label="Thông báo trước"
               onClick={() => shiftAnnouncement(-1)}
-              className="shrink-0 rounded-full p-1 transition-colors hover:bg-white/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="grid h-7 w-7 shrink-0 place-items-center rounded-full hover:bg-white/15"
             >
-              <HiChevronLeft aria-hidden="true" className="text-base" />
+              <HiChevronLeft aria-hidden="true" />
             </button>
-            <p className="min-w-0 flex-1 text-center text-[11px] font-semibold leading-relaxed sm:text-xs lg:text-sm">
+            <p className="min-w-0 flex-1 truncate text-center text-[10px] font-semibold sm:text-xs">
               {ANNOUNCEMENTS[announcementIndex]}
             </p>
             <button
               type="button"
               aria-label="Thông báo tiếp theo"
               onClick={() => shiftAnnouncement(1)}
-              className="shrink-0 rounded-full p-1 transition-colors hover:bg-white/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="grid h-7 w-7 shrink-0 place-items-center rounded-full hover:bg-white/15"
             >
-              <HiChevronRight aria-hidden="true" className="text-base" />
+              <HiChevronRight aria-hidden="true" />
             </button>
             <button
               type="button"
-              aria-label="Đóng thông báo vận hành"
+              aria-label="Đóng thông báo"
               onClick={() => setAnnouncementVisible(false)}
-              className="shrink-0 rounded-full p-1 transition-colors hover:bg-white/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="grid h-7 w-7 shrink-0 place-items-center rounded-full hover:bg-white/15"
             >
-              <HiOutlineX aria-hidden="true" className="text-lg" />
+              <HiOutlineX aria-hidden="true" />
             </button>
           </div>
         </div>
       )}
 
-      <div className="mx-auto flex min-h-[56px] max-w-[1240px] items-center gap-2 px-3 py-2 sm:px-4 md:min-h-[68px] md:gap-3 md:py-3 lg:min-h-[76px] lg:gap-6">
-        <Link href="/trang-chu" aria-label="Trang chủ Vietjet Air" className="shrink-0">
-          <img src="/logo-vj.svg" alt="Vietjet Air" className="h-6 w-auto sm:h-9 md:h-8 lg:h-10" />
+      <div className="mx-auto flex h-[68px] max-w-[1240px] items-center gap-5 px-3 sm:px-4 lg:h-[76px]">
+        <Link href="/trang-chu" aria-label="VietjetSim - Trang chủ" className="shrink-0">
+          <img
+            src="/logo-vj.svg"
+            alt="VietjetSim"
+            className="h-8 w-auto brightness-0 invert sm:h-9 lg:h-10"
+          />
         </Link>
 
         <nav
-          aria-label="Liên kết nhanh"
-          className="ml-auto hidden items-center gap-4 text-xs font-bold text-vj-text dark:text-white/80 lg:flex"
+          aria-label="Điều hướng chính"
+          className="hidden flex-1 items-center justify-center gap-1 lg:flex"
         >
-          <Link
-            href="/lien-he"
-            className="rounded-sm px-2 py-2 transition-colors hover:text-vj-red focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vj-red dark:hover:text-vj-yellow"
-          >
-            Hỗ trợ
-          </Link>
-          <Link
-            href="/chuyen-bay-cua-toi"
-            className="rounded-sm px-2 py-2 transition-colors hover:text-vj-red focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vj-red dark:hover:text-vj-yellow"
-          >
-            Chuyến bay của tôi
-          </Link>
-          <Link
-            href="/lam-thu-tuc"
-            className="rounded-sm px-2 py-2 transition-colors hover:text-vj-red focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vj-red dark:hover:text-vj-yellow"
-          >
-            Online Check-in
-          </Link>
+          {NAV_LINKS.map((link) => {
+            const active = isActivePath(pathname, link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={active ? 'page' : undefined}
+                className={`relative whitespace-nowrap px-3 py-3 text-[13px] font-bold uppercase tracking-wide transition-colors xl:text-sm ${
+                  active ? 'text-white' : 'text-white/85 hover:text-white'
+                }`}
+              >
+                {link.label}
+                <span
+                  className={`absolute inset-x-3 bottom-0 h-0.5 bg-white transition-transform ${
+                    active ? 'scale-x-100' : 'scale-x-0'
+                  }`}
+                />
+              </Link>
+            );
+          })}
         </nav>
 
-        <div className="ml-auto flex items-center gap-1 md:gap-2 lg:ml-0">
+        <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <Link
+            href="/tra-cuu"
+            className="hidden min-h-10 items-center gap-1.5 rounded-lg px-2 text-xs font-bold text-white/85 hover:bg-white/10 hover:text-white md:flex"
+          >
+            <HiOutlineGlobeAlt aria-hidden="true" className="text-base" />
+            Tra cứu
+          </Link>
+          <ThemeToggle />
           <div ref={accountMenuRef} className="relative">
             <button
               type="button"
-              aria-label={user ? 'Mở menu tài khoản' : 'Mở menu đăng ký và đăng nhập'}
-              aria-expanded={accountMenuOpen}
-              aria-controls="account-menu"
               onClick={() => setAccountMenuOpen((open) => !open)}
-              className="flex items-center gap-1 rounded-sm px-1.5 py-1.5 text-xs font-bold text-vj-text transition-colors hover:text-vj-red focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vj-red dark:text-white/80 dark:hover:text-vj-yellow md:px-2 md:py-2 lg:text-sm"
+              aria-expanded={accountMenuOpen}
+              className="flex min-h-10 items-center gap-1.5 rounded-lg border border-white/50 bg-transparent px-2.5 text-xs font-bold text-white hover:bg-white/10 sm:px-3"
             >
-              <HiOutlineUserCircle aria-hidden="true" className="text-lg md:text-xl" />
-              <span className="hidden md:inline">
-                {user ? user.fullName || 'Tài khoản' : 'Đăng ký | Đăng nhập'}
-              </span>
+              <HiOutlineUserCircle aria-hidden="true" className="text-lg" />
+              <span className="hidden sm:inline">{user ? 'Tài khoản' : 'SkyID'}</span>
             </button>
             {accountMenuOpen && (
-              <div
-                id="account-menu"
-                role="menu"
-                aria-label="Menu tài khoản"
-                className="absolute right-0 top-full z-40 mt-2 w-60 overflow-hidden rounded-[10px] border border-vj-border bg-white py-1 shadow-lg dark:border-white/10 dark:bg-navy-dark dark:shadow-xl"
-              >
+              <div className="absolute right-0 top-[calc(100%+8px)] w-64 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] py-2 shadow-[0_16px_40px_rgba(0,0,0,0.14)]">
+                {user && (
+                  <div className="border-b border-[var(--border)] px-4 py-3">
+                    <p className="truncate text-sm font-bold text-[var(--foreground)]">
+                      {user.fullName || user.email}
+                    </p>
+                    <p className="mt-0.5 truncate text-xs text-[var(--foreground-muted)]">
+                      {user.email}
+                    </p>
+                  </div>
+                )}
                 {accountLinks.map(([label, href]) => (
                   <Link
                     key={href}
                     href={href}
-                    role="menuitem"
                     onClick={() => setAccountMenuOpen(false)}
-                    className="block px-4 py-3 text-sm font-semibold text-vj-text transition-colors hover:bg-[rgb(var(--vj-red-rgb))]/10 hover:text-vj-red focus:bg-[rgb(var(--vj-red-rgb))]/10 focus:text-vj-red focus:outline-none dark:text-white/80 dark:hover:bg-white/5 dark:hover:text-vj-yellow"
+                    className="block px-4 py-2.5 text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--surface)] hover:text-[var(--primary)]"
                   >
                     {label}
                   </Link>
@@ -205,146 +224,88 @@ export default function Header() {
                 {user && (
                   <button
                     type="button"
-                    role="menuitem"
-                    onClick={() => {
-                      setAccountMenuOpen(false);
-                      signOut();
-                    }}
-                    className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-semibold text-vj-text transition-colors hover:bg-[rgb(var(--vj-red-rgb))]/10 hover:text-vj-red focus:bg-[rgb(var(--vj-red-rgb))]/10 focus:text-vj-red focus:outline-none dark:text-white/80 dark:hover:bg-white/5 dark:hover:text-vj-yellow"
+                    onClick={() => void signOut()}
+                    className="flex w-full items-center gap-2 border-t border-[var(--border)] px-4 py-3 text-left text-sm font-semibold text-[var(--primary)] hover:bg-[rgb(var(--primary-rgb))/5]"
                   >
-                    <HiOutlineLogout aria-hidden="true" className="text-base" />
+                    <HiOutlineLogout aria-hidden="true" />
                     Đăng xuất
                   </button>
                 )}
-                <div className="mt-1 border-t border-vj-border px-4 py-3 dark:border-white/10">
-                  <ThemeToggle />
-                </div>
               </div>
             )}
           </div>
-
-          <button
-            type="button"
-            aria-label="Chọn ngôn ngữ"
-            className="hidden items-center gap-1 rounded-sm px-1.5 py-1.5 text-xs font-bold text-vj-text transition-colors hover:text-vj-red focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vj-red dark:text-white/80 dark:hover:text-vj-yellow md:px-2 md:py-2 lg:flex lg:text-sm"
+          <Link
+            href="/tim-ve"
+            className="vj-cta hidden min-h-10 items-center px-5 text-xs font-black sm:flex"
           >
-            <HiOutlineGlobeAlt aria-hidden="true" className="text-base" />
-            Tiếng Việt
-          </button>
-
+            Đặt vé
+          </Link>
           <button
             type="button"
-            aria-label="Mở menu điều hướng"
+            onClick={() => setMobileMenuOpen((open) => !open)}
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-menu"
-            onClick={() => setMobileMenuOpen((open) => !open)}
-            className="rounded-sm p-1.5 text-xl text-vj-text transition-colors hover:text-vj-red focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vj-red dark:text-white/80 lg:hidden"
+            aria-label={mobileMenuOpen ? 'Đóng menu' : 'Mở menu'}
+            className="grid h-10 w-10 place-items-center rounded-lg border border-white/50 text-white lg:hidden"
           >
             {mobileMenuOpen ? (
-              <HiOutlineX aria-hidden="true" />
+              <HiOutlineX className="text-xl" />
             ) : (
-              <HiOutlineMenu aria-hidden="true" />
+              <HiOutlineMenu className="text-xl" />
             )}
           </button>
         </div>
       </div>
 
-      <nav className="vj-menubar" aria-label="Quản lý chuyến bay">
-        <div className="mx-auto flex max-w-[1240px] items-stretch gap-1 overflow-x-auto px-3 md:px-4">
-          {FLIGHT_LINKS.map(([label, href]) => {
-            const isActive = pathname === href || pathname.startsWith(`${href}/`);
-            return (
-              <Link
-                key={label}
-                href={href}
-                className={`flex h-12 shrink-0 items-center border-b-[3px] px-3 text-[11px] font-extrabold uppercase tracking-wide transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-white md:px-4 md:text-xs ${
-                  isActive
-                    ? 'border-vj-yellow text-vj-yellow'
-                    : 'border-transparent text-white hover:border-white/60 hover:text-white/90'
-                }`}
-              >
-                {label}
-              </Link>
-            );
-          })}
-          <Link
-            href="/tra-cuu"
-            className="ml-auto hidden h-12 shrink-0 items-center gap-1.5 px-3 text-[11px] font-bold text-white transition-colors hover:text-vj-yellow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-white md:px-4 md:text-xs lg:flex"
-          >
-            <HiOutlineGlobeAlt aria-hidden="true" className="text-base" />
-            Tra cứu đặt chỗ
-          </Link>
-        </div>
-      </nav>
-
-      <nav
-        aria-label="Dịch vụ bổ trợ"
-        className="hidden border-b border-vj-border bg-[#f7f7f7] dark:border-white/5 dark:bg-navy-dark/50 lg:block"
-      >
-        <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-2 px-3 py-2 md:px-4">
-          {SERVICE_LINKS.map(({ label, href, Icon }) => (
-            <Link
-              key={label}
-              href={href}
-              className="group flex flex-1 shrink-0 flex-col items-center gap-1 rounded-lg px-2 py-2 text-center transition-colors hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-vj-red dark:hover:bg-white/5"
-            >
-              <Icon
-                aria-hidden="true"
-                className="text-xl text-vj-red transition-transform group-hover:scale-110"
-              />
-              <span className="text-[11px] font-bold text-vj-text dark:text-white/80">{label}</span>
-            </Link>
-          ))}
-        </div>
-      </nav>
-
-      {mobileMenuOpen && (
-        <div
-          id="mobile-menu"
-          className="absolute inset-x-0 top-full z-40 max-h-[80vh] overflow-y-auto border-t border-vj-border bg-white shadow-xl dark:border-white/10 dark:bg-navy-dark lg:hidden"
+      {pathname === '/trang-chu' && (
+        <nav
+          aria-label="Dịch vụ nhanh"
+          className="hidden border-t border-[var(--border)] bg-[var(--surface)] lg:block"
         >
-          <nav aria-label="Chuyến bay" className="border-b border-vj-border dark:border-white/10">
-            {FLIGHT_LINKS.map(([label, href]) => (
-              <Link
-                key={label}
-                href={href}
-                className="block px-4 py-3 text-sm font-bold text-vj-text transition-colors hover:bg-[#f7f7f7] hover:text-vj-red dark:text-white/80 dark:hover:bg-white/5"
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
-
-          <nav
-            aria-label="Dịch vụ bổ trợ"
-            className="grid grid-cols-3 gap-1 border-b border-vj-border p-3 dark:border-white/10"
-          >
+          <div className="mx-auto flex max-w-[1240px] items-center justify-center gap-3 px-4">
             {SERVICE_LINKS.map(({ label, href, Icon }) => (
               <Link
                 key={label}
                 href={href}
-                className="flex flex-col items-center gap-1 rounded-lg px-2 py-3 text-center transition-colors hover:bg-[#f7f7f7] dark:hover:bg-white/5"
+                className="group flex min-w-[92px] flex-col items-center gap-1 py-2.5 text-center text-[11px] font-semibold text-[var(--foreground-muted)] hover:text-[var(--primary)]"
               >
-                <Icon aria-hidden="true" className="text-xl text-vj-red" />
-                <span className="text-[11px] font-bold text-vj-text dark:text-white/80">
-                  {label}
-                </span>
+                <Icon
+                  aria-hidden="true"
+                  className="text-xl text-[var(--primary)] transition-transform group-hover:-translate-y-0.5"
+                />
+                {label}
+              </Link>
+            ))}
+          </div>
+        </nav>
+      )}
+
+      {mobileMenuOpen && (
+        <div
+          id="mobile-menu"
+          className="max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-[var(--border)] bg-[var(--background)] shadow-xl lg:hidden"
+        >
+          <nav aria-label="Điều hướng chính" className="grid grid-cols-2 gap-px bg-[var(--border)]">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`bg-[var(--background)] px-4 py-3.5 text-sm font-bold ${
+                  isActivePath(pathname, link.href)
+                    ? 'text-[var(--primary)]'
+                    : 'text-[var(--foreground)]'
+                }`}
+              >
+                {link.label}
               </Link>
             ))}
           </nav>
-
-          <div className="p-3">
+          <div className="border-t border-[var(--border)] p-4">
             <Link
-              href="/lien-he"
-              className="block rounded-lg px-4 py-3 text-sm font-bold text-vj-text transition-colors hover:bg-[#f7f7f7] hover:text-vj-red dark:text-white/80 dark:hover:bg-white/5"
+              href="/tim-ve"
+              className="vj-cta flex min-h-12 items-center justify-center font-black"
             >
-              Hỗ trợ
-            </Link>
-            <Link
-              href="/tra-cuu"
-              className="block rounded-lg px-4 py-3 text-sm font-bold text-vj-text transition-colors hover:bg-[#f7f7f7] hover:text-vj-red dark:text-white/80 dark:hover:bg-white/5"
-            >
-              Tra cứu đặt chỗ
+              Tìm và đặt vé
             </Link>
           </div>
         </div>

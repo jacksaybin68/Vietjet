@@ -6,7 +6,7 @@
  * Boots assertions against an already-running server (default
  * http://localhost:4028, override with SMOKE_BASE_URL). This is the only check
  * that exercises the app through HTTP, so it covers the seams unit tests miss:
- * middleware routing, redirects, the CSRF cookie/header handshake and auth
+ * proxy routing, redirects, the CSRF cookie/header handshake and auth
  * guards on real requests.
  *
  * It deliberately asserts *guard* behaviour rather than happy-path writes: with
@@ -122,11 +122,10 @@ async function main() {
     '/lam-thu-tuc?code=VD-12345678'
   );
 
-  // Dev/Turbopack does not run the root middleware, so an unknown path reaches
-  // the router and renders 404. A production build runs the Proxy, which
-  // bounces any non-public path (including nonexistent ones) to /dang-nhap
-  // before routing — a deliberate choice that avoids leaking which routes
-  // exist. Accept either, but never 200.
+  // The proxy bounces any non-public path (including nonexistent ones)
+  // to /dang-nhap before routing — a deliberate choice that avoids leaking
+  // which routes exist. A 404 would mean the proxy was skipped (e.g. a matcher
+  // gap); accept either, but never 200.
   await checkOneOf('GET unknown route', await status('/khong-ton-tai-xyz'), [404, 307]);
 
   console.info('\nPublic API');

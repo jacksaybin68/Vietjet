@@ -1,14 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: 'class',
   content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Be Vietnam Pro', 'KoHo', 'system-ui', 'sans-serif'],
-        display: ['Be Vietnam Pro', 'KoHo', 'system-ui', 'sans-serif'],
-        heading: ['Be Vietnam Pro', 'KoHo', 'sans-serif'],
-        koho: ['KoHo', 'Be Vietnam Pro', 'system-ui', 'sans-serif'],
+        sans: ['KoHo', 'Be Vietnam Pro', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['Be Vietnam Pro', 'KoHo', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        heading: ['Be Vietnam Pro', 'KoHo', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        koho: ['KoHo', 'Be Vietnam Pro', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
         // Brand palette lifted from vietjetair.com production bundle

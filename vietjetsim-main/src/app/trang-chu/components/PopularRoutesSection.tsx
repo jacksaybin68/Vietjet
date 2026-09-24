@@ -200,9 +200,9 @@ export default function PopularRoutesSection() {
   if (loading) return <PopularRoutesSkeleton />;
 
   return (
-    <section ref={sectionRef} className="bg-white dark:bg-navy-dark overflow-hidden">
+    <section ref={sectionRef} className="bg-whiteoverflow-hidden">
       {/* Service icons grid */}
-      <div className="py-3 md:py-5 sm:py-7 border-b border-gray-100 dark:border-white/5">
+      <div className="py-3 md:py-5 sm:py-7 border-b border-gray-100/5">
         <div className="max-w-7xl mx-auto px-3 md:px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-9 gap-2 sm:gap-2.5 md:gap-3">
             {SERVICES?.map((service, i) => (
@@ -214,7 +214,7 @@ export default function PopularRoutesSection() {
                   transitionDuration: '0.6s',
                   transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
-                className="vj-service-icon group flex flex-col items-center gap-1 sm:gap-1.5 md:gap-2 p-2 sm:p-2.5 md:p-3 rounded-xl border border-transparent hover:border-[rgba(236,32,41,0.2)] dark:hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(236,32,41,0.03)] dark:hover:bg-[rgba(255,255,255,0.05)] hover:-translate-y-1 hover:shadow-md transition-all duration-300 reveal-up"
+                className="vj-service-icon group flex flex-col items-center gap-1 sm:gap-1.5 md:gap-2 p-2 sm:p-2.5 md:p-3 rounded-xl border border-transparent hover:border-[rgba(236,32,41,0.2)]:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(236,32,41,0.03)]:bg-[rgba(255,255,255,0.05)] hover:-translate-y-1 hover:shadow-md transition-all duration-300 reveal-up"
               >
                 <div
                   className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center text-white shadow-sm group-hover:shadow-md group-hover:scale-110 transition-all duration-300"
@@ -223,7 +223,7 @@ export default function PopularRoutesSection() {
                   <service.Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5" />
                 </div>
                 <span
-                  className="text-[9px] sm:text-[10px] md:text-[11px] font-semibold text-center leading-tight text-vj-gray dark:text-white/70"
+                  className="text-[9px] sm:text-[10px] md:text-[11px] font-semibold text-center leading-tight text-vj-gray/70"
                   style={{ fontWeight: 600 }}
                 >
                   {service?.label}
@@ -235,7 +235,7 @@ export default function PopularRoutesSection() {
       </div>
 
       {/* Popular Routes */}
-      <div className="py-4 md:py-6 sm:py-7 bg-white dark:bg-navy-dark border-b border-gray-100 dark:border-white/5">
+      <div className="py-4 md:py-6 sm:py-7 bg-whiteborder-b border-gray-100/5">
         <div className="max-w-7xl mx-auto px-3 md:px-4 sm:px-6 lg:px-8">
           {/* Header with parallax drift */}
           <div
@@ -245,7 +245,7 @@ export default function PopularRoutesSection() {
           >
             <span className="vj-section-label">Tuyến bay</span>
             <h2
-              className="text-base sm:text-lg lg:text-xl font-black tracking-tight text-vj-text dark:text-white"
+              className="text-base sm:text-lg lg:text-xl font-black tracking-tight text-vj-text"
               style={{ fontWeight: 900 }}
             >
               Tuyến đường phổ biến
@@ -263,7 +263,7 @@ export default function PopularRoutesSection() {
                   transitionDuration: '0.65s',
                   transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
-                className="reveal-up group flex items-center justify-between bg-white dark:bg-navy-dark/50 border border-gray-100 dark:border-white/5 hover:border-[rgba(236,32,41,0.3)] dark:hover:border-white/10 rounded-xl px-2.5 md:px-3 sm:px-4 py-2.5 md:py-3 sm:py-3.5 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
+                className="reveal-up group flex items-center justify-between bg-white/50 border border-gray-100/5 hover:border-[rgba(236,32,41,0.3)]:border-white/10 rounded-xl px-2.5 md:px-3 sm:px-4 py-2.5 md:py-3 sm:py-3.5 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
               >
                 <div className="flex items-center gap-2 sm:gap-2.5 md:gap-3 min-w-0">
                   <div
@@ -281,14 +281,14 @@ export default function PopularRoutesSection() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
                       <span
-                        className="text-[11px] md:text-sm font-black text-vj-text dark:text-white"
+                        className="text-[11px] md:text-sm font-black text-vj-text"
                         style={{ fontWeight: 900 }}
                       >
                         {route?.fromCode}
                       </span>
                       <MdArrowForward className="w-2.5 h-2.5 md:w-3 md:h-3 sm:w-3.5 sm:h-3.5 shrink-0 text-vjred" />
                       <span
-                        className="text-[11px] md:text-sm font-black text-vj-text dark:text-white"
+                        className="text-[11px] md:text-sm font-black text-vj-text"
                         style={{ fontWeight: 900 }}
                       >
                         {route?.toCode}
@@ -304,7 +304,7 @@ export default function PopularRoutesSection() {
                       </span>
                     </div>
                     <p
-                      className="text-[10px] md:text-xs truncate mt-0.5 text-vj-gray dark:text-white/60"
+                      className="text-[10px] md:text-xs truncate mt-0.5 text-vj-gray/60"
                       style={{ fontWeight: 500 }}
                     >
                       {route?.from} → {route?.to} · {route?.duration}
@@ -312,9 +312,9 @@ export default function PopularRoutesSection() {
                   </div>
                 </div>
                 <div className="shrink-0 text-right ml-2 sm:ml-3">
-                  <p className="text-[10px] md:text-xs mb-0.5 font-koho dark:text-white/70">Từ</p>
+                  <p className="text-[10px] md:text-xs mb-0.5 font-koho/70">Từ</p>
                   <p
-                    className="text-[11px] md:text-sm font-black whitespace-nowrap text-primary dark:text-[#FFDD00]"
+                    className="text-[11px] md:text-sm font-black whitespace-nowrap text-primary"
                     style={{ fontWeight: 900 }}
                   >
                     {route?.price}₫
@@ -337,7 +337,7 @@ export default function PopularRoutesSection() {
           >
             <span className="vj-section-label">Dịch vụ nổi bật</span>
             <h2
-              className="text-base sm:text-lg lg:text-xl font-black tracking-tight text-vj-text dark:text-white"
+              className="text-base sm:text-lg lg:text-xl font-black tracking-tight text-vj-text"
               style={{ fontWeight: 900 }}
             >
               Trải nghiệm bay cùng Vietjet Air
@@ -392,7 +392,7 @@ export default function PopularRoutesSection() {
                     {banner?.subtitle}
                   </p>
                   <span
-                    className="inline-block text-[10px] md:text-xs font-black px-2.5 md:px-3 py-1 md:py-1.5 rounded-lg text-navy dark:text-navy-dark"
+                    className="inline-block text-[10px] md:text-xs font-black px-2.5 md:px-3 py-1 md:py-1.5 rounded-lg text-navy"
                     style={{
                       background:
                         'linear-gradient(26.73deg, rgb(249,165,26) 13.7%, rgb(251,182,18) 29.8%, rgb(255,221,0) 66.81%)',

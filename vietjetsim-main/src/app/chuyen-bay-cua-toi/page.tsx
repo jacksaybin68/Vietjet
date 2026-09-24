@@ -3,23 +3,26 @@
 // Chuyến bay của tôi — Vietjet Air Manage Booking
 // Sao chép + bổ sung từ vietjetair.com/en/my/search-booking
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import { Header, Footer } from '@/shared/components/navigation';
 import {
   MdFlight as FlightIcon,
-  MdSearch,
   MdLogin,
   MdCheckCircle,
   MdAirlineSeatReclineNormal,
   MdPrint,
   MdQrCodeScanner,
+  MdLuggage,
+  MdConfirmationNumber,
 } from 'react-icons/md';
+import Icon from '@/shared/components/ui/AppIcon';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 import { AppImage } from '@/shared/components/ui';
-import MyFlightsStats from './components/MyFlightsStats';
+import { MyFlightsStats } from '@/features/bookings';
 import { listBookings } from '@/features/bookings/services';
 import { apiRequest, getApiErrorMessage } from '@/shared/services';
 
@@ -114,6 +117,12 @@ const STATUS_LABELS: Record<RecentBooking['status'], { label: string; color: str
 export default function MyFlightsPage() {
   const toast = useToast();
   const [tab, setTab] = useState<'booking' | 'eticket'>('booking');
+  // Chip đầu trang "Tìm kiếm mã đặt chỗ" / "Chuyến bay của tôi" — bố cục của
+  // vietjetair.com/vi/my/search-booking (khối nào hiện do chip quyết định).
+  const [view, setView] = useState<'search' | 'list'>('search');
+  // Khách chưa bấm chip thì lần tải danh sách đầu tiên tự mở tab "Chuyến bay của
+  // tôi" khi tài khoản đã có đặt chỗ; khách vãng lai vẫn ở lại form tra cứu.
+  const viewPinned = useRef(false);
   const [bookingCode, setBookingCode] = useState('');
   const [surname, setSurname] = useState('');
   const [givenName, setGivenName] = useState('');
@@ -121,6 +130,9 @@ export default function MyFlightsPage() {
   const router = useRouter();
   const [bookings, setBookings] = useState<RecentBooking[]>([]);
   const [bookingsLoading, setBookingsLoading] = useState(true);
+  // Chỉ gọi /api/dat-ve khi đã đăng nhập — gọi khi khách vãng lai sẽ nhận 401 và
+  // hiện thành lỗi console (badge "Issues" của Next dev overlay).
+  const { user: authUser, loading: authLoading } = useAuth();
 
   const fetchBookings = useCallback(async () => {
     try {
@@ -155,6 +167,7 @@ export default function MyFlightsPage() {
       );
 
       setBookings(bookingsWithCheckIn);
+      if (bookingsWithCheckIn.length > 0 && !viewPinned.current) setView('list');
     } catch {
       setBookings([]);
     } finally {
@@ -163,8 +176,15 @@ export default function MyFlightsPage() {
   }, []);
 
   useEffect(() => {
+    if (authLoading) return; // chờ AuthContext xác định trạng thái đăng nhập
+    if (!authUser) {
+      // Khách vãng lai: không có dữ liệu đặt chỗ để tải, tránh request 401.
+      setBookings([]);
+      setBookingsLoading(false);
+      return;
+    }
     fetchBookings();
-  }, [fetchBookings]);
+  }, [fetchBookings, authLoading, authUser]);
 
   // Thống kê
   const stats = useMemo(() => {
@@ -261,47 +281,63 @@ export default function MyFlightsPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <Header />
 
-      {/* ===== HERO: Tra cứu đặt chỗ ===== */}
-      <section className="relative overflow-hidden bg-[var(--surface)]">
-        {/* Decorative flight arcs */}
-        <div className="absolute inset-0 opacity-[0.06] pointer-events-none">
-          <svg className="w-full h-full" viewBox="0 0 1440 300">
-            <path
-              fill="none"
-              stroke="var(--vj-navy)"
-              strokeWidth="1.5"
-              d="M100,280 C300,180 600,120 980,200 1300,90"
-            />
-            <path
-              fill="none"
-              stroke="var(--vj-navy)"
-              strokeWidth="1"
-              d="M200,60 C420,140 760,90 1100,220 1420,70"
-            />
-          </svg>
-        </div>
+      {/* ===== Đầu trang: 2 chip + tiêu đề (bố cục vietjetair.com/vi/my/search-booking) ===== */}
+      <section className="relative overflow-hidden border-b border-[var(--border)] bg-gradient-to-b from-[#d9e9f8] via-[#eef4fa] to-[var(--background)]">
+        <div className="relative mx-auto max-w-5xl px-4 pt-8 pb-10 sm:px-6 lg:px-8">
+          <div role="tablist" aria-label="Chuyến bay của tôi" className="flex flex-wrap gap-2">
+            {(
+              [
+                { id: 'search', label: 'Tìm kiếm mã đặt chỗ', icon: 'MagnifyingGlassIcon' },
+                { id: 'list', label: 'Chuyến bay của tôi', icon: 'TicketIcon' },
+              ] as const
+            ).map((chip) => {
+              const active = view === chip.id;
+              return (
+                <button
+                  key={chip.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => {
+                    viewPinned.current = true;
+                    setView(chip.id);
+                  }}
+                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition-colors ${
+                    active
+                      ? 'bg-white text-[var(--vj-red)] shadow-vj-btn ring-1 ring-white/70'
+                      : 'bg-white/50 text-[var(--vj-text-gray)] hover:text-[var(--vj-red)]'
+                  }`}
+                >
+                  <Icon name={chip.icon} size={15} />
+                  {chip.label}
+                </button>
+              );
+            })}
+          </div>
 
-        <div className="relative mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:px-8">
-          <p className="inline-flex items-center gap-2 rounded-full border border-[rgb(var(--vj-red-rgb))]/20 bg-[rgb(var(--vj-red-rgb))]/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--vj-red)]">
-            <span className="h-2 w-2 rounded-full bg-[var(--vj-yellow)]" />
-            Bay là thích ngay!
-          </p>
-          <h1 className="mt-5 text-3xl font-black italic leading-tight text-[var(--foreground)] sm:text-4xl lg:text-5xl">
+          <h1 className="mt-6 text-lg font-black uppercase tracking-tight text-[var(--vj-text)] sm:text-xl">
             Chuyến bay của tôi
           </h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--vj-text-gray)]">
+            Bạn muốn xem chuyến bay đã đặt, đổi lịch trình bay hay mua thêm dịch vụ hành lý, chỗ
+            ngồi, suất ăn…, vui lòng điền thông tin bên dưới:
+          </p>
 
-          {/* Form tra cứu đặt chỗ — 2 cột: trường nhập + hình ảnh */}
+          {/* Form tra cứu đặt chỗ — 2 cột: trường nhập + hình ảnh. Chip thứ hai
+              ("Chuyến bay của tôi") ẩn khối này đi và mở danh sách đặt chỗ. */}
           <form
             onSubmit={handleSearchBooking}
-            className="mt-7 rounded-2xl border border-[var(--border)] bg-[var(--background)] dark:bg-[var(--dark-surface)] p-5 shadow-vj-md"
+            className={`mt-6 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5 shadow-vj-md ${
+              view === 'search' ? '' : 'hidden'
+            }`}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Cột trái: Trường nhập */}
               <div className="flex flex-col gap-3">
-                <div>
+                <div className="relative">
                   <label
                     htmlFor="booking-code"
-                    className="block text-[10px] font-bold uppercase tracking-wide text-[var(--foreground)] mb-1"
+                    className="pointer-events-none absolute left-3 top-2 text-[11px] font-medium text-[var(--vj-text-muted)]"
                   >
                     Mã đặt chỗ <span className="text-[var(--vj-red)]">*</span>
                   </label>
@@ -311,14 +347,14 @@ export default function MyFlightsPage() {
                     required
                     value={bookingCode}
                     onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
-                    placeholder="VD-12345678"
-                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] dark:bg-[var(--dark-surface)] px-3 py-2 text-xs font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50 uppercase"
+                    placeholder=" "
+                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 pb-3 pt-7 text-sm font-medium uppercase text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
                   />
                 </div>
-                <div>
+                <div className="relative">
                   <label
                     htmlFor="surname"
-                    className="block text-[10px] font-bold uppercase tracking-wide text-[var(--foreground)] mb-1"
+                    className="pointer-events-none absolute left-3 top-2 text-[11px] font-medium text-[var(--vj-text-muted)]"
                   >
                     Họ
                   </label>
@@ -327,14 +363,14 @@ export default function MyFlightsPage() {
                     type="text"
                     value={surname}
                     onChange={(e) => setSurname(e.target.value)}
-                    placeholder="Nguyễn"
-                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] dark:bg-[var(--dark-surface)] px-3 py-2 text-xs font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
+                    placeholder=" "
+                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 pb-3 pt-7 text-sm font-medium text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
                   />
                 </div>
-                <div>
+                <div className="relative">
                   <label
                     htmlFor="given-name"
-                    className="block text-[10px] font-bold uppercase tracking-wide text-[var(--foreground)] mb-1"
+                    className="pointer-events-none absolute left-3 top-2 text-[11px] font-medium text-[var(--vj-text-muted)]"
                   >
                     Tên đệm &amp; Tên
                   </label>
@@ -343,16 +379,15 @@ export default function MyFlightsPage() {
                     type="text"
                     value={givenName}
                     onChange={(e) => setGivenName(e.target.value)}
-                    placeholder="Van A"
-                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] dark:bg-[var(--dark-surface)] px-3 py-2 text-xs font-medium text-[var(--foreground)] placeholder:text-[var(--foreground-subtle)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
+                    placeholder=" "
+                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 pb-3 pt-7 text-sm font-medium text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-1 justify-center py-2.5 rounded-xl bg-[var(--vj-yellow)] text-[var(--vj-red)] font-black text-sm inline-flex items-center gap-2 hover:bg-[var(--vj-yellow-2)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="vj-cta mt-1 inline-flex h-10 items-center justify-center self-start rounded-lg px-7 text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <MdSearch className="h-4 w-4" />
                   {loading ? 'Đang tìm…' : 'Tìm kiếm'}
                 </button>
               </div>
@@ -360,11 +395,11 @@ export default function MyFlightsPage() {
               {/* Cột phải: Hình ảnh */}
               <div className="flex items-center justify-center">
                 <AppImage
-                  src="/images/hero/banner-1-hongkong.jpg"
-                  alt="Vietjet Air"
+                  src="/images/hero/banner-quang-cao-ngoai-te.jpg"
+                  alt="Mua ngoại tệ dễ dàng khi đặt vé"
                   width={640}
                   height={360}
-                  className="w-full h-auto rounded-xl object-cover max-h-[200px]"
+                  className="w-full h-auto rounded-xl object-cover max-h-[300px]"
                 />
               </div>
             </div>
@@ -372,7 +407,10 @@ export default function MyFlightsPage() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+      {/* Danh sách chỉ hiện ở chip "Chuyến bay của tôi"; form tra cứu nằm ở chip đầu. */}
+      <div
+        className={`mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 ${view === 'list' ? '' : 'hidden'}`}
+      >
         {/* Stats */}
         {bookings.length > 0 && (
           <section className="mb-8">
@@ -421,7 +459,9 @@ export default function MyFlightsPage() {
               </div>
             ) : bookings.length === 0 ? (
               <section className="vj-card p-10 text-center">
-                <div className="mx-auto mb-4 text-6xl opacity-30">🧳</div>
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[rgb(var(--vj-red-rgb))]/10 text-[var(--vj-red)]">
+                  <MdLuggage className="h-8 w-8" />
+                </div>
                 <h3 className="text-xl font-bold text-[var(--foreground)]">Chưa có đặt chỗ nào</h3>
                 <p className="mt-1 text-sm text-[var(--foreground-muted)]">
                   Tra cứu bằng mã đặt chỗ ở trên, hoặc đăng nhập để xem các chuyến bay của bạn.
@@ -449,25 +489,24 @@ export default function MyFlightsPage() {
                   return (
                     <article
                       key={b.id}
-                      className="overflow-hidden rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--background)] dark:bg-[var(--dark-surface)] shadow-sm hover:shadow-md transition-shadow"
+                      className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] shadow-sm hover:shadow-md transition-shadow"
                     >
-                      {/* Biller header (perforé) */}
-                      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-[var(--vj-navy)] text-white">
+                      {/* Đầu phiếu: nền đỏ thương hiệu; chip trạng thái đổi sang nền
+                          trắng để vẫn đọc được trên nền đỏ. */}
+                      <div className="flex flex-wrap items-center justify-between gap-3 bg-[var(--vj-red)] px-4 py-3 text-white">
                         <div className="flex items-center gap-2">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[rgb(var(--vj-red-rgb))]/80 text-white">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-white">
                             <FlightIcon className="h-5 w-5" />
                           </div>
                           <div>
                             <p className="text-sm font-black text-[var(--vj-yellow)]">
                               {f.flight_no || '—'}
                             </p>
-                            <p className="text-[11px] text-white/70">Đặt chỗ: {b.id}</p>
+                            <p className="text-[11px] text-white/75">Đặt chỗ: {b.id}</p>
                           </div>
                         </div>
-                        <span
-                          className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${st.bg} ${st.color}`}
-                        >
-                          <span className={`h-1.5 w-1.5 rounded-full ${st.color}`} />
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs font-bold text-[var(--vj-red)]">
+                          <span className="h-1.5 w-1.5 rounded-full bg-[var(--vj-red)]" />
                           {st.label}
                         </span>
                       </div>
@@ -552,7 +591,7 @@ export default function MyFlightsPage() {
                       </div>
 
                       {/* Perforation footer */}
-                      <div className="flex items-center justify-between gap-2 px-4 py-2 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border-t">
+                      <div className="flex items-center justify-between gap-2 px-4 py-2 bg-[var(--surface)] border-t border-[var(--border)]">
                         <div className="flex gap-2">
                           {!b.has_check_in && b.status === 'confirmed' && (
                             <Link
@@ -567,7 +606,7 @@ export default function MyFlightsPage() {
                               href={`/lam-thu-tuc?code=${b.id}`}
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-[rgb(var(--vj-yellow-rgb))]/25 text-[var(--vj-red)] font-bold hover:bg-[rgb(var(--vj-yellow-rgb))]/40 transition-colors"
                             >
-                              ✅ Thẻ lên tàu
+                              <MdCheckCircle className="h-3.5 w-3.5" /> Thẻ lên tàu
                             </Link>
                           )}
                           <Link
@@ -604,7 +643,7 @@ export default function MyFlightsPage() {
                   return (
                     <div
                       key={b.id}
-                      className="rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--background)] dark:bg-[var(--dark-surface)] p-5"
+                      className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
@@ -669,7 +708,9 @@ export default function MyFlightsPage() {
               </div>
             ) : (
               <section className="vj-card p-10 text-center">
-                <div className="mx-auto mb-4 text-6xl opacity-30">🎫</div>
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[rgb(var(--vj-red-rgb))]/10 text-[var(--vj-red)]">
+                  <MdConfirmationNumber className="h-8 w-8" />
+                </div>
                 <h3 className="text-xl font-bold text-[var(--foreground)]">Chưa có vé điện tử</h3>
                 <p className="text-sm text-[var(--foreground-muted)]">
                   Vé điện tử của đặt chỗ sẽ hiển thị tại đây.

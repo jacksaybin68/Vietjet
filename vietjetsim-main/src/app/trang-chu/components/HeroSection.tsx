@@ -1,22 +1,21 @@
 'use client';
 
-// Last updated: 2026-09-09 - Fixed JSX parsing errors and passenger selector
-
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
+  MdArrowOutward,
+  MdCalendarMonth,
+  MdConfirmationNumber,
+  MdExpandMore,
   MdFlightLand,
   MdFlightTakeoff,
-  MdConfirmationNumber,
-  MdChildCare,
-  MdChildFriendly,
-  MdPerson,
   MdPeople,
+  MdSwapHoriz,
 } from 'react-icons/md';
 
-const airports = [
+const AIRPORTS = [
   { code: 'HAN', city: 'Hà Nội', airport: 'Nội Bài' },
-  { code: 'SGN', city: 'TP. Hồ Chí Minh', airport: 'Tân Sơn Nhất' },
+  { code: 'SGN', city: 'Hồ Chí Minh', airport: 'Tân Sơn Nhất' },
   { code: 'DAD', city: 'Đà Nẵng', airport: 'Đà Nẵng' },
   { code: 'PQC', city: 'Phú Quốc', airport: 'Phú Quốc' },
   { code: 'CXR', city: 'Nha Trang', airport: 'Cam Ranh' },
@@ -29,400 +28,322 @@ const airports = [
   { code: 'DLI', city: 'Đà Lạt', airport: 'Liên Khuông' },
   { code: 'VCS', city: 'Côn Đảo', airport: 'Côn Đảo' },
   { code: 'THD', city: 'Thanh Hóa', airport: 'Tho Xuân' },
-  { code: 'VDH', city: 'Đông Hội', airport: 'Đông Hội' },
   { code: 'VII', city: 'Vinh', airport: 'Vinh' },
-  { code: 'SYH', city: 'Kon Tum', airport: 'Kon Tum' },
 ];
+
+/**
+ * Homepage hero artwork.
+ *
+ * Picked for a right-pinned booking card: this 4000x2000 campaign banner keeps
+ * its passengers and plane in the bottom-left and its promo copy between ~33%
+ * and ~55% of the width, so the whole right half stays empty cloud for the card
+ * to sit on. The `*-fare-website-*.webp` banners (1920x650 / 2560x867) are the
+ * right ratio for a hero, but their headline sits at 52-82% of the width and the
+ * card half-clipped it. The previous `banner-1-hongkong.jpg` is a 1562x1354
+ * (1.15:1) portrait crop built for the deal cards, so stretching it behind a
+ * full-bleed hero via `background-size: cover` destroyed it.
+ */
+const HERO_ARTWORK = '/images/hero/f3aa27c1-7cad-4a31-8086-58654aa494b5.jpg';
+
+/**
+ * Tab strip of the hero booking card, mirrored from vietjetair.com: the active
+ * tab is gold with dark-red type, the inactive tabs are white on red.
+ */
+const BOOKING_TABS = [
+  {
+    id: 'services',
+    label: 'Mua hành lý, suất ăn chọn chỗ ngồi và hơn thế nữa...',
+    href: '/dich-vu',
+  },
+  { id: 'booking', label: 'Đặt chuyến đi & Mua SkyJoy', href: '#hero-booking-form' },
+  { id: 'cargo', label: 'Gửi hàng nhanh', href: '/dich-vu' },
+] as const;
+
+const CURRENCIES = ['VND', 'USD'] as const;
+
+const inputClass =
+  'w-full min-w-0 border-0 bg-transparent px-0 text-sm font-extrabold text-[#333333] outline-none disabled:cursor-not-allowed disabled:text-[#8b9099]';
+const labelClass =
+  'block text-[10px] font-bold uppercase leading-none tracking-[0.06em] text-[#8c8c8c]';
+const fieldClass =
+  'flex items-center gap-2 rounded border border-[#e4e4e4] bg-white px-3 py-1.5 focus-within:border-[var(--accent)]';
+const iconClass = 'shrink-0 text-lg text-[#4a4a4a]';
+const toInputDate = (date: Date) => date.toISOString().slice(0, 10);
 
 export default function HeroSection() {
   const router = useRouter();
   const [roundTrip, setRoundTrip] = useState(true);
   const [from, setFrom] = useState('HAN');
   const [to, setTo] = useState('SGN');
-  const [pax, setPax] = useState({ adults: 1, children: 0, infants: 0 });
-  const [paxOpen, setPaxOpen] = useState(false);
+  const [departDate, setDepartDate] = useState(() => toInputDate(new Date(Date.now() + 86400000)));
+  const [returnDate, setReturnDate] = useState(() =>
+    toInputDate(new Date(Date.now() + 7 * 86400000))
+  );
+  const [passengers, setPassengers] = useState(1);
+  const [promoCode, setPromoCode] = useState('');
+  const [currency, setCurrency] = useState<string>('VND');
+  const [cheapestOnly, setCheapestOnly] = useState(false);
 
   const search = (event: FormEvent) => {
     event.preventDefault();
-    router.push(`/tim-ve?from=${from}&to=${to}&pax=${pax.adults}`);
+    const params = new URLSearchParams({
+      from,
+      to,
+      depart: departDate,
+      pax: String(passengers),
+      cur: currency,
+    });
+    if (roundTrip) params.set('return', returnDate);
+    if (promoCode.trim()) params.set('promo', promoCode.trim());
+    if (cheapestOnly) params.set('sort', 'cheapest');
+    router.push(`/tim-ve?${params.toString()}`);
   };
 
   return (
-    <section
-      className="relative min-h-[565px] overflow-hidden bg-cover bg-center py-10 lg:min-h-[610px] lg:py-14 dark:py-12 dark:lg:py-16"
-      style={{
-        backgroundImage:
-          "linear-gradient(110deg,rgba(227,30,36,.90),rgba(128,117,214,.56) 50%,rgba(37,99,212,.40)),url('/images/hero/banner-1-hongkong.jpg')",
-      }}
-    >
-      <div className="mx-auto max-w-[1240px] px-4">
-        <div className="max-w-xl pt-5 font-[var(--vj-font)] text-white lg:pt-10 animate-fade-in-up">
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-[.14em] text-[#FFDD00] sm:text-[13px]">
-            Vietjet Air
-          </p>
-          <h1 className="font-[var(--vj-font-heading)] text-4xl font-black leading-[1.05] tracking-[-0.04em] drop-shadow-md sm:text-5xl lg:text-6xl">
-            Bay là thích ngay!
-          </h1>
-          <p className="mt-3 max-w-md text-sm font-normal leading-6 text-white/95 sm:text-base lg:text-xl">
-            Sẵn sàng cho hành trình mới với vé bay linh hoạt và nhiều ưu đãi.
-          </p>
+    <section className="relative w-full overflow-hidden bg-[#e9f2fb]">
+      {/* Full-bleed campaign artwork with no scrim in front of it, exactly like
+          the vietjetair.com hero. */}
+      <div className="absolute inset-0" aria-hidden="true">
+        <img
+          src={HERO_ARTWORK}
+          alt=""
+          className="h-full w-full object-cover object-left lg:object-center"
+        />
+      </div>
 
-          <form
-            onSubmit={search}
-            className="mt-6 w-full max-w-[540px] bg-[#EC2029] dark:bg-[#D91A21] border-2 border-[#EC2029] dark:border-[#D91A21] rounded-lg shadow-sm p-4 sm:p-6 font-[var(--vj-font)]"
+      <div className="relative mx-auto flex w-full max-w-[1920px] flex-col px-4 pb-7 pt-[150px] sm:px-6 sm:pt-[230px] lg:min-h-[560px] lg:items-end lg:justify-center lg:px-10 lg:pb-10 lg:pt-10 xl:min-h-[640px] xl:px-[104px]">
+        {/* The campaign headline is baked into the artwork, so the page outline
+            keeps a screen-reader title instead of duplicating it visually. */}
+        <p className="sr-only">Bay là thích ngay</p>
+        <h1 className="sr-only">Chuyến bay tốt giá bắt đầu từ đây</h1>
+
+        <form
+          id="hero-booking-form"
+          onSubmit={search}
+          className="w-full rounded bg-[var(--primary)] p-3.5 shadow-[0_12px_36px_rgba(71,0,0,0.3)] lg:w-[392px] lg:shrink-0"
+        >
+          <nav
+            className="mb-3 flex items-stretch gap-px rounded bg-white/30"
+            aria-label="Dịch vụ chuyến bay"
           >
-            <div className="mb-4 flex flex-nowrap items-center gap-2">
-              {/* Column 1 (3.5): Primary text - logo replaced */}
-              <div
-                className="text-[11px] font-bold text-white sm:text-[12px] md:text-[13px]"
-                style={{ flex: '3.5 1 auto', width: '58.33%' }}
-              >
-                Mua hành lý, suất ăn, chọn ghế ngồi và hơn thế nữa, từ 3.99 USD
-              </div>
-
-              {/* Column 2 (1.5): Highlighted call-to-action */}
-              <div
-                className="text-[11px] font-bold text-black sm:text-[12px] md:text-[13px]"
-                style={{
-                  flex: '1.5 1 auto',
-                  width: '25%',
-                  background: '#FFDD00',
-                  color: '#000000',
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                }}
-              >
-                Đổi thưởng &amp; Mua Skypoint
-              </div>
-
-              {/* Column 3 (1): Secondary link */}
-              <div
-                className="text-right text-[11px] font-bold text-white sm:text-[12px] md:text-[13px]"
-                style={{ flex: '1 1 auto', width: '16.67%' }}
-              >
-                Giao hàng nhanh
-              </div>
-            </div>
-
-            <div className="mt-4 flex flex-wrap items-center gap-2 md:gap-4 text-[13px] font-bold text-white md:text-[14px] lg:text-[15px]">
-              <div className="flex flex-wrap items-center gap-2 md:gap-4">
-                <label className="flex cursor-pointer items-center gap-1.5">
-                  <input
-                    checked={roundTrip}
-                    onChange={() => setRoundTrip(true)}
-                    type="radio"
-                    name="trip"
-                    className="h-4 w-4 accent-[#f3c84d]"
-                  />
-                  <span className="text-[12px] md:text-[14px]">Khứ hồi</span>
-                </label>
-                <label className="flex cursor-pointer items-center gap-1.5">
-                  <input
-                    checked={!roundTrip}
-                    onChange={() => setRoundTrip(false)}
-                    type="radio"
-                    name="trip"
-                    className="h-4 w-4 accent-[#f3c84d]"
-                  />
-                  <span className="text-[12px] md:text-[14px]">Một chiều</span>
-                </label>
-                <span className="cursor-pointer text-[12px] md:text-[14px] font-bold text-white/90">
-                  Nhiều chặng ↗
-                </span>
-                <span className="text-[12px] md:text-[14px] font-bold text-white">VND ▾</span>
-              </div>
-            </div>
-
-            <div className="mt-4 space-y-2 md:space-y-3">
-              <div className="grid grid-cols-1 md:grid-cols-[1fr_180px] gap-2 md:gap-3">
-                <div className="flex h-[50px] md:h-[58px] items-center rounded-xl bg-white dark:bg-navy-dark border-2 border-[#EC2029] dark:border-[#444] px-3 md:px-4 text-left shadow-sm">
-                  <MdFlightTakeoff className="text-[24px] md:text-[32px] text-black dark:text-white/80" />
-                  <div className="ml-2 md:ml-3 min-w-0 flex-1">
-                    <div className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.08em] text-[#1A2948] dark:text-white/70">
-                      Điểm khởi hành
-                    </div>
-                    <select
-                      value={from}
-                      onChange={(e) => setFrom(e.target.value)}
-                      className="mt-1 w-full appearance-none bg-transparent text-[14px] md:text-[19px] font-black text-black dark:text-white outline-none sm:text-[16px] md:text-[20px]"
-                    >
-                      {airports.map((item) => (
-                        <option
-                          key={item.code}
-                          value={item.code}
-                          className="bg-white dark:bg-navy-dark text-[#1A2948] dark:text-white"
-                        >
-                          {item.city} ({item.code})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="flex h-[50px] md:h-[58px] items-center rounded-xl bg-white dark:bg-navy-dark border-2 border-[#EC2029] dark:border-[#444] px-3 md:px-4 text-left shadow-sm">
-                  <div className="ml-2 md:ml-3 min-w-0 flex-1">
-                    <div className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.08em] text-[#1A2948] dark:text-white/70">
-                      Ngày đi
-                    </div>
-                    <input
-                      type="date"
-                      defaultValue="2026-04-15"
-                      className="mt-1 w-full bg-transparent text-[12px] md:text-[15px] font-black text-black dark:text-white outline-none sm:text-[14px] md:text-[16px]"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-[1fr_180px] gap-2 md:gap-3">
-                <div className="flex h-[50px] md:h-[58px] items-center rounded-xl bg-white dark:bg-navy-dark border-2 border-[#EC2029] dark:border-[#444] px-3 md:px-4 text-left shadow-sm">
-                  <MdFlightLand className="text-[24px] md:text-[32px] text-black dark:text-white/80" />
-                  <div className="ml-2 md:ml-3 min-w-0 flex-1">
-                    <div className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.08em] text-[#1A2948] dark:text-white/70">
-                      Điểm đến
-                    </div>
-                    <select
-                      value={to}
-                      onChange={(e) => setTo(e.target.value)}
-                      className="mt-1 w-full appearance-none bg-transparent text-[14px] md:text-[19px] font-black text-black dark:text-white outline-none sm:text-[16px] md:text-[20px]"
-                    >
-                      {airports.map((item) => (
-                        <option
-                          key={item.code}
-                          value={item.code}
-                          className="bg-white dark:bg-navy-dark text-[#1A2948] dark:text-white"
-                        >
-                          {item.city} ({item.code})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="flex h-[50px] md:h-[58px] items-center rounded-xl bg-white dark:bg-navy-dark border-2 border-[#EC2029] dark:border-[#444] px-3 md:px-4 text-left shadow-sm">
-                  <div className="ml-2 md:ml-3 min-w-0 flex-1">
-                    <div className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.08em] text-[#1A2948] dark:text-white/70">
-                      Ngày về
-                    </div>
-                    <input
-                      type="date"
-                      defaultValue="2026-04-22"
-                      disabled={!roundTrip}
-                      className="mt-1 w-full bg-transparent text-[12px] md:text-[15px] font-black text-black dark:text-white outline-none disabled:text-[#999] dark:disabled:text-[#666] sm:text-[14px] md:text-[16px]"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Passenger Selector - Accordion */}
-              <div className="mt-2 md:mt-4">
-                <div
-                  onClick={() => setPaxOpen(!paxOpen)}
-                  className={`cursor-pointer flex items-center justify-between px-3 md:px-4 py-2 md:py-3 bg-white dark:bg-navy-dark border-2 border-[#EC2029] dark:border-[#444] hover:bg-[#f9f9f9] dark:hover:bg-[#2a2a2a] transition-colors duration-200 h-[46px] md:h-[58px] ${
-                    paxOpen ? 'rounded-t-xl border-b-0' : 'rounded-xl'
+            {BOOKING_TABS.map((tab) => {
+              const active = tab.id === 'booking';
+              return (
+                <a
+                  key={tab.id}
+                  href={tab.href}
+                  aria-current={active ? 'true' : undefined}
+                  className={`flex flex-1 items-center justify-center rounded-[2px] px-1.5 py-2 text-center text-[10px] font-bold leading-[1.2] transition-colors sm:text-[11px] ${
+                    active
+                      ? 'bg-[var(--accent)] text-[var(--primary-deep)]'
+                      : 'bg-[var(--primary)] text-white hover:bg-[var(--primary-dark)]'
                   }`}
                 >
-                  <div className="flex items-center gap-2 md:gap-3">
-                    <MdPeople className="h-4 w-4 md:h-5 md:w-5 text-black dark:text-[#FFDD00]" />
-                    <div>
-                      <div className="text-[10px] font-bold uppercase tracking-wide text-black opacity-70 dark:text-white/70">
-                        Hành khách
-                      </div>
-                      <div className="text-[17px] font-black text-black dark:text-white leading-tight">
-                        {pax.adults} người lớn {pax.children > 0 && `, ${pax.children} trẻ em `}
-                        {pax.infants > 0 && `, ${pax.infants} em bé`}
-                      </div>
-                    </div>
-                  </div>
-                  <svg
-                    viewBox="0 0 24 24"
-                    className={`ml-auto h-4 w-4 md:h-5 md:w-5 transition-transform duration-200 ${
-                      paxOpen ? 'rotate-180' : ''
-                    }`}
-                    fill="currentColor"
-                  >
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
-                </div>
-
-                {/* Passenger Details Panel — liền mạch với thanh tìm kiếm */}
-                <div
-                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                    paxOpen ? 'height-auto' : 'height-0'
-                  }`}
-                  style={{
-                    height: paxOpen ? 'auto' : 0,
-                    overflow: paxOpen ? 'visible' : 'hidden',
-                  }}
-                >
-                  <div className="px-3 md:px-4 py-2 bg-white dark:bg-navy-dark border-2 border-t-0 border-[#EC2029] dark:border-[#444] dark:border-t-0 rounded-b-xl">
-                    <div className="grid gap-2 md:gap-4">
-                      {/* Adults Row */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 md:gap-3">
-                          <MdPerson className="h-4 w-4 md:h-5 md:w-5 scale-[0.85] text-black dark:text-white/80" />
-                          <div>
-                            <div className="text-[11px] md:text-[13px] font-bold text-[#1A2948] dark:text-white">
-                              Người lớn
-                            </div>
-                            <div className="text-[9px] md:text-[11px] text-[#1A2948] dark:text-white/70">
-                              {'> 12 tuổi'}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 md:gap-2">
-                          <button
-                            onClick={() =>
-                              setPax((prev) => ({
-                                ...prev,
-                                adults: Math.max(1, prev.adults - 1),
-                              }))
-                            }
-                            disabled={pax.adults <= 1}
-                            className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full border border-[#d1d5db] dark:border-[#555] text-[10px] md:text-[12px] text-[#6B7280] dark:text-white/60 hover:bg-[#f3f4f6] dark:hover:bg-[#333]"
-                          >
-                            -
-                          </button>
-                          <span className="text-[14px] md:text-[16px] font-bold text-[#1A2948] dark:text-white">
-                            {pax.adults}
-                          </span>
-                          <button
-                            onClick={() =>
-                              setPax((prev) => ({
-                                ...prev,
-                                adults: prev.adults + 1,
-                              }))
-                            }
-                            className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full border border-[#d1d5db] dark:border-[#555] text-[10px] md:text-[12px] text-[#6B7280] dark:text-white/60 hover:bg-[#f3f4f6] dark:hover:bg-[#333]"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Children Row */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 md:gap-3">
-                          <MdChildCare
-                            viewBox="0 0 24 24"
-                            className="h-4 w-4 md:h-5 md:w-5 scale-[0.85] text-black dark:text-white/80"
-                          />
-                          <div>
-                            <div className="text-[11px] md:text-[13px] font-bold text-[#1A2948] dark:text-white">
-                              Trẻ em
-                            </div>
-                            <div className="text-[9px] md:text-[11px] text-[#1A2948] dark:text-white/70">
-                              {'2-12 tuổi'}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 md:gap-2">
-                          <button
-                            onClick={() =>
-                              setPax((prev) => ({
-                                ...prev,
-                                children: Math.max(0, prev.children - 1),
-                              }))
-                            }
-                            disabled={pax.children <= 0}
-                            className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full border border-[#d1d5db] dark:border-[#555] text-[10px] md:text-[12px] text-[#6B7280] dark:text-white/60 hover:bg-[#f3f4f6] dark:hover:bg-[#333]"
-                          >
-                            -
-                          </button>
-                          <span className="text-[14px] md:text-[16px] font-bold text-[#1A2948] dark:text-white">
-                            {pax.children}
-                          </span>
-                          <button
-                            onClick={() =>
-                              setPax((prev) => ({
-                                ...prev,
-                                children: prev.children + 1,
-                              }))
-                            }
-                            className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full border border-[#d1d5db] dark:border-[#555] text-[10px] md:text-[12px] text-[#6B7280] dark:text-white/60 hover:bg-[#f3f4f6] dark:hover:bg-[#333]"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Infants Row */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 md:gap-3">
-                          <MdChildFriendly
-                            viewBox="0 0 24 24"
-                            className="h-4 w-4 md:h-5 md:w-5 scale-[0.85] text-black dark:text-white/80"
-                          />
-                          <div>
-                            <div className="text-[11px] md:text-[13px] font-bold text-[#1A2948] dark:text-white">
-                              Em bé
-                            </div>
-                            <div className="text-[9px] md:text-[11px] text-[#1A2948] dark:text-white/70">
-                              {'< 2 tuổi'}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 md:gap-2">
-                          <button
-                            onClick={() =>
-                              setPax((prev) => ({
-                                ...prev,
-                                infants: Math.max(0, prev.infants - 1),
-                              }))
-                            }
-                            disabled={pax.infants <= 0}
-                            className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full border border-[#d1d5db] dark:border-[#555] text-[10px] md:text-[12px] text-[#6B7280] dark:text-white/60 hover:bg-[#f3f4f6] dark:hover:bg-[#333]"
-                          >
-                            -
-                          </button>
-                          <span className="text-[14px] md:text-[16px] font-bold text-[#1A2948] dark:text-white">
-                            {pax.infants}
-                          </span>
-                          <button
-                            onClick={() =>
-                              setPax((prev) => ({
-                                ...prev,
-                                infants: prev.infants + 1,
-                              }))
-                            }
-                            className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full border border-[#d1d5db] dark:border-[#555] text-[10px] md:text-[12px] text-[#6B7280] dark:text-white/60 hover:bg-[#f3f4f6] dark:hover:bg-[#333]"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Discount Code Input */}
-              <div className="mt-2 md:mt-4 flex items-center gap-2 rounded-xl bg-white dark:bg-navy-dark border-2 border-[#EC2029] dark:border-[#444] px-3 md:px-4 h-[46px] md:h-[58px]">
-                <MdConfirmationNumber className="text-[16px] md:text-[20px] text-black dark:text-white/80" />
+                  {tab.label}
+                </a>
+              );
+            })}
+          </nav>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pb-3">
+            {[
+              { value: true, label: 'Khứ hồi' },
+              { value: false, label: 'Một chiều' },
+            ].map(({ value, label }) => (
+              <label
+                key={label}
+                className="flex cursor-pointer items-center gap-1.5 text-xs font-bold text-white"
+              >
                 <input
-                  type="text"
-                  placeholder="Nhập mã giảm giá"
-                  className="mt-0 w-full bg-transparent text-[13px] md:text-[17px] font-black text-black dark:text-white outline-none sm:text-[15px] md:text-[18px]"
+                  type="radio"
+                  name="trip-type"
+                  checked={roundTrip === value}
+                  onChange={() => setRoundTrip(value)}
+                  className="h-3.5 w-3.5 accent-[var(--accent)]"
                 />
-              </div>
-
-              <label className="mt-2 flex items-center gap-2 text-[12px] md:text-[14px] font-bold text-white">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 md:h-5 md:w-5 rounded border-0 accent-[#f3c84d] dark:accent-[#FFDD00]"
-                />
-                <span>Tìm vé rẻ nhất</span>
+                <span>{label}</span>
               </label>
+            ))}
 
-              <button
-                type="submit"
-                className="vj-cta mt-3 flex h-[48px] w-full items-center justify-center text-[14px] uppercase transition-all duration-200 md:mt-4 md:h-[50px] md:text-[16px]"
+            <a
+              href="/tim-ve"
+              className="ml-auto flex items-center text-xs font-bold text-white hover:underline"
+            >
+              Nhiều chặng
+              <MdArrowOutward className="text-sm" />
+            </a>
+
+            <label className="flex items-center rounded border border-white/70 px-1.5 py-0.5">
+              <select
+                value={currency}
+                onChange={(event) => setCurrency(event.target.value)}
+                aria-label="Loại tiền tệ"
+                className="cursor-pointer appearance-none border-0 bg-transparent text-xs font-bold text-white outline-none"
               >
-                Tìm chuyến bay
-              </button>
+                {CURRENCIES.map((code) => (
+                  <option key={code} value={code} className="text-[#333333]">
+                    {code}
+                  </option>
+                ))}
+              </select>
+              <MdExpandMore className="text-sm text-white" />
+            </label>
+          </div>
+
+          {/* Departure / destination paired with their dates, with the swap
+              control hugging the left gutter between the two rows. */}
+          <div className="relative">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1.3fr_1fr]">
+              <AirportField
+                label="Điểm khởi hành"
+                value={from}
+                onChange={setFrom}
+                icon={<MdFlightTakeoff className={iconClass} />}
+              />
+              <DateField
+                label="Ngày đi"
+                value={departDate}
+                min={toInputDate(new Date())}
+                onChange={setDepartDate}
+              />
             </div>
-          </form>
-        </div>
+
+            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-[1.3fr_1fr]">
+              <AirportField
+                label="Điểm đến"
+                value={to}
+                onChange={setTo}
+                icon={<MdFlightLand className={iconClass} />}
+              />
+              {roundTrip && (
+                <DateField
+                  label="Ngày về"
+                  value={returnDate}
+                  min={departDate}
+                  onChange={setReturnDate}
+                />
+              )}
+            </div>
+
+            <button
+              type="button"
+              aria-label="Đổi điểm khởi hành và điểm đến"
+              onClick={() => {
+                setFrom(to);
+                setTo(from);
+              }}
+              className="absolute -left-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full bg-white text-base text-[var(--primary)] shadow-[0_2px_8px_rgba(0,0,0,0.2)] hover:bg-[#fff3f3]"
+            >
+              <MdSwapHoriz />
+            </button>
+          </div>
+
+          <label className={`mt-2 ${fieldClass}`}>
+            <MdPeople className={iconClass} />
+            <span className="min-w-0 flex-1">
+              <span className={labelClass}>Hành khách</span>
+              <select
+                value={passengers}
+                onChange={(event) => setPassengers(Number(event.target.value))}
+                aria-label="Số hành khách"
+                className={`${inputClass} cursor-pointer appearance-none`}
+              >
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((count) => (
+                  <option key={count} value={count}>
+                    {count} người lớn
+                  </option>
+                ))}
+              </select>
+            </span>
+            <MdExpandMore className={iconClass} />
+          </label>
+
+          <label className={`mt-2 ${fieldClass}`}>
+            <MdConfirmationNumber className={iconClass} />
+            <input
+              value={promoCode}
+              onChange={(event) => setPromoCode(event.target.value)}
+              placeholder="Mã khuyến mại"
+              className="min-w-0 flex-1 border-0 bg-transparent px-0 text-sm font-extrabold text-[#333333] outline-none placeholder:font-bold placeholder:text-[#8c8c8c]"
+            />
+          </label>
+
+          <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm font-bold text-white">
+            <input
+              type="checkbox"
+              checked={cheapestOnly}
+              onChange={(event) => setCheapestOnly(event.target.checked)}
+              className="h-4 w-4 accent-[var(--accent)]"
+            />
+            <span>Tìm vé rẻ nhất</span>
+          </label>
+
+          <button type="submit" className="vj-cta mt-3 w-full px-4 text-sm font-extrabold">
+            Tìm chuyến bay
+          </button>
+        </form>
       </div>
     </section>
+  );
+}
+
+function AirportField({
+  label,
+  value,
+  onChange,
+  icon,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  icon: React.ReactNode;
+}) {
+  return (
+    <label className={fieldClass}>
+      {icon}
+      <span className="min-w-0 flex-1">
+        <span className={labelClass}>{label}</span>
+        <select
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          aria-label={label}
+          className={`${inputClass} cursor-pointer appearance-none`}
+        >
+          {AIRPORTS.map((airport) => (
+            <option key={airport.code} value={airport.code}>
+              {airport.city} ({airport.code})
+            </option>
+          ))}
+        </select>
+      </span>
+    </label>
+  );
+}
+
+function DateField({
+  label,
+  value,
+  min,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  min: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className={fieldClass}>
+      <MdCalendarMonth className={iconClass} />
+      <span className="min-w-0 flex-1">
+        <span className={labelClass}>{label}</span>
+        <input
+          type="date"
+          value={value}
+          min={min}
+          onChange={(event) => onChange(event.target.value)}
+          aria-label={label}
+          className={`${inputClass} cursor-pointer`}
+        />
+      </span>
+    </label>
   );
 }

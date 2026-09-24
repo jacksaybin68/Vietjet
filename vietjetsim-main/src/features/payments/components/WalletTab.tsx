@@ -1,0 +1,924 @@
+'use client';
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { Icon } from '@/shared/components/ui';
+import { useToast } from '@/hooks/useToast';
+import {
+  getWalletOverview,
+  listPaymentMethods,
+  mutateWallet,
+  addPaymentMethod,
+  deletePaymentMethod,
+  setDefaultPaymentMethod,
+} from '@/features/payments/services';
+
+// ─── Types ──────────────────────────────────────────────────────────────────
+
+interface PaymentMethod {
+  id: string;
+  type: 'card' | 'bank';
+  cardBrand: string | null;
+  lastFour: string | null;
+  cardHolderName: string | null;
+  expiryMonth: number | null;
+  expiryYear: number | null;
+  bankId: string | null;
+  bankName: string | null;
+  bankCode: string | null;
+  isDefault: boolean;
+  isActive: boolean;
+  createdAt: string;
+}
+
+interface WalletData {
+  id: string;
+  balance: number;
+  currency: string;
+  account_number: string;
+}
+
+interface WalletTransaction {
+  id: string;
+  type: 'topup' | 'withdraw' | 'payment' | 'refund' | 'bonus';
+  amount: number;
+  description: string | null;
+  created_at: string;
+}
+
+// ─── Card Brand Icons ─────────────────────────────────────────────────────────
+
+const CARD_BRANDS: Record<string, { name: string; color: string }> = {
+  Visa: { name: ' CREDIT CARD', color: '#1A1F71' },
+  Mastercard: { name: 'CARD', color: '#EB001B' },
+  Amex: { name: 'CARD', color: '#2E77BC' },
+  JCB: { name: 'CARD', color: '#003087' },
+};
+
+function getCardBrandLabel(brand: string | null): string {
+  if (!brand) return 'CARD';
+  return CARD_BRANDS[brand]?.name || brand.toUpperCase();
+}
+
+function getCardBrandColor(brand: string | null): string {
+  if (!brand) return '#1A2948';
+  return CARD_BRANDS[brand]?.color || '#1A2948';
+}
+
+// ─── Add Payment Method Modal ───────────────────────────────────────────────
+
+function AddPaymentMethodModal({
+  onClose,
+  onSuccess,
+}: {
+  onClose: () => void;
+  onSuccess: (method: PaymentMethod) => void;
+}) {
+  const toast = useToast();
+  const [methodType, setMethodType] = useState<'card' | 'bank'>('card');
+  const [loading, setLoading] = useState(false);
+
+  // Card fields
+  const [cardBrand, setCardBrand] = useState('Visa');
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardHolder, setCardHolder] = useState('');
+  const [expiryMonth, setExpiryMonth] = useState('');
+  const [expiryYear, setExpiryYear] = useState('');
+
+  // Bank fields
+  const [bankName, setBankName] = useState('');
+  const [bankId, setBankId] = useState('');
+
+  const formatCardNumber = (val: string) =>
+    val
+      .replace(/\D/g, '')
+      .slice(0, 16)
+      .replace(/(.{4})/g, '$1 ')
+      .trim();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      if (methodType === 'card') {
+        if (!cardNumber || cardNumber.replace(/\D/g, '').length < 13) {
+          toast.error('Lỗi', 'Số thẻ không hợp lệ');
+          return;
+        }
+        if (!cardHolder.trim()) {
+          toast.error('Lỗi', 'Vui lòng nhập tên chủ thẻ');
+          return;
+        }
+      } else {
+        if (!bankName.trim()) {
+          toast.error('Lỗi', 'Vui lòng nhập tên ngân hàng');
+          return;
+        }
+      }
+
+      const payload: Record<string, any> = { type: methodType };
+
+      if (methodType === 'card') {
+        payload.cardBrand = cardBrand;
+        payload.lastFour = cardNumber.replace(/\D/g, '').slice(-4);
+        payload.cardHolderName = cardHolder;
+        payload.expiryMonth = parseInt(expiryMonth) || 0;
+        payload.expiryYear = parseInt(expiryYear) || 0;
+      } else {
+        payload.bankName = bankName;
+        payload.bankId = bankId;
+      }
+
+      const res = await addPaymentMethod(payload);
+
+      const method: PaymentMethod = {
+        id: res.id,
+        type: res.type,
+        cardBrand: res.card_brand,
+        lastFour: res.last_four,
+        cardHolderName: res.card_holder_name,
+        expiryMonth: res.expiry_month,
+        expiryYear: res.expiry_year,
+        bankId: res.bank_id,
+        bankName: res.bank_name,
+        bankCode: res.bank_code,
+        isDefault: res.is_default,
+        isActive: res.is_active,
+        createdAt: res.created_at,
+      };
+
+      toast.success('Thành công', 'Phương thức thanh toán đã được thêm.');
+      onSuccess(method);
+      onClose();
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Đã xảy ra lỗi khi thêm phương thức thanh toán.';
+      toast.error('Lỗi', message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const inputClass =
+    'w-full px-4 py-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#EC2029]/20 focus:border-[#EC2029]';
+  const labelClass = 'block text-sm font-semibold mb-1.5 text-[#1A2948] font-[KoHo,sans-serif]';
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
+        style={{ maxHeight: '90vh', overflowY: 'auto' }}
+      >
+        <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
+          <h3 className="text-lg font-bold font-[KoHo,sans-serif] text-[#1A2948]">
+            Thêm phương thức thanh toán
+          </h3>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--surface-2)] transition-colors"
+          >
+            <Icon
+              name="XMarkIcon"
+              size={20}
+              className="text-[var(--foreground-muted)] [var(--foreground-muted)]"
+            />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          {/* Type Tabs */}
+          <div className="flex gap-2 p-1 bg-[var(--surface-2)] rounded-xl">
+            <button
+              type="button"
+              onClick={() => setMethodType('card')}
+              className={`flex-1 py-2.5 rounded-lg text-sm font-semibold font-[KoHo,sans-serif] transition-all ${
+                methodType === 'card'
+                  ? 'bg-white text-[#EC2029] shadow-sm'
+                  : 'text-[var(--foreground-muted)] [var(--foreground-muted)] hover:text-[var(--foreground)]'
+              }`}
+            >
+              <Icon name="CreditCardIcon" size={16} className="inline mr-1.5" />
+              Thẻ tín dụng
+            </button>
+            <button
+              type="button"
+              onClick={() => setMethodType('bank')}
+              className={`flex-1 py-2.5 rounded-lg text-sm font-semibold font-[KoHo,sans-serif] transition-all ${
+                methodType === 'bank'
+                  ? 'bg-white text-[#EC2029] shadow-sm'
+                  : 'text-[var(--foreground-muted)] [var(--foreground-muted)] hover:text-[var(--foreground)]'
+              }`}
+            >
+              <Icon name="BuildingColumnsIcon" size={16} className="inline mr-1.5" />
+              Tài khoản ngân hàng
+            </button>
+          </div>
+
+          {methodType === 'card' ? (
+            <>
+              {/* Card Brand */}
+              <div>
+                <label className={labelClass}>Loại thẻ</label>
+                <select
+                  value={cardBrand}
+                  onChange={(e) => setCardBrand(e.target.value)}
+                  className={inputClass}
+                >
+                  <option value="Visa">Visa</option>
+                  <option value="Mastercard">Mastercard</option>
+                  <option value="Amex">American Express</option>
+                  <option value="JCB">JCB</option>
+                </select>
+              </div>
+
+              {/* Card Number */}
+              <div>
+                <label className={labelClass}>Số thẻ</label>
+                <input
+                  type="text"
+                  value={cardNumber}
+                  onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
+                  className={inputClass}
+                  placeholder="1234 5678 9012 3456"
+                  maxLength={19}
+                />
+              </div>
+
+              {/* Card Holder */}
+              <div>
+                <label className={labelClass}>Tên chủ thẻ</label>
+                <input
+                  type="text"
+                  value={cardHolder}
+                  onChange={(e) => setCardHolder(e.target.value.toUpperCase())}
+                  className={inputClass}
+                  placeholder="NGUYEN VAN A"
+                />
+              </div>
+
+              {/* Expiry */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClass}>Tháng hết hạn</label>
+                  <select
+                    value={expiryMonth}
+                    onChange={(e) => setExpiryMonth(e.target.value)}
+                    className={inputClass}
+                  >
+                    <option value="">MM</option>
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                      <option key={m} value={m.toString().padStart(2, '0')}>
+                        {m.toString().padStart(2, '0')}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className={labelClass}>Năm hết hạn</label>
+                  <select
+                    value={expiryYear}
+                    onChange={(e) => setExpiryYear(e.target.value)}
+                    className={inputClass}
+                  >
+                    <option value="">YYYY</option>
+                    {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i).map((y) => (
+                      <option key={y} value={y}>
+                        {y}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Bank Name */}
+              <div>
+                <label className={labelClass}>Tên ngân hàng</label>
+                <select
+                  value={bankName}
+                  onChange={(e) => setBankName(e.target.value)}
+                  className={inputClass}
+                >
+                  <option value="">-- Chọn ngân hàng --</option>
+                  <option value="Vietcombank">Vietcombank</option>
+                  <option value="VietinBank">VietinBank</option>
+                  <option value="BIDV">BIDV</option>
+                  <option value="Agribank">Agribank</option>
+                  <option value="ACB">ACB</option>
+                  <option value="TPBank">TPBank</option>
+                  <option value="MBBank">MBBank</option>
+                  <option value="VPBank">VPBank</option>
+                  <option value="Techcombank">Techcombank</option>
+                  <option value="Sacombank">Sacombank</option>
+                  <option value="Shinhan Bank">Shinhan Bank</option>
+                  <option value="Citibank">Citibank</option>
+                  <option value="HSBC">HSBC</option>
+                </select>
+              </div>
+
+              {/* Bank ID */}
+              <div>
+                <label className={labelClass}>Số tài khoản</label>
+                <input
+                  type="text"
+                  value={bankId}
+                  onChange={(e) => setBankId(e.target.value.replace(/\D/g, ''))}
+                  className={inputClass}
+                  placeholder="1234567890"
+                  maxLength={14}
+                />
+              </div>
+            </>
+          )}
+
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#EC2029] text-white rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-primary-dark transition-all shadow-md hover:shadow-lg active:scale-95 disabled:opacity-50"
+            >
+              {loading ? (
+                <>
+                  <Icon name="ArrowPathIcon" size={18} className="animate-spin" />
+                  Đang xử lý...
+                </>
+              ) : (
+                <>
+                  <Icon name="CheckIcon" size={18} />
+                  Thêm ngay
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-3 bg-[var(--surface-2)] text-[var(--foreground-muted)] rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-[var(--surface-3)] transition-all"
+            >
+              Hủy
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ─── WalletTab Component ─────────────────────────────────────────────────────
+
+interface WalletTabProps {
+  user: { id: string; email: string; fullName: string };
+}
+
+export default function WalletTab({ user }: WalletTabProps) {
+  const toast = useToast();
+  const [wallet, setWallet] = useState<WalletData | null>(null);
+  const [methods, setMethods] = useState<PaymentMethod[]>([]);
+  const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [topupAmount, setTopupAmount] = useState('');
+  const [topupLoading, setTopupLoading] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [withdrawLoading, setWithdrawLoading] = useState(false);
+  const [topupMethodId, setTopupMethodId] = useState('');
+  const [withdrawMethodId, setWithdrawMethodId] = useState('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const linkedBanks = methods.filter((method) => method.type === 'bank');
+  const defaultLinkedBank =
+    linkedBanks.find((method) => method.isDefault) || linkedBanks[0] || null;
+  const activeTopupMethods = methods;
+  const selectedTopupMethod =
+    activeTopupMethods.find((method) => method.id === topupMethodId) ||
+    activeTopupMethods.find((method) => method.isDefault) ||
+    activeTopupMethods[0] ||
+    null;
+  const selectedWithdrawBank =
+    linkedBanks.find((method) => method.id === withdrawMethodId) ||
+    (withdrawMethodId ? null : defaultLinkedBank);
+
+  const parseFormattedAmount = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    return digits ? parseInt(digits, 10) : 0;
+  };
+
+  const fetchData = useCallback(async () => {
+    try {
+      const [walletData, methodRecords] = await Promise.all([
+        getWalletOverview(),
+        listPaymentMethods(),
+      ]);
+
+      setWallet(walletData.wallet);
+      setTransactions(walletData.transactions || []);
+
+      const normalizedMethods = methodRecords.map((m) => ({
+        id: m.id,
+        type: m.type,
+        cardBrand: m.card_brand,
+        lastFour: m.last_four,
+        cardHolderName: m.card_holder_name,
+        expiryMonth: m.expiry_month,
+        expiryYear: m.expiry_year,
+        bankId: m.bank_id,
+        bankName: m.bank_name,
+        bankCode: m.bank_code,
+        isDefault: m.is_default,
+        isActive: m.is_active,
+        createdAt: m.created_at,
+      }));
+      setMethods(normalizedMethods);
+      const defaultMethod = normalizedMethods.find((m) => m.isDefault) || normalizedMethods[0];
+      if (defaultMethod) {
+        setTopupMethodId(defaultMethod.id);
+      }
+      const defaultBankMethod =
+        normalizedMethods.find((m) => m.type === 'bank' && m.isDefault) ||
+        normalizedMethods.find((m) => m.type === 'bank');
+      if (defaultBankMethod) {
+        setWithdrawMethodId(defaultBankMethod.id);
+      }
+    } catch {
+      toast.error('Lỗi', 'Không thể tải dữ liệu ví.');
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleTopup = async () => {
+    const amount = parseFormattedAmount(topupAmount);
+    if (!selectedTopupMethod) {
+      toast.error('Thiếu phương thức nạp', 'Vui lòng liên kết thẻ hoặc tài khoản để nạp tiền.');
+      return;
+    }
+    if (!amount || amount <= 0) {
+      toast.error('Lỗi', 'Vui lòng nhập số tiền hợp lệ.');
+      return;
+    }
+
+    setTopupLoading(true);
+    try {
+      const data = await mutateWallet({
+        action: 'topup',
+        amount,
+        paymentMethodId: selectedTopupMethod.id,
+        description: 'Nạp tiền vào ví Vietjet Air',
+      });
+
+      setWallet((prev) => (prev ? { ...prev, balance: data.wallet.balance } : null));
+      if (data.transaction) {
+        setTransactions((prev) => [data.transaction, ...prev].slice(0, 10));
+      }
+      setTopupAmount('');
+      toast.success('Thành công', `Đã nạp ${amount.toLocaleString('vi-VN')} VND vào ví.`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Nạp tiền thất bại. Vui lòng thử lại.';
+      toast.error('Lỗi', message);
+    } finally {
+      setTopupLoading(false);
+    }
+  };
+
+  const handleWithdraw = async () => {
+    const amount = parseFormattedAmount(withdrawAmount);
+    if (!selectedWithdrawBank) {
+      toast.error(
+        'Thiếu tài khoản ngân hàng',
+        'Vui lòng liên kết tài khoản ngân hàng trước khi rút.'
+      );
+      return;
+    }
+    if (!amount || amount <= 0) {
+      toast.error('Lỗi', 'Vui lòng nhập số tiền rút hợp lệ.');
+      return;
+    }
+    if ((wallet?.balance || 0) < amount) {
+      toast.error('Lỗi', 'Số dư ví không đủ để rút.');
+      return;
+    }
+
+    setWithdrawLoading(true);
+    try {
+      const data = await mutateWallet({
+        action: 'withdraw',
+        amount,
+        paymentMethodId: selectedWithdrawBank.id,
+        description: `Rút tiền về ${selectedWithdrawBank.bankName} - ${selectedWithdrawBank.bankId}`,
+      });
+
+      setWallet((prev) => (prev ? { ...prev, balance: data.wallet.balance } : null));
+      if (data.transaction) {
+        setTransactions((prev) => [data.transaction, ...prev].slice(0, 10));
+      }
+      setWithdrawAmount('');
+      toast.success(
+        'Rút tiền thành công',
+        `Đã rút ${amount.toLocaleString('vi-VN')} VND về tài khoản liên kết.`
+      );
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Không thể rút tiền.';
+      toast.error('Rút tiền thất bại', message);
+    } finally {
+      setWithdrawLoading(false);
+    }
+  };
+
+  const handleSetDefault = async (methodId: string) => {
+    try {
+      await setDefaultPaymentMethod(methodId);
+      setMethods((prev) => prev.map((m) => ({ ...m, isDefault: m.id === methodId })));
+      toast.success('Thành công', 'Đã đặt làm phương thức mặc định.');
+    } catch {
+      toast.error('Lỗi', 'Không thể cập nhật.');
+    }
+  };
+
+  const handleDelete = async (methodId: string) => {
+    if (!confirm('Bạn có chắc muốn xóa phương thức thanh toán này?')) return;
+
+    setDeletingId(methodId);
+    try {
+      await deletePaymentMethod(methodId);
+      setMethods((prev) => prev.filter((m) => m.id !== methodId));
+      toast.success('Đã xóa', 'Phương thức thanh toán đã được xóa.');
+    } catch {
+      toast.error('Lỗi', 'Không thể xóa phương thức.');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleMethodAdded = (method: PaymentMethod) => {
+    setMethods((prev) =>
+      method.isDefault
+        ? [method, ...prev.map((m) => ({ ...m, isDefault: false }))]
+        : [method, ...prev]
+    );
+  };
+
+  const formatCurrency = (amount: number) =>
+    amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+
+  if (loading) {
+    return (
+      <div className="space-y-4 p-4">
+        <div className="h-48 bg-[var(--surface-2)] rounded-2xl animate-pulse" />
+        <div className="h-32 bg-[var(--surface-2)] rounded-2xl animate-pulse" />
+        <div className="h-24 bg-[var(--surface-2)] rounded-2xl animate-pulse" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 p-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[#1A2948]">
+            Ví Vietjet Air
+          </h2>
+          <p className="text-sm text-[var(--foreground-muted)] [var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
+            Quản lý số dư và phương thức thanh toán
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-amber-50 border border-[rgb(var(--accent-rgb))]/30 rounded-2xl p-4">
+        <p className="text-sm font-semibold text-amber-900 mb-2">Thiết lập ví để đặt vé</p>
+        <div className="space-y-1 text-xs text-amber-800">
+          <p>{methods.length > 0 ? '✓' : '•'} Bước 1: Liên kết tài khoản/thẻ thanh toán</p>
+          <p>{(wallet?.balance || 0) > 0 ? '✓' : '•'} Bước 2: Nạp tiền vào ví</p>
+          <p>• Bước 3: Dùng số dư ví để thanh toán vé tại trang thanh toán</p>
+        </div>
+      </div>
+
+      {/* Balance Card */}
+      <div
+        className="rounded-2xl p-6 text-white relative overflow-hidden"
+        style={{
+          background:
+            'linear-gradient(135deg, var(--vj-grad-red-from) 0%, var(--primary) 50%, var(--vj-grad-red-to) 100%)',
+        }}
+      >
+        <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4" />
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4" />
+
+        <div className="relative">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Icon name="WalletIcon" size={20} className="text-white/70" />
+              <span className="text-sm text-white/70 font-[Be Vietnam Pro,sans-serif]">
+                Số dư ví
+              </span>
+            </div>
+
+            {/* Account Number Display */}
+            {wallet?.account_number && (
+              <div
+                className="flex items-center gap-2 bg-black/20 rounded-lg px-3 py-1.5 backdrop-blur-sm group hover:bg-black/30 transition-colors cursor-pointer"
+                onClick={() => {
+                  navigator.clipboard.writeText(wallet.account_number);
+                  toast.success('Đã sao chép', 'Số tài khoản đã được copy vào khay nhớ tạm.');
+                }}
+                title="Nhấn để copy"
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs text-white/60 font-[Be Vietnam Pro,sans-serif] uppercase tracking-wider">
+                    Số TK:
+                  </span>
+                  <span className="text-sm font-bold font-[KoHo,sans-serif] text-white tracking-widest">
+                    {wallet.account_number}
+                  </span>
+                </div>
+                <Icon
+                  name="DocumentDuplicateIcon"
+                  size={14}
+                  className="text-white/40 group-hover:text-white transition-colors"
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="text-4xl font-bold font-[KoHo,sans-serif] mb-6">
+            {formatCurrency(wallet?.balance || 0)}
+          </div>
+
+          {/* Topup Form */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+            <div className="mb-3">
+              <label className="block text-xs text-white/70 mb-1 font-[Be Vietnam Pro,sans-serif]">
+                Nguồn nạp tiền
+              </label>
+              <select
+                value={selectedTopupMethod?.id || ''}
+                onChange={(e) => setTopupMethodId(e.target.value)}
+                className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-xl text-sm text-white"
+              >
+                {activeTopupMethods.map((method) => (
+                  <option key={method.id} value={method.id} className="text-[var(--foreground)]">
+                    {method.type === 'card'
+                      ? `${getCardBrandLabel(method.cardBrand)} •••• ${method.lastFour || ''}`
+                      : `${method.bankName || 'Ngân hàng'} - ${method.bankId || ''}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  value={topupAmount}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    setTopupAmount(val ? parseInt(val, 10).toLocaleString('vi-VN') : '');
+                  }}
+                  placeholder="Nhập số tiền nạp"
+                  className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 text-sm focus:outline-none focus:ring-2 focus:ring-white/40 font-[Be Vietnam Pro,sans-serif]"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 text-sm">
+                  VND
+                </span>
+              </div>
+              <button
+                onClick={handleTopup}
+                disabled={topupLoading || !topupAmount || !selectedTopupMethod}
+                className="px-6 py-3 bg-white text-[#EC2029] rounded-xl font-bold text-sm font-[KoHo,sans-serif] hover:bg-white/90 transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              >
+                {topupLoading ? (
+                  <Icon name="ArrowPathIcon" size={18} className="animate-spin" />
+                ) : (
+                  'Nạp tiền'
+                )}
+              </button>
+            </div>
+            {activeTopupMethods.length === 0 && (
+              <p className="text-xs text-white/80 mt-2 font-[Be Vietnam Pro,sans-serif]">
+                Bạn cần thêm phương thức thanh toán trước khi nạp tiền.
+              </p>
+            )}
+            <div className="flex gap-2 mt-3">
+              {[100000, 200000, 500000, 1000000].map((amt) => (
+                <button
+                  key={amt}
+                  onClick={() => setTopupAmount(amt.toLocaleString('vi-VN'))}
+                  className="flex-1 py-1.5 bg-white/15 hover:bg-white/25 rounded-lg text-xs font-semibold text-white transition-colors font-[Be Vietnam Pro,sans-serif]"
+                >
+                  {amt >= 1000000
+                    ? `${(amt / 1000000).toFixed(0)}M`
+                    : `${(amt / 1000).toFixed(0)}K`}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Payment Methods */}
+      <div className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden shadow-vj-card">
+        <div className="p-5 border-b border-[var(--border)] flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Icon name="CreditCardIcon" size={20} className="text-[#EC2029]" />
+            <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948]">
+              Phương thức thanh toán
+            </h3>
+          </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#EC2029] text-white rounded-lg text-sm font-semibold font-[KoHo,sans-serif] hover:bg-primary-dark transition-all active:scale-95 shadow-sm"
+          >
+            <Icon name="PlusIcon" size={16} />
+            Thêm mới
+          </button>
+        </div>
+
+        <div className="divide-y divide-[var(--border)]">
+          {methods.length === 0 ? (
+            <div className="p-8 text-center">
+              <div className="w-16 h-16 bg-[var(--surface-2)] rounded-full flex items-center justify-center mx-auto mb-3">
+                <Icon
+                  name="CreditCardIcon"
+                  size={28}
+                  className="text-[var(--foreground-subtle)] [var(--foreground-subtle)]"
+                />
+              </div>
+              <p className="text-[var(--foreground-muted)] [var(--foreground-muted)] text-sm font-[Be Vietnam Pro,sans-serif]">
+                Chưa có phương thức thanh toán nào.
+              </p>
+              <p className="text-[var(--foreground-subtle)] [var(--foreground-subtle)] text-xs mt-1 font-[Be Vietnam Pro,sans-serif]">
+                Thêm thẻ hoặc tài khoản ngân hàng để thanh toán nhanh hơn.
+              </p>
+            </div>
+          ) : (
+            methods.map((method) => (
+              <div key={method.id} className="p-4 flex items-center gap-4">
+                {/* Icon */}
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${getCardBrandColor(method.cardBrand)}15` }}
+                >
+                  {method.type === 'card' ? (
+                    <Icon
+                      name="CreditCardIcon"
+                      size={22}
+                      style={{ color: getCardBrandColor(method.cardBrand) }}
+                    />
+                  ) : (
+                    <Icon name="BuildingColumnsIcon" size={22} className="text-[#1A2948]" />
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-sm text-[#1A2948] font-[KoHo,sans-serif]">
+                      {method.type === 'card'
+                        ? `${getCardBrandLabel(method.cardBrand)} •••• ${method.lastFour}`
+                        : method.bankName || 'Ngân hàng'}
+                    </span>
+                    {method.isDefault && (
+                      <span className="px-2 py-0.5 bg-[#FFDD00]/20 text-[#1A2948] rounded-full text-xs font-semibold font-[Be Vietnam Pro,sans-serif]">
+                        Mặc định
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-[var(--foreground-muted)] [var(--foreground-muted)] mt-0.5 font-[Be Vietnam Pro,sans-serif]">
+                    {method.type === 'card'
+                      ? `${method.cardHolderName || ''}${method.expiryMonth ? ` · Hết hạn ${method.expiryMonth.toString().padStart(2, '0')}/${method.expiryYear}` : ''}`
+                      : method.bankId
+                        ? `Số TK: ${method.bankId}`
+                        : 'Tài khoản ngân hàng'}
+                  </p>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-2">
+                  {!method.isDefault && (
+                    <button
+                      onClick={() => handleSetDefault(method.id)}
+                      className="px-3 py-1.5 text-xs text-[var(--foreground-muted)] [var(--foreground-muted)] hover:text-[#EC2029] hover:bg-[var(--surface-2)] rounded-lg transition-colors font-semibold font-[Be Vietnam Pro,sans-serif]"
+                    >
+                      Đặt mặc định
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDelete(method.id)}
+                    disabled={deletingId === method.id}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--foreground-subtle)] [var(--foreground-subtle)] hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+                  >
+                    <Icon
+                      name="TrashIcon"
+                      size={16}
+                      className={deletingId === method.id ? 'animate-spin' : ''}
+                    />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-white rounded-2xl border border-[var(--border)] p-5 shadow-vj-card">
+          <div className="flex items-center gap-2 mb-3">
+            <Icon name="BuildingColumnsIcon" size={18} className="text-[#EC2029]" />
+            <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948]">
+              Rút tiền về tài khoản liên kết
+            </h3>
+          </div>
+          {defaultLinkedBank ? (
+            <>
+              <select
+                value={selectedWithdrawBank?.id || ''}
+                onChange={(e) => setWithdrawMethodId(e.target.value)}
+                className="w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-sm mb-2"
+              >
+                {linkedBanks.map((bankMethod) => (
+                  <option key={bankMethod.id} value={bankMethod.id}>
+                    {bankMethod.bankName} - {bankMethod.bankId}
+                    {bankMethod.isDefault ? ' (Mặc định)' : ''}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-[var(--foreground-muted)] [var(--foreground-muted)] mb-2 font-[Be Vietnam Pro,sans-serif]">
+                Tài khoản nhận: {selectedWithdrawBank?.bankName} - {selectedWithdrawBank?.bankId}
+              </p>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={withdrawAmount}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    setWithdrawAmount(val ? parseInt(val, 10).toLocaleString('vi-VN') : '');
+                  }}
+                  placeholder="Nhập số tiền rút"
+                  className="flex-1 px-4 py-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-sm"
+                />
+                <button
+                  onClick={handleWithdraw}
+                  disabled={withdrawLoading || !withdrawAmount}
+                  className="px-4 py-3 bg-[#1A2948] text-white rounded-xl text-sm font-semibold hover:bg-[#121d35] disabled:opacity-50"
+                >
+                  {withdrawLoading ? 'Đang rút...' : 'Rút tiền'}
+                </button>
+              </div>
+            </>
+          ) : (
+            <p className="text-sm text-[var(--foreground-muted)] [var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
+              Bạn cần liên kết tài khoản ngân hàng để rút tiền về STK.
+            </p>
+          )}
+        </div>
+
+        <div className="bg-white rounded-2xl border border-[var(--border)] p-5 shadow-vj-card">
+          <div className="flex items-center gap-2 mb-3">
+            <Icon name="ClockIcon" size={18} className="text-[#EC2029]" />
+            <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948]">
+              Giao dịch gần đây
+            </h3>
+          </div>
+          {transactions.length === 0 ? (
+            <p className="text-sm text-[var(--foreground-muted)] [var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
+              Chưa có giao dịch.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {transactions.map((tx) => (
+                <div
+                  key={tx.id}
+                  className="flex items-center justify-between bg-[var(--surface-2)] rounded-xl p-3"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-[#1A2948]">
+                      {tx.description || 'Giao dịch ví'}
+                    </p>
+                    <p className="text-xs text-[var(--foreground-muted)] [var(--foreground-muted)]">
+                      {new Date(tx.created_at).toLocaleString('vi-VN')}
+                    </p>
+                  </div>
+                  <span
+                    className={`text-sm font-bold ${tx.amount >= 0 ? 'text-emerald-600' : 'text-red-500'}`}
+                  >
+                    {tx.amount >= 0 ? '+' : ''}
+                    {Math.abs(tx.amount).toLocaleString('vi-VN')}đ
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {showAddModal && (
+        <AddPaymentMethodModal
+          onClose={() => setShowAddModal(false)}
+          onSuccess={handleMethodAdded}
+        />
+      )}
+    </div>
+  );
+}

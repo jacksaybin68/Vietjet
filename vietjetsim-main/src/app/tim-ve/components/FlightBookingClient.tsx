@@ -167,7 +167,7 @@ function FlightBookingClientInner() {
   };
 
   return (
-    <div className="pt-[128px] pb-8 sm:pb-12 min-h-screen bg-[var(--surface)] dark:bg-[var(--dark-surface)] font-body">
+    <div className="pt-[128px] pb-8 sm:pb-12 min-h-screen bg-[var(--surface)]font-body">
       {/* VietJet-style sticky step bar - responsive */}
       <div
         className="sticky top-[128px] z-30"
@@ -283,13 +283,13 @@ export default function FlightBookingClient() {
 function FlightSearchSkeleton() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-      <div className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl shadow-lg p-8 animate-pulse">
-        <div className="h-8 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] rounded-lg w-1/3 mb-6" />
+      <div className="bg-[var(--surface)]rounded-2xl shadow-lg p-8 animate-pulse">
+        <div className="h-8 bg-[var(--surface-2)]rounded-lg w-1/3 mb-6" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
             <div key={i}>
-              <div className="h-4 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] rounded w-1/2 mb-2" />
-              <div className="h-10 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] rounded-lg" />
+              <div className="h-4 bg-[var(--surface-2)]rounded w-1/2 mb-2" />
+              <div className="h-10 bg-[var(--surface-2)]rounded-lg" />
             </div>
           ))}
         </div>

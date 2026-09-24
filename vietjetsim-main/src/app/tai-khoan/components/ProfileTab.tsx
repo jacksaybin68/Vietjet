@@ -192,12 +192,12 @@ export default function ProfileTab({ user }: { user: User }) {
   };
 
   const inputBaseClass =
-    'w-full px-4 py-3 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/20 focus:border-[var(--primary)]';
+    'w-full px-4 py-3 bg-[var(--surface-2)]border border-[var(--border)]rounded-xl text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/20 focus:border-[var(--primary)]';
   const inputDisabledClass =
-    'bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] cursor-not-allowed';
-  const inputErrorClass = 'border-[var(--primary)] bg-red-50 dark:bg-red-900/10';
+    'bg-[var(--surface-2)]text-[var(--foreground-muted)]cursor-not-allowed';
+  const inputErrorClass = 'border-[var(--primary)] bg-red-50/10';
   const labelClass =
-    'block text-sm font-medium mb-1.5 font-[KoHo,sans-serif] text-[var(--foreground)] dark:text-[var(--foreground)]';
+    'block text-sm font-medium mb-1.5 font-[KoHo,sans-serif] text-[var(--foreground)]';
   const errorTextClass = 'text-xs text-[var(--primary)] mt-1 font-[Be Vietnam Pro,sans-serif]';
 
   return (
@@ -205,10 +205,10 @@ export default function ProfileTab({ user }: { user: User }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[var(--foreground)] dark:text-[var(--foreground)]">
+          <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[var(--foreground)]">
             Hồ sơ cá nhân
           </h2>
-          <p className="text-sm text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
+          <p className="text-sm text-[var(--foreground-muted)]mt-1 font-[Be Vietnam Pro,sans-serif]">
             Quản lý thông tin tài khoản và mật khẩu của bạn
           </p>
         </div>
@@ -227,7 +227,7 @@ export default function ProfileTab({ user }: { user: User }) {
         {/* Left Column - Avatar & Quick Info */}
         <div className="lg:col-span-1">
           <div
-            className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] p-6 text-center"
+            className="bg-[var(--surface)]rounded-2xl border border-[var(--border)]p-6 text-center"
             style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
           >
             {/* Avatar */}
@@ -265,10 +265,10 @@ export default function ProfileTab({ user }: { user: User }) {
               )}
             </div>
 
-            <h3 className="text-lg font-bold font-[KoHo,sans-serif] text-[var(--foreground)] dark:text-[var(--foreground)]">
+            <h3 className="text-lg font-bold font-[KoHo,sans-serif] text-[var(--foreground)]">
               {user.fullName || 'Người dùng'}
             </h3>
-            <p className="text-sm text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
+            <p className="text-sm text-[var(--foreground-muted)]mt-1 font-[Be Vietnam Pro,sans-serif]">
               {user.email}
             </p>
             <span
@@ -282,7 +282,7 @@ export default function ProfileTab({ user }: { user: User }) {
             </span>
 
             {user.createdAt && (
-              <p className="text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] mt-4 font-[Be Vietnam Pro,sans-serif]">
+              <p className="text-xs text-[var(--foreground-subtle)]mt-4 font-[Be Vietnam Pro,sans-serif]">
                 Tham gia từ{' '}
                 {new Date(user.createdAt).toLocaleDateString('vi-VN', {
                   month: 'long',
@@ -297,10 +297,10 @@ export default function ProfileTab({ user }: { user: User }) {
         <div className="lg:col-span-2">
           <form
             onSubmit={handleSaveProfile}
-            className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden shadow-vj-card"
+            className="bg-[var(--surface)]rounded-2xl border border-[var(--border)]overflow-hidden shadow-vj-card"
           >
-            <div className="p-6 border-b border-[var(--border)] dark:border-[var(--dark-border)]">
-              <h3 className="text-lg font-bold font-[KoHo,sans-serif] flex items-center gap-2 text-[var(--foreground)] dark:text-[var(--foreground)]">
+            <div className="p-6 border-b border-[var(--border)]">
+              <h3 className="text-lg font-bold font-[KoHo,sans-serif] flex items-center gap-2 text-[var(--foreground)]">
                 <Icon name="UserCircleIcon" size={22} className="text-[var(--primary)]" />
                 Thông tin cá nhân
               </h3>
@@ -392,7 +392,7 @@ export default function ProfileTab({ user }: { user: User }) {
 
               {/* Action Buttons */}
               {isEditing && (
-                <div className="flex items-center gap-3 pt-4 border-t border-[var(--border)] dark:border-[var(--dark-border)]">
+                <div className="flex items-center gap-3 pt-4 border-t border-[var(--border)]">
                   <button
                     type="submit"
                     disabled={isSaving}
@@ -414,7 +414,7 @@ export default function ProfileTab({ user }: { user: User }) {
                     type="button"
                     onClick={handleCancelEdit}
                     disabled={isSaving}
-                    className="px-6 py-2.5 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] rounded-xl font-semibold text-sm font-[KoHo,sans-serif] hover:bg-[var(--surface)] dark:hover:bg-[var(--dark-surface)] transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-6 py-2.5 bg-[var(--surface-2)]text-[var(--foreground-muted)]rounded-xl font-semibold text-sm font-[KoHo,sans-serif] hover:bg-[var(--surface)]:bg-[var(--dark-surface)] transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Hủy
                   </button>
@@ -426,9 +426,9 @@ export default function ProfileTab({ user }: { user: User }) {
       </div>
 
       {/* Password Change Section */}
-      <div className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden shadow-vj-card">
-        <div className="p-6 border-b border-[var(--border)] dark:border-[var(--dark-border)] flex items-center justify-between">
-          <h3 className="text-lg font-bold font-[KoHo,sans-serif] flex items-center gap-2 text-[var(--foreground)] dark:text-[var(--foreground)]">
+      <div className="bg-[var(--surface)]rounded-2xl border border-[var(--border)]overflow-hidden shadow-vj-card">
+        <div className="p-6 border-b border-[var(--border)]flex items-center justify-between">
+          <h3 className="text-lg font-bold font-[KoHo,sans-serif] flex items-center gap-2 text-[var(--foreground)]">
             <Icon name="KeyIcon" size={22} className="text-[var(--vj-navy)]" />
             Đổi mật khẩu
           </h3>
@@ -490,7 +490,7 @@ export default function ProfileTab({ user }: { user: User }) {
               </div>
 
               {/* Password Actions */}
-              <div className="flex items-center gap-3 pt-4 border-t border-[var(--border)] dark:border-[var(--dark-border)]">
+              <div className="flex items-center gap-3 pt-4 border-t border-[var(--border)]">
                 <button
                   type="submit"
                   disabled={isChangingPassword}
@@ -516,7 +516,7 @@ export default function ProfileTab({ user }: { user: User }) {
                     setErrors({});
                   }}
                   disabled={isChangingPassword}
-                  className="px-6 py-2.5 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] rounded-xl font-semibold text-sm font-[KoHo,sans-serif] hover:bg-[var(--surface)] dark:hover:bg-[var(--dark-surface)] transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2.5 bg-[var(--surface-2)]text-[var(--foreground-muted)]rounded-xl font-semibold text-sm font-[KoHo,sans-serif] hover:bg-[var(--surface)]:bg-[var(--dark-surface)] transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Hủy
                 </button>

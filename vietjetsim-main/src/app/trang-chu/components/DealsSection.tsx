@@ -120,7 +120,7 @@ export default function DealsSection() {
   }, [handleScroll]);
 
   return (
-    <section ref={sectionRef} className="py-8 md:py-12 lg:py-14 bg-white dark:bg-white/5">
+    <section ref={sectionRef} className="py-8 md:py-12 lg:py-14 bg-white/5">
       <div className="max-w-7xl mx-auto px-3 md:px-4 sm:px-6 lg:px-8">
         <div
           ref={headerRef}
@@ -137,15 +137,13 @@ export default function DealsSection() {
               </span>
               <MdLocalFireDepartment className="w-3 h-3 md:w-4 md:h-4 text-orange-500" />
             </div>
-            <h2 className="mt-2 text-xl font-black tracking-tight text-navy dark:text-white sm:text-2xl md:text-3xl">
+            <h2 className="mt-2 text-xl font-black tracking-tight text-navysm:text-2xl md:text-3xl">
               Săn vé giá rẻ mỗi ngày
             </h2>
           </div>
           <div className="flex items-center gap-1 md:gap-2">
             {DEALS.length > 0 && (
-              <span className="text-[10px] md:text-xs text-vj-muted dark:text-white/60">
-                {DEALS.length} ưu đãi
-              </span>
+              <span className="text-[10px] md:text-xs text-vj-muted/60">{DEALS.length} ưu đãi</span>
             )}
           </div>
         </div>
@@ -159,7 +157,7 @@ export default function DealsSection() {
         <div className="md:hidden mt-3 text-center reveal-up" style={{ transitionDelay: '450ms' }}>
           <Link
             href="/tim-ve"
-            className="inline-flex items-center gap-1.5 text-[11px] font-bold text-primary dark:text-[#FFDD00] transition-all duration-200 border px-3 py-1.5 rounded-md hover:shadow-md hover:scale-105 active:scale-95"
+            className="inline-flex items-center gap-1.5 text-[11px] font-bold text-primarytransition-all duration-200 border px-3 py-1.5 rounded-md hover:shadow-md hover:scale-105 active:scale-95"
             style={{
               borderColor: 'rgba(236,32,41,0.25)',
               fontWeight: 700,

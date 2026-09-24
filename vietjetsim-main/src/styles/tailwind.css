@@ -19,8 +19,8 @@
   --background: #ffffff;
   --background-secondary: #f7f7f7;
   --surface: #f7f7f7;
-  --surface-2: #efefef;
-  --surface-3: #e4e4e4;
+  --surface-2: #f1f2f4;
+  --surface-3: #e7e8eb;
   /* Component channels for Tailwind's `/opacity` modifier: `bg-[rgb(var(--x-rgb))]/20`. */
   --primary-rgb: 236 32 41;
   --accent-rgb: 255 221 0;
@@ -30,15 +30,15 @@
   --surface-2-rgb: 239 239 239;
   --dark-surface-2-rgb: 36 48 74;
   --foreground: #333333;
-  --foreground-muted: #6c6c6c;
-  --foreground-subtle: #939393;
-  --border: #ececec;
+  --foreground-muted: #626875;
+  --foreground-subtle: #8b9099;
+  --border: #e2e4e8;
   --dark-bg: #1e293b;
   --dark-surface: #172033;
   --dark-surface-2: #24304a;
   --dark-border: rgba(255, 255, 255, 0.14);
   --vj-navy: #1a2948;
-  --vj-navy-2: #172033;
+  --vj-navy-2: #14213d;
   --vj-sky: #f7f7f7;
   --vj-red: #ec2029;
   --vj-red-dark: #d91a21;
@@ -115,9 +115,9 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-size: 15px;
-  line-height: 1.65;
-  font-weight: 400;
-  letter-spacing: 0.005em;
+  line-height: 1.6;
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 /* Dark mode body styles */
@@ -133,17 +133,18 @@ h4,
 h5,
 h6 {
   font-family: var(--vj-font-heading);
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.12;
 }
 
 :where(a, button, input, select, textarea) {
   transition:
-    color 80ms ease,
-    background-color 80ms ease,
-    border-color 80ms ease,
-    box-shadow 80ms ease;
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
 }
 
 :where(a, button, input, select, textarea):focus-visible {
@@ -154,21 +155,32 @@ h6 {
 
 .vj-section {
   background: var(--surface);
-  padding-block: clamp(3rem, 6vw, 5.5rem);
+  padding-block: clamp(2.75rem, 5vw, 4.5rem);
 }
 
 .vj-card {
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  background: #fff;
-  box-shadow: 0 8px 24px rgba(30, 41, 59, 0.08);
+  border-radius: 0.5rem;
+  background: var(--background);
+  box-shadow: 0 8px 24px rgba(26, 41, 72, 0.08);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.vj-card:hover {
+  border-color: rgba(236, 32, 41, 0.28);
+  box-shadow: 0 12px 30px rgba(26, 41, 72, 0.12);
 }
 
 .vj-button-primary {
+  min-height: 44px;
   border: 2px solid var(--primary);
+  border-radius: 0.5rem;
   background: var(--primary);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(236, 32, 41, 0.22);
+  box-shadow: 0 2px 8px rgba(236, 32, 41, 0.2);
 }
 
 .vj-button-primary:hover {
@@ -201,8 +213,12 @@ h6 {
     var(--vj-grad-gold-to) 71.59%
   );
   color: #333333;
-  border-radius: 9999px;
-  font-weight: 700;
+  border-radius: 0.5rem;
+  font-weight: 800;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .vj-cta:hover {
@@ -241,6 +257,23 @@ h6 {
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* Chat launcher mascot — the gentle idle bob vietjetair.com's widget mascot does.
+   The global `prefers-reduced-motion` rule above already neutralises it. */
+.chat-mascot {
+  transform-origin: bottom center;
+  animation: chatMascotBob 3.2s ease-in-out infinite;
+}
+
+@keyframes chatMascotBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
   }
 }
 
@@ -481,6 +514,18 @@ h6 {
 
 .page-transition-content {
   width: 100%;
+}
+
+/* will-change only while a page transition is actually running. Kept
+   permanently, this element became the containing block for every
+   position:fixed descendant, so pinned UI (e.g. the results bottom bar)
+   anchored to the document bottom instead of the viewport. */
+.page-enter-forward .page-transition-content,
+.page-exit-forward .page-transition-content,
+.page-enter-back .page-transition-content,
+.page-exit-back .page-transition-content,
+.page-enter-fade .page-transition-content,
+.page-exit-fade .page-transition-content {
   will-change: transform, opacity, filter;
 }
 
@@ -1158,10 +1203,11 @@ h6 {
   background: linear-gradient(135deg, #ec2029 0%, #6f0000 50%, #8b0d12 100%);
 }
 
-.bg-gradient-vj {
-  background: linear-gradient(135deg, #ec2029 0%, #1a2948 100%);
-}
-
+/* NOTE: there used to be a `.bg-gradient-vj` rule here (red → #1a2948, a leftover
+   from the pre-redesign theme). It shadowed the `gradient-vj` backgroundImage
+   token declared in tailwind.config.js, so the chat surfaces rendered that old
+   purple ramp instead of the brand red sweep. Removed on purpose — the Tailwind
+   token now wins, which is what the chat header/launcher expect. */
 .bg-vj-sky {
   background: linear-gradient(180deg, #e8f4fd 0%, #f0f8ff 50%, #ffffff 100%);
 }
@@ -1395,8 +1441,8 @@ h6 {
    Keep this reserved for the auth forms — other CTAs stay on .vj-cta/.vj-btn. */
 .vj-auth-submit {
   height: 48px;
-  max-width: 344px;
-  margin-inline: auto;
+  max-width: none;
+  margin-inline: 0;
   border: none;
   border-radius: 4px;
   background: linear-gradient(90deg, var(--vj-grad-gold-from) 0%, var(--vj-grad-gold-to) 100%);
@@ -1407,7 +1453,8 @@ h6 {
 }
 
 .vj-auth-submit:hover {
-  opacity: 0.9;
+  filter: brightness(1.03);
+  box-shadow: 0 4px 12px rgba(136, 92, 0, 0.16);
 }
 
 .vj-auth-submit:disabled {
@@ -1598,10 +1645,10 @@ h6 {
   background: linear-gradient(90deg, #ec2029 0%, #ff4d6a 100%);
 }
 
-/* ─── Admin Dashboard Dark Theme ─── */
+/* ─── Admin Dashboard Brand Theme ─── */
 .admin-sidebar {
-  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-  border-right: 1px solid rgba(148, 163, 184, 0.1);
+  background: linear-gradient(180deg, #1a2948 0%, #111827 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .admin-nav-item {
@@ -1609,35 +1656,35 @@ h6 {
 }
 
 .admin-nav-item:hover:not(.active) {
-  background: rgba(148, 163, 184, 0.05);
-  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
 }
 
 .admin-nav-item.active {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  background: #ec2029;
+  box-shadow: 0 4px 12px rgba(236, 32, 41, 0.24);
 }
 
 .admin-header {
-  background: linear-gradient(90deg, #1e293b 0%, #0f172a 100%);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  background: linear-gradient(90deg, #1a2948 0%, #111827 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .admin-content {
-  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+  background: linear-gradient(180deg, #1a2948 0%, #0f172a 100%);
 }
 
 .admin-card {
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-  border: 1px solid rgba(148, 163, 184, 0.1);
-  border-radius: 16px;
+  background: rgba(30, 41, 59, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
   transition: all 0.3s ease;
 }
 
 .admin-card:hover {
-  border-color: rgba(99, 102, 241, 0.3);
-  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15);
-  transform: translateY(-2px);
+  border-color: rgba(236, 32, 41, 0.45);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  transform: translateY(-1px);
 }
 
 .admin-stat-card {
