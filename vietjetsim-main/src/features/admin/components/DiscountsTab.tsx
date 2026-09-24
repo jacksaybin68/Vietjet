@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
 import { apiRequest, getApiErrorMessage } from '@/shared/services';
@@ -54,7 +54,7 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
   const [_isSaving, _setIsSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const fetchDiscounts = async () => {
+  const fetchDiscounts = useCallback(async () => {
     setIsLoading(true);
     try {
       const params = new URLSearchParams({
@@ -72,11 +72,11 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentPage, pageSize, searchQuery, onToast]);
 
   useEffect(() => {
     fetchDiscounts();
-  }, [currentPage, pageSize, searchQuery]);
+  }, [fetchDiscounts]);
 
   const handleDelete = async (id: string, code: string) => {
     if (!confirm(`Bạn có chắc muốn xóa mã giảm giá "${code}"?`)) return;

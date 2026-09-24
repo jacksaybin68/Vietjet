@@ -66,10 +66,15 @@ export default function VSCodeWebEditorPage() {
     }
   };
 
+  // Mount-once bootstrap. Intentionally not listing `loadTree`/`openFile`:
+  // `openFile` reads `openTabs`, so adding it would re-run this effect (and
+  // re-open the default file) every time a tab is opened or closed. Both are
+  // plain async functions defined in this component, not shared elsewhere.
   useEffect(() => {
     loadTree();
     // Default open homepage file
     openFile('src/app/trang-chu/page.tsx', 'page.tsx');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Open a file

@@ -124,7 +124,7 @@ export default function ChatTab() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
   // Close/reopen a thread. Archived (`closed`) threads back the "Lưu trữ" filter.
   const handleToggleArchive = useCallback(async (conv: Conversation) => {

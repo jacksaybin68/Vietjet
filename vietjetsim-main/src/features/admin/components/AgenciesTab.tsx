@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
 import { apiRequest, getApiErrorMessage } from '@/shared/services';
@@ -38,7 +38,7 @@ export default function AgenciesTab({ onToast }: { onToast?: ToastAPI }) {
   const [editingAgency, setEditingAgency] = useState<Agency | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const fetchAgencies = async () => {
+  const fetchAgencies = useCallback(async () => {
     setIsLoading(true);
     try {
       const params = new URLSearchParams({
@@ -56,11 +56,11 @@ export default function AgenciesTab({ onToast }: { onToast?: ToastAPI }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentPage, pageSize, searchQuery, onToast]);
 
   useEffect(() => {
     fetchAgencies();
-  }, [currentPage, pageSize, searchQuery]);
+  }, [fetchAgencies]);
 
   const handleDelete = async (id: string, name: string) => {
     if (

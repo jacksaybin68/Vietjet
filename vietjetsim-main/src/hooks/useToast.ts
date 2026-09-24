@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import type { ToastAction, ToastItem, ToastType } from '@/shared/components/feedback';
 
 let toastIdCounter = 0;
@@ -75,5 +75,29 @@ export function useToast() {
     [show]
   );
 
-  return { toasts, show, dismiss, dismissAll, success, error, warning, info, promo };
+  // The handle must stay referentially stable: it is passed as the `onToast`
+  // prop to ~13 child components and listed in their effect dependency arrays.
+  // Returning a fresh object literal (or one that depends on `toasts`) would
+  // change identity on every render/notification and make those effects refetch
+  // in a loop. So the list lives in a ref and is exposed through a getter that
+  // reads the current value when React renders the component.
+  const toastsRef = useRef<ToastItem[]>([]);
+  toastsRef.current = toasts;
+
+  return useMemo(
+    () => ({
+      get toasts() {
+        return toastsRef.current;
+      },
+      show,
+      dismiss,
+      dismissAll,
+      success,
+      error,
+      warning,
+      info,
+      promo,
+    }),
+    [show, dismiss, dismissAll, success, error, warning, info, promo]
+  );
 }
