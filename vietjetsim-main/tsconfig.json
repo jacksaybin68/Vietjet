@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -23,51 +19,17 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@/features/*": [
-        "./src/features/*"
-      ],
-      "@/features/flights": [
-        "./src/features/flights/index.ts"
-      ],
-      "@/features/bookings": [
-        "./src/features/bookings/index.ts"
-      ],
-      "@/features/payments": [
-        "./src/features/payments/index.ts"
-      ],
-      "@/features/auth": [
-        "./src/features/auth/index.ts"
-      ],
-      "@/features/loyalty": [
-        "./src/features/loyalty/index.ts"
-      ],
-      "@/shared/*": [
-        "./src/shared/*"
-      ],
-      "@/shared/components": [
-        "./src/shared/components/index.ts"
-      ],
-      "@/shared/utils": [
-        "./src/shared/utils/index.ts"
-      ],
-      "@/shared/services": [
-        "./src/shared/services/index.ts"
-      ],
-      "@/shared/hooks": [
-        "./src/shared/hooks/index.ts"
-      ],
-      "@/shared/types": [
-        "./src/shared/types/index.ts"
-      ],
-      "@/shared/constants": [
-        "./src/shared/constants/index.ts"
-      ],
-      "@/lib/*": [
-        "./src/lib/*"
-      ]
+      "@/*": ["./src/*"],
+      "@/features/*": ["./src/features/*"],
+      "@/features/flights": ["./src/features/flights/index.ts"],
+      "@/features/bookings": ["./src/features/bookings/index.ts"],
+      "@/features/payments": ["./src/features/payments/index.ts"],
+      "@/features/auth": ["./src/features/auth/index.ts"],
+      "@/features/loyalty": ["./src/features/loyalty/index.ts"],
+      "@/shared/*": ["./src/shared/*"],
+      "@/shared/services": ["./src/shared/services/index.ts"],
+      "@/shared/constants": ["./src/shared/constants/index.ts"],
+      "@/lib/*": ["./src/lib/*"]
     }
   },
   "include": [
@@ -77,7 +39,5 @@
     "next-env.d.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
