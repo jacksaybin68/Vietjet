@@ -275,6 +275,19 @@ function createMockSql() {
 
   return Object.assign(
     async (strings: TemplateStringsArray, ...values: unknown[]) => {
+      // Mirror the real Neon client, which rejects a non-template invocation:
+      // it requires `Array.isArray(strings) && Array.isArray(strings.raw)`.
+      // Without this guard a call like `sql(dynamicString, ...values)` silently
+      // "worked" in dev/test and then threw a 500 against a real database.
+      if (!(Array.isArray(strings) && Array.isArray((strings as TemplateStringsArray).raw))) {
+        throw new Error(
+          'This function can now be called only as a tagged-template function: ' +
+            'sql`SELECT ${value}`, not sql("SELECT $1", [value], options). ' +
+            'For a conventional function call with value placeholders ' +
+            '($1, $2, etc.), use sql.query("SELECT $1", [value], options).'
+        );
+      }
+
       const query = strings.join('?');
       console.info('[MOCK SQL]', query, values);
 
