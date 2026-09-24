@@ -43,6 +43,17 @@ export type VerifyAdminResult = VerifyAdminSuccess | VerifyAdminFailure;
  * Verify that a request is from an authenticated admin user.
  * Since we only have 1 admin role with full permissions, the permission
  * parameter is kept for backward compatibility but is not enforced.
+ *
+ * Concretely: `isAdminRole()` accepts six role names (`admin`, `super_admin`,
+ * `admin_ops`, `admin_finance`, `admin_support`, `admin_content`) and every
+ * one of them gets full access to every admin route. `hasPermission()` in
+ * `@/lib/rbac` behaves the same way, and the migrations define no
+ * `role_permissions` table, so there is currently no per-permission check
+ * anywhere in the request path.
+ *
+ * Callers still pass their required permission so the intent is captured at
+ * each route and enforcement can be switched on in one place later — but do
+ * not read that argument as a control that is active today.
  */
 export async function verifyAdminRequest(
   request: NextRequest,
