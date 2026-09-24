@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Flight } from '@/features/bookings/types/booking-flow';
 import { getBookingTotals } from '@/features/bookings/pricing';
+import BookingBottomBar from '@/features/bookings/components/BookingBottomBar';
 import { Icon, AppImage } from '@/shared/components/ui';
 import { FlightResultsSkeleton } from '@/shared/components/ui';
 import { getErrorMessage } from '@/lib/utils';
@@ -1593,29 +1594,13 @@ export default function FlightResultsStep({
           of the viewport with the amount on the left and "Đi tiếp" on the right.
           It continues with the top-ranked flight so the wizard flow is unchanged:
           picking an individual fare still goes through that card's "Chọn". */}
-      <div
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--border)] bg-[var(--surface)] shadow-[0_-2px_12px_rgba(0,0,0,0.08)]"
-        data-testid="results-bottom-bar"
-      >
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-3 py-2 sm:px-4 md:px-6">
-          <div className="flex flex-col leading-tight">
-            <span className="text-[10px] uppercase tracking-wide text-[var(--foreground-muted)]">
-              Tổng tiền
-            </span>
-            <span className="text-sm font-black font-koho text-[var(--foreground)] sm:text-base">
-              {leadTotal.toLocaleString('vi-VN')} VND
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={() => leadFlight && onSelect(leadFlight)}
-            disabled={!leadFlight}
-            className="rounded-lg bg-[var(--accent)] px-5 py-2 font-koho text-xs font-black text-[var(--vj-navy)] transition-all hover:bg-[var(--accent-dark)] disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
-          >
-            Đi tiếp
-          </button>
-        </div>
-      </div>
+      <BookingBottomBar
+        total={leadTotal}
+        ctaLabel="Đi tiếp"
+        onCta={() => leadFlight && onSelect(leadFlight)}
+        disabled={!leadFlight}
+        testId="results-bottom-bar"
+      />
     </div>
   );
 }
