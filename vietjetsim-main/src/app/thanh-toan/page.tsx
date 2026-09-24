@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import { Header } from '@/shared/components/navigation';
-import PaymentClient from './components/PaymentClient';
+import { PaymentClient } from '@/features/payments';
 import { Footer } from '@/shared/components/navigation';
 import { ErrorBoundary } from '@/shared/components/feedback';
 

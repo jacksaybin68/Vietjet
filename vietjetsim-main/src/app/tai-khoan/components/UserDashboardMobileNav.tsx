@@ -126,10 +126,10 @@ export default function UserDashboardMobileNav({
                 </button>
               ))}
             </nav>
-            <div className="px-3 py-4 border-t border-[rgb(var(--accent-rgb))]/20 dark:border-[rgb(var(--accent-rgb))]/30">
+            <div className="px-3 py-4 border-t border-[rgb(var(--accent-rgb))]/20/30">
               <Link
                 href="/dang-nhap"
-                className="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all text-[var(--accent-dark)] dark:text-[var(--accent-light)] hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 dark:hover:text-red-400"
+                className="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all text-[var(--accent-dark)]hover:bg-red-50:bg-red-900/10 hover:text-red-600:text-red-400"
               >
                 <Icon name="ArrowRightOnRectangleIcon" size={20} className="text-[var(--accent)]" />
                 Đăng xuất

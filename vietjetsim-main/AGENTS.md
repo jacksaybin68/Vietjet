@@ -87,7 +87,7 @@ protocol ‚Äî raw `DATABASE_URL=postgresql://localhost/...` fails with
   `verifyAdminRequest` run `validateCsrfOrReject` for non-GET methods, so new
   mutating handlers that use either helper are covered automatically. Handlers
   that parse cookies themselves must call `validateCsrfOrReject` explicitly.
-  `middleware.ts` seeds the `csrf_token` cookie for cookieless sessions, so
+  `proxy.ts` seeds the `csrf_token` cookie for cookieless sessions, so
   `getCsrfHeaders()` always has a value to echo back. When adding enforcement,
   migrate the client to `apiRequest` in the same change or the UI breaks with 403.
   The password-reset routes do not use the auth helpers, so they call
@@ -95,10 +95,10 @@ protocol ‚Äî raw `DATABASE_URL=postgresql://localhost/...` fails with
 - **`verifyAdminRequest` returns a discriminated union.** Failure always carries
   `response`, so `const { error, response } = await verifyAdminRequest(...); if (error)
 return response;` narrows correctly and avoids returning `undefined` from a handler.
-- All state-changing admin APIs must be gated by `verifyAdminRequest`; middleware
-  (`middleware.ts`) also blocks non-admins from `/quan-tri` and `/api/quan-tri`.
+- All state-changing admin APIs must be gated by `verifyAdminRequest`; the proxy
+  (`proxy.ts`) also blocks non-admins from `/quan-tri` and `/api/quan-tri`.
 - **Public routes/APIs are declared in `src/lib/route-access.ts`**, which
-  `middleware.ts` imports (`src/lib/route-access.test.ts` pins the classification).
+  `proxy.ts` imports (`src/lib/route-access.test.ts` pins the classification).
   `isPublicApiRoute` lists only endpoints that must answer without a session
   (flight search, booking-code check-in, public bank config); anything else is
   treated as private, so don't add an entry without confirming the handler is
@@ -195,22 +195,28 @@ against a running server; CI runs it in the `smoke` job on port 4028 with no
 handshake and auth guards, not happy-path writes ‚Äî the mock DB cannot register users, so
 persistence flows are out of scope. Point it elsewhere with `SMOKE_BASE_URL`.
 
-**`next dev` (Turbopack) does not run the root `middleware.ts`, but `next start` does.**
-This is the single biggest dev/prod divergence in this repo: on a dev server an unknown
-path renders 404 and protected pages/APIs reach their handlers (which answer 401 on their
-own), while a production build runs the Proxy first and redirects every non-public path
-to `/dang-nhap` before routing. Consequences to remember:
+**`src/proxy.ts` runs on both `next dev` and `next start`.** Next.js 16 renamed
+the file convention from `middleware.ts` (export `middleware`) to `proxy.ts` (export
+`proxy`), and the file must sit at the same level as `app` — here that is `src/`,
+not the project root. All three mistakes stacked in this repo: the deprecated name was
+silently skipped by `next dev` while `next start` still ran it, and the dev watcher
+never even sees a root-level proxy when the app lives in `src/`
+(`setup-dev-bundler` only watches `<app-level>/proxy.*`, while `next build`
+additionally accepts the project root). That is exactly how auth redirects and
+CSRF seeding were disabled in development while production still worked. With the
+`src/proxy.ts` convention the dev/prod divergence is gone:
+the proxy bounces every non-public path to `/dang-nhap` before routing and seeds the
+`csrf_token` cookie on cookieless requests in dev too. Consequences to remember:
 
 - Any route that must answer without a session needs an entry in
-  `src/lib/route-access.ts` (see `isPublicApiRoute`), or production returns a 307
+  `src/lib/route-access.ts` (see `isPublicApiRoute`), or the proxy returns a 307
   redirect where dev/tests expect 401/200/404. `/api/csrf`, `/api/xac-thuc/lam-moi` and
   the marketing pages were each missing and only failed in production.
 - Protected `/api/*` routes return **401 JSON**, not a redirect, so XHR callers can
   branch on status. Only page paths redirect to `/dang-nhap`.
-- Because CI's smoke job runs against `next dev`, it cannot catch a missing
-  public-route entry. When touching `middleware.ts`/`route-access.ts`, also run the
-  smoke test against a production build (`npm run build && npm start`) before trusting
-  a green CI.
+- CI's smoke job runs against `next dev`, so it now exercises the proxy as well. When
+  touching `proxy.ts`/`route-access.ts`, still run the smoke test against a production
+  build (`npm run build && npm start`) before trusting a green CI.
 
 ## UI design system
 

@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { Icon } from '@/shared/components/ui';
+import Link from 'next/link';
+import { Icon, Mascot } from '@/shared/components/ui';
 
 interface Message {
   id: string;
@@ -20,6 +21,14 @@ interface Conversation {
   user_id: string;
   unread_by_user: number;
 }
+
+/** Suggested openers in the welcome state — the chip row vietjetair.com's chat shows. */
+const QUICK_REPLIES = [
+  { icon: 'TicketIcon', label: 'Tra cứu vé đã đặt' },
+  { icon: 'BriefcaseIcon', label: 'Quy định hành lý' },
+  { icon: 'ArrowPathIcon', label: 'Đổi ngày bay' },
+  { icon: 'ReceiptRefundIcon', label: 'Hoàn / hủy vé' },
+];
 
 // ─── API ──────────────────────────────────────────────────────────────────────
 
@@ -209,9 +218,10 @@ export default function UserChat() {
     }, 2000);
   };
 
-  const handleSend = async () => {
-    if (!inputText.trim() || sending || !user) return;
-    const text = inputText.trim();
+  // `override` lets the quick-reply chips send their own copy of the text.
+  const handleSend = async (override?: string) => {
+    const text = (override ?? inputText).trim();
+    if (!text || sending || !user) return;
     setInputText('');
     setSending(true);
 
@@ -264,27 +274,38 @@ export default function UserChat() {
     return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
   };
 
-  if (!user) return null;
-
   // The admin console has its own chat surface (ChatTab) plus the AI assistant
   // widget — never stack the user widget on top of it.
   if (pathname?.startsWith('/quan-tri')) return null;
 
+  // Signed-out visitors get the same launcher vietjetair.com shows to everyone;
+  // opening it asks them to sign in instead of showing an empty thread.
+  const isGuest = !user;
+  const operatorOnline = !isGuest && adminOnline;
+
   return (
     <>
-      {/* Floating Button */}
+      {/* Launcher — the Vietjet mascot with its "Xin chào!" bubble. While the panel
+          is open on mobile it steps aside, because the panel header owns the close
+          button there. */}
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-5 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-vj ring-1 ring-white/40 shadow-vj-btn-hover transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.04] active:scale-95 sm:right-6 touch-manipulation"
         aria-label={isOpen ? 'Đóng chat hỗ trợ' : 'Mở chat hỗ trợ'}
+        aria-expanded={isOpen}
+        className={`fixed bottom-0 right-2 z-50 items-end transition-transform duration-200 hover:-translate-y-0.5 active:scale-95 sm:right-6 touch-manipulation ${
+          isOpen ? 'hidden sm:flex' : 'flex'
+        }`}
       >
-        <Icon
-          name={isOpen ? 'XMarkIcon' : 'ChatBubbleLeftRightIcon'}
-          size={24}
-          className="text-white"
-        />
+        {isOpen ? (
+          <span className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-vj text-white shadow-vj-btn-hover ring-1 ring-white/40">
+            <Icon name="XMarkIcon" size={22} />
+          </span>
+        ) : (
+          <Mascot greeting="Xin chào!" className="h-24 sm:h-32" />
+        )}
         {!isOpen && unreadCount > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-navy text-xs font-black shadow-sm">
+          <span className="absolute right-1 top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-vjred px-1 text-xs font-black text-white shadow-vj-btn">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -302,20 +323,24 @@ export default function UserChat() {
               <Icon name="ChatBubbleLeftRightIcon" size={22} className="text-accent" />
               <span
                 className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-[#EC2029] ${
-                  adminOnline ? 'bg-green-400' : 'bg-gray-400'
+                  operatorOnline ? 'bg-green-400' : 'bg-gray-400'
                 }`}
               />
             </div>
             <div className="relative min-w-0 flex-1">
-              <div className="truncate text-sm font-bold leading-tight">Hỗ trợ Vietjet Air</div>
+              <div className="truncate text-sm font-bold leading-tight">
+                {isGuest ? 'Tổng đài Vietjet Air' : 'Hỗ trợ Vietjet Air'}
+              </div>
               <div className="mt-1 flex items-center gap-1.5">
                 <span
-                  className={`h-2 w-2 rounded-full ${adminOnline ? 'bg-green-400' : 'bg-gray-400'} ${
-                    adminOnline ? 'animate-pulse' : ''
+                  className={`h-2 w-2 rounded-full ${operatorOnline ? 'bg-green-400' : 'bg-gray-400'} ${
+                    operatorOnline ? 'animate-pulse' : ''
                   }`}
                 />
                 <span className="text-xs text-white/80">
-                  {adminTyping ? (
+                  {isGuest ? (
+                    'Đăng nhập để trò chuyện'
+                  ) : adminTyping ? (
                     <span className="font-medium text-white">Đang nhập...</span>
                   ) : adminOnline ? (
                     'Sẵn sàng hỗ trợ'
@@ -340,14 +365,45 @@ export default function UserChat() {
               <div className="flex items-center justify-center h-full">
                 <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               </div>
-            ) : messages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center gap-3">
-                <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center">
-                  <Icon name="ChatBubbleLeftRightIcon" size={28} className="text-primary" />
-                </div>
+            ) : isGuest ? (
+              <div className="flex min-h-full flex-col items-center justify-center gap-3 text-center">
+                <Mascot greeting={null} className="h-28" />
                 <div>
-                  <p className="text-navy font-semibold text-sm">Xin chào! 👋</p>
-                  <p className="text-gray-500 text-xs mt-1">Hãy gửi tin nhắn để được hỗ trợ</p>
+                  <p className="text-navy font-bold text-sm">Xin chào! 👋</p>
+                  <p className="text-gray-500 text-xs mt-1 leading-relaxed">
+                    Đăng nhập để trò chuyện cùng tổng đài viên và xem lại lịch sử hỗ trợ của bạn.
+                  </p>
+                </div>
+                <Link
+                  href="/dang-nhap?redirect=/trang-chu"
+                  className="vj-cta w-full max-w-[230px] px-5 text-sm"
+                >
+                  Đăng nhập để trò chuyện
+                </Link>
+              </div>
+            ) : messages.length === 0 ? (
+              <div className="flex min-h-full flex-col items-center justify-center gap-4 text-center">
+                <Mascot greeting={null} className="h-28" />
+                <div>
+                  <p className="text-navy font-bold text-sm">
+                    Xin chào{user?.fullName ? ` ${user.fullName}` : ''}! 👋
+                  </p>
+                  <p className="text-gray-500 text-xs mt-1">
+                    Vietjet Air có thể hỗ trợ gì cho bạn?
+                  </p>
+                </div>
+                <div className="w-full space-y-2">
+                  {QUICK_REPLIES.map((item) => (
+                    <button
+                      key={item.label}
+                      type="button"
+                      onClick={() => handleSend(item.label)}
+                      className="flex w-full items-center gap-2.5 rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-left text-xs font-semibold text-navy transition-colors hover:border-primary hover:bg-red-50 touch-manipulation"
+                    >
+                      <Icon name={item.icon} size={16} className="text-primary" />
+                      {item.label}
+                    </button>
+                  ))}
                 </div>
               </div>
             ) : (
@@ -371,8 +427,8 @@ export default function UserChat() {
                       <div
                         className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed select-text touch-manipulation ${
                           isUser
-                            ? 'bg-primary text-white rounded-br-sm dark:bg-primary-dark'
-                            : 'bg-gray-100 text-navy border border-gray-200 rounded-bl-sm shadow-sm dark:bg-gray-700 dark:border-gray-600'
+                            ? 'bg-primary text-white rounded-br-sm'
+                            : 'bg-gray-100 text-navy border border-gray-200 rounded-bl-sm shadow-sm'
                         }`}
                       >
                         {msg.content}
@@ -423,34 +479,36 @@ export default function UserChat() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
-          <div className="px-3 py-3 bg-white border-t border-gray-100 flex-shrink-0">
-            <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-200 focus-within:border-primary transition-colors">
-              <input
-                id="chat-message-input"
-                name="message"
-                ref={inputRef}
-                type="text"
-                value={inputText}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyDown}
-                placeholder="Nhập tin nhắn..."
-                className="flex-1 bg-transparent text-sm text-navy placeholder-gray-400 outline-none min-w-0"
-                disabled={sending}
-              />
-              <button
-                onClick={handleSend}
-                disabled={!inputText.trim() || sending}
-                className="w-10 h-10 bg-primary disabled:bg-gray-200 rounded-xl flex items-center justify-center transition-colors hover:bg-red-700 active:bg-red-800 disabled:cursor-not-allowed flex-shrink-0 touch-manipulation"
-              >
-                {sending ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Icon name="PaperAirplaneIcon" size={16} className="text-white" />
-                )}
-              </button>
+          {/* Composer — signed-in users only; guests get the prompt in the body. */}
+          {!isGuest && (
+            <div className="px-3 py-3 bg-white border-t border-gray-100 flex-shrink-0">
+              <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-200 focus-within:border-primary transition-colors">
+                <input
+                  id="chat-message-input"
+                  name="message"
+                  ref={inputRef}
+                  type="text"
+                  value={inputText}
+                  onChange={handleInputChange}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Nhập tin nhắn..."
+                  className="flex-1 bg-transparent text-sm text-navy placeholder-gray-400 outline-none min-w-0"
+                  disabled={sending}
+                />
+                <button
+                  onClick={() => handleSend()}
+                  disabled={!inputText.trim() || sending}
+                  className="w-10 h-10 bg-primary disabled:bg-gray-200 rounded-xl flex items-center justify-center transition-colors hover:bg-red-700 active:bg-red-800 disabled:cursor-not-allowed flex-shrink-0 touch-manipulation"
+                >
+                  {sending ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Icon name="PaperAirplaneIcon" size={16} className="text-white" />
+                  )}
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </>

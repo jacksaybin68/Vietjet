@@ -330,8 +330,11 @@ export async function searchFlights(params: {
   class?: string;
 }): Promise<FlightRecord[]> {
   if (params.depart_date) {
-    const startDate = `${params.depart_date}T00:00:00`;
-    const endDate = `${params.depart_date}T23:59:59`;
+    // `depart_date` is a Hanoi calendar day (the day the date strip highlights),
+    // so the window has to be built in +07:00 — a bare timestamp would be read as
+    // UTC and silently drop the flights that depart late in the local evening.
+    const startDate = `${params.depart_date}T00:00:00+07:00`;
+    const endDate = `${params.depart_date}T23:59:59.999+07:00`;
     return (await sql`
       SELECT * FROM flights
       WHERE from_code = ${params.from_code}

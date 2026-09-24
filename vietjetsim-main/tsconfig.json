@@ -59,6 +59,9 @@
       "@/shared/hooks": [
         "./src/shared/hooks/index.ts"
       ],
+      "@/shared/types": [
+        "./src/shared/types/index.ts"
+      ],
       "@/shared/constants": [
         "./src/shared/constants/index.ts"
       ],

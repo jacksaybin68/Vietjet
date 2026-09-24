@@ -25,3 +25,9 @@ vietjetsim-main/.next/
 
 # Nested cloned repo (managed riêng, không commit vào repo cha)
 Vietjet/
+
+# OS / IDE / local artifacts
+.DS_Store
+.idea/
+.ai/
+*.backup

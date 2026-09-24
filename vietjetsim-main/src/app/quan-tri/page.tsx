@@ -1,5 +1,5 @@
 import React from 'react';
-import AdminDashboardClient from './components/AdminDashboardClient';
+import { AdminDashboardClient } from '@/features/admin';
 import { ErrorBoundary } from '@/shared/components/feedback';
 import { ProtectedRoute } from '@/features/auth';
 

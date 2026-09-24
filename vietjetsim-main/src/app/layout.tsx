@@ -5,6 +5,7 @@ import { PageTransition } from '@/shared/components/layouts';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { ChatWidgets } from '@/features/chat';
+import { SiteOverlays } from '@/shared/components/feedback/SiteOverlays';
 import NextTopLoader from 'nextjs-toploader';
 import { NavigationOptimizer } from '@/shared/components/layouts';
 export const viewport: Viewport = {
@@ -15,21 +16,27 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:4028'),
-  title: 'Vietjet Air — Đặt Vé Máy Bay Giá Rẻ',
+  title: {
+    default: 'VietjetSim — Mô phỏng đặt vé máy bay',
+    template: '%s | VietjetSim',
+  },
   description:
-    'Hệ thống đặt vé máy bay Vietjet Air chính thức. Tìm kiếm, đặt chỗ, chọn ghế và thanh toán trực tuyến.',
+    'VietjetSim là hệ thống mô phỏng trải nghiệm tìm kiếm, đặt chỗ, chọn ghế và thanh toán chuyến bay.',
+  robots: {
+    index: false,
+    follow: false,
+  },
   openGraph: {
-    title: 'Vietjet Air — Đặt Vé Máy Bay Giá Rẻ',
-    description:
-      'Hệ thống đặt vé máy bay Vietjet Air chính thức. Tìm kiếm, đặt chỗ, chọn ghế và thanh toán trực tuyến.',
-    url: 'http://localhost:4028',
-    siteName: 'Vietjet Air',
+    title: 'VietjetSim — Mô phỏng đặt vé máy bay',
+    description: 'Trải nghiệm mô phỏng tìm kiếm, đặt chỗ, chọn ghế và thanh toán chuyến bay.',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:4028',
+    siteName: 'VietjetSim',
     images: [
       {
         url: '/logo.png',
         width: 1200,
         height: 630,
-        alt: 'Vietjet Air Booking Interface',
+        alt: 'VietjetSim giao diện đặt vé',
       },
     ],
     locale: 'vi_VN',
@@ -37,17 +44,13 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Vietjet Air — Đặt Vé Máy Bay Giá Rẻ',
-    description:
-      'Hệ thống đặt vé máy bay Vietjet Air chính thức. Tìm kiếm, đặt chỗ, chọn ghế và thanh toán trực tuyến.',
+    title: 'VietjetSim — Mô phỏng đặt vé máy bay',
+    description: 'Trải nghiệm mô phỏng tìm kiếm, đặt chỗ, chọn ghế và thanh toán chuyến bay.',
     images: ['/logo.png'],
   },
   icons: {
     icon: [{ url: '/favicon.ico', type: 'image/x-icon' }],
     apple: [{ url: '/logo.png' }],
-  },
-  verification: {
-    google: 'your-google-site-verification-code',
   },
 };
 
@@ -69,39 +72,9 @@ export default function RootLayout({
 
         {/* External scripts optimized */}
 
-        {/* JSON-LD Schema for SEO */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@graph': [
-                {
-                  '@type': 'Airline',
-                  '@id': 'https://vietjetair.com/#organization',
-                  name: 'Vietjet Air',
-                  url: 'https://vietjetair.com',
-                  logo: 'https://vietjetair.com/logo.png',
-                  sameAs: [
-                    'https://www.facebook.com/vietjetvietnam',
-                    'https://twitter.com/vietjetvietnam',
-                  ],
-                },
-                {
-                  '@type': 'WebSite',
-                  '@id': 'https://vietjetair.com/#website',
-                  url: 'https://vietjetair.com',
-                  name: 'Vietjet Air — Đặt Vé Máy Bay Giá Rẻ',
-                  publisher: {
-                    '@id': 'https://vietjetair.com/#organization',
-                  },
-                },
-              ],
-            }),
-          }}
-        />
+        {/* VietjetSim is a local booking simulator and is intentionally not indexed as the official airline site. */}
       </head>
-      <body className="bg-white dark:bg-navy-dark text-vj-text dark:text-white/90">
+      <body className="bg-[var(--background)] text-[var(--foreground)]">
         {/* Rocket Extension message handler - Suppress unknown message type warnings */}
         <script
           dangerouslySetInnerHTML={{
@@ -125,6 +98,7 @@ export default function RootLayout({
           <AuthProvider>
             <PageTransition>{children}</PageTransition>
             <ChatWidgets />
+            <SiteOverlays />
           </AuthProvider>
         </ThemeProvider>
       </body>

@@ -165,20 +165,24 @@ function SignUpLoginPageInner() {
     isEmailValid || phone.replace(/\D/g, '').length >= 9 || email.replace(/\D/g, '').length >= 9;
   const isPasswordValid = password.length >= 6;
   const isNameValid = surname.trim().length >= 1 && givenName.trim().length >= 1;
-  const isPhoneValid = phone.replace(/\D/g, '').length >= 9;
 
   const inputClass = (valid: boolean) =>
-    `form-input font-body-vj w-full rounded-xl border border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] py-3 pl-10 pr-4 text-sm transition-all focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20 ${valid ? 'form-input-valid' : ''}`;
+    `form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3.5 pl-11 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${valid ? 'form-input-valid' : ''}`;
 
-  const submitClass = 'vj-auth-submit flex w-full items-center justify-center gap-2';
+  const submitClass =
+    'vj-auth-submit flex min-h-12 w-full items-center justify-center gap-2 rounded-md';
 
   return (
     <AuthShell
-      eyebrow="Chào mừng bạn trở lại"
-      title="Đăng nhập / Đăng ký tài khoản"
-      subtitle="Vui lòng điền thông tin để tiếp tục sử dụng các tiện ích thành viên."
+      eyebrow={tab === 'login' ? 'SkyJoy Member' : 'Chào mừng đến với Vietjet'}
+      title={tab === 'login' ? 'Đăng nhập tài khoản' : 'Tạo tài khoản Vietjet'}
+      subtitle={
+        tab === 'login'
+          ? 'Đăng nhập để quản lý chuyến bay, đặt vé và tích điểm SkyJoy.'
+          : 'Đăng ký miễn phí để nhận ưu đãi và quản lý hành trình của bạn.'
+      }
     >
-      <div className="mb-6 grid grid-cols-2 rounded-2xl bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] p-1.5">
+      <div className="vj-auth-tabs mb-7 grid grid-cols-2 border-b border-[#d8dade]">
         {/* VietjetAir's SkyID modal lists "Đăng ký" before "Đăng nhập"; the
             order is presentational only — the default tab stays login unless
             `?tab=register` deep-links registration. */}
@@ -188,10 +192,10 @@ function SignUpLoginPageInner() {
             type="button"
             onClick={() => switchTab(value)}
             aria-pressed={tab === value}
-            className={`rounded-xl px-3 py-2.5 text-sm font-bold transition-all ${
+            className={`relative min-h-12 px-3 pb-3 pt-2 text-base font-extrabold transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-1 after:transition-transform ${
               tab === value
-                ? 'bg-[var(--background)] text-primary shadow-vj-sm'
-                : 'text-[var(--foreground-muted)] hover:text-primary'
+                ? 'text-[var(--primary)] after:scale-x-100 after:bg-[var(--primary)]'
+                : 'text-[#6c6f76] after:scale-x-0 after:bg-[var(--primary)] hover:text-[var(--primary)]'
             }`}
           >
             {value === 'register' ? 'Đăng ký' : 'Đăng nhập'}
@@ -238,7 +242,7 @@ function SignUpLoginPageInner() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder=" "
-              className={`form-input w-full rounded-xl border border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] py-3 pl-10 pr-12 text-sm transition-all focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20 ${isPasswordValid ? 'form-input-valid' : ''}`}
+              className={`form-input vj-auth-input w-full rounded-md border border-[#d8dade] bg-white py-3.5 pl-11 pr-12 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isPasswordValid ? 'form-input-valid' : ''}`}
               required
             />
             <label className="form-label-float has-icon">Mật khẩu</label>
@@ -276,19 +280,18 @@ function SignUpLoginPageInner() {
           )}
 
           <div className="flex items-center justify-between">
-            <label className="flex cursor-pointer items-center gap-2 text-sm font-koho">
+            <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-[#555960]">
               <input
                 id="remember-me"
                 name="remember"
                 type="checkbox"
-                className="rounded"
-                style={{ accentColor: 'var(--primary)' }}
+                className="h-4 w-4 rounded-sm border-[#b9bcc1] accent-[var(--primary)]"
               />
               Ghi nhớ đăng nhập
             </label>
             <Link
               href="/quen-mat-khau"
-              className="text-sm font-semibold text-primary hover:underline"
+              className="text-sm font-semibold text-[var(--primary)] hover:underline"
             >
               Quên mật khẩu?
             </Link>
@@ -321,7 +324,7 @@ function SignUpLoginPageInner() {
                     value={surname}
                     onChange={(e) => setSurname(e.target.value)}
                     placeholder=" "
-                    className={`form-input font-body-vj w-full rounded-xl border border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] py-3 pl-4 pr-4 text-sm transition-all focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20 ${isNameValid ? 'form-input-valid' : ''}`}
+                    className={`form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3.5 pl-4 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isNameValid ? 'form-input-valid' : ''}`}
                     required
                   />
                   <label className="form-label-float">Họ</label>
@@ -335,38 +338,34 @@ function SignUpLoginPageInner() {
                     value={givenName}
                     onChange={(e) => setGivenName(e.target.value)}
                     placeholder=" "
-                    className={`form-input font-body-vj w-full rounded-xl border border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] py-3 pl-4 pr-4 text-sm transition-all focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20 ${isNameValid ? 'form-input-valid' : ''}`}
+                    className={`form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3.5 pl-4 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isNameValid ? 'form-input-valid' : ''}`}
                     required
                   />
                   <label className="form-label-float">Tên đệm/tên</label>
                 </div>
               </div>
 
-              <div>
-                <label
-                  htmlFor="phone"
-                  className="mb-1 block text-xs text-[var(--foreground-muted)] font-koho"
-                >
-                  Số điện thoại
-                </label>
-                <div
-                  className={`flex items-center rounded-xl border border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] px-3 py-3 transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 ${isPhoneValid ? 'border-primary/40' : ''}`}
-                >
-                  <span className="select-none text-sm text-[var(--foreground-muted)] font-koho">
-                    (+84)
-                  </span>
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    autoComplete="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                    placeholder="912 345 678"
-                    className="font-body-vj ml-2 flex-1 bg-transparent text-sm text-vj-text outline-none placeholder:text-[var(--foreground-subtle)]"
-                    required
-                  />
-                </div>
+              {/* Cùng kiểu floating label với các ô còn lại; mã quốc gia (+84) nằm
+                  trong nhãn để không phải tách thêm một control phụ. */}
+              <div className={`form-field-float ${phone ? 'has-value' : ''}`}>
+                <Icon
+                  name="PhoneIcon"
+                  size={18}
+                  className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-[var(--foreground-subtle)]"
+                />
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                  placeholder=" "
+                  className={inputClass(false)}
+                  required
+                />
+                <label className="form-label-float has-icon">Số điện thoại (+84)</label>
               </div>
 
               <div className={`form-field-float ${email ? 'has-value' : ''}`}>
@@ -383,7 +382,7 @@ function SignUpLoginPageInner() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder=" "
-                  className={`form-input font-body-vj w-full rounded-xl border border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] py-3 pl-10 pr-4 text-sm transition-all focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20 ${isEmailValid ? 'form-input-valid' : ''}`}
+                  className={`form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3.5 pl-11 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isEmailValid ? 'form-input-valid' : ''}`}
                 />
                 <label className="form-label-float has-icon">Email (Tùy chọn)</label>
               </div>
@@ -402,7 +401,7 @@ function SignUpLoginPageInner() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder=" "
-                  className={`form-input w-full rounded-xl border border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] py-3 pl-10 pr-12 text-sm transition-all focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20 ${isPasswordValid ? 'form-input-valid' : ''}`}
+                  className={`form-input vj-auth-input w-full rounded-md border border-[#d8dade] bg-white py-3.5 pl-11 pr-12 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isPasswordValid ? 'form-input-valid' : ''}`}
                   required
                 />
                 <label className="form-label-float has-icon">Mật khẩu</label>
@@ -416,7 +415,7 @@ function SignUpLoginPageInner() {
                 </button>
               </div>
 
-              <label className="flex cursor-pointer select-none items-start gap-2 text-xs text-[var(--foreground-muted)] font-koho">
+              <label className="flex cursor-pointer select-none items-start gap-2.5 text-xs leading-5 text-[#6c6f76]">
                 <input
                   type="checkbox"
                   checked={agreeTerms}
@@ -486,7 +485,7 @@ function SignUpLoginPageInner() {
                   value={otpInput}
                   onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))}
                   placeholder=" "
-                  className="w-full rounded-xl border border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] py-4 pl-12 pr-4 text-center text-xl font-bold tracking-[0.5em] transition-all focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20"
+                  className="w-full rounded-xl border border-[var(--border)]bg-[var(--surface-2)]py-4 pl-12 pr-4 text-center text-xl font-bold tracking-[0.5em] transition-all focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20"
                   required
                 />
                 <label

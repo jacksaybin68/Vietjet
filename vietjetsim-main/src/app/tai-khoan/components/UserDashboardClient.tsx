@@ -16,10 +16,7 @@ const NotificationsTab = dynamic(() => import('./NotificationsTab'), {
   loading: () => (
     <div className="space-y-3 p-4">
       {[1, 2, 3].map((i) => (
-        <div
-          key={i}
-          className="h-24 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl animate-pulse"
-        />
+        <div key={i} className="h-24 bg-[var(--surface-2)]rounded-xl animate-pulse" />
       ))}
     </div>
   ),
@@ -29,10 +26,7 @@ const NotificationSettingsTab = dynamic(() => import('./NotificationSettingsTab'
   loading: () => (
     <div className="p-4 space-y-4">
       {[1, 2, 3].map((i) => (
-        <div
-          key={i}
-          className="h-12 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-lg animate-pulse"
-        />
+        <div key={i} className="h-12 bg-[var(--surface-2)]rounded-lg animate-pulse" />
       ))}
     </div>
   ),
@@ -42,10 +36,7 @@ const WalletTab = dynamic(() => import('./WalletTab'), {
   loading: () => (
     <div className="p-4 space-y-4">
       {[1, 2, 3].map((i) => (
-        <div
-          key={i}
-          className="h-32 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse"
-        />
+        <div key={i} className="h-32 bg-[var(--surface-2)]rounded-2xl animate-pulse" />
       ))}
     </div>
   ),
@@ -55,10 +46,7 @@ const PaymentHistoryTab = dynamic(() => import('./PaymentHistoryTab'), {
   loading: () => (
     <div className="p-4 space-y-3">
       {[1, 2, 3, 4].map((i) => (
-        <div
-          key={i}
-          className="h-20 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl animate-pulse"
-        />
+        <div key={i} className="h-20 bg-[var(--surface-2)]rounded-xl animate-pulse" />
       ))}
     </div>
   ),
@@ -68,10 +56,7 @@ const LoyaltyTab = dynamic(() => import('./LoyaltyTab'), {
   loading: () => (
     <div className="p-4 space-y-4">
       {[1, 2].map((i) => (
-        <div
-          key={i}
-          className="h-48 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse"
-        />
+        <div key={i} className="h-48 bg-[var(--surface-2)]rounded-2xl animate-pulse" />
       ))}
     </div>
   ),
@@ -81,10 +66,7 @@ const SecurityTab = dynamic(() => import('./SecurityTab'), {
   loading: () => (
     <div className="p-4 space-y-4">
       {[1, 2, 3].map((i) => (
-        <div
-          key={i}
-          className="h-24 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-2xl animate-pulse"
-        />
+        <div key={i} className="h-24 bg-[var(--surface-2)]rounded-2xl animate-pulse" />
       ))}
     </div>
   ),
@@ -698,7 +680,7 @@ export default function UserDashboardClient() {
 
   const toast = useToast();
   return (
-    <div className="pt-[120px] sm:pt-[140px] pb-8 sm:pb-12 min-h-screen bg-[var(--surface)] dark:bg-[var(--dark-surface)]">
+    <div className="pt-[120px] sm:pt-[140px] pb-8 sm:pb-12 min-h-screen bg-[var(--surface)]">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6">
         <UserDashboardMobileNav
           tabs={tabs}
@@ -743,10 +725,10 @@ export default function UserDashboardClient() {
                   <UpcomingBookingsSkeleton count={2} />
                 ) : upcomingError ? (
                   <div
-                    className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-xl sm:rounded-2xl border border-[rgb(var(--primary-rgb))]/20 dark:border-[rgb(var(--primary-rgb))]/30 p-6 sm:p-8 text-center"
+                    className="bg-[var(--surface)]rounded-xl sm:rounded-2xl border border-[rgb(var(--primary-rgb))]/20/30 p-6 sm:p-8 text-center"
                     style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
                   >
-                    <div className="w-10 h-10 sm:w-14 sm:h-14 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 border border-[rgb(var(--primary-rgb))]/20 dark:border-[rgb(var(--primary-rgb))]/30">
+                    <div className="w-10 h-10 sm:w-14 sm:h-14 bg-[var(--surface-2)]rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 border border-[rgb(var(--primary-rgb))]/20/30">
                       <Icon
                         name="ExclamationTriangleIcon"
                         size={28}
@@ -770,7 +752,7 @@ export default function UserDashboardClient() {
                   </div>
                 ) : upcomingBookings.length === 0 ? (
                   <div
-                    className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl sm:rounded-3xl border border-[rgb(var(--accent-rgb))]/20 dark:border-[rgb(var(--accent-rgb))]/30 overflow-hidden"
+                    className="bg-[var(--surface)]rounded-2xl sm:rounded-3xl border border-[rgb(var(--accent-rgb))]/20/30 overflow-hidden"
                     style={{
                       boxShadow:
                         '0 8px 32px rgba(245, 158, 11, 0.1), 0 4px 12px rgba(251, 191, 36, 0.06)',
@@ -812,7 +794,7 @@ export default function UserDashboardClient() {
                           </Link>
                           <button
                             onClick={retryUpcoming}
-                            className="inline-flex items-center gap-1.5 sm:gap-2 text-amber-700 font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-sm border border-[rgb(var(--accent-rgb))]/30 dark:border-amber-700 hover:bg-amber-50 transition-all bg-[var(--surface)] dark:bg-[var(--dark-surface)]"
+                            className="inline-flex items-center gap-1.5 sm:gap-2 text-amber-700 font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-sm border border-[rgb(var(--accent-rgb))]/30hover:bg-amber-50 transition-all bg-[var(--surface)]"
                           >
                             <Icon name="ArrowPathIcon" size={14} />
                             Tải lại
@@ -825,7 +807,7 @@ export default function UserDashboardClient() {
                   upcomingBookings.map((booking) => (
                     <Link key={booking.id} href={`/dat-ve/${booking.id}`} className="block">
                       <div
-                        className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-3xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden card-hover-yellow"
+                        className="bg-[var(--surface)]rounded-3xl border border-[var(--border)]overflow-hidden card-hover-yellow"
                         style={{
                           boxShadow:
                             '0 4px 20px rgba(245, 158, 11, 0.08), 0 2px 8px rgba(251, 191, 36, 0.04)',
@@ -890,7 +872,7 @@ export default function UserDashboardClient() {
                                 </div>
                               </div>
                             </div>
-                            <div className="flex items-center justify-between pt-3 border-t border-[var(--border)] dark:border-[var(--dark-border)]">
+                            <div className="flex items-center justify-between pt-3 border-t border-[var(--border)]">
                               <div className="flex items-center gap-3 text-xs text-[var(--foreground-muted)]">
                                 <div className="flex items-center gap-1">
                                   <Icon name="TicketIcon" size={12} />
@@ -916,7 +898,7 @@ export default function UserDashboardClient() {
                               </div>
                             </div>
                             <div className="mt-3 flex items-center gap-3">
-                              <div className="w-12 h-12 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] rounded-lg flex items-center justify-center border border-dashed border-[var(--border)] dark:border-[var(--dark-border)]">
+                              <div className="w-12 h-12 bg-[var(--surface-2)]rounded-lg flex items-center justify-center border border-dashed border-[var(--border)]">
                                 <Icon
                                   name="QrCodeIcon"
                                   size={20}
@@ -955,7 +937,7 @@ export default function UserDashboardClient() {
             {/* History */}
             {activeTab === 'history' && (
               <div
-                className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden"
+                className="bg-[var(--surface)]rounded-2xl border border-[var(--border)]overflow-hidden"
                 style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
               >
                 <div
@@ -965,7 +947,7 @@ export default function UserDashboardClient() {
                       'linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%)',
                   }}
                 />
-                <div className="p-5 border-b border-[var(--border)] dark:border-[var(--dark-border)]">
+                <div className="p-5 border-b border-[var(--border)]">
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h2 className="font-bold text-[var(--foreground)]">Lịch sử đặt vé</h2>
@@ -978,7 +960,7 @@ export default function UserDashboardClient() {
                         <>
                           <button
                             onClick={exportCSV}
-                            className="flex items-center gap-1.5 text-xs font-semibold text-green-700 dark:text-green-300 hover:text-green-800 dark:hover:text-green-200 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border border-green-200 dark:border-green-700 px-3 py-1.5 rounded-lg transition-all"
+                            className="flex items-center gap-1.5 text-xs font-semibold text-green-700hover:text-green-800:text-green-200 bg-green-50/20 hover:bg-green-100:bg-green-900/30 border border-green-200px-3 py-1.5 rounded-lg transition-all"
                             title="Xuất CSV"
                           >
                             <Icon name="TableCellsIcon" size={13} />
@@ -986,7 +968,7 @@ export default function UserDashboardClient() {
                           </button>
                           <button
                             onClick={exportPDF}
-                            className="flex items-center gap-1.5 text-xs font-semibold text-[var(--primary)] dark:text-[var(--primary-light)] hover:text-[var(--primary-dark)] dark:hover:text-[var(--primary)] bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] hover:bg-[rgb(var(--primary-rgb))]/10 dark:hover:bg-[rgb(var(--primary-rgb))]/20 border border-[rgb(var(--primary-rgb))]/20 dark:border-[rgb(var(--primary-rgb))]/30 px-3 py-1.5 rounded-lg transition-all"
+                            className="flex items-center gap-1.5 text-xs font-semibold text-[var(--primary)]hover:text-[var(--primary-dark)]:text-[var(--primary)] bg-[var(--surface-2)]hover:bg-[rgb(var(--primary-rgb))]/10:bg-[rgb(var(--primary-rgb))]/20 border border-[rgb(var(--primary-rgb))]/20/30 px-3 py-1.5 rounded-lg transition-all"
                             title="Xuất PDF"
                           >
                             <Icon name="DocumentArrowDownIcon" size={13} />
@@ -1021,7 +1003,7 @@ export default function UserDashboardClient() {
                         setHistoryPage(1);
                       }}
                       placeholder="Tìm theo mã đặt chỗ, chuyến bay, thành phố..."
-                      className="w-full pl-9 pr-9 py-2.5 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm text-[var(--foreground)] placeholder-[var(--foreground-muted)] focus:outline-none transition-all"
+                      className="w-full pl-9 pr-9 py-2.5 bg-[var(--surface-2)]border border-[var(--border)]rounded-xl text-sm text-[var(--foreground)] placeholder-[var(--foreground-muted)] focus:outline-none transition-all"
                       style={{ outline: 'none' }}
                       onFocus={(e) => {
                         e.target.style.borderColor = 'var(--primary)';
@@ -1060,7 +1042,7 @@ export default function UserDashboardClient() {
                             setHistoryDateFrom(e.target.value);
                             setHistoryPage(1);
                           }}
-                          className="w-full pl-8 pr-3 py-2 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none transition-all"
+                          className="w-full pl-8 pr-3 py-2 bg-[var(--surface-2)]border border-[var(--border)]rounded-xl text-xs text-[var(--foreground)] focus:outline-none transition-all"
                         />
                       </div>
                       <span className="text-[var(--foreground-muted)] text-xs flex-shrink-0">
@@ -1079,11 +1061,11 @@ export default function UserDashboardClient() {
                             setHistoryDateTo(e.target.value);
                             setHistoryPage(1);
                           }}
-                          className="w-full pl-8 pr-3 py-2 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none transition-all"
+                          className="w-full pl-8 pr-3 py-2 bg-[var(--surface-2)]border border-[var(--border)]rounded-xl text-xs text-[var(--foreground)] focus:outline-none transition-all"
                         />
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl p-1 flex-shrink-0">
+                    <div className="flex items-center gap-1 bg-[var(--surface-2)]border border-[var(--border)]rounded-xl p-1 flex-shrink-0">
                       {(
                         [
                           { value: 'all', label: 'Tất cả' },
@@ -1098,7 +1080,7 @@ export default function UserDashboardClient() {
                             setHistoryStatus(opt.value);
                             setHistoryPage(1);
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${historyStatus === opt.value ? 'text-white border-transparent' : 'text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface)] dark:hover:bg-[var(--dark-surface)]'}`}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${historyStatus === opt.value ? 'text-white border-transparent' : 'text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface)]:bg-[var(--dark-surface)]'}`}
                           style={
                             historyStatus === opt.value
                               ? { background: 'var(--primary)', borderColor: 'var(--primary)' }
@@ -1115,7 +1097,7 @@ export default function UserDashboardClient() {
                   <table className="w-full">
                     <thead>
                       <tr
-                        className="border-b border-[var(--border)] dark:border-[var(--dark-border)]"
+                        className="border-b border-[var(--border)]"
                         style={{ background: 'var(--surface-2)' }}
                       >
                         <th
@@ -1219,11 +1201,11 @@ export default function UserDashboardClient() {
                         <tr>
                           <td colSpan={6} className="px-4 py-12 text-center">
                             <div className="flex flex-col items-center gap-3">
-                              <div className="w-14 h-14 bg-red-50 dark:bg-red-900/20 rounded-2xl flex items-center justify-center">
+                              <div className="w-14 h-14 bg-red-50/20 rounded-2xl flex items-center justify-center">
                                 <Icon
                                   name="ExclamationTriangleIcon"
                                   size={28}
-                                  className="text-red-500 dark:text-red-400"
+                                  className="text-red-500"
                                 />
                               </div>
                               <div>
@@ -1283,7 +1265,7 @@ export default function UserDashboardClient() {
                         paginatedHistory.map((booking, i) => (
                           <tr
                             key={booking.id}
-                            className={`vj-table-row border-b border-[var(--border)] dark:border-[var(--dark-border)] ${i % 2 === 0 ? '' : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface)]'} cursor-pointer hover:bg-[var(--surface-2)] dark:hover:bg-[var(--dark-surface)]`}
+                            className={`vj-table-row border-b border-[var(--border)]${i % 2 === 0 ? '' : 'bg-[var(--surface-2)]'} cursor-pointer hover:bg-[var(--surface-2)]:bg-[var(--dark-surface)]`}
                             onClick={() => (window.location.href = `/dat-ve/${booking.id}`)}
                           >
                             <td className="px-4 py-2.5">
@@ -1350,7 +1332,7 @@ export default function UserDashboardClient() {
                   </table>
                 </div>
                 {filteredHistory.length > 0 && (
-                  <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-2.5 border-t border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--surface-2)] dark:bg-[var(--dark-surface)] gap-3">
+                  <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-2.5 border-t border-[var(--border)]bg-[var(--surface-2)]gap-3">
                     <div className="flex items-center gap-3">
                       <span className="text-xs text-[var(--foreground-muted)]">
                         {filteredHistory.length > historyPageSize
@@ -1365,7 +1347,7 @@ export default function UserDashboardClient() {
                             setHistoryPageSize(Number(e.target.value));
                             setHistoryPage(1);
                           }}
-                          className="text-xs font-semibold border border-[var(--border)] dark:border-[var(--dark-border)] rounded-lg px-2 py-1 bg-[var(--surface)] dark:bg-[var(--dark-surface)] text-[var(--foreground)] focus:outline-none cursor-pointer"
+                          className="text-xs font-semibold border border-[var(--border)]rounded-lg px-2 py-1 bg-[var(--surface)]text-[var(--foreground)] focus:outline-none cursor-pointer"
                         >
                           <option value={10}>10</option>
                           <option value={25}>25</option>
@@ -1403,7 +1385,7 @@ export default function UserDashboardClient() {
               <div className="space-y-5">
                 {/* Submit refund form */}
                 <div
-                  className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden"
+                  className="bg-[var(--surface)]rounded-2xl border border-[var(--border)]overflow-hidden"
                   style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
                 >
                   <div
@@ -1426,14 +1408,14 @@ export default function UserDashboardClient() {
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h2 className="font-bold text-base text-[var(--vj-navy)] dark:text-white">
+                          <h2 className="font-bold text-base text-[var(--vj-navy)]">
                             Yêu cầu hoàn tiền
                           </h2>
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-100/10 text-emerald-700text-[10px] font-bold">
                             Giao diện mới
                           </span>
                         </div>
-                        <p className="text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]">
+                        <p className="text-xs text-[var(--foreground-muted)]">
                           Điền thông tin để gửi yêu cầu hoàn tiền vé máy bay
                         </p>
                       </div>
@@ -1448,17 +1430,13 @@ export default function UserDashboardClient() {
 
                     {refundSubmitted ? (
                       <div className="flex flex-col items-center py-10 text-center">
-                        <div className="w-16 h-16 bg-green-50 dark:bg-green-900/10 rounded-2xl flex items-center justify-center mb-4">
-                          <Icon
-                            name="CheckCircleIcon"
-                            size={36}
-                            className="text-green-500 dark:text-green-400"
-                          />
+                        <div className="w-16 h-16 bg-green-50/10 rounded-2xl flex items-center justify-center mb-4">
+                          <Icon name="CheckCircleIcon" size={36} className="text-green-500" />
                         </div>
-                        <h3 className="font-black text-base mb-2 text-[var(--foreground)] dark:text-[var(--foreground)]">
+                        <h3 className="font-black text-base mb-2 text-[var(--foreground)]">
                           Yêu cầu đã được gửi!
                         </h3>
-                        <p className="text-sm text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] max-w-xs mb-6">
+                        <p className="text-sm text-[var(--foreground-subtle)]max-w-xs mb-6">
                           Chúng tôi sẽ xem xét và phản hồi yêu cầu hoàn tiền của bạn trong vòng 3–5
                           ngày làm việc.
                         </p>
@@ -1584,7 +1562,7 @@ export default function UserDashboardClient() {
                             <Icon
                               name="TicketIcon"
                               size={15}
-                              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] pointer-events-none"
+                              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-subtle)]pointer-events-none"
                             />
                             <input
                               type="text"
@@ -1592,7 +1570,7 @@ export default function UserDashboardClient() {
                               onChange={(e) => setRefundBookingId(e.target.value.toUpperCase())}
                               placeholder="VD: VJ2B4K9"
                               required
-                              className="w-full pl-9 pr-4 py-2.5 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm text-[var(--foreground)] dark:text-[var(--foreground)] placeholder-[var(--foreground-subtle)] dark:placeholder-[var(--foreground-subtle)] focus:outline-none transition-all"
+                              className="w-full pl-9 pr-4 py-2.5 bg-[var(--surface-2)]border border-[var(--border)]rounded-xl text-sm text-[var(--foreground)]placeholder-[var(--foreground-subtle)]focus:outline-none transition-all"
                               onFocus={(e) => {
                                 e.target.style.borderColor = 'var(--primary)';
                                 e.target.style.boxShadow =
@@ -1616,7 +1594,7 @@ export default function UserDashboardClient() {
                               <Icon
                                 name="BanknotesIcon"
                                 size={15}
-                                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] pointer-events-none"
+                                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-subtle)]pointer-events-none"
                               />
                               <input
                                 type="text"
@@ -1629,14 +1607,14 @@ export default function UserDashboardClient() {
                                 }}
                                 placeholder="VD: 1.250.000"
                                 required
-                                className="w-full pl-9 pr-14 py-2.5 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm text-[var(--foreground)] dark:text-[var(--foreground)] placeholder-[var(--foreground-subtle)] dark:placeholder-[var(--foreground-subtle)] focus:outline-none transition-all"
+                                className="w-full pl-9 pr-14 py-2.5 bg-[var(--surface-2)]border border-[var(--border)]rounded-xl text-sm text-[var(--foreground)]placeholder-[var(--foreground-subtle)]focus:outline-none transition-all"
                               />
-                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]">
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--foreground-muted)]">
                                 VND
                               </span>
                             </div>
                           </div>
-                          <p className="text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] mt-1">
+                          <p className="text-xs text-[var(--foreground-subtle)]mt-1">
                             Nhập mã đặt chỗ từ email xác nhận hoặc lịch sử đặt vé
                           </p>
                         </div>
@@ -1654,7 +1632,7 @@ export default function UserDashboardClient() {
                             onChange={(e) => setRefundNote(e.target.value)}
                             placeholder="Ghi chú cho yêu cầu hoàn vé (không bắt buộc)..."
                             rows={3}
-                            className="w-full px-4 py-2.5 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm text-[var(--foreground)] dark:text-[var(--foreground)] placeholder-[var(--foreground-subtle)] dark:placeholder-[var(--foreground-subtle)] focus:outline-none transition-all resize-none"
+                            className="w-full px-4 py-2.5 bg-[var(--surface-2)]border border-[var(--border)]rounded-xl text-sm text-[var(--foreground)]placeholder-[var(--foreground-subtle)]focus:outline-none transition-all resize-none"
                             onFocus={(e) => {
                               e.target.style.borderColor = 'var(--primary)';
                               e.target.style.boxShadow = '0 0 0 2px rgba(var(--primary-rgb), 0.1)';
@@ -1667,8 +1645,8 @@ export default function UserDashboardClient() {
                         </div>
 
                         {/* Bank account info section */}
-                        <div className="rounded-xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden">
-                          <div className="flex items-center gap-2 px-4 py-3 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] border-b border-[var(--border)] dark:border-[var(--dark-border)]">
+                        <div className="rounded-xl border border-[var(--border)]overflow-hidden">
+                          <div className="flex items-center gap-2 px-4 py-3 bg-[var(--surface-2)]border-b border-[var(--border)]">
                             <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-[rgb(var(--vj-red-rgb))]/10">
                               <Icon
                                 name="CreditCardIcon"
@@ -1687,14 +1665,14 @@ export default function UserDashboardClient() {
                           <div className="p-4 space-y-3">
                             {/* Bank name */}
                             <div>
-                              <label className="block text-xs font-semibold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mb-1.5">
+                              <label className="block text-xs font-semibold text-[var(--foreground-muted)]mb-1.5">
                                 Tên ngân hàng <span className="text-red-500">*</span>
                               </label>
                               <div className="relative">
                                 <Icon
                                   name="BuildingOffice2Icon"
                                   size={15}
-                                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] pointer-events-none"
+                                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-subtle)]pointer-events-none"
                                 />
                                 <input
                                   type="text"
@@ -1702,7 +1680,7 @@ export default function UserDashboardClient() {
                                   onChange={(e) => setRefundBankName(e.target.value)}
                                   placeholder="VD: Vietcombank, Techcombank, MB Bank..."
                                   required
-                                  className="w-full pl-8 pr-4 py-2.5 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm text-[var(--foreground)] dark:text-[var(--foreground)] placeholder-[var(--foreground-subtle)] dark:placeholder-[var(--foreground-subtle)] focus:outline-none transition-all"
+                                  className="w-full pl-8 pr-4 py-2.5 bg-[var(--surface)]border border-[var(--border)]rounded-xl text-sm text-[var(--foreground)]placeholder-[var(--foreground-subtle)]focus:outline-none transition-all"
                                   onFocus={(e) => {
                                     e.target.style.borderColor = 'var(--primary)';
                                     e.target.style.boxShadow =
@@ -1717,14 +1695,14 @@ export default function UserDashboardClient() {
                             </div>
                             {/* Account number */}
                             <div>
-                              <label className="block text-xs font-semibold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mb-1.5">
+                              <label className="block text-xs font-semibold text-[var(--foreground-muted)]mb-1.5">
                                 Số tài khoản <span className="text-red-500">*</span>
                               </label>
                               <div className="relative">
                                 <Icon
                                   name="HashtagIcon"
                                   size={15}
-                                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] pointer-events-none"
+                                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-subtle)]pointer-events-none"
                                 />
                                 <input
                                   type="text"
@@ -1734,7 +1712,7 @@ export default function UserDashboardClient() {
                                   }
                                   placeholder="Nhập số tài khoản ngân hàng"
                                   required
-                                  className="w-full pl-8 pr-4 py-2.5 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm text-[var(--foreground)] dark:text-[var(--foreground)] placeholder-[var(--foreground-subtle)] dark:placeholder-[var(--foreground-subtle)] focus:outline-none transition-all"
+                                  className="w-full pl-8 pr-4 py-2.5 bg-[var(--surface)]border border-[var(--border)]rounded-xl text-sm text-[var(--foreground)]placeholder-[var(--foreground-subtle)]focus:outline-none transition-all"
                                   onFocus={(e) => {
                                     e.target.style.borderColor = 'var(--primary)';
                                     e.target.style.boxShadow =
@@ -1749,14 +1727,14 @@ export default function UserDashboardClient() {
                             </div>
                             {/* Account holder */}
                             <div>
-                              <label className="block text-xs font-semibold text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mb-1.5">
+                              <label className="block text-xs font-semibold text-[var(--foreground-muted)]mb-1.5">
                                 Tên chủ tài khoản <span className="text-red-500">*</span>
                               </label>
                               <div className="relative">
                                 <Icon
                                   name="UserIcon"
                                   size={15}
-                                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] pointer-events-none"
+                                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-subtle)]pointer-events-none"
                                 />
                                 <input
                                   type="text"
@@ -1766,7 +1744,7 @@ export default function UserDashboardClient() {
                                   }
                                   placeholder="Nhập tên chủ tài khoản (in hoa)"
                                   required
-                                  className="w-full pl-8 pr-4 py-2.5 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm text-[var(--foreground)] dark:text-[var(--foreground)] placeholder-[var(--foreground-subtle)] dark:placeholder-[var(--foreground-subtle)] focus:outline-none transition-all"
+                                  className="w-full pl-8 pr-4 py-2.5 bg-[var(--surface)]border border-[var(--border)]rounded-xl text-sm text-[var(--foreground)]placeholder-[var(--foreground-subtle)]focus:outline-none transition-all"
                                   onFocus={(e) => {
                                     e.target.style.borderColor = 'var(--primary)';
                                     e.target.style.boxShadow =
@@ -1778,7 +1756,7 @@ export default function UserDashboardClient() {
                                   }}
                                 />
                               </div>
-                              <p className="text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] mt-1">
+                              <p className="text-xs text-[var(--foreground-subtle)]mt-1">
                                 Tên phải khớp với tên đăng ký tài khoản ngân hàng
                               </p>
                             </div>
@@ -1790,9 +1768,9 @@ export default function UserDashboardClient() {
                           <Icon
                             name="InformationCircleIcon"
                             size={16}
-                            className="text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0"
+                            className="text-amber-600mt-0.5 flex-shrink-0"
                           />
-                          <p className="text-xs text-amber-700 dark:text-amber-300 leading-relaxed">
+                          <p className="text-xs text-amber-700leading-relaxed">
                             Hoàn tiền sẽ được xử lý trong <strong>3–5 ngày làm việc</strong>. Số
                             tiền hoàn lại phụ thuộc vào chính sách vé và thời điểm huỷ.
                           </p>
@@ -1855,7 +1833,7 @@ export default function UserDashboardClient() {
                               setRefundAccountNumber('');
                               setRefundAccountHolder('');
                             }}
-                            className="px-6 py-2.5 border border-[var(--border)] font-semibold rounded-xl text-sm transition-all hover:bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)]"
+                            className="px-6 py-2.5 border border-[var(--border)] font-semibold rounded-xl text-sm transition-all hover:bg-[var(--surface-2)]text-[var(--foreground-muted)]"
                           >
                             Xoá trắng
                           </button>
@@ -1867,7 +1845,7 @@ export default function UserDashboardClient() {
 
                 {/* Refund history */}
                 <div
-                  className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-3xl border border-[rgb(var(--accent-rgb))]/20 dark:border-[rgb(var(--accent-rgb))]/30 overflow-hidden"
+                  className="bg-[var(--surface)]rounded-3xl border border-[rgb(var(--accent-rgb))]/20/30 overflow-hidden"
                   style={{
                     boxShadow:
                       '0 8px 32px rgba(var(--accent-rgb), 0.1), 0 4px 12px rgba(var(--accent-rgb), 0.06)',
@@ -1882,34 +1860,32 @@ export default function UserDashboardClient() {
                   <div className="p-5 border-b border-[rgb(var(--accent-rgb))]/10">
                     <div className="flex items-center justify-between mb-4">
                       <div>
-                        <h3 className="font-bold text-sm text-[var(--vj-navy)] dark:text-white">
+                        <h3 className="font-bold text-sm text-[var(--vj-navy)]">
                           Lịch sử yêu cầu hoàn tiền
                         </h3>
-                        <p className="text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] mt-0.5">
+                        <p className="text-xs text-[var(--foreground-muted)]mt-0.5">
                           {refundRequests.length} yêu cầu
                         </p>
                       </div>
                       <button
                         onClick={loadRefundRequests}
-                        className="flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)] dark:text-[var(--accent-light)] hover:text-[var(--accent-dark)] dark:hover:text-[var(--accent)] transition-colors"
+                        className="flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)]hover:text-[var(--accent-dark)]:text-[var(--accent)] transition-colors"
                         title="Tải lại"
                       >
                         <Icon name="ArrowPathIcon" size={13} />
                       </button>
                     </div>
                     {refundError && (
-                      <div className="px-4 py-3 bg-red-50 dark:bg-red-900/10 border-b border-red-100 dark:border-red-800 flex items-center gap-2">
+                      <div className="px-4 py-3 bg-red-50/10 border-b border-red-100flex items-center gap-2">
                         <Icon
                           name="ExclamationTriangleIcon"
                           size={14}
-                          className="text-red-500 dark:text-red-400 flex-shrink-0"
+                          className="text-red-500flex-shrink-0"
                         />
-                        <p className="text-xs text-red-600 dark:text-red-400 flex-1">
-                          {refundError}
-                        </p>
+                        <p className="text-xs text-red-600flex-1">{refundError}</p>
                         <button
                           onClick={loadRefundRequests}
-                          className="text-xs font-semibold text-red-600 dark:text-red-400 underline"
+                          className="text-xs font-semibold text-red-600underline"
                         >
                           Thử lại
                         </button>
@@ -1929,10 +1905,10 @@ export default function UserDashboardClient() {
                           />
                         </div>
                         <div className="text-center sm:text-left">
-                          <p className="font-black text-base mb-1.5 text-[var(--foreground)] dark:text-[var(--foreground)]">
+                          <p className="font-black text-base mb-1.5 text-[var(--foreground)]">
                             Chưa có yêu cầu nào
                           </p>
-                          <p className="text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] mb-4 leading-relaxed">
+                          <p className="text-xs text-[var(--foreground-subtle)]mb-4 leading-relaxed">
                             Các yêu cầu hoàn tiền bạn gửi sẽ xuất hiện tại đây. Bạn có thể theo dõi
                             trạng thái xử lý của từng yêu cầu.
                           </p>
@@ -1958,7 +1934,7 @@ export default function UserDashboardClient() {
                           >
                             <div className="flex items-start gap-3 min-w-0">
                               <div
-                                className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${req.status === 'approved' ? 'bg-green-50 dark:bg-green-900/10' : req.status === 'rejected' ? 'bg-red-50 dark:bg-red-900/10' : 'bg-amber-50 dark:bg-amber-900/10'}`}
+                                className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${req.status === 'approved' ? 'bg-green-50/10' : req.status === 'rejected' ? 'bg-red-50/10' : 'bg-amber-50/10'}`}
                               >
                                 <Icon
                                   name={
@@ -1971,36 +1947,36 @@ export default function UserDashboardClient() {
                                   size={18}
                                   className={
                                     req.status === 'approved'
-                                      ? 'text-green-500 dark:text-green-400'
+                                      ? 'text-green-500'
                                       : req.status === 'rejected'
-                                        ? 'text-red-500 dark:text-red-400'
-                                        : 'text-amber-500 dark:text-amber-400'
+                                        ? 'text-red-500'
+                                        : 'text-amber-500'
                                   }
                                 />
                               </div>
                               <div className="min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="font-mono font-bold text-sm text-[var(--foreground)] dark:text-[var(--foreground)]">
+                                  <span className="font-mono font-bold text-sm text-[var(--foreground)]">
                                     {req.bookingId}
                                   </span>
                                 </div>
-                                <div className="text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] truncate">
+                                <div className="text-xs text-[var(--foreground-muted)]truncate">
                                   Mã đặt chỗ: {req.bookingId} · Số tiền:{' '}
                                   {req.amount.toLocaleString('vi-VN')}đ
                                 </div>
-                                <div className="text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] truncate">
+                                <div className="text-xs text-[var(--foreground-muted)]truncate">
                                   {req.bankName} · {req.accountHolder} · STK: {req.accountNumber}
                                 </div>
-                                <div className="text-xs text-[var(--foreground-muted)] dark:text-[var(--foreground-muted)] truncate">
+                                <div className="text-xs text-[var(--foreground-muted)]truncate">
                                   {req.reason}
                                   {req.note ? ` · ${req.note}` : ''}
                                 </div>
-                                <div className="text-xs text-[var(--foreground-subtle)] dark:text-[var(--foreground-subtle)] mt-0.5">
+                                <div className="text-xs text-[var(--foreground-subtle)]mt-0.5">
                                   {req.date}
                                 </div>
                                 {req.adminNote && (
                                   <div
-                                    className={`mt-1.5 text-xs px-2.5 py-1.5 rounded-lg ${req.status === 'approved' ? 'bg-green-50 dark:bg-green-900/10 text-green-700 dark:text-green-300' : req.status === 'rejected' ? 'bg-red-50 dark:bg-red-900/10 text-red-700 dark:text-red-300' : 'bg-amber-50 dark:bg-amber-900/10 text-amber-700 dark:text-amber-300'}`}
+                                    className={`mt-1.5 text-xs px-2.5 py-1.5 rounded-lg ${req.status === 'approved' ? 'bg-green-50/10 text-green-700' : req.status === 'rejected' ? 'bg-red-50/10 text-red-700' : 'bg-amber-50/10 text-amber-700'}`}
                                   >
                                     <span className="font-semibold">Admin: </span>
                                     {req.adminNote}
@@ -2009,7 +1985,7 @@ export default function UserDashboardClient() {
                               </div>
                             </div>
                             <span
-                              className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5 ${req.status === 'approved' ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300' : req.status === 'rejected' ? 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300' : 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300'}`}
+                              className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5 ${req.status === 'approved' ? 'bg-green-100/20 text-green-700' : req.status === 'rejected' ? 'bg-red-100/20 text-red-700' : 'bg-amber-100/20 text-amber-700'}`}
                             >
                               {req.status === 'approved'
                                 ? 'Đã duyệt'

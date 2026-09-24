@@ -6,7 +6,7 @@
  * In development/demo mode, uses a mock implementation.
  */
 
-import { neon } from '@neondatabase/serverless';
+import { neon, neonConfig } from '@neondatabase/serverless';
 
 // Check if we have a real database connection
 const hasRealDb = !!process.env.DATABASE_URL;
@@ -17,6 +17,12 @@ let sqlFn: any;
 if (hasRealDb) {
   // Real Neon connection
   sqlFn = neon(process.env.DATABASE_URL!);
+  // Local dev/database-behind-proxy setups (NEON_FETCH_ENDPOINT in .env.local):
+  // the driver otherwise derives `https://<host>/sql` from the connection
+  // string, which neither resolves nor speaks plain HTTP for local hosts.
+  if (process.env.NEON_FETCH_ENDPOINT) {
+    neonConfig.fetchEndpoint = process.env.NEON_FETCH_ENDPOINT;
+  }
 } else {
   // Mock implementation for development without DB
   console.warn('⚠️  DATABASE_URL not set. Using mock database. Do not use in production.');

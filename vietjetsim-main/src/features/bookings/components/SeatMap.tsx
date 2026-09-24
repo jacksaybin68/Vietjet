@@ -66,18 +66,18 @@ export function SeatMap({
 
   const getSeatColor = (seat: Seat) => {
     if (seat.isOccupied) {
-      return 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed';
+      return 'bg-gray-300cursor-not-allowed';
     }
     if (selectedSeats.includes(seat.id) || seat.isSelected) {
-      return 'bg-blue-500 text-white ring-2 ring-blue-300 dark:ring-blue-600';
+      return 'bg-blue-500 text-white ring-2 ring-blue-300';
     }
     if (seat.isExtraLegroom || emergencyExitRows.includes(seat.row)) {
-      return 'bg-amber-100 dark:bg-amber-900/50 hover:bg-amber-200 dark:hover:bg-amber-800 text-amber-800 dark:text-amber-200';
+      return 'bg-amber-100/50 hover:bg-amber-200:bg-amber-800 text-amber-800';
     }
     if (seat.class === 'business') {
-      return 'bg-purple-100 dark:bg-purple-900/50 hover:bg-purple-200 dark:hover:bg-purple-800 text-purple-800 dark:text-purple-200';
+      return 'bg-purple-100/50 hover:bg-purple-200:bg-purple-800 text-purple-800';
     }
-    return 'bg-green-100 dark:bg-green-900/50 hover:bg-green-200 dark:hover:bg-green-800 text-green-800 dark:text-green-200';
+    return 'bg-green-100/50 hover:bg-green-200:bg-green-800 text-green-800';
   };
 
   const formatPrice = (price: number) => {
@@ -85,28 +85,28 @@ export function SeatMap({
   };
 
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-lg p-4 ${className}`}>
+    <div className={`bg-whiterounded-lg p-4 ${className}`}>
       {/* Legend */}
-      <div className="flex flex-wrap gap-4 mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex flex-wrap gap-4 mb-6 pb-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-green-100 dark:bg-green-900/50" />
-          <span className="text-xs text-gray-600 dark:text-gray-400">Phổ thông</span>
+          <div className="w-6 h-6 rounded bg-green-100/50" />
+          <span className="text-xs text-gray-600">Phổ thông</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-purple-100 dark:bg-purple-900/50" />
-          <span className="text-xs text-gray-600 dark:text-gray-400">Thương gia</span>
+          <div className="w-6 h-6 rounded bg-purple-100/50" />
+          <span className="text-xs text-gray-600">Thương gia</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-amber-100 dark:bg-amber-900/50" />
-          <span className="text-xs text-gray-600 dark:text-gray-400">Chỗ rộng</span>
+          <div className="w-6 h-6 rounded bg-amber-100/50" />
+          <span className="text-xs text-gray-600">Chỗ rộng</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded bg-blue-500" />
-          <span className="text-xs text-gray-600 dark:text-gray-400">Đã chọn</span>
+          <span className="text-xs text-gray-600">Đã chọn</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-gray-300 dark:bg-gray-600" />
-          <span className="text-xs text-gray-600 dark:text-gray-400">Đã đặt</span>
+          <div className="w-6 h-6 rounded bg-gray-300" />
+          <span className="text-xs text-gray-600">Đã đặt</span>
         </div>
       </div>
 
@@ -117,10 +117,7 @@ export function SeatMap({
           <div className="flex mb-2">
             <div className="w-8" />
             {columns.map((col, idx) => (
-              <div
-                key={col}
-                className="flex-1 text-center text-sm font-medium text-gray-600 dark:text-gray-400"
-              >
+              <div key={col} className="flex-1 text-center text-sm font-medium text-gray-600">
                 <span className={idx === 2 ? 'mr-8' : idx === 3 ? 'ml-8' : ''}>{col}</span>
               </div>
             ))}
@@ -137,9 +134,7 @@ export function SeatMap({
             return (
               <div key={row} className="flex items-center mb-1">
                 {/* Row Number */}
-                <div className="w-8 text-center text-xs text-gray-500 dark:text-gray-500">
-                  {row}
-                </div>
+                <div className="w-8 text-center text-xs text-gray-500">{row}</div>
 
                 {/* Left Aisle Seats */}
                 {columns.slice(0, 3).map((col) => {
@@ -168,7 +163,7 @@ export function SeatMap({
                 {/* Aisle */}
                 <div className="w-8 flex items-center justify-center">
                   {(isExtraLegroom || isEmergency) && (
-                    <span className="text-[8px] text-amber-500 dark:text-amber-400 font-medium">
+                    <span className="text-[8px] text-amber-500font-medium">
                       {isEmergency ? 'EXIT' : 'XL'}
                     </span>
                   )}
@@ -199,9 +194,7 @@ export function SeatMap({
                 })}
 
                 {/* Row Number */}
-                <div className="w-8 text-center text-xs text-gray-500 dark:text-gray-500">
-                  {row}
-                </div>
+                <div className="w-8 text-center text-xs text-gray-500">{row}</div>
               </div>
             );
           })}

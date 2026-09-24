@@ -1,5 +1,11 @@
-// ⚠️ CRITICAL: Next.js requires this file at the PROJECT ROOT.
-// JWT-based authentication middleware - replaces Supabase auth
+// ⚠️ CRITICAL: Next.js requires this file at the same level as `app` — for
+// this project that is `src/proxy.ts` (we use a `src/` directory). A proxy at
+// the project root is found by `next build` but is NOT watched by `next dev`,
+// which is how the old root `middleware.ts` silently stopped running in dev.
+// Next.js 16 file convention: `proxy.ts` (formerly `middleware.ts`), exported
+// as `proxy`. The old `middleware` name is deprecated and is not executed by
+// `next dev`. The location also matters: see the header above.
+// JWT-based request proxy - replaces Supabase auth
 
 import { NextResponse, type NextRequest } from 'next/server';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limit';
@@ -25,10 +31,10 @@ if (!JWT_SECRET || JWT_SECRET === 'dev-secret-key-do-not-use-in-production') {
 const effectiveJwtSecret = JWT_SECRET || 'dev-secret-key-do-not-use-in-production';
 
 // Must match `CSRF_COOKIE_NAME` in `@/lib/csrf-client`; duplicated because the
-// Edge middleware bundle cannot import `next/headers`-dependent modules.
+// proxy runs outside the route context where `next/headers` is available.
 const CSRF_COOKIE_NAME = 'csrf_token';
 
-// ─── HMAC-SHA256 Verification (Edge Runtime Compatible) ───────────────────────
+// ─── HMAC-SHA256 Verification (runtime agnostic) ────────────────────────────
 
 async function verifyJwtSignature(token: string, secret: string): Promise<JWTPayload | null> {
   try {
@@ -74,7 +80,7 @@ async function verifyJwtSignature(token: string, secret: string): Promise<JWTPay
     const payloadJson = base64UrlDecode(payloadB64);
     const payload = JSON.parse(payloadJson) as JWTPayload;
 
-    // Enforce token expiry at the Edge: an expired access token must not grant
+    // Enforce token expiry in the proxy: an expired access token must not grant
     // access to protected pages/APIs even if its signature is still valid.
     if (typeof payload.exp === 'number' && payload.exp * 1000 < Date.now()) {
       return null;
@@ -118,17 +124,25 @@ function base64UrlDecode(str: string): string {
 }
 
 /**
- * Delegates to the shared role rules so middleware and API routes cannot
+ * Delegates to the shared role rules so the proxy and API routes cannot
  * disagree about who is an admin.
  */
 function isAdminRole(role: string): boolean {
   return sharedIsAdminRole(role);
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const { pathname } = request.nextUrl;
+
+  // Registration shares the auth page with login. Preserve the public
+  // /dang-ky entry point while opening the correct tab directly.
+  if (pathname === '/dang-ky') {
+    const registerUrl = new URL('/dang-nhap', request.url);
+    registerUrl.searchParams.set('tab', 'register');
+    return NextResponse.redirect(registerUrl);
+  }
 
   // ─── Rate Limiting for Auth Endpoints ──────────────────────────────
   if (
@@ -234,8 +248,8 @@ export async function middleware(request: NextRequest) {
     }
 
     // Header values are ByteStrings: any character above U+00FF (e.g. Vietnamese
-    // diacritics) throws "Cannot convert argument to a ByteString" in the Edge
-    // runtime. None of the x-user-* headers are read downstream — route handlers
+    // diacritics) throws "Cannot convert argument to a ByteString" in the fetch
+    // Headers API. None of the x-user-* headers are read downstream — route handlers
     // resolve identity from the signed JWT via verifyAuthRequest — so drop
     // non-latin-1 characters rather than corrupting them.
     const byteString = (v: string) =>

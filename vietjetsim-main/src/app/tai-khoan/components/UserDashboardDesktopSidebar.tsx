@@ -118,10 +118,10 @@ export default function UserDashboardDesktopSidebar({
         </nav>
 
         {!sidebarCollapsed && (
-          <div className="px-3 py-3 border-t border-[rgb(var(--accent-rgb))]/20 dark:border-[rgb(var(--accent-rgb))]/30">
+          <div className="px-3 py-3 border-t border-[rgb(var(--accent-rgb))]/20/30">
             <Link
               href="/dang-nhap"
-              className="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-[var(--accent-dark)] dark:text-[var(--accent-light)] hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 dark:hover:text-red-400 transition-all"
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-[var(--accent-dark)]hover:bg-red-50:bg-red-900/10 hover:text-red-600:text-red-400 transition-all"
             >
               <Icon name="ArrowRightOnRectangleIcon" size={20} className="text-[var(--accent)]" />
               <span>Đăng xuất</span>
@@ -129,11 +129,11 @@ export default function UserDashboardDesktopSidebar({
           </div>
         )}
         {sidebarCollapsed && (
-          <div className="px-2 py-3 border-t border-[rgb(var(--accent-rgb))]/20 dark:border-[rgb(var(--accent-rgb))]/30">
+          <div className="px-2 py-3 border-t border-[rgb(var(--accent-rgb))]/20/30">
             <Link
               href="/dang-nhap"
               title="Đăng xuất"
-              className="flex items-center justify-center w-full py-3 rounded-2xl text-[var(--accent-dark)] dark:text-[var(--accent-light)] hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 dark:hover:text-red-400 transition-all"
+              className="flex items-center justify-center w-full py-3 rounded-2xl text-[var(--accent-dark)]hover:bg-red-50:bg-red-900/10 hover:text-red-600:text-red-400 transition-all"
             >
               <Icon name="ArrowRightOnRectangleIcon" size={20} />
             </Link>

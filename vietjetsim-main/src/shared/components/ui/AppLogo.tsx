@@ -2,7 +2,6 @@
 
 import React, { memo, useMemo } from 'react';
 import AppIcon from './AppIcon';
-import AppImage from './AppImage';
 
 interface AppLogoProps {
   src?: string; // Image source (optional)
@@ -33,10 +32,10 @@ const AppLogo = memo(function AppLogo({
       {src ? (
         <img
           src={src}
-          alt="Logo"
+          alt="VietjetSim"
           width={size}
           height={size}
-          className={`h-14 w-auto object-contain ${className}`}
+          className={`object-contain ${className}`}
           loading="eager"
         />
       ) : (

@@ -86,7 +86,7 @@ export default function ForgotPasswordPage() {
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               placeholder=" "
-              className="form-input font-body-vj w-full rounded-xl border border-[var(--border)] dark:border-[var(--dark-border)] bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] py-3 pl-10 pr-4 text-sm transition-all focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20"
+              className="form-input font-body-vj w-full rounded-xl border border-[var(--border)]bg-[var(--surface-2)]py-3 pl-10 pr-4 text-sm transition-all focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20"
               required
             />
             <label className="form-label-float has-icon">Email hoặc Số điện thoại</label>

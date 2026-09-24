@@ -359,7 +359,7 @@ function ErrorModal({ title, message, onRetry, onDismiss }: ErrorModalProps) {
             </button>
             <button
               onClick={onDismiss}
-              className="w-full py-3 rounded-xl border border-[var(--border)] dark:border-[var(--dark-border)] text-[var(--foreground-muted)] font-semibold text-sm hover:bg-[var(--surface)] dark:bg-[var(--dark-surface)] transition-all"
+              className="w-full py-3 rounded-xl border border-[var(--border)]text-[var(--foreground-muted)] font-semibold text-sm hover:bg-[var(--surface)]transition-all"
             >
               Đóng
             </button>
@@ -692,7 +692,7 @@ export default function PaymentClient() {
           <div className="max-w-lg w-full mx-auto px-4">
             {/* Success state */}
             <div
-              className="bg-white rounded-3xl border border-[var(--border)] dark:border-[var(--dark-border)] overflow-hidden"
+              className="bg-white rounded-3xl border border-[var(--border)]overflow-hidden"
               style={{
                 boxShadow: '0 32px 72px rgba(0,0,0,0.18), 0 12px 28px rgba(0,0,0,0.10)',
                 animation: 'fadeInUp 0.5s ease-out',
@@ -731,7 +731,7 @@ export default function PaymentClient() {
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
                         copied
                           ? 'bg-[rgb(var(--vj-green-rgb))]/15 text-[var(--vj-green)] border border-[rgb(var(--vj-green-rgb))]/40'
-                          : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)] border border-[var(--border)] dark:border-[var(--dark-border)] hover:bg-primary-50 hover:text-primary hover:border-primary'
+                          : 'bg-[var(--surface-2)]text-[var(--foreground-muted)] border border-[var(--border)]hover:bg-primary-50 hover:text-primary hover:border-primary'
                       }`}
                     >
                       {copied ? (
@@ -751,13 +751,13 @@ export default function PaymentClient() {
 
                 {/* Dashed divider */}
                 <div className="relative my-5">
-                  <div className="border-t-2 border-dashed border-[var(--border)] dark:border-[var(--dark-border)]" />
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-full -ml-2 border border-[var(--border)] dark:border-[var(--dark-border)]" />
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-full -mr-2 border border-[var(--border)] dark:border-[var(--dark-border)]" />
+                  <div className="border-t-2 border-dashed border-[var(--border)]" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-[var(--surface)]rounded-full -ml-2 border border-[var(--border)]" />
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-[var(--surface)]rounded-full -mr-2 border border-[var(--border)]" />
                 </div>
 
                 {/* Flight info */}
-                <div className="bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl p-4 mb-4">
+                <div className="bg-[var(--surface)]rounded-2xl p-4 mb-4">
                   {booking && (
                     <>
                       <div className="flex items-center justify-between mb-3">
@@ -806,7 +806,7 @@ export default function PaymentClient() {
                 {booking?.passengers.map((p: { name: string; seat: string }, i: number) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between py-3 border-b border-[var(--border)] dark:border-[var(--dark-border)]"
+                    className="flex items-center justify-between py-3 border-b border-[var(--border)]"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-primary-50 rounded-full flex items-center justify-center">
@@ -852,7 +852,7 @@ export default function PaymentClient() {
                           {bankAccountNumber}
                         </span>
                       </div>
-                      <div className="border-t border-dashed border-[var(--border)] dark:border-[var(--dark-border)]" />
+                      <div className="border-t border-dashed border-[var(--border)]" />
                       <div className="flex justify-between items-center">
                         <span className="text-[var(--foreground-muted)] text-xs">
                           Chủ tài khoản
@@ -861,7 +861,7 @@ export default function PaymentClient() {
                           {bankAccountHolder}
                         </span>
                       </div>
-                      <div className="border-t border-dashed border-[var(--border)] dark:border-[var(--dark-border)]" />
+                      <div className="border-t border-dashed border-[var(--border)]" />
                       <div className="flex justify-between items-center">
                         <span className="text-[var(--foreground-muted)] text-xs">Mã ngân hàng</span>
                         <span className="font-mono text-xs font-semibold text-[var(--foreground-muted)]">
@@ -873,7 +873,7 @@ export default function PaymentClient() {
                 )}
 
                 {/* Total */}
-                <div className="flex justify-between items-center mt-4 pt-4 border-t border-[var(--border)] dark:border-[var(--dark-border)]">
+                <div className="flex justify-between items-center mt-4 pt-4 border-t border-[var(--border)]">
                   <span className="font-bold text-[var(--foreground-muted)]">Tổng thanh toán</span>
                   <span className="text-xl font-black text-primary">
                     {total.toLocaleString('vi-VN')}₫
@@ -882,7 +882,7 @@ export default function PaymentClient() {
 
                 {/* QR Mock */}
                 <div className="mt-5 flex flex-col items-center">
-                  <div className="w-28 h-28 bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] rounded-xl flex items-center justify-center border-2 border-dashed border-[var(--border)] dark:border-[var(--dark-border)]">
+                  <div className="w-28 h-28 bg-[var(--surface-2)]rounded-xl flex items-center justify-center border-2 border-dashed border-[var(--border)]">
                     <div className="text-center">
                       <Icon
                         name="QrCodeIcon"
@@ -897,7 +897,7 @@ export default function PaymentClient() {
                 </div>
 
                 {/* Share section */}
-                <div className="mt-5 pt-4 border-t border-[var(--border)] dark:border-[var(--dark-border)]">
+                <div className="mt-5 pt-4 border-t border-[var(--border)]">
                   <div className="text-xs font-bold text-[var(--foreground-subtle)] uppercase tracking-widest mb-3 text-center">
                     Chia sẻ chuyến bay
                   </div>
@@ -929,7 +929,7 @@ export default function PaymentClient() {
                       <button
                         onClick={handleShareNative}
                         title="Chia sẻ"
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)] text-xs font-semibold hover:bg-[var(--surface-3)] dark:bg-[var(--dark-surface-2)] transition-all hover:-translate-y-0.5 hover:shadow-md border border-[var(--border)] dark:border-[var(--dark-border)]"
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--surface-2)]text-[var(--foreground-muted)] text-xs font-semibold hover:bg-[var(--surface-3)]transition-all hover:-translate-y-0.5 hover:shadow-md border border-[var(--border)]"
                       >
                         <Icon name="ShareIcon" size={14} />
                         Chia sẻ
@@ -949,7 +949,7 @@ export default function PaymentClient() {
                   </Link>
                   <Link
                     href="/trang-chu"
-                    className="w-full border border-[var(--border)] dark:border-[var(--dark-border)] text-[var(--foreground-muted)] hover:bg-[var(--surface)] dark:bg-[var(--dark-surface)] font-semibold py-2.5 rounded-xl transition-all text-sm text-center"
+                    className="w-full border border-[var(--border)]text-[var(--foreground-muted)] hover:bg-[var(--surface)]font-semibold py-2.5 rounded-xl transition-all text-sm text-center"
                   >
                     Về trang chủ
                   </Link>
@@ -973,7 +973,7 @@ export default function PaymentClient() {
             <div className="lg:col-span-2 space-y-5">
               {/* Payment Method */}
               <div
-                className="bg-white rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] p-5"
+                className="bg-white rounded-2xl border border-[var(--border)]p-5"
                 style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
               >
                 <h2 className="font-bold text-[var(--foreground)] mb-4">Phương thức thanh toán</h2>
@@ -1001,7 +1001,7 @@ export default function PaymentClient() {
                       className={`flex flex-col items-center gap-2 py-4 rounded-xl border-2 transition-all text-sm font-semibold ${
                         paymentMethod === val
                           ? 'border-primary bg-primary-50 text-primary'
-                          : 'border-[var(--border)] dark:border-[var(--dark-border)] text-[var(--foreground-muted)] hover:border-[var(--border)] dark:border-[var(--dark-border)]'
+                          : 'border-[var(--border)]text-[var(--foreground-muted)] hover:border-[var(--border)]'
                       }`}
                     >
                       <Icon name={icon} size={22} />
@@ -1031,7 +1031,7 @@ export default function PaymentClient() {
                             value={cardNumber}
                             onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
                             placeholder=" "
-                            className={`w-full pl-10 pr-4 py-3 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm font-mono form-input ${cardNumber.replace(/\s/g, '').length === 16 ? 'form-input-valid' : ''}`}
+                            className={`w-full pl-10 pr-4 py-3 bg-[var(--surface)]border border-[var(--border)]rounded-xl text-sm font-mono form-input ${cardNumber.replace(/\s/g, '').length === 16 ? 'form-input-valid' : ''}`}
                             maxLength={19}
                             required
                           />
@@ -1050,7 +1050,7 @@ export default function PaymentClient() {
                             value={cardName}
                             onChange={(e) => setCardName(e.target.value.toUpperCase())}
                             placeholder=" "
-                            className={`w-full px-4 py-3 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm font-semibold form-input uppercase ${cardName.trim().length >= 3 ? 'form-input-valid' : ''}`}
+                            className={`w-full px-4 py-3 bg-[var(--surface)]border border-[var(--border)]rounded-xl text-sm font-semibold form-input uppercase ${cardName.trim().length >= 3 ? 'form-input-valid' : ''}`}
                             required
                           />
                           <label className="form-label-float">NGUYEN VAN A</label>
@@ -1072,7 +1072,7 @@ export default function PaymentClient() {
                                 setExpiry(v.length > 2 ? v.slice(0, 2) + '/' + v.slice(2) : v);
                               }}
                               placeholder=" "
-                              className={`w-full px-4 py-3 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm form-input ${expiry.length === 5 ? 'form-input-valid' : ''}`}
+                              className={`w-full px-4 py-3 bg-[var(--surface)]border border-[var(--border)]rounded-xl text-sm form-input ${expiry.length === 5 ? 'form-input-valid' : ''}`}
                               maxLength={5}
                               required
                             />
@@ -1093,7 +1093,7 @@ export default function PaymentClient() {
                                 setCvv(e.target.value.replace(/\D/g, '').substring(0, 3))
                               }
                               placeholder=" "
-                              className={`w-full px-4 py-3 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm form-input ${cvv.length === 3 ? 'form-input-valid' : ''}`}
+                              className={`w-full px-4 py-3 bg-[var(--surface)]border border-[var(--border)]rounded-xl text-sm form-input ${cvv.length === 3 ? 'form-input-valid' : ''}`}
                               maxLength={3}
                               required
                             />
@@ -1136,7 +1136,7 @@ export default function PaymentClient() {
                                       setBankAccountNumber(acc.accountNumber);
                                       setBankAccountHolder(acc.accountHolder);
                                     }}
-                                    className="w-full flex items-center gap-3 p-3 bg-[var(--surface)] dark:bg-[var(--dark-surface)] hover:bg-primary-50 border border-[var(--border)] dark:border-[var(--dark-border)] hover:border-primary rounded-xl transition-all text-left"
+                                    className="w-full flex items-center gap-3 p-3 bg-[var(--surface)]hover:bg-primary-50 border border-[var(--border)]hover:border-primary rounded-xl transition-all text-left"
                                   >
                                     {bank && (
                                       <div
@@ -1176,7 +1176,7 @@ export default function PaymentClient() {
                             className={`relative py-3 px-3 border rounded-xl text-sm font-semibold transition-all flex flex-col items-center gap-1.5 ${
                               selectedBank?.id === bank.id
                                 ? 'border-2 shadow-md'
-                                : 'bg-[var(--surface)] dark:bg-[var(--dark-surface)] hover:bg-primary-50 hover:border-primary border-[var(--border)] dark:border-[var(--dark-border)] text-[var(--foreground-muted)]'
+                                : 'bg-[var(--surface)]hover:bg-primary-50 hover:border-primary border-[var(--border)]text-[var(--foreground-muted)]'
                             }`}
                             style={
                               selectedBank?.id === bank.id
@@ -1206,7 +1206,7 @@ export default function PaymentClient() {
                       </div>
 
                       {/* Bank Account Form */}
-                      <div className="bg-white border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl p-4 space-y-3 mt-2">
+                      <div className="bg-white border border-[var(--border)]rounded-xl p-4 space-y-3 mt-2">
                         <h4 className="text-sm font-bold text-[var(--foreground)] flex items-center gap-2">
                           <Icon name="BanknotesIcon" size={18} className="text-primary" />
                           Thông tin tài khoản thụ hưởng
@@ -1222,7 +1222,7 @@ export default function PaymentClient() {
                               setBankAccountNumber(e.target.value.replace(/\D/g, ''))
                             }
                             placeholder="Nhập số tài khoản"
-                            className="w-full px-3 py-2.5 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                            className="w-full px-3 py-2.5 bg-[var(--surface)]border border-[var(--border)]rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                           />
                         </div>
                         <div>
@@ -1234,7 +1234,7 @@ export default function PaymentClient() {
                             value={bankAccountHolder}
                             onChange={(e) => setBankAccountHolder(e.target.value)}
                             placeholder="Nhập tên chủ tài khoản"
-                            className="w-full px-3 py-2.5 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                            className="w-full px-3 py-2.5 bg-[var(--surface)]border border-[var(--border)]rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                           />
                         </div>
                       </div>
@@ -1245,7 +1245,7 @@ export default function PaymentClient() {
                           type="checkbox"
                           checked={saveAccount}
                           onChange={(e) => setSaveAccount(e.target.checked)}
-                          className="w-4 h-4 rounded border-[var(--border)] dark:border-[var(--dark-border)] text-primary focus:ring-primary"
+                          className="w-4 h-4 rounded border-[var(--border)]text-primary focus:ring-primary"
                         />
                         <span className="text-sm text-[var(--foreground-muted)]">
                           Lưu tài khoản này cho lần thanh toán sau
@@ -1270,7 +1270,7 @@ export default function PaymentClient() {
                                   className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
                                     selectedAdminAccount.id === acc.id
                                       ? 'bg-primary text-white shadow-md shadow-primary/20'
-                                      : 'bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] text-[var(--foreground-muted)] hover:bg-[var(--surface-3)] dark:bg-[var(--dark-surface-2)]'
+                                      : 'bg-[var(--surface-2)]text-[var(--foreground-muted)] hover:bg-[var(--surface-3)]'
                                   }`}
                                 >
                                   {acc.admin_bank_name}
@@ -1283,14 +1283,14 @@ export default function PaymentClient() {
                             <div className="p-4 bg-gradient-to-br from-[var(--surface)] to-[var(--background)]">
                               <div className="flex justify-between items-start mb-4">
                                 <div>
-                                  <div className="text-xs font-bold text-[var(--foreground-subtle)] uppercase tracking-widest bg-[var(--surface-2)] dark:bg-[var(--dark-surface-2)] px-2 py-0.5 rounded inline-block mb-1">
+                                  <div className="text-xs font-bold text-[var(--foreground-subtle)] uppercase tracking-widest bg-[var(--surface-2)]px-2 py-0.5 rounded inline-block mb-1">
                                     Ngân hàng thụ hưởng
                                   </div>
                                   <h4 className="text-lg font-black text-[var(--foreground)]">
                                     {selectedAdminAccount.admin_bank_name}
                                   </h4>
                                 </div>
-                                <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-[var(--border)] dark:border-[var(--dark-border)] flex items-center justify-center p-1">
+                                <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-[var(--border)]flex items-center justify-center p-1">
                                   <div className="text-[10px] font-black text-primary">
                                     {selectedAdminAccount.admin_bank_name.substring(0, 3)}
                                   </div>
@@ -1298,7 +1298,7 @@ export default function PaymentClient() {
                               </div>
 
                               {/* QR Code Section */}
-                              <div className="flex flex-col items-center justify-center py-4 bg-[var(--surface)] dark:bg-[var(--dark-surface)] rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] mb-4">
+                              <div className="flex flex-col items-center justify-center py-4 bg-[var(--surface)]rounded-2xl border border-[var(--border)]mb-4">
                                 <div className="relative group cursor-pointer">
                                   {/* QR must not be proxied/optimized: resizing corrupts scannability. */}
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1400,7 +1400,7 @@ export default function PaymentClient() {
                   {paymentMethod === 'wallet' && (
                     <div className="space-y-4">
                       <div
-                        className={`bg-[var(--background)] border rounded-2xl p-6 flex flex-col items-center gap-4 transition-all ${walletBalance !== null && walletBalance >= total ? 'border-[rgb(var(--vj-green-rgb))]/40 bg-[rgb(var(--vj-green-rgb))]/10' : 'border-[var(--border)] dark:border-[var(--dark-border)]'}`}
+                        className={`bg-[var(--background)] border rounded-2xl p-6 flex flex-col items-center gap-4 transition-all ${walletBalance !== null && walletBalance >= total ? 'border-[rgb(var(--vj-green-rgb))]/40 bg-[rgb(var(--vj-green-rgb))]/10' : 'border-[var(--border)]'}`}
                       >
                         <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
                           <Icon name="WalletIcon" size={32} className="text-primary" />
@@ -1414,7 +1414,7 @@ export default function PaymentClient() {
                           </p>
                         </div>
 
-                        <div className="w-full border-t border-[var(--border)] dark:border-[var(--dark-border)] pt-4 mt-2">
+                        <div className="w-full border-t border-[var(--border)]pt-4 mt-2">
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-sm text-[var(--foreground-muted)]">
                               Số dư hiện tại:
@@ -1457,7 +1457,7 @@ export default function PaymentClient() {
                         <button
                           key={wallet}
                           type="button"
-                          className="py-4 px-4 bg-[var(--surface)] dark:bg-[var(--dark-surface)] hover:bg-primary-50 hover:border-primary border border-[var(--border)] dark:border-[var(--dark-border)] rounded-xl text-sm font-bold text-[var(--foreground-muted)] transition-all flex flex-col items-center gap-2"
+                          className="py-4 px-4 bg-[var(--surface)]hover:bg-primary-50 hover:border-primary border border-[var(--border)]rounded-xl text-sm font-bold text-[var(--foreground-muted)] transition-all flex flex-col items-center gap-2"
                         >
                           <Icon name="DevicePhoneMobileIcon" size={24} className="text-primary" />
                           {wallet}
@@ -1532,7 +1532,7 @@ export default function PaymentClient() {
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl border border-[var(--border)] dark:border-[var(--dark-border)] p-5 sticky top-[140px]">
+              <div className="bg-white rounded-2xl border border-[var(--border)]p-5 sticky top-[140px]">
                 <h3 className="font-bold text-[var(--foreground)] mb-4">Chi tiết đơn hàng</h3>
 
                 {/* Flight summary */}
@@ -1575,7 +1575,7 @@ export default function PaymentClient() {
                 {booking?.passengers.map((p: { name: string; seat: string }, i: number) => (
                   <div
                     key={i}
-                    className="flex justify-between items-center py-2 text-sm border-b border-[var(--border)] dark:border-[var(--dark-border)]"
+                    className="flex justify-between items-center py-2 text-sm border-b border-[var(--border)]"
                   >
                     <span className="text-[var(--foreground-muted)]">{p.name}</span>
                     <span className="font-semibold text-[var(--foreground)]">Ghế {p.seat}</span>
@@ -1600,7 +1600,7 @@ export default function PaymentClient() {
                         }}
                         placeholder=" "
                         disabled={promoApplied}
-                        className={`w-full px-3 py-2 bg-[var(--surface)] dark:bg-[var(--dark-surface)] border border-[var(--border)] dark:border-[var(--dark-border)] rounded-lg text-sm form-input font-mono disabled:opacity-50 ${promoApplied ? 'form-input-valid' : ''}`}
+                        className={`w-full px-3 py-2 bg-[var(--surface)]border border-[var(--border)]rounded-lg text-sm form-input font-mono disabled:opacity-50 ${promoApplied ? 'form-input-valid' : ''}`}
                       />
                       <label className="form-label-float">VJ2026</label>
                     </div>
@@ -1672,7 +1672,7 @@ export default function PaymentClient() {
                       <span className="font-bold">-{discountAmount.toLocaleString('vi-VN')}₫</span>
                     </div>
                   )}
-                  <div className="border-t border-[var(--border)] dark:border-[var(--dark-border)] pt-2 flex justify-between font-bold text-[var(--foreground)]">
+                  <div className="border-t border-[var(--border)]pt-2 flex justify-between font-bold text-[var(--foreground)]">
                     <span>Tổng thanh toán</span>
                     <span className="text-primary text-lg">{total.toLocaleString('vi-VN')}₫</span>
                   </div>
