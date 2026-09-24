@@ -7,7 +7,11 @@ on:
     branches: [main, develop]
 
 env:
-  NODE_VERSION: '20'
+  # Node 20 cannot run this suite: vitest@5 declares engines
+  # "^22.12.0 || ^24.0.0 || >=26.0.0" and the app now pins @types/node ^26.
+  # Keep this in step with SETUP.md ("Node.js v26.7.0 trở lên") — otherwise CI
+  # fails before a single test runs.
+  NODE_VERSION: '26'
 
 jobs:
   lint-and-type-check:
