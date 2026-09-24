@@ -143,7 +143,7 @@ export default function NotificationSettingsTab() {
                   className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${alert.enabled ? 'bg-red-50' : 'bg-[var(--surface-2)]'}`}
                 >
                   <Icon
-                    name={alert.icon as any}
+                    name={alert.icon}
                     className="w-4 h-4"
                     style={{ color: alert.enabled ? 'var(--primary)' : '#a8a29e' }}
                   />
@@ -196,7 +196,7 @@ export default function NotificationSettingsTab() {
                   className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${method.enabled ? 'bg-amber-50' : 'bg-[var(--surface-2)]'}`}
                 >
                   <Icon
-                    name={method.icon as any}
+                    name={method.icon}
                     className="w-4 h-4"
                     style={{ color: method.enabled ? '#FFC72C' : '#a8a29e' }}
                   />

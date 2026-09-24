@@ -339,7 +339,7 @@ export default function SstkTab({ onToast }: { onToast?: ToastAPI }) {
                         style={{ background: catStyle.bg, border: `1px solid ${catStyle.border}` }}
                       >
                         <Icon
-                          name={(CATEGORY_ICONS[tool.category] as any) || 'WrenchScrewdriverIcon'}
+                          name={CATEGORY_ICONS[tool.category] || 'WrenchScrewdriverIcon'}
                           size={18}
                           style={{ color: catStyle.text }}
                         />

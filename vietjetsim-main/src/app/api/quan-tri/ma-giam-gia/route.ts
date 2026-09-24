@@ -5,6 +5,17 @@ import { getAllDiscountCodes, createDiscountCode } from '@/lib/db';
 import { parsePaginationParams } from '@/lib/pagination';
 
 // ─── GET: List all discount codes ───────────────────────────────────────────
+/**
+ * PostgreSQL raises `23505` (unique_violation) for duplicate keys. The driver
+ * surfaces it as a `code` property on the thrown value, which TypeScript cannot
+ * see on `unknown`.
+ */
+function isUniqueViolation(error: unknown): boolean {
+  return (
+    typeof error === 'object' && error !== null && (error as { code?: unknown }).code === '23505'
+  );
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'discount:list');
@@ -106,7 +117,7 @@ export async function POST(request: NextRequest) {
     // Handle unique constraint error for 'code'
     if (
       (error instanceof Error ? error.message : 'Unknown error')?.includes('unique constraint') ||
-      (error as any).code === '23505'
+      isUniqueViolation(error)
     ) {
       return NextResponse.json(
         { error: 'Conflict', message: 'Discount code already exists' },

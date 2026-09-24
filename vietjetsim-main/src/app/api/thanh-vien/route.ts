@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserLoyaltyWithProgram } from '@/lib/db';
 import { verifyAuthRequest } from '@/lib/auth';
+import { getApiErrorMessage } from '@/shared/services';
 
 export async function GET(request: NextRequest) {
   try {
@@ -40,10 +41,10 @@ export async function GET(request: NextRequest) {
         tierOrder: tier.tier_order,
       })),
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Membership API Error:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error', message: error.message },
+      { error: 'Internal Server Error', message: getApiErrorMessage(error, 'Lỗi hệ thống') },
       { status: 500 }
     );
   }

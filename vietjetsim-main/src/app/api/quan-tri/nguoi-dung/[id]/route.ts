@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { findUserById, updateUserRole, deleteUser } from '@/lib/db';
+import type { UserRecord } from '@/lib/db';
 import { canManageRole } from '@/lib/rbac';
 import { ASSIGNABLE_ROLES, isAssignableRole } from '@/lib/roles';
 import { LOCKED_UNTIL_SENTINEL } from '@/lib/account-lock';
@@ -114,7 +115,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         WHERE id = ${id}
         RETURNING *
       `;
-      updatedUser = (results as any[])[0];
+      updatedUser = (results as UserRecord[])[0];
     }
 
     return NextResponse.json({

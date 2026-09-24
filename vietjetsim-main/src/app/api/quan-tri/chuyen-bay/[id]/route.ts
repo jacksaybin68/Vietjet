@@ -158,7 +158,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       [];
 
     for (const field of updateFields) {
-      const oldValue = (existingFlight as any)[field];
+      const oldValue = (existingFlight as unknown as Record<string, string | number | null>)[field];
       let newValue = body[field];
 
       // Normalize values for comparison

@@ -40,10 +40,18 @@ function getSafePath(relativePath: string): string | null {
   return resolved;
 }
 
+/** One node of the file tree returned by `?action=tree`. */
+interface FileTreeNode {
+  name: string;
+  path: string;
+  type: 'file' | 'directory';
+  children?: FileTreeNode[];
+}
+
 // Recursively build file tree
-function getFileTree(dir: string, baseDir: string = ''): any[] {
+function getFileTree(dir: string, baseDir: string = ''): FileTreeNode[] {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
-  const results: any[] = [];
+  const results: FileTreeNode[] = [];
 
   for (const entry of entries) {
     if (

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { isAdminRole } from '@/lib/roles';
+import type { FlightRecord } from '@/lib/db';
 import { getApiErrorMessage } from '@/shared/services';
 import { sql } from '@/lib/neon';
 import {
@@ -187,8 +188,12 @@ const TOOLS: Record<
       }
       const allFlightsResult = await getAllFlights();
       const allFlights = allFlightsResult.flights || [];
-      const filtered = allFlights.filter((f: any) => {
-        return f.date >= dateFrom && f.date <= dateTo;
+      // `FlightRecord` has no `date` column — filtering on it made every
+      // comparison `undefined >= 'YYYY-MM-DD'` (false), so this tool always
+      // reported zero flights. Compare the date part of `depart_time` instead.
+      const filtered = allFlights.filter((f: FlightRecord) => {
+        const day = f.depart_time.slice(0, 10);
+        return day >= dateFrom && day <= dateTo;
       });
       let cancelled = 0;
       for (const f of filtered) {
@@ -213,7 +218,7 @@ const TOOLS: Record<
     execute: async (_params, _adminId) => {
       const bookingsResult = await getAllBookings({ page: 1, limit: 1000 });
       const bookings = bookingsResult.bookings || [];
-      const pending = bookings.filter((b: any) => b.status === 'pending');
+      const pending = bookings.filter((b: { status: string }) => b.status === 'pending');
       // In a real system this would push notifications via WS/email
       return {
         summary: `Tìm thấy ${pending.length} đặt vé chờ duyệt. Đã gửi nhắc nhở (mock).`,

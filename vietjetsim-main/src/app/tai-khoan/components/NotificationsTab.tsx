@@ -465,6 +465,17 @@ interface NotificationsTabProps {
   onUnreadCountChange?: (count: number) => void;
 }
 
+/** Row shape returned by GET /api/thong-bao, before mapping to `Notification`. */
+interface NotificationApiRow {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  created_at: string;
+  read_at: string | null;
+  metadata?: { status?: string; action?: string; delay_type?: string; promo_code?: string } | null;
+}
+
 export default function NotificationsTab({ onUnreadCountChange }: NotificationsTabProps) {
   const { user } = useAuth();
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -485,11 +496,7 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
     setLoading(true);
     try {
       const result = await apiRequest<{
-        notifications?: {
-          type: string;
-          metadata?: { status?: string };
-          [key: string]: unknown;
-        }[];
+        notifications?: NotificationApiRow[];
       }>('/api/thong-bao');
 
       if (!result.notifications || result.notifications.length === 0) {
@@ -497,7 +504,7 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
         return;
       }
 
-      const mapped: Notification[] = result.notifications.map((row: any) => {
+      const mapped: Notification[] = result.notifications.map((row: NotificationApiRow) => {
         const style = getNotifStyle(row.type);
         let icon = style.icon;
         if (row.type === 'booking' && row.metadata?.status === 'refunded') icon = 'BanknotesIcon';

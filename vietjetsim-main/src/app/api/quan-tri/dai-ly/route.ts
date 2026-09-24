@@ -5,6 +5,17 @@ import { getAllAgencies, createAgency } from '@/lib/db';
 import { parsePaginationParams } from '@/lib/pagination';
 
 // ─── GET: List agencies ─────────────────────────────────────────────────────
+/**
+ * PostgreSQL raises `23505` (unique_violation) for duplicate keys. The driver
+ * surfaces it as a `code` property on the thrown value, which TypeScript cannot
+ * see on `unknown`.
+ */
+function isUniqueViolation(error: unknown): boolean {
+  return (
+    typeof error === 'object' && error !== null && (error as { code?: unknown }).code === '23505'
+  );
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'agency:list');
@@ -88,7 +99,7 @@ export async function POST(request: NextRequest) {
     console.error('Error creating agency:', error);
     if (
       (error instanceof Error ? error.message : '')?.includes('unique constraint') ||
-      (error as any).code === '23505'
+      isUniqueViolation(error)
     ) {
       return NextResponse.json(
         { error: 'Conflict', message: 'Mã đại lý đã tồn tại' },

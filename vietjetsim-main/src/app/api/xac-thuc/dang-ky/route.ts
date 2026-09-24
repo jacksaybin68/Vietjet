@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     const normalizedPhone = normalizePhone(phone);
 
     // Check if user already exists
-    let existingUsers: any[] = [];
+    let existingUsers: Array<{ id: string }> = [];
     if (email) {
       existingUsers = await sql`SELECT id FROM user_profiles WHERE email = ${email}`;
       if (existingUsers.length > 0) {

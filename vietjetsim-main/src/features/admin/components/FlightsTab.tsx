@@ -428,7 +428,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
       );
       setEditingFlight(null);
 
-      const changedFields = (data.changes || []).map((c: any) => c.label).join(', ');
+      const changedFields = (data.changes || []).map((c: { label?: string }) => c.label).join(', ');
       onToast?.success(
         'Cập nhật chuyến bay thành công',
         changedFields
@@ -1283,7 +1283,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                           : 'bg-stone-50 border-stone-200 text-stone-500 hover:bg-stone-100'
                       }`}
                     >
-                      <Icon name={opt.icon as any} size={13} />
+                      <Icon name={opt.icon} size={13} />
                       {opt.label}
                     </button>
                   ))}

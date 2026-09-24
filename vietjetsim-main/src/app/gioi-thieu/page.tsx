@@ -45,7 +45,7 @@ export default function AboutPage() {
                 ].map((stat, i) => (
                   <div key={i} className="bg-white rounded-lg p-4 text-center shadow-sm">
                     <div className="text-[#EC2029] mb-2 flex justify-center">
-                      <Icon name={stat.icon as any} size={24} />
+                      <Icon name={stat.icon} size={24} />
                     </div>
                     <div className="text-2xl font-extrabold text-[#1A2948]">{stat.value}</div>
                     <div className="text-xs text-[#6D6E71] font-medium">{stat.label}</div>

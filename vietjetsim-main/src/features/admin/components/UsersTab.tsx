@@ -127,6 +127,23 @@ const ROLE_TABS: { value: 'all' | UserRole; label: string; activeColor: string }
   { value: 'admin', label: 'Admin', activeColor: 'text-primary bg-primary-100' },
 ];
 
+/** Row shape returned by GET /api/quan-tri/nguoi-dung. */
+interface UserApiRow {
+  id: string;
+  full_name?: string | null;
+  name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  role?: string | null;
+  status?: string | null;
+  bookings_count?: number | null;
+  total_spent?: number | null;
+  created_at?: string | null;
+  notes?: string | null;
+  last_login?: string | null;
+  address?: string | null;
+}
+
 export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
   const [users, setUsers] = useState<User[]>(INITIAL_USERS);
   const [searchQuery, setSearchQuery] = useState('');
@@ -156,19 +173,19 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
     try {
       const data = await listUsers({ limit: 100 });
       if (data.users && Array.isArray(data.users)) {
-        const mapped = data.users.map((u: any) => ({
+        const mapped = data.users.map((u: UserApiRow) => ({
           id: u.id,
           name: u.full_name || u.name || 'Unknown',
           email: u.email || '',
           phone: u.phone || '0900 000 000',
-          role: u.role || 'user',
-          status: u.status || 'active',
+          role: (u.role as UserRole) || 'user',
+          status: (u.status as UserStatus) || 'active',
           bookings: u.bookings_count || 0,
           spent: Number(u.total_spent) || 0,
           joinDate: u.created_at ? new Date(u.created_at).toISOString().split('T')[0] : 'N/A',
-          notes: u.notes,
+          notes: u.notes ?? undefined,
           lastLogin: u.last_login ? new Date(u.last_login).toLocaleString('vi-VN') : undefined,
-          address: u.address,
+          address: u.address ?? undefined,
         }));
         setUsers(mapped.length > 0 ? mapped : INITIAL_USERS);
       }

@@ -5,6 +5,7 @@ import { getBookingById } from '@/lib/db';
 import { sql } from '@/lib/neon';
 import { searchCheckIn, createCheckIn, getCheckInStatusByBookingId } from '@/lib/db';
 import { rateLimit } from '@/lib/rate-limit';
+import { getApiErrorMessage } from '@/shared/services';
 
 // GET /api/checkin - Search for check-in by booking code and passenger name
 export async function GET(request: NextRequest) {
@@ -64,10 +65,10 @@ export async function GET(request: NextRequest) {
       hasCheckIn,
       checkIn: hasCheckIn ? result.checkIn : null,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Check-in search error:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error', message: error.message },
+      { error: 'Internal Server Error', message: getApiErrorMessage(error, 'Lỗi hệ thống') },
       { status: 500 }
     );
   }
@@ -172,10 +173,10 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Check-in creation error:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error', message: error.message },
+      { error: 'Internal Server Error', message: getApiErrorMessage(error, 'Lỗi hệ thống') },
       { status: 500 }
     );
   }
