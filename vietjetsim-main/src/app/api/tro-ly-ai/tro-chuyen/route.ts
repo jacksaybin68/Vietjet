@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { researchVietjetFlights } from '@/lib/openclaw/flight-researcher';
 import { verifyAdminRequest } from '@/lib/admin-auth';
+import { getApiErrorMessage } from '@/shared/services';
 
 export async function POST(req: NextRequest) {
   try {
@@ -109,8 +110,11 @@ QUY TẮC:
 
       throw apiError;
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('OpenClaw Route Error:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      { error: getApiErrorMessage(error, 'Internal Server Error') },
+      { status: 500 }
+    );
   }
 }

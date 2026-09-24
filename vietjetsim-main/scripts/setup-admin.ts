@@ -34,9 +34,9 @@ async function setupAdminAccount() {
 
     if (existingAdmins.length > 0) {
       console.log(`⚠️  Admin account already exists!`);
-      console.log(`   ID: ${(existingAdmins[0] as any).id}`);
-      console.log(`   Email: ${(existingAdmins[0] as any).email}`);
-      console.log(`   Role: ${(existingAdmins[0] as any).role}`);
+      console.log(`   ID: ${existingAdmins[0].id}`);
+      console.log(`   Email: ${existingAdmins[0].email}`);
+      console.log(`   Role: ${existingAdmins[0].role}`);
 
       // Ask if we should update the password
       const readline = await import('readline');
@@ -72,7 +72,7 @@ async function setupAdminAccount() {
       RETURNING id, email, full_name, role, created_at
     `;
 
-    const admin = result[0] as any;
+    const admin = result[0];
 
     console.log('\n✅ Admin account created successfully!');
     console.log('═'.repeat(50));

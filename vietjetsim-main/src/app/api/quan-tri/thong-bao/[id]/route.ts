@@ -27,7 +27,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     // Build update query
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: string[] = [];
     let paramIndex = 1;
 
     if (title !== undefined) {

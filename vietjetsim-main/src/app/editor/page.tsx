@@ -47,6 +47,8 @@ export default function VSCodeWebEditorPage() {
   const [claudeInput, setClaudeInput] = useState('');
   const [claudeMessages, setClaudeMessages] = useState<ClaudeMessage[]>([]);
   const [isClaudeSending, setIsClaudeSending] = useState(false);
+  // GrapesJS editor instance (external library with no local type surface).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const editorRef = useRef<any>(null);
 
   // Load File Tree

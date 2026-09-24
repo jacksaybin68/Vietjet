@@ -287,7 +287,7 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
                 : 'text-stone-500 hover:bg-stone-50 hover:text-stone-700'
             }`}
           >
-            <Icon name={cat.icon as any} size={18} />
+            <Icon name={cat.icon} size={18} />
             {cat.label}
           </button>
         ))}
@@ -305,10 +305,7 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
               style={{ background: 'rgba(255,255,255,0.1)' }}
             >
               <Icon
-                name={
-                  (SETTING_CATEGORIES.find((c) => c.id === activeCategory)?.icon ||
-                    'CogIcon') as any
-                }
+                name={SETTING_CATEGORIES.find((c) => c.id === activeCategory)?.icon || 'CogIcon'}
                 size={20}
                 className="text-white"
               />

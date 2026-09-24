@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
 import { listRefunds, updateRefund } from '@/features/admin';
+import type { AdminRefund } from '@/features/admin/types';
 import { getApiErrorMessage } from '@/shared/services';
 
 interface ToastAPI {
@@ -70,10 +71,10 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [_error, setError] = useState<string | null>(null);
 
-  const mapRow = (row: any): RefundRequest => ({
+  const mapRow = (row: AdminRefund): RefundRequest => ({
     id: row.id,
-    bookingId: row.booking_id,
-    userId: row.user_id,
+    bookingId: row.booking_id ?? '',
+    userId: row.user_id ?? '',
     userName:
       row.user_profiles?.full_name || row.user_profiles?.email?.split('@')[0] || 'Khách hàng',
     userEmail: row.user_profiles?.email || '',

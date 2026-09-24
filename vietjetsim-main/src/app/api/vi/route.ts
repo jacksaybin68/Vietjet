@@ -7,6 +7,7 @@ import {
   withdrawWallet,
 } from '@/lib/db';
 import { verifyAuthRequest } from '@/lib/auth';
+import { getApiErrorMessage } from '@/shared/services';
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,9 +24,9 @@ export async function GET(request: NextRequest) {
       linkedBankAccounts: methods.filter((method) => method.type === 'bank'),
       transactions,
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { error: 'Internal Server Error', message: error.message },
+      { error: 'Internal Server Error', message: getApiErrorMessage(error, 'Lỗi hệ thống') },
       { status: 500 }
     );
   }
@@ -116,10 +117,10 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ error: 'Bad Request', message: 'Invalid action' }, { status: 400 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Wallet API Error:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error', message: error.message },
+      { error: 'Internal Server Error', message: getApiErrorMessage(error, 'Lỗi hệ thống') },
       { status: 500 }
     );
   }

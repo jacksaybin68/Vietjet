@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { parsePaginationParams, getOffset } from '@/lib/pagination';
+import type { AuditLogRecord } from '@/lib/db';
 
 // ─── GET: Get audit logs with filters ─────────────────────────────────────────
 
@@ -202,8 +203,8 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
       filters: {
-        actions: actions.map((a: any) => a.action),
-        resources: resources.map((r: any) => r.target_type),
+        actions: actions.map((a: AuditLogRecord) => a.action),
+        resources: resources.map((r: AuditLogRecord) => r.target_type),
       },
     });
   } catch (error) {

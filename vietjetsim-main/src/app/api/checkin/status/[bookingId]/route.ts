@@ -4,8 +4,15 @@ import { getCheckInStatusByBookingId } from '@/lib/db';
 import { rateLimit } from '@/lib/rate-limit';
 import { verifyAuthRequest } from '@/lib/auth';
 import { isAdminRole } from '@/lib/roles';
+import { getApiErrorMessage } from '@/shared/services';
 
 // GET /api/checkin/status/[bookingId] - Get check-in status for a booking
+/** Minimal booking row needed by the ownership check below. */
+interface CheckInBookingRow {
+  id: string;
+  user_id: string;
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ bookingId: string }> }
@@ -36,7 +43,7 @@ export async function GET(
       WHERE id = ${bookingId} OR booking_code = ${bookingId}
       LIMIT 1
     `;
-    if ((bookingResult as any[]).length === 0) {
+    if ((bookingResult as CheckInBookingRow[]).length === 0) {
       return NextResponse.json(
         {
           success: false,
@@ -46,7 +53,7 @@ export async function GET(
         { status: 404 }
       );
     }
-    const resolvedBooking = (bookingResult as any[])[0];
+    const resolvedBooking = (bookingResult as CheckInBookingRow[])[0];
     if (!isAdminRole(user.role) && resolvedBooking.user_id !== user.userId) {
       return NextResponse.json(
         { error: 'Forbidden', message: 'Không có quyền truy cập' },
@@ -64,10 +71,10 @@ export async function GET(
     }
 
     return NextResponse.json({ success: true, checkInStatus: status });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Check-in status error:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error', message: error.message },
+      { error: 'Internal Server Error', message: getApiErrorMessage(error, 'Lỗi hệ thống') },
       { status: 500 }
     );
   }

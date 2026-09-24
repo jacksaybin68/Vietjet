@@ -177,6 +177,17 @@ export interface AdminRefund {
   status: string;
   reason?: string;
   created_at?: string;
+  user_id?: string;
+  user_profiles?: { full_name?: string | null; email?: string | null } | null;
+  flight_no?: string | null;
+  route?: string | null;
+  flight_date?: string | null;
+  note?: string | null;
+  admin_note?: string | null;
+  bank_name?: string | null;
+  account_number?: string | null;
+  account_holder?: string | null;
+  processed_at?: string | null;
 }
 
 export interface AdminTransaction {

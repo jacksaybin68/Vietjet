@@ -66,7 +66,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const updates: any = {};
+    const updates: {
+      is_online?: boolean;
+      is_typing?: boolean;
+      last_seen?: string;
+    } = {};
     if (is_online !== undefined) updates.is_online = is_online;
     if (is_typing !== undefined) updates.is_typing = is_typing;
     if (last_seen !== undefined) updates.last_seen = last_seen;

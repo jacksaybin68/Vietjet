@@ -103,7 +103,7 @@ type Tab =
   | 'security';
 
 // Fallback data — used only when API fails or returns empty results
-const FALLBACK_UPCOMING = [
+const FALLBACK_UPCOMING: UiBooking[] = [
   {
     id: 'VJ2B4K9',
     flightNo: 'VJ 101',
@@ -138,7 +138,7 @@ const FALLBACK_UPCOMING = [
   },
 ];
 
-const FALLBACK_HISTORY = [
+const FALLBACK_HISTORY: UiBooking[] = [
   {
     id: 'VJ1A2B3',
     flightNo: 'VJ 301',
@@ -240,6 +240,14 @@ type UiBooking = {
  * Map a DB booking record (from /api/dat-ve) to UiBooking format.
  * DB returns: { id, status, total_price, flight: { flight_no, from_code, to_code, depart_time, arrive_time }, passengers: [] }
  */
+/**
+ * NOTE: kept as `any` on purpose. This mapper reads a *nested* `flight` object,
+ * but its only call sites pass `BookingRecord` (flat, no `flight` key). Whether
+ * the dashboard endpoint actually returns the nested shape is a runtime
+ * question that needs a live database to answer — typing it either way here
+ * would be a guess that silently changes what the UI renders.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapDbBookingToUi(b: any): UiBooking {
   const flight = b.flight || {};
   const dep = flight.depart_time ? new Date(flight.depart_time) : new Date();
@@ -435,12 +443,12 @@ export default function UserDashboardClient() {
         setUpcomingBookings(mapped);
       } else {
         // API empty or error → use fallback
-        setUpcomingBookings(FALLBACK_UPCOMING as any);
+        setUpcomingBookings(FALLBACK_UPCOMING);
       }
     } catch {
       setUpcomingError(true);
       // Keep fallback so UI still shows something
-      setUpcomingBookings(FALLBACK_UPCOMING as any);
+      setUpcomingBookings(FALLBACK_UPCOMING);
     } finally {
       setUpcomingLoading(false);
     }
@@ -504,13 +512,13 @@ export default function UserDashboardClient() {
         const mapped = bookings
           .map(mapDbBookingToUi)
           .filter((b: UiBooking) => b.status !== 'confirmed' && b.status !== 'pending');
-        setHistoryBookings(mapped.length > 0 ? mapped : (FALLBACK_HISTORY as any));
+        setHistoryBookings(mapped.length > 0 ? mapped : FALLBACK_HISTORY);
       } else {
-        setHistoryBookings(FALLBACK_HISTORY as any);
+        setHistoryBookings(FALLBACK_HISTORY);
       }
     } catch {
       setHistoryError(true);
-      setHistoryBookings(FALLBACK_HISTORY as any);
+      setHistoryBookings(FALLBACK_HISTORY);
     } finally {
       setHistoryLoading(false);
     }
@@ -1473,7 +1481,7 @@ export default function UserDashboardClient() {
                           setRefundSubmitting(true);
                           setRefundError(null);
                           try {
-                            const insertData: any = {
+                            const insertData: Record<string, unknown> = {
                               booking_id: refundBookingId,
                               reason: refundReason,
                               note: refundNote,

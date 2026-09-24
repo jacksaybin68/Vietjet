@@ -9,7 +9,7 @@ interface AuditLog {
   action: string;
   resource: string;
   resource_id: string | null;
-  details: any;
+  details: unknown;
   ip_address: string | null;
   user_agent: string | null;
   created_at: string;
@@ -394,13 +394,13 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
                                   </div>
                                 )}
                               </div>
-                              {log.details && (
+                              {log.details != null && (
                                 <div className="mt-3 pt-3 border-t border-stone-100">
                                   <p className="text-stone-400 font-medium mb-1">Chi tiết</p>
                                   <pre className="text-xs text-stone-600 bg-slate-100 rounded p-2 overflow-x-auto">
                                     {typeof log.details === 'string'
                                       ? log.details
-                                      : JSON.stringify(log.details, null, 2)}
+                                      : (JSON.stringify(log.details, null, 2) ?? '')}
                                   </pre>
                                 </div>
                               )}

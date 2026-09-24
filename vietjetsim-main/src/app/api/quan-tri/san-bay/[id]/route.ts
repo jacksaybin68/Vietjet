@@ -42,7 +42,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     // Build update query dynamically
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: (string | number | null)[] = [];
     let paramIndex = 1;
 
     if (code !== undefined) {

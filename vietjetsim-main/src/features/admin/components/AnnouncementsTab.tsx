@@ -492,7 +492,12 @@ function AnnouncementModal({
               </label>
               <select
                 value={formData.type}
-                onChange={(e) => setFormData((p) => ({ ...p, type: e.target.value as any }))}
+                onChange={(e) =>
+                  setFormData((p) => ({
+                    ...p,
+                    type: e.target.value as Announcement['type'],
+                  }))
+                }
                 className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"
               >
                 {TYPE_OPTIONS.map((opt) => (

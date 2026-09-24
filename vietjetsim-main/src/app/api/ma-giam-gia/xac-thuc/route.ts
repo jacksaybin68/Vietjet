@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
       },
       message: 'Áp dụng mã giảm giá thành công',
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error validating discount:', error);
     return NextResponse.json(
       { valid: false, message: 'Có lỗi xảy ra khi kiểm tra mã giảm giá' },

@@ -443,7 +443,7 @@ export default function LoyaltyTab() {
                     className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                     style={{ background: config.bg }}
                   >
-                    <Icon name={config.icon as any} size={18} style={{ color: config.color }} />
+                    <Icon name={config.icon} size={18} style={{ color: config.color }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-sm text-[#1A2948] font-[KoHo,sans-serif]">

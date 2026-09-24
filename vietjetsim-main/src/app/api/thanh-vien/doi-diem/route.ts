@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { spendLoyaltyPoints, getOrEnrollLoyalty } from '@/lib/db';
 import { verifyAuthRequest } from '@/lib/auth';
+import { getApiErrorMessage } from '@/shared/services';
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,8 +42,8 @@ export async function POST(request: NextRequest) {
         },
         { status: 201 }
       );
-    } catch (dbError: any) {
-      if (dbError.message === 'Insufficient loyalty points') {
+    } catch (dbError) {
+      if (getApiErrorMessage(dbError, '') === 'Insufficient loyalty points') {
         return NextResponse.json(
           { error: 'Insufficient Points', message: 'Bạn không có đủ điểm thưởng để đổi' },
           { status: 400 }
@@ -50,10 +51,10 @@ export async function POST(request: NextRequest) {
       }
       throw dbError;
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Loyalty Exchange API Error:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error', message: error.message },
+      { error: 'Internal Server Error', message: getApiErrorMessage(error, 'Lỗi hệ thống') },
       { status: 500 }
     );
   }

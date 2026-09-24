@@ -137,7 +137,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                 : 'text-gray-500 hover:text-gray-700'
             } font-koho`}
           >
-            <Icon name={t.icon as any} size={14} /> {t.label}
+            <Icon name={t.icon} size={14} /> {t.label}
           </button>
         ))}
       </div>
@@ -242,7 +242,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                           colSpan={Object.keys(SYSTEM_ROLES).length + 1}
                           className="px-3 py-1.5 font-bold text-gray-700 text-[10px] uppercase tracking-wider flex items-center gap-1.5 font-koho"
                         >
-                          <Icon name={cat.icon as any} size={12} /> {cat.label}
+                          <Icon name={cat.icon} size={12} /> {cat.label}
                         </td>
                       </tr>
                       {/* Permission rows */}
@@ -524,7 +524,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
               >
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors">
-                    <Icon name={cfg.icon as any} size={15} className="text-primary" />
+                    <Icon name={cfg.icon} size={15} className="text-primary" />
                   </div>
                   <span className="text-[10px] font-mono text-gray-400">{cfg.key}</span>
                 </div>

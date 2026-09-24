@@ -4,6 +4,15 @@ import { verifyAdminRequest } from '@/lib/admin-auth';
 
 // ─── GET: Get all system settings ───────────────────────────────────────────
 
+/** Row shape of the `system_config` table used by this route. */
+interface SystemConfigRow {
+  id: string;
+  key: string;
+  value: string;
+  description?: string | null;
+  updated_at: string;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'system:config');
@@ -17,10 +26,10 @@ export async function GET(request: NextRequest) {
 
     // Transform to key-value object for easier frontend consumption
     const settingsObject: Record<string, { value: string; description?: string }> = {};
-    settings.forEach((setting: any) => {
+    settings.forEach((setting: SystemConfigRow) => {
       settingsObject[setting.key] = {
         value: setting.value || '',
-        description: setting.description,
+        description: setting.description ?? undefined,
       };
     });
 
@@ -54,11 +63,11 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const updatedSettings: any[] = [];
+    const updatedSettings: Array<{ key: string; value: string }> = [];
 
     // Process each setting
     for (const [key, valueObj] of Object.entries(settings)) {
-      const value = (valueObj as any).value;
+      const value = (valueObj as SystemConfigRow).value;
 
       if (value === undefined) continue;
 
