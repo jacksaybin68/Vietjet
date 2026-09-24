@@ -116,7 +116,7 @@ function AddPaymentMethodModal({
         }
       }
 
-      const payload: Record<string, any> = { type: methodType };
+      const payload: Record<string, unknown> = { type: methodType };
 
       if (methodType === 'card') {
         payload.cardBrand = cardBrand;

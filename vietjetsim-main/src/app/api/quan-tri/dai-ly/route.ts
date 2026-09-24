@@ -7,7 +7,7 @@ import { parsePaginationParams } from '@/lib/pagination';
 // ─── GET: List agencies ─────────────────────────────────────────────────────
 export async function GET(request: NextRequest) {
   try {
-    const { error, response } = await verifyAdminRequest(request, 'agency:list' as any);
+    const { error, response } = await verifyAdminRequest(request, 'agency:list');
     if (error) return response;
 
     const { searchParams } = new URL(request.url);
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
   if (csrfError) return csrfError;
 
   try {
-    const { error, response } = await verifyAdminRequest(request, 'agency:create' as any);
+    const { error, response } = await verifyAdminRequest(request, 'agency:create');
     if (error) return response;
 
     const body = await request.json();

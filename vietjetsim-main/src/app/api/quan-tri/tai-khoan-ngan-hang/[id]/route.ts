@@ -7,7 +7,7 @@ import { validateTransferNoteTemplate } from '@/lib/transfer-note';
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const { error, response } = await verifyAdminRequest(request, 'system:config' as any);
+    const { error, response } = await verifyAdminRequest(request, 'system:config');
     if (error) return response;
 
     const body = await request.json();
@@ -74,7 +74,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const { error, response } = await verifyAdminRequest(request, 'system:config' as any);
+    const { error, response } = await verifyAdminRequest(request, 'system:config');
     if (error) return response;
 
     await sql`DELETE FROM bank_accounts WHERE id = ${id}`;

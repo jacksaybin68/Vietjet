@@ -5,7 +5,7 @@ import { getDiscountCodeById, updateDiscountCode, deleteDiscountCode } from '@/l
 // ─── GET: Get discount code by ID ───────────────────────────────────────────
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { error, response } = await verifyAdminRequest(request, 'discount:view' as any);
+    const { error, response } = await verifyAdminRequest(request, 'discount:view');
     if (error) return response;
 
     const { id } = await params;
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 // ─── PATCH: Update a discount code ──────────────────────────────────────────
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { error, response } = await verifyAdminRequest(request, 'discount:update' as any);
+    const { error, response } = await verifyAdminRequest(request, 'discount:edit');
     if (error) return response;
 
     const { id } = await params;
@@ -72,7 +72,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { error, response } = await verifyAdminRequest(request, 'discount:delete' as any);
+    const { error, response } = await verifyAdminRequest(request, 'discount:delete');
     if (error) return response;
 
     const { id } = await params;

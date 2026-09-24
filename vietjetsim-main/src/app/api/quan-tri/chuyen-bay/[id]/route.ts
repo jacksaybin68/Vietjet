@@ -24,7 +24,7 @@ const FIELD_LABELS: Record<AllowedField, string> = {
   status: 'Trạng thái chuyến bay',
 };
 
-function validateField(field: AllowedField, value: any): string | null {
+function validateField(field: AllowedField, value: unknown): string | null {
   if (value === undefined || value === null || value === '') {
     return `Trường ${FIELD_LABELS[field]} không được để trống`;
   }
@@ -80,7 +80,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const flightId = id;
 
     // ─── 3. Parse & validate body ────────────────────────────────────────
-    let body: Record<string, any>;
+    let body: Record<string, unknown>;
     try {
       body = await request.json();
     } catch {
@@ -120,8 +120,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     // Business rule: depart_time must be before arrive_time
     if (body.depart_time && body.arrive_time) {
-      const dep = new Date(body.depart_time);
-      const arr = new Date(body.arrive_time);
+      // Values already passed `validateField` above; `String()` just narrows the
+      // `unknown` from the body map for the Date constructor.
+      const dep = new Date(String(body.depart_time));
+      const arr = new Date(String(body.arrive_time));
       if (dep >= arr) {
         return NextResponse.json(
           { error: 'Validation Error', message: 'Thời gian khởi hành phải sớm hơn thời gian đến.' },
@@ -134,7 +136,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (
       body.from_code &&
       body.to_code &&
-      body.from_code.toUpperCase() === body.to_code.toUpperCase()
+      String(body.from_code).toUpperCase() === String(body.to_code).toUpperCase()
     ) {
       return NextResponse.json(
         { error: 'Validation Error', message: 'Điểm đi và điểm đến không được trùng nhau.' },
@@ -152,7 +154,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     // ─── 5. Build changes array for logging ───────────────────────────────
-    const changes: Array<{ field: string; label: string; oldValue: any; newValue: any }> = [];
+    const changes: Array<{ field: string; label: string; oldValue: unknown; newValue: unknown }> =
+      [];
 
     for (const field of updateFields) {
       const oldValue = (existingFlight as any)[field];
@@ -189,7 +192,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     // ─── 6. Execute DB update ────────────────────────────────────────────
-    const updates: Record<string, any> = {};
+    const updates: Record<string, unknown> = {};
     for (const field of updateFields) {
       let val = body[field];
       if (field === 'from_code' || field === 'to_code') val = String(val).toUpperCase();

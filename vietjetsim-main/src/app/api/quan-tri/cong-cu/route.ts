@@ -32,7 +32,7 @@ const TOOLS: Record<
     description: string;
     category: string;
     execute: (
-      params: Record<string, any>,
+      params: Record<string, unknown>,
       adminId: string
     ) => Promise<{ summary: string; status: 'success' | 'error' | 'partial' }>;
   }
