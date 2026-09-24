@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     const device = describeDevice(request.headers.get('user-agent'));
 
-    console.log(`[AUTH] Login attempt for identifier: ${email}`);
+    console.info(`[AUTH] Login attempt for identifier: ${email}`);
     if (results.length === 0) {
       console.warn(`[AUTH] Login failed: User not found in database for identifier: ${email}`);
       return NextResponse.json(
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`[AUTH] User found, comparing password for: ${email}`);
+    console.info(`[AUTH] User found, comparing password for: ${email}`);
     const userRecord = results[0];
 
     // Locked accounts cannot authenticate, even with the correct password.

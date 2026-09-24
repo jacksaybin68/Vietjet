@@ -65,6 +65,11 @@ export default function RootLayout({
         {/* KoHo is VietJet's primary body font; Be Vietnam Pro for headings */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* `@next/next/no-page-custom-font` targets the Pages Router’s
+            `pages/_document.js`; this app is App Router only, so the rule fires as
+            a false positive. Switching to `next/font` would change how the KoHo /
+            Be Vietnam Pro CSS variables are wired into tailwind.config.js. */}
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
           href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=KoHo:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
           rel="stylesheet"
