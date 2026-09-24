@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { getUserLoyaltyWithProgram, spendLoyaltyPoints, getPaymentHistory } from '@/lib/db';
-import { verifyAuthRequest } from '@/lib/auth';
+import { spendLoyaltyPoints, getPaymentHistory } from '@/lib/db';
 import { rateLimiter, _clearStore as clearRateLimitStore, _getStore } from '@/lib/rate-limit';
 
 // Mock user for testing

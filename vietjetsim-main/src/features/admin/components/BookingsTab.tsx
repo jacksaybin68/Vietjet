@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
 import { createAdminInvoice } from '@/features/admin';
@@ -867,7 +867,7 @@ export default function BookingsTab() {
                   </td>
                 </tr>
               ) : (
-                paginated.map((booking, i) => (
+                paginated.map((booking, _i) => (
                   <tr
                     key={booking.id}
                     onClick={() => {

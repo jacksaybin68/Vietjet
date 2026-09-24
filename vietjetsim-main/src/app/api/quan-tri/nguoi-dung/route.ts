@@ -4,7 +4,6 @@ import { getAllUsers, updateUserRole, findUserById, deleteUser } from '@/lib/db'
 import { canManageRole } from '@/lib/rbac';
 import { ASSIGNABLE_ROLES, isAssignableRole } from '@/lib/roles';
 import { isAccountLocked } from '@/lib/account-lock';
-import type { AllRoles } from '@/lib/rbac';
 import { parsePaginationParams, getPaginationMeta } from '@/lib/pagination';
 
 // ─── GET: Get all users (admin) ─────────────────────────────────────────────

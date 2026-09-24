@@ -46,12 +46,12 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
   const [isLoading, setIsLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, _setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingDiscount, setEditingDiscount] = useState<DiscountCode | null>(null);
   const [viewingDiscount, setViewingDiscount] = useState<DiscountCode | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
+  const [_isSaving, _setIsSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchDiscounts = async () => {
@@ -215,8 +215,6 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
                 discounts.map((discount) => {
                   const isExpired = new Date(discount.end_date) < new Date();
                   const isFuture = new Date(discount.start_date) > new Date();
-                  const StatusIcon = discount.is_active ? 'CheckCircleIcon' : 'XCircleIcon';
-
                   return (
                     <tr
                       key={discount.id}

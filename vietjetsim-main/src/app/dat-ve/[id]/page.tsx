@@ -284,7 +284,7 @@ export default function BookingDetailPage() {
                 Hành khách
               </h3>
               <div className="space-y-2.5 sm:space-y-3">
-                {booking.passengers.map((p, i) => (
+                {booking.passengers.map((p, _i) => (
                   <div
                     key={p.id}
                     className="flex items-center justify-between py-1.5 sm:py-2 border-b border-[var(--border)]last:border-0"

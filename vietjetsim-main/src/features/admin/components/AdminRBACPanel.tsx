@@ -15,7 +15,6 @@ import {
   PERMISSION_CATEGORIES,
   PERMISSION_LABELS,
   SYSTEM_ROLES,
-  getRolePermissions,
   hasPermission,
   type Permission,
   type SystemRoleName,

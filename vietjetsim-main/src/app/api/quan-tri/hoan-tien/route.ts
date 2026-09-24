@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
 import { verifyAdminRequest } from '@/lib/admin-auth';
-import { getAllRefunds, updateRefundStatus, getBookingById, refundWallet } from '@/lib/db';
-import { verifyAccessToken } from '@/lib/auth';
+import { getAllRefunds, updateRefundStatus, refundWallet } from '@/lib/db';
 import { parsePaginationParams, getPaginationMeta } from '@/lib/pagination';
 
 // ─── GET: Get all refund requests (admin) ───────────────────────────────────
 
 export async function GET(request: NextRequest) {
   try {
-    const { payload, error, response } = await verifyAdminRequest(request, 'refund:list');
+    const { payload: _payload, error, response } = await verifyAdminRequest(request, 'refund:list');
     if (error) return response;
 
     const { searchParams } = new URL(request.url);
@@ -35,7 +34,11 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const { payload, error, response } = await verifyAdminRequest(request, 'refund:approve');
+    const {
+      payload: _payload,
+      error,
+      response,
+    } = await verifyAdminRequest(request, 'refund:approve');
     if (error) return response;
 
     const body = await request.json();

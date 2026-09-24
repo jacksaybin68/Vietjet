@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import Link from 'next/link';
 import { AppImage } from '@/shared/components/ui';
 import { DealCardProps } from '@/types/deals';
-import { MdCalendarToday, MdArrowForward, MdLocalFireDepartment } from 'react-icons/md';
+import { MdCalendarToday, MdArrowForward } from 'react-icons/md';
 
 /**
  * Chỉ hiển thị một deal card.

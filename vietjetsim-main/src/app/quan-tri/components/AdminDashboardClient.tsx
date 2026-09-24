@@ -128,7 +128,7 @@ export default function AdminDashboardClient() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [searchOpen, setSearchOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [_unreadCount, setUnreadCount] = useState(0);
   const toast = useToast();
   const { user, profile, roleLabel } = useAuth();
 

@@ -1,5 +1,5 @@
 // Loyalty Points Calculation Utilities
-import type { LoyaltyTierRecord, LoyaltyProgramRecord, UserLoyaltyRecord } from '@/types/database';
+import type { LoyaltyTierRecord, LoyaltyProgramRecord } from '@/types/database';
 
 /**
  * Calculate the number of points earned for a given booking amount.
@@ -65,7 +65,7 @@ export function formatPoints(points: number): string {
  * Check if points are expired and mark them for cleanup.
  * Returns true if points should be expired.
  */
-export function shouldExpirePoints(expiresAt: string | null, expiryMonths: number): boolean {
+export function shouldExpirePoints(expiresAt: string | null, _expiryMonths: number): boolean {
   if (!expiresAt) return false;
   const expiryDate = new Date(expiresAt);
   const now = new Date();

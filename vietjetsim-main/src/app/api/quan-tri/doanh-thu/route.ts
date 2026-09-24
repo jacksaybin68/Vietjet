@@ -4,13 +4,15 @@ import { getRevenueStats, getBookingStatusDistribution, getRecentActivity } from
 
 export async function GET(request: NextRequest) {
   try {
-    const { payload, error, response } = await verifyAdminRequest(request, 'analytics:view');
+    const {
+      payload: _payload,
+      error,
+      response,
+    } = await verifyAdminRequest(request, 'analytics:view');
     if (error) return response;
 
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get('startDate') || undefined;
-    const endDate = searchParams.get('endDate') || undefined;
-
     const [revenueStats, statusDistribution, recentActivity] = await Promise.all([
       getRevenueStats(),
       getBookingStatusDistribution(),

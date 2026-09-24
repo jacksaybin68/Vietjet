@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
 import {
@@ -188,7 +188,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
         const mapped = data.flights.map(toFlightRow);
         setFlights(mapped.length > 0 ? mapped : INITIAL_FLIGHTS);
       }
-    } catch (err) {
+    } catch (_err) {
       setHasError(true);
     } finally {
       setIsLoading(false);
@@ -732,7 +732,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   </td>
                 </tr>
               ) : (
-                paginated.map((flight, i) => (
+                paginated.map((flight, _i) => (
                   <tr
                     key={flight.id}
                     onClick={() => setSelectedFlight(flight)}

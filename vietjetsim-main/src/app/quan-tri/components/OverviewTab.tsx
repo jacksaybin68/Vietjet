@@ -249,7 +249,7 @@ export default function OverviewTab({ onNavigate }: Props) {
               {isLoading ? (
                 <AdminBookingsTableSkeleton rows={5} />
               ) : (
-                RECENT_BOOKINGS.map((booking, i) => (
+                RECENT_BOOKINGS.map((booking, _i) => (
                   <tr
                     key={booking.id}
                     className="vj-table-row border-b border-white/5 hover:bg-white/[0.02] transition-colors"

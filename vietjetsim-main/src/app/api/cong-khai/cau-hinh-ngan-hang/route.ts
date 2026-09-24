@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const accounts = await sql`
       SELECT id, bank_name as admin_bank_name, account_number as admin_bank_account_number, 
