@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { apiRequest } from '@/shared/services';
+import { apiRequest, getApiErrorMessage } from '@/shared/services';
 
 // Dynamically import Monaco Editor to avoid SSR window issues
 const Editor = dynamic(() => import('@monaco-editor/react'), { ssr: false });
@@ -203,8 +203,8 @@ export default function VSCodeWebEditorPage() {
       } else {
         alert(`Lưu thất bại: ${data.error}`);
       }
-    } catch (err: any) {
-      alert(`Lỗi khi lưu file: ${err.message}`);
+    } catch (err) {
+      alert(`Lỗi khi lưu file: ${getApiErrorMessage(err, 'Lỗi không xác định')}`);
     } finally {
       setIsSaving(false);
     }
