@@ -112,7 +112,7 @@ export async function PATCH(request: NextRequest) {
           refundSummary = walletRefunded
             ? ' Seats released, wallet credited and booking marked as refunded'
             : ' Seats released and booking marked as refunded';
-          console.log(
+          console.info(
             `[REFUND] Processing refund for booking ${refundRecord.booking_id}:${refundSummary}`
           );
         }

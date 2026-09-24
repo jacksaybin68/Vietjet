@@ -276,7 +276,7 @@ function createMockSql() {
   return Object.assign(
     async (strings: TemplateStringsArray, ...values: unknown[]) => {
       const query = strings.join('?');
-      console.log('[MOCK SQL]', query, values);
+      console.info('[MOCK SQL]', query, values);
 
       const chatResult = runChatQuery(query, values);
       if (chatResult) return chatResult;
@@ -296,7 +296,7 @@ function createMockSql() {
       // helpers use for counter updates. Non-chat statements stay unhandled and
       // return an empty result set rather than throwing.
       query: async (text: string, values: unknown[] = []) => {
-        console.log('[MOCK SQL:query]', text, values);
+        console.info('[MOCK SQL:query]', text, values);
         return runChatQuery(text, values) ?? ([] as MockResult[]);
       },
     }

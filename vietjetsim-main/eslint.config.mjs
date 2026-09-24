@@ -61,6 +61,16 @@ const eslintConfig = [
       '@typescript-eslint/no-require-imports': 'off',
     },
   },
+  {
+    // CLI utilities print their results to stdout — that is their whole purpose,
+    // and the `no-console` rule exists to keep logging out of application code.
+    // `src/lib/dbCheck.ts` belongs here too: `npm run db:check` runs it via
+    // ts-node as a command, not as part of the Next.js app.
+    files: ['scripts/**/*.{js,cjs,mjs,ts}', 'src/lib/dbCheck.ts'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
 ];
 
 export default eslintConfig;
