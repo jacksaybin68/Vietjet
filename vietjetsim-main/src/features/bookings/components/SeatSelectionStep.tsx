@@ -13,6 +13,7 @@ import {
   type AncillaryOption,
   type AncillaryId,
 } from '@/features/bookings/pricing';
+import BookingBottomBar from './BookingBottomBar';
 
 interface Props {
   flight: Flight;
@@ -285,528 +286,542 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
       {seatsLoading ? (
         <SeatMapSkeleton />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Seat Map */}
-          <div className="lg:col-span-2 space-y-3 sm:space-y-4">
-            {/* Hold Timeout Counter - responsive */}
-            {holdTimer !== null && (
-              <div
-                className={`rounded-xl px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between border ${
-                  timerUrgent
-                    ? 'bg-[rgb(var(--primary-rgb))]/10 border-[rgb(var(--primary-rgb))]/40 text-primary'
-                    : timerWarning
-                      ? 'bg-[rgb(var(--orange-rgb))]/10 border-[rgb(var(--orange-rgb))]/40 text-[var(--orange)]'
-                      : 'bg-primary/5 /10 border-primary/20 /40 text-primary '
-                }`}
-              >
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <Icon
-                    name="ClockIcon"
-                    size={14}
-                    className={
-                      timerUrgent
-                        ? 'text-primary'
-                        : timerWarning
-                          ? 'text-[var(--orange)]'
-                          : 'text-primary'
-                    }
-                  />
-                  <span className="text-[10px] sm:text-sm font-semibold font-koho">
-                    {timerUrgent ? '⚠️ Ghế sắp hết hạn giữ!' : 'Thời gian giữ chỗ còn lại'}
-                  </span>
-                </div>
+        <>
+          {/* pb: keep the last row clear of the sticky bottom totals bar. */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 pb-16 sm:pb-14">
+            {/* Seat Map */}
+            <div className="lg:col-span-2 space-y-3 sm:space-y-4">
+              {/* Hold Timeout Counter - responsive */}
+              {holdTimer !== null && (
                 <div
-                  className={`font-mono font-bold text-base sm:text-lg tabular-nums ${timerUrgent ? 'text-primary' : timerWarning ? 'text-[var(--orange)]' : 'text-primary'}`}
+                  className={`rounded-xl px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between border ${
+                    timerUrgent
+                      ? 'bg-[rgb(var(--primary-rgb))]/10 border-[rgb(var(--primary-rgb))]/40 text-primary'
+                      : timerWarning
+                        ? 'bg-[rgb(var(--orange-rgb))]/10 border-[rgb(var(--orange-rgb))]/40 text-[var(--orange)]'
+                        : 'bg-primary/5 border-primary/20 text-primary '
+                  }`}
                 >
-                  {formatTime(timeLeft)}
-                </div>
-              </div>
-            )}
-
-            {/* Extra Services - responsive */}
-            <div className="bg-[var(--surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] overflow-hidden mb-4 sm:mb-6 shadow-vj-md">
-              <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
-              <div className="p-4 sm:p-5">
-                <h2 className="font-black text-[var(--foreground)] [var(--foreground)] flex items-center gap-1.5 sm:gap-2 font-koho mb-3 sm:mb-4">
-                  <span className="inline-block w-1 h-4 sm:h-5 bg-primary rounded-full" />
-                  Dịch vụ bổ sung
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                  {ANCILLARY_OPTIONS.map((svc: AncillaryOption) => {
-                    const isOn = ancillaries.includes(svc.id);
-                    return (
-                      <button
-                        key={svc.id}
-                        type="button"
-                        onClick={() => toggleAncillary(svc.id)}
-                        aria-pressed={isOn}
-                        className={`border rounded-xl p-2.5 sm:p-3 flex flex-col justify-between text-left transition-all ${
-                          isOn
-                            ? 'border-primary bg-primary/5 ring-1 ring-primary'
-                            : 'border-[var(--border)] hover:border-primary/40'
-                        }`}
-                      >
-                        <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-                          <div
-                            className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center ${
-                              isOn
-                                ? 'bg-primary text-white'
-                                : 'bg-[var(--surface-2)] text-[var(--foreground-muted)]'
-                            }`}
-                          >
-                            <Icon name={svc.icon} size={16} />
-                          </div>
-                          <span className="font-bold text-[var(--foreground)] [var(--foreground)] font-koho">
-                            {svc.title}
-                          </span>
-                          {isOn && (
-                            <Icon
-                              name="CheckCircleIcon"
-                              size={16}
-                              className="ml-auto text-primary"
-                            />
-                          )}
-                        </div>
-                        <div className="mt-auto">
-                          <div className="text-[8px] sm:text-[10px] text-[var(--foreground-subtle)]">
-                            {svc.description}
-                          </div>
-                          <div className="text-[11px] sm:text-sm font-black text-primary font-koho">
-                            {svc.price.toLocaleString('vi-VN')}₫
-                            <span className="font-body text-[9px] sm:text-[10px] font-normal text-[var(--foreground-muted)]">
-                              {' '}
-                              / khách
-                            </span>
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-[var(--surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] overflow-hidden shadow-vj-md">
-              {/* Red accent top bar */}
-              <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
-              <div className="p-4 sm:p-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1.5 sm:mb-2">
-                  <h2 className="font-black text-[var(--foreground)] [var(--foreground)] flex items-center gap-1.5 sm:gap-2 font-koho">
-                    <span className="inline-block w-1 h-4 sm:h-5 bg-primary rounded-full" />
-                    Chọn chỗ ngồi
-                  </h2>
-                  {/* Heatmap toggle */}
-                  <button
-                    onClick={() => setShowHeatmap((v) => !v)}
-                    className={`flex items-center gap-1 text-[10px] sm:gap-1.5 sm:text-xs font-semibold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border transition-all ${
-                      showHeatmap
-                        ? 'bg-[var(--orange)] text-white border-[var(--orange)]'
-                        : 'bg-[var(--surface)] text-[var(--foreground-muted)] [var(--foreground-muted)] border-[var(--border)] hover:border-[var(--orange)] hover:text-[var(--orange)]'
-                    }`}
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <Icon
+                      name="ClockIcon"
+                      size={14}
+                      className={
+                        timerUrgent
+                          ? 'text-primary'
+                          : timerWarning
+                            ? 'text-[var(--orange)]'
+                            : 'text-primary'
+                      }
+                    />
+                    <span className="text-[10px] sm:text-sm font-semibold font-koho">
+                      {timerUrgent ? '⚠️ Ghế sắp hết hạn giữ!' : 'Thời gian giữ chỗ còn lại'}
+                    </span>
+                  </div>
+                  <div
+                    className={`font-mono font-bold text-base sm:text-lg tabular-nums ${timerUrgent ? 'text-primary' : timerWarning ? 'text-[var(--orange)]' : 'text-primary'}`}
                   >
-                    <Icon name="FireIcon" size={12} />
-                    Bản đồ nhiệt
-                  </button>
-                </div>
-                <p className="text-[11px] sm:text-sm text-[var(--foreground-muted)] [var(--foreground-muted)] mb-4 sm:mb-5">
-                  Chọn {passengerCount} chỗ ngồi ({selected.length}/{passengerCount} đã chọn)
-                </p>
-
-                {/* Seat Type Legend - responsive */}
-                <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-2.5 sm:p-3 mb-4 sm:mb-5">
-                  <div className="text-[10px] sm:text-xs font-bold text-[var(--foreground)] [var(--foreground)] uppercase tracking-wide mb-1.5 sm:mb-2 font-koho">
-                    Chú thích loại ghế
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
-                    <div className="flex items-center gap-1.5 sm:gap-2">
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-available border-2 border-[var(--border)] bg-[var(--surface)] flex-shrink-0" />
-                      <div>
-                        <div className="font-semibold text-[var(--foreground)]">Phổ thông</div>
-                        <div className="text-[var(--foreground-subtle)]">45k–70k₫</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 sm:gap-2">
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-business flex-shrink-0" />
-                      <div>
-                        <div className="font-semibold text-[var(--foreground)]">Thương gia</div>
-                        <div className="text-[var(--foreground-subtle)]">350k₫+</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 sm:gap-2">
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-[rgb(var(--orange-rgb))]/15 border-2 border-[var(--orange)] flex-shrink-0" />
-                      <div>
-                        <div className="font-semibold text-[var(--foreground)]">Ưa chuộng</div>
-                        <div className="text-[var(--foreground-subtle)]">Đặt nhiều</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 sm:gap-2">
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-selected flex-shrink-0" />
-                      <div>
-                        <div className="font-semibold text-[var(--foreground)]">Đã chọn</div>
-                        <div className="text-[var(--foreground-subtle)]">Của bạn</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 sm:gap-2">
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-occupied flex-shrink-0" />
-                      <div>
-                        <div className="font-semibold text-[var(--foreground)]">Đã đặt</div>
-                        <div className="text-[var(--foreground-subtle)]">Không có</div>
-                      </div>
-                    </div>
-                    {showHeatmap && (
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-[rgb(var(--vj-green-rgb))]/15 border-2 border-[var(--vj-green)] flex-shrink-0" />
-                        <div>
-                          <div className="font-semibold text-[var(--foreground)]">Ít người</div>
-                          <div className="text-[var(--foreground-subtle)]">Còn nhiều</div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Heatmap scale - responsive */}
-                  {showHeatmap && (
-                    <div className="mt-2.5 sm:mt-3 pt-2.5 sm:pt-3 border-t border-[var(--border)] ">
-                      <div className="text-[10px] sm:text-xs font-bold text-[var(--foreground)] mb-1 sm:mb-1.5 font-koho">
-                        Mức độ lấp đầy
-                      </div>
-                      <div className="flex items-center gap-0.5 sm:gap-1">
-                        <span className="text-[8px] sm:text-xs text-[var(--foreground-subtle)]">
-                          Thấp
-                        </span>
-                        <div className="flex gap-0.25 sm:gap-0.5 flex-1">
-                          <div className="h-2 sm:h-3 flex-1 rounded-l bg-[rgb(var(--vj-green-rgb))]/40" />
-                          <div className="h-2 sm:h-3 flex-1 bg-[rgb(var(--accent-rgb))]/50" />
-                          <div className="h-2 sm:h-3 flex-1 bg-[rgb(var(--orange-rgb))]/40" />
-                          <div className="h-2 sm:h-3 flex-1 rounded-r bg-[rgb(var(--primary-rgb))]/40" />
-                        </div>
-                        <span className="text-[8px] sm:text-xs text-[var(--foreground-subtle)]">
-                          Cao
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Airplane nose - responsive */}
-                <div className="text-center mb-3 sm:mb-4">
-                  <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-primary/5 /10 text-[var(--foreground)] text-[10px] sm:text-xs px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-primary/10 /20 font-semibold font-koho">
-                    <Icon name="PaperAirplaneIcon" size={12} className="text-primary" />
-                    Mũi máy bay
+                    {formatTime(timeLeft)}
                   </div>
                 </div>
+              )}
 
-                {/* Seat map with tooltip - responsive */}
-                <div className="overflow-x-auto">
-                  <div className="min-w-[300px] sm:min-w-[340px] seat-map-container relative">
-                    {/* Col headers */}
-                    <div className="flex items-center mb-1.5 sm:mb-2 pl-7 sm:pl-8">
-                      {cols.map((col, i) => (
-                        <React.Fragment key={col}>
-                          {i === 3 && <div className="w-5 sm:w-6" />}
-                          <div className="w-7 sm:w-8 text-center text-[10px] sm:text-xs font-bold text-[var(--foreground)] [var(--foreground)]">
-                            {col}
-                          </div>
-                        </React.Fragment>
-                      ))}
-                    </div>
-
-                    {/* Rows - responsive */}
-                    <div className="space-y-1 max-h-[400px] sm:max-h-[480px] overflow-y-auto pr-1">
-                      {rows.map((row) => (
-                        <div key={row} className="flex items-center gap-0">
-                          <span className="w-6 sm:w-7 text-[10px] sm:text-xs text-[var(--foreground-subtle)] [var(--foreground-subtle)] font-medium text-right mr-0.5 sm:mr-1">
-                            {row}
-                          </span>
-                          {cols.map((col, i) => {
-                            const seatId = `${row}${col}`;
-                            const info = SEATS[seatId];
-                            const isSelected = selected.includes(seatId);
-                            return (
-                              <React.Fragment key={col}>
-                                {i === 3 && <div className="w-4 sm:w-5" />}
-                                <button
-                                  onClick={() => toggleSeat(seatId)}
-                                  onMouseEnter={(e) => handleMouseEnter(e, seatId)}
-                                  onMouseLeave={handleMouseLeave}
-                                  disabled={info.status === 'occupied'}
-                                  aria-pressed={isSelected}
-                                  aria-label={`Ghế ${seatId}, ${SEAT_STATUS_LABELS[info.status]}${isSelected ? ', đã chọn' : ''}, ${info.price.toLocaleString('vi-VN')}₫`}
-                                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded text-[10px] sm:text-xs font-bold seat mx-0.25 sm:mx-0.5 transition-all relative ${getHeatmapClass(
-                                    seatId,
-                                    info.status,
-                                    info.occupancyLevel,
-                                    isSelected,
-                                    showHeatmap
-                                  )}`}
-                                >
-                                  {isSelected ? '✓' : info.status === 'hot' ? '🔥' : ''}
-                                </button>
-                              </React.Fragment>
-                            );
-                          })}
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Tooltip - responsive */}
-                    {tooltip && tooltipSeat && (
-                      <div
-                        ref={tooltipRef}
-                        className="absolute z-50 pointer-events-none"
-                        style={{
-                          left: Math.min(tooltip.x - 70, 200),
-                          top: tooltip.y - 140,
-                        }}
-                      >
-                        <div className="bg-[var(--vj-navy)] text-white rounded-xl shadow-xl p-2.5 sm:p-3 w-40 sm:w-44 text-[10px] sm:text-xs">
-                          <div className="flex items-center justify-between mb-1.5 sm:mb-2">
-                            <span className="font-black text-sm sm:text-base font-koho">
-                              Ghế {tooltip.seatId}
-                            </span>
-                            <span
-                              className={`px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold ${
-                                tooltipSeat.status === 'business'
-                                  ? 'bg-accent text-[var(--vj-navy)]'
-                                  : tooltipSeat.status === 'hot'
-                                    ? 'bg-[var(--orange)] text-white'
-                                    : tooltipSeat.status === 'occupied'
-                                      ? 'bg-[var(--foreground-muted)] text-white [var(--foreground-muted)]'
-                                      : 'bg-primary text-white'
+              {/* Extra Services - responsive */}
+              <div className="bg-[var(--surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] overflow-hidden mb-4 sm:mb-6 shadow-vj-md">
+                <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
+                <div className="p-4 sm:p-5">
+                  <h2 className="font-black text-[var(--foreground)] flex items-center gap-1.5 sm:gap-2 font-koho mb-3 sm:mb-4">
+                    <span className="inline-block w-1 h-4 sm:h-5 bg-primary rounded-full" />
+                    Dịch vụ bổ sung
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                    {ANCILLARY_OPTIONS.map((svc: AncillaryOption) => {
+                      const isOn = ancillaries.includes(svc.id);
+                      return (
+                        <button
+                          key={svc.id}
+                          type="button"
+                          onClick={() => toggleAncillary(svc.id)}
+                          aria-pressed={isOn}
+                          className={`border rounded-xl p-2.5 sm:p-3 flex flex-col justify-between text-left transition-all ${
+                            isOn
+                              ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                              : 'border-[var(--border)] hover:border-primary/40'
+                          }`}
+                        >
+                          <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                            <div
+                              className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center ${
+                                isOn
+                                  ? 'bg-primary text-white'
+                                  : 'bg-[var(--surface-2)] text-[var(--foreground-muted)]'
                               }`}
                             >
-                              {tooltipSeat.status === 'business'
-                                ? 'BIZ'
-                                : tooltipSeat.status === 'hot'
-                                  ? 'HOT'
-                                  : tooltipSeat.status === 'occupied'
-                                    ? 'ĐẶT'
-                                    : 'ECO'}
+                              <Icon name={svc.icon} size={16} />
+                            </div>
+                            <span className="font-bold text-[var(--foreground)] font-koho">
+                              {svc.title}
                             </span>
+                            {isOn && (
+                              <Icon
+                                name="CheckCircleIcon"
+                                size={16}
+                                className="ml-auto text-primary"
+                              />
+                            )}
                           </div>
-                          {tooltipSeat.status !== 'occupied' && (
-                            <>
-                              <div className="space-y-0.5 sm:space-y-1 border-t border-white/10 pt-1.5 sm:pt-2">
-                                <div className="flex justify-between">
-                                  <span className="text-white/60">Giá gốc</span>
-                                  <span>{tooltipSeat.basePrice.toLocaleString('vi-VN')}₫</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-white/60">
-                                    Thuế ({Math.round(SEAT_TAX_RATE * 100)}%)
-                                  </span>
-                                  <span>{tooltipSeat.tax.toLocaleString('vi-VN')}₫</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-white/60">
-                                    Phí dịch vụ ({Math.round(SEAT_SERVICE_FEE_RATE * 100)}%)
-                                  </span>
-                                  <span>{tooltipSeat.fee.toLocaleString('vi-VN')}₫</span>
-                                </div>
-                                <div className="flex justify-between font-bold border-t border-white/10 pt-0.5 sm:pt-1 text-accent">
-                                  <span>Tổng</span>
-                                  <span>{tooltipSeat.price.toLocaleString('vi-VN')}₫</span>
-                                </div>
-                              </div>
-                              <div className="mt-1.5 sm:mt-2 pt-1.5 sm:pt-2 border-t border-white/10">
-                                <div className="flex items-center gap-0.5 sm:gap-1">
-                                  <div
-                                    className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
-                                      tooltipSeat.occupancyLevel === 'low'
-                                        ? 'bg-[var(--vj-green)]'
-                                        : tooltipSeat.occupancyLevel === 'medium'
-                                          ? 'bg-accent'
-                                          : tooltipSeat.occupancyLevel === 'high'
-                                            ? 'bg-[var(--orange)]'
-                                            : 'bg-primary'
-                                    }`}
-                                  />
-                                  <span className="text-white/60">
-                                    {tooltipSeat.occupancyLevel === 'low'
-                                      ? 'Còn nhiều chỗ'
-                                      : tooltipSeat.occupancyLevel === 'medium'
-                                        ? 'Đang lấp đầy'
-                                        : tooltipSeat.occupancyLevel === 'high'
-                                          ? 'Ít chỗ trống'
-                                          : 'Gần hết'}
-                                  </span>
-                                </div>
-                              </div>
-                            </>
-                          )}
-                          {tooltipSeat.status === 'occupied' && (
-                            <div className="text-white/50 text-center py-0.5 sm:py-1">
-                              Ghế đã được đặt
+                          <div className="mt-auto">
+                            <div className="text-[8px] sm:text-[10px] text-[var(--foreground-subtle)]">
+                              {svc.description}
                             </div>
-                          )}
-                          {/* Arrow */}
-                          <div className="absolute bottom-[-5px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[var(--vj-navy)] rotate-45" />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Summary - responsive */}
-          <div className="lg:col-span-1">
-            <div className="bg-[var(--surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] overflow-hidden sticky top-[180px] sm:top-[200px] lg:top-[230px] shadow-vj-md">
-              {/* Yellow accent top bar */}
-              <div className="h-1 w-full bg-gradient-to-r from-accent/60 via-accent to-accent/60" />
-              <div className="p-4 sm:p-5">
-                <h3 className="font-black text-[var(--foreground)] mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2 font-koho">
-                  <Icon name="TicketIcon" size={16} className="text-primary" />
-                  Chỗ đã chọn
-                </h3>
-
-                {selected.length === 0 ? (
-                  <div className="text-center py-6 sm:py-8 text-[var(--foreground-subtle)]">
-                    <Icon
-                      name="TicketIcon"
-                      size={32}
-                      className="mx-auto mb-1.5 sm:mb-2 text-[var(--foreground-muted)]"
-                    />
-                    <div className="text-[11px] sm:text-sm">Chưa chọn chỗ ngồi</div>
-                  </div>
-                ) : (
-                  <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
-                    {selected.map((seat, i) => {
-                      const info = SEATS[seat];
-                      return (
-                        <div
-                          key={seat}
-                          className="flex items-center justify-between rounded-xl border border-[rgb(var(--primary-rgb))]/10 bg-[rgb(var(--primary-rgb))]/5 px-2.5 py-2 sm:px-3 sm:py-2.5"
-                        >
-                          <div className="flex items-center gap-1.5 sm:gap-2">
-                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-red rounded text-white text-[10px] sm:text-xs font-black flex items-center justify-center shadow-sm">
-                              {i + 1}
-                            </div>
-                            <div>
-                              <div className="font-black text-[var(--foreground)] text-[11px] sm:text-sm font-koho">
-                                Ghế {seat}
-                              </div>
-                              <div className="text-[9px] sm:text-xs text-[var(--foreground-muted)]">
-                                {passengers[i]?.name || `Hành khách ${i + 1}`}
-                              </div>
-                              <div className="text-[9px] sm:text-xs text-primary font-bold">
-                                {info.price.toLocaleString('vi-VN')}₫
-                              </div>
+                            <div className="text-[11px] sm:text-sm font-black text-primary font-koho">
+                              {svc.price.toLocaleString('vi-VN')}₫
+                              <span className="font-body text-[9px] sm:text-[10px] font-normal text-[var(--foreground-muted)]">
+                                {' '}
+                                / khách
+                              </span>
                             </div>
                           </div>
-                          <button
-                            onClick={() => setSelected((prev) => prev.filter((s) => s !== seat))}
-                            className="text-[var(--foreground-subtle)] hover:text-primary transition-colors"
-                          >
-                            <Icon name="XMarkIcon" size={14} />
-                          </button>
-                        </div>
+                        </button>
                       );
                     })}
                   </div>
-                )}
+                </div>
+              </div>
 
-                {/* Price - responsive */}
-                <div className="border-t border-[var(--border)] pt-3 sm:pt-4 mb-3 sm:mb-4 space-y-1.5 sm:space-y-2 text-[11px] sm:text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-[var(--foreground-muted)]">Vé máy bay</span>
-                    <span className="font-semibold text-[var(--foreground)]">
-                      {totals.fareSubtotal.toLocaleString('vi-VN')}₫
-                    </span>
+              <div className="bg-[var(--surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] overflow-hidden shadow-vj-md">
+                {/* Red accent top bar */}
+                <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
+                <div className="p-4 sm:p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1.5 sm:mb-2">
+                    <h2 className="font-black text-[var(--foreground)] flex items-center gap-1.5 sm:gap-2 font-koho">
+                      <span className="inline-block w-1 h-4 sm:h-5 bg-primary rounded-full" />
+                      Chọn chỗ ngồi
+                    </h2>
+                    {/* Heatmap toggle */}
+                    <button
+                      onClick={() => setShowHeatmap((v) => !v)}
+                      className={`flex items-center gap-1 text-[10px] sm:gap-1.5 sm:text-xs font-semibold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border transition-all ${
+                        showHeatmap
+                          ? 'bg-[var(--orange)] text-white border-[var(--orange)]'
+                          : 'bg-[var(--surface)] text-[var(--foreground-muted)] border-[var(--border)] hover:border-[var(--orange)] hover:text-[var(--orange)]'
+                      }`}
+                    >
+                      <Icon name="FireIcon" size={12} />
+                      Bản đồ nhiệt
+                    </button>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-[var(--foreground-muted)]">
-                      Thuế &amp; phí ({Math.round(TAX_AND_FEE_RATE * 100)}%)
-                    </span>
-                    <span className="font-semibold text-[var(--foreground)]">
-                      {totals.taxAndFee.toLocaleString('vi-VN')}₫
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[var(--foreground-muted)]">Phí chọn chỗ</span>
-                    <span className="font-semibold text-[var(--foreground)]">
-                      {totals.seatFee.toLocaleString('vi-VN')}₫
-                    </span>
-                  </div>
-                  {totals.ancillaryFee > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-[var(--foreground-muted)]">Dịch vụ bổ sung</span>
-                      <span className="font-semibold text-[var(--foreground)]">
-                        {totals.ancillaryFee.toLocaleString('vi-VN')}₫
-                      </span>
+                  <p className="text-[11px] sm:text-sm text-[var(--foreground-muted)] mb-4 sm:mb-5">
+                    Chọn {passengerCount} chỗ ngồi ({selected.length}/{passengerCount} đã chọn)
+                  </p>
+
+                  {/* Seat Type Legend - responsive */}
+                  <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-2.5 sm:p-3 mb-4 sm:mb-5">
+                    <div className="text-[10px] sm:text-xs font-bold text-[var(--foreground)] uppercase tracking-wide mb-1.5 sm:mb-2 font-koho">
+                      Chú thích loại ghế
                     </div>
-                  )}
-                  <div className="flex justify-between font-black text-[var(--foreground)] pt-1 border-t border-[var(--border)] font-koho">
-                    <span>Tổng cộng</span>
-                    <span className="text-primary">{totals.total.toLocaleString('vi-VN')}₫</span>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-available border-2 border-[var(--border)] bg-[var(--surface)] flex-shrink-0" />
+                        <div>
+                          <div className="font-semibold text-[var(--foreground)]">Phổ thông</div>
+                          <div className="text-[var(--foreground-subtle)]">45k–70k₫</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-business flex-shrink-0" />
+                        <div>
+                          <div className="font-semibold text-[var(--foreground)]">Thương gia</div>
+                          <div className="text-[var(--foreground-subtle)]">350k₫+</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-[rgb(var(--orange-rgb))]/15 border-2 border-[var(--orange)] flex-shrink-0" />
+                        <div>
+                          <div className="font-semibold text-[var(--foreground)]">Ưa chuộng</div>
+                          <div className="text-[var(--foreground-subtle)]">Đặt nhiều</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-selected flex-shrink-0" />
+                        <div>
+                          <div className="font-semibold text-[var(--foreground)]">Đã chọn</div>
+                          <div className="text-[var(--foreground-subtle)]">Của bạn</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-occupied flex-shrink-0" />
+                        <div>
+                          <div className="font-semibold text-[var(--foreground)]">Đã đặt</div>
+                          <div className="text-[var(--foreground-subtle)]">Không có</div>
+                        </div>
+                      </div>
+                      {showHeatmap && (
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <div className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-[rgb(var(--vj-green-rgb))]/15 border-2 border-[var(--vj-green)] flex-shrink-0" />
+                          <div>
+                            <div className="font-semibold text-[var(--foreground)]">Ít người</div>
+                            <div className="text-[var(--foreground-subtle)]">Còn nhiều</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Heatmap scale - responsive */}
+                    {showHeatmap && (
+                      <div className="mt-2.5 sm:mt-3 pt-2.5 sm:pt-3 border-t border-[var(--border)] ">
+                        <div className="text-[10px] sm:text-xs font-bold text-[var(--foreground)] mb-1 sm:mb-1.5 font-koho">
+                          Mức độ lấp đầy
+                        </div>
+                        <div className="flex items-center gap-0.5 sm:gap-1">
+                          <span className="text-[8px] sm:text-xs text-[var(--foreground-subtle)]">
+                            Thấp
+                          </span>
+                          <div className="flex gap-0.25 sm:gap-0.5 flex-1">
+                            <div className="h-2 sm:h-3 flex-1 rounded-l bg-[rgb(var(--vj-green-rgb))]/40" />
+                            <div className="h-2 sm:h-3 flex-1 bg-[rgb(var(--accent-rgb))]/50" />
+                            <div className="h-2 sm:h-3 flex-1 bg-[rgb(var(--orange-rgb))]/40" />
+                            <div className="h-2 sm:h-3 flex-1 rounded-r bg-[rgb(var(--primary-rgb))]/40" />
+                          </div>
+                          <span className="text-[8px] sm:text-xs text-[var(--foreground-subtle)]">
+                            Cao
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Airplane nose - responsive */}
+                  <div className="text-center mb-3 sm:mb-4">
+                    <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-primary/5 text-[var(--foreground)] text-[10px] sm:text-xs px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-primary/10 font-semibold font-koho">
+                      <Icon name="PaperAirplaneIcon" size={12} className="text-primary" />
+                      Mũi máy bay
+                    </div>
+                  </div>
+
+                  {/* Seat map with tooltip - responsive */}
+                  <div className="overflow-x-auto">
+                    <div className="min-w-[300px] sm:min-w-[340px] seat-map-container relative">
+                      {/* Col headers */}
+                      <div className="flex items-center mb-1.5 sm:mb-2 pl-7 sm:pl-8">
+                        {cols.map((col, i) => (
+                          <React.Fragment key={col}>
+                            {i === 3 && <div className="w-5 sm:w-6" />}
+                            <div className="w-7 sm:w-8 text-center text-[10px] sm:text-xs font-bold text-[var(--foreground)]">
+                              {col}
+                            </div>
+                          </React.Fragment>
+                        ))}
+                      </div>
+
+                      {/* Rows - responsive */}
+                      <div className="space-y-1 max-h-[400px] sm:max-h-[480px] overflow-y-auto pr-1">
+                        {rows.map((row) => (
+                          <div key={row} className="flex items-center gap-0">
+                            <span className="w-6 sm:w-7 text-[10px] sm:text-xs text-[var(--foreground-subtle)] font-medium text-right mr-0.5 sm:mr-1">
+                              {row}
+                            </span>
+                            {cols.map((col, i) => {
+                              const seatId = `${row}${col}`;
+                              const info = SEATS[seatId];
+                              const isSelected = selected.includes(seatId);
+                              return (
+                                <React.Fragment key={col}>
+                                  {i === 3 && <div className="w-4 sm:w-5" />}
+                                  <button
+                                    onClick={() => toggleSeat(seatId)}
+                                    onMouseEnter={(e) => handleMouseEnter(e, seatId)}
+                                    onMouseLeave={handleMouseLeave}
+                                    disabled={info.status === 'occupied'}
+                                    aria-pressed={isSelected}
+                                    aria-label={`Ghế ${seatId}, ${SEAT_STATUS_LABELS[info.status]}${isSelected ? ', đã chọn' : ''}, ${info.price.toLocaleString('vi-VN')}₫`}
+                                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded text-[10px] sm:text-xs font-bold seat mx-0.25 sm:mx-0.5 transition-all relative ${getHeatmapClass(
+                                      seatId,
+                                      info.status,
+                                      info.occupancyLevel,
+                                      isSelected,
+                                      showHeatmap
+                                    )}`}
+                                  >
+                                    {isSelected ? '✓' : info.status === 'hot' ? '🔥' : ''}
+                                  </button>
+                                </React.Fragment>
+                              );
+                            })}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Tooltip - responsive */}
+                      {tooltip && tooltipSeat && (
+                        <div
+                          ref={tooltipRef}
+                          className="absolute z-50 pointer-events-none"
+                          style={{
+                            left: Math.min(tooltip.x - 70, 200),
+                            top: tooltip.y - 140,
+                          }}
+                        >
+                          <div className="bg-[var(--vj-navy)] text-white rounded-xl shadow-xl p-2.5 sm:p-3 w-40 sm:w-44 text-[10px] sm:text-xs">
+                            <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                              <span className="font-black text-sm sm:text-base font-koho">
+                                Ghế {tooltip.seatId}
+                              </span>
+                              <span
+                                className={`px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold ${
+                                  tooltipSeat.status === 'business'
+                                    ? 'bg-accent text-[var(--vj-navy)]'
+                                    : tooltipSeat.status === 'hot'
+                                      ? 'bg-[var(--orange)] text-white'
+                                      : tooltipSeat.status === 'occupied'
+                                        ? 'bg-[var(--foreground-muted)] text-white'
+                                        : 'bg-primary text-white'
+                                }`}
+                              >
+                                {tooltipSeat.status === 'business'
+                                  ? 'BIZ'
+                                  : tooltipSeat.status === 'hot'
+                                    ? 'HOT'
+                                    : tooltipSeat.status === 'occupied'
+                                      ? 'ĐẶT'
+                                      : 'ECO'}
+                              </span>
+                            </div>
+                            {tooltipSeat.status !== 'occupied' && (
+                              <>
+                                <div className="space-y-0.5 sm:space-y-1 border-t border-white/10 pt-1.5 sm:pt-2">
+                                  <div className="flex justify-between">
+                                    <span className="text-white/60">Giá gốc</span>
+                                    <span>{tooltipSeat.basePrice.toLocaleString('vi-VN')}₫</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-white/60">
+                                      Thuế ({Math.round(SEAT_TAX_RATE * 100)}%)
+                                    </span>
+                                    <span>{tooltipSeat.tax.toLocaleString('vi-VN')}₫</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-white/60">
+                                      Phí dịch vụ ({Math.round(SEAT_SERVICE_FEE_RATE * 100)}%)
+                                    </span>
+                                    <span>{tooltipSeat.fee.toLocaleString('vi-VN')}₫</span>
+                                  </div>
+                                  <div className="flex justify-between font-bold border-t border-white/10 pt-0.5 sm:pt-1 text-accent">
+                                    <span>Tổng</span>
+                                    <span>{tooltipSeat.price.toLocaleString('vi-VN')}₫</span>
+                                  </div>
+                                </div>
+                                <div className="mt-1.5 sm:mt-2 pt-1.5 sm:pt-2 border-t border-white/10">
+                                  <div className="flex items-center gap-0.5 sm:gap-1">
+                                    <div
+                                      className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
+                                        tooltipSeat.occupancyLevel === 'low'
+                                          ? 'bg-[var(--vj-green)]'
+                                          : tooltipSeat.occupancyLevel === 'medium'
+                                            ? 'bg-accent'
+                                            : tooltipSeat.occupancyLevel === 'high'
+                                              ? 'bg-[var(--orange)]'
+                                              : 'bg-primary'
+                                      }`}
+                                    />
+                                    <span className="text-white/60">
+                                      {tooltipSeat.occupancyLevel === 'low'
+                                        ? 'Còn nhiều chỗ'
+                                        : tooltipSeat.occupancyLevel === 'medium'
+                                          ? 'Đang lấp đầy'
+                                          : tooltipSeat.occupancyLevel === 'high'
+                                            ? 'Ít chỗ trống'
+                                            : 'Gần hết'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                            {tooltipSeat.status === 'occupied' && (
+                              <div className="text-white/50 text-center py-0.5 sm:py-1">
+                                Ghế đã được đặt
+                              </div>
+                            )}
+                            {/* Arrow */}
+                            <div className="absolute bottom-[-5px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[var(--vj-navy)] rotate-45" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
+              </div>
+            </div>
 
-                {/* Compact hold timer in sidebar - responsive */}
-                {holdTimer !== null && (
-                  <div
-                    className={`rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 mb-2.5 sm:mb-3 flex items-center justify-between text-[10px] sm:text-xs ${
-                      timerUrgent
-                        ? 'bg-[rgb(var(--primary-rgb))]/10 text-primary border border-[rgb(var(--primary-rgb))]/30'
-                        : timerWarning
-                          ? 'bg-[rgb(var(--orange-rgb))]/10 text-[var(--orange)] border border-[rgb(var(--orange-rgb))]/30'
-                          : 'bg-primary/5 text-primary border border-primary/10'
-                    }`}
-                  >
-                    <span className="flex items-center gap-0.5 sm:gap-1 font-semibold">
-                      <Icon name="ClockIcon" size={12} />
-                      Giữ chỗ còn
-                    </span>
-                    <span className="font-mono font-bold">{formatTime(timeLeft)}</span>
-                  </div>
-                )}
+            {/* Summary - responsive */}
+            <div className="lg:col-span-1">
+              <div className="bg-[var(--surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] overflow-hidden sticky top-[180px] sm:top-[200px] lg:top-[230px] shadow-vj-md">
+                {/* Yellow accent top bar */}
+                <div className="h-1 w-full bg-gradient-to-r from-accent/60 via-accent to-accent/60" />
+                <div className="p-4 sm:p-5">
+                  <h3 className="font-black text-[var(--foreground)] mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2 font-koho">
+                    <Icon name="TicketIcon" size={16} className="text-primary" />
+                    Chỗ đã chọn
+                  </h3>
 
-                <div className="flex flex-col gap-2">
-                  <button
-                    onClick={handleConfirm}
-                    disabled={selected.length < passengerCount || isConfirming}
-                    className="w-full vj-btn vj-btn-md vj-btn-accent rounded-xl font-black disabled:opacity-50 disabled:cursor-not-allowed font-koho"
-                  >
-                    {isConfirming ? (
-                      <>
-                        <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          />
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                          />
-                        </svg>
-                        Đang xử lý...
-                      </>
-                    ) : (
-                      <>
-                        <Icon name="CreditCardIcon" size={16} />
-                        Tiến hành thanh toán
-                      </>
+                  {selected.length === 0 ? (
+                    <div className="text-center py-6 sm:py-8 text-[var(--foreground-subtle)]">
+                      <Icon
+                        name="TicketIcon"
+                        size={32}
+                        className="mx-auto mb-1.5 sm:mb-2 text-[var(--foreground-muted)]"
+                      />
+                      <div className="text-[11px] sm:text-sm">Chưa chọn chỗ ngồi</div>
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
+                      {selected.map((seat, i) => {
+                        const info = SEATS[seat];
+                        return (
+                          <div
+                            key={seat}
+                            className="flex items-center justify-between rounded-xl border border-[rgb(var(--primary-rgb))]/10 bg-[rgb(var(--primary-rgb))]/5 px-2.5 py-2 sm:px-3 sm:py-2.5"
+                          >
+                            <div className="flex items-center gap-1.5 sm:gap-2">
+                              <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-red rounded text-white text-[10px] sm:text-xs font-black flex items-center justify-center shadow-sm">
+                                {i + 1}
+                              </div>
+                              <div>
+                                <div className="font-black text-[var(--foreground)] text-[11px] sm:text-sm font-koho">
+                                  Ghế {seat}
+                                </div>
+                                <div className="text-[9px] sm:text-xs text-[var(--foreground-muted)]">
+                                  {passengers[i]?.name || `Hành khách ${i + 1}`}
+                                </div>
+                                <div className="text-[9px] sm:text-xs text-primary font-bold">
+                                  {info.price.toLocaleString('vi-VN')}₫
+                                </div>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => setSelected((prev) => prev.filter((s) => s !== seat))}
+                              className="text-[var(--foreground-subtle)] hover:text-primary transition-colors"
+                            >
+                              <Icon name="XMarkIcon" size={14} />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Price - responsive */}
+                  <div className="border-t border-[var(--border)] pt-3 sm:pt-4 mb-3 sm:mb-4 space-y-1.5 sm:space-y-2 text-[11px] sm:text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-[var(--foreground-muted)]">Vé máy bay</span>
+                      <span className="font-semibold text-[var(--foreground)]">
+                        {totals.fareSubtotal.toLocaleString('vi-VN')}₫
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[var(--foreground-muted)]">
+                        Thuế &amp; phí ({Math.round(TAX_AND_FEE_RATE * 100)}%)
+                      </span>
+                      <span className="font-semibold text-[var(--foreground)]">
+                        {totals.taxAndFee.toLocaleString('vi-VN')}₫
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[var(--foreground-muted)]">Phí chọn chỗ</span>
+                      <span className="font-semibold text-[var(--foreground)]">
+                        {totals.seatFee.toLocaleString('vi-VN')}₫
+                      </span>
+                    </div>
+                    {totals.ancillaryFee > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-[var(--foreground-muted)]">Dịch vụ bổ sung</span>
+                        <span className="font-semibold text-[var(--foreground)]">
+                          {totals.ancillaryFee.toLocaleString('vi-VN')}₫
+                        </span>
+                      </div>
                     )}
-                  </button>
-                  <button
-                    onClick={onBack}
-                    disabled={isConfirming}
-                    className="w-full vj-btn vj-btn-md vj-btn-outline rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Icon name="ArrowLeftIcon" size={14} />
-                    Quay lại
-                  </button>
+                    <div className="flex justify-between font-black text-[var(--foreground)] pt-1 border-t border-[var(--border)] font-koho">
+                      <span>Tổng cộng</span>
+                      <span className="text-primary">{totals.total.toLocaleString('vi-VN')}₫</span>
+                    </div>
+                  </div>
+
+                  {/* Compact hold timer in sidebar - responsive */}
+                  {holdTimer !== null && (
+                    <div
+                      className={`rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 mb-2.5 sm:mb-3 flex items-center justify-between text-[10px] sm:text-xs ${
+                        timerUrgent
+                          ? 'bg-[rgb(var(--primary-rgb))]/10 text-primary border border-[rgb(var(--primary-rgb))]/30'
+                          : timerWarning
+                            ? 'bg-[rgb(var(--orange-rgb))]/10 text-[var(--orange)] border border-[rgb(var(--orange-rgb))]/30'
+                            : 'bg-primary/5 text-primary border border-primary/10'
+                      }`}
+                    >
+                      <span className="flex items-center gap-0.5 sm:gap-1 font-semibold">
+                        <Icon name="ClockIcon" size={12} />
+                        Giữ chỗ còn
+                      </span>
+                      <span className="font-mono font-bold">{formatTime(timeLeft)}</span>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={handleConfirm}
+                      disabled={selected.length < passengerCount || isConfirming}
+                      className="w-full vj-btn vj-btn-md vj-btn-accent rounded-xl font-black disabled:opacity-50 disabled:cursor-not-allowed font-koho"
+                    >
+                      {isConfirming ? (
+                        <>
+                          <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                            />
+                          </svg>
+                          Đang xử lý...
+                        </>
+                      ) : (
+                        <>
+                          <Icon name="CreditCardIcon" size={16} />
+                          Tiến hành thanh toán
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={onBack}
+                      disabled={isConfirming}
+                      className="w-full vj-btn vj-btn-md vj-btn-outline rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Icon name="ArrowLeftIcon" size={14} />
+                      Quay lại
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+          {/* Sticky totals bar — live total (fare + taxes + seats + add-ons) with
+            the terminal payment CTA, mirroring the real site's pinned footer.
+            Disabled until every passenger has a seat, same rule as the
+            sidebar button above. */}
+          <BookingBottomBar
+            total={totals.total}
+            ctaLabel="Tiếp tục thanh toán"
+            onCta={handleConfirm}
+            disabled={selected.length < passengerCount || isConfirming}
+            testId="seat-bottom-bar"
+          />
+        </>
       )}
     </>
   );

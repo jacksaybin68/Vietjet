@@ -1,4 +1,5 @@
 export { PriceBreakdown } from './PriceBreakdown';
+export { default as BookingBottomBar } from './BookingBottomBar';
 export { default as FlightBookingClient } from './FlightBookingClient';
 export { default as PassengerInfoStep } from './PassengerInfoStep';
 export { default as SeatSelectionStep } from './SeatSelectionStep';
