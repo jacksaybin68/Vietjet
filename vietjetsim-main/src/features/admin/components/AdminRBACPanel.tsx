@@ -1,5 +1,19 @@
 'use client';
 
+/**
+ * Admin RBAC console.
+ *
+ * NOTE — this panel edits a role/permission matrix, but that matrix is
+ * currently **advisory only**. `verifyAdminRequest()` checks the admin *role*
+ * and ignores its `_permission` argument (see the note there), and
+ * `hasPermission()` in `@/lib/rbac` collapses every admin role to full access.
+ * There is no `role_permissions` table in the migrations. So changing a row
+ * here records the intent in the UI and the audit log, but does not yet narrow
+ * what an `admin_content` or `admin_finance` account can call.
+ *
+ * Treat this screen as the groundwork for enforcement, not as a control that
+ * is already active.
+ */
 import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
 import {
