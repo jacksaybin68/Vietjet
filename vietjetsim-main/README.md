@@ -49,11 +49,13 @@ Run the SQL migrations in order against your Neon database (any psql client or t
 ```bash
 psql "$DATABASE_URL" -f migrations/000_core_schema.sql
 psql "$DATABASE_URL" -f migrations/001_bank_accounts.sql
-# ... apply every file in migrations/ in filename order (000 → 015).
+# ... apply every file in migrations/ in filename order (000 → 017).
 # 013 wires up the booking_code default and 014 seeds demo airports, flights
 # and the demo accounts below, so a fresh database is usable immediately.
 # 015 adds the `agencies` table and links discount codes to the agency an
 # admin issued them to; apply it before using the "Đại lý" admin tab.
+# 016 normalizes stored phone numbers.
+# 017 adds the missing `bookings.discount_code_id` foreign key.
 ```
 
 ### 4. Start Development Server

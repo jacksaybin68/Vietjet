@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useMemo, memo } from 'react';
-import Image from 'next/image';
+import Image, { type ImageProps } from 'next/image';
 
 interface AppImageProps {
   src: string;
@@ -19,7 +19,7 @@ interface AppImageProps {
   fallbackSrc?: string;
   loading?: 'lazy' | 'eager';
   unoptimized?: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const AppImage = memo(function AppImage({
@@ -71,7 +71,7 @@ const AppImage = memo(function AppImage({
   }, [className, isLoading, onClick]);
 
   const imageProps = useMemo(() => {
-    const baseProps: any = {
+    const baseProps: ImageProps = {
       src: imageSrc,
       alt,
       className: imageClassName,

@@ -1301,7 +1301,7 @@ export default function PaymentClient() {
                               <div className="flex flex-col items-center justify-center py-4 bg-[var(--surface)] rounded-2xl border border-[var(--border)] mb-4">
                                 <div className="relative group cursor-pointer">
                                   {/* QR must not be proxied/optimized: resizing corrupts scannability. */}
-                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  {}
                                   <img
                                     src={`https://img.vietqr.io/image/${selectedAdminAccount.bank_bin || 'VCB'}-${selectedAdminAccount.admin_bank_account_number}-compact2.png?amount=${total}&addInfo=${encodeURIComponent(transferNote)}&accountName=${encodeURIComponent(selectedAdminAccount.admin_bank_account_holder)}`}
                                     alt="VietQR"

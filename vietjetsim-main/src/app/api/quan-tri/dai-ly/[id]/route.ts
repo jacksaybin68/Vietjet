@@ -5,7 +5,7 @@ import { getAgencyById, updateAgency, deleteAgency } from '@/lib/db';
 // ─── GET: Get agency by ID ──────────────────────────────────────────────────
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { error, response } = await verifyAdminRequest(request, 'agency:view' as any);
+    const { error, response } = await verifyAdminRequest(request, 'agency:view');
     if (error) return response;
 
     const { id } = await params;
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 // ─── PATCH: Update an agency ────────────────────────────────────────────────
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { error, response } = await verifyAdminRequest(request, 'agency:edit' as any);
+    const { error, response } = await verifyAdminRequest(request, 'agency:edit');
     if (error) return response;
 
     const { id } = await params;
@@ -86,7 +86,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { error, response } = await verifyAdminRequest(request, 'agency:delete' as any);
+    const { error, response } = await verifyAdminRequest(request, 'agency:delete');
     if (error) return response;
 
     const { id } = await params;

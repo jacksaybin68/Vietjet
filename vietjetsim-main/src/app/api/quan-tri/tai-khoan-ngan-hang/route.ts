@@ -6,7 +6,7 @@ import { validateTransferNoteTemplate } from '@/lib/transfer-note';
 // ─── GET: List all bank accounts ─────────────────────────────────────────────
 export async function GET(request: NextRequest) {
   try {
-    const { error, response } = await verifyAdminRequest(request, 'system:config' as any);
+    const { error, response } = await verifyAdminRequest(request, 'system:config');
     if (error) return response;
 
     const accounts = await sql`
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 // ─── POST: Create a new bank account ──────────────────────────────────────────
 export async function POST(request: NextRequest) {
   try {
-    const { error, response } = await verifyAdminRequest(request, 'system:config' as any);
+    const { error, response } = await verifyAdminRequest(request, 'system:config');
     if (error) return response;
 
     const body = await request.json();

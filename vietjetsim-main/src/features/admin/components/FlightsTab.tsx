@@ -394,7 +394,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
           ? `${editingFlight.date}T${editingFlight.arriveTime}:00`
           : editingFlight.arriveTime;
 
-      const payload: Record<string, any> = {
+      const payload: Record<string, unknown> = {
         flight_no: editingFlight.flightNo,
         from_code: editingFlight.from,
         to_code: editingFlight.to,
