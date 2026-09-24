@@ -61,6 +61,19 @@ export async function getCsrfTokenFromCookies(): Promise<string | null> {
 }
 
 /**
+ * Get the CSRF token `request` already holds, read from the request itself.
+ *
+ * Prefers the request's own `Cookie` header — the same source
+ * {@link validateCsrfToken} compares against — so route handlers, tests and
+ * non-Next runtimes all see the exact value the client will echo back in
+ * `x-csrf-token`. Falls back to `cookies()` when the request carries no cookie
+ * header. Used by the issuing route to reuse a token instead of rotating it.
+ */
+export async function getCsrfTokenFromRequest(request: Request): Promise<string | null> {
+  return (await readCsrfCookie(request)) ?? null;
+}
+
+/**
  * Ensure the double-submit cookie is present on a response.
  *
  * Without this, a freshly logged-in client has no CSRF cookie and every
