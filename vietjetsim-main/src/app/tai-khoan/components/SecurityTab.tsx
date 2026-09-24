@@ -42,7 +42,7 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const initSetup = async () => {
+  const initSetup = useCallback(async () => {
     setLoading(true);
     try {
       const data = await apiRequest<{
@@ -60,11 +60,11 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
     } finally {
       setLoading(false);
     }
-  };
+  }, [onClose, toast]);
 
   useEffect(() => {
     initSetup();
-  }, []);
+  }, [initSetup]);
 
   const handleVerify = async () => {
     if (token.length !== 6) {

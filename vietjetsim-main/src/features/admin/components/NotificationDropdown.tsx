@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { Icon } from '@/shared/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,28 +29,7 @@ export default function NotificationDropdown({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchNotifications();
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    onNotificationCountChange?.(unreadCount);
-  }, [unreadCount, onNotificationCountChange]);
-
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     if (!user) return;
 
     setIsLoading(true);
@@ -66,7 +45,31 @@ export default function NotificationDropdown({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
+
+  // Defined above this effect so the hook can list it as a dependency; each
+  // render produced a new function identity before, so listing it would refetch
+  // on every render.
+  useEffect(() => {
+    if (isOpen) {
+      fetchNotifications();
+    }
+  }, [isOpen, fetchNotifications]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    onNotificationCountChange?.(unreadCount);
+  }, [unreadCount, onNotificationCountChange]);
 
   const markAsRead = async (notificationId: string) => {
     try {

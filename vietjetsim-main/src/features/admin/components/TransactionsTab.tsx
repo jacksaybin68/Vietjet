@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
 import { listTransactions } from '@/features/admin';
@@ -31,7 +31,7 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const pageSize = 10;
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     setIsLoading(true);
     try {
       const data = await listTransactions(
@@ -43,11 +43,11 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filterStatus, onToast]);
 
   useEffect(() => {
     fetchTransactions();
-  }, [filterStatus]);
+  }, [fetchTransactions]);
 
   const filtered = transactions.filter(
     (t) =>
