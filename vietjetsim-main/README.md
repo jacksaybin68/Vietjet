@@ -49,11 +49,12 @@ Run the SQL migrations in order against your Neon database (any psql client or t
 ```bash
 psql "$DATABASE_URL" -f migrations/000_core_schema.sql
 psql "$DATABASE_URL" -f migrations/001_bank_accounts.sql
-# ... apply every file in migrations/ in filename order (000 → 015).
+# ... apply every file in migrations/ in filename order (000 → 016).
 # 013 wires up the booking_code default and 014 seeds demo airports, flights
 # and the demo accounts below, so a fresh database is usable immediately.
 # 015 adds the `agencies` table and links discount codes to the agency an
 # admin issued them to; apply it before using the "Đại lý" admin tab.
+# 016 normalizes stored phone numbers, so apply it after 014/015.
 ```
 
 ### 4. Start Development Server
@@ -153,6 +154,12 @@ in transactions with compensating rollback on failure.
 | `admin@vietjetsim.vn` | `admin123` | Admin |
 
 > ⚠️ These are mock credentials for development. Register a real account through the app and promote it via `npm run db:setup-admin` for production.
+
+> ℹ️ They only exist **after the migrations above have been applied to a real
+> Postgres database**. With `DATABASE_URL` empty the app uses the in-memory mock
+> in `src/lib/neon.ts`, which seeds airports and a demo chat thread but has no
+> `users` rows — every login attempt there fails with 401 regardless of the
+> credentials.
 
 If these accounts already exist in your database with different passwords, migration
 `014_seed_demo_data.sql` will not touch them (`ON CONFLICT (email) DO NOTHING`). Run

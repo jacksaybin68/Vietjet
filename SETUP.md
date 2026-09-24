@@ -32,11 +32,12 @@ cp .env.local.example .env.local
 ### 3. Thiết Lập Database
 ```bash
 # Chạy migrations trong Neon SQL Editor hoặc psql
-# Chạy tất cả tệp trong thứ tự:
+# Áp dụng MỌI tệp trong vietjetsim-main/migrations/ theo thứ tự tên tệp (000 → 016):
 # - migrations/000_core_schema.sql
-# - migrations/001_refresh_tokens.sql
 # - migrations/001_bank_accounts.sql
+# - migrations/001_refresh_tokens.sql
 # - migrations/002_user_wallet.sql
+# - migrations/003_discount_system.sql
 # - migrations/003_loyalty_program.sql
 # - migrations/004_security_2fa_sessions.sql
 # - migrations/005_enhanced_user_profiles.sql
@@ -44,9 +45,15 @@ cp .env.local.example .env.local
 # - migrations/007_phone_registration_support.sql
 # - migrations/008_notifications.sql
 # - migrations/009_admin_tables.sql
+# - migrations/010_chat.sql
+# - migrations/011_checkin_system.sql
+# - migrations/012_add_booking_code.sql
+# - migrations/013_booking_code_default.sql
+# - migrations/014_seed_demo_data.sql   ← seed sân bay, chuyến bay, tài khoản demo
+# - migrations/015_agency_discounts.sql  ← bảng agencies (tab "Đại lý")
+# - migrations/016_normalize_phone_and_cleanup.sql
 
-# Hoặc chạy complete schema:
-# - migrations/020260320000000_complete_schema.sql
+# Không có tệp "complete schema" gộp — phải chạy lần lượt như trên.
 ```
 
 ---
