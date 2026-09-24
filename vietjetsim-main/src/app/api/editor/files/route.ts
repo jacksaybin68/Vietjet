@@ -3,6 +3,13 @@ import fs from 'fs';
 import path from 'path';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 
+// NOTE: `path.resolve(process.cwd())` here and in `getSafePath()` makes the
+// filesystem access dynamic, so Turbopack reports "Dynamic filesystem access
+// causes tracing of the whole project" at build time (2 warnings). That is
+// inherent to what this route does — an admin-only editor that browses the
+// project tree — not a defect. Suppressing it would need an output tracing
+// override; left as-is deliberately, with access still restricted to
+// admins + `getSafePath()`'s traversal/sensitive-file checks.
 const PROJECT_ROOT = path.resolve(process.cwd());
 
 // Files/dirs the editor must never read or write.

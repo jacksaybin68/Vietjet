@@ -9,14 +9,7 @@ import {
   getAllConfig,
   setConfigValue,
 } from '@/lib/db';
-import {
-  SYSTEM_ROLES,
-  Permission,
-  PERMISSION_LABELS,
-  hasPermission,
-  canManageRole,
-  type SystemRoleName,
-} from '@/lib/rbac';
+import { SYSTEM_ROLES, Permission, PERMISSION_LABELS, type SystemRoleName } from '@/lib/rbac';
 import { parsePaginationParams } from '@/lib/pagination';
 
 // ─── Auth helper (shared across all endpoints) with RBAC support ─────────────

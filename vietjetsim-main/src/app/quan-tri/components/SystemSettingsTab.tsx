@@ -4,14 +4,6 @@ import { Icon } from '@/shared/components/ui';
 import { getSystemSettings, updateSystemSettings } from '@/features/admin';
 import { getApiErrorMessage } from '@/shared/services';
 
-interface SystemSetting {
-  id: string;
-  key: string;
-  value: string;
-  description?: string;
-  updated_at: string;
-}
-
 interface SettingsObject {
   [key: string]: { value: string; description?: string };
 }
