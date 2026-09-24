@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
 import { verifyAdminRequest } from '@/lib/admin-auth';
+import type { AirportRecord } from '@/lib/db';
 
 // ─── PATCH: Update an airport ──────────────────────────────────────────────
 
@@ -77,7 +78,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       RETURNING id, code, name, city, country, created_at
     `;
 
-    const [airport] = await sql(updateQuery, ...values);
+    // `sql` is tagged-template only — the real Neon client throws when it is
+    // called with a plain string ("...can now be called only as a
+    // tagged-template function"). Dynamic SQL with $n placeholders must go
+    // through `sql.query()`.
+    const [airport] = (await sql.query(updateQuery, values)) as AirportRecord[];
 
     return NextResponse.json({
       success: true,
