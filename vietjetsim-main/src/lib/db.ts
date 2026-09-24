@@ -3,6 +3,50 @@ import { sql } from '@/lib/neon';
 export { sql };
 import type { Permission } from '@/lib/rbac';
 
+// ─── Result Helpers ─────────────────────────────────────────────────────────
+
+/**
+ * `sql` is declared `any` in `@/lib/neon`, so every raw result arrives
+ * untyped. These helpers keep the cast in one documented place instead of
+ * scattering `as any` through the file, and name the row shape the caller
+ * actually relies on.
+ */
+function asRows<T>(result: unknown): T[] {
+  return result as T[];
+}
+
+function asFirstRow<T>(result: unknown): T | undefined {
+  return asRows<T>(result)[0];
+}
+
+/**
+ * Flat row from the booking-list query: booking columns plus the joined flight
+ * and the JSON-aggregated passengers/payments (the API shape nests these, the
+ * row does not).
+ */
+type BookingListRow = BookingRecord & {
+  flight_no: string;
+  from_code: string;
+  to_code: string;
+  depart_time: string;
+  arrive_time: string;
+  passengers: PassengerRecord[];
+  payments: PaymentRecord[];
+};
+
+/** A value that can be bound as a SQL parameter. */
+type DbParam = string | number | boolean | null | Date;
+
+/**
+ * Read a `COUNT(*)`-style total.
+ *
+ * Postgres returns bigint counts as strings, hence the `String(...)`. Missing
+ * rows yield 0 rather than throwing on `.total` of `undefined`.
+ */
+function totalOf(result: unknown): number {
+  return parseInt(String(asFirstRow<{ total?: string | number }>(result)?.total ?? 0), 10);
+}
+
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 export interface UserRecord {
@@ -115,7 +159,7 @@ export interface RefundRecord {
   user_id: string;
   reason: string;
   status: 'pending' | 'approved' | 'rejected' | 'completed' | 'processed' | 'archived';
-  bank_info: any;
+  bank_info: string | Record<string, string | number> | null;
   admin_note: string | null;
   created_at: string;
   updated_at: string;
@@ -228,7 +272,7 @@ export async function updateUserProfile(
   // Whitelist of allowed column names (prevent SQL key injection)
   const ALLOWED_COLUMNS = ['full_name', 'phone', 'avatar_url'] as const;
   const setClauses: string[] = [];
-  const values: any[] = [];
+  const values: DbParam[] = [];
 
   for (const col of ALLOWED_COLUMNS) {
     if (updates[col] !== undefined) {
@@ -252,7 +296,7 @@ export async function updateUserProfile(
   `;
 
   const results = await sql.query(query, values);
-  return (results as any)[0] as UserRecord;
+  return asFirstRow<UserRecord>(results)!;
 }
 
 /** Replace a user's password hash. Callers must hash with `hashPassword` first. */
@@ -277,7 +321,7 @@ export async function getAllUsers(
   `;
 
   const countResult = await sql`SELECT COUNT(*) as total FROM user_profiles`;
-  const total = parseInt((countResult as any)[0].total, 10);
+  const total = totalOf(countResult);
 
   return { users: users as UserRecord[], total };
 }
@@ -386,7 +430,7 @@ export async function getAllFlights(params?: {
   const offset = (page - 1) * limit;
 
   let whereClause = 'WHERE 1=1';
-  const values: any[] = [];
+  const values: DbParam[] = [];
 
   if (params?.from_code) {
     values.push(params.from_code);
@@ -418,9 +462,9 @@ export async function getAllFlights(params?: {
 
   const flights = await sql.query(flightsQuery, values);
   const countResult = await sql.query(countQuery, values.slice(0, -2));
-  const total = parseInt((countResult as any)[0].total, 10);
+  const total = totalOf(countResult);
 
-  return { flights: flights as any as FlightRecord[], total };
+  return { flights: asRows<FlightRecord>(flights), total };
 }
 
 export async function createFlight(flight: {
@@ -466,7 +510,7 @@ export async function updateFlight(
     'available',
   ] as const;
   const setClauses: string[] = [];
-  const values: any[] = [];
+  const values: DbParam[] = [];
 
   for (const col of ALLOWED_COLUMNS) {
     if (updates[col] !== undefined) {
@@ -490,7 +534,7 @@ export async function updateFlight(
   `;
 
   const results = await sql.query(query, values);
-  return (results as any)[0] as FlightRecord;
+  return asFirstRow<FlightRecord>(results)!;
 }
 
 export async function deleteFlight(flightId: string): Promise<void> {
@@ -539,7 +583,7 @@ export async function getBookingsByUserId(
     `SELECT COUNT(*) as total FROM bookings WHERE ${whereClauseForCount}`,
     countValues
   );
-  const total = parseInt((countResult as any)[0].total, 10);
+  const total = totalOf(countResult);
 
   const bookings = await sql.query(
     `
@@ -561,12 +605,12 @@ export async function getBookingsByUserId(
 
   return {
     total,
-    bookings: (bookings as any[]).map((b: any) => ({
+    bookings: asRows<BookingListRow>(bookings).map((b) => ({
       id: b.id,
       user_id: b.user_id,
       flight_id: b.flight_id,
       status: b.status,
-      total_price: parseFloat(b.total_price),
+      total_price: parseFloat(String(b.total_price)),
       created_at: b.created_at,
       updated_at: b.updated_at,
       flight: {
@@ -705,7 +749,7 @@ export async function getAllBookings(params?: {
   const offset = (page - 1) * limit;
 
   let whereClause = 'WHERE 1=1';
-  const filterValues: any[] = [];
+  const filterValues: DbParam[] = [];
 
   if (params?.status) {
     filterValues.push(params.status);
@@ -737,9 +781,16 @@ export async function getAllBookings(params?: {
 
   const bookingsResult = await sql.query(bookingsQuery, [...filterValues, limit, offset]);
   const countResult = await sql.query(countQuery, filterValues);
-  const total = parseInt((countResult as any)[0].total, 10);
+  const total = totalOf(countResult);
 
-  return { bookings: bookingsResult as any as any[], total };
+  return {
+    bookings: bookingsResult as (BookingRecord & {
+      user_email: string;
+      user_name: string;
+      flight_no: string;
+    })[],
+    total,
+  };
 }
 
 // ─── Payment Queries ────────────────────────────────────────────────────────
@@ -877,11 +928,11 @@ export async function getPaymentHistory(
     LIMIT ${limit} OFFSET ${offset}
   `) as PaymentRecord[];
 
-  const countResult = (await sql`
+  const countResult = await sql`
     SELECT COUNT(*) as total FROM payments p
     INNER JOIN bookings b ON p.booking_id = b.id
     WHERE b.user_id = ${userId}
-  `) as any[];
+  `;
 
   return {
     payments,
@@ -956,7 +1007,7 @@ export async function getUnreadNotificationCount(userId: string): Promise<number
     SELECT COUNT(*) as count FROM notifications
     WHERE user_id = ${userId} AND is_read = false
   `;
-  return parseInt((result as any)[0].count, 10);
+  return totalOf(result);
 }
 
 // ─── Refund Queries ─────────────────────────────────────────────────────────
@@ -981,7 +1032,7 @@ export async function createRefund(refund: {
   booking_id: string;
   user_id: string;
   reason: string;
-  bank_info?: any;
+  bank_info?: string | Record<string, string | number> | null;
 }): Promise<RefundRecord> {
   const results = await sql`
     INSERT INTO refund_requests (booking_id, user_id, reason, bank_info)
@@ -1004,7 +1055,7 @@ export async function getAllRefunds(params?: {
   const offset = (page - 1) * limit;
 
   let whereClause = 'WHERE 1=1';
-  const filterValues: any[] = [];
+  const filterValues: DbParam[] = [];
 
   if (params?.status) {
     filterValues.push(params.status);
@@ -1025,9 +1076,16 @@ export async function getAllRefunds(params?: {
 
   const refundsResult = await sql.query(refundsQuery, [...filterValues, limit, offset]);
   const countResult = await sql.query(countQuery, filterValues);
-  const total = parseInt((countResult as any)[0].total, 10);
+  const total = totalOf(countResult);
 
-  return { refunds: refundsResult as any as any[], total };
+  return {
+    refunds: refundsResult as (RefundRecord & {
+      user_email: string;
+      user_name: string;
+      booking_total: number;
+    })[],
+    total,
+  };
 }
 
 export async function updateRefundStatus(
@@ -1079,7 +1137,7 @@ export async function getOrCreateConversation(
     LIMIT 1
   `;
 
-  if ((existing as any[]).length > 0) {
+  if (asRows<ChatConversationRecord>(existing).length > 0) {
     return (existing as ChatConversationRecord[])[0];
   }
 
@@ -1106,7 +1164,7 @@ export async function getAllConversations(params?: {
   `;
 
   const countResult = await sql`SELECT COUNT(*) as total FROM chat_conversations`;
-  const total = parseInt((countResult as any)[0].total, 10);
+  const total = totalOf(countResult);
 
   return { conversations: conversations as ChatConversationRecord[], total };
 }
@@ -1272,7 +1330,13 @@ export async function getRevenueStats(): Promise<{
     FROM bookings
   `;
 
-  const r = (result as any)[0];
+  const r = asFirstRow<{
+    total_revenue: string;
+    total_bookings: string;
+    completed_bookings: string;
+    pending_bookings: string;
+    avg_booking_value: string;
+  }>(result)!;
   return {
     totalRevenue: parseFloat(r.total_revenue),
     totalBookings: parseInt(r.total_bookings, 10),
@@ -1285,11 +1349,11 @@ export async function getRevenueStats(): Promise<{
 export async function getBookingStatusDistribution(): Promise<
   Array<{ status: string; count: number }>
 > {
-  return (await sql`
+  return await sql`
     SELECT status, COUNT(*) as count
     FROM bookings
     GROUP BY status
-  `) as any[];
+  `;
 }
 
 export async function getRecentActivity(limit: number = 20): Promise<
@@ -1316,7 +1380,22 @@ export async function getRecentActivity(limit: number = 20): Promise<
     LIMIT ${limit}
   `;
 
-  const combined = [...(bookings as any[]), ...(refunds as any[])]
+  const combined = [
+    ...asRows<{
+      type: 'booking';
+      id: string;
+      created_at: string;
+      status: string;
+      total_price: number;
+    }>(bookings),
+    ...asRows<{
+      type: 'refund';
+      id: string;
+      created_at: string;
+      status: string;
+      reason: string;
+    }>(refunds),
+  ]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, limit);
 
@@ -1544,7 +1623,7 @@ export async function getAuditLogs(params?: {
   const offset = (page - 1) * limit;
 
   let where = 'WHERE 1=1';
-  const values: any[] = [];
+  const values: DbParam[] = [];
 
   if (params?.adminId) {
     where += ` AND admin_id = $${values.length + 1}`;
@@ -1569,14 +1648,14 @@ export async function getAuditLogs(params?: {
     `SELECT COUNT(*) as total FROM audit_logs ${where}`,
     values.slice(0, -2)
   );
-  const total = parseInt((countRes as any)[0].total, 10);
+  const total = totalOf(countRes);
 
   const dataRes = await sql.query(
     `SELECT * FROM audit_logs ${where} ORDER BY created_at DESC LIMIT $${values.length - 1} OFFSET $${values.length}`,
     values
   );
 
-  return { logs: dataRes as any as AuditLogRecord[], total };
+  return { logs: asRows<AuditLogRecord>(dataRes), total };
 }
 
 // ─── Refresh Token Store (for rotation / revocation) ───────────────────────
@@ -1600,7 +1679,9 @@ export async function getStoredRefreshToken(
     FROM refresh_tokens
     WHERE token_hash = ${tokenHash}
   `;
-  return (rows as any)[0] || null;
+  return (
+    asFirstRow<{ id: string; user_id: string; family_id: string; revoked: boolean }>(rows) || null
+  );
 }
 
 /**
@@ -1711,7 +1792,7 @@ export async function getAllDiscountCodes(params?: {
   const offset = (page - 1) * limit;
 
   let whereClause = 'WHERE 1=1';
-  const values: any[] = [];
+  const values: DbParam[] = [];
 
   if (params?.search) {
     values.push(`%${params.search}%`);
@@ -1741,9 +1822,9 @@ export async function getAllDiscountCodes(params?: {
 
   const discounts = await sql.query(discountsQuery, queryParams);
   const countResult = await sql.query(countQuery, values);
-  const total = parseInt((countResult as any)[0].total, 10);
+  const total = totalOf(countResult);
 
-  return { discounts: discounts as any as DiscountCodeRecord[], total };
+  return { discounts: asRows<DiscountCodeRecord>(discounts), total };
 }
 
 export async function getDiscountCodeByCode(code: string): Promise<DiscountCodeRecord | null> {
@@ -1763,7 +1844,7 @@ export async function countUserDiscountUsage(
     FROM bookings
     WHERE user_id = ${userId} AND discount_code_id = ${discountCodeId}
   `;
-  return Number((results as any[])[0]?.count ?? 0);
+  return totalOf(results);
 }
 
 export async function getDiscountCodeById(id: string): Promise<DiscountCodeRecord | null> {
@@ -1811,7 +1892,7 @@ export async function updateDiscountCode(
   ] as const;
 
   const setClauses: string[] = [];
-  const values: any[] = [];
+  const values: DbParam[] = [];
 
   for (const col of ALLOWED_COLUMNS) {
     if (updates[col] !== undefined) {
@@ -1835,7 +1916,7 @@ export async function updateDiscountCode(
   `;
 
   const results = await sql.query(query, values);
-  return (results as any)[0] as DiscountCodeRecord;
+  return asFirstRow<DiscountCodeRecord>(results)!;
 }
 
 export async function deleteDiscountCode(id: string): Promise<void> {
@@ -1863,7 +1944,7 @@ export async function getAllAgencies(params?: {
   const offset = (page - 1) * limit;
 
   let whereClause = 'WHERE 1=1';
-  const values: any[] = [];
+  const values: DbParam[] = [];
 
   if (params?.search) {
     values.push(`%${params.search}%`);
@@ -1890,9 +1971,9 @@ export async function getAllAgencies(params?: {
 
   const agencies = await sql.query(agenciesQuery, queryParams);
   const countResult = await sql.query(countQuery, values);
-  const total = parseInt((countResult as any)[0].total, 10);
+  const total = totalOf(countResult);
 
-  return { agencies: agencies as any as AgencyRecord[], total };
+  return { agencies: asRows<AgencyRecord>(agencies), total };
 }
 
 export async function getAgencyById(id: string): Promise<AgencyRecord | null> {
@@ -1935,7 +2016,7 @@ export async function updateAgency(
   ] as const;
 
   const setClauses: string[] = [];
-  const values: any[] = [];
+  const values: DbParam[] = [];
 
   for (const col of ALLOWED_COLUMNS) {
     if (updates[col] !== undefined) {
@@ -1958,7 +2039,7 @@ export async function updateAgency(
     RETURNING *
   `;
   const results = await sql.query(query, values);
-  return (results as any as AgencyRecord[])[0];
+  return asRows<AgencyRecord>(results)[0];
 }
 
 export async function deleteAgency(id: string): Promise<void> {
@@ -2065,7 +2146,7 @@ export async function getWalletTransactions(
 
   return {
     transactions,
-    total: parseInt((countResult as any)[0].total, 10),
+    total: totalOf(countResult),
   };
 }
 
@@ -2379,7 +2460,7 @@ export async function getLoyaltyTransactions(
 
   return {
     transactions: transactions as LoyaltyTransactionRecord[],
-    total: parseInt((countResult as any)[0].total, 10),
+    total: totalOf(countResult),
   };
 }
 
@@ -2420,6 +2501,18 @@ export async function spendLoyaltyPoints(
 }
 
 // ─── Check-in Queries ──────────────────────────────────────────────────────────
+
+/** Row shape returned by `getCheckInStatusByBookingId`. */
+interface CheckInStatusRow {
+  has_check_in: boolean;
+  check_in_id: string | null;
+  passenger_name: string | null;
+  seat_number: string | null;
+  check_in_number: string | null;
+  boarding_pass_number: string | null;
+  status: string | null;
+  check_in_time: string | null;
+}
 
 export interface CheckInSearchResult {
   booking: {
@@ -2470,11 +2563,11 @@ export async function searchCheckIn(
     LIMIT 1
   `;
 
-  if ((bookingResult as any[]).length === 0) {
+  if (asRows<CheckInSearchResult['booking']>(bookingResult).length === 0) {
     return null;
   }
 
-  const booking = (bookingResult as any[])[0];
+  const booking = asFirstRow<CheckInSearchResult['booking']>(bookingResult)!;
 
   const passengersResult = await sql`
     SELECT p.id, p.booking_id, p.name, p.dob, p.id_number, p.gender, p.created_at
@@ -2525,7 +2618,7 @@ export async function searchCheckIn(
     LIMIT 1
   `;
 
-  const checkIn = (checkInResult as any[])[0] || null;
+  const checkIn = asFirstRow<CheckInSearchResult['checkIn']>(checkInResult) || null;
 
   return {
     booking: {
@@ -2578,11 +2671,11 @@ export async function getCheckInStatusByBookingId(bookingId: string): Promise<{
       (SELECT check_in_time FROM check_in WHERE booking_id = ${bookingId} LIMIT 1) as check_in_time
   `;
 
-  if ((result as any[]).length === 0) {
+  if (asRows<CheckInStatusRow>(result).length === 0) {
     return null;
   }
 
-  const row = (result as any[])[0];
+  const row = asFirstRow<CheckInStatusRow>(result)!;
   return {
     has_check_in: row.has_check_in,
     check_in_id: row.check_in_id,
@@ -2646,5 +2739,14 @@ export async function createCheckIn(data: {
     RETURNING id, check_in_number, booking_id, seat_number, gate, terminal, check_in_time, boarding_pass_number
   `;
 
-  return (result as any[])[0];
+  return asFirstRow<{
+    id: string;
+    check_in_number: string;
+    booking_id: string;
+    seat_number: string;
+    gate: string | null;
+    terminal: string | null;
+    check_in_time: string;
+    boarding_pass_number: string;
+  }>(result)!;
 }
