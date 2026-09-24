@@ -54,7 +54,7 @@ psql "$DATABASE_URL" -f migrations/001_bank_accounts.sql
 # and the demo accounts below, so a fresh database is usable immediately.
 # 015 adds the `agencies` table and links discount codes to the agency an
 # admin issued them to; apply it before using the "Đại lý" admin tab.
-# 016 normalizes stored phone numbers.
+# 016 normalizes stored phone numbers, so apply it after 014/015.
 # 017 adds the missing `bookings.discount_code_id` foreign key.
 ```
 
@@ -155,6 +155,12 @@ in transactions with compensating rollback on failure.
 | `admin@vietjetsim.vn` | `admin123` | Admin |
 
 > ⚠️ These are mock credentials for development. Register a real account through the app and promote it via `npm run db:setup-admin` for production.
+
+> ℹ️ They only exist **after the migrations above have been applied to a real
+> Postgres database**. With `DATABASE_URL` empty the app uses the in-memory mock
+> in `src/lib/neon.ts`, which seeds airports and a demo chat thread but has no
+> `users` rows — every login attempt there fails with 401 regardless of the
+> credentials.
 
 If these accounts already exist in your database with different passwords, migration
 `014_seed_demo_data.sql` will not touch them (`ON CONFLICT (email) DO NOTHING`). Run
