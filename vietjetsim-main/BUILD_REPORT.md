@@ -1,234 +1,88 @@
-# 📦 BUILD COMPLETION REPORT - VietjetSim
+# 📦 BUILD COMPLETION REPORT — VietjetSim
 
-**Date**: 2026-09-02T14:42:00Z  
-**Status**: ✅ **BUILD SUCCESSFUL**  
-**Branch**: agents/continue-conversation  
-**Build Time**: 21.3s
-
----
-
-## 🎯 Build Summary
-
-**Next.js Build Completed Successfully**
-
-```
-✅ Compiled successfully in 21.3s
-✅ Generated 62 static pages
-✅ Collected build traces
-✅ Finalized page optimization
-```
+**Date**: 2026-09-24T16:32:55+07:00
+**Status**: ✅ **BUILD SUCCESSFUL — pipeline4/4 gates xanh**
+**Branch**: main
+**Toolchain**: Next.js16.3.4 (Turbopack) · React19.0.3 · TypeScript5 · Node v26.7.0 · npm11.19.0
 
 ---
 
-## 📊 Build Metrics
+## 🎯 Pipeline (gate → kết quả)
 
-| Metric | Value |
-|--------|-------|
-| **Build Duration** | 21.3 seconds |
-| **Total Routes** | 62 pages + API endpoints |
-| **Static Pages** | 16 routes (prerendered) |
-| **Dynamic API Routes** | 46 endpoints |
-| **Build Size** | 608 MB (.next directory) |
-| **First Load JS (Shared)** | ~102 kB |
-| **Status** | ✅ Production Ready |
+| # | Gate | Kết quả |
+|---|------|---------|
+|1 | `npm run type-check` (`tsc --noEmit`) | ✅ EXIT=0 |
+|2 | `npm run lint` (`eslint .`) | ✅ **0 errors** (410 warnings pre-existing ở `src/test/*`, không chặn) |
+|3 | `npm run test` (vitest) | ✅ **314/314 tests · 28/28 files** · 22.3s |
+|4 | `npm run build` (`next build`) | ✅ **EXIT=0** — log: `/tmp/vjcmp/build-full2.log` |
 
 ---
 
-## ✨ Newly Implemented Endpoints (Verified in Build)
+## 📊 Build metrics (build cuối, sau sửa cấu hình)
 
-All 3 previously missing endpoints are now **included in the production build**:
-
-### 1. GET `/api/thanh-vien` - Membership Status
-- **File**: `src/app/api/thanh-vien/route.ts`
-- **Status**: ✅ Compiled & Available
-- **Features**:
-  - Fetch user loyalty tier
-  - Current available points
-  - Total lifetime points
-  - Program details
-- **Authentication**: JWT required
-- **Response**: JSON with user loyalty data
-
-### 2. GET `/api/thanh-toan/lich-su` - Payment History
-- **File**: `src/app/api/thanh-toan/lich-su/route.ts`
-- **Status**: ✅ Compiled & Available
-- **Features**:
-  - Pagination support (page, limit)
-  - Filter by date range
-  - Return user's past payments
-- **Authentication**: JWT required
-- **Response**: JSON with paginated payment history
-
-### 3. POST `/api/thanh-vien/doi-diem` - Points Redemption
-- **File**: `src/app/api/thanh-vien/doi-diem/route.ts`
-- **Status**: ✅ Compiled & Available
-- **Features**:
-  - Exchange loyalty points
-  - Validate point balance
-  - Create redemption transaction
-- **Authentication**: JWT required
-- **Request Body**: `{ points: number, description: string }`
-- **Response**: JSON with redemption confirmation
+- `✓ Compiled successfully in` **22.1s** (Turbopack cold build sau đổi config; warm build ~1.7s)
+- `Finished TypeScript` **5.5s** — `ignoreBuildErrors: false` (type error = build fail)
+- `✓ Generating static pages (72/72)` trong **1016ms**
+- Route table: **82 routes** — pages `○` prerendered + API `ƒ` dynamic + `ƒ Proxy (Middleware)`
+- `.next/BUILD_ID` = `1dew-6-LVaElBWb3rmbPH`
+- Env: tự nạp `.env.local`
 
 ---
 
-## 📁 Build Output Structure
+## 🔧 Cấu hình sửa trong build này (chặn warning)
 
-```
-.next/                                   (608 MB)
-├── server/                              (Server-side code)
-│   └── app/api/
-│       ├── thanh-vien/                  ✅ COMPILED
-│       ├── thanh-toan/                  ✅ COMPILED
-│       └── [other API routes]           ✅ COMPILED
-├── static/                              (Client-side bundles)
-│   └── chunks/
-│       ├── 1255-eae4096fb21f1304.js    (46 kB)
-│       ├── 4bd1b696-100b9d70ed4e49c1.js (54.2 kB)
-│       └── [other chunks]               (~2.21 kB)
-├── app-build-manifest.json              (28 KB)
-├── routes-manifest.json                 (6.2 KB)
-├── prerender-manifest.json              (12 KB)
-└── [other build metadata]
-```
+1. **`next.config.mjs`**: thêm `turbopack: { root: projectRoot }` — chốt workspace root = thư mục app. Hết cảnh báo `ignored package-lock.json in /Users/user` và `inferred workspace root / multiple lockfiles` (**grep lockfile/root sau build →0 match**).
+2. **Xóa2 lockfile thừa**:
+   - `/Users/user/package-lock.json` (83 bytes, không kèm `package.json` — mồ côi do npm chạy nhầm ở `$HOME`)
+   - `package-lock.json` ở git-root (untracked,`/Users/user/Downloads/vietjet air/`)
+   - Lockfile chính `vietjetsim-main/package-lock.json` (338KB) **giữ nguyên**.
+3. **Còn lại2 warning không chặn** (code-level, cần refactor nếu muốn gọn build trace): `Dynamic filesystem access causes tracing of the whole project` — `src/app/api/editor/files/route.ts:91` (`fs.existsSync` với path động).
 
 ---
 
-## 🔧 Route Details
+## 🚀 Smoke test — server production (`next start -p4028`)
 
-### Newly Implemented Routes (In Build)
-
-```
-├── ƒ /api/thanh-vien                   272 B  103 kB (First Load)
-├── ƒ /api/thanh-toan/lich-su           272 B  103 kB (First Load)
-└── ƒ /api/thanh-vien/doi-diem          272 B  103 kB (First Load)
-```
-
-**Legend**:
-- `ƒ` = Dynamic route (server-rendered on demand)
-- `○` = Static route (prerendered)
-
-### All Available Routes (Total: 62)
-
-- **Admin Dashboard**: `/quan-tri`
-- **Flight Management**: `/chuyen-bay-cua-toi`, `/dat-ve/[id]`
-- **Payment**: `/thanh-toan`
-- **Account**: `/tai-khoan`
-- **Search**: `/tim-ve`, `/tra-cuu`
-- **API Endpoints**: 46 total (including the 3 new implementations)
+| Route | Kết quả |
+|-------|---------|
+| `/` | **307** → `/trang-chu` ✓ (redirect đúng `next.config.mjs`) |
+| `/trang-chu` | **200** · 245KB ✓ |
+| `/tim-ve` (lối vào booking) | **200** · 45KB ✓ |
+| `/dat-ve` |404 = **đúng thiết kế** (repo chỉ có `/dat-ve/[id]`) |
+| Dừng server | ✅ port4028 free |
 
 ---
 
-## 🚀 Deployment Instructions
+## 📁 Deploy
 
-### 1. Verify Build
 ```bash
 cd vietjetsim-main
-ls -lh .next/BUILD_ID  # Should exist
+ls -l .next/BUILD_ID        # 1dew-6-LVaElBWb3rmbPH
+npm run start               # http://localhost:4028
 ```
 
-### 2. Start Production Server
-```bash
-npm run start
-# Server runs on http://localhost:4028
-```
-
-### 3. Test Endpoints
-```bash
-# Get JWT token first (from login endpoint)
-# Then test:
-
-curl -X GET http://localhost:4028/api/thanh-vien \
-  -H "Authorization: Bearer <jwt_token>"
-
-curl -X GET "http://localhost:4028/api/thanh-toan/lich-su?page=1&limit=20" \
-  -H "Authorization: Bearer <jwt_token>"
-
-curl -X POST http://localhost:4028/api/thanh-vien/doi-diem \
-  -H "Authorization: Bearer <jwt_token>" \
-  -H "Content-Type: application/json" \
-  -d '{"points": 5000, "description": "Redeem for discount"}'
-```
-
-### 4. Environment Configuration
-The following must be set at runtime:
-- `DATABASE_URL`: PostgreSQL connection string
-- `JWT_SECRET`: JWT signing secret
-- `JWT_REFRESH_SECRET`: JWT refresh token secret
-- `NEXT_PUBLIC_SITE_URL`: Application URL
-
-See `.env.local` for reference configuration.
+Runtime env cần set: `DATABASE_URL`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, `NEXT_PUBLIC_SITE_URL` (xem `.env.local` làm mẫu).
 
 ---
 
-## ✅ Verification Checklist
+## ⚠️ Biết trước / việc cònTre
 
-- ✅ Build completed without errors
-- ✅ All 62 routes compiled successfully
-- ✅ 3 new endpoints included in build
-- ✅ Database functions compiled
-- ✅ TypeScript types verified
-- ✅ Build artifacts generated in `.next/`
-- ✅ First Load JS bundle optimized (~102 kB)
-- ✅ Static pages prerendered (16/62 pages)
-- ✅ API routes ready for on-demand rendering
+- Lint: **410 warnings** pre-existing (unused vars trong `src/test/*`) — không chặn build; muốn sạch thì chạy `lint:fix` riêng.
+- **Repo root đang track nhầm `node_modules/`** + `package.json` root mồ côi (devDeps vitest/ts-node…) — nên dọn ở thay đổi riêng (change lớn, cần bạn quyết định).
+- Warning `DATABASE_URL` lúc prerender là bình thường (mock DB khi build; runtime dùng Neon PostgreSQL thật).
 
 ---
 
-## 📈 Build Quality Metrics
+## 📈 Chất lượng build
 
 | Aspect | Status |
 |--------|--------|
-| **Compilation** | ✅ No errors |
-| **Type Safety** | ✅ All types valid |
-| **Code Quality** | ✅ Verified earlier |
-| **Bundle Size** | ✅ Optimized |
-| **Performance** | ✅ Traces collected |
-| **Production Readiness** | ✅ Ready to deploy |
-
----
-
-## 🔗 Related Documentation
-
-- **SETUP.md** - Deployment and configuration guide
-- **IMPLEMENTATION_SUMMARY.md** - API implementation details
-- **BUILD_VERIFICATION.md** - Code quality verification report
-- **BUILD_SUMMARY.md** - Quick reference guide
-- **.env.local** - Development environment configuration
-
----
-
-## 📝 Notes
-
-1. **DATABASE_URL Warnings**: During build, warnings about DATABASE_URL being unset are expected. The application will use `.env.local` at runtime.
-
-2. **Mock Database**: Build-time uses mock database for static generation. Runtime uses real Neon PostgreSQL.
-
-3. **Next.js 15 Features**:
-   - App Router (Next.js 15)
-   - Turbo build system
-   - React 19 compatibility
-   - Edge-ready deployment
-
-4. **Bundle Optimization**:
-   - Shared chunks: ~102 kB
-   - Per-route overhead: ~272 B
-   - Total optimized for production
-
----
-
-## 🎯 Next Steps
-
-1. ✅ Build completed
-2. → Set `DATABASE_URL` in production environment
-3. → Run `npm run start` to start production server
-4. → Test endpoints with valid JWT tokens
-5. → Monitor logs for any issues
-
----
+| Compilation | ✅ No errors (Turbopack) |
+| Type safety | ✅ tsc standalone + in-build TS pass |
+| Tests | ✅314/314 |
+| Lint | ✅0 errors |
+| Cấu hình warning | ✅ đã sửa (turbopack.root + dọn lockfile thừa) |
+| Smoke production | ✅307/200/200 đúng |
+| Production readiness | ✅ BUILD_ID generated |
 
 **Build Status**: ✅ **PRODUCTION READY**
-
-The application is ready for deployment. All code has been compiled, verified, and optimized for production use.
-
-Generated: 2026-09-02T14:42:00Z
+Generated: 2026-09-24T16:32:55+07:00
