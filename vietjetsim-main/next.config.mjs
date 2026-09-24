@@ -1,9 +1,21 @@
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { imageHosts } from './image-hosts.config.mjs';
+
+const projectRoot = dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   productionBrowserSourceMaps: false,
   distDir: process.env.DIST_DIR || '.next',
+
+  // Pin Turbopack's workspace root to this app directory. Stray lockfiles one
+  // level up (the git-root package-lock.json) and in $HOME made Next infer the
+  // wrong root and print "ignored/multiple lockfiles" warnings on every build.
+  turbopack: {
+    root: projectRoot,
+  },
 
   // The floating dev overlay (the "N • n Issues" badge that sits on top of the
   // page) is turned off: it lands in every QA screenshot but is never part of
