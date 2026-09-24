@@ -34,6 +34,10 @@ const effectiveJwtSecret = JWT_SECRET || 'dev-secret-key-do-not-use-in-productio
 // proxy runs outside the route context where `next/headers` is available.
 const CSRF_COOKIE_NAME = 'csrf_token';
 
+// `/api/csrf` exists solely to issue that cookie, so the proxy must stay out of
+// its responses — see the bootstrap block at the end of `proxy()`.
+const CSRF_ISSUE_PATH = '/api/csrf';
+
 // ─── HMAC-SHA256 Verification (runtime agnostic) ────────────────────────────
 
 async function verifyJwtSignature(token: string, secret: string): Promise<JWTPayload | null> {
@@ -272,7 +276,12 @@ export async function proxy(request: NextRequest) {
   // Bootstrap the double-submit CSRF cookie for any browser session that does
   // not have one yet, so mutation calls guarded by `validateCsrfOrReject`
   // succeed without requiring an explicit token-fetch round trip.
-  if (!request.cookies.get(CSRF_COOKIE_NAME)?.value) {
+  //
+  // `/api/csrf` is excluded: that route issues this same cookie, so writing one
+  // here too produced two `Set-Cookie: csrf_token=…` headers with different
+  // values in a single response on a token-less request. Which value a browser
+  // keeps then depends on header ordering rather than on a single issuer.
+  if (pathname !== CSRF_ISSUE_PATH && !request.cookies.get(CSRF_COOKIE_NAME)?.value) {
     const bytes = new Uint8Array(32);
     crypto.getRandomValues(bytes);
     const token = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
