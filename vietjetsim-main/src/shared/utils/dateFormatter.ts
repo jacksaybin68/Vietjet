@@ -1,5 +1,5 @@
 // Date & time formatting utilities
-import { format, parse, differenceInMinutes, addDays } from 'date-fns';
+import { format, differenceInMinutes, addDays } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
 export const formatDate = (date: Date | string, fmt: string = 'dd/MM/yyyy'): string => {

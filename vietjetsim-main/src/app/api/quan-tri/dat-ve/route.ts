@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminRequest } from '@/lib/admin-auth';
-import { getAllBookings, getBookingById, updateBookingStatus } from '@/lib/db';
-import { verifyAccessToken } from '@/lib/auth';
+import { getAllBookings, updateBookingStatus } from '@/lib/db';
 import { parsePaginationParams } from '@/lib/pagination';
 
 // ─── GET: Get all bookings (admin) ──────────────────────────────────────────
 
 export async function GET(request: NextRequest) {
   try {
-    const { payload, error, response } = await verifyAdminRequest(request, 'booking:list');
+    const {
+      payload: _payload,
+      error,
+      response,
+    } = await verifyAdminRequest(request, 'booking:list');
     if (error) return response;
 
     const { searchParams } = new URL(request.url);
@@ -40,7 +43,11 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const { payload, error, response } = await verifyAdminRequest(request, 'booking:status_change');
+    const {
+      payload: _payload,
+      error,
+      response,
+    } = await verifyAdminRequest(request, 'booking:status_change');
     if (error) return response;
 
     const body = await request.json();

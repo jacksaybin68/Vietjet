@@ -13,7 +13,6 @@ import {
   SYSTEM_ROLES,
   Permission,
   PERMISSION_LABELS,
-  getRolePermissions,
   hasPermission,
   canManageRole,
   type SystemRoleName,
@@ -70,7 +69,7 @@ export async function GET(request: NextRequest) {
 
     // Default: full RBAC overview
     const roles = await getAllAdminRoles();
-    const allRoles = Object.entries(SYSTEM_ROLES).map(([name, def]) => ({
+    const allRoles = Object.entries(SYSTEM_ROLES).map(([_name, def]) => ({
       name: def.name,
       label: def.label,
       description: def.description,

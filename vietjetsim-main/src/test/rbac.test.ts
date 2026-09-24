@@ -7,7 +7,6 @@ import {
   isAdminRole,
   hasAnyPermission,
   hasAllPermissions,
-  AllRoles,
   getRoleInfo,
 } from '@/lib/rbac';
 import { isAssignableRole, normalizeRole } from '@/lib/roles';

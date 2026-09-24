@@ -274,7 +274,7 @@ const ADMIN_PERMISSIONS = new Set<Permission>(PERMISSION_CATEGORIES.flatMap((c) 
  */
 export function hasPermission(
   userRole: AllRoles,
-  permission: Permission,
+  _permission: Permission,
   _customPermissions?: Permission[] | null
 ): boolean {
   return isAdminRole(userRole);

@@ -366,7 +366,7 @@ interface WalletTabProps {
   user: { id: string; email: string; fullName: string };
 }
 
-export default function WalletTab({ user }: WalletTabProps) {
+export default function WalletTab({ user: _user }: WalletTabProps) {
   const toast = useToast();
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [methods, setMethods] = useState<PaymentMethod[]>([]);

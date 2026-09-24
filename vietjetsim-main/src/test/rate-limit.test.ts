@@ -2,7 +2,7 @@
  * Unit Tests for Rate Limiting Module
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
 import {
   rateLimit,
   getClientIP,

@@ -4,7 +4,7 @@
  * Tests CSRF token generation, validation, and double-submit pattern.
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 import { generateCsrfToken, generateMaskedCsrfToken } from '@/lib/csrf';
 

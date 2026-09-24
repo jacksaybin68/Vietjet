@@ -68,7 +68,7 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
   const [modalAction, setModalAction] = useState<'approve' | 'reject' | null>(null);
   const [adminNote, setAdminNote] = useState('');
   const [processingId, setProcessingId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, setError] = useState<string | null>(null);
 
   const mapRow = (row: any): RefundRequest => ({
     id: row.id,
@@ -211,7 +211,6 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
 
   const pendingCount = requests.filter((r) => r.status === 'pending').length;
   const approvedCount = requests.filter((r) => r.status === 'approved').length;
-  const rejectedCount = requests.filter((r) => r.status === 'rejected').length;
   const totalRefundAmount = requests
     .filter((r) => r.status === 'approved')
     .reduce((s, r) => s + r.amount, 0);

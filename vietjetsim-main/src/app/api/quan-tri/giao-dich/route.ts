@@ -8,9 +8,9 @@ export async function GET(request: NextRequest) {
     if (error) return response;
 
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    const _userId = searchParams.get('userId');
     const status = searchParams.get('status');
-    const method = searchParams.get('method');
+    const _method = searchParams.get('method');
 
     // Use multiple queries or a more structured approach since tagged templates don't easily support dynamic building without helpers
     // For simplicity with this library, we'll branch based on filters

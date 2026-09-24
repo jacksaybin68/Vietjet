@@ -1,8 +1,8 @@
 'use client';
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
-import { useAuth, isAdminRole } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { deleteUser, listUsers, updateUser } from '@/features/admin';
 import { getApiErrorMessage } from '@/shared/services';
 
@@ -172,7 +172,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
         }));
         setUsers(mapped.length > 0 ? mapped : INITIAL_USERS);
       }
-    } catch (err) {
+    } catch (_err) {
       setHasError(true);
     } finally {
       setIsLoading(false);
@@ -300,15 +300,6 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
       setDeletingId(null);
     }
   };
-
-  const handleSaveNotes = (id: string, notes: string) => {
-    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, notes } : u)));
-    if (selectedUser?.id === id) {
-      setSelectedUser((prev) => (prev ? { ...prev, notes } : null));
-    }
-    onToast?.success('Thành công', 'Đã lưu ghi chú vận hành.');
-  };
-
   const handleSwitchRole = async (targetUser: User) => {
     if (!currentUser || switchingRoleId === targetUser.id) return;
     if (targetUser.id === currentUser.id) {
@@ -633,7 +624,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
                   </td>
                 </tr>
               ) : (
-                paginated.map((user, i) => (
+                paginated.map((user, _i) => (
                   <tr
                     key={user.id}
                     onClick={() => setSelectedUser(user)}

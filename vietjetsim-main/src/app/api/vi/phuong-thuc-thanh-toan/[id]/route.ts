@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthRequest } from '@/lib/auth';
-import {
-  getSavedPaymentMethods,
-  deleteSavedPaymentMethod,
-  setDefaultPaymentMethod,
-} from '@/lib/db';
+import { deleteSavedPaymentMethod, setDefaultPaymentMethod } from '@/lib/db';
 
 export async function DELETE(
   request: NextRequest,

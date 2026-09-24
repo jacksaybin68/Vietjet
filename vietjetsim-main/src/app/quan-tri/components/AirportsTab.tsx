@@ -246,7 +246,7 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
                   </td>
                 </tr>
               ) : (
-                airports.map((airport, i) => (
+                airports.map((airport, _i) => (
                   <tr
                     key={airport.id}
                     onClick={() => setViewingAirport(airport)}

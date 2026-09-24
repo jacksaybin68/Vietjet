@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { AppImage } from '@/shared/components/ui';
-import { FaStar, FaPlane } from 'react-icons/fa';
+import { FaPlane } from 'react-icons/fa';
 
 const DESTINATIONS = [
   {

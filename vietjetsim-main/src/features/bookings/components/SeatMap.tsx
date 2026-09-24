@@ -1,7 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-
 export interface Seat {
   id: string;
   number: string;

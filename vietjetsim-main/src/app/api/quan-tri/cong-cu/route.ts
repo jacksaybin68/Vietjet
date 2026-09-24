@@ -8,7 +8,6 @@ import {
   getAllUsers,
   getAllRefunds,
   updateBookingStatus,
-  updateUserRole,
   deleteFlight,
   getSstkLogs,
   insertSstkLog,
@@ -41,7 +40,7 @@ const TOOLS: Record<
     label: 'Dọn dẹp đặt vé hết hạn',
     description: 'Huỷ tự động các đặt vé ở trạng thái pending quá 30 phút',
     category: 'booking',
-    execute: async (_params, adminId) => {
+    execute: async (_params, _adminId) => {
       const bookings = await getAllBookings({ page: 1, limit: 1000 });
       const now = new Date();
       let count = 0;
@@ -68,10 +67,10 @@ const TOOLS: Record<
       const flights = flightsResult.flights || [];
       const basePrice = Number(params.basePrice) || 850000;
       let updated = 0;
-      for (const f of flights) {
+      for (const _f of flights) {
         // simulate price sync based on route popularity
         const multiplier = 0.8 + Math.random() * 0.4; // 0.8 - 1.2
-        const newPrice = Math.round(basePrice * multiplier);
+        const _newPrice = Math.round(basePrice * multiplier);
         // In real implementation: await updateFlight(f.id, { price: newPrice });
         updated++;
       }
