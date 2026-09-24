@@ -214,7 +214,6 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
               ) : (
                 discounts.map((discount) => {
                   const isExpired = new Date(discount.end_date) < new Date();
-                  const isFuture = new Date(discount.start_date) > new Date();
                   return (
                     <tr
                       key={discount.id}

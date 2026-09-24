@@ -11,8 +11,6 @@ export async function GET(request: NextRequest) {
     } = await verifyAdminRequest(request, 'analytics:view');
     if (error) return response;
 
-    const { searchParams } = new URL(request.url);
-    const startDate = searchParams.get('startDate') || undefined;
     const [revenueStats, statusDistribution, recentActivity] = await Promise.all([
       getRevenueStats(),
       getBookingStatusDistribution(),

@@ -15,7 +15,6 @@ import {
   PERMISSION_CATEGORIES,
   PERMISSION_LABELS,
   SYSTEM_ROLES,
-  hasPermission,
   type Permission,
   type SystemRoleName,
 } from '@/lib/rbac';
