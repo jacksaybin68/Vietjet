@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { Icon, Mascot } from '@/shared/components/ui';
+import { ApiRequestError } from '@/shared/services/apiClient';
 
 interface Message {
   id: string;
@@ -63,6 +64,41 @@ export default function UserChat() {
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const presencePollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastMessageCountRef = useRef(0);
+  /** Set once a poll returns 401 so the rest of the cycle skips silently. */
+  const authErrorRef = useRef(false);
+
+  /** Cancel both poll timers (unmount, logout, or auth failure). */
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+    if (presencePollingRef.current) {
+      clearInterval(presencePollingRef.current);
+      presencePollingRef.current = null;
+    }
+  }, []);
+
+  /**
+   * True when the failure is a lost session (401/403 or "Authentication
+   * required"). The caller then stops polling instead of logging every 3s.
+   */
+  const handleAuthError = useCallback(
+    (err: unknown) => {
+      const status = err instanceof ApiRequestError ? err.status : undefined;
+      const message = err instanceof Error ? err.message : '';
+      const isAuthFailure =
+        status === 401 || status === 403 || /authentication required|unauthorized/i.test(message);
+      if (!isAuthFailure) return false;
+      if (!authErrorRef.current) {
+        console.warn('Chat polling stopped: session no longer valid');
+        authErrorRef.current = true;
+      }
+      stopPolling();
+      return true;
+    },
+    [stopPolling]
+  );
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -130,7 +166,7 @@ export default function UserChat() {
 
   // Poll for new messages
   const pollMessages = useCallback(async () => {
-    if (!conversation?.id) return;
+    if (!conversation?.id || !user || authErrorRef.current) return;
     try {
       const data = await getConversationMessages(conversation.id);
       const newMessages = data.messages || [];
@@ -145,50 +181,61 @@ export default function UserChat() {
           setUnreadCount((c) => c + newAdminMsgs.length);
         }
       }
+      authErrorRef.current = false;
     } catch (err) {
+      // Session gone: stop the loop instead of logging the same 401 every 3s.
+      if (handleAuthError(err)) return;
       console.error('Poll messages error:', err);
     }
-  }, [conversation?.id, isOpen]);
+  }, [conversation?.id, isOpen, user, handleAuthError]);
 
   // Poll for presence
   const pollPresence = useCallback(async () => {
-    if (!conversation?.id) return;
+    if (!conversation?.id || !user || authErrorRef.current) return;
     try {
       const data = await getChatPresence(conversation.id);
       if (data.presence) {
         setAdminOnline(data.presence.is_online ?? false);
         setAdminTyping(data.presence.is_typing ?? false);
       }
+      authErrorRef.current = false;
     } catch (err) {
+      if (handleAuthError(err)) return;
       console.error('Poll presence error:', err);
     }
-  }, [conversation?.id]);
+  }, [conversation?.id, user, handleAuthError]);
 
   // Load conversation on mount
   useEffect(() => {
     if (user) {
       loadConversation();
     }
-    return () => {
-      if (pollingRef.current) clearInterval(pollingRef.current);
-      if (presencePollingRef.current) clearInterval(presencePollingRef.current);
-    };
-  }, [user, loadConversation]);
+    return () => stopPolling();
+  }, [user, loadConversation, stopPolling]);
 
-  // Start polling when conversation is loaded
+  // Start polling when conversation is loaded — and only while signed in.
   useEffect(() => {
-    if (conversation?.id) {
+    if (conversation?.id && user) {
+      authErrorRef.current = false;
       pollingRef.current = setInterval(pollMessages, 3000);
       presencePollingRef.current = setInterval(pollPresence, 3000);
       // Initial poll
       pollMessages();
       pollPresence();
     }
-    return () => {
-      if (pollingRef.current) clearInterval(pollingRef.current);
-      if (presencePollingRef.current) clearInterval(presencePollingRef.current);
-    };
-  }, [conversation?.id, pollMessages, pollPresence]);
+    return () => stopPolling();
+  }, [conversation?.id, user, pollMessages, pollPresence, stopPolling]);
+
+  // Session lost mid-session: drop the conversation so polling stays off until
+  // the user signs in again (the effect above only re-arms on a new `user`).
+  useEffect(() => {
+    if (!user && conversation) {
+      setConversation(null);
+      setMessages([]);
+      setUnreadCount(0);
+      lastMessageCountRef.current = 0;
+    }
+  }, [user, conversation]);
 
   // Handle chat open/close
   useEffect(() => {
@@ -285,9 +332,9 @@ export default function UserChat() {
 
   return (
     <>
-      {/* Launcher — the Vietjet mascot with its "Xin chào!" bubble. While the panel
-          is open on mobile it steps aside, because the panel header owns the close
-          button there. */}
+      {/* Launcher — local VietjetSim support logo with its "Xin chào!" bubble.
+          While the panel is open on mobile it steps aside, because the panel
+          header owns the close button there. */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -302,7 +349,18 @@ export default function UserChat() {
             <Icon name="XMarkIcon" size={22} />
           </span>
         ) : (
-          <Mascot greeting="Xin chào!" className="h-24 sm:h-32" />
+          <span className="relative flex h-16 w-16 items-center justify-center sm:h-20 sm:w-20">
+            <img
+              src="/assets/images/app_logo.svg"
+              alt="Logo hỗ trợ VietjetSim"
+              width={80}
+              height={80}
+              className="h-full w-full rounded-full object-cover shadow-vj-btn-hover ring-2 ring-white/90"
+            />
+            <span className="absolute -top-2 right-0 whitespace-nowrap rounded-2xl rounded-br-sm bg-white px-3 py-1.5 text-[13px] font-bold text-[var(--vj-navy)] shadow-[0_6px_18px_rgba(0,0,0,0.16)] ring-1 ring-black/5">
+              Xin chào!
+            </span>
+          </span>
         )}
         {!isOpen && unreadCount > 0 && (
           <span className="absolute right-1 top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-vjred px-1 text-xs font-black text-white shadow-vj-btn">

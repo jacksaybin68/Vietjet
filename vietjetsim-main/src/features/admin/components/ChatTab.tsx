@@ -17,9 +17,14 @@ interface Conversation {
   user_email: string;
   user_name: string;
   status?: 'active' | 'closed';
-  last_message: string;
-  last_message_at: string;
-  updated_at?: string;
+  last_message: string | null;
+  /**
+   * The `chat_conversations` table has no `last_message_at` column (see
+   * migrations/010_chat.sql), so the API only ever returns `updated_at` /
+   * `created_at`. Treat the newer fields as optional and nullable.
+   */
+  last_message_at?: string | null;
+  updated_at?: string | null;
   unread_by_admin: number;
   unread_by_user: number;
   created_at: string;
@@ -175,31 +180,61 @@ export default function ChatTab() {
     }
   };
 
-  const formatTime = (dateStr: string) => {
-    const d = new Date(dateStr);
-    const now = new Date();
-    const diffMs = now.getTime() - d.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    if (diffMins < 1) return 'Vừa xong';
-    if (diffMins < 60) return `${diffMins} phút trước`;
-    if (diffMins < 1440)
+  /** Parse a timestamp that may be null/missing/invalid; null when unusable. */
+  const toValidDate = useCallback((value?: string | null): Date | null => {
+    if (!value) return null;
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }, []);
+
+  /** Conversation activity timestamp: last message, else updated_at, else created_at. */
+  const conversationDate = useCallback(
+    (conv: Conversation): Date | null =>
+      toValidDate(conv.last_message_at) ??
+      toValidDate(conv.updated_at) ??
+      toValidDate(conv.created_at),
+    [toValidDate]
+  );
+
+  const formatTime = useCallback(
+    (dateStr?: string | null) => {
+      const d = toValidDate(dateStr);
+      if (!d) return '';
+      const now = new Date();
+      const diffMs = now.getTime() - d.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      if (diffMins < 1) return 'Vừa xong';
+      if (diffMins < 60) return `${diffMins} phút trước`;
+      if (diffMins < 1440)
+        return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+      return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+    },
+    [toValidDate]
+  );
+
+  const formatMsgTime = useCallback(
+    (dateStr?: string | null) => {
+      const d = toValidDate(dateStr);
+      if (!d) return '';
       return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-    return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
-  };
+    },
+    [toValidDate]
+  );
 
-  const formatMsgTime = (dateStr: string) => {
-    return new Date(dateStr).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-  };
-
-  const formatFullDateTime = (dateStr: string) => {
-    return new Date(dateStr).toLocaleString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+  const formatFullDateTime = useCallback(
+    (dateStr?: string | null) => {
+      const d = toValidDate(dateStr);
+      if (!d) return '';
+      return d.toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    },
+    [toValidDate]
+  );
 
   const totalUnread = conversations.reduce((sum, c) => sum + (c.unread_by_admin || 0), 0);
 
@@ -218,8 +253,8 @@ export default function ChatTab() {
       return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
-      const aTime = new Date(a.last_message_at || a.created_at).getTime();
-      const bTime = new Date(b.last_message_at || b.created_at).getTime();
+      const aTime = conversationDate(a)?.getTime() ?? 0;
+      const bTime = conversationDate(b)?.getTime() ?? 0;
       return sortOrder === 'latest' ? bTime - aTime : aTime - bTime;
     });
 
@@ -256,7 +291,7 @@ export default function ChatTab() {
     } finally {
       setExporting(false);
     }
-  }, [selectedConv, messages]);
+  }, [selectedConv, messages, formatFullDateTime]);
 
   // Export PDF (print-based)
   const exportPDF = useCallback(() => {
@@ -319,7 +354,7 @@ export default function ChatTab() {
     } finally {
       setExporting(false);
     }
-  }, [selectedConv, messages]);
+  }, [selectedConv, messages, formatFullDateTime]);
 
   // ─── Polling (replaces dead Supabase realtime subscriptions) ──────────
   useEffect(() => {
@@ -490,7 +525,7 @@ export default function ChatTab() {
                           {conv.user_name || conv.user_email?.split('@')[0] || 'Khách hàng'}
                         </span>
                         <span className="text-xs text-gray-400 flex-shrink-0">
-                          {formatTime(conv.last_message_at)}
+                          {formatTime(conversationDate(conv)?.toISOString() ?? null)}
                         </span>
                       </div>
                       <div className="flex items-center justify-between gap-1 mt-0.5">

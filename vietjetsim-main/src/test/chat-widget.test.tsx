@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
@@ -50,9 +50,12 @@ describe('UserChat — Vietjet-style launcher', () => {
     services.markConversationRead.mockResolvedValue({ success: true });
   });
 
-  it('shows the mascot with its "Xin chào!" bubble to visitors', () => {
+  it('uses the local VietjetSim logo for the chat launcher', () => {
     render(<UserChat />);
-    expect(screen.getByRole('button', { name: 'Mở chat hỗ trợ' })).toBeInTheDocument();
+    const launcher = screen.getByRole('button', { name: 'Mở chat hỗ trợ' });
+    const logo = within(launcher).getByRole('img', { name: 'Logo hỗ trợ VietjetSim' });
+
+    expect(logo).toHaveAttribute('src', '/assets/images/app_logo.svg');
     expect(screen.getByText('Xin chào!')).toBeInTheDocument();
   });
 
