@@ -207,14 +207,21 @@
 ### Cần Chuẩn Bị:
 1. ✅ Cài dependencies: `npm install`
 2. ✅ Build project: `npm run build`
-3. ✅ Chạy test: `npm run test` (nếu có)
+3. ✅ Chạy test: `npm test` (36 file / 367 test) và `npm run test:smoke`
 4. ✅ Deploy: `npm run start`
 
 ### Environment Variables:
 - ✅ `JWT_SECRET` - Đã cấu hình
 - ✅ `JWT_REFRESH_SECRET` - Đã cấu hình
 - ✅ `NEXT_PUBLIC_SITE_URL` - Đã cấu hình
-- ⚠️ `DATABASE_URL` - Cần cấu hình với production database
+- ✅ `DATABASE_URL` - Đã cấu hình (Neon PostgreSQL)
+- ⚠️ Migration phải được áp dụng trước khi phục vụ traffic:
+  `for f in migrations/*.sql; do psql "$DATABASE_URL" -f "$f"; done`
+  Riêng `019_role_permissions.sql` là bắt buộc — `verifyAdminRequest()` fail-closed,
+  thiếu bảng này thì mọi route admin có guard sẽ trả 500.
+
+> Cập nhật 25/09/2026: `DATABASE_URL` đã được cấu hình trong `.env.local`; mục này
+> trước đây ghi "cần cấu hình" đã không còn đúng.
 
 ---
 
