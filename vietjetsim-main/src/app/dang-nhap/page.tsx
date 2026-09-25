@@ -13,6 +13,88 @@ type AuthTab = 'login' | 'register';
 
 const DEMO_OTP = '123456';
 
+const CURRENT_YEAR = new Date().getFullYear();
+
+/** Năm sinh hợp lệ: 1900 → năm nay (mảng giảm dần để năm gần nhất ở trên cùng). */
+const BIRTH_YEARS = Array.from({ length: CURRENT_YEAR - 1900 + 1 }, (_, i) => CURRENT_YEAR - i);
+const MONTH_NUMBERS = Array.from({ length: 12 }, (_, i) => i + 1);
+
+/** Số ngày của tháng (thang 1-12), có xét năm nhuận. */
+function daysInMonth(month: number, year: number): number {
+  return new Date(year, month, 0).getDate();
+}
+
+/**
+ * Gom ba ô Ngày / Tháng / Năm thành chuỗi ISO `YYYY-MM-DD` khớp cột
+ * `user_profiles.dob` (DATE) mà `POST /api/xac-thuc/dang-ky` đã nhận sẵn.
+ * Trả về thông báo tiếng Việt để hiển thị tại chỗ thay vì lỗi trình duyệt.
+ */
+function resolveBirthDate(
+  day: string,
+  month: string,
+  year: string
+): { iso: string; error: string } {
+  if (!day || !month || !year) {
+    return { iso: '', error: 'Vui lòng nhập Ngày / Tháng / Năm sinh.' };
+  }
+
+  const d = Number(day);
+  const m = Number(month);
+  const y = Number(year);
+  const invalid = { iso: '', error: 'Ngày sinh không hợp lệ.' };
+
+  if (!Number.isInteger(d) || !Number.isInteger(m) || !Number.isInteger(y)) return invalid;
+  if (m < 1 || m > 12 || y < 1900 || y > CURRENT_YEAR) return invalid;
+  if (d < 1 || d > daysInMonth(m, y)) return invalid;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (new Date(y, m - 1, d) > today) {
+    return { iso: '', error: 'Ngày sinh không được ở trong tương lai.' };
+  }
+
+  return { iso: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`, error: '' };
+}
+
+interface BirthSelectProps {
+  /** Nhãn tiếng Việt cho screen reader, ví dụ "Ngày sinh: ngày". */
+  label: string;
+  placeholder: string;
+  value: string;
+  options: Array<{ value: string; label: string }>;
+  onChange: (value: string) => void;
+}
+
+/**
+ * Một ô chọn trong khung Ngày sinh. Select không dùng được kiểu floating label
+ * của input nên nhãn đặt tĩnh ở trên khung chung; mũi tên được vẽ lại vì
+ * `appearance-none` đã bỏ mũi tên mặc định của trình duyệt.
+ */
+function BirthSelect({ label, placeholder, value, options, onChange }: BirthSelectProps) {
+  return (
+    <div className="relative">
+      <select
+        aria-label={label}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className={`w-full appearance-none bg-transparent px-3 py-3.5 pr-8 text-[15px] font-bold text-black outline-none ${value ? '' : 'placeholder:font-bold'}`}
+      >
+        <option value="">{placeholder}</option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <Icon
+        name="ChevronDownIcon"
+        size={16}
+        className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[#939598]"
+      />
+    </div>
+  );
+}
+
 /**
  * AuthContext rejects with the parsed API payload attached to the Error, so a
  * caught error can carry `requires2FA` alongside `message`.
@@ -48,6 +130,10 @@ function SignUpLoginPageInner() {
   const [password, setPassword] = useState('');
   const [surname, setSurname] = useState('');
   const [givenName, setGivenName] = useState('');
+  const [birthDay, setBirthDay] = useState('');
+  const [birthMonth, setBirthMonth] = useState('');
+  const [birthYear, setBirthYear] = useState('');
+  const [birthError, setBirthError] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [phone, setPhone] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -78,6 +164,7 @@ function SignUpLoginPageInner() {
     resetMessages();
     setOtpRequested(false);
     setOtpInput('');
+    setBirthError('');
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -117,6 +204,8 @@ function SignUpLoginPageInner() {
     e.preventDefault();
     setError('');
 
+    const birth = resolveBirthDate(birthDay, birthMonth, birthYear);
+
     if (!otpRequested) {
       setLoading(true);
 
@@ -126,6 +215,13 @@ function SignUpLoginPageInner() {
             ? 'Vui lòng đồng ý với Điều khoản dịch vụ và Chính sách bảo mật.'
             : 'Vui lòng điền họ tên, mật khẩu và (Email hoặc Số điện thoại).'
         );
+        setLoading(false);
+        return;
+      }
+
+      if (birth.error) {
+        setBirthError(birth.error);
+        setError(birth.error);
         setLoading(false);
         return;
       }
@@ -150,6 +246,7 @@ function SignUpLoginPageInner() {
       await signUp(email, password, {
         fullName: (surname.trim() + ' ' + givenName.trim()).trim(),
         phone,
+        dob: birth.iso || undefined,
       });
       setSuccess('Đăng ký thành công! Đang chuyển hướng...');
       setTimeout(() => router.push(redirectTo || '/tai-khoan'), 1200);
@@ -165,6 +262,41 @@ function SignUpLoginPageInner() {
     isEmailValid || phone.replace(/\D/g, '').length >= 9 || email.replace(/\D/g, '').length >= 9;
   const isPasswordValid = password.length >= 6;
   const isNameValid = surname.trim().length >= 1 && givenName.trim().length >= 1;
+
+  // Số ngày của tháng phụ thuộc tháng và năm (tháng 2 có 28–29 ngày), nên danh sách
+  // ngày được giới hạn lại và ngày đang chọn bị bỏ nếu vượt số ngày mới.
+  const maxBirthDay = birthMonth
+    ? daysInMonth(Number(birthMonth), birthYear ? Number(birthYear) : CURRENT_YEAR)
+    : 31;
+  // Ngày và Tháng đều dùng value là số không pad; phần hiển thị mới pad 2 chữ số
+  // (01, 02…) để đọc như dd/mm/yyyy và khớp với giá trị gửi lên API.
+  const birthDayOptions = Array.from({ length: maxBirthDay }, (_, i) => i + 1);
+
+  const birthSelectOptions = {
+    day: birthDayOptions.map((day) => ({
+      value: String(day),
+      label: String(day).padStart(2, '0'),
+    })),
+    month: MONTH_NUMBERS.map((month) => ({
+      value: String(month),
+      label: String(month).padStart(2, '0'),
+    })),
+    year: BIRTH_YEARS.map((year) => ({ value: String(year), label: String(year) })),
+  };
+
+  const handleBirthMonthChange = (value: string) => {
+    setBirthMonth(value);
+    setBirthError('');
+    const limit = daysInMonth(Number(value) || 1, birthYear ? Number(birthYear) : CURRENT_YEAR);
+    if (Number(birthDay) > limit) setBirthDay('');
+  };
+
+  const handleBirthYearChange = (value: string) => {
+    setBirthYear(value);
+    setBirthError('');
+    const limit = daysInMonth(birthMonth ? Number(birthMonth) : 1, Number(value) || CURRENT_YEAR);
+    if (Number(birthDay) > limit) setBirthDay('');
+  };
 
   const inputClass = (valid: boolean) =>
     `form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3.5 pl-11 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${valid ? 'form-input-valid' : ''}`;
@@ -343,6 +475,44 @@ function SignUpLoginPageInner() {
                   />
                   <label className="form-label-float">Tên đệm/tên</label>
                 </div>
+              </div>
+
+              {/* Ngày sinh: ba select Ngày / Tháng / Năm trong một khung, dùng đúng
+                  viền / bo góc / nền của các ô nhập còn lại. Nhãn đặt tĩnh ở trên
+                  vì select không dùng được kiểu floating label của input. */}
+              <div>
+                <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6c6f76]">
+                  Ngày sinh <span className="text-[var(--primary)]">*</span>
+                </span>
+                <div className="grid grid-cols-3 divide-x divide-[#d8dade] overflow-hidden rounded-md border border-[#d8dade] bg-white transition-all focus-within:border-[var(--primary)] focus-within:ring-2 focus-within:ring-[rgb(var(--primary-rgb))]/10">
+                  <BirthSelect
+                    label="Ngày sinh: ngày"
+                    placeholder="Ngày"
+                    value={birthDay}
+                    options={birthSelectOptions.day}
+                    onChange={(value) => {
+                      setBirthDay(value);
+                      setBirthError('');
+                    }}
+                  />
+                  <BirthSelect
+                    label="Ngày sinh: tháng"
+                    placeholder="Tháng"
+                    value={birthMonth}
+                    options={birthSelectOptions.month}
+                    onChange={handleBirthMonthChange}
+                  />
+                  <BirthSelect
+                    label="Ngày sinh: năm"
+                    placeholder="Năm"
+                    value={birthYear}
+                    options={birthSelectOptions.year}
+                    onChange={handleBirthYearChange}
+                  />
+                </div>
+                {birthError && (
+                  <p className="mt-1.5 text-xs font-medium text-[#dc2626]">{birthError}</p>
+                )}
               </div>
 
               {/* Cùng kiểu floating label với các ô còn lại; mã quốc gia (+84) nằm
