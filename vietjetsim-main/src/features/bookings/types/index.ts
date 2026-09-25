@@ -1,20 +1,23 @@
 import type { BookingRecord, BookingDetail } from '@/lib/db';
+import type { BookingConsents, Passenger } from './booking-flow';
 
 export type { BookingRecord, BookingDetail };
-export type { Flight, Passenger, BookingState, SearchParams } from './booking-flow';
+export type {
+  Flight,
+  Passenger,
+  BookingConsents,
+  BookingState,
+  SearchParams,
+} from './booking-flow';
 
-export interface PassengerInput {
-  name: string;
-  dob: string;
-  idNumber: string;
-  gender: string;
-}
+export type PassengerInput = Passenger;
 
 export interface CreateBookingInput {
   flight_id: string;
   total_price: number;
   passengers: PassengerInput[];
   seats?: string[];
+  consents: BookingConsents;
 }
 
 export interface BookingPagination {

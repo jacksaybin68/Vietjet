@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     const userId = user.userId;
 
     const body = await request.json();
-    const { flight_id, total_price, passengers, seats } = body;
+    const { flight_id, total_price, passengers, seats, consents } = body;
     const parsedTotalPrice =
       typeof total_price === 'number' ? total_price : Number.parseFloat(String(total_price));
 
@@ -62,6 +62,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!consents || typeof consents !== 'object' || consents.policyAccepted !== true) {
+      return NextResponse.json({ error: 'Policy acceptance is required' }, { status: 400 });
+    }
+
+    const invalidPassenger = passengers.some(
+      (passenger: Record<string, unknown>) =>
+        !passenger.name ||
+        !passenger.dob ||
+        !passenger.idNumber ||
+        !passenger.phone ||
+        !passenger.email
+    );
+    if (invalidPassenger) {
+      return NextResponse.json(
+        { error: 'Each passenger requires identity and contact details' },
+        { status: 400 }
+      );
+    }
+
+    const normalizedPassengers = passengers.map((passenger: Record<string, string>) => ({
+      name: passenger.name,
+      dob: passenger.dob,
+      id_number: passenger.idNumber,
+      gender: passenger.gender || 'male',
+      country_code: passenger.countryCode || 'VN',
+      phone: passenger.phone,
+      email: passenger.email,
+      residence: passenger.residence || null,
+      skyjoy_member_id: passenger.skyJoyMemberId || null,
+    }));
+
     // Validate seats count matches passenger count
     if (seats && Array.isArray(seats) && seats.length !== passengers.length) {
       return NextResponse.json(
@@ -72,8 +103,9 @@ export async function POST(request: NextRequest) {
 
     const booking = await createBooking(
       { user_id: userId as string, flight_id, total_price: parsedTotalPrice },
-      passengers,
-      seats || []
+      normalizedPassengers,
+      seats || [],
+      consents
     );
 
     return NextResponse.json({ booking }, { status: 201 });

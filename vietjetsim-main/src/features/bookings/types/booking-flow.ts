@@ -7,6 +7,18 @@ export interface Passenger {
   dob: string;
   idNumber: string;
   gender: string;
+  countryCode: string;
+  phone: string;
+  email: string;
+  residence: string;
+  skyJoyMemberId: string;
+}
+
+export interface BookingConsents {
+  marketing: boolean;
+  survey: boolean;
+  retainForFutureBooking: boolean;
+  policyAccepted: boolean;
 }
 
 import type { AncillaryId } from '../pricing';

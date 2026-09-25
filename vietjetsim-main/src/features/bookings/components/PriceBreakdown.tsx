@@ -1,6 +1,6 @@
 'use client';
 
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatNumber } from '@/lib/utils';
 
 interface PriceBreakdownProps {
   baseFare: number;
@@ -103,7 +103,7 @@ export function PriceBreakdown({
               </svg>
               Điểm tích lũy
             </span>
-            <span className="text-blue-600font-medium">+{loyaltyPoints.toLocaleString()} điểm</span>
+            <span className="text-blue-600font-medium">+{formatNumber(loyaltyPoints)} điểm</span>
           </div>
         )}
 
