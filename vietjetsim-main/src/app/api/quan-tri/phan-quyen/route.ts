@@ -30,7 +30,7 @@ async function authenticate(request: NextRequest, permission?: Permission) {
 // ═════════════════════════════════════════════════════════════════════
 
 export async function GET(request: NextRequest) {
-  const auth = await authenticate(request);
+  const auth = await authenticate(request, 'rbac:manage');
   if ('error' in auth) return auth.error;
 
   try {
@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
 // ═════════════════════════════════════════════════════════════════════
 
 export async function POST(request: NextRequest) {
-  const auth = await authenticate(request);
+  const auth = await authenticate(request, 'rbac:manage');
   if ('error' in auth) return auth.error;
 
   try {

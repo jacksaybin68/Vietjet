@@ -3,16 +3,19 @@
 /**
  * Admin RBAC console.
  *
- * NOTE — this panel edits a role/permission matrix, but that matrix is
- * currently **advisory only**. `verifyAdminRequest()` checks the admin *role*
- * and ignores its `_permission` argument (see the note there), and
- * `hasPermission()` in `@/lib/rbac` collapses every admin role to full access.
- * There is no `role_permissions` table in the migrations. So changing a row
- * here records the intent in the UI and the audit log, but does not yet narrow
- * what an `admin_content` or `admin_finance` account can call.
+ * The matrix is now **enforced**. `verifyAdminRequest()` checks each route's
+ * `permission` against the `role_permissions` table (migration 019) via
+ * `lib/role-permissions.ts`, and this panel renders the same grants so an
+ * operator can see and change them.
  *
- * Treat this screen as the groundwork for enforcement, not as a control that
- * is already active.
+ * Two caveats worth keeping in view:
+ *   * `super_admin` bypasses the table entirely, so narrowing it here has no
+ *     effect on that role by design.
+ *   * The sets rendered here are the static mirror in `lib/rbac.ts`; the
+ *     request path trusts the database. A grant is only live once persisted.
+ *
+ * Treat this screen as the control surface for RBAC, not as a record of a
+ * decision that lives somewhere else.
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';

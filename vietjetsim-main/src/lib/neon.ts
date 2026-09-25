@@ -8,6 +8,8 @@
 
 import { neon, neonConfig } from '@neondatabase/serverless';
 
+import { SYSTEM_ROLES } from '@/lib/rbac';
+
 // Check if we have a real database connection
 const hasRealDb = !!process.env.DATABASE_URL;
 
@@ -65,6 +67,19 @@ function createMockSql() {
         created_at: new Date().toISOString(),
       },
     ],
+  };
+
+  // ─── role_permissions ──────────────────────────────────────────────────────
+  // `verifyAdminRequest` is fail-closed, so a role with no rows can call no
+  // guarded route. Without this handler every admin-route test would 403 purely
+  // because the in-memory database had no grants — the mock has to mirror the
+  // seed in migrations/019_role_permissions.sql, or tests would assert against
+  // a database no real deployment ever has.
+  const runRolePermissionQuery = (query: string, values: unknown[]): MockResult[] | null => {
+    if (!/from\s+role_permissions/i.test(query)) return null;
+    const role = values[0];
+    const grants = Array.from(SYSTEM_ROLES[String(role)]?.permissions ?? []);
+    return grants.map((permission) => ({ permission }));
   };
 
   // ─── In-memory chat store ────────────────────────────────────────────────────
@@ -293,6 +308,9 @@ function createMockSql() {
 
       const chatResult = runChatQuery(query, values);
       if (chatResult) return chatResult;
+
+      const rolePermissionResult = runRolePermissionQuery(query, values);
+      if (rolePermissionResult) return rolePermissionResult;
 
       // Find matching mock data
       for (const [key, data] of Object.entries(mockData)) {

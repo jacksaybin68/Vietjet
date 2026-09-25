@@ -10,9 +10,23 @@ import { POST as createDiscountRoute } from '@/app/api/quan-tri/ma-giam-gia/rout
 import { POST as validateDiscount } from '@/app/api/ma-giam-gia/xac-thuc/route';
 import * as db from '@/lib/db';
 
-vi.mock('@/lib/neon', () => {
+vi.mock('@/lib/neon', async () => {
+  const { SYSTEM_ROLES } = await import('@/lib/rbac');
   const queryMock = vi.fn().mockResolvedValue([{ total: '0' }]);
-  const sqlMock = Object.assign(vi.fn().mockResolvedValue([]), {
+  // `verifyAdminRequest` is fail-closed, so the permission lookup has to answer
+  // with real grants. Without this branch every admin route 403s and the test
+  // would be asserting against a database no deployment has.
+  const tagged = vi.fn((strings: TemplateStringsArray, ...values: unknown[]) => {
+    const text = Array.isArray(strings) ? strings.join('?') : String(strings);
+    if (/from\s+role_permissions/i.test(text)) {
+      const role = String(values[0]);
+      return Promise.resolve(
+        Array.from(SYSTEM_ROLES[role]?.permissions ?? []).map((permission) => ({ permission }))
+      );
+    }
+    return Promise.resolve([]);
+  });
+  const sqlMock = Object.assign(tagged, {
     query: queryMock,
     begin: vi.fn(),
     transaction: vi.fn().mockResolvedValue([[]]),

@@ -10,6 +10,15 @@ import { UserRole } from './auth';
 // 1. PERMISSION DEFINITIONS
 // ═════════════════════════════════════════════════════════════════════
 
+/**
+ * The one role that bypasses the `role_permissions` table entirely.
+ *
+ * It is deliberately not assignable through the API (`ASSIGNABLE_ROLES` is
+ * `user | admin`) — it exists so an operator keeps a way back in if a grant is
+ * ever misconfigured. See `lib/role-permissions.ts`.
+ */
+export const SUPER_ADMIN_ROLE = 'super_admin';
+
 export type Permission =
   | 'user:list'
   | 'user:view'
@@ -352,9 +361,90 @@ export { isAdminRole, normalizeRole, roleLevel } from './roles';
 // ─── Backward-compatibility bridge for AdminRBACPanel ───────────────────
 
 /**
+ * Scoped grants for the legacy specialist roles.
+ *
+ * These MUST stay in sync with the seed rows in
+ * `migrations/019_role_permissions.sql` — the console renders this matrix, but
+ * `lib/role-permissions.ts` reads the database, so a mismatch would show an
+ * operator a grant the request path does not actually honour.
+ */
+const OPS_PERMISSIONS = new Set<Permission>([
+  'flight:list',
+  'flight:view',
+  'flight:create',
+  'flight:edit',
+  'flight:status_change',
+  'flight:price_edit',
+  'booking:list',
+  'booking:view',
+  'booking:status_change',
+  'airport:manage',
+  'announcement:crud',
+  'user:list',
+  'user:view',
+  'analytics:view',
+  'report:generate',
+]);
+
+const FINANCE_PERMISSIONS = new Set<Permission>([
+  'payment:view',
+  'payment:refund',
+  'payment:process',
+  'refund:list',
+  'refund:approve',
+  'refund:reject',
+  'booking:list',
+  'booking:view',
+  'discount:list',
+  'discount:view',
+  'discount:create',
+  'discount:edit',
+  'discount:status_change',
+  'analytics:view',
+  'analytics:export',
+  'report:generate',
+]);
+
+const SUPPORT_PERMISSIONS = new Set<Permission>([
+  'chat:view',
+  'chat:send',
+  'booking:list',
+  'booking:view',
+  'booking:edit',
+  'refund:list',
+  'user:list',
+  'user:view',
+  'flight:list',
+  'flight:view',
+]);
+
+const CONTENT_PERMISSIONS = new Set<Permission>([
+  'content:manage',
+  'announcement:crud',
+  'airport:manage',
+  'flight:list',
+  'flight:view',
+  'discount:list',
+  'discount:view',
+  'discount:create',
+  'discount:edit',
+  'discount:delete',
+  'discount:status_change',
+  'agency:list',
+  'agency:view',
+  'agency:create',
+  'agency:edit',
+  'agency:delete',
+  'agency:status_change',
+  'analytics:view',
+]);
+
+/**
  * SYSTEM_ROLES bridge — includes simplified roles (admin, user) and legacy
  * role names so AdminRBACPanel UI compiles and runs without rewrite.
- * Legacy roles map to admin-level permissions for display purposes.
+ *
+ * `admin` and `super_admin` hold every permission; the specialist legacy roles
+ * hold only their scoped grant.
  */
 export const SYSTEM_ROLES: Record<
   string,
@@ -403,7 +493,7 @@ export const SYSTEM_ROLES: Record<
     color: 'text-blue-600',
     bgColor: 'bg-blue-50',
     level: 1,
-    permissions: ADMIN_PERMISSIONS,
+    permissions: OPS_PERMISSIONS,
   },
   admin_finance: {
     name: 'admin_finance',
@@ -412,7 +502,7 @@ export const SYSTEM_ROLES: Record<
     color: 'text-emerald-600',
     bgColor: 'bg-emerald-50',
     level: 1,
-    permissions: ADMIN_PERMISSIONS,
+    permissions: FINANCE_PERMISSIONS,
   },
   admin_support: {
     name: 'admin_support',
@@ -421,7 +511,7 @@ export const SYSTEM_ROLES: Record<
     color: 'text-amber-600',
     bgColor: 'bg-amber-50',
     level: 1,
-    permissions: ADMIN_PERMISSIONS,
+    permissions: SUPPORT_PERMISSIONS,
   },
   admin_content: {
     name: 'admin_content',
@@ -430,7 +520,7 @@ export const SYSTEM_ROLES: Record<
     color: 'text-orange-600',
     bgColor: 'bg-orange-50',
     level: 1,
-    permissions: ADMIN_PERMISSIONS,
+    permissions: CONTENT_PERMISSIONS,
   },
 };
 
