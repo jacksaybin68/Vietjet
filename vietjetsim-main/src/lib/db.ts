@@ -186,6 +186,14 @@ export interface RefundRecord {
   status: 'pending' | 'approved' | 'rejected' | 'completed' | 'processed' | 'archived';
   bank_info: string | Record<string, string | number> | null;
   admin_note: string | null;
+  /** PNR the customer typed on the form, kept for operator reference. */
+  booking_code?: string | null;
+  /** Contact number for the payout; required by the current form. */
+  phone?: string | null;
+  /** Hidden from the customer until an operator reveals it (migration 020). */
+  visible_to_user?: boolean;
+  reviewed_at?: string | null;
+  reviewed_by?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -653,6 +661,27 @@ export async function getBookingsByUserId(
   };
 }
 
+/**
+ * Resolve a booking from either its UUID or its PNR.
+ *
+ * `getBookingById` filters on `b.id`, so handing it a PNR makes Postgres attempt
+ * a uuid cast and throw — turning "not found" into a 500. Matching on the text
+ * form of the id keeps both lookups in one safe, non-throwing query.
+ */
+export async function getBookingByCodeOrId(codeOrId: string): Promise<BookingDetail | null> {
+  const results = await sql`
+    SELECT b.*,
+           f.flight_no, f.from_code, f.to_code, f.depart_time, f.arrive_time, f.price, f.class
+    FROM bookings b
+    JOIN flights f ON b.flight_id = f.id
+    WHERE b.booking_code = ${codeOrId} OR b.id::text = ${codeOrId}
+    LIMIT 1
+  `;
+
+  if ((results as BookingDetail[]).length === 0) return null;
+  return (results as Record<string, unknown>[])[0] as unknown as BookingDetail;
+}
+
 export async function getBookingById(bookingId: string): Promise<BookingDetail | null> {
   const results = await sql`
     SELECT b.*,
@@ -1091,12 +1120,23 @@ export async function getRefundsByUserId(
   const limit = params?.limit || 50;
   const offset = (page - 1) * limit;
 
+  // Only tickets an operator has revealed. A customer who has just submitted
+  // must not be able to read the ticket back — including the bank details they
+  // supplied — until it has actually been reviewed.
   return (await sql`
     SELECT * FROM refund_requests
-    WHERE user_id = ${userId}
+    WHERE user_id = ${userId} AND visible_to_user = TRUE
     ORDER BY created_at DESC
     LIMIT ${limit} OFFSET ${offset}
   `) as RefundRecord[];
+}
+
+/** Payout details the customer supplies on the refund form. */
+export interface RefundPayoutDetails {
+  bank_name: string;
+  account_number: string;
+  account_holder: string;
+  phone: string;
 }
 
 export async function createRefund(refund: {
@@ -1104,13 +1144,116 @@ export async function createRefund(refund: {
   user_id: string;
   reason: string;
   bank_info?: string | Record<string, string | number> | null;
+  phone?: string | null;
+  booking_code?: string | null;
 }): Promise<RefundRecord> {
   const results = await sql`
-    INSERT INTO refund_requests (booking_id, user_id, reason, bank_info)
-    VALUES (${refund.booking_id}, ${refund.user_id}, ${refund.reason}, ${JSON.stringify(refund.bank_info || {})})
+    INSERT INTO refund_requests (
+      booking_id, user_id, reason, bank_info, phone, booking_code, visible_to_user
+    )
+    VALUES (
+      ${refund.booking_id},
+      ${refund.user_id},
+      ${refund.reason},
+      ${JSON.stringify(refund.bank_info || {})},
+      ${refund.phone ?? null},
+      ${refund.booking_code ?? null},
+      FALSE
+    )
     RETURNING *
   `;
   return (results as RefundRecord[])[0];
+}
+
+/**
+ * Operator-side update: editable payout details, the customer-facing note, and
+ * the reveal flag. Kept separate from `updateRefundStatus` so a plain status
+ * change never accidentally publishes a ticket to the customer.
+ */
+export async function updateRefundDetails(
+  refundId: string,
+  fields: {
+    bank_info?: Record<string, string | number>;
+    phone?: string | null;
+    admin_note?: string | null;
+    reason?: string | null;
+  },
+  reviewedBy: string
+): Promise<RefundRecord | null> {
+  const values: DbParam[] = [reviewedBy];
+  const sets: string[] = ['reviewed_at = NOW()', 'reviewed_by = $1'];
+  if (fields.bank_info) {
+    values.push(JSON.stringify(fields.bank_info));
+    // `bank_info` is a TEXT column, so the jsonb merge has to be cast in and back
+    // out. Merging rather than replacing means an operator correcting just the
+    // bank name keeps the account holder and number already on file.
+    sets.push(
+      `bank_info = (COALESCE(NULLIF(bank_info, '')::jsonb, '{}'::jsonb) || $${values.length}::jsonb)::text`
+    );
+  }
+  if (fields.phone !== undefined) {
+    values.push(fields.phone);
+    sets.push(`phone = $${values.length}`);
+  }
+  if (fields.admin_note !== undefined) {
+    values.push(fields.admin_note);
+    sets.push(`admin_note = $${values.length}`);
+  }
+  if (fields.reason !== undefined) {
+    values.push(fields.reason);
+    sets.push(`reason = $${values.length}`);
+  }
+  values.push(refundId);
+
+  const rows = await sql.query(
+    `UPDATE refund_requests SET ${sets.join(', ')}, updated_at = NOW()
+     WHERE id = $${values.length}
+     RETURNING *`,
+    values
+  );
+  return asRows<RefundRecord>(rows)[0] ?? null;
+}
+
+/** Show or hide a single ticket on the customer's screen. */
+export async function setRefundVisibility(
+  refundId: string,
+  visible: boolean,
+  reviewedBy: string
+): Promise<RefundRecord | null> {
+  const rows = await sql`
+    UPDATE refund_requests
+    SET visible_to_user = ${visible},
+        reviewed_at = NOW(),
+        reviewed_by = ${reviewedBy},
+        updated_at = NOW()
+    WHERE id = ${refundId}
+    RETURNING *
+  `;
+  return (rows as RefundRecord[])[0] ?? null;
+}
+
+const REFUND_FEATURE_KEY = 'refund_feature_enabled';
+
+/**
+ * Whether customers may open new refund tickets. Defaults to enabled when the
+ * config row is missing, so a database that predates migration 020 is not
+ * accidentally read as "refunds disabled".
+ */
+export async function isRefundFeatureEnabled(): Promise<boolean> {
+  const config = await getConfigValue(REFUND_FEATURE_KEY);
+  if (!config) return true;
+  return String(config.value).toLowerCase() !== 'false';
+}
+
+export async function setRefundFeatureEnabled(enabled: boolean, updatedBy: string): Promise<void> {
+  await setConfigValue(
+    REFUND_FEATURE_KEY,
+    enabled ? 'true' : 'false',
+    'boolean',
+    'Cho phép khách hàng gửi yêu cầu hoàn tiền',
+    'refund',
+    updatedBy
+  );
 }
 
 export async function getAllRefunds(params?: {

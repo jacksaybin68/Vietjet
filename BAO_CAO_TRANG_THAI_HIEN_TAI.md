@@ -55,13 +55,13 @@ Kiểm chứng thật trên DB dev (role tạm đổi rồi hoàn tác): cho ph�
 
 ## 4. Còn tồn đọng
 
-### 4.1 Tra cứu đặt chỗ dùng dữ liệu giả — **cần quyết định**
+### 4.1 Tra cứu đặt chỗ — **đã xử lý (commit `5ea080c`)**
 
-`src/app/tra-cuu/page.tsx:27` còn `MOCK_BOOKINGS` với 3 PNR viết cứng. Tra cứu
-booking có thật trong DB luôn trả "không tìm thấy".
+`MOCK_BOOKINGS` đã bị gỡ khỏi `src/app/tra-cuu/page.tsx`. Tra cứu giờ chạy trên
+session + sở hữu: khách phải đăng nhập, dữ liệu lấy từ `GET /api/dat-ve`, bỏ ô
+email. Không có endpoint tra cứu PNR ẩn danh.
 
-**Chưa tự sửa vì đụng quyết định bảo mật.** Chính codebase này đã cố ý tránh tra
-cứu PNR ẩn danh — `api/checkin/status/[bookingId]:27-28` ghi rõ:
+Lý do đã nêu trong báo cáo bảo mật vẫn đúng:
 
 > *"Requiring a session and ownership stops anyone from enumerating check-in
 > details via booking codes."*
@@ -99,10 +99,35 @@ phải dữ liệu.
   bật 2FA.
 - Chưa test biên ngày sinh (tháng 2, năm nhuận).
 
-### 4.5 Chưa push
+### 4.5 Git
 
-7 commit đang ở local `main`, chưa lên remote. Git identity đặt cục bộ cho repo là
-`Cline <cline@localhost>` — đổi được nếu muốn commit dưới tên khác.
+Các commit đã push, `main` đồng bộ với `origin/main`. Git identity đặt cục bộ cho
+repo là `Cline <cline@localhost>` — đổi được nếu muốn commit dưới tên khác.
+
+---
+
+## 6. Hoàn tiền: quy trình hai chiều (migration 020)
+
+Phiếu hoàn tiền trở thành luồng có trạng thái, không còn là bản ghi một chiều.
+
+**Khách gửi phiếu** (`/api/hoan-tien` POST) — 5 trường bắt buộc: ngân hàng nhận
+tiền, số tài khoản, họ tên chủ tài khoản, số điện thoại, mã đặt chỗ. Mã đặt chỗ
+được tra và **kiểm tra sở hữu** trước khi gắn thông tin nhận tiền; PNR 6 ký tự
+nên không coi là bằng chứng danh tính.
+
+**Phiếu tạo ra ở trạng thái ẩn** (`visible_to_user = FALSE`). `GET /api/hoan-tien`
+lọc theo cờ này, và response POST chỉ trả `refundId` — không trả lại nội dung phiếu,
+để khách không đọc được qua devtools. Khách không có endpoint sửa phiếu (PATCH → 405).
+
+**Admin** (`/api/quan-tri/hoan-tien` PATCH) có 4 hành động:
+`set_status` (mặc định), `set_visibility`, `update_details`, `set_feature_lock`.
+Ghi đè chi tiết tách riêng khỏi `updateRefundStatus` để đổi trạng thái không vô tình
+công khai phiếu.
+
+**Khoá tính năng** qua `system_config.refund_feature_enabled`. Thiếu dòng config thì
+mặc định **bật**, để DB cũ chưa chạy migration không bị hiểu nhầm là đang tắt.
+
+Đã kiểm thử thật trên dev server (chi tiết ở `BAO_CAO_KIEM_THU_UI.md`).
 
 ---
 

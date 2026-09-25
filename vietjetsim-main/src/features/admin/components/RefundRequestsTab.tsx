@@ -2,7 +2,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
-import { listRefunds, updateRefund } from '@/features/admin';
+import {
+  listRefunds,
+  updateRefund,
+  setRefundVisibility,
+  updateRefundDetails,
+  setRefundFeatureLock,
+} from '@/features/admin';
 import type { AdminRefund } from '@/features/admin/types';
 import { getApiErrorMessage } from '@/shared/services';
 
@@ -34,6 +40,9 @@ interface RefundRequest {
   adminNote: string;
   createdAt: string;
   processedAt?: string;
+  bookingCode: string;
+  phone: string;
+  visibleToUser: boolean;
 }
 
 const STATUS_MAP: Record<RefundStatus, { label: string; cls: string; icon: string }> = {
@@ -69,6 +78,17 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
   const [modalAction, setModalAction] = useState<'approve' | 'reject' | null>(null);
   const [adminNote, setAdminNote] = useState('');
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [featureEnabled, setFeatureEnabled] = useState(true);
+  const [togglingLock, setTogglingLock] = useState(false);
+  const [editing, setEditing] = useState<RefundRequest | null>(null);
+  const [editForm, setEditForm] = useState({
+    bankName: '',
+    accountNumber: '',
+    accountHolder: '',
+    phone: '',
+    reason: '',
+    adminNote: '',
+  });
   const [_error, setError] = useState<string | null>(null);
 
   const mapRow = (row: AdminRefund): RefundRequest => ({
@@ -87,6 +107,9 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
     bankName: row.bank_name || '',
     accountNumber: row.account_number || '',
     accountHolder: row.account_holder || '',
+    bookingCode: row.booking_code || '',
+    phone: row.phone || '',
+    visibleToUser: row.visible_to_user === true,
     status: (row.status as RefundStatus) || 'pending',
     adminNote: row.admin_note || '',
     createdAt: row.created_at
@@ -115,6 +138,9 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
     try {
       const result = await listRefunds();
       setRequests((result.refunds || []).map(mapRow));
+      if (typeof result.refundFeatureEnabled === 'boolean') {
+        setFeatureEnabled(result.refundFeatureEnabled);
+      }
     } catch (e) {
       console.error('Load refund requests error:', e);
       setError('Không thể tải dữ liệu');
@@ -212,6 +238,96 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
 
   const pendingCount = requests.filter((r) => r.status === 'pending').length;
   const approvedCount = requests.filter((r) => r.status === 'approved').length;
+  const handleToggleLock = async () => {
+    const next = !featureEnabled;
+    setTogglingLock(true);
+    try {
+      await setRefundFeatureLock(next);
+      setFeatureEnabled(next);
+      onToast?.success(
+        next ? 'Đã mở khoá hoàn tiền' : 'Đã khoá hoàn tiền',
+        next
+          ? 'Khách hàng có thể gửi yêu cầu hoàn tiền trở lại.'
+          : 'Khách hàng sẽ không thể gửi yêu cầu hoàn tiền mới.'
+      );
+    } catch (e) {
+      onToast?.error(
+        'Thao tác thất bại',
+        getApiErrorMessage(e, 'Không thể thay đổi trạng thái khoá')
+      );
+    } finally {
+      setTogglingLock(false);
+    }
+  };
+
+  const handleToggleVisibility = async (req: RefundRequest) => {
+    setProcessingId(req.id);
+    const next = !req.visibleToUser;
+    try {
+      await setRefundVisibility({ refundId: req.id, visible: next });
+      setRequests((prev) => prev.map((r) => (r.id === req.id ? { ...r, visibleToUser: next } : r)));
+      onToast?.success(
+        next ? 'Đã hiển thị phiếu cho khách' : 'Đã ẩn phiếu khỏi khách hàng',
+        next
+          ? 'Khách hàng sẽ thấy đầy đủ thông tin phiếu.'
+          : 'Khách hàng sẽ không thấy phiếu này nữa.'
+      );
+    } catch (e) {
+      onToast?.error('Thao tác thất bại', getApiErrorMessage(e, 'Không thể cập nhật'));
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const openEditModal = (req: RefundRequest) => {
+    setEditing(req);
+    setEditForm({
+      bankName: req.bankName,
+      accountNumber: req.accountNumber,
+      accountHolder: req.accountHolder,
+      phone: req.phone,
+      reason: req.reason,
+      adminNote: req.adminNote,
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editing) return;
+    setProcessingId(editing.id);
+    try {
+      await updateRefundDetails({
+        refundId: editing.id,
+        bank_name: editForm.bankName.trim(),
+        account_number: editForm.accountNumber.trim(),
+        account_holder: editForm.accountHolder.trim(),
+        phone: editForm.phone.trim(),
+        reason: editForm.reason.trim(),
+        admin_note: editForm.adminNote.trim(),
+      });
+      setRequests((prev) =>
+        prev.map((r) =>
+          r.id === editing.id
+            ? {
+                ...r,
+                bankName: editForm.bankName.trim(),
+                accountNumber: editForm.accountNumber.trim(),
+                accountHolder: editForm.accountHolder.trim(),
+                phone: editForm.phone.trim(),
+                reason: editForm.reason.trim(),
+                adminNote: editForm.adminNote.trim(),
+              }
+            : r
+        )
+      );
+      setEditing(null);
+      onToast?.success('Đã cập nhật phiếu hoàn tiền');
+    } catch (e) {
+      onToast?.error('Thao tác thất bại', getApiErrorMessage(e, 'Không thể lưu thay đổi'));
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   const totalRefundAmount = requests
     .filter((r) => r.status === 'approved')
     .reduce((s, r) => s + r.amount, 0);
@@ -230,6 +346,19 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleToggleLock}
+            disabled={togglingLock}
+            className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-2xl border transition-all disabled:opacity-50 ${
+              featureEnabled
+                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+            }`}
+            title={featureEnabled ? 'Khoá tính năng hoàn tiền' : 'Mở khoá tính năng hoàn tiền'}
+          >
+            <Icon name={featureEnabled ? 'LockOpenIcon' : 'LockClosedIcon'} size={14} />
+            {featureEnabled ? 'Đang mở' : 'Đang khoá'}
+          </button>
           {pendingCount > 0 && (
             <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-2xl">
               <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
@@ -490,6 +619,34 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-center">
+                      <div className="flex items-center justify-center gap-1 mb-1.5">
+                        <button
+                          onClick={() => openEditModal(req)}
+                          disabled={processingId === req.id}
+                          className="flex items-center gap-1 text-xs font-bold text-stone-700 bg-stone-100 hover:bg-stone-200 border border-stone-200 px-2 py-1 rounded-md transition-all disabled:opacity-50"
+                          title="Chỉnh sửa thông tin phiếu"
+                        >
+                          <Icon name="PencilSquareIcon" size={11} />
+                          Sửa
+                        </button>
+                        <button
+                          onClick={() => handleToggleVisibility(req)}
+                          disabled={processingId === req.id}
+                          className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md border transition-all disabled:opacity-50 ${
+                            req.visibleToUser
+                              ? 'text-slate-600 bg-slate-50 hover:bg-slate-100 border-slate-200'
+                              : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-200'
+                          }`}
+                          title={
+                            req.visibleToUser
+                              ? 'Ẩn phiếu khỏi khách hàng'
+                              : 'Hiển thị phiếu cho khách hàng'
+                          }
+                        >
+                          <Icon name={req.visibleToUser ? 'EyeSlashIcon' : 'EyeIcon'} size={11} />
+                          {req.visibleToUser ? 'Ẩn' : 'Hiện'}
+                        </button>
+                      </div>
                       {req.status === 'pending' ? (
                         <div className="flex items-center justify-center gap-1">
                           <button
@@ -848,6 +1005,90 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
                   Đóng cửa sổ
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Edit payout details */}
+      {editing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-3xl p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="text-lg font-black text-white">Chỉnh sửa phiếu hoàn tiền</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Mã đặt chỗ: {editing.bookingCode || editing.bookingId || '—'}
+                </p>
+              </div>
+              <button
+                onClick={() => setEditing(null)}
+                className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+              >
+                <Icon name="XMarkIcon" size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {(
+                [
+                  ['bankName', 'Ngân hàng nhận tiền'],
+                  ['accountNumber', 'Số tài khoản'],
+                  ['accountHolder', 'Họ và tên chủ tài khoản'],
+                  ['phone', 'Số điện thoại'],
+                ] as const
+              ).map(([key, label]) => (
+                <div key={key}>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">
+                    {label}
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm[key]}
+                    onChange={(e) => setEditForm((f) => ({ ...f, [key]: e.target.value }))}
+                    className="w-full px-3 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-rose-400 transition-colors"
+                  />
+                </div>
+              ))}
+
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">
+                  Lý do hoàn tiền
+                </label>
+                <textarea
+                  value={editForm.reason}
+                  onChange={(e) => setEditForm((f) => ({ ...f, reason: e.target.value }))}
+                  rows={2}
+                  className="w-full px-3 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-rose-400 transition-colors resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">
+                  Ghi chú nội bộ / hiển thị cho khách
+                </label>
+                <textarea
+                  value={editForm.adminNote}
+                  onChange={(e) => setEditForm((f) => ({ ...f, adminNote: e.target.value }))}
+                  rows={2}
+                  className="w-full px-3 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-rose-400 transition-colors resize-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleSaveEdit}
+                disabled={processingId === editing.id}
+                className="flex-1 px-6 py-3 bg-rose-600 hover:bg-rose-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all disabled:opacity-50"
+              >
+                Lưu thay đổi
+              </button>
+              <button
+                onClick={() => setEditing(null)}
+                className="px-6 py-3 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all"
+              >
+                Huỷ
+              </button>
             </div>
           </div>
         </div>
