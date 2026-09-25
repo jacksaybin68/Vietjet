@@ -293,12 +293,16 @@ export default function UserDashboardClient() {
   const [refundBookingId, setRefundBookingId] = useState('');
   const [refundAmount, setRefundAmount] = useState('');
   const [refundReason, setRefundReason] = useState('');
-  const [refundNote, setRefundNote] = useState('');
   const [refundSubmitted, setRefundSubmitted] = useState(false);
   const [refundSubmitting, setRefundSubmitting] = useState(false);
   const [refundBankName, setRefundBankName] = useState('');
   const [refundAccountNumber, setRefundAccountNumber] = useState('');
   const [refundAccountHolder, setRefundAccountHolder] = useState('');
+  const [refundPhone, setRefundPhone] = useState('');
+  /** Server-side switch: operators can pause refund requests entirely. */
+  const [refundFeatureEnabled, setRefundFeatureEnabled] = useState(true);
+  /** True once submitted; the ticket stays hidden until an operator reveals it. */
+  const [refundAwaitingReview, setRefundAwaitingReview] = useState(false);
   const [refundRequests, setRefundRequests] = useState<
     {
       id: string;
@@ -463,8 +467,14 @@ export default function UserDashboardClient() {
     setRefundLoading(true);
     setRefundError(null);
     try {
-      const json = await apiRequest<{ refunds?: RefundApiRow[] }>('/api/hoan-tien');
+      const json = await apiRequest<{
+        refunds?: RefundApiRow[];
+        refundFeatureEnabled?: boolean;
+      }>('/api/hoan-tien');
       const data = json.refunds || [];
+      if (typeof json.refundFeatureEnabled === 'boolean') {
+        setRefundFeatureEnabled(json.refundFeatureEnabled);
+      }
       setRefundRequests(
         data.map((r) => {
           const parsedBankInfo =
@@ -1436,33 +1446,60 @@ export default function UserDashboardClient() {
                       }}
                     />
 
+                    {!refundFeatureEnabled && (
+                      <div className="mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-start gap-3">
+                        <Icon
+                          name="LockClosedIcon"
+                          size={16}
+                          className="text-red-500 mt-0.5 flex-shrink-0"
+                        />
+                        <p className="text-xs text-red-700 leading-relaxed">
+                          Tính năng yêu cầu hoàn tiền đang tạm khoá. Vui lòng liên hệ hotline hoặc
+                          thử lại sau.
+                        </p>
+                      </div>
+                    )}
+                    {refundFeatureEnabled && refundAwaitingReview && (
+                      <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-3">
+                        <Icon
+                          name="ClockIcon"
+                          size={16}
+                          className="text-amber-600 mt-0.5 flex-shrink-0"
+                        />
+                        <p className="text-xs text-amber-700 leading-relaxed">
+                          Bạn đang có 1 yêu cầu hoàn tiền chờ xét duyệt. Phiếu sẽ hiện ở mục{' '}
+                          <strong>Lịch sử yêu cầu hoàn tiền</strong> ngay khi nhân viên kiểm tra
+                          xong.
+                        </p>
+                      </div>
+                    )}
+
                     {refundSubmitted ? (
                       <div className="flex flex-col items-center py-10 text-center">
-                        <div className="w-16 h-16 bg-green-50/10 rounded-2xl flex items-center justify-center mb-4">
-                          <Icon name="CheckCircleIcon" size={36} className="text-green-500" />
+                        <div className="w-16 h-16 bg-amber-50/10 rounded-2xl flex items-center justify-center mb-4">
+                          <Icon name="ClockIcon" size={36} className="text-amber-500" />
                         </div>
                         <h3 className="font-black text-base mb-2 text-[var(--foreground)]">
-                          Yêu cầu đã được gửi!
+                          Yêu cầu đã được gửi thành công
                         </h3>
-                        <p className="text-sm text-[var(--foreground-subtle)]max-w-xs mb-6">
-                          Chúng tôi sẽ xem xét và phản hồi yêu cầu hoàn tiền của bạn trong vòng 3–5
-                          ngày làm việc.
+                        <p className="text-sm text-[var(--foreground-subtle)]max-w-sm mb-2">
+                          Yêu cầu hoàn tiền của bạn đã được gửi tới bộ phận xử lý. Thông tin phiếu
+                          sẽ <strong>hiển thị tại đây</strong> sau khi nhân viên kiểm tra và xác
+                          nhận.
+                        </p>
+                        <p className="text-xs text-[var(--foreground-subtle)]max-w-sm mb-6">
+                          Trong thời gian chờ duyệt, bạn không thể xem hoặc chỉnh sửa phiếu hoàn
+                          tiền này. Vui lòng tải lại trang sau ít phút.
                         </p>
                         <button
                           onClick={() => {
-                            setRefundSubmitted(false);
-                            setRefundBookingId('');
-                            setRefundAmount('');
-                            setRefundReason('');
-                            setRefundNote('');
-                            setRefundBankName('');
-                            setRefundAccountNumber('');
-                            setRefundAccountHolder('');
+                            loadRefundRequests();
+                            setRefundAwaitingReview(false);
                           }}
                           className="inline-flex items-center gap-2 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition-all hover:opacity-90 bg-[var(--primary)]"
                         >
-                          <Icon name="PlusIcon" size={15} />
-                          Gửi yêu cầu mới
+                          <Icon name="ArrowPathIcon" size={15} />
+                          Tải lại trạng thái
                         </button>
                       </div>
                     ) : (
@@ -1475,72 +1512,29 @@ export default function UserDashboardClient() {
                             !refundReason ||
                             !refundBankName ||
                             !refundAccountNumber ||
-                            !refundAccountHolder
+                            !refundAccountHolder ||
+                            !refundPhone ||
+                            !refundFeatureEnabled
                           )
                             return;
                           setRefundSubmitting(true);
                           setRefundError(null);
                           try {
                             const insertData: Record<string, unknown> = {
-                              booking_id: refundBookingId,
+                              booking_code: refundBookingId.trim().toUpperCase(),
                               reason: refundReason,
-                              note: refundNote,
+                              bank_name: refundBankName,
+                              account_number: refundAccountNumber,
+                              account_holder: refundAccountHolder,
+                              phone: refundPhone,
                               amount: Number(refundAmount.replace(/\D/g, '')),
-                              bank_info: {
-                                bank_name: refundBankName,
-                                account_number: refundAccountNumber,
-                                account_holder: refundAccountHolder,
-                                note: refundNote,
-                                amount: Number(refundAmount.replace(/\D/g, '')),
-                              },
                             };
-                            if (user) {
-                              insertData.user_id = user.id;
-                            }
-                            const responseJson = await apiRequest<{
-                              refund?: {
-                                id: string;
-                                booking_id: string;
-                                reason?: string;
-                                bank_info?: string | Record<string, unknown>;
-                                created_at?: string;
-                              };
-                            }>('/api/hoan-tien', {
+                            await apiRequest<{ message?: string }>('/api/hoan-tien', {
                               method: 'POST',
                               body: insertData,
                             });
-                            const refund = responseJson?.refund;
-                            if (refund) {
-                              const parsedBankInfo =
-                                typeof refund.bank_info === 'string'
-                                  ? (() => {
-                                      try {
-                                        return JSON.parse(refund.bank_info as string);
-                                      } catch {
-                                        return {};
-                                      }
-                                    })()
-                                  : refund.bank_info || {};
-                              const bankInfo = parsedBankInfo as Record<string, string>;
-                              setRefundRequests((prev) => [
-                                {
-                                  id: refund.id,
-                                  bookingId: refund.booking_id,
-                                  amount: Number(bankInfo.amount || 0),
-                                  reason: refund.reason || refundReason,
-                                  note: bankInfo.note || refundNote || '',
-                                  bankName: bankInfo.bank_name || refundBankName,
-                                  accountHolder: bankInfo.account_holder || refundAccountHolder,
-                                  accountNumber: bankInfo.account_number || refundAccountNumber,
-                                  status: 'pending',
-                                  date: new Date(
-                                    refund.created_at || Date.now()
-                                  ).toLocaleDateString('vi-VN'),
-                                },
-                                ...prev,
-                              ]);
-                            }
                             setRefundSubmitted(true);
+                            setRefundAwaitingReview(true);
                             toast.success(
                               'Yêu cầu hoàn tiền đã được gửi',
                               'Chúng tôi sẽ xem xét và phản hồi trong 3–5 ngày làm việc.'
@@ -1625,31 +1619,6 @@ export default function UserDashboardClient() {
                           <p className="text-xs text-[var(--foreground-subtle)]mt-1">
                             Nhập mã đặt chỗ từ email xác nhận hoặc lịch sử đặt vé
                           </p>
-                        </div>
-
-                        {/* Note */}
-                        <div>
-                          <label
-                            className="block text-xs font-bold uppercase tracking-wider mb-1.5"
-                            style={{ color: 'var(--vj-navy)' }}
-                          >
-                            Ghi chú thêm
-                          </label>
-                          <textarea
-                            value={refundNote}
-                            onChange={(e) => setRefundNote(e.target.value)}
-                            placeholder="Ghi chú cho yêu cầu hoàn vé (không bắt buộc)..."
-                            rows={3}
-                            className="w-full px-4 py-2.5 bg-[var(--surface-2)]border border-[var(--border)]rounded-xl text-sm text-[var(--foreground)]placeholder-[var(--foreground-subtle)]focus:outline-none transition-all resize-none"
-                            onFocus={(e) => {
-                              e.target.style.borderColor = 'var(--primary)';
-                              e.target.style.boxShadow = '0 0 0 2px rgba(var(--primary-rgb), 0.1)';
-                            }}
-                            onBlur={(e) => {
-                              e.target.style.borderColor = '';
-                              e.target.style.boxShadow = '';
-                            }}
-                          />
                         </div>
 
                         {/* Bank account info section */}
@@ -1768,6 +1737,37 @@ export default function UserDashboardClient() {
                                 Tên phải khớp với tên đăng ký tài khoản ngân hàng
                               </p>
                             </div>
+                            {/* Contact phone */}
+                            <div>
+                              <label className="block text-xs font-semibold text-[var(--foreground-muted)]mb-1.5">
+                                Số điện thoại liên hệ <span className="text-red-500">*</span>
+                              </label>
+                              <div className="relative">
+                                <Icon
+                                  name="PhoneIcon"
+                                  size={15}
+                                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-subtle)]pointer-events-none"
+                                />
+                                <input
+                                  type="tel"
+                                  inputMode="tel"
+                                  value={refundPhone}
+                                  onChange={(e) => setRefundPhone(e.target.value)}
+                                  placeholder="VD: 0912 345 678"
+                                  required
+                                  className="w-full pl-8 pr-4 py-2.5 bg-[var(--surface)]border border-[var(--border)]rounded-xl text-sm text-[var(--foreground)]placeholder-[var(--foreground-subtle)]focus:outline-none transition-all"
+                                  onFocus={(e) => {
+                                    e.target.style.borderColor = 'var(--primary)';
+                                    e.target.style.boxShadow =
+                                      '0 0 0 2px rgba(var(--primary-rgb), 0.1)';
+                                  }}
+                                  onBlur={(e) => {
+                                    e.target.style.borderColor = '';
+                                    e.target.style.boxShadow = '';
+                                  }}
+                                />
+                              </div>
+                            </div>
                           </div>
                         </div>
 
@@ -1795,6 +1795,8 @@ export default function UserDashboardClient() {
                               !refundBankName ||
                               !refundAccountNumber ||
                               !refundAccountHolder ||
+                              !refundPhone ||
+                              !refundFeatureEnabled ||
                               refundSubmitting
                             }
                             className="flex items-center gap-2 text-white font-bold px-6 py-2.5 rounded-xl transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1826,7 +1828,7 @@ export default function UserDashboardClient() {
                             ) : (
                               <>
                                 <Icon name="PaperAirplaneIcon" size={15} />
-                                Gửi yêu cầu
+                                Gửi yêu cầu ngay
                               </>
                             )}
                           </button>
@@ -1836,10 +1838,10 @@ export default function UserDashboardClient() {
                               setRefundBookingId('');
                               setRefundAmount('');
                               setRefundReason('');
-                              setRefundNote('');
                               setRefundBankName('');
                               setRefundAccountNumber('');
                               setRefundAccountHolder('');
+                              setRefundPhone('');
                             }}
                             className="px-6 py-2.5 border border-[var(--border)] font-semibold rounded-xl text-sm transition-all hover:bg-[var(--surface-2)]text-[var(--foreground-muted)]"
                           >

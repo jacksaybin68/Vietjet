@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
 import { verifyAdminRequest } from '@/lib/admin-auth';
-import { getAllRefunds, updateRefundStatus, refundWallet } from '@/lib/db';
+import {
+  getAllRefunds,
+  updateRefundStatus,
+  refundWallet,
+  setRefundVisibility,
+  updateRefundDetails,
+  isRefundFeatureEnabled,
+  setRefundFeatureEnabled,
+} from '@/lib/db';
+import type { RefundRecord } from '@/lib/db';
 import { parsePaginationParams, getPaginationMeta } from '@/lib/pagination';
 
 // ─── GET: Get all refund requests (admin) ───────────────────────────────────
@@ -16,10 +25,12 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') || undefined;
 
     const { refunds, total } = await getAllRefunds({ page, limit, status });
+    const refundFeatureEnabled = await isRefundFeatureEnabled();
 
     return NextResponse.json({
       refunds,
       pagination: getPaginationMeta(page, limit, total),
+      refundFeatureEnabled,
     });
   } catch (error) {
     console.error('Error fetching refunds (admin):', error);
@@ -34,19 +45,89 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const {
-      payload: _payload,
-      error,
-      response,
-    } = await verifyAdminRequest(request, 'refund:approve');
+    const { payload: admin, error, response } = await verifyAdminRequest(request, 'refund:approve');
     if (error) return response;
 
-    const body = await request.json();
-    const { refundId, status } = body;
+    const body = (await request.json()) as Record<string, unknown>;
+    const action = typeof body.action === 'string' ? body.action : 'set_status';
 
-    if (!refundId || !status) {
+    // ─── Lock / unlock the whole feature ──────────────────────────────────
+    if (action === 'set_feature_lock') {
+      const enabled = Boolean(body.enabled);
+      await setRefundFeatureEnabled(enabled, admin.userId);
+      return NextResponse.json({ success: true, refundFeatureEnabled: enabled });
+    }
+
+    const refundId = typeof body.refundId === 'string' ? body.refundId : '';
+    if (!refundId) {
       return NextResponse.json(
-        { error: 'Bad Request', message: 'refundId and status are required' },
+        { error: 'Bad Request', message: 'refundId is required' },
+        { status: 400 }
+      );
+    }
+
+    // ─── Show / hide a ticket on the customer's screen ────────────────────
+    if (action === 'set_visibility') {
+      const refund = await setRefundVisibility(refundId, Boolean(body.visible), admin.userId);
+      if (!refund) {
+        return NextResponse.json(
+          { error: 'Not Found', message: 'Refund request not found' },
+          { status: 404 }
+        );
+      }
+      return NextResponse.json({ success: true, refund });
+    }
+
+    // ─── Edit the payout details on a ticket ──────────────────────────────
+    if (action === 'update_details') {
+      const fields: Parameters<typeof updateRefundDetails>[1] = {};
+      if (typeof body.reason === 'string') fields.reason = body.reason.trim();
+      if (typeof body.phone === 'string') fields.phone = body.phone.trim();
+      if (typeof body.admin_note === 'string') fields.admin_note = body.admin_note.trim();
+      const info =
+        body.bank_info && typeof body.bank_info === 'object'
+          ? (body.bank_info as Record<string, unknown>)
+          : {};
+      const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
+      // Accept the payout fields either nested under `bank_info` or flat on the
+      // body, so a direct API caller cannot silently no-op on a bank edit. Only
+      // keys actually supplied are forwarded; blank strings would otherwise
+      // overwrite the values already recorded on the ticket.
+      const bankName = str(info.bank_name ?? body.bank_name);
+      const accountNumber = str(info.account_number ?? body.account_number);
+      const accountHolder = str(info.account_holder ?? body.account_holder);
+      const bankPatch: Record<string, string> = {};
+      for (const [key, value] of Object.entries(info)) {
+        if (typeof value === 'string' || typeof value === 'number') bankPatch[key] = String(value);
+      }
+      if (bankName) bankPatch.bank_name = bankName;
+      if (accountNumber) bankPatch.account_number = accountNumber;
+      if (accountHolder) bankPatch.account_holder = accountHolder;
+      if (Object.keys(bankPatch).length > 0) {
+        fields.bank_info = bankPatch;
+      }
+      if (Object.keys(fields).length === 0) {
+        return NextResponse.json(
+          { error: 'Bad Request', message: 'Không có trường nào để cập nhật' },
+          { status: 400 }
+        );
+      }
+      const refund = await updateRefundDetails(refundId, fields, admin.userId);
+      if (!refund) {
+        return NextResponse.json(
+          { error: 'Not Found', message: 'Refund request not found' },
+          { status: 404 }
+        );
+      }
+      return NextResponse.json({ success: true, refund });
+    }
+
+    // ─── Default: change workflow status ──────────────────────────────────
+    const { status } = body;
+
+    if (typeof status !== 'string' || !status) {
+      return NextResponse.json(
+        { error: 'Bad Request', message: 'status is required' },
         { status: 400 }
       );
     }
@@ -61,8 +142,6 @@ export async function PATCH(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    const { admin_note } = body;
 
     // Atomic refund processing: If status is approved/completed, release seats and update booking
     let refundSummary = '';
@@ -124,7 +203,15 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
-    const result = await updateRefundStatus(refundId, status, admin_note);
+    const operatorNote = typeof body.admin_note === 'string' ? body.admin_note.trim() : null;
+
+    // Narrowed to string above and checked against validStatuses, so this cast
+    // cannot smuggle an unvalidated value through.
+    const result = await updateRefundStatus(
+      refundId,
+      status as RefundRecord['status'],
+      operatorNote || undefined
+    );
 
     if (!result) {
       return NextResponse.json(

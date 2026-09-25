@@ -223,11 +223,55 @@ export function deleteAnnouncement(id: string) {
 // ─── Refunds & transactions ─────────────────────────────────────────────────
 
 export function listRefunds(query: AdminListQuery = {}) {
-  return apiRequest<AdminList<'refunds', AdminRefund>>(`${EP.REFUNDS}${buildQuery(query)}`);
+  return apiRequest<AdminList<'refunds', AdminRefund> & { refundFeatureEnabled?: boolean }>(
+    `${EP.REFUNDS}${buildQuery(query)}`
+  );
 }
 
 export function updateRefund(input: { refundId: string; status: string; admin_note?: string }) {
   return apiRequest<{ success: boolean }>(EP.REFUNDS, { method: 'PATCH', body: input });
+}
+
+/** Show or hide a single ticket on the customer's screen. */
+export function setRefundVisibility(input: { refundId: string; visible: boolean }) {
+  return apiRequest<{ success: boolean; refund: AdminRefund }>(EP.REFUNDS, {
+    method: 'PATCH',
+    body: { action: 'set_visibility', ...input },
+  });
+}
+
+/** Correct the payout details recorded on a ticket. */
+export function updateRefundDetails(input: {
+  refundId: string;
+  bank_name?: string;
+  account_number?: string;
+  account_holder?: string;
+  phone?: string;
+  reason?: string;
+  admin_note?: string;
+}) {
+  const { refundId, ...fields } = input;
+  return apiRequest<{ success: boolean; refund: AdminRefund }>(EP.REFUNDS, {
+    method: 'PATCH',
+    body: {
+      action: 'update_details',
+      refundId,
+      bank_info: {
+        ...(fields.bank_name !== undefined ? { bank_name: fields.bank_name } : {}),
+        ...(fields.account_number !== undefined ? { account_number: fields.account_number } : {}),
+        ...(fields.account_holder !== undefined ? { account_holder: fields.account_holder } : {}),
+      },
+      ...fields,
+    },
+  });
+}
+
+/** Pause or resume refund requests for every customer. */
+export function setRefundFeatureLock(enabled: boolean) {
+  return apiRequest<{ success: boolean; refundFeatureEnabled: boolean }>(EP.REFUNDS, {
+    method: 'PATCH',
+    body: { action: 'set_feature_lock', enabled },
+  });
 }
 
 export function listTransactions(query: AdminListQuery = {}) {

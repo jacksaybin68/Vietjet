@@ -211,3 +211,44 @@ middleware.ts     # (tại root project) auth/CSRF/rate-limit — XEM LỖI NẶ
   (`user_id` nullable) — thay đổi lớn, ngoài phạm vi báo cáo lỗi. **Vẫn còn.**
 - ~~334 warning ESLint còn lại~~ → **Đã sửa**: `npm run lint` hiện ra 0 error,
   0 warning.
+
+
+---
+
+## Kiểm thử luồng hoàn tiền (migration 020) — 26/09/2026
+
+Thực hiện trên dev server `http://localhost:4028`, tài khoản demo thật, CSRF token
+thật. Booking demo `VJDEMO01` được tạo cho `user@vietjetsim.vn` vì tài khoản này
+trước đó chưa có booking nào (chặn việc test E2E).
+
+| # | Bước | Kết quả mong đợi | Thực tế |
+|---|------|------------------|---------|
+| 1 | POST thiếu số điện thoại | 400 nêu đúng trường thiếu | 400 `Thiếu thông tin: Số điện thoại` |
+| 2 | POST PNR của tài khoản khác (`VJ644052`) | 403 | 403 |
+| 3 | POST hợp lệ | 201, chỉ trả `refundId` | 201 |
+| 4 | User GET sau khi gửi | 0 phiếu (đang ẩn) | 0 |
+| 5 | Admin GET | thấy phiếu, `visible_to_user=false`, có PNR + SĐT | đúng |
+| 6 | Admin `update_details` | 200 | 200 |
+| 7 | Admin `set_visibility=true` | 200 | 200 |
+| 8 | User GET sau khi hiện | thấy phiếu + bản admin đã sửa | đúng |
+| 9 | Admin khoá tính năng rồi POST | 200 rồi 403 | đúng |
+| 10 | Admin mở khoá | 200 | đúng |
+| 11 | Admin ẩn lại | user về 0 phiếu | đúng |
+| 12 | User tự PATCH phiếu | 405 (không có endpoint) | 405 |
+
+### Lỗi tìm được và đã sửa trong quá trình test
+
+1. **POST hợp lệ trả 500.** `getBookingById` lọc theo `b.id` (UUID); khi nhận PNR,
+   Postgres thử cast sang uuid và ném lỗi — "không tìm thấy" biến thành 500.
+   Thêm `getBookingByCodeOrId` khớp `booking_code` **hoặc** `id::text`.
+2. **Sửa bank xoá mất `account_holder`.** Route ghi đè cả ba trường, nên chỉ sửa
+   tên ngân hàng là mất tên chủ tài khoản. Sửa bằng cách merge jsonb thay vì thay
+   thế, và chỉ gửi các key thực sự được cung cấp.
+3. **`reviewed_by` nội suy sai kiểu.** Ban đầu để `${reviewedBy}` trong chuỗi
+   thường nên thành chữ literal, đồng thời `$` bị hiểu là placeholder.
+
+### Lưu ý vận hành
+
+- Auth rate-limit là 5 request/60 giây. Chạy nhiều kịch bản đăng nhập liên tiếp sẽ
+  nhận 401; cần nghỉ 60 giây giữa các lần.
+- Cột `bank_info` là **TEXT**, không phải JSONB — phép merge phải ép kiểu hai chiều.

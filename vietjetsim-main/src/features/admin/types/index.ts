@@ -188,6 +188,14 @@ export interface AdminRefund {
   account_number?: string | null;
   account_holder?: string | null;
   processed_at?: string | null;
+  /** PNR the customer typed on the refund form (migration 020). */
+  booking_code?: string | null;
+  /** Contact number supplied on the form (migration 020). */
+  phone?: string | null;
+  /** Whether the customer can currently see this ticket (migration 020). */
+  visible_to_user?: boolean;
+  reviewed_at?: string | null;
+  reviewed_by?: string | null;
 }
 
 export interface AdminTransaction {
