@@ -271,10 +271,13 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
 
       <main className="mx-auto max-w-[1000px] flex-1 px-4 py-6">
         {/* ============ BƯỚC 1: TRA CỨU ============ */}
+        {/* Bố cục 1 khung trên 1 khung: form, hướng dẫn và chuyến bay quốc tế
+            xếp dọc trong một cột, mỗi phần là một khung riêng. */}
         {step === 'search' && (
-          <div className="grid lg:grid-cols-[1.1fr_1fr] gap-6">
-            {/* Thẻ form tra cứu */}
-            <div className="rounded-2xl bg-white/70 p-4 ring-1 ring-white/70 shadow-vj-md">
+          <div className="flex flex-col gap-6">
+            {/* Thẻ form tra cứu — cùng bộ khung (bo góc, nền, viền, đổ bóng, padding)
+                với hai khung bên dưới để cả trang đọc như một chuỗi khung. */}
+            <div className="rounded-2xl bg-white/70 p-5 ring-1 ring-white/70 shadow-vj-md">
               <form onSubmit={handleSearch} className="flex flex-col gap-4">
                 <div className="relative">
                   <label className="pointer-events-none absolute left-3 top-2 text-[11px] font-medium text-[var(--vj-text-muted)]">
@@ -286,7 +289,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                     value={bookingCode}
                     onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
                     placeholder=" "
-                    className={`${fieldClass} pb-2 pt-6 uppercase`}
+                    className={`${fieldClass} pb-2 pt-6 text-black font-bold uppercase`}
                   />
                 </div>
 
@@ -315,8 +318,9 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
             </div>
 
             {/* Nội dung hướng dẫn — bám theo vietjetair.com/vi/checkin. Khối "Quy
-                trình check-in" cũ đã bỏ vì stepper phía trên đã mô tả quy trình. */}
-            <div className="space-y-5 text-[13px] leading-6 text-[var(--vj-text-gray)]">
+                trình check-in" cũ đã bỏ vì stepper phía trên đã mô tả quy trình.
+                Nay là khung riêng, nằm ngay dưới khung form. */}
+            <div className="space-y-5 rounded-2xl bg-white/70 p-5 text-[13px] leading-6 text-[var(--vj-text-gray)] ring-1 ring-white/70 shadow-vj-md">
               <div>
                 <p>
                   Quý khách có thể chủ động làm thủ tục chuyến bay trực tuyến (Online Check-in) trên
@@ -333,7 +337,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                 </p>
               </div>
 
-              <div className="grid gap-6 sm:grid-cols-2">
+              <div className="space-y-6">
                 <div>
                   <h3 className="text-sm font-black text-[var(--vj-text)]">
                     Lưu ý sau khi Online Check-in:
@@ -366,7 +370,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
             </div>
 
             {/* Khoản mục site thật:3. Chuyến bay quốc tế + các liên kết TẠI ĐÂY */}
-            <div className="mt-6 space-y-3 rounded-2xl bg-white p-6 text-[13px] leading-6 text-[var(--vj-text-gray)] shadow-vj-md">
+            <div className="space-y-3 rounded-2xl bg-white/70 p-5 text-[13px] leading-6 text-[var(--vj-text-gray)] ring-1 ring-white/70 shadow-vj-md">
               <div>
                 <h3 className="text-sm font-black text-[var(--vj-text)]">3. Chuyến bay quốc tế:</h3>
                 <p className="mt-2 font-bold text-[var(--vj-text)]">

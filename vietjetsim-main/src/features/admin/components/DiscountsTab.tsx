@@ -348,13 +348,13 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
       {viewingDiscount && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div
-            className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-[40px] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-300"
+            className="w-full max-w-lg flex max-h-[90vh] flex-col bg-slate-900 border border-white/10 rounded-[40px] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-300"
             style={{
               background:
                 'linear-gradient(135deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 100%)',
             }}
           >
-            <div className="px-8 py-8 border-b border-white/5 flex items-center justify-between">
+            <div className="shrink-0 px-8 py-8 border-b border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
                   <Icon name="TagIcon" size={24} />
@@ -378,7 +378,9 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
               </button>
             </div>
 
-            <div className="p-8 space-y-8">
+            {/* Thân modal cuộn độc lập: header và nút hành động luôn nhìn thấy
+                kể cả khi nội dung dài hơn chiều cao viewport. */}
+            <div className="min-h-0 flex-1 overflow-y-auto p-8 space-y-8">
               <div className="flex items-center justify-between bg-slate-950/40 border border-white/5 rounded-3xl p-6 overflow-hidden relative group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
                 <div>
@@ -443,7 +445,7 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
               </div>
             </div>
 
-            <div className="p-8 pt-0 flex gap-4">
+            <div className="shrink-0 p-8 pt-0 flex gap-4">
               <button
                 onClick={() => {
                   setViewingDiscount(null);
@@ -547,8 +549,10 @@ function DiscountModal({
 
   return (
     <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[110] flex items-center justify-center p-4 animate-in fade-in duration-300">
-      <div className="w-full max-w-xl bg-slate-900 border border-white/10 rounded-[40px] shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300">
-        <div className="px-8 py-8 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
+      {/* Modal giới hạn theo chiều cao viewport (max-h-90vh): header cố định,
+          thân form cuộn riêng — nút "Khởi tạo mã" không bị đẩy khỏi màn hình. */}
+      <div className="w-full max-w-xl flex max-h-[90vh] flex-col bg-slate-900 border border-white/10 rounded-[40px] shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="shrink-0 px-8 py-8 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
           <h3 className="text-lg font-black text-white uppercase tracking-tight">
             {discount ? 'Chỉnh sửa mã' : 'Thêm mã ưu đãi mới'}
           </h3>
@@ -559,9 +563,9 @@ function DiscountModal({
             <Icon name="XMarkIcon" size={20} />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-8 space-y-8">
-          <div className="grid grid-cols-2 gap-6">
-            <div className="col-span-2">
+        <form onSubmit={handleSubmit} className="min-h-0 flex-1 overflow-y-auto p-8 space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
+            <div className="sm:col-span-2">
               <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
                 Mã giảm giá
               </label>
@@ -619,7 +623,7 @@ function DiscountModal({
                 </div>
               )}
             </div>
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
                 Phát hành cho đại lý
               </label>

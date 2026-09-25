@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { AppImage } from '@/shared/components/ui';
 import { DealCardProps } from '@/types/deals';
 import { MdCalendarToday, MdArrowForward } from 'react-icons/md';
+import { formatNumber } from '@/lib/utils';
 
 /**
  * Chỉ hiển thị một deal card.
@@ -54,11 +55,9 @@ const DealCard: React.FC<DealCardProps> = ({ deal }) => {
           </div>
           <h3 className="text-semibold text-base mb-1">{deal.route}</h3>
           <div className="flex items-center justify-between">
-            <span className="text-lg font-semibold text-vj-text">
-              {deal.price.toLocaleString()}đ
-            </span>
+            <span className="text-lg font-semibold text-vj-text">{formatNumber(deal.price)}đ</span>
             <span className="text-sm text-gray-400 line-through">
-              {deal.original.toLocaleString()}đ
+              {formatNumber(deal.original)}đ
             </span>
           </div>
           <div className="flex items-center justify-between mt-2">

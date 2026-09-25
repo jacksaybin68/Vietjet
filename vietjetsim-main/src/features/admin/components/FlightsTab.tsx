@@ -323,7 +323,10 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
         depart_time: departTimeStr,
         arrive_time: arriveTimeStr,
         price: parseInt(newFlight.price),
-        class: 'Economy', // Default class for new flights
+        // Must be lowercase: flights.class has a CHECK constraint
+        // `class IN ('economy','business')`, so 'Economy' is rejected by
+        // Postgres with flights_class_check and the whole POST returns 500.
+        class: 'economy',
         available: parseInt(newFlight.capacity),
       };
       await createAdminFlight(payload);
