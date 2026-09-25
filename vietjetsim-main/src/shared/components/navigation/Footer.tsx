@@ -92,7 +92,7 @@ export default function Footer() {
               Chọn điểm đi và đến để xem các chuyến bay phù hợp.
             </p>
             <Link
-              href="/tim-ve"
+              href="/trang-chu#hero-booking-form"
               className="vj-cta mt-5 flex min-h-11 items-center justify-center gap-2 px-4 text-sm font-black"
             >
               Tìm chuyến bay

@@ -16,7 +16,8 @@
     "test:smoke": "node scripts/smoke-test.cjs",
     "db:check": "ts-node src/lib/dbCheck.ts",
     "db:setup-admin": "node scripts/setup-admin.cjs",
-    "db:seed-demo": "node scripts/seed-demo-accounts.cjs"
+    "db:seed-demo": "node scripts/seed-demo-accounts.cjs",
+    "db:seed-flights": "node scripts/seed-future-flights.cjs"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

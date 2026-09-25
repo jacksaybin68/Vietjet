@@ -233,6 +233,139 @@ describe('API & RBAC Security Logic', () => {
         expect(res.status).toBe(201);
       });
 
+      /**
+       * `flights.class` has a CHECK constraint limited to 'economy'/'business'.
+       * The admin UI used to send 'Economy', which Postgres rejected with
+       * flights_class_check and the handler reported as a bare 500.
+       */
+      it('POST - normalises class casing instead of letting the DB reject it', async () => {
+        const token = makeAdminToken();
+        const req = new NextRequest('http://localhost:4028/api/quan-tri/chuyen-bay', {
+          method: 'POST',
+          headers: withCsrf(token),
+          body: JSON.stringify({
+            flight_no: 'VJ101',
+            from_code: 'HAN',
+            to_code: 'SGN',
+            depart_time: '2026-10-10T10:00:00Z',
+            arrive_time: '2026-10-10T12:00:00Z',
+            price: 1500000,
+            class: 'Economy',
+            available: 180,
+          }),
+        });
+
+        const spy = vi.spyOn(db, 'createFlight').mockResolvedValueOnce({
+          id: 'f1',
+          flight_no: 'VJ101',
+          from_code: 'HAN',
+          to_code: 'SGN',
+          depart_time: '2026-10-10T10:00:00Z',
+          arrive_time: '2026-10-10T12:00:00Z',
+          price: 1500000,
+          class: 'economy',
+          available: 180,
+          created_at: '2026-01-01T00:00:00Z',
+          updated_at: '2026-01-01T00:00:00Z',
+        });
+
+        const res = (await createAdminFlight(req))!;
+        expect(res.status).toBe(201);
+        expect(spy).toHaveBeenCalledWith(expect.objectContaining({ class: 'economy' }));
+      });
+
+      it('POST - rejects an unsupported class with 400 before touching the DB', async () => {
+        const token = makeAdminToken();
+        const req = new NextRequest('http://localhost:4028/api/quan-tri/chuyen-bay', {
+          method: 'POST',
+          headers: withCsrf(token),
+          body: JSON.stringify({
+            flight_no: 'VJ101',
+            from_code: 'HAN',
+            to_code: 'SGN',
+            depart_time: '2026-10-10T10:00:00Z',
+            arrive_time: '2026-10-10T12:00:00Z',
+            price: 1500000,
+            class: 'first',
+            available: 180,
+          }),
+        });
+
+        const spy = vi.spyOn(db, 'createFlight');
+
+        const res = (await createAdminFlight(req))!;
+        expect(res.status).toBe(400);
+        const body = await res.json();
+        expect(body.message).toMatch(/economy, business/);
+        expect(spy).not.toHaveBeenCalled();
+      });
+
+      /**
+       * A unique index on (from_code, to_code, depart_time) means two flights
+       * cannot occupy the same departure slot. That is a user mistake, so it
+       * must read as 409, not as a server fault.
+       */
+      it('POST - reports a duplicate departure slot as 409, not 500', async () => {
+        const token = makeAdminToken();
+        const req = new NextRequest('http://localhost:4028/api/quan-tri/chuyen-bay', {
+          method: 'POST',
+          headers: withCsrf(token),
+          body: JSON.stringify({
+            flight_no: 'VJ101',
+            from_code: 'HAN',
+            to_code: 'SGN',
+            depart_time: '2026-10-10T10:00:00Z',
+            arrive_time: '2026-10-10T12:00:00Z',
+            price: 1500000,
+            class: 'economy',
+            available: 180,
+          }),
+        });
+
+        // Shape a Neon/Postgres unique-violation carries across the bundler.
+        vi.spyOn(db, 'createFlight').mockRejectedValueOnce({
+          name: 'NeonDbError',
+          code: '23505',
+          constraint: 'idx_flights_route_depart_time',
+          message: 'duplicate key value violates unique constraint',
+        });
+
+        const res = (await createAdminFlight(req))!;
+        expect(res.status).toBe(409);
+        const body = await res.json();
+        expect(body.error).toBe('Conflict');
+        expect(body.message).toMatch(/HAN/);
+        expect(body.message).toMatch(/already departs/);
+      });
+
+      it('POST - still returns 500 for an unrelated database failure', async () => {
+        const token = makeAdminToken();
+        const req = new NextRequest('http://localhost:4028/api/quan-tri/chuyen-bay', {
+          method: 'POST',
+          headers: withCsrf(token),
+          body: JSON.stringify({
+            flight_no: 'VJ101',
+            from_code: 'HAN',
+            to_code: 'SGN',
+            depart_time: '2026-10-10T10:00:00Z',
+            arrive_time: '2026-10-10T12:00:00Z',
+            price: 1500000,
+            class: 'economy',
+            available: 180,
+          }),
+        });
+
+        vi.spyOn(db, 'createFlight').mockRejectedValueOnce({
+          name: 'NeonDbError',
+          code: '23503',
+          constraint: 'flights_from_code_fkey',
+          message: 'foreign key violation',
+        });
+
+        const res = (await createAdminFlight(req))!;
+        expect(res.status).toBe(500);
+      });
+
       it('GET - forwards the search term to getAllFlights', async () => {
         const token = makeAdminToken();
         const req = new NextRequest(
