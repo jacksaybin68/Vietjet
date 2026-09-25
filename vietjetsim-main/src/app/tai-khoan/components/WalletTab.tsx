@@ -45,6 +45,28 @@ interface WalletTransaction {
   created_at: string;
 }
 
+// ─── Transaction sign ──────────────────────────────────────────────────────────
+
+/**
+ * Dấu của giao dịch được quyết định bởi `type` chứ không chỉ bởi dấu của
+ * `amount`: bản ghi cũ có thể lưu số tiền rút ở dạng dương, khiến giao dịch
+ * rút hiển thị nhầm dấu "+" giống nạp tiền.
+ * - Cộng (tích cực): topup, refund, bonus
+ * - Trừ (tiêu cực): withdraw, payment
+ */
+const CREDIT_TX_TYPES: ReadonlySet<WalletTransaction['type']> = new Set([
+  'topup',
+  'refund',
+  'bonus',
+]);
+const DEBIT_TX_TYPES: ReadonlySet<WalletTransaction['type']> = new Set(['withdraw', 'payment']);
+
+function isCreditTransaction(tx: WalletTransaction): boolean {
+  if (CREDIT_TX_TYPES.has(tx.type)) return true;
+  if (DEBIT_TX_TYPES.has(tx.type)) return false;
+  return tx.amount >= 0;
+}
+
 // ─── Card Brand Icons ─────────────────────────────────────────────────────────
 
 const CARD_BRANDS: Record<string, { name: string; color: string }> = {
@@ -879,27 +901,30 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
             </p>
           ) : (
             <div className="space-y-2">
-              {transactions.map((tx) => (
-                <div
-                  key={tx.id}
-                  className="flex items-center justify-between bg-[var(--surface-2)] rounded-xl p-3"
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-[#1A2948]">
-                      {tx.description || 'Giao dịch ví'}
-                    </p>
-                    <p className="text-xs text-[var(--foreground-muted)]">
-                      {new Date(tx.created_at).toLocaleString('vi-VN')}
-                    </p>
-                  </div>
-                  <span
-                    className={`text-sm font-bold ${tx.amount >= 0 ? 'text-emerald-600' : 'text-red-500'}`}
+              {transactions.map((tx) => {
+                const isCredit = isCreditTransaction(tx);
+                return (
+                  <div
+                    key={tx.id}
+                    className="flex items-center justify-between bg-[var(--surface-2)] rounded-xl p-3"
                   >
-                    {tx.amount >= 0 ? '+' : ''}
-                    {Math.abs(tx.amount).toLocaleString('vi-VN')}đ
-                  </span>
-                </div>
-              ))}
+                    <div>
+                      <p className="text-sm font-semibold text-[#1A2948]">
+                        {tx.description || 'Giao dịch ví'}
+                      </p>
+                      <p className="text-xs text-[var(--foreground-muted)]">
+                        {new Date(tx.created_at).toLocaleString('vi-VN')}
+                      </p>
+                    </div>
+                    <span
+                      className={`text-sm font-bold ${isCredit ? 'text-emerald-600' : 'text-red-500'}`}
+                    >
+                      {isCredit ? '+' : '-'}
+                      {Math.abs(tx.amount).toLocaleString('vi-VN')}đ
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
