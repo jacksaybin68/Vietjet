@@ -6,6 +6,23 @@
 **Tài khoản test:** `user@vietjetsim.vn / user123`, `admin@vietjetsim.vn / admin123`
 **Ảnh bằng chứng:** `qa-screenshots/01…09-*.webp`
 
+> **Cập nhật 25/09/2026 — báo cáo này mô tả trạng thái ngày 23/09 và đã lệch ở
+> một số điểm. Trạng thái mới nhất:**
+>
+> | Hạng mục | Ngày 23/09 | Hiện tại |
+> |---|---|---|
+> | `type-check` | ✅ 0 lỗi | ✅ 0 lỗi |
+> | `npm run lint` | 334 warning | ✅ **0 error, 0 warning** |
+> | `npm test` | 309 test | ✅ **367 test** (37 file) |
+> | `test:smoke` | ✅ pass | ✅ pass |
+> | `npm run build` | ✅ pass | ✅ pass |
+> | Hydration mismatch | đã sửa | ✅ đã sửa thật (`DealCard`/`PriceBreakdown` dùng `Intl.NumberFormat('vi-VN')`) |
+> | RBAC | *advisory only* | ✅ **đã enforce thật** — migration `019_role_permissions.sql` |
+> | Mã đặt chỗ | hiển thị UUID/bịa | ✅ hiển thị `booking_code` thật từ DB |
+> | Số liệu dashboard admin | *ghi là dữ liệu mẫu* | ✅ **đã nối API thật** (`getAdminAnalytics`) — ghi chú dưới đây đã lỗi thời |
+>
+> Các mục còn tồn đọng: xem `BAO_CAO_TRANG_THAI_HIEN_TAI.md`.
+
 ---
 
 ## 1. Tổng quan dự án (đọc hiểu)
@@ -184,6 +201,13 @@ middleware.ts     # (tại root project) auth/CSRF/rate-limit — XEM LỖI NẶ
 
 ## 2.5 Việc còn lại (không nằm trong phạm vi đã sửa)
 
-- Số liệu dashboard admin vẫn là dữ liệu mẫu cứng — đã dán nhãn minh bạch, muốn thật thì phải nối API thống kê (`/api/quan-tri/doanh-thu`, `giao-dich`, `dat-ve`).
-- Luồng khách muốn đặt vé không cần đăng nhập: cần thay đổi API + schema (`user_id` nullable) — thay đổi lớn, ngoài phạm vi báo cáo lỗi.
-- 334 warning ESLint còn lại (unused vars, `any`, `<img>`) là nợ kỹ thuật có sẵn.
+> Hai mục đầu dưới đây đã lỗi thời so với code hiện tại (25/09/2026) — xem bảng
+> cập nhật ở đầu file.
+
+- ~~Số liệu dashboard admin vẫn là dữ liệu mẫu cứng~~ → **Đã sửa**: `OverviewTab`
+  và `RevenueTab` gọi `getAdminAnalytics()` / `listAdminFlights()` / `listUsers()`,
+  route `api/quan-tri/cong-cu` truy vấn `sql` thật. Nhãn "dữ liệu mẫu" đã bị gỡ.
+- Luồng khách muốn đặt vé không cần đăng nhập: cần thay đổi API + schema
+  (`user_id` nullable) — thay đổi lớn, ngoài phạm vi báo cáo lỗi. **Vẫn còn.**
+- ~~334 warning ESLint còn lại~~ → **Đã sửa**: `npm run lint` hiện ra 0 error,
+  0 warning.
