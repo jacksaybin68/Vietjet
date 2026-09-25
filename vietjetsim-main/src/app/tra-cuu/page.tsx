@@ -6,6 +6,8 @@ import { Icon } from '@/shared/components/ui';
 import { Header, Footer } from '@/shared/components/navigation';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
+import { useAuth } from '@/contexts/AuthContext';
+import { apiRequest } from '@/shared/services';
 
 interface BookingResult {
   pnr: string;
@@ -24,79 +26,58 @@ interface BookingResult {
   price: number;
 }
 
-const MOCK_BOOKINGS: Record<string, BookingResult> = {
-  VJ8A3F: {
-    pnr: 'VJ8A3F',
-    flightNo: 'VJ 101',
-    from: 'SGN',
-    to: 'HAN',
-    fromCity: 'TP.HCM',
-    toCity: 'Hà Nội',
-    departTime: '06:00',
-    arriveTime: '08:10',
-    date: '25/03/2026',
-    passengerName: 'Nguyễn Văn An',
-    seat: '12A',
-    class: 'Phổ thông',
-    status: 'confirmed',
-    price: 899000,
-  },
-  VJ7B2K: {
-    pnr: 'VJ7B2K',
-    flightNo: 'VJ 503',
-    from: 'HAN',
-    to: 'DAD',
-    fromCity: 'Hà Nội',
-    toCity: 'Đà Nẵng',
-    departTime: '10:30',
-    arriveTime: '12:00',
-    date: '28/03/2026',
-    passengerName: 'Trần Thị Bình',
-    seat: '8C',
-    class: 'Phổ thông',
-    status: 'pending',
-    price: 650000,
-  },
-  VJ5C9M: {
-    pnr: 'VJ5C9M',
-    flightNo: 'VJ 807',
-    from: 'SGN',
-    to: 'PQC',
-    fromCity: 'TP.HCM',
-    toCity: 'Phú Quốc',
-    departTime: '14:15',
-    arriveTime: '15:30',
-    date: '01/04/2026',
-    passengerName: 'Lê Hoàng Minh',
-    seat: '3A',
-    class: 'SkyBoss',
-    status: 'completed',
-    price: 1450000,
-  },
-};
+/** One row as `GET /api/dat-ve` returns it. */
+interface OwnedBooking {
+  id: string;
+  booking_code: string | null;
+  status: BookingResult['status'];
+  total_price: number;
+  created_at: string;
+  flight: {
+    flight_no: string;
+    from_code: string;
+    to_code: string;
+    depart_time: string;
+    arrive_time: string;
+  };
+  passengers: Array<{ name: string }>;
+}
 
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> = {
   pending: { label: 'Chờ thanh toán', color: '#d97706', bg: '#fef3c7' },
   confirmed: { label: 'Đã xác nhận', color: '#059669', bg: '#d1fae5' },
   completed: { label: 'Hoàn thành', color: '#2563eb', bg: '#dbeafe' },
   cancelled: { label: 'Đã hủy', color: '#dc2626', bg: '#fee2e2' },
+  refunded: { label: 'Đã hoàn tiền', color: '#2563eb', bg: '#dbeafe' },
 };
+
+/** `HH:MM` in the viewer's timezone, falling back to the raw value. */
+function toTime(value: string | null | undefined): string {
+  if (!value) return '—';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+}
+
+function toDate(value: string | null | undefined): string {
+  if (!value) return '—';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
 
 export default function TrackBookingPage() {
   const toast = useToast();
+  const { user } = useAuth();
   const [pnr, setPnr] = useState('');
-  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<BookingResult | null>(null);
   const [notFound, setNotFound] = useState(false);
 
   const handleSearch = useCallback(async () => {
-    if (!pnr.trim()) {
+    const code = pnr.trim().toUpperCase();
+    if (!code) {
       toast.error('Lỗi', 'Vui lòng nhập mã đặt chỗ (PNR)');
-      return;
-    }
-    if (!email.trim() || !email.includes('@')) {
-      toast.error('Lỗi', 'Vui lòng nhập email hợp lệ');
       return;
     }
 
@@ -104,23 +85,50 @@ export default function TrackBookingPage() {
     setNotFound(false);
     setResult(null);
 
-    // Simulate API call
-    await new Promise((r) => setTimeout(r, 1200));
+    try {
+      // Only the signed-in customer's own bookings are searched: `/api/dat-ve`
+      // requires a session and filters by `user_id` server-side. A booking code
+      // is only 6 characters, so a public lookup-by-PNR would let anyone walk
+      // the keyspace and read other people's itineraries — the same reason
+      // `/api/checkin/status/[bookingId]` demands a session and ownership.
+      const data = await apiRequest<{ bookings: OwnedBooking[] }>('/api/dat-ve?limit=100');
+      const match = data.bookings.find((b) => (b.booking_code || '').toUpperCase() === code);
 
-    const booking = MOCK_BOOKINGS[pnr.toUpperCase().trim()];
-    if (booking) {
-      setResult(booking);
-      toast.success('Tìm thấy!', `Đặt chỗ ${booking.pnr} của ${booking.passengerName}`);
-    } else {
-      setNotFound(true);
-      toast.warning('Không tìm thấy', 'Không có đặt chỗ nào khớp với thông tin nhập');
+      if (!match) {
+        setNotFound(true);
+        toast.warning('Không tìm thấy', 'Không có đặt chỗ nào khớp với mã bạn nhập');
+        return;
+      }
+
+      setResult({
+        pnr: match.booking_code || code,
+        flightNo: match.flight.flight_no,
+        from: match.flight.from_code,
+        to: match.flight.to_code,
+        fromCity: '',
+        toCity: '',
+        departTime: toTime(match.flight.depart_time),
+        arriveTime: toTime(match.flight.arrive_time),
+        date: toDate(match.flight.depart_time),
+        passengerName: match.passengers[0]?.name || '—',
+        seat: '—',
+        class: '—',
+        status: match.status,
+        price: match.total_price,
+      });
+      toast.success('Tìm thấy!', `Đặt chỗ ${match.booking_code} của bạn`);
+    } catch (error) {
+      toast.error(
+        'Lỗi',
+        error instanceof Error ? error.message : 'Không thể tra cứu, vui lòng thử lại'
+      );
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }, [pnr, email, toast]);
+  }, [pnr, toast]);
 
   const handleReset = useCallback(() => {
     setPnr('');
-    setEmail('');
     setResult(null);
     setNotFound(false);
   }, []);
@@ -138,7 +146,7 @@ export default function TrackBookingPage() {
           </div>
           <h1 className="text-2xl sm:text-3xl font-black mb-1 font-heading-sm">Tra Cứu Đặt Chỗ</h1>
           <p className="text-white/80 text-sm font-koho">
-            Nhập mã đặt chỗ và email để xem thông tin chuyến bay
+            Nhập mã đặt chỗ của bạn để xem thông tin chuyến bay
           </p>
           <Link
             href="/"
@@ -151,8 +159,32 @@ export default function TrackBookingPage() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-8">
+        {/* Not signed in — a booking code is only 6 characters, so the lookup
+            is deliberately restricted to the signed-in customer's own bookings
+            rather than exposed as a public search. */}
+        {!user && (
+          <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center shadow-sm">
+            <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Icon name="LockClosedIcon" size={32} className="text-amber-600" />
+            </div>
+            <h2 className="text-xl font-bold text-stone-900 mb-2">Cần đăng nhập để tra cứu</h2>
+            <p className="text-stone-500 mb-6 text-sm max-w-md mx-auto">
+              Mã đặt chỗ chỉ gồm 6 ký tự, nên tra cứu công khai sẽ khiến bất kỳ ai cũng có thể dò ra
+              hành trình của người khác. Hãy đăng nhập — tra cứu chỉ hiển thị các chuyến của chính
+              bạn.
+            </p>
+            <Link
+              href="/dang-nhap?redirect=%2Ftra-cuu"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition-colors"
+            >
+              <Icon name="ArrowRightIcon" size={18} />
+              Đăng nhập
+            </Link>
+          </div>
+        )}
+
         {/* Search Form */}
-        {!result && !notFound && (
+        {user && !result && !notFound && (
           <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
             <div className="p-6 space-y-4">
               <div>
@@ -170,39 +202,17 @@ export default function TrackBookingPage() {
                     value={pnr}
                     onChange={(e) => setPnr(e.target.value.toUpperCase())}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    placeholder="VD: VJ8A3F"
+                    placeholder="VD: VJ644052"
                     className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                    maxLength={6}
+                    maxLength={8}
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">
-                  Email đặt vé
-                </label>
-                <div className="relative">
-                  <Icon
-                    name="EnvelopeIcon"
-                    size={18}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
-                  />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    placeholder="VD: demo@vietjet.com"
-                    className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                  />
-                </div>
-              </div>
-
-              {/* Demo hint */}
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700">
-                <span className="font-semibold">Gợi ý demo:</span> Nhập PNR:{' '}
-                <code className="font-mono font-bold">VJ8A3F</code> + Email:{' '}
-                <code className="font-mono">demo@vietjet.com</code>
+                <span className="font-semibold">Đang xem tài khoản:</span>{' '}
+                <code className="font-mono">{user.email}</code> — chỉ các đặt chỗ của tài khoản này
+                được hiển thị.
               </div>
 
               <button
@@ -234,8 +244,8 @@ export default function TrackBookingPage() {
             </div>
             <h2 className="text-xl font-bold text-stone-900 mb-2">Không tìm thấy đặt chỗ</h2>
             <p className="text-stone-500 mb-6 text-sm">
-              Không có đặt chỗ nào khớp với mã PNR và email bạn đã nhập. Vui lòng kiểm tra lại thông
-              tin.
+              Không có đặt chỗ nào của tài khoản này khớp với mã bạn đã nhập. Vui lòng kiểm tra lại
+              thông tin.
             </p>
             <button
               onClick={handleReset}
