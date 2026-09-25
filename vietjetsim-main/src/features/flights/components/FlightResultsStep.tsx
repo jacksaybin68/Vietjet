@@ -878,11 +878,12 @@ export default function FlightResultsStep({
             return (
               <div
                 key={flight.id}
+                data-testid="flight-result-card"
                 style={{ transitionDelay: `${Math.min(idx * 50, 300)}ms` }}
-                className={`@container bg-[var(--surface)] rounded-xl border border-primary/30 transition-all hover:shadow-lg relative overflow-hidden flex flex-col xl:flex-row shadow-[0_2px_8px_rgba(209,22,27,0.15)]`}
+                className={`@container bg-[var(--surface)] rounded-xl border border-primary/30 transition-all hover:shadow-lg relative overflow-hidden flex flex-col lg:flex-row shadow-[0_2px_8px_rgba(209,22,27,0.15)]`}
               >
                 {/* Left: Flight Info - responsive */}
-                <div className="w-full xl:w-[240px] shrink-0 p-3 sm:p-4 border-b xl:border-b-0 border-primary/10 flex flex-col justify-between">
+                <div className="w-full lg:w-[240px] shrink-0 p-3 sm:p-4 border-b lg:border-b-0 border-primary/10 flex flex-col justify-between">
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-3">
                     <span className="font-black text-[var(--foreground)] text-sm leading-none font-koho">
                       {flight.flightNo}
@@ -937,26 +938,26 @@ export default function FlightResultsStep({
                 </div>
 
                 {/* Right: Fare Classes - responsive */}
-                <div className="flex-1 min-w-0 grid grid-cols-2 @3xl:grid-cols-4 gap-0.5 sm:gap-1 p-1 sm:p-2 bg-[var(--surface-2)]">
+                <div className="flex-1 min-w-0 grid grid-cols-4 gap-0.5 bg-[var(--surface-2)] p-1">
                   {fareClasses.map((fc) => (
                     <div
                       key={fc.id}
-                      className="flex flex-col relative rounded-lg overflow-hidden group"
+                      className="relative flex min-w-0 flex-col overflow-hidden rounded-lg group"
                     >
-                      <div className={`text-center py-1 sm:py-1.5 ${fc.headerClass}`}>
-                        <div className="text-[9px] sm:text-[10px] font-black uppercase font-koho tracking-widest">
+                      <div className={`text-center py-1 ${fc.headerClass}`}>
+                        <div className="truncate text-[8px] font-black uppercase font-koho tracking-tight sm:text-[9px] 2xl:text-[10px]">
                           {fc.name}
                         </div>
                       </div>
-                      <div className="bg-[var(--surface)] flex flex-col justify-center items-center flex-1 p-2 sm:p-3 border-x border-b border-[var(--border)] rounded-b-lg">
+                      <div className="bg-[var(--surface)] flex flex-col justify-center items-center flex-1 p-1 sm:p-1.5 2xl:p-3 border-x border-b border-[var(--border)] rounded-b-lg">
                         <div
-                          className={`text-[11px] sm:text-sm font-black ${fc.priceColor} font-koho mb-2 sm:mb-3 leading-none`}
+                          className={`text-[8px] sm:text-[9px] 2xl:text-sm font-black ${fc.priceColor} font-koho mb-1.5 sm:mb-2 2xl:mb-3 leading-none break-words text-center`}
                         >
                           {fc.price.toLocaleString('vi-VN')}₫
                         </div>
                         <button
                           onClick={() => onSelect({ ...flight, price: fc.price, class: fc.cabin })}
-                          className={`w-[75%] py-1 sm:py-1.5 rounded text-[10px] sm:text-xs font-bold transition-all border ${fc.color}`}
+                          className={`w-full py-1 rounded text-[8px] sm:text-[9px] 2xl:text-xs font-bold transition-all border ${fc.color}`}
                         >
                           Chọn
                         </button>

@@ -127,6 +127,11 @@ export interface PassengerRecord {
   dob: string | null;
   id_number: string | null;
   gender: 'male' | 'female' | 'other';
+  country_code: string;
+  phone: string | null;
+  email: string | null;
+  residence: string | null;
+  skyjoy_member_id: string | null;
   created_at: string;
 }
 
@@ -694,8 +699,24 @@ export async function createBooking(
     flight_id: string;
     total_price: number;
   },
-  passengers: { name: string; dob?: string; id_number?: string; gender?: string }[],
-  seats?: string[] // seat numbers to reserve
+  passengers: {
+    name: string;
+    dob?: string;
+    id_number?: string;
+    gender?: string;
+    country_code?: string;
+    phone?: string;
+    email?: string;
+    residence?: string | null;
+    skyjoy_member_id?: string | null;
+  }[],
+  seats?: string[],
+  consents: {
+    marketing: boolean;
+    survey: boolean;
+    retainForFutureBooking: boolean;
+    policyAccepted: boolean;
+  } = { marketing: false, survey: false, retainForFutureBooking: false, policyAccepted: true }
 ): Promise<BookingRecord> {
   // One statement for the booking, passengers and seats so the whole booking is
   // atomic. The child rows select the new booking's id from a data-modifying
@@ -708,6 +729,11 @@ export async function createBooking(
     dob: p.dob || null,
     id_number: p.id_number || null,
     gender: p.gender || 'male',
+    country_code: p.country_code || 'VN',
+    phone: p.phone || null,
+    email: p.email || null,
+    residence: p.residence || null,
+    skyjoy_member_id: p.skyjoy_member_id || null,
   }));
 
   const rows = (await sql`
@@ -717,11 +743,31 @@ export async function createBooking(
       RETURNING id, user_id, flight_id, status, total_price, created_at, updated_at
     ),
     inserted_passengers AS (
-      INSERT INTO passengers (booking_id, name, dob, id_number, gender)
-      SELECT nb.id, p.name, p.dob, p.id_number, p.gender
+      INSERT INTO passengers (
+        booking_id, name, dob, id_number, gender, country_code, phone, email, residence, skyjoy_member_id
+      )
+      SELECT
+        nb.id, p.name, p.dob, p.id_number, p.gender, p.country_code,
+        p.phone, p.email, p.residence, p.skyjoy_member_id
       FROM new_booking nb
       CROSS JOIN jsonb_to_recordset(${JSON.stringify(passengerRows)}::jsonb)
-        AS p(name text, dob date, id_number text, gender text)
+        AS p(
+          name text, dob date, id_number text, gender text, country_code text,
+          phone text, email text, residence text, skyjoy_member_id text
+        )
+      RETURNING 1
+    ),
+    inserted_consents AS (
+      INSERT INTO booking_consents (
+        booking_id, marketing, survey, retain_for_future_booking, policy_accepted
+      )
+      SELECT
+        nb.id,
+        ${consents.marketing},
+        ${consents.survey},
+        ${consents.retainForFutureBooking},
+        ${consents.policyAccepted}
+      FROM new_booking nb
       RETURNING 1
     ),
     inserted_seats AS (
