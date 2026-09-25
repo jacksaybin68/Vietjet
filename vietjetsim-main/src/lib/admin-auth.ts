@@ -1,8 +1,18 @@
 /**
- * Admin Route Helper — Simplified auth + authorization
+ * Admin Route Helper — authentication + enforced per-permission authorization
  *
  * Roles collapse to 'user' and 'admin'; admin-family legacy names count as
- * admin (see `lib/roles.ts`). Admins have full access to all admin APIs.
+ * admin (see `lib/roles.ts`).
+ *
+ * The `permission` argument IS enforced. It is resolved against the
+ * `role_permissions` table (migration 019) via `lib/role-permissions.ts`, with
+ * two documented exceptions:
+ *   * `super_admin` bypasses the table, so an operator always has a way back in.
+ *   * a route that passes no permission is admin-only, unchecked by design.
+ *
+ * A role with no rows in the table is fail-closed: it can call no guarded
+ * route. That is deliberate — silently treating "unconfigured" as "allow
+ * everything" would reintroduce the hole this closes.
  *
  * Usage (in an API route):
  *   import { verifyAdminRequest } from '@/lib/admin-auth';
@@ -19,9 +29,7 @@ import { verifyAccessToken } from '@/lib/auth';
 import type { JWTPayload } from '@/lib/auth';
 import { validateCsrfOrReject } from '@/lib/csrf';
 import { isAdminRole } from '@/lib/roles';
-
-// We still import Permission type for API documentation purposes,
-// but permission checks are simplified — admin always has full access.
+import { getRolePermissionsFromDb, bypassesPermissionTable } from '@/lib/role-permissions';
 import type { Permission } from '@/lib/rbac';
 
 export interface VerifyAdminSuccess {
@@ -40,24 +48,16 @@ export interface VerifyAdminFailure {
 export type VerifyAdminResult = VerifyAdminSuccess | VerifyAdminFailure;
 
 /**
- * Verify that a request is from an authenticated admin user.
- * Since we only have 1 admin role with full permissions, the permission
- * parameter is kept for backward compatibility but is not enforced.
+ * Verify that a request is from an authenticated admin user who holds the
+ * required `permission`.
  *
- * Concretely: `isAdminRole()` accepts six role names (`admin`, `super_admin`,
- * `admin_ops`, `admin_finance`, `admin_support`, `admin_content`) and every
- * one of them gets full access to every admin route. `hasPermission()` in
- * `@/lib/rbac` behaves the same way, and the migrations define no
- * `role_permissions` table, so there is currently no per-permission check
- * anywhere in the request path.
- *
- * Callers still pass their required permission so the intent is captured at
- * each route and enforcement can be switched on in one place later — but do
- * not read that argument as a control that is active today.
+ * Order matters: token, then CSRF, then role, then permission. CSRF is checked
+ * before the role gate so a cross-site request can never trigger admin side
+ * effects, even with a valid stolen cookie.
  */
 export async function verifyAdminRequest(
   request: NextRequest,
-  _permission?: Permission
+  permission?: Permission
 ): Promise<VerifyAdminResult> {
   const token = request.cookies.get('access_token')?.value;
 
@@ -100,6 +100,25 @@ export async function verifyAdminRequest(
         { status: 403 }
       ),
     };
+  }
+
+  // No permission requested → admin-only route, nothing narrower to check.
+  if (permission && !bypassesPermissionTable(payload.role)) {
+    const granted = await getRolePermissionsFromDb(payload.role);
+    if (!granted.has(permission)) {
+      return {
+        payload,
+        error: 'Forbidden',
+        response: NextResponse.json(
+          {
+            error: 'Forbidden',
+            message: 'Tài khoản không có quyền thực hiện thao tác này',
+            requiredPermission: permission,
+          },
+          { status: 403 }
+        ),
+      };
+    }
   }
 
   return { payload };
