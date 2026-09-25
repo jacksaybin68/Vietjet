@@ -324,16 +324,18 @@ export default function MyFlightsPage() {
           </p>
 
           {/* Form tra cứu đặt chỗ — 2 cột: trường nhập + hình ảnh. Chip thứ hai
-              ("Chuyến bay của tôi") ẩn khối này đi và mở danh sách đặt chỗ. */}
+              ("Chuyến bay của tôi") ẩn khối này đi và mở danh sách đặt chỗ.
+              Desktop giữ `min-h` để khung luôn cao thoáng như thiết kế, kể cả
+              khi nút đổi chữ sang "Đang tìm…" lúc đang tải. */}
           <form
             onSubmit={handleSearchBooking}
-            className={`mt-6 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5 shadow-vj-md ${
+            className={`mt-6 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6 shadow-vj-md md:min-h-[400px] lg:p-8 ${
               view === 'search' ? '' : 'hidden'
             }`}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Cột trái: Trường nhập */}
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-4 md:justify-center">
                 <div className="relative">
                   <label
                     htmlFor="booking-code"
@@ -348,7 +350,7 @@ export default function MyFlightsPage() {
                     value={bookingCode}
                     onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
                     placeholder=" "
-                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 pb-3 pt-7 text-sm font-medium uppercase text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
+                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 pb-2 pt-6 text-base font-black uppercase text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
                   />
                 </div>
                 <div className="relative">
@@ -364,7 +366,7 @@ export default function MyFlightsPage() {
                     value={surname}
                     onChange={(e) => setSurname(e.target.value)}
                     placeholder=" "
-                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 pb-3 pt-7 text-sm font-medium text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
+                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 pb-3.5 pt-8 text-sm font-medium text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
                   />
                 </div>
                 <div className="relative">
@@ -380,13 +382,13 @@ export default function MyFlightsPage() {
                     value={givenName}
                     onChange={(e) => setGivenName(e.target.value)}
                     placeholder=" "
-                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 pb-3 pt-7 text-sm font-medium text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
+                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 pb-3.5 pt-8 text-sm font-medium text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="vj-cta mt-1 inline-flex h-10 items-center justify-center self-start rounded-lg px-7 text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                  className="vj-cta mt-1 inline-flex h-11 items-center justify-center self-start rounded-lg px-7 text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loading ? 'Đang tìm…' : 'Tìm kiếm'}
                 </button>
@@ -399,7 +401,7 @@ export default function MyFlightsPage() {
                   alt="Mua ngoại tệ dễ dàng khi đặt vé"
                   width={640}
                   height={360}
-                  className="w-full h-auto rounded-xl object-cover max-h-[300px]"
+                  className="w-full h-auto rounded-xl object-cover max-h-[340px]"
                 />
               </div>
             </div>

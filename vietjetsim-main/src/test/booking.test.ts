@@ -151,7 +151,8 @@ describe('Booking Database Module', () => {
       // undefined and violated passengers.booking_id NOT NULL.
       const [strings, ...params] = (sql as any).mock.calls[0];
       expect(strings.join(' ')).toContain('WITH new_booking AS');
-      expect(strings.join(' ')).toContain('SELECT nb.id, p.name');
+      expect(strings.join(' ')).toContain('nb.id, p.name');
+      expect(strings.join(' ')).toContain('INSERT INTO booking_consents');
       expect(params.every((param: unknown) => param !== undefined)).toBe(true);
     });
   });

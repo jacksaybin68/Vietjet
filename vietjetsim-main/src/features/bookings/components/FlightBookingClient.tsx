@@ -13,6 +13,7 @@ import { ApiRequestError } from '@/shared/services';
 import {
   getBookingTotals,
   type AncillaryId,
+  type BookingConsents,
   type Flight,
   type Passenger,
   type BookingState,
@@ -21,8 +22,8 @@ import {
 
 const STEPS = [
   { id: 1, label: 'Chọn chuyến bay' },
-  { id: 2, label: 'Thông tin hành khách' },
-  { id: 3, label: 'Chọn chỗ ngồi' },
+  { id: 2, label: 'Chọn chỗ ngồi' },
+  { id: 3, label: 'Thông tin hành khách' },
 ];
 
 function FlightBookingClientInner() {
@@ -44,10 +45,16 @@ function FlightBookingClientInner() {
       dob: '',
       idNumber: '',
       gender: 'male',
+      countryCode: 'VN',
+      phone: '',
+      email: '',
+      residence: '',
+      skyJoyMemberId: '',
     })),
     selectedSeats: [],
     ancillaries: [],
   }));
+  const [selectedSeatPrices, setSelectedSeatPrices] = useState<number[]>([]);
   const router = useRouter();
   const toast = useToast();
 
@@ -60,7 +67,13 @@ function FlightBookingClientInner() {
   };
 
   const handleFlightSelect = (flight: Flight) => {
-    setBooking((b) => ({ ...b, selectedFlight: flight }));
+    setBooking((b) => ({
+      ...b,
+      selectedFlight: flight,
+      selectedSeats: [],
+      ancillaries: [],
+    }));
+    setSelectedSeatPrices([]);
     goStep(2);
     toast.success(
       'Chuyến bay đã được chọn!',
@@ -68,30 +81,34 @@ function FlightBookingClientInner() {
     );
   };
 
-  const handlePassengerSubmit = (passengers: Passenger[]) => {
-    setBooking((b) => ({ ...b, passengers }));
-    goStep(3);
-    toast.success(
-      'Thông tin hành khách đã lưu!',
-      `${passengers.length} hành khách đã được xác nhận. Vui lòng chọn chỗ ngồi.`
-    );
-  };
-
-  const handleSeatConfirm = async (
+  const handleSeatContinue = (
     seats: string[],
     seatPrices: number[],
     ancillaries: AncillaryId[]
-  ): Promise<boolean> => {
-    try {
-      const flightId = booking.selectedFlight?.id;
-      if (!flightId) {
-        toast.error('Lỗi đặt chỗ', 'Vui lòng chọn chuyến bay trước.');
-        return false;
-      }
-      const passengers = booking.passengers;
-      const basePrice = booking.selectedFlight?.price || 0;
+  ): boolean => {
+    setBooking((b) => ({ ...b, selectedSeats: seats, ancillaries }));
+    setSelectedSeatPrices(seatPrices);
+    goStep(3);
+    toast.success(
+      'Chỗ ngồi đã được chọn!',
+      `Ghế ${seats.join(', ')} đã được giữ. Vui lòng nhập thông tin hành khách.`
+    );
+    return true;
+  };
 
-      const seatsFee = seatPrices.reduce((sum, price) => sum + price, 0);
+  const handlePassengerSubmit = async (passengers: Passenger[], consents: BookingConsents) => {
+    try {
+      const selectedFlight = booking.selectedFlight;
+      const flightId = selectedFlight?.id;
+      if (!selectedFlight || !flightId) {
+        toast.error('Lỗi đặt chỗ', 'Vui lòng chọn chuyến bay trước.');
+        return;
+      }
+
+      const seats = booking.selectedSeats;
+      const ancillaries = booking.ancillaries;
+      const basePrice = selectedFlight.price;
+      const seatsFee = selectedSeatPrices.reduce((sum, price) => sum + price, 0);
       const totals = getBookingTotals({
         farePerPassenger: basePrice,
         passengerCount: passengers.length,
@@ -102,27 +119,35 @@ function FlightBookingClientInner() {
       const data = await createBooking({
         flight_id: flightId,
         total_price: totals.total,
-        passengers: passengers,
-        seats: seats,
+        passengers,
+        seats,
+        consents,
       });
-
       const bookingId = data.booking.id;
 
-      setBooking((b) => ({ ...b, selectedSeats: seats, ancillaries }));
+      setBooking((b) => ({
+        ...b,
+        passengers,
+        selectedSeats: seats,
+        ancillaries,
+      }));
 
       sessionStorage.setItem(
         'vjsim_booking',
         JSON.stringify({
-          bookingId: bookingId,
-          flightNo: booking.selectedFlight?.flightNo,
-          from: booking.selectedFlight?.from,
-          to: booking.selectedFlight?.to,
-          fromCity: booking.selectedFlight?.fromCity,
-          toCity: booking.selectedFlight?.toCity,
-          departTime: booking.selectedFlight?.departTime,
-          arriveTime: booking.selectedFlight?.arriveTime,
+          bookingId,
+          flightNo: selectedFlight.flightNo,
+          from: selectedFlight.from,
+          to: selectedFlight.to,
+          fromCity: selectedFlight.fromCity,
+          toCity: selectedFlight.toCity,
+          departTime: selectedFlight.departTime,
+          arriveTime: selectedFlight.arriveTime,
           date: new Date().toLocaleDateString('vi-VN'),
-          passengers: passengers.map((p, i) => ({ name: p.name, seat: seats[i] })),
+          passengers: passengers.map((passenger, index) => ({
+            name: passenger.name,
+            seat: seats[index],
+          })),
           fareSubtotal: totals.fareSubtotal,
           tax: totals.taxAndFee,
           seatFee: totals.seatFee,
@@ -133,24 +158,21 @@ function FlightBookingClientInner() {
       );
 
       toast.success(
-        'Chỗ ngồi đã được chọn!',
-        `Ghế ${seats.join(', ')} đã được giữ. Mã ĐC: ${bookingId}. Đang chuyển đến thanh toán...`,
+        'Thông tin hành khách đã được xác nhận!',
+        `Mã đặt chỗ: ${bookingId}. Đang chuyển đến thanh toán...`,
         { duration: 3000 }
       );
       setTimeout(() => router.push(`/thanh-toan?bookingId=${bookingId}`), 800);
-      return true;
     } catch (err) {
       // Booking creation requires a session (the API answers 401); send guests
-      // to login with the current search kept as the post-login destination
-      // instead of surfacing a raw "Authentication required" toast.
+      // to login with the current search kept as the post-login destination.
       if (err instanceof ApiRequestError && err.status === 401) {
         toast.error('Yêu cầu đăng nhập', 'Vui lòng đăng nhập để hoàn tất đặt vé.');
         const target = encodeURIComponent(window.location.pathname + window.location.search);
         router.push(`/dang-nhap?redirect=${target}`);
-        return false;
+        return;
       }
       toast.error('Lỗi đặt chỗ', err instanceof Error ? err.message : 'Không thể tạo booking');
-      return false;
     }
   };
 
@@ -198,7 +220,10 @@ function FlightBookingClientInner() {
       {/* Booking progress — compact, sticky below the global header. */}
       <div className="border-b border-[var(--border)] bg-[var(--background)] shadow-sm">
         <div className="mx-auto max-w-5xl px-3 py-3 sm:px-4 md:px-6">
-          <div className="flex items-center gap-2 overflow-x-auto sm:gap-3 md:gap-4">
+          <nav
+            aria-label="Tiến trình đặt vé"
+            className="mx-auto flex max-w-2xl items-center justify-center gap-2 overflow-x-auto sm:gap-3 md:gap-4"
+          >
             {STEPS.map((s, i) => (
               <React.Fragment key={s.id}>
                 <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-shrink-0">
@@ -260,7 +285,7 @@ function FlightBookingClientInner() {
                 )}
               </React.Fragment>
             ))}
-          </div>
+          </nav>
         </div>
       </div>
 
@@ -277,21 +302,26 @@ function FlightBookingClientInner() {
           </ErrorBoundary>
         )}
         {step === 2 && (
-          <ErrorBoundary inline variant="booking" retryLabel="Nhập lại thông tin">
-            <PassengerInfoStep
+          <ErrorBoundary inline variant="booking" retryLabel="Chọn lại chỗ ngồi">
+            <SeatSelectionStep
               flight={booking.selectedFlight!}
-              passengerCount={booking.passengers.length}
-              onSubmit={handlePassengerSubmit}
+              passengers={booking.passengers}
+              initialSeats={booking.selectedSeats}
+              initialAncillaries={booking.ancillaries}
+              onConfirm={handleSeatContinue}
               onBack={() => goStep(1)}
             />
           </ErrorBoundary>
         )}
         {step === 3 && (
-          <ErrorBoundary inline variant="booking" retryLabel="Chọn lại chỗ ngồi">
-            <SeatSelectionStep
+          <ErrorBoundary inline variant="booking" retryLabel="Nhập lại thông tin">
+            <PassengerInfoStep
               flight={booking.selectedFlight!}
-              passengers={booking.passengers}
-              onConfirm={handleSeatConfirm}
+              passengerCount={booking.passengers.length}
+              initialPassengers={booking.passengers}
+              seatFee={selectedSeatPrices.reduce((sum, price) => sum + price, 0)}
+              ancillaries={booking.ancillaries}
+              onSubmit={handlePassengerSubmit}
               onBack={() => goStep(2)}
             />
           </ErrorBoundary>

@@ -18,10 +18,12 @@ import BookingBottomBar from './BookingBottomBar';
 interface Props {
   flight: Flight;
   passengers: Passenger[];
+  initialSeats?: string[];
+  initialAncillaries?: AncillaryId[];
   /**
-   * Confirm the selected seats. Returns whether the booking advanced (true =
-   * redirecting to payment); false/throw keeps the button re-enableable so a
-   * failed API call does not leave the spinner stuck.
+   * Save the seat selection and continue to passenger details. Returns whether
+   * the wizard advanced so the seat picker can keep its button enabled when the
+   * parent rejects the selection.
    */
   onConfirm: (
     seats: string[],
@@ -168,9 +170,16 @@ function formatTime(seconds: number): string {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-export default function SeatSelectionStep({ flight, passengers, onConfirm, onBack }: Props) {
-  const [selected, setSelected] = useState<string[]>([]);
-  const [ancillaries, setAncillaries] = useState<AncillaryId[]>([]);
+export default function SeatSelectionStep({
+  flight,
+  passengers,
+  initialSeats = [],
+  initialAncillaries = [],
+  onConfirm,
+  onBack,
+}: Props) {
+  const [selected, setSelected] = useState<string[]>(initialSeats);
+  const [ancillaries, setAncillaries] = useState<AncillaryId[]>(initialAncillaries);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [holdTimer, setHoldTimer] = useState<number | null>(null);
@@ -792,8 +801,8 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
                         </>
                       ) : (
                         <>
-                          <Icon name="CreditCardIcon" size={16} />
-                          Tiến hành thanh toán
+                          <Icon name="ArrowRightIcon" size={16} />
+                          Tiếp tục nhập hành khách
                         </>
                       )}
                     </button>
@@ -810,13 +819,13 @@ export default function SeatSelectionStep({ flight, passengers, onConfirm, onBac
               </div>
             </div>
           </div>
-          {/* Sticky totals bar — live total (fare + taxes + seats + add-ons) with
-            the terminal payment CTA, mirroring the real site's pinned footer.
+          {/* Sticky totals bar — keeps the live total visible while the user
+            completes seat selection before moving to passenger details.
             Disabled until every passenger has a seat, same rule as the
             sidebar button above. */}
           <BookingBottomBar
             total={totals.total}
-            ctaLabel="Tiếp tục thanh toán"
+            ctaLabel="Tiếp tục nhập hành khách"
             onCta={handleConfirm}
             disabled={selected.length < passengerCount || isConfirming}
             testId="seat-bottom-bar"

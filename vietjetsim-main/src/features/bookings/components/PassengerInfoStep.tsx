@@ -1,41 +1,72 @@
 'use client';
 import React, { useState } from 'react';
-import { Flight, Passenger } from '@/features/bookings/types/booking-flow';
+import { BookingConsents, Flight, Passenger } from '@/features/bookings/types/booking-flow';
 import { Icon, AppImage } from '@/shared/components/ui';
-import { TAX_AND_FEE_RATE, getBookingTotals } from '@/features/bookings/pricing';
+import { TAX_AND_FEE_RATE, getBookingTotals, type AncillaryId } from '@/features/bookings/pricing';
 import BookingBottomBar from './BookingBottomBar';
 
 interface Props {
   flight: Flight;
   passengerCount: number;
-  onSubmit: (passengers: Passenger[]) => void;
+  initialPassengers?: Passenger[];
+  seatFee?: number;
+  ancillaries?: AncillaryId[];
+  onSubmit: (passengers: Passenger[], consents: BookingConsents) => void | Promise<void>;
   onBack: () => void;
 }
 
-export default function PassengerInfoStep({ flight, passengerCount, onSubmit, onBack }: Props) {
+export default function PassengerInfoStep({
+  flight,
+  passengerCount,
+  initialPassengers,
+  seatFee = 0,
+  ancillaries = [],
+  onSubmit,
+  onBack,
+}: Props) {
   const [passengers, setPassengers] = useState<Passenger[]>(
-    Array.from({ length: passengerCount }, () => ({
-      name: '',
-      dob: '',
-      idNumber: '',
-      gender: 'male',
-    }))
+    initialPassengers ??
+      Array.from({ length: passengerCount }, () => ({
+        name: '',
+        dob: '',
+        idNumber: '',
+        gender: 'male',
+        countryCode: 'VN',
+        phone: '',
+        email: '',
+        residence: '',
+        skyJoyMemberId: '',
+      }))
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [phoneTouched, setPhoneTouched] = useState<boolean[]>([]);
+  const [emailTouched, setEmailTouched] = useState<boolean[]>([]);
+  const [consents, setConsents] = useState<BookingConsents>({
+    marketing: false,
+    survey: false,
+    retainForFutureBooking: false,
+    policyAccepted: false,
+  });
 
   const totals = getBookingTotals({
     farePerPassenger: flight.price,
     passengerCount,
+    seatFee,
+    ancillaries,
   });
 
   const updatePassenger = (i: number, field: keyof Passenger, value: string) => {
     setPassengers((prev) => prev.map((p, idx) => (idx === i ? { ...p, [field]: value } : p)));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    onSubmit(passengers);
+    try {
+      await onSubmit(passengers, consents);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -150,7 +181,10 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
 
                     {/* Name */}
                     <div className="sm:col-span-2">
-                      <label className="block text-[10px] sm:text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-1 font-koho">
+                      <label
+                        htmlFor={`passenger-${i}-name`}
+                        className="block text-[10px] sm:text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-1 font-koho"
+                      >
                         Họ và tên{' '}
                         <span className="text-[var(--foreground-subtle)] font-normal normal-case">
                           (như CMND/Hộ chiếu)
@@ -171,9 +205,39 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
                       </div>
                     </div>
 
+                    {/* Country and nationality */}
+                    <div>
+                      <label
+                        htmlFor={`passenger-${i}-countryCode`}
+                        className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)] font-koho sm:text-xs"
+                      >
+                        Quốc gia <span className="text-primary">*</span>
+                      </label>
+                      <div className="relative">
+                        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm">
+                          🇻🇳
+                        </span>
+                        <select
+                          id={`passenger-${i}-countryCode`}
+                          name={`passenger-${i}-countryCode`}
+                          value={p.countryCode}
+                          onChange={(event) =>
+                            updatePassenger(i, 'countryCode', event.target.value)
+                          }
+                          className="w-full appearance-none rounded-xl border border-[var(--border)] bg-[var(--surface-2)] py-2.5 pl-10 pr-3 text-sm text-[var(--foreground)] outline-none focus:border-primary sm:py-3"
+                          required
+                        >
+                          <option value="VN">Việt Nam (+84)</option>
+                        </select>
+                      </div>
+                    </div>
+
                     {/* DOB */}
                     <div>
-                      <label className="block text-[10px] sm:text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-1 font-koho">
+                      <label
+                        htmlFor={`passenger-${i}-dob`}
+                        className="block text-[10px] sm:text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-1 font-koho"
+                      >
                         Ngày sinh
                       </label>
                       <input
@@ -187,10 +251,99 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
                       />
                     </div>
 
-                    {/* ID */}
+                    {/* Phone */}
                     <div>
-                      <label className="block text-[10px] sm:text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-1 font-koho">
-                        Số CMND/Hộ chiếu
+                      <label
+                        htmlFor={`passenger-${i}-phone`}
+                        className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)] font-koho sm:text-xs"
+                      >
+                        Số điện thoại <span className="text-primary">*</span>
+                      </label>
+                      <div className="flex overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-2)] focus-within:border-primary">
+                        <span className="flex items-center border-r border-[var(--border)] px-3 text-sm font-semibold text-[var(--foreground-muted)]">
+                          +84
+                        </span>
+                        <input
+                          id={`passenger-${i}-phone`}
+                          name={`passenger-${i}-phone`}
+                          type="tel"
+                          value={p.phone}
+                          onChange={(event) =>
+                            updatePassenger(i, 'phone', event.target.value.replace(/[^0-9\s]/g, ''))
+                          }
+                          onBlur={() =>
+                            setPhoneTouched((current) => {
+                              const next = [...current];
+                              next[i] = true;
+                              return next;
+                            })
+                          }
+                          aria-describedby={`passenger-${i}-phone-error`}
+                          aria-invalid={
+                            phoneTouched[i] && !/^0\d{8,9}$/.test(p.phone.replace(/\s/g, ''))
+                          }
+                          placeholder="0123456789"
+                          className="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-sm text-[var(--foreground)] outline-none sm:py-3"
+                          required
+                        />
+                      </div>
+                      {phoneTouched[i] && !/^0\d{8,9}$/.test(p.phone.replace(/\s/g, '')) && (
+                        <p
+                          id={`passenger-${i}-phone-error`}
+                          className="mt-1 text-[11px] font-medium text-primary"
+                        >
+                          Vui lòng nhập số điện thoại.
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Email */}
+                    <div>
+                      <label
+                        htmlFor={`passenger-${i}-email`}
+                        className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)] font-koho sm:text-xs"
+                      >
+                        Email <span className="text-primary">*</span>
+                      </label>
+                      <input
+                        id={`passenger-${i}-email`}
+                        name={`passenger-${i}-email`}
+                        type="email"
+                        value={p.email}
+                        onChange={(event) => updatePassenger(i, 'email', event.target.value)}
+                        onBlur={() =>
+                          setEmailTouched((current) => {
+                            const next = [...current];
+                            next[i] = true;
+                            return next;
+                          })
+                        }
+                        aria-describedby={`passenger-${i}-email-error`}
+                        aria-invalid={emailTouched[i] && !/^\S+@\S+\.\S+$/.test(p.email)}
+                        placeholder="email@example.com"
+                        className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2.5 text-sm text-[var(--foreground)] outline-none focus:border-primary sm:px-4 sm:py-3"
+                        required
+                      />
+                      {emailTouched[i] && !/^\S+@\S+\.\S+$/.test(p.email) && (
+                        <p
+                          id={`passenger-${i}-email-error`}
+                          className="mt-1 text-[11px] font-medium text-primary"
+                        >
+                          Vui lòng nhập địa chỉ email của bạn.
+                        </p>
+                      )}
+                    </div>
+
+                    {/* ID */}
+                    <div className="sm:col-span-2">
+                      <label
+                        htmlFor={`passenger-${i}-idNumber`}
+                        className="block text-[10px] sm:text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-1 font-koho"
+                      >
+                        CCCD / Hộ chiếu <span className="text-primary">*</span>
+                        <span className="ml-1 font-normal normal-case text-[var(--foreground-subtle)]">
+                          (Theo giấy tờ tuỳ thân)
+                        </span>
                       </label>
                       <div className={`form-field-float ${p.idNumber ? 'has-value' : ''}`}>
                         <input
@@ -206,10 +359,101 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
                         <label className="form-label-float">012345678</label>
                       </div>
                     </div>
+
+                    <div>
+                      <label
+                        htmlFor={`passenger-${i}-residence`}
+                        className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)] font-koho sm:text-xs"
+                      >
+                        Nơi ở hiện tại
+                      </label>
+                      <input
+                        id={`passenger-${i}-residence`}
+                        name={`passenger-${i}-residence`}
+                        type="text"
+                        value={p.residence}
+                        onChange={(event) => updatePassenger(i, 'residence', event.target.value)}
+                        placeholder="Tỉnh/thành phố"
+                        className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2.5 text-sm text-[var(--foreground)] outline-none focus:border-primary sm:px-4 sm:py-3"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor={`passenger-${i}-skyJoyMemberId`}
+                        className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)] font-koho sm:text-xs"
+                      >
+                        Mã hội viên SkyJoy
+                      </label>
+                      <input
+                        id={`passenger-${i}-skyJoyMemberId`}
+                        name={`passenger-${i}-skyJoyMemberId`}
+                        type="text"
+                        value={p.skyJoyMemberId}
+                        onChange={(event) =>
+                          updatePassenger(
+                            i,
+                            'skyJoyMemberId',
+                            event.target.value.toUpperCase().replace(/\s/g, '')
+                          )
+                        }
+                        placeholder="SJxxxxxxxxxx"
+                        pattern="SJ[0-9]{8,10}"
+                        title="Mã SkyJoy gồm SJ và 8–10 chữ số"
+                        className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2.5 text-sm uppercase text-[var(--foreground)] outline-none focus:border-primary sm:px-4 sm:py-3"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             ))}
+
+            <section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5">
+              <h3 className="font-black text-[var(--foreground)]">Quyền riêng tư và đồng ý</h3>
+              <p className="mt-2 text-xs leading-5 text-[var(--foreground-muted)]">
+                Dữ liệu cá nhân của Quý khách sẽ được Vietjet xử lý theo Chính sách Quyền riêng tư.
+                Quý khách có thể lựa chọn cho phép Vietjet sử dụng dữ liệu cá nhân cho các mục đích
+                sau:
+              </p>
+              <div className="mt-3 space-y-2.5">
+                {[
+                  ['marketing', 'Gửi thông tin khuyến mãi, ưu đãi'],
+                  ['survey', 'Thực hiện khảo sát và chăm sóc khách hàng'],
+                  ['retainForFutureBooking', 'Lưu thông tin hành khách cho các lần đặt vé sau'],
+                ].map(([key, label]) => (
+                  <label
+                    key={key}
+                    className="flex cursor-pointer items-start gap-2.5 text-sm text-[var(--foreground)]"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={consents[key as keyof Omit<BookingConsents, 'policyAccepted'>]}
+                      onChange={(event) =>
+                        setConsents((current) => ({ ...current, [key]: event.target.checked }))
+                      }
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--primary)]"
+                    />
+                    <span>{label}</span>
+                  </label>
+                ))}
+              </div>
+              <label className="mt-4 flex cursor-pointer items-start gap-2.5 border-t border-[var(--border)] pt-4 text-sm font-semibold text-[var(--foreground)]">
+                <input
+                  type="checkbox"
+                  checked={consents.policyAccepted}
+                  onChange={(event) =>
+                    setConsents((current) => ({ ...current, policyAccepted: event.target.checked }))
+                  }
+                  required
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--primary)]"
+                />
+                <span>
+                  Tôi đã đọc, hiểu và đồng ý với Chính sách về quyền riêng tư, Điều lệ vận chuyển,
+                  Điều kiện vé, Quy định vật dụng bị cấm mang lên máy bay và các điều kiện giao dịch
+                  chung tại website Vietjetair.com.
+                </span>
+              </label>
+            </section>
 
             <div className="flex gap-2 sm:gap-3">
               <button
@@ -251,7 +495,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
                   </>
                 ) : (
                   <>
-                    Tiếp theo: Chọn chỗ ngồi
+                    Hoàn tất & thanh toán
                     <Icon name="ArrowRightIcon" size={14} />
                   </>
                 )}
@@ -319,6 +563,22 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
                     {totals.taxAndFee.toLocaleString('vi-VN')}₫
                   </span>
                 </div>
+                {seatFee > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-[var(--foreground-muted)]">Phí chọn chỗ</span>
+                    <span className="font-semibold text-[var(--foreground)]">
+                      {totals.seatFee.toLocaleString('vi-VN')}₫
+                    </span>
+                  </div>
+                )}
+                {totals.ancillaryFee > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-[var(--foreground-muted)]">Dịch vụ bổ sung</span>
+                    <span className="font-semibold text-[var(--foreground)]">
+                      {totals.ancillaryFee.toLocaleString('vi-VN')}₫
+                    </span>
+                  </div>
+                )}
                 <div className="border-t border-[var(--border)] pt-1.5 sm:pt-2 flex justify-between">
                   <span className="font-black text-[var(--foreground)] font-koho">Tổng cộng</span>
                   <span className="font-black text-primary text-sm sm:text-base font-koho">
@@ -335,7 +595,7 @@ export default function PassengerInfoStep({ flight, passengerCount, onSubmit, on
         form from here keeps the browser's native required-field validation. */}
       <BookingBottomBar
         total={totals.total}
-        ctaLabel="Đi tiếp"
+        ctaLabel="Hoàn tất & thanh toán"
         formId="passenger-info-form"
         disabled={isSubmitting}
         testId="pax-bottom-bar"
