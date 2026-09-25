@@ -65,6 +65,17 @@ const inputClass =
   'w-full min-w-0 border-0 bg-transparent px-0 text-sm font-extrabold text-[#333333] outline-none disabled:cursor-not-allowed disabled:text-[#8b9099]';
 const labelClass =
   'block text-[10px] font-bold uppercase leading-none tracking-[0.06em] text-[#8c8c8c]';
+/**
+ * Airport + date share a single bordered box split 2:1 by a `|` hairline, the
+ * way vietjetair.com pairs a route field with its date. The group owns the
+ * border, the rounding and the focus colour; each half is only a segment, so it
+ * contributes padding, its own focus tint and — on mobile, where the halves
+ * stack — the hairline that turns into a top border.
+ */
+const pairedFieldClass = 'flex items-center gap-2 bg-white px-3 py-1.5 focus-within:bg-[#fffdf3]';
+const pairedFieldWideClass = 'sm:col-span-2';
+const fieldGroupClass =
+  'grid grid-cols-1 divide-y divide-[#e4e4e4] overflow-hidden rounded border border-[#e4e4e4] bg-white focus-within:border-[var(--accent)] sm:grid-cols-[2fr_1fr] sm:divide-x sm:divide-y-0';
 const fieldClass =
   'flex items-center gap-2 rounded border border-[#e4e4e4] bg-white px-3 py-1.5 focus-within:border-[var(--accent)]';
 const iconClass = 'shrink-0 text-lg text-[#4a4a4a]';
@@ -128,12 +139,15 @@ export default function HeroSection() {
           >
             {BOOKING_TABS.map((tab) => {
               const active = tab.id === 'booking';
+              const isCargo = tab.id === 'cargo';
               return (
                 <a
                   key={tab.id}
                   href={tab.href}
                   aria-current={active ? 'true' : undefined}
-                  className={`flex flex-1 items-center justify-center rounded-[2px] px-1.5 py-2 text-center text-[10px] font-bold leading-[1.2] transition-colors sm:text-[11px] ${
+                  className={`flex items-center justify-center rounded-[2px] text-center text-[10px] font-bold leading-[1.2] transition-colors sm:text-[11px] ${
+                    isCargo ? 'w-[72px] shrink-0 px-1 py-1.5' : 'flex-1 px-1.5 py-2'
+                  } ${
                     active
                       ? 'bg-[var(--accent)] text-[var(--primary-deep)]'
                       : 'bg-[var(--primary)] text-white hover:bg-[var(--primary-dark)]'
@@ -165,7 +179,7 @@ export default function HeroSection() {
             ))}
 
             <a
-              href="/tim-ve"
+              href="/trang-chu#hero-booking-form"
               className="ml-auto flex items-center text-xs font-bold text-white hover:underline"
             >
               Nhiều chặng
@@ -192,35 +206,77 @@ export default function HeroSection() {
           {/* Departure / destination paired with their dates, with the swap
               control hugging the left gutter between the two rows. */}
           <div className="relative">
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1.3fr_1fr]">
-              <AirportField
-                label="Điểm khởi hành"
-                value={from}
-                onChange={setFrom}
-                icon={<MdFlightTakeoff className={iconClass} />}
-              />
-              <DateField
-                label="Ngày đi"
-                value={departDate}
-                min={toInputDate(new Date())}
-                onChange={setDepartDate}
-              />
+            <div className={fieldGroupClass}>
+              <label className={pairedFieldClass}>
+                <MdFlightTakeoff className={iconClass} />
+                <span className="min-w-0 flex-1">
+                  <span className={labelClass}>Điểm khởi hành</span>
+                  <select
+                    value={from}
+                    onChange={(event) => setFrom(event.target.value)}
+                    aria-label="Điểm khởi hành"
+                    className={`${inputClass} cursor-pointer appearance-none`}
+                  >
+                    {AIRPORTS.map((airport) => (
+                      <option key={airport.code} value={airport.code}>
+                        {airport.city} ({airport.code})
+                      </option>
+                    ))}
+                  </select>
+                </span>
+              </label>
+              <label className={pairedFieldClass}>
+                <MdCalendarMonth className={iconClass} />
+                <span className="min-w-0 flex-1">
+                  <span className={labelClass}>Ngày đi</span>
+                  <input
+                    type="date"
+                    value={departDate}
+                    min={toInputDate(new Date())}
+                    onChange={(event) => setDepartDate(event.target.value)}
+                    aria-label="Ngày đi"
+                    className={`${inputClass} cursor-pointer`}
+                  />
+                </span>
+              </label>
             </div>
 
-            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-[1.3fr_1fr]">
-              <AirportField
-                label="Điểm đến"
-                value={to}
-                onChange={setTo}
-                icon={<MdFlightLand className={iconClass} />}
-              />
+            <div className={`mt-2 ${fieldGroupClass}`}>
+              <label
+                className={`${pairedFieldClass}${roundTrip ? '' : ` ${pairedFieldWideClass}`}`}
+              >
+                <MdFlightLand className={iconClass} />
+                <span className="min-w-0 flex-1">
+                  <span className={labelClass}>Điểm đến</span>
+                  <select
+                    value={to}
+                    onChange={(event) => setTo(event.target.value)}
+                    aria-label="Điểm đến"
+                    className={`${inputClass} cursor-pointer appearance-none`}
+                  >
+                    {AIRPORTS.map((airport) => (
+                      <option key={airport.code} value={airport.code}>
+                        {airport.city} ({airport.code})
+                      </option>
+                    ))}
+                  </select>
+                </span>
+              </label>
               {roundTrip && (
-                <DateField
-                  label="Ngày về"
-                  value={returnDate}
-                  min={departDate}
-                  onChange={setReturnDate}
-                />
+                <label className={pairedFieldClass}>
+                  <MdCalendarMonth className={iconClass} />
+                  <span className="min-w-0 flex-1">
+                    <span className={labelClass}>Ngày về</span>
+                    <input
+                      type="date"
+                      value={returnDate}
+                      min={departDate}
+                      onChange={(event) => setReturnDate(event.target.value)}
+                      aria-label="Ngày về"
+                      className={`${inputClass} cursor-pointer`}
+                    />
+                  </span>
+                </label>
               )}
             </div>
 
@@ -283,67 +339,5 @@ export default function HeroSection() {
         </form>
       </div>
     </section>
-  );
-}
-
-function AirportField({
-  label,
-  value,
-  onChange,
-  icon,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  icon: React.ReactNode;
-}) {
-  return (
-    <label className={fieldClass}>
-      {icon}
-      <span className="min-w-0 flex-1">
-        <span className={labelClass}>{label}</span>
-        <select
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          aria-label={label}
-          className={`${inputClass} cursor-pointer appearance-none`}
-        >
-          {AIRPORTS.map((airport) => (
-            <option key={airport.code} value={airport.code}>
-              {airport.city} ({airport.code})
-            </option>
-          ))}
-        </select>
-      </span>
-    </label>
-  );
-}
-
-function DateField({
-  label,
-  value,
-  min,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  min: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <label className={fieldClass}>
-      <MdCalendarMonth className={iconClass} />
-      <span className="min-w-0 flex-1">
-        <span className={labelClass}>{label}</span>
-        <input
-          type="date"
-          value={value}
-          min={min}
-          onChange={(event) => onChange(event.target.value)}
-          aria-label={label}
-          className={`${inputClass} cursor-pointer`}
-        />
-      </span>
-    </label>
   );
 }

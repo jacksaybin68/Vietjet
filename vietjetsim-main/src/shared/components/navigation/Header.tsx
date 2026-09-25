@@ -7,7 +7,6 @@ import { usePathname } from 'next/navigation';
 import {
   HiChevronLeft,
   HiChevronRight,
-  HiOutlineGlobeAlt,
   HiOutlineLogout,
   HiOutlineMenu,
   HiOutlineUserCircle,
@@ -25,7 +24,6 @@ import {
   RiVipCrownLine,
 } from 'react-icons/ri';
 import { useAuth } from '@/contexts/AuthContext';
-import { ThemeToggle } from '@/shared/components/ui';
 
 const ANNOUNCEMENTS = [
   'Lưu ý thời gian thay đổi nhà ga và lịch bay trước khi khởi hành.',
@@ -34,7 +32,7 @@ const ANNOUNCEMENTS = [
 ];
 
 // Nav theo đúng bốn mục của vietjetair.com (site thật render uppercase qua CSS);
-// "Trang chủ" đi qua logo, CTA "Đặt vé" nằm ở nút vàng bên phải header.
+// "Trang chủ" đi qua logo; thao tác đặt vé luôn dẫn về form booking trên trang chủ.
 const NAV_LINKS = [
   { label: 'Chuyến bay của tôi', href: '/chuyen-bay-cua-toi' },
   { label: 'Online Check-in', href: '/lam-thu-tuc' },
@@ -49,7 +47,7 @@ interface ServiceLink {
 }
 
 const SERVICE_LINKS: ServiceLink[] = [
-  { label: 'Đặt vé', href: '/tim-ve', Icon: RiFlightTakeoffLine },
+  { label: 'Đặt vé', href: '/trang-chu#hero-booking-form', Icon: RiFlightTakeoffLine },
   { label: 'Mua sắm', href: '/dich-vu?service=lounge', Icon: RiShoppingBag3Line },
   { label: 'Khách sạn', href: '/dich-vu?service=lounge', Icon: RiHotelLine },
   { label: 'E-Voucher', href: '/dich-vu?service=lounge', Icon: RiGiftLine },
@@ -72,18 +70,14 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
 
-  const accountLinks = user
-    ? [
-        ['Tài khoản của tôi', '/tai-khoan'],
-        ['Chuyến bay của tôi', '/chuyen-bay-cua-toi'],
-        ['Ví và thanh toán', '/tai-khoan?tab=wallet'],
-        ['Cài đặt bảo mật', '/tai-khoan?tab=security'],
-      ]
-    : [
-        ['Đăng nhập', '/dang-nhap'],
-        ['Đăng ký', '/dang-nhap?tab=register'],
-        ['Tra cứu đặt chỗ', '/tra-cuu'],
-      ];
+  // Menu tài khoản chỉ dành cho khách đã đăng nhập. Khách chưa đăng nhập thấy
+  // "Đăng nhập" / "Đăng ký" ngay trên thanh header, không qua menu này.
+  const accountLinks = [
+    ['Tài khoản của tôi', '/tai-khoan'],
+    ['Chuyến bay của tôi', '/chuyen-bay-cua-toi'],
+    ['Ví và thanh toán', '/tai-khoan?tab=wallet'],
+    ['Cài đặt bảo mật', '/tai-khoan?tab=security'],
+  ] as const;
 
   const shiftAnnouncement = (delta: number) => {
     setAnnouncementIndex((index) => (index + delta + ANNOUNCEMENTS.length) % ANNOUNCEMENTS.length);
@@ -181,27 +175,21 @@ export default function Header() {
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
-          <Link
-            href="/tra-cuu"
-            className="hidden min-h-10 items-center gap-1.5 rounded-lg px-2 text-xs font-bold text-white/85 hover:bg-white/10 hover:text-white md:flex"
-          >
-            <HiOutlineGlobeAlt aria-hidden="true" className="text-base" />
-            Tra cứu
-          </Link>
-          <ThemeToggle />
-          <div ref={accountMenuRef} className="relative">
-            <button
-              type="button"
-              onClick={() => setAccountMenuOpen((open) => !open)}
-              aria-expanded={accountMenuOpen}
-              className="flex min-h-10 items-center gap-1.5 rounded-lg border border-white/50 bg-transparent px-2.5 text-xs font-bold text-white hover:bg-white/10 sm:px-3"
-            >
-              <HiOutlineUserCircle aria-hidden="true" className="text-lg" />
-              <span className="hidden sm:inline">{user ? 'Tài khoản' : 'SkyID'}</span>
-            </button>
-            {accountMenuOpen && (
-              <div className="absolute right-0 top-[calc(100%+8px)] w-64 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] py-2 shadow-[0_16px_40px_rgba(0,0,0,0.14)]">
-                {user && (
+          {/* Đã đăng nhập: menu tài khoản. Chưa đăng nhập: "Đăng nhập" / "Đăng ký"
+              nằm thẳng trên thanh header, không chui vào dropdown nữa. */}
+          {user ? (
+            <div ref={accountMenuRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setAccountMenuOpen((open) => !open)}
+                aria-expanded={accountMenuOpen}
+                className="flex min-h-10 items-center gap-1.5 rounded-lg border border-white/50 bg-transparent px-2.5 text-xs font-bold text-white hover:bg-white/10 sm:px-3"
+              >
+                <HiOutlineUserCircle aria-hidden="true" className="text-lg" />
+                <span className="hidden sm:inline">Tài khoản</span>
+              </button>
+              {accountMenuOpen && (
+                <div className="absolute right-0 top-[calc(100%+8px)] w-64 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] py-2 shadow-[0_16px_40px_rgba(0,0,0,0.14)]">
                   <div className="border-b border-[var(--border)] px-4 py-3">
                     <p className="truncate text-sm font-bold text-[var(--foreground)]">
                       {user.fullName || user.email}
@@ -210,18 +198,16 @@ export default function Header() {
                       {user.email}
                     </p>
                   </div>
-                )}
-                {accountLinks.map(([label, href]) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    onClick={() => setAccountMenuOpen(false)}
-                    className="block px-4 py-2.5 text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--surface)] hover:text-[var(--primary)]"
-                  >
-                    {label}
-                  </Link>
-                ))}
-                {user && (
+                  {accountLinks.map(([label, href]) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={() => setAccountMenuOpen(false)}
+                      className="block px-4 py-2.5 text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--surface)] hover:text-[var(--primary)]"
+                    >
+                      {label}
+                    </Link>
+                  ))}
                   <button
                     type="button"
                     onClick={() => void signOut()}
@@ -230,16 +216,26 @@ export default function Header() {
                     <HiOutlineLogout aria-hidden="true" />
                     Đăng xuất
                   </button>
-                )}
-              </div>
-            )}
-          </div>
-          <Link
-            href="/tim-ve"
-            className="vj-cta hidden min-h-10 items-center px-5 text-xs font-black sm:flex"
-          >
-            Đặt vé
-          </Link>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <Link
+                href="/dang-nhap"
+                className="hidden min-h-10 items-center gap-1.5 rounded-lg px-2.5 text-xs font-bold text-white/85 transition-colors hover:bg-white/10 hover:text-white sm:flex"
+              >
+                <HiOutlineUserCircle aria-hidden="true" className="text-base" />
+                Đăng nhập
+              </Link>
+              <Link
+                href="/dang-nhap?tab=register"
+                className="hidden min-h-10 items-center rounded-lg border border-white/70 bg-white px-3.5 text-xs font-black text-[var(--vj-red)] transition-colors hover:bg-white/85 sm:flex"
+              >
+                Đăng ký
+              </Link>
+            </>
+          )}
           <button
             type="button"
             onClick={() => setMobileMenuOpen((open) => !open)}
@@ -267,13 +263,13 @@ export default function Header() {
               <Link
                 key={label}
                 href={href}
-                className="group flex min-w-[92px] flex-col items-center gap-1 py-2.5 text-center text-[11px] font-semibold text-[var(--foreground-muted)] hover:text-[var(--primary)]"
+                className="group flex items-center gap-1.5 py-2.5 px-2 text-center text-xs font-semibold text-[var(--foreground-muted)] hover:text-[var(--primary)]"
               >
                 <Icon
                   aria-hidden="true"
-                  className="text-xl text-[var(--primary)] transition-transform group-hover:-translate-y-0.5"
+                  className="text-lg text-[var(--primary)] transition-transform group-hover:scale-110"
                 />
-                {label}
+                <span>{label}</span>
               </Link>
             ))}
           </div>
@@ -300,9 +296,30 @@ export default function Header() {
               </Link>
             ))}
           </nav>
+          {/* Mobile không hiện 2 link trên thanh header, nên menu phải giữ chúng
+              để khách chưa đăng nhập vẫn vào được màn hình đăng nhập/đăng ký. */}
+          {!user && (
+            <nav
+              aria-label="Đăng nhập và đăng ký"
+              className="grid grid-cols-2 gap-px border-t border-[var(--border)] bg-[var(--border)]"
+            >
+              <Link
+                href="/dang-nhap"
+                className="bg-[var(--background)] px-4 py-3.5 text-center text-sm font-bold text-[var(--foreground)]"
+              >
+                Đăng nhập
+              </Link>
+              <Link
+                href="/dang-nhap?tab=register"
+                className="bg-[var(--background)] px-4 py-3.5 text-center text-sm font-bold text-[var(--primary)]"
+              >
+                Đăng ký
+              </Link>
+            </nav>
+          )}
           <div className="border-t border-[var(--border)] p-4">
             <Link
-              href="/tim-ve"
+              href="/trang-chu#hero-booking-form"
               className="vj-cta flex min-h-12 items-center justify-center font-black"
             >
               Tìm và đặt vé

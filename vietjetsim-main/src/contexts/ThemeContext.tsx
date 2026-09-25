@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -27,81 +27,29 @@ interface ThemeProviderProps {
   storageKey?: string;
 }
 
-export function ThemeProvider({
-  children,
-  defaultTheme = 'light',
-  storageKey = 'vietjetsim-theme',
-}: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>(defaultTheme);
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
+export function ThemeProvider({ children, storageKey = 'vietjetsim-theme' }: ThemeProviderProps) {
+  const [theme, setThemeState] = useState<Theme>('light');
 
-  // Resolve system theme
-  const getSystemTheme = useCallback((): 'light' | 'dark' => {
-    if (typeof window === 'undefined') return 'light';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }, []);
-
-  // Update resolved theme and apply to document
-  const applyTheme = useCallback(
-    (newTheme: Theme) => {
-      const resolved = newTheme === 'system' ? getSystemTheme() : newTheme;
-      setResolvedTheme(resolved);
-
-      // Apply to document
-      if (typeof document !== 'undefined') {
-        const root = document.documentElement;
-        root.classList.remove('light', 'dark');
-        root.classList.add(resolved);
-      }
-    },
-    [getSystemTheme]
-  );
-
-  // Initialize theme from storage or system preference
+  // VietjetSim uses one deliberate light presentation. Clear any preference
+  // left by the old theme switch so a previous dark selection cannot persist.
   useEffect(() => {
-    const stored = localStorage.getItem(storageKey) as Theme | null;
-    if (stored && ['light', 'dark', 'system'].includes(stored)) {
-      setThemeState(stored);
-      applyTheme(stored);
-    } else {
-      applyTheme(defaultTheme);
-    }
-  }, [storageKey, defaultTheme, applyTheme]);
+    localStorage.removeItem(storageKey);
+    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.add('light');
+  }, [storageKey]);
 
-  // Listen for system theme changes
-  useEffect(() => {
-    if (theme !== 'system') return;
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = () => {
-      applyTheme('system');
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [theme, applyTheme]);
-
-  // Set theme and persist to storage
-  const setTheme = useCallback(
-    (newTheme: Theme) => {
-      setThemeState(newTheme);
-      localStorage.setItem(storageKey, newTheme);
-      applyTheme(newTheme);
-    },
-    [storageKey, applyTheme]
-  );
-
-  // Toggle between light and dark
-  const toggleTheme = useCallback(() => {
-    const newTheme = resolvedTheme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-  }, [resolvedTheme, setTheme]);
+  const setTheme = useCallback(() => {
+    setThemeState('light');
+    localStorage.removeItem(storageKey);
+    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.add('light');
+  }, [storageKey]);
 
   const value = {
     theme,
-    resolvedTheme,
+    resolvedTheme: 'light' as const,
     setTheme,
-    toggleTheme,
+    toggleTheme: setTheme,
   };
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

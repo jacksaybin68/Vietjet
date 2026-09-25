@@ -865,6 +865,21 @@ h6 {
   font-weight: 500;
   color: #333333;
 }
+/* Placeholder guidance should be prominent and readable across light forms. */
+input:not(.vj-auth-input)::placeholder,
+textarea::placeholder {
+  color: #000000 !important;
+  font-weight: 700;
+  opacity: 1;
+}
+
+/* Native select options do not expose ::placeholder; keep the empty/default
+   guidance dark and bold as well. */
+select option {
+  color: #000000;
+  font-weight: 700;
+}
+
 .form-input:focus {
   outline: none;
   border-color: var(--primary);
