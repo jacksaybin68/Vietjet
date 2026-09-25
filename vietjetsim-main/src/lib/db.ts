@@ -149,6 +149,8 @@ export interface BookingDetail {
   id: string;
   user_id: string;
   flight_id: string;
+  /** Short reference the customer is given (PNR). Assigned by the database. */
+  booking_code: string | null;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded';
   total_price: number;
   discount_code_id?: string | null;
@@ -670,6 +672,9 @@ export async function getBookingById(bookingId: string): Promise<BookingDetail |
     id: String(b.id),
     user_id: String(b.user_id),
     flight_id: String(b.flight_id),
+    // `b.*` already selects it, but the explicit mapping below would otherwise
+    // drop it — and the payment page needs the real PNR, not the booking UUID.
+    booking_code: b.booking_code ? String(b.booking_code) : null,
     status: b.status as BookingDetail['status'],
     total_price: parseFloat(String(b.total_price)),
     created_at: String(b.created_at),

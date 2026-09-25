@@ -109,10 +109,6 @@ const BANKS: BankInfo[] = [
 
 const EWALLETS = ['MoMo', 'ZaloPay', 'VNPay'];
 
-function generateBookingCode() {
-  return 'VJ' + Math.random().toString(36).substring(2, 8).toUpperCase();
-}
-
 // Confetti particle type
 interface Particle {
   id: number;
@@ -397,13 +393,35 @@ export default function PaymentClient() {
   const [loading, setLoading] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [bookingCode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      return params.get('bookingId') || params.get('bookingCode') || generateBookingCode();
-    }
-    return generateBookingCode();
+  // The PNR is assigned by the database when the booking is created. It used to
+  // be invented here — a random string when the URL carried no bookingId, or the
+  // raw booking UUID otherwise — and then shown to the customer as "Mã đặt chỗ",
+  // copied into bank transfer memos and pasted into chat. None of those values
+  // resolved in check-in or tra cứu, so the customer was handed a reference that
+  // did not exist. Read the real one instead, and render a dash until it loads.
+  const [bookingId] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return new URLSearchParams(window.location.search).get('bookingId');
   });
+  const [bookingCode, setBookingCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!bookingId) return;
+    let cancelled = false;
+    apiRequest<{ booking?: { booking_code: string | null } }>(`/api/dat-ve/${bookingId}`)
+      .then((data) => {
+        if (!cancelled) setBookingCode(data.booking?.booking_code ?? null);
+      })
+      .catch(() => {
+        // A missing PNR must not block payment, and apiRequest already logged it.
+        if (!cancelled) setBookingCode(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [bookingId]);
+
+  const bookingCodeLabel = bookingCode ?? '—';
   const [pageLoading, setPageLoading] = useState(true);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -492,7 +510,7 @@ export default function PaymentClient() {
   const transferNote = useMemo(
     () =>
       renderTransferNote(selectedAdminAccount?.transfer_note_template, {
-        code: bookingCode,
+        code: bookingCodeLabel,
         originalAmount: booking?.total ?? 0,
         discountAmount,
         amount: total,
@@ -500,7 +518,7 @@ export default function PaymentClient() {
       }),
     [
       selectedAdminAccount?.transfer_note_template,
-      bookingCode,
+      bookingCodeLabel,
       booking?.total,
       discountAmount,
       total,
@@ -629,6 +647,9 @@ export default function PaymentClient() {
   };
 
   const handleCopyBookingCode = useCallback(async () => {
+    // Nothing to copy until the real PNR arrives; copying "—" would put a
+    // useless string on the clipboard.
+    if (!bookingCode) return;
     try {
       await navigator.clipboard.writeText(bookingCode);
       setCopied(true);
@@ -648,8 +669,8 @@ export default function PaymentClient() {
 
   const shareText = useMemo(() => {
     if (!booking) return 'Tôi vừa đặt vé thành công trên VietJet!';
-    return `Tôi vừa đặt vé thành công trên VietJet!\n✈️ ${booking.flightNo}: ${booking.fromCity} → ${booking.toCity}\n📅 ${booking.date} | ${booking.departTime} - ${booking.arriveTime}\n🎫 Mã đặt chỗ: ${bookingCode}`;
-  }, [booking, bookingCode]);
+    return `Tôi vừa đặt vé thành công trên VietJet!\n✈️ ${booking.flightNo}: ${booking.fromCity} → ${booking.toCity}\n📅 ${booking.date} | ${booking.departTime} - ${booking.arriveTime}\n🎫 Mã đặt chỗ: ${bookingCodeLabel}`;
+  }, [booking, bookingCodeLabel]);
 
   const handleShareNative = useCallback(async () => {
     if (navigator.share) {
@@ -723,7 +744,7 @@ export default function PaymentClient() {
                   </div>
                   <div className="flex items-center justify-center gap-3">
                     <div className="text-3xl font-black text-primary tracking-widest">
-                      {bookingCode}
+                      {bookingCodeLabel}
                     </div>
                     <button
                       onClick={handleCopyBookingCode}
