@@ -112,6 +112,8 @@ export interface BookingRecord {
   id: string;
   user_id: string;
   flight_id: string;
+  /** Short reference the customer is given (PNR). Assigned by the database. */
+  booking_code: string | null;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded';
   total_price: number;
   discount_code_id?: string | null;
@@ -632,6 +634,8 @@ export async function getBookingsByUserId(
       id: b.id,
       user_id: b.user_id,
       flight_id: b.flight_id,
+      // Selected by `b.*` but previously dropped by this explicit mapping.
+      booking_code: b.booking_code ?? null,
       status: b.status,
       total_price: parseFloat(String(b.total_price)),
       created_at: b.created_at,
