@@ -35,7 +35,9 @@ export default function AuthShell({ eyebrow, title, subtitle, children }: AuthSh
             <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[var(--primary)]">
               {eyebrow}
             </p>
-            <h2 className="mt-2 text-[30px] font-black leading-tight text-[#333]">{title}</h2>
+            <h2 className="mt-2 font-[Be_Vietnam_Pro,sans-serif] text-[28px] font-extrabold leading-[1.2] tracking-[-0.03em] text-[#1a2948]">
+              {title}
+            </h2>
             <p className="mt-2 text-sm leading-6 text-[#6c6f76]">{subtitle}</p>
             <div className="mt-7">{children}</div>
             <p className="mt-7 border-t border-[#eee] pt-5 text-xs leading-5 text-[#6c6f76]">
