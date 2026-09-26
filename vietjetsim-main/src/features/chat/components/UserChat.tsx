@@ -357,7 +357,7 @@ export default function UserChat() {
               height={80}
               className="h-full w-full object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.28)]"
             />
-            <span className="absolute -top-2 right-0 whitespace-nowrap rounded-2xl rounded-br-sm bg-white px-3 py-1.5 text-[13px] font-bold text-[var(--vj-navy)] shadow-[0_6px_18px_rgba(0,0,0,0.16)] ring-1 ring-black/5">
+            <span className="absolute -top-9 right-0 whitespace-nowrap rounded-2xl rounded-br-sm bg-white px-3 py-1.5 text-[13px] font-bold text-[var(--vj-navy)] shadow-[0_6px_18px_rgba(0,0,0,0.16)] ring-1 ring-black/5">
               Xin chào!
             </span>
           </span>
