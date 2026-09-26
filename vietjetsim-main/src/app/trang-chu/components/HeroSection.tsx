@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   MdArrowOutward,
@@ -12,7 +12,12 @@ import {
 import AirportPicker, { type Airport } from './AirportPicker';
 import PassengerPicker, { type PaxCounts } from './PassengerPicker';
 
-const AIRPORTS: Airport[] = [
+/**
+ * Fallback list, used for the first paint and if the airports API is down. The
+ * live list comes from the `airports` table so a new airport needs a migration
+ * only, not a code change here.
+ */
+const FALLBACK_AIRPORTS: Airport[] = [
   { code: 'HAN', city: 'Hà Nội', airport: 'Nội Bài' },
   { code: 'SGN', city: 'Hồ Chí Minh', airport: 'Tân Sơn Nhất' },
   { code: 'DAD', city: 'Đà Nẵng', airport: 'Đà Nẵng' },
@@ -91,6 +96,36 @@ export default function HeroSection() {
     toInputDate(new Date(Date.now() + 7 * 86400000))
   );
   const [paxCounts, setPaxCounts] = useState<PaxCounts>({ adult: 1, child: 0, infant: 0 });
+  const [airports, setAirports] = useState<Airport[]>(FALLBACK_AIRPORTS);
+
+  // Prefer the table so the picker can never offer an airport the database does
+  // not know about. The fallback list keeps the form usable if this fails.
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const res = await fetch('/api/san-bay');
+        if (!res?.ok) return;
+        const data = await res.json();
+        const list = data?.airports as Airport[] | undefined;
+        if (!cancelled && Array.isArray(list) && list.length > 0) {
+          setAirports(list);
+        }
+      } catch {
+        /* keep the fallback list */
+      }
+    };
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // A city can be re-coded, so keep the selection valid against the live list.
+  useEffect(() => {
+    setFrom((current) => (airports.some((a) => a.code === current) ? current : airports[0].code));
+    setTo((current) => (airports.some((a) => a.code === current) ? current : airports[0].code));
+  }, [airports]);
   const [promoCode, setPromoCode] = useState('');
   const [currency, setCurrency] = useState<string>('VND');
   const [cheapestOnly, setCheapestOnly] = useState(false);
@@ -214,7 +249,7 @@ export default function HeroSection() {
                 label="Điểm khởi hành"
                 icon="takeoff"
                 value={from}
-                airports={AIRPORTS}
+                airports={airports}
                 onChange={setFrom}
                 variant="flush"
               />
@@ -239,7 +274,7 @@ export default function HeroSection() {
                 label="Điểm đến"
                 icon="land"
                 value={to}
-                airports={AIRPORTS}
+                airports={airports}
                 onChange={setTo}
                 variant="flush"
                 className={roundTrip ? '' : pairedFieldWideClass}
