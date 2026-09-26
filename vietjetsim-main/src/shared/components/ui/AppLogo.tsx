@@ -32,7 +32,7 @@ const AppLogo = memo(function AppLogo({
       {src ? (
         <img
           src={src}
-          alt="VietjetSim"
+          alt="Vietjet Air"
           width={size}
           height={size}
           className={`object-contain ${className}`}

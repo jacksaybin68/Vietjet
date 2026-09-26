@@ -1,6 +1,6 @@
 # Development Documentation
 
-This document contains essential information for advanced development on the `VietjetSim` project.
+This document contains essential information for advanced development on the `Vietjet Air` project.
 
 ## 1. Build/Configuration Instructions
 

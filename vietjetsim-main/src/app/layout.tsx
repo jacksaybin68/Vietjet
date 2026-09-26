@@ -17,26 +17,26 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:4028'),
   title: {
-    default: 'VietjetSim — Mô phỏng đặt vé máy bay',
-    template: '%s | VietjetSim',
+    default: 'Vietjet Air — Mô phỏng đặt vé máy bay',
+    template: '%s | Vietjet Air',
   },
   description:
-    'VietjetSim là hệ thống mô phỏng trải nghiệm tìm kiếm, đặt chỗ, chọn ghế và thanh toán chuyến bay.',
+    'Vietjet Air là hệ thống mô phỏng trải nghiệm tìm kiếm, đặt chỗ, chọn ghế và thanh toán chuyến bay.',
   robots: {
     index: false,
     follow: false,
   },
   openGraph: {
-    title: 'VietjetSim — Mô phỏng đặt vé máy bay',
+    title: 'Vietjet Air — Mô phỏng đặt vé máy bay',
     description: 'Trải nghiệm mô phỏng tìm kiếm, đặt chỗ, chọn ghế và thanh toán chuyến bay.',
     url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:4028',
-    siteName: 'VietjetSim',
+    siteName: 'Vietjet Air',
     images: [
       {
         url: '/logo.png',
         width: 1200,
         height: 630,
-        alt: 'VietjetSim giao diện đặt vé',
+        alt: 'Vietjet Air giao diện đặt vé',
       },
     ],
     locale: 'vi_VN',
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'VietjetSim — Mô phỏng đặt vé máy bay',
+    title: 'Vietjet Air — Mô phỏng đặt vé máy bay',
     description: 'Trải nghiệm mô phỏng tìm kiếm, đặt chỗ, chọn ghế và thanh toán chuyến bay.',
     images: ['/logo.png'],
   },
@@ -77,7 +77,7 @@ export default function RootLayout({
 
         {/* External scripts optimized */}
 
-        {/* VietjetSim is a local booking simulator and is intentionally not indexed as the official airline site. */}
+        {/* Vietjet Air is a local booking simulator and is intentionally not indexed as the official airline site. */}
       </head>
       <body className="bg-[var(--background)] text-[var(--foreground)]">
         {/* Rocket Extension message handler - Suppress unknown message type warnings */}

@@ -1,4 +1,4 @@
-# 🛫 VietjetSim — Vietnam Flight Booking Simulator
+# 🛫 Vietjet Air — Vietnam Flight Booking Simulator
 
 A complete **Vietjet Air booking experience simulator** built with Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS, and **Neon Serverless Postgres** with **custom JWT authentication**. Search domestic Vietnam flights, select seats, pay via wallet/card simulation, manage bookings, and access a full admin panel.
 

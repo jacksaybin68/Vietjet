@@ -332,7 +332,7 @@ export default function UserChat() {
 
   return (
     <>
-      {/* Launcher — local VietjetSim support logo with its "Xin chào!" bubble.
+      {/* Launcher — local Vietjet Air support logo with its "Xin chào!" bubble.
           While the panel is open on mobile it steps aside, because the panel
           header owns the close button there. */}
       <button
@@ -352,7 +352,7 @@ export default function UserChat() {
           <span className="relative flex h-16 w-16 items-center justify-center sm:h-20 sm:w-20">
             <img
               src="/assets/images/app_logo.svg"
-              alt="Logo hỗ trợ VietjetSim"
+              alt="Logo hỗ trợ Vietjet Air"
               width={80}
               height={80}
               className="h-full w-full rounded-full object-cover shadow-vj-btn-hover ring-2 ring-white/90"

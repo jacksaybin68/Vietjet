@@ -30,7 +30,7 @@ interface ThemeProviderProps {
 export function ThemeProvider({ children, storageKey = 'vietjetsim-theme' }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>('light');
 
-  // VietjetSim uses one deliberate light presentation. Clear any preference
+  // Vietjet Air uses one deliberate light presentation. Clear any preference
   // left by the old theme switch so a previous dark selection cannot persist.
   useEffect(() => {
     localStorage.removeItem(storageKey);

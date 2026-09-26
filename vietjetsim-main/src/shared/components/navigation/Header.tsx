@@ -140,10 +140,10 @@ export default function Header() {
       )}
 
       <div className="mx-auto flex h-[68px] max-w-[1240px] items-center gap-5 px-3 sm:px-4 lg:h-[76px]">
-        <Link href="/trang-chu" aria-label="VietjetSim - Trang chủ" className="shrink-0">
+        <Link href="/trang-chu" aria-label="Vietjet Air - Trang chủ" className="shrink-0">
           <img
             src="/logo-vj.svg"
-            alt="VietjetSim"
+            alt="Vietjet Air"
             className="h-8 w-auto brightness-0 invert sm:h-9 lg:h-10"
           />
         </Link>

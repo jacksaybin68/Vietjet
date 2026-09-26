@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Repository memory for VietjetSim (Next.js 15 / React 19 / TypeScript / Tailwind / Neon Postgres).
+Repository memory for Vietjet Air (Next.js 15 / React 19 / TypeScript / Tailwind / Neon Postgres).
 
 ## Commands
 
