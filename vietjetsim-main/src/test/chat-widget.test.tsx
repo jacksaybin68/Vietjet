@@ -50,10 +50,10 @@ describe('UserChat — Vietjet-style launcher', () => {
     services.markConversationRead.mockResolvedValue({ success: true });
   });
 
-  it('uses the local VietjetSim logo for the chat launcher', () => {
+  it('uses the local Vietjet Air logo for the chat launcher', () => {
     render(<UserChat />);
     const launcher = screen.getByRole('button', { name: 'Mở chat hỗ trợ' });
-    const logo = within(launcher).getByRole('img', { name: 'Logo hỗ trợ VietjetSim' });
+    const logo = within(launcher).getByRole('img', { name: 'Logo hỗ trợ Vietjet Air' });
 
     expect(logo).toHaveAttribute('src', '/assets/images/app_logo.svg');
     expect(screen.getByText('Xin chào!')).toBeInTheDocument();

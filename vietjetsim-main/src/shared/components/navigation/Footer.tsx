@@ -37,8 +37,8 @@ export default function Footer() {
       <div className="mx-auto max-w-[1240px] px-4 py-10 md:py-12">
         <div className="grid gap-9 md:grid-cols-[1.1fr_2fr] lg:grid-cols-[1.3fr_2.2fr_1fr]">
           <div>
-            <Link href="/trang-chu" className="inline-flex" aria-label="VietjetSim - Trang chủ">
-              <img src="/logo-vj.svg" alt="VietjetSim" className="h-10 w-auto" loading="lazy" />
+            <Link href="/trang-chu" className="inline-flex" aria-label="Vietjet Air - Trang chủ">
+              <img src="/logo-vj.svg" alt="Vietjet Air" className="h-10 w-auto" loading="lazy" />
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-6 text-[var(--foreground-muted)]">
               Trải nghiệm đặt vé trực tuyến nhanh chóng, quản lý chuyến bay và thanh toán tiện lợi
@@ -104,7 +104,7 @@ export default function Footer() {
 
       <div className="bg-[var(--vj-navy)] text-white">
         <div className="mx-auto flex max-w-[1240px] flex-col gap-2 px-4 py-4 text-xs text-white/70 sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 VietjetSim · Dự án mô phỏng giao diện và nghiệp vụ đặt vé.</p>
+          <p>© 2026 Vietjet Air · Dự án mô phỏng giao diện và nghiệp vụ đặt vé.</p>
           <div className="flex flex-wrap gap-x-5 gap-y-2 font-semibold">
             <Link href="/gioi-thieu" className="hover:text-[var(--accent)]">
               Điều khoản

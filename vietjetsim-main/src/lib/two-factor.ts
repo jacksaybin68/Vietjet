@@ -10,7 +10,7 @@ import { createHash, randomInt } from 'crypto';
 import { generateSecret, generateURI, verifySync } from 'otplib';
 
 export const BACKUP_CODE_COUNT = 10;
-export const TOTP_ISSUER = 'VietjetSim';
+export const TOTP_ISSUER = 'Vietjet Air';
 
 /** Drift tolerated per side of the current 30s step (clock-skewed phones). */
 const EPOCH_TOLERANCE_SECONDS = 30;

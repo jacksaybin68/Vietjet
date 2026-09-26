@@ -1,5 +1,5 @@
 // ──────────────────────────────────────────────────────────────────────
-// VietjetSim RBAC (Role-Based Access Control) System
+// Vietjet Air RBAC (Role-Based Access Control) System
 // Simplified: Only 2 roles — 'user' (regular user) and 'admin' (full access)
 // ──────────────────────────────────────────────────────────────────────
 
