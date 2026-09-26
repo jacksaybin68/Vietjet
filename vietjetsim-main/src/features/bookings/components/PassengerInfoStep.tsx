@@ -1,6 +1,13 @@
 'use client';
 import React, { useState } from 'react';
-import { BookingConsents, Flight, Passenger } from '@/features/bookings/types/booking-flow';
+import {
+  BookingConsents,
+  Flight,
+  Passenger,
+  PASSENGER_TYPE_LABELS,
+  countPassengerTypes,
+  requiresIdNumber,
+} from '@/features/bookings/types/booking-flow';
 import { Icon, AppImage } from '@/shared/components/ui';
 import { TAX_AND_FEE_RATE, getBookingTotals, type AncillaryId } from '@/features/bookings/pricing';
 import BookingBottomBar from './BookingBottomBar';
@@ -50,7 +57,8 @@ export default function PassengerInfoStep({
 
   const totals = getBookingTotals({
     farePerPassenger: flight.price,
-    passengerCount,
+    passengerCount: passengers.length,
+    paxCounts: countPassengerTypes(passengers),
     seatFee,
     ancillaries,
   });
@@ -143,6 +151,9 @@ export default function PassengerInfoStep({
                       {i + 1}
                     </div>
                     Hành khách {i + 1}
+                    <span className="ml-1 inline-block rounded-md bg-[var(--vj-navy)] px-1.5 py-0.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-white">
+                      {PASSENGER_TYPE_LABELS[p.type ?? 'adult']}
+                    </span>
                   </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -340,7 +351,14 @@ export default function PassengerInfoStep({
                         htmlFor={`passenger-${i}-idNumber`}
                         className="block text-[10px] sm:text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-1 font-koho"
                       >
-                        CCCD / Hộ chiếu <span className="text-primary">*</span>
+                        CCCD / Hộ chiếu{' '}
+                        {requiresIdNumber(p.type) ? (
+                          <span className="text-primary">*</span>
+                        ) : (
+                          <span className="font-normal normal-case text-[var(--foreground-subtle)]">
+                            (không bắt buộc với em bé)
+                          </span>
+                        )}
                         <span className="ml-1 font-normal normal-case text-[var(--foreground-subtle)]">
                           (Theo giấy tờ tuỳ thân)
                         </span>
@@ -354,7 +372,7 @@ export default function PassengerInfoStep({
                           onChange={(e) => updatePassenger(i, 'idNumber', e.target.value)}
                           placeholder=" "
                           className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-[var(--foreground)] text-sm form-input ${p.idNumber.replace(/\D/g, '').length >= 9 ? 'form-input-valid' : ''}`}
-                          required
+                          required={requiresIdNumber(p.type)}
                         />
                         <label className="form-label-float">012345678</label>
                       </div>

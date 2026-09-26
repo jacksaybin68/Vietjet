@@ -1,6 +1,11 @@
 'use client';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Flight, Passenger } from '@/features/bookings/types/booking-flow';
+import {
+  Flight,
+  Passenger,
+  countPassengerTypes,
+  isSeated,
+} from '@/features/bookings/types/booking-flow';
 import { Icon } from '@/shared/components/ui';
 import { SeatMapSkeleton } from '@/shared/components/ui';
 import {
@@ -188,7 +193,10 @@ export default function SeatSelectionStep({
   const [isConfirming, setIsConfirming] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const passengerCount = passengers.length;
+  // Infants travel on a lap, so the picker only has to seat the others; the
+  // seat array the API receives is therefore shorter than the passenger list.
+  const seatedPassengers = passengers.filter((passenger) => isSeated(passenger.type));
+  const passengerCount = seatedPassengers.length;
 
   // Simulate seat data loading
   useEffect(() => {
@@ -285,7 +293,8 @@ export default function SeatSelectionStep({
 
   const totals = getBookingTotals({
     farePerPassenger: flight.price,
-    passengerCount,
+    passengerCount: passengers.length,
+    paxCounts: countPassengerTypes(passengers),
     seatFee: selected.reduce((sum, s) => sum + SEATS[s].price, 0),
     ancillaries,
   });
@@ -700,7 +709,7 @@ export default function SeatSelectionStep({
                                   Ghế {seat}
                                 </div>
                                 <div className="text-[9px] sm:text-xs text-[var(--foreground-muted)]">
-                                  {passengers[i]?.name || `Hành khách ${i + 1}`}
+                                  {seatedPassengers[i]?.name || `Hành khách ${i + 1}`}
                                 </div>
                                 <div className="text-[9px] sm:text-xs text-primary font-bold">
                                   {info.price.toLocaleString('vi-VN')}₫

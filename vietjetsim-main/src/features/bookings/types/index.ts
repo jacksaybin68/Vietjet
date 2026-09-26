@@ -5,9 +5,18 @@ export type { BookingRecord, BookingDetail };
 export type {
   Flight,
   Passenger,
+  PassengerType,
   BookingConsents,
   BookingState,
   SearchParams,
+} from './booking-flow';
+// Passenger-type helpers are runtime values (labels, counters), not types.
+export {
+  PASSENGER_TYPE_LABELS,
+  SEATED_PASSENGER_TYPES,
+  countPassengerTypes,
+  isSeated,
+  requiresIdNumber,
 } from './booking-flow';
 
 export type PassengerInput = Passenger;

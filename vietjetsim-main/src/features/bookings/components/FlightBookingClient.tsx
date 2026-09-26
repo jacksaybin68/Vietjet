@@ -12,10 +12,12 @@ import { createBooking } from '@/features/bookings/services';
 import { ApiRequestError } from '@/shared/services';
 import {
   getBookingTotals,
+  PASSENGER_TYPE_LABELS,
   type AncillaryId,
   type BookingConsents,
   type Flight,
   type Passenger,
+  type PassengerType,
   type BookingState,
   type SearchParams,
 } from '@/features/bookings';
@@ -26,6 +28,41 @@ const STEPS = [
   { id: 3, label: 'Thông tin hành khách' },
 ];
 
+/** Build the passenger roster: adults first, then children, then lap infants. */
+function buildPassengerRoster(counts: Record<PassengerType, number>): Passenger[] {
+  const blank = {
+    name: '',
+    dob: '',
+    idNumber: '',
+    gender: 'male',
+    countryCode: 'VN',
+    phone: '',
+    email: '',
+    residence: '',
+    skyJoyMemberId: '',
+  };
+  return (['adult', 'child', 'infant'] as const).flatMap((type) =>
+    Array.from({ length: counts[type] }, () => ({ ...blank, type }))
+  );
+}
+
+/** Recount the roster after the passenger form is edited, so pricing never drifts. */
+function countByType(passengers: Passenger[]): Record<PassengerType, number> {
+  const counts: Record<PassengerType, number> = { adult: 0, child: 0, infant: 0 };
+  for (const passenger of passengers) {
+    counts[passenger.type ?? 'adult'] += 1;
+  }
+  return counts;
+}
+
+/** "2 Người lớn, 1 Trẻ em" — only the categories actually on the booking. */
+function describePax(counts: Record<PassengerType, number>): string {
+  return (['adult', 'child', 'infant'] as const)
+    .filter((type) => counts[type] > 0)
+    .map((type) => `${counts[type]} ${PASSENGER_TYPE_LABELS[type]}`)
+    .join(', ');
+}
+
 function FlightBookingClientInner() {
   const searchParams = useSearchParams();
   const params: SearchParams = {
@@ -34,23 +71,19 @@ function FlightBookingClientInner() {
     depart: searchParams.get('depart') || undefined,
     return: searchParams.get('return') || undefined,
     pax: searchParams.get('pax') || undefined,
+    child: searchParams.get('child') || undefined,
+    infant: searchParams.get('infant') || undefined,
   };
 
   const [step, setStep] = useState(1);
-  const passengerCount = params.pax ? parseInt(params.pax, 10) || 1 : 1;
+  const paxCounts: Record<PassengerType, number> = {
+    adult: params.pax ? parseInt(params.pax, 10) || 1 : 1,
+    child: params.child ? parseInt(params.child, 10) || 0 : 0,
+    infant: params.infant ? parseInt(params.infant, 10) || 0 : 0,
+  };
   const [booking, setBooking] = useState<BookingState>(() => ({
     selectedFlight: null,
-    passengers: Array.from({ length: passengerCount }, () => ({
-      name: '',
-      dob: '',
-      idNumber: '',
-      gender: 'male',
-      countryCode: 'VN',
-      phone: '',
-      email: '',
-      residence: '',
-      skyJoyMemberId: '',
-    })),
+    passengers: buildPassengerRoster(paxCounts),
     selectedSeats: [],
     ancillaries: [],
   }));
@@ -112,6 +145,7 @@ function FlightBookingClientInner() {
       const totals = getBookingTotals({
         farePerPassenger: basePrice,
         passengerCount: passengers.length,
+        paxCounts: countByType(passengers),
         seatFee: seatsFee,
         ancillaries,
       });
@@ -194,7 +228,7 @@ function FlightBookingClientInner() {
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs sm:text-sm font-koho">
             <span className="font-black uppercase tracking-wide">{tripLabel}</span>
             <span className="hidden sm:inline opacity-50">|</span>
-            <span className="font-semibold">{passengerCount} Người lớn</span>
+            <span className="font-semibold">{describePax(paxCounts)}</span>
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] sm:text-xs">
             <span className="inline-flex items-center gap-1.5">
@@ -298,6 +332,8 @@ function FlightBookingClientInner() {
               search={params}
               onDateChange={handleDateChange}
               pax={params.pax}
+              child={params.child}
+              infant={params.infant}
             />
           </ErrorBoundary>
         )}
