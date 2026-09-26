@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Quên mật khẩu — Vietjet Air',
+  title: 'Quên mật khẩu',
   description: 'Yêu cầu liên kết đặt lại mật khẩu cho tài khoản Vietjet SkyJoy của bạn.',
 };
 
