@@ -585,7 +585,7 @@ function SignUpLoginPageInner() {
                 </button>
               </div>
 
-              <label className="flex cursor-pointer select-none items-start gap-2.5 text-xs leading-5 text-[#6c6f76]">
+              <label className="flex cursor-pointer select-none items-start gap-2.5 text-xs font-bold leading-5 text-[#6c6f76]">
                 <input
                   type="checkbox"
                   checked={agreeTerms}
@@ -599,7 +599,7 @@ function SignUpLoginPageInner() {
                     href="/gioi-thieu"
                     target="_blank"
                     rel="noreferrer"
-                    className="font-semibold text-primary hover:underline"
+                    className="font-bold text-primary hover:underline"
                   >
                     Điều khoản dịch vụ
                   </a>{' '}
@@ -608,7 +608,7 @@ function SignUpLoginPageInner() {
                     href="/gioi-thieu"
                     target="_blank"
                     rel="noreferrer"
-                    className="font-semibold text-primary hover:underline"
+                    className="font-bold text-primary hover:underline"
                   >
                     Chính sách bảo mật
                   </a>{' '}
@@ -634,10 +634,10 @@ function SignUpLoginPageInner() {
                   <Icon name="DevicePhoneMobileIcon" size={32} className="text-primary" />
                 </div>
                 <h3 className="text-lg font-bold text-[var(--foreground)]">Xác thực OTP</h3>
-                <p className="mt-2 text-sm text-[var(--foreground-muted)]">
+                <p className="mt-2 text-sm font-bold text-[var(--foreground-muted)]">
                   Vui lòng nhập mã bảo mật 6 số được gửi tới
                   <br />
-                  <span className="font-semibold text-primary">{phone || email}</span>
+                  <span className="font-bold text-primary">{phone || email}</span>
                 </p>
               </div>
 

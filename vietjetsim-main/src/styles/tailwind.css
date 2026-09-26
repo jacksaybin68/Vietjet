@@ -919,23 +919,6 @@ select option {
   position: relative;
 }
 
-/*
- * The auth forms are set in bold throughout — field values, floating labels,
- * helper text. Applied through the hooks the auth pages already carry rather
- * than by editing each class string, so a new auth field is bold by default.
- * The label rule is scoped with `:has(.vj-auth-input)` on purpose: the booking
- * wizard reuses `.form-label-float` and keeps its lighter label.
- */
-.vj-auth-input,
-.vj-auth-submit,
-.vj-auth-input option,
-select option {
-  font-weight: 700;
-}
-.form-field-float:has(.vj-auth-input) .form-label-float {
-  font-weight: 700;
-}
-
 .form-field-float .form-label-float {
   position: absolute;
   left: 12px;
@@ -966,7 +949,7 @@ select option {
   color: var(--primary);
   background: var(--background);
   padding: 0 4px;
-  font-weight: 600;
+  font-weight: 700;
 }
 .dark .form-field-float .form-input:focus ~ .form-label-float,
 .dark .form-field-float .form-input:not(:placeholder-shown) ~ .form-label-float,
@@ -980,6 +963,29 @@ select option {
 .form-field-float .form-input:focus ~ .form-label-float.has-icon,
 .form-field-float .form-input:not(:placeholder-shown) ~ .form-label-float.has-icon {
   left: 12px;
+}
+
+/*
+ * Auth forms bold styling.
+ * .vj-auth-input/.vj-auth-submit add bold to inputs/buttons; the label rules are
+ * scoped with `:has(.vj-auth-input)` on purpose: the booking wizard reuses
+ * `.form-label-float` and keeps its lighter label.
+ */
+.vj-auth-input,
+.vj-auth-submit,
+.vj-auth-input option,
+select option {
+  font-weight: 700;
+}
+.form-field-float:has(.vj-auth-input) .form-label-float,
+.form-field-float .vj-auth-input ~ .form-label-float {
+  font-weight: 700;
+  color: #555960;
+}
+.form-field-float .vj-auth-input:focus ~ .form-label-float,
+.form-field-float .vj-auth-input:not(:placeholder-shown) ~ .form-label-float,
+.form-field-float.has-value .vj-auth-input ~ .form-label-float {
+  font-weight: 700;
 }
 
 /* Checkmark animation */
@@ -1490,7 +1496,7 @@ select option {
   background: linear-gradient(90deg, var(--vj-grad-gold-from) 0%, var(--vj-grad-gold-to) 100%);
   color: var(--vj-text);
   font-family: 'KoHo', 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
-  font-weight: 500;
+  font-weight: 700;
   font-size: 16px;
 }
 
