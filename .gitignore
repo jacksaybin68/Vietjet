@@ -31,3 +31,5 @@ Vietjet/
 .idea/
 .ai/
 *.backup
+.DS_Store
+logs/
