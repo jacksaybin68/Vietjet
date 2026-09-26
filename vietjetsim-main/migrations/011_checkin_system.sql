@@ -45,11 +45,19 @@ CREATE INDEX IF NOT EXISTS idx_check_in_status ON check_in(status);
 
 -- Add check-in status field to seats table if not exists
 DO $$ 
+-- Every existence guard below filters on `table_schema = current_schema()`.
+-- `information_schema.columns` is a database-wide view: with only a `public`
+-- schema the filter is redundant, but on a database carrying a second schema
+-- the unqualified `table_name` match finds a same-named column there too. The
+-- guard then reports "already present", skips the ALTER, and the next migration
+-- that references the column fails. `current_schema()` is the right scope
+-- because the `ALTER TABLE` statements are themselves unqualified and resolve
+-- through the same search path.
 BEGIN
   -- Check if column exists
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns 
-    WHERE table_name = 'seats' AND column_name = 'check_in_status'
+    WHERE table_schema = current_schema() AND table_name = 'seats' AND column_name = 'check_in_status'
   ) THEN
     ALTER TABLE seats ADD COLUMN check_in_status VARCHAR(20) 
       DEFAULT 'not_checked_in' 
@@ -65,7 +73,7 @@ DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns 
-    WHERE table_name = 'seats' AND column_name = 'check_in_time'
+    WHERE table_schema = current_schema() AND table_name = 'seats' AND column_name = 'check_in_time'
   ) THEN
     ALTER TABLE seats ADD COLUMN check_in_time TIMESTAMPTZ;
   END IF;
@@ -76,7 +84,7 @@ DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns 
-    WHERE table_name = 'check_in' AND column_name = 'is_online_check_in'
+    WHERE table_schema = current_schema() AND table_name = 'check_in' AND column_name = 'is_online_check_in'
   ) THEN
     ALTER TABLE check_in ADD COLUMN is_online_check_in BOOLEAN DEFAULT true;
   END IF;
@@ -87,7 +95,7 @@ DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns 
-    WHERE table_name = 'check_in' AND column_name = 'baggage_info'
+    WHERE table_schema = current_schema() AND table_name = 'check_in' AND column_name = 'baggage_info'
   ) THEN
     ALTER TABLE check_in ADD COLUMN baggage_info JSONB;
   END IF;
@@ -98,7 +106,7 @@ DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns 
-    WHERE table_name = 'check_in' AND column_name = 'gate'
+    WHERE table_schema = current_schema() AND table_name = 'check_in' AND column_name = 'gate'
   ) THEN
     ALTER TABLE check_in ADD COLUMN gate VARCHAR(20);
     ALTER TABLE check_in ADD COLUMN terminal VARCHAR(20);

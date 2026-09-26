@@ -77,26 +77,51 @@ ON CONFLICT (from_code, to_code, depart_time) DO NOTHING;
 -- ─── Demo accounts ──────────────────────────────────────────────────────────
 -- Passwords are bcrypt (12 rounds) hashes of the README's documented demo
 -- credentials: user@vietjetsim.vn / user123 and admin@vietjetsim.vn / admin123.
+--
+-- The insert is guarded on *both* email domains, not just the one this file
+-- writes. `022_rename_demo_email_domain.sql` renames these two rows to
+-- @vietjetair.vn, which frees the old addresses; a re-run of the whole
+-- migration set (CI's idempotency step, or anyone re-seeding) would then
+-- re-create the accounts here under the old domain with fresh user ids. The
+-- wallet insert below would mint the same 970400… account numbers for those new
+-- ids and collide with the live wallets on the unique account_number. Checking
+-- both domains keeps a re-run a no-op.
 
-INSERT INTO user_profiles (email, password_hash, full_name, role, email_verified)
-VALUES
-  (
-    'user@vietjetsim.vn',
-    '$2b$12$KUzud4jhdQ3uls6Wduco3uf5kj/ZkOhuPywzWi1b6UJq.fh92qTcq',
-    'Nguyễn Văn A',
-    'user',
-    true
-  ),
-  (
-    'admin@vietjetsim.vn',
-    '$2b$12$FISyKxhzJEDYcLJ6YkTqpubiTcKxGT4TkvU/qClLrCPEwOVZ0luvi',
-    'Quản Trị Viên',
-    'admin',
-    true
-  )
-ON CONFLICT (email) DO NOTHING;
+DO $seed$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM user_profiles
+    WHERE email IN ('user@vietjetsim.vn', 'admin@vietjetsim.vn',
+                    'user@vietjetair.vn', 'admin@vietjetair.vn')
+  ) THEN
+    INSERT INTO user_profiles (email, password_hash, full_name, role, email_verified)
+    VALUES
+      (
+        'user@vietjetsim.vn',
+        '$2b$12$KUzud4jhdQ3uls6Wduco3uf5kj/ZkOhuPywzWi1b6UJq.fh92qTcq',
+        'Nguyễn Văn A',
+        'user',
+        true
+      ),
+      (
+        'admin@vietjetsim.vn',
+        '$2b$12$FISyKxhzJEDYcLJ6YkTqpubiTcKxGT4TkvU/qClLrCPEwOVZ0luvi',
+        'Quản Trị Viên',
+        'admin',
+        true
+      )
+    ON CONFLICT (email) DO NOTHING;
+  END IF;
+END
+$seed$;
 
--- Every user gets a wallet so payment flows have somewhere to debit.
+-- Every user gets a wallet so payment flows have somewhere to debit. The
+-- account numbers are derived from the row's position among the demo accounts,
+-- so they are stable across a re-run *because* the guard above keeps the
+-- accounts from being re-created. Only wallets for accounts that do not have
+-- one yet are minted, which is a second line of defence against a unique
+-- account_number collision.
+
 INSERT INTO user_wallets (user_id, balance, currency, account_number)
 SELECT
   u.id,
@@ -105,4 +130,5 @@ SELECT
   '970400' || LPAD((row_number() OVER (ORDER BY u.email))::text, 6, '0')
 FROM user_profiles u
 WHERE u.email IN ('user@vietjetsim.vn', 'admin@vietjetsim.vn')
+  AND NOT EXISTS (SELECT 1 FROM user_wallets w WHERE w.user_id = u.id)
 ON CONFLICT (user_id) DO NOTHING;

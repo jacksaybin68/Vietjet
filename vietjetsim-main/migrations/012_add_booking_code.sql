@@ -2,11 +2,19 @@
 -- This adds a human-readable booking code (PNR) for each booking
 
 -- Add booking_code column to bookings table if not exists
+--
+-- The guard filters on `table_schema = current_schema()`, not just `table_name`.
+-- `information_schema.columns` spans the whole database, so on one carrying a
+-- second schema an unqualified match also finds a same-named column there. The
+-- guard would then report "already present", skip every statement below —
+-- including the `generate_booking_code()` function — and 013 would fail on the
+-- `ALTER TABLE ... SET DEFAULT` that expects both. `current_schema()` is the
+-- right scope: the `ALTER TABLE` is unqualified and resolves the same way.
 DO $do$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns 
-    WHERE table_name = 'bookings' AND column_name = 'booking_code'
+    WHERE table_schema = current_schema() AND table_name = 'bookings' AND column_name = 'booking_code'
   ) THEN
     ALTER TABLE bookings ADD COLUMN booking_code VARCHAR(20) UNIQUE;
     
