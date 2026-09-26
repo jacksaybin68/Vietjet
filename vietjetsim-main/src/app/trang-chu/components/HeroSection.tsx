@@ -7,13 +7,12 @@ import {
   MdCalendarMonth,
   MdConfirmationNumber,
   MdExpandMore,
-  MdFlightLand,
-  MdFlightTakeoff,
   MdSwapHoriz,
 } from 'react-icons/md';
+import AirportPicker, { type Airport } from './AirportPicker';
 import PassengerPicker, { type PaxCounts } from './PassengerPicker';
 
-const AIRPORTS = [
+const AIRPORTS: Airport[] = [
   { code: 'HAN', city: 'Hà Nội', airport: 'Nội Bài' },
   { code: 'SGN', city: 'Hồ Chí Minh', airport: 'Tân Sơn Nhất' },
   { code: 'DAD', city: 'Đà Nẵng', airport: 'Đà Nẵng' },
@@ -29,6 +28,7 @@ const AIRPORTS = [
   { code: 'VCS', city: 'Côn Đảo', airport: 'Côn Đảo' },
   { code: 'THD', city: 'Thanh Hóa', airport: 'Tho Xuân' },
   { code: 'VII', city: 'Vinh', airport: 'Vinh' },
+  { code: 'VDH', city: 'Đồng Hới', airport: 'Đồng Hới' },
 ];
 
 /**
@@ -210,24 +210,14 @@ export default function HeroSection() {
               control hugging the left gutter between the two rows. */}
           <div className="relative">
             <div className={fieldGroupClass}>
-              <label className={pairedFieldClass}>
-                <MdFlightTakeoff className={iconClass} />
-                <span className="min-w-0 flex-1">
-                  <span className={labelClass}>Điểm khởi hành</span>
-                  <select
-                    value={from}
-                    onChange={(event) => setFrom(event.target.value)}
-                    aria-label="Điểm khởi hành"
-                    className={`${inputClass} cursor-pointer appearance-none`}
-                  >
-                    {AIRPORTS.map((airport) => (
-                      <option key={airport.code} value={airport.code}>
-                        {airport.city} ({airport.code})
-                      </option>
-                    ))}
-                  </select>
-                </span>
-              </label>
+              <AirportPicker
+                label="Điểm khởi hành"
+                icon="takeoff"
+                value={from}
+                airports={AIRPORTS}
+                onChange={setFrom}
+                variant="flush"
+              />
               <label className={pairedFieldClass}>
                 <MdCalendarMonth className={iconClass} />
                 <span className="min-w-0 flex-1">
@@ -245,26 +235,15 @@ export default function HeroSection() {
             </div>
 
             <div className={`mt-2 ${fieldGroupClass}`}>
-              <label
-                className={`${pairedFieldClass}${roundTrip ? '' : ` ${pairedFieldWideClass}`}`}
-              >
-                <MdFlightLand className={iconClass} />
-                <span className="min-w-0 flex-1">
-                  <span className={labelClass}>Điểm đến</span>
-                  <select
-                    value={to}
-                    onChange={(event) => setTo(event.target.value)}
-                    aria-label="Điểm đến"
-                    className={`${inputClass} cursor-pointer appearance-none`}
-                  >
-                    {AIRPORTS.map((airport) => (
-                      <option key={airport.code} value={airport.code}>
-                        {airport.city} ({airport.code})
-                      </option>
-                    ))}
-                  </select>
-                </span>
-              </label>
+              <AirportPicker
+                label="Điểm đến"
+                icon="land"
+                value={to}
+                airports={AIRPORTS}
+                onChange={setTo}
+                variant="flush"
+                className={roundTrip ? '' : pairedFieldWideClass}
+              />
               {roundTrip && (
                 <label className={pairedFieldClass}>
                   <MdCalendarMonth className={iconClass} />

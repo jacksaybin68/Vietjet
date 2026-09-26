@@ -45,7 +45,9 @@ describe('HeroSection Banner', () => {
   it('lets the destination fill the whole box on a one-way trip', () => {
     render(<HeroSection />);
     fireEvent.click(screen.getByLabelText('Một chiều'));
-    const destination = screen.getByLabelText('Điểm đến').closest('label');
+    // The airport picker owns its own <label>, so the grid span lives on the
+    // element that is the actual grid child.
+    const destination = screen.getByLabelText('Điểm đến').closest('div.relative');
     expect(destination).toHaveClass('sm:col-span-2');
   });
 
