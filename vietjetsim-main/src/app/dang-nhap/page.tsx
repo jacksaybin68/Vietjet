@@ -257,12 +257,6 @@ function SignUpLoginPageInner() {
     }
   };
 
-  const isEmailValid = email.length === 0 || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const isLoginIdentifierValid =
-    isEmailValid || phone.replace(/\D/g, '').length >= 9 || email.replace(/\D/g, '').length >= 9;
-  const isPasswordValid = password.length >= 6;
-  const isNameValid = surname.trim().length >= 1 && givenName.trim().length >= 1;
-
   // Số ngày của tháng phụ thuộc tháng và năm (tháng 2 có 28–29 ngày), nên danh sách
   // ngày được giới hạn lại và ngày đang chọn bị bỏ nếu vượt số ngày mới.
   const maxBirthDay = birthMonth
@@ -298,8 +292,11 @@ function SignUpLoginPageInner() {
     if (Number(birthDay) > limit) setBirthDay('');
   };
 
-  const inputClass = (valid: boolean) =>
-    `form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3 pl-11 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${valid ? 'form-input-valid' : ''}`;
+  // Form đăng nhập/đăng ký không dùng trạng thái "form-input-valid" (khung viền
+  // xanh + dấu tích): trạng thái hợp lệ lúc đang gõ hiện cả khi ô còn trống và
+  // không khớp với hệ màu đỏ của Vietjet. Viền chỉ đổi sang đỏ khi focus.
+  const inputClass =
+    'form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3 pl-11 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10';
 
   const submitClass =
     'vj-auth-submit flex min-h-11 w-full items-center justify-center gap-2 rounded-md';
@@ -354,7 +351,7 @@ function SignUpLoginPageInner() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder=" "
-              className={inputClass(isLoginIdentifierValid)}
+              className={inputClass}
               required
             />
             <label className="form-label-float has-icon">Email hoặc Số điện thoại</label>
@@ -374,7 +371,7 @@ function SignUpLoginPageInner() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder=" "
-              className={`form-input vj-auth-input w-full rounded-md border border-[#d8dade] bg-white py-3 pl-11 pr-12 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isPasswordValid ? 'form-input-valid' : ''}`}
+              className={`form-input vj-auth-input w-full rounded-md border border-[#d8dade] bg-white py-3 pl-11 pr-12 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10`}
               required
             />
             <label className="form-label-float has-icon">Mật khẩu</label>
@@ -404,7 +401,7 @@ function SignUpLoginPageInner() {
                 value={twoFAToken}
                 onChange={(e) => setTwoFAToken(e.target.value)}
                 placeholder=" "
-                className={inputClass(false)}
+                className={inputClass}
                 required
               />
               <label className="form-label-float has-icon">Mã 2FA (hoặc mã dự phòng)</label>
@@ -456,7 +453,7 @@ function SignUpLoginPageInner() {
                     value={surname}
                     onChange={(e) => setSurname(e.target.value)}
                     placeholder=" "
-                    className={`form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3 pl-4 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isNameValid ? 'form-input-valid' : ''}`}
+                    className={`form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3 pl-4 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10`}
                     required
                   />
                   <label className="form-label-float">Họ</label>
@@ -470,7 +467,7 @@ function SignUpLoginPageInner() {
                     value={givenName}
                     onChange={(e) => setGivenName(e.target.value)}
                     placeholder=" "
-                    className={`form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3 pl-4 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isNameValid ? 'form-input-valid' : ''}`}
+                    className={`form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3 pl-4 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10`}
                     required
                   />
                   <label className="form-label-float">Tên đệm/tên</label>
@@ -532,7 +529,7 @@ function SignUpLoginPageInner() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                   placeholder=" "
-                  className={inputClass(false)}
+                  className={inputClass}
                   required
                 />
                 <label className="form-label-float has-icon">Số điện thoại (+84)</label>
@@ -552,7 +549,7 @@ function SignUpLoginPageInner() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder=" "
-                  className={`form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3 pl-11 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isEmailValid ? 'form-input-valid' : ''}`}
+                  className={`form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3 pl-11 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10`}
                 />
                 <label className="form-label-float has-icon">Email (Tùy chọn)</label>
               </div>
@@ -571,7 +568,7 @@ function SignUpLoginPageInner() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder=" "
-                  className={`form-input vj-auth-input w-full rounded-md border border-[#d8dade] bg-white py-3 pl-11 pr-12 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isPasswordValid ? 'form-input-valid' : ''}`}
+                  className={`form-input vj-auth-input w-full rounded-md border border-[#d8dade] bg-white py-3 pl-11 pr-12 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10`}
                   required
                 />
                 <label className="form-label-float has-icon">Mật khẩu</label>
