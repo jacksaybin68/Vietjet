@@ -55,7 +55,10 @@ describe('UserChat — Vietjet-style launcher', () => {
     const launcher = screen.getByRole('button', { name: 'Mở chat hỗ trợ' });
     const logo = within(launcher).getByRole('img', { name: 'Logo hỗ trợ Vietjet Air' });
 
-    expect(logo).toHaveAttribute('src', '/assets/images/app_logo.svg');
+    expect(logo).toHaveAttribute('src', '/assets/images/app_logo.png');
+    // The character is a full-body mascot, so it must not be cropped by
+    // `rounded-full object-cover` (which would cut off head and feet).
+    expect(logo.getAttribute('class')).not.toMatch(/object-cover/);
     expect(screen.getByText('Xin chào!')).toBeInTheDocument();
   });
 
