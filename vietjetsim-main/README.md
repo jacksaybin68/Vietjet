@@ -65,6 +65,9 @@ psql "$DATABASE_URL" -f migrations/001_bank_accounts.sql
 # and 024 built their times in the session time zone (GMT on Neon), so
 # every one of them departed seven hours late; apply it after 025 or the
 # morning flights will not be findable.
+# 027 spreads those flights over seven days instead of one, so a
+# departure can be booked on any date the form offers. A separate
+# file rather than an edit to 026, which is already applied.
 #
 # CI runs a "Migrations" job that applies every file above to an empty
 # PostgreSQL instance and then re-applies them, so ordering mistakes and

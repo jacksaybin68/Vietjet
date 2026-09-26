@@ -62,6 +62,7 @@ cp .env.local.example .env.local
 # - migrations/024_more_airports_and_flights.sql
 # - migrations/025_airport_codes_and_tuy_hoa.sql  ← sửa mã IATA sai, thêm Tuy Hòa
 # - migrations/026_fix_seed_flight_times.sql    ← sửa giờ bay lệch 7 giờ do múi giờ UTC
+# - migrations/027_seed_a_rolling_week.sql     ← mở rộng chuyến bay lên 7 ngày
 
 # Không có tệp "complete schema" gộp — phải chạy lần lượt như trên.
 ```

@@ -114,7 +114,9 @@ describe('AirportPicker', () => {
     fireEvent.change(screen.getByRole('textbox', { name: 'Tìm điểm khởi hành' }), {
       target: { value: 'quoc' },
     });
-    expect(screen.getByText('1 / 3 sân bay')).toBeInTheDocument();
+    // "sân bay" is dropped while filtering — the count sits next to the search
+    // box that produced it, so the unit is already understood.
+    expect(screen.getByText('1 / 3')).toBeInTheDocument();
   });
 
   it('keeps the list inside the viewport instead of running off the bottom', () => {
