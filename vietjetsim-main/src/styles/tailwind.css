@@ -1,5 +1,26 @@
 /* @import Google Fonts moved to next/font for zero render-blocking */
 @tailwind base;
+
+/*
+ * Hide the native calendar glyph inside hero date fields. The form already
+ * shows its own MdCalendarMonth at the edge, and the two icons side by side
+ * read as a duplicate. `cursor-pointer` stays so the whole field still opens
+ * the native picker.
+ */
+input[type='date'].vj-no-native-icon::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+input[type='date'].vj-no-native-icon::-webkit-inner-spin-button,
+input[type='date'].vj-no-native-icon::-webkit-clear-button {
+  display: none;
+  -webkit-appearance: none;
+}
+input[type='date'].vj-no-native-icon::-moz-calendar-picker-indicator {
+  opacity: 0;
+  pointer-events: none;
+}
+
 @tailwind components;
 @tailwind utilities;
 
