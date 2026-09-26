@@ -1,7 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <circle cx="32" cy="32" r="30" fill="#DA291C"/>
-  <path d="M32 12C18.745 12 8 22.745 8 36s10.745 24 24 24 24-10.745 24-24S45.255 12 32 12zm0 4c11.046 0 20 8.954 20 20s-8.954 20-20 20S12 47.046 12 36s8.954-20 20-20z" fill="#fff"/>
-  <path d="M22 40c-2.2 0-4-1.8-4-4s1.8-4 4-4h20c2.2 0 4 1.8 4 4s-1.8 4-4 4H22z" fill="#fff"/>
-  <path d="M26 36c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2s-.9-2-2-2h-8c-1.1 0-2 .9-2 2z" fill="#DA291C"/>
-  <path d="M32 18v6l4 2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img">
+  <title>Vietjet Air</title>
+  <circle cx="32" cy="32" r="30" fill="#E12127"/>
+  <!--
+    Chữ "V" lấy nguyên path từ logo thật /logo-vj.svg (wordmark 115x20).
+    Path gốc có bbox x 0..12.8388, y 2.91357..18.34443 (rộng 12.8388, cao 15.43086).
+    Đưa về khung 64x64: cao mong muốn 30px nen scale = 30 / 15.43086 = 1.94419.
+    Sau khi scale, bbox x 0..24.9618, y 5.6647..35.6645 nen translate de canh giua
+    tâm khung: tx = (64 - 24.9618) / 2 = 19.5191, ty = 17 - 5.6647 = 11.3353.
+  -->
+  <g transform="translate(19.5191 11.3353) scale(1.94419)">
+    <path d="M4.80597 18.344H1.51045L0 2.91357H3.57015L4.18806 13.3771L9.2 2.91357H12.8388L4.80597 18.344Z" fill="#fff"/>
+  </g>
 </svg>
+
