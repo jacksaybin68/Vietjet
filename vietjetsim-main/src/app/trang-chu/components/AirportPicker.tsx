@@ -214,8 +214,17 @@ export default function AirportPicker({
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Tìm sân bay..."
               aria-label={`Tìm ${label.toLowerCase()}`}
-              className="w-full bg-transparent text-sm text-[#333333] outline-none placeholder:text-[#b0b0b0]"
+              className="min-w-0 flex-1 bg-transparent text-sm text-[#333333] outline-none placeholder:text-[#b0b0b0]"
             />
+            {/* How many are left, so the list does not have to be scrolled to the
+                end to find out it is not the whole list. Sits in the search row
+                rather than in a footer of its own: on a short screen every row
+                the panel gives back is another airport the customer can see. */}
+            <span className="shrink-0 text-[11px] tabular-nums text-[#8c8c8c]">
+              {query.trim()
+                ? `${results.length} / ${airports.length}`
+                : `${airports.length} sân bay`}
+            </span>
           </div>
           <ul
             ref={listRef}
@@ -251,13 +260,6 @@ export default function AirportPicker({
               </li>
             ))}
           </ul>
-          {/* How many are left, so the list does not have to be scrolled to the
-              end to find out it is not the whole list. */}
-          <div className="border-t border-[#eee] px-3 py-1.5 text-[11px] text-[#8c8c8c]">
-            {query.trim()
-              ? `${results.length} / ${airports.length} sân bay`
-              : `${airports.length} sân bay`}
-          </div>
         </div>
       )}
     </div>
