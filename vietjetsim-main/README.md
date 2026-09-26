@@ -49,13 +49,22 @@ Run the SQL migrations in order against your Neon database (any psql client or t
 ```bash
 psql "$DATABASE_URL" -f migrations/000_core_schema.sql
 psql "$DATABASE_URL" -f migrations/001_bank_accounts.sql
-# ... apply every file in migrations/ in filename order (000 → 017).
+# ... apply every file in migrations/ in filename order (000 → 025).
 # 013 wires up the booking_code default and 014 seeds demo airports, flights
 # and the demo accounts below, so a fresh database is usable immediately.
 # 015 adds the `agencies` table and links discount codes to the agency an
 # admin issued them to; apply it before using the "Đại lý" admin tab.
 # 016 normalizes stored phone numbers, so apply it after 014/015.
 # 017 adds the missing `bookings.discount_code_id` foreign key.
+# 018-023 add passenger contacts, RBAC grants, refunds, flight status,
+# the demo-email rename, passenger types and more airports/flights.
+# 025 corrects three IATA codes 024 introduced (DIH→DIN, CXL→VCL,
+# RKG→VKG) and adds Tuy Hòa (TBB); apply it after 024 or the codes
+# will disagree with the airlines' own.
+# 026 re-seeds the migration-created flights in Vietnam local time. 014
+# and 024 built their times in the session time zone (GMT on Neon), so
+# every one of them departed seven hours late; apply it after 025 or the
+# morning flights will not be findable.
 #
 # CI runs a "Migrations" job that applies every file above to an empty
 # PostgreSQL instance and then re-applies them, so ordering mistakes and

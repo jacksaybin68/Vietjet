@@ -10,6 +10,7 @@ import {
   type AdminFlight,
 } from '@/features/admin';
 import { getApiErrorMessage } from '@/shared/services';
+import { AIRPORT_CITIES } from '@/shared/constants';
 
 interface ToastAPI {
   success: (title: string, message?: string, options?: object) => void;
@@ -456,7 +457,9 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
     }
   };
 
-  const AIRPORTS = ['HAN', 'SGN', 'DAD', 'PQC', 'CXR', 'HPH', 'HUI'];
+  // Every airport the `airports` table knows about, not the seven the tab used
+  // to list by hand — an admin could not create a flight to any of the rest.
+  const AIRPORTS = Object.keys(AIRPORT_CITIES);
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
   const safePage = Math.min(currentPage, totalPages);

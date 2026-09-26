@@ -19,21 +19,29 @@ import PassengerPicker, { type PaxCounts } from './PassengerPicker';
  */
 const FALLBACK_AIRPORTS: Airport[] = [
   { code: 'HAN', city: 'Hà Nội', airport: 'Nội Bài' },
-  { code: 'SGN', city: 'Hồ Chí Minh', airport: 'Tân Sơn Nhất' },
+  { code: 'SGN', city: 'TP. Hồ Chí Minh', airport: 'Tân Sơn Nhất' },
   { code: 'DAD', city: 'Đà Nẵng', airport: 'Đà Nẵng' },
   { code: 'PQC', city: 'Phú Quốc', airport: 'Phú Quốc' },
   { code: 'CXR', city: 'Nha Trang', airport: 'Cam Ranh' },
   { code: 'HPH', city: 'Hải Phòng', airport: 'Cát Bi' },
   { code: 'HUI', city: 'Huế', airport: 'Phú Bài' },
   { code: 'VDO', city: 'Quảng Ninh', airport: 'Vân Đồn' },
-  { code: 'VCA', city: 'Cần Thơ', airport: 'Cần Thơ Quốc tế' },
+  { code: 'VCA', city: 'Cần Thơ', airport: 'Cần Thơ' },
   { code: 'PXU', city: 'Pleiku', airport: 'Pleiku' },
   { code: 'BMV', city: 'Buôn Ma Thuột', airport: 'Buôn Ma Thuột' },
-  { code: 'DLI', city: 'Đà Lạt', airport: 'Liên Khuông' },
+  { code: 'DLI', city: 'Đà Lạt', airport: 'Liên Khương' },
   { code: 'VCS', city: 'Côn Đảo', airport: 'Côn Đảo' },
-  { code: 'THD', city: 'Thanh Hóa', airport: 'Tho Xuân' },
+  { code: 'THD', city: 'Thanh Hóa', airport: 'Thọ Xuân' },
   { code: 'VII', city: 'Vinh', airport: 'Vinh' },
-  { code: 'VDH', city: 'Đồng Hới', airport: 'Đồng Hới' },
+  { code: 'VDH', city: 'Quảng Bình', airport: 'Đồng Hới' },
+  { code: 'UIH', city: 'Quy Nhơn', airport: 'Phù Cát' },
+  { code: 'VCL', city: 'Chu Lai', airport: 'Chu Lai' },
+  { code: 'DIN', city: 'Điện Biên Phủ', airport: 'Ely Nguyen Binh Khiem' },
+  { code: 'VKG', city: 'Rạch Giá', airport: 'Rạch Giá' },
+  { code: 'HXX', city: 'Hà Giang', airport: 'Hà Giang' },
+  { code: 'TUQ', city: 'Tuyên Quang', airport: 'Tuyên Quang' },
+  { code: 'BBU', city: 'Quảng Trạch', airport: 'Bãi Bụt' },
+  { code: 'TBB', city: 'Phú Yên', airport: 'Tuy Hòa' },
 ];
 
 /**
@@ -263,7 +271,7 @@ export default function HeroSection() {
                     min={toInputDate(new Date())}
                     onChange={(event) => setDepartDate(event.target.value)}
                     aria-label="Ngày đi"
-                    className={`${inputClass} cursor-pointer`}
+                    className={`${inputClass} vj-no-native-icon cursor-pointer`}
                   />
                 </span>
               </label>
