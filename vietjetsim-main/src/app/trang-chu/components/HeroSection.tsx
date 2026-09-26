@@ -9,9 +9,9 @@ import {
   MdExpandMore,
   MdFlightLand,
   MdFlightTakeoff,
-  MdPeople,
   MdSwapHoriz,
 } from 'react-icons/md';
+import PassengerPicker, { type PaxCounts } from './PassengerPicker';
 
 const AIRPORTS = [
   { code: 'HAN', city: 'Hà Nội', airport: 'Nội Bài' },
@@ -90,7 +90,7 @@ export default function HeroSection() {
   const [returnDate, setReturnDate] = useState(() =>
     toInputDate(new Date(Date.now() + 7 * 86400000))
   );
-  const [passengers, setPassengers] = useState(1);
+  const [paxCounts, setPaxCounts] = useState<PaxCounts>({ adult: 1, child: 0, infant: 0 });
   const [promoCode, setPromoCode] = useState('');
   const [currency, setCurrency] = useState<string>('VND');
   const [cheapestOnly, setCheapestOnly] = useState(false);
@@ -101,9 +101,12 @@ export default function HeroSection() {
       from,
       to,
       depart: departDate,
-      pax: String(passengers),
+      pax: String(paxCounts.adult),
       cur: currency,
     });
+    // Only sent when non-zero so a plain one-adult search keeps its old URL.
+    if (paxCounts.child > 0) params.set('child', String(paxCounts.child));
+    if (paxCounts.infant > 0) params.set('infant', String(paxCounts.infant));
     if (roundTrip) params.set('return', returnDate);
     if (promoCode.trim()) params.set('promo', promoCode.trim());
     if (cheapestOnly) params.set('sort', 'cheapest');
@@ -293,25 +296,7 @@ export default function HeroSection() {
             </button>
           </div>
 
-          <label className={`mt-2 ${fieldClass}`}>
-            <MdPeople className={iconClass} />
-            <span className="min-w-0 flex-1">
-              <span className={labelClass}>Hành khách</span>
-              <select
-                value={passengers}
-                onChange={(event) => setPassengers(Number(event.target.value))}
-                aria-label="Số hành khách"
-                className={`${inputClass} cursor-pointer appearance-none`}
-              >
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((count) => (
-                  <option key={count} value={count}>
-                    {count} người lớn
-                  </option>
-                ))}
-              </select>
-            </span>
-            <MdExpandMore className={iconClass} />
-          </label>
+          <PassengerPicker value={paxCounts} onChange={setPaxCounts} />
 
           <label className={`mt-2 ${fieldClass}`}>
             <MdConfirmationNumber className={iconClass} />

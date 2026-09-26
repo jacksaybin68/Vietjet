@@ -5,6 +5,8 @@
 // the total shown to the user did not match what was charged. Keep every
 // consumer importing from here.
 
+import type { PassengerType } from '@/features/bookings/types/booking-flow';
+
 /** Tax + airport fee applied to the air fare. */
 export const TAX_AND_FEE_RATE = 0.15;
 
@@ -55,9 +57,15 @@ export const ANCILLARY_OPTIONS: readonly AncillaryOption[] = [
 ] as const;
 
 export interface PriceBreakdownInput {
-  /** Air fare for ONE passenger. */
+  /** Air fare for ONE adult. */
   farePerPassenger: number;
   passengerCount: number;
+  /**
+   * Head count per category. Omit it for an all-adult booking: the totals then
+   * come out identical to the single-fare behaviour this module had before
+   * passenger types existed, so every existing caller keeps working.
+   */
+  paxCounts?: Partial<Record<PassengerType, number>>;
   /** Total of all selected seats. */
   seatFee?: number;
   /** Ancillary options selected for the whole booking. */
@@ -67,6 +75,8 @@ export interface PriceBreakdownInput {
 export interface BookingTotals {
   farePerPassenger: number;
   passengerCount: number;
+  /** Passengers who occupy a seat; excludes infants. */
+  seatedPassengerCount: number;
   /** air fare across every passenger */
   fareSubtotal: number;
   taxAndFee: number;
@@ -74,6 +84,13 @@ export interface BookingTotals {
   ancillaryFee: number;
   total: number;
 }
+
+/** Share of the adult fare charged per category. */
+export const FARE_RATE_BY_TYPE: Record<PassengerType, number> = {
+  adult: 1,
+  child: 0.75,
+  infant: 0.1,
+};
 
 const round = (n: number) => Math.round(n);
 
@@ -95,16 +112,30 @@ export function getAncillaryFee(
 export function getBookingTotals({
   farePerPassenger,
   passengerCount,
+  paxCounts,
   seatFee = 0,
   ancillaries = [],
 }: PriceBreakdownInput): BookingTotals {
-  const fareSubtotal = farePerPassenger * passengerCount;
-  const taxAndFee = round(fareSubtotal * TAX_AND_FEE_RATE);
-  const ancillaryFee = getAncillaryFee(ancillaries, passengerCount);
+  const adultCount = paxCounts?.adult ?? passengerCount;
+  const childCount = paxCounts?.child ?? 0;
+  const infantCount = paxCounts?.infant ?? 0;
+
+  // Tax is charged on the fares actually flown: the adult and child fares, but
+  // not the infant lap fare, which carries no ticket of its own.
+  const taxableFare = farePerPassenger * (adultCount + childCount * FARE_RATE_BY_TYPE.child);
+  const fareSubtotal = round(
+    taxableFare + farePerPassenger * infantCount * FARE_RATE_BY_TYPE.infant
+  );
+  const taxAndFee = round(taxableFare * TAX_AND_FEE_RATE);
+
+  // Infants occupy no seat, so neither seat nor ancillary fees apply to them.
+  const seatedPassengerCount = adultCount + childCount;
+  const ancillaryFee = getAncillaryFee(ancillaries, seatedPassengerCount);
 
   return {
     farePerPassenger,
     passengerCount,
+    seatedPassengerCount,
     fareSubtotal,
     taxAndFee,
     seatFee,

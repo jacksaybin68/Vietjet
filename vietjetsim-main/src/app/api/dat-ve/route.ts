@@ -66,14 +66,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Policy acceptance is required' }, { status: 400 });
     }
 
-    const invalidPassenger = passengers.some(
-      (passenger: Record<string, unknown>) =>
-        !passenger.name ||
-        !passenger.dob ||
-        !passenger.idNumber ||
-        !passenger.phone ||
-        !passenger.email
-    );
+    const PASSENGER_TYPES = ['adult', 'child', 'infant'] as const;
+    const rawPassengers = passengers as Record<string, unknown>[];
+
+    // An infant has no passport of their own, so every other category still
+    // needs an identity document. Unrecognised values are rejected rather than
+    // coerced: a typo would otherwise silently price a child as an adult.
+    const invalidPassenger = rawPassengers.some((passenger) => {
+      const type = passenger.type ?? 'adult';
+      if (!PASSENGER_TYPES.includes(type as (typeof PASSENGER_TYPES)[number])) return true;
+      if (!passenger.name || !passenger.dob || !passenger.phone || !passenger.email) return true;
+      if (type !== 'infant' && !passenger.idNumber) return true;
+      return false;
+    });
     if (invalidPassenger) {
       return NextResponse.json(
         { error: 'Each passenger requires identity and contact details' },
@@ -81,22 +86,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const normalizedPassengers = passengers.map((passenger: Record<string, string>) => ({
-      name: passenger.name,
-      dob: passenger.dob,
-      id_number: passenger.idNumber,
-      gender: passenger.gender || 'male',
-      country_code: passenger.countryCode || 'VN',
-      phone: passenger.phone,
-      email: passenger.email,
-      residence: passenger.residence || null,
-      skyjoy_member_id: passenger.skyJoyMemberId || null,
+    const normalizedPassengers = rawPassengers.map((passenger) => ({
+      name: String(passenger.name),
+      dob: String(passenger.dob),
+      id_number: passenger.idNumber ? String(passenger.idNumber) : null,
+      gender: passenger.gender ? String(passenger.gender) : 'male',
+      country_code: passenger.countryCode ? String(passenger.countryCode) : 'VN',
+      phone: String(passenger.phone),
+      email: String(passenger.email),
+      residence: passenger.residence ? String(passenger.residence) : null,
+      skyjoy_member_id: passenger.skyJoyMemberId ? String(passenger.skyJoyMemberId) : null,
+      passenger_type: String(passenger.type ?? 'adult'),
     }));
 
-    // Validate seats count matches passenger count
-    if (seats && Array.isArray(seats) && seats.length !== passengers.length) {
+    // Infants travel on a lap, so a seat is required for every other passenger
+    // only. An all-adult booking still has to match one-to-one as before.
+    const seatedPassengers = normalizedPassengers.filter((p) => p.passenger_type !== 'infant');
+    if (seats && Array.isArray(seats) && seats.length !== seatedPassengers.length) {
       return NextResponse.json(
-        { error: 'Number of seats must match number of passengers' },
+        { error: 'Number of seats must match number of seated passengers' },
         { status: 400 }
       );
     }

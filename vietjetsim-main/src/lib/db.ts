@@ -94,6 +94,8 @@ export interface AirportRecord {
   created_at: string;
 }
 
+export type FlightStatus = 'active' | 'delayed' | 'cancelled' | 'completed' | 'departed';
+
 export interface FlightRecord {
   id: string;
   flight_no: string;
@@ -104,6 +106,9 @@ export interface FlightRecord {
   price: number;
   class: 'economy' | 'business';
   available: number;
+  status: FlightStatus;
+  gate: string | null;
+  terminal: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -450,6 +455,24 @@ export async function getFlightById(flightId: string): Promise<FlightRecord | nu
   return (results as FlightRecord[])[0] || null;
 }
 
+/**
+ * Resolve a flight's operational status by flight number (case-insensitive),
+ * returning the columns the tracking page renders. Only the most recent
+ * matching flight is surfaced; a flight number is unique per schedule window
+ * in this simulator, so a future-dated duplicate would shadow an older one.
+ */
+export async function getFlightStatusByNo(flightNo: string): Promise<FlightRecord | null> {
+  const normalized = flightNo.trim().toUpperCase();
+  if (!normalized) return null;
+  const results = await sql`
+    SELECT * FROM flights
+    WHERE UPPER(flight_no) = ${normalized}
+    ORDER BY depart_time DESC
+    LIMIT 1
+  `;
+  return (results as FlightRecord[])[0] || null;
+}
+
 export async function getAllFlights(params?: {
   page?: number;
   limit?: number;
@@ -529,6 +552,9 @@ export async function updateFlight(
     price: number;
     class: string;
     available: number;
+    status?: FlightStatus;
+    gate?: string | null;
+    terminal?: string | null;
   }>
 ): Promise<FlightRecord> {
   // Whitelist of allowed column names (prevent SQL key injection)
@@ -541,6 +567,9 @@ export async function updateFlight(
     'price',
     'class',
     'available',
+    'status',
+    'gate',
+    'terminal',
   ] as const;
   const setClauses: string[] = [];
   const values: DbParam[] = [];
@@ -739,14 +768,15 @@ export async function createBooking(
   },
   passengers: {
     name: string;
-    dob?: string;
-    id_number?: string;
-    gender?: string;
-    country_code?: string;
-    phone?: string;
-    email?: string;
+    dob?: string | null;
+    id_number?: string | null;
+    gender?: string | null;
+    country_code?: string | null;
+    phone?: string | null;
+    email?: string | null;
     residence?: string | null;
     skyjoy_member_id?: string | null;
+    passenger_type?: string | null;
   }[],
   seats?: string[],
   consents: {
@@ -772,6 +802,9 @@ export async function createBooking(
     email: p.email || null,
     residence: p.residence || null,
     skyjoy_member_id: p.skyjoy_member_id || null,
+    // Bookings created before passenger types existed carry no type, and every
+    // one of them was an adult.
+    passenger_type: p.passenger_type || 'adult',
   }));
 
   const rows = (await sql`
@@ -782,16 +815,17 @@ export async function createBooking(
     ),
     inserted_passengers AS (
       INSERT INTO passengers (
-        booking_id, name, dob, id_number, gender, country_code, phone, email, residence, skyjoy_member_id
+        booking_id, name, dob, id_number, gender, country_code, phone, email, residence, skyjoy_member_id, passenger_type
       )
       SELECT
         nb.id, p.name, p.dob, p.id_number, p.gender, p.country_code,
-        p.phone, p.email, p.residence, p.skyjoy_member_id
+        p.phone, p.email, p.residence, p.skyjoy_member_id, p.passenger_type
       FROM new_booking nb
       CROSS JOIN jsonb_to_recordset(${JSON.stringify(passengerRows)}::jsonb)
         AS p(
           name text, dob date, id_number text, gender text, country_code text,
-          phone text, email text, residence text, skyjoy_member_id text
+          phone text, email text, residence text, skyjoy_member_id text,
+          passenger_type text
         )
       RETURNING 1
     ),

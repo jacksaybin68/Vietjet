@@ -238,6 +238,9 @@ describe('API & RBAC Security Logic', () => {
           price: 1500000,
           class: 'economy',
           available: 180,
+          status: 'active',
+          gate: null,
+          terminal: null,
           created_at: '2026-01-01T00:00:00Z',
           updated_at: '2026-01-01T00:00:00Z',
         });
@@ -279,6 +282,9 @@ describe('API & RBAC Security Logic', () => {
           price: 1500000,
           class: 'economy',
           available: 180,
+          status: 'active',
+          gate: null,
+          terminal: null,
           created_at: '2026-01-01T00:00:00Z',
           updated_at: '2026-01-01T00:00:00Z',
         });

@@ -137,6 +137,10 @@ export interface FlightResultsStepProps {
   onDateChange?: (isoDate: string) => void;
   /** Passenger count from the URL (`pax`) — drives the sticky totals bar. */
   pax?: string;
+  /** Children aged 2-11 from the URL, charged a reduced fare. */
+  child?: string;
+  /** Infants under 2 from the URL, charged a lap fare and not seated. */
+  infant?: string;
 }
 
 const WEEKDAY_LABELS = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
@@ -241,6 +245,8 @@ export default function FlightResultsStep({
   search,
   onDateChange,
   pax,
+  child,
+  infant,
 }: FlightResultsStepProps) {
   const [flights, setFlights] = useState<Flight[]>([]);
   const [sortBy, setSortBy] = useState<string>('price_asc');
@@ -451,10 +457,17 @@ export default function FlightResultsStep({
   // 0 VND; here the bar previews the top-ranked flight (cheapest under the
   // default sort) so the CTA carries a concrete price. Fare + the shared
   // tax/fee rate is exactly what `createBooking` will charge.
-  const passengerCount = Math.max(1, Number.parseInt(pax ?? '1', 10) || 1);
+  const adultCount = Math.max(1, Number.parseInt(pax ?? '1', 10) || 1);
+  const childCount = Math.max(0, Number.parseInt(child ?? '0', 10) || 0);
+  const infantCount = Math.max(0, Number.parseInt(infant ?? '0', 10) || 0);
+  const passengerCount = adultCount + childCount + infantCount;
   const leadFlight = !isLoading && filtered.length > 0 ? filtered[0] : null;
   const leadTotal = leadFlight
-    ? getBookingTotals({ farePerPassenger: leadFlight.price, passengerCount }).total
+    ? getBookingTotals({
+        farePerPassenger: leadFlight.price,
+        passengerCount,
+        paxCounts: { adult: adultCount, child: childCount, infant: infantCount },
+      }).total
     : 0;
 
   return (
