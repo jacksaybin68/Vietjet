@@ -77,7 +77,7 @@ function BirthSelect({ label, placeholder, value, options, onChange }: BirthSele
         aria-label={label}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className={`w-full appearance-none bg-transparent px-3 py-3.5 pr-8 text-[15px] font-bold text-black outline-none ${value ? '' : 'placeholder:font-bold'}`}
+        className={`w-full appearance-none bg-transparent px-3 py-3 pr-8 text-[15px] font-bold text-black outline-none ${value ? '' : 'placeholder:font-bold'}`}
       >
         <option value="">{placeholder}</option>
         {options.map((option) => (
@@ -299,10 +299,10 @@ function SignUpLoginPageInner() {
   };
 
   const inputClass = (valid: boolean) =>
-    `form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3.5 pl-11 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${valid ? 'form-input-valid' : ''}`;
+    `form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3 pl-11 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${valid ? 'form-input-valid' : ''}`;
 
   const submitClass =
-    'vj-auth-submit flex min-h-12 w-full items-center justify-center gap-2 rounded-md';
+    'vj-auth-submit flex min-h-11 w-full items-center justify-center gap-2 rounded-md';
 
   return (
     <AuthShell
@@ -339,7 +339,7 @@ function SignUpLoginPageInner() {
       <AlertBanner message={success} variant="success" />
 
       {tab === 'login' && (
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-3">
           <div className={`form-field-float ${email ? 'has-value' : ''}`}>
             <Icon
               name="EnvelopeIcon"
@@ -374,7 +374,7 @@ function SignUpLoginPageInner() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder=" "
-              className={`form-input vj-auth-input w-full rounded-md border border-[#d8dade] bg-white py-3.5 pl-11 pr-12 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isPasswordValid ? 'form-input-valid' : ''}`}
+              className={`form-input vj-auth-input w-full rounded-md border border-[#d8dade] bg-white py-3 pl-11 pr-12 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isPasswordValid ? 'form-input-valid' : ''}`}
               required
             />
             <label className="form-label-float has-icon">Mật khẩu</label>
@@ -443,9 +443,9 @@ function SignUpLoginPageInner() {
       )}
 
       {tab === 'register' && (
-        <form onSubmit={handleRegister} className="space-y-4">
+        <form onSubmit={handleRegister} className="space-y-3">
           {!otpRequested ? (
-            <div className="animate-fade-in-slide space-y-4">
+            <div className="animate-fade-in-slide space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div className={`form-field-float ${surname ? 'has-value' : ''}`}>
                   <input
@@ -456,7 +456,7 @@ function SignUpLoginPageInner() {
                     value={surname}
                     onChange={(e) => setSurname(e.target.value)}
                     placeholder=" "
-                    className={`form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3.5 pl-4 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isNameValid ? 'form-input-valid' : ''}`}
+                    className={`form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3 pl-4 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isNameValid ? 'form-input-valid' : ''}`}
                     required
                   />
                   <label className="form-label-float">Họ</label>
@@ -470,7 +470,7 @@ function SignUpLoginPageInner() {
                     value={givenName}
                     onChange={(e) => setGivenName(e.target.value)}
                     placeholder=" "
-                    className={`form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3.5 pl-4 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isNameValid ? 'form-input-valid' : ''}`}
+                    className={`form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3 pl-4 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isNameValid ? 'form-input-valid' : ''}`}
                     required
                   />
                   <label className="form-label-float">Tên đệm/tên</label>
@@ -552,7 +552,7 @@ function SignUpLoginPageInner() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder=" "
-                  className={`form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3.5 pl-11 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isEmailValid ? 'form-input-valid' : ''}`}
+                  className={`form-input vj-auth-input font-body-vj w-full rounded-md border border-[#d8dade] bg-white py-3 pl-11 pr-4 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isEmailValid ? 'form-input-valid' : ''}`}
                 />
                 <label className="form-label-float has-icon">Email (Tùy chọn)</label>
               </div>
@@ -571,7 +571,7 @@ function SignUpLoginPageInner() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder=" "
-                  className={`form-input vj-auth-input w-full rounded-md border border-[#d8dade] bg-white py-3.5 pl-11 pr-12 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isPasswordValid ? 'form-input-valid' : ''}`}
+                  className={`form-input vj-auth-input w-full rounded-md border border-[#d8dade] bg-white py-3 pl-11 pr-12 text-[15px] text-[#333] outline-none transition-all placeholder:text-transparent hover:border-[#b8bbc1] focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/10 ${isPasswordValid ? 'form-input-valid' : ''}`}
                   required
                 />
                 <label className="form-label-float has-icon">Mật khẩu</label>
