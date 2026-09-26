@@ -1,4 +1,4 @@
-# 📦 BUILD COMPLETION REPORT — VietjetSim
+# 📦 BUILD COMPLETION REPORT — Vietjet Air
 
 **Date**: 2026-09-24T16:32:55+07:00
 **Status**: ✅ **BUILD SUCCESSFUL — pipeline4/4 gates xanh**

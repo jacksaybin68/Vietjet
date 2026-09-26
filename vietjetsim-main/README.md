@@ -155,8 +155,8 @@ in transactions with compensating rollback on failure.
 
 | Email | Password | Role |
 |-------|----------|------|
-| `user@vietjetsim.vn` | `user123` | User |
-| `admin@vietjetsim.vn` | `admin123` | Admin |
+| `user@vietjetair.vn` | `user123` | User |
+| `admin@vietjetair.vn` | `admin123` | Admin |
 
 > ⚠️ These are mock credentials for development. Register a real account through the app and promote it via `npm run db:setup-admin` for production.
 

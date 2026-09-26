@@ -4,7 +4,7 @@
  * Run: node scripts/seed-demo-accounts.cjs
  *
  * Resets the two demo accounts documented in README.md to the credentials the
- * README promises (user@vietjetsim.vn / user123, admin@vietjetsim.vn / admin123)
+ * README promises (user@vietjetair.vn / user123, admin@vietjetair.vn / admin123)
  * and marks them email-verified, matching migrations/014_seed_demo_data.sql.
  *
  * This exists because migration 014 uses `ON CONFLICT (email) DO NOTHING`: on a
@@ -34,8 +34,8 @@ const DATABASE_URL = process.env.DATABASE_URL;
 
 // Must stay in sync with README.md → "Default Test Accounts".
 const DEMO_ACCOUNTS = [
-  { email: 'user@vietjetsim.vn', password: 'user123', fullName: 'Nguyễn Văn A', role: 'user' },
-  { email: 'admin@vietjetsim.vn', password: 'admin123', fullName: 'Quản Trị Viên', role: 'admin' },
+  { email: 'user@vietjetair.vn', password: 'user123', fullName: 'Nguyễn Văn A', role: 'user' },
+  { email: 'admin@vietjetair.vn', password: 'admin123', fullName: 'Quản Trị Viên', role: 'admin' },
 ];
 
 async function seedDemoAccounts() {

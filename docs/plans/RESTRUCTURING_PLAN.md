@@ -1,4 +1,4 @@
-# 📋 RESTRUCTURING PLAN - VietjetSim Project
+# 📋 RESTRUCTURING PLAN - Vietjet Air Project
 
 **Date**: 2026-09-02  
 **Status**: Optimization Plan  

@@ -11,7 +11,7 @@
 -- Check if admin already exists
 SELECT 
   CASE 
-    WHEN EXISTS (SELECT 1 FROM user_profiles WHERE email = 'admin@vietjetsim.vn')
+    WHEN EXISTS (SELECT 1 FROM user_profiles WHERE email = 'admin@vietjetair.vn')
     THEN 'Admin account already exists'
     ELSE 'No admin account found - will create one'
   END AS status;
@@ -19,13 +19,13 @@ SELECT
 -- Option 1: Insert new admin (if not exists)
 INSERT INTO user_profiles (email, password_hash, full_name, role)
 SELECT 
-  'admin@vietjetsim.vn',
+  'admin@vietjetair.vn',
   -- bcrypt hash for 'Admin@123' (12 rounds)
   '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4jHnWJQ5MKCGfKPa',
   'Administrator',
   'admin'
 WHERE NOT EXISTS (
-  SELECT 1 FROM user_profiles WHERE email = 'admin@vietjetsim.vn'
+  SELECT 1 FROM user_profiles WHERE email = 'admin@vietjetair.vn'
 )
 RETURNING id, email, full_name, role, created_at;
 
@@ -38,7 +38,7 @@ RETURNING id, email, full_name, role, created_at;
 -- UPDATE user_profiles 
 -- SET password_hash = '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4jHnWJQ5MKCGfKPa',
 --     updated_at = NOW()
--- WHERE email = 'admin@vietjetsim.vn';
+-- WHERE email = 'admin@vietjetair.vn';
 
 -- Verify admin account
 SELECT 
@@ -49,4 +49,4 @@ SELECT
   created_at,
   updated_at
 FROM user_profiles 
-WHERE email = 'admin@vietjetsim.vn';
+WHERE email = 'admin@vietjetair.vn';

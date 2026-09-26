@@ -4,7 +4,7 @@
  * Run: node scripts/setup-admin.cjs
  *
  * This script creates an admin account with the following credentials:
- * - Email: admin@vietjetsim.vn
+ * - Email: admin@vietjetair.vn
  * - Password: Admin@123 (will be hashed with bcrypt)
  * - Role: admin
  */
@@ -25,7 +25,7 @@ envContent.split('\n').forEach((line) => {
 });
 
 const DATABASE_URL = process.env.DATABASE_URL;
-const ADMIN_EMAIL = 'admin@vietjetsim.vn';
+const ADMIN_EMAIL = 'admin@vietjetair.vn';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin@123';
 const ADMIN_FULL_NAME = 'Administrator';
 const ADMIN_ROLE = 'admin';

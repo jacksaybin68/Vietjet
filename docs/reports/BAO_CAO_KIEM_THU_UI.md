@@ -1,9 +1,9 @@
-# BÁO CÁO KIỂM THỬ UI THỰC TẾ — VietjetSim
+# BÁO CÁO KIỂM THỬ UI THỰC TẾ — Vietjet Air
 
 **Ngày kiểm thử:** 23/09/2026
 **Môi trường:** `vietjetsim-main/` — Next.js 16.3.4 (Turbopack, dev), cổng **4028**, PostgreSQL Docker (`vietjet-pg`, cổng 5433) qua Neon HTTP proxy (5444)
 **Phương pháp:** thao tác trên trình duyệt thật như người dùng cuối (mở trang, điền form, bấm nút, đăng nhập, đặt vé, thanh toán, duyệt trang quản trị), quan sát DOM/console/network và đối chiếu source code cho từng lỗi
-**Tài khoản test:** `user@vietjetsim.vn / user123`, `admin@vietjetsim.vn / admin123`
+**Tài khoản test:** `user@vietjetair.vn / user123`, `admin@vietjetair.vn / admin123`
 **Ảnh bằng chứng:** `qa-screenshots/01…09-*.webp`
 
 > **Cập nhật 25/09/2026 — báo cáo này mô tả trạng thái ngày 23/09 và đã lệch ở
@@ -27,7 +27,7 @@
 
 ## 1. Tổng quan dự án (đọc hiểu)
 
-VietjetSim là web mô phỏng đặt vé máy bay Vietjet Air, kiến trúc feature-based (vừa tái cấu trúc Phase 1–6):
+Vietjet Air là web mô phỏng đặt vé máy bay Vietjet Air, kiến trúc feature-based (vừa tái cấu trúc Phase 1–6):
 
 ```
 src/
@@ -51,13 +51,13 @@ middleware.ts     # (tại root project) auth/CSRF/rate-limit — XEM LỖI NẶ
 | 1 | Mở trang chủ `/trang-chu` | ⚠️ Pass có lỗi | Render đủ, nhưng dev overlay báo **1 lỗi Hydration** (chi tiết #L1) |
 | 2 | Tìm vé HAN→SGN, chọn ngày/khách | ⚠️ Pass có lỗi | Kết quả đúng (VJ 110, 4 hạng vé, bộ lọc); **ngày bay không nằm trong URL** (`/tim-ve?from&to&pax`, thiếu date) → không chia sẻ được ngày đi; card vé **tràn phải, giá bị cắt** ở viewport 1024px (ảnh 02) |
 | 3 | **Khách (chưa đăng nhập) đặt vé → thanh toán** | ❌ **FAIL** | Chọn ghế OK, bấm "Tiến hành thanh toán" → `POST /api/dat-ve` trả **403 CSRF validation failed**, nút kẹt "Đang xử lý..." **vĩnh viễn** (xem #L2, #L3 — ảnh 03) |
-| 4 | Đăng nhập `user@vietjetsim.vn` | ✅ Pass | Redirect `/tai-khoan`, hiện "Xin chào! Nguyễn Văn A" |
+| 4 | Đăng nhập `user@vietjetair.vn` | ✅ Pass | Redirect `/tai-khoan`, hiện "Xin chào! Nguyễn Văn A" |
 | 5 | **Đặt vé khi đã đăng nhập → thanh toán thẻ** | ✅ Pass | VJ 108, ghế 1B, tổng 2.643.850₫ → booking `0d0dcc30…` → trang xác nhận **mã đặt chỗ VJNV61B2**, QR check-in (ảnh 05) |
 | 6 | `/chuyen-bay-cua-toi` | ✅ Pass | 3 đặt chỗ, tổng chi 5.133.850₫, điểm đến thường xuyên, booking mới hiện "Đã xác nhận" |
 | 7 | Dashboard `/tai-khoan` → tab "Chuyến bay sắp tới" | ✅ Pass | Hiện 2 chuyến, kiểm tra đúng mã booking/đơn giá (ảnh 06) |
 | 8 | Dashboard → tab **"Lịch sử đặt vé"** | ❌ **CRASH** | ErrorBoundary toàn trang: `Cannot read properties of undefined (reading 'cls')` (xem #L4 — ảnh 07). API `/api/dat-ve` vẫn 200 → lỗi nằm ở client render |
 | 9 | Dashboard → tab "Ví của tôi" | ✅ Pass | Số dư 2.660.000₫, SỐ TK 970400000002, thẻ VISA ••••4242, nạp 100K–1M (ảnh 08) |
-| 10 | Logout → đăng nhập `admin@vietjetsim.vn` | ✅ Pass | Redirect đúng `/quan-tri` |
+| 10 | Logout → đăng nhập `admin@vietjetair.vn` | ✅ Pass | Redirect đúng `/quan-tri` |
 | 11 | Admin: Tổng quan, Chuyến bay (70 chuyến), Người dùng (2 TK), Đặt vé (7 đơn), Giao dịch, Hoàn tiền (1 phiếu), Doanh thu | ✅ Pass | Không tab nào crash; giao dịch card 2.643.850₫ của booking vừa tạo xuất hiện đúng (ảnh 09) |
 | 12 | Sweep 14 route (public + protected + 404) | ⚠️ Pass có lỗ hổng | Tất cả 200, `/khong-ton-tai-xyz` → 404 đúng; **nhưng request ẩn danh (không cookie) tới `/quan-tri` và `/tai-khoan` vẫn 200 server-side thay vì redirect về `/dang-nhap`** → bằng chứng #L1 |
 
@@ -218,7 +218,7 @@ middleware.ts     # (tại root project) auth/CSRF/rate-limit — XEM LỖI NẶ
 ## Kiểm thử luồng hoàn tiền (migration 020) — 26/09/2026
 
 Thực hiện trên dev server `http://localhost:4028`, tài khoản demo thật, CSRF token
-thật. Booking demo `VJDEMO01` được tạo cho `user@vietjetsim.vn` vì tài khoản này
+thật. Booking demo `VJDEMO01` được tạo cho `user@vietjetair.vn` vì tài khoản này
 trước đó chưa có booking nào (chặn việc test E2E).
 
 | # | Bước | Kết quả mong đợi | Thực tế |

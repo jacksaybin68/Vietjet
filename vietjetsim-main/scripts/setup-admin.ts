@@ -4,7 +4,7 @@
  * Run: npm run db:setup-admin
  *
  * This script creates an admin account with the following credentials:
- * - Email: admin@vietjetsim.vn
+ * - Email: admin@vietjetair.vn
  * - Password: Admin@123 (will be hashed with bcrypt)
  * - Role: admin
  */
@@ -21,7 +21,7 @@ import { hashPassword } from '../src/lib/auth';
 async function setupAdminAccount() {
   console.log('🚀 Starting admin account setup...\n');
 
-  const adminEmail = 'admin@vietjetsim.vn';
+  const adminEmail = 'admin@vietjetair.vn';
   const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123';
   const adminFullName = 'Administrator';
   const adminRole = 'admin';

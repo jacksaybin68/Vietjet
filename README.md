@@ -36,12 +36,18 @@ Setup và build từ đầu: `docs/SETUP.md`.
 
 ## Ghi chú về tên
 
-Ngày 2026-09-26 dự án đổi hiển thị từ `VietjetSim` sang **Vietjet Air**.
-Chủ ý **chưa đổi** ở những nơi dễ gây mất dữ liệu hoặc hỏng đăng nhập:
+Ngày 2026-09-26 dự án đổi hiển thị từ `VietjetSim` sang **Vietjet Air**:
+metadata, logo, header/footer, chat launcher, `TOTP_ISSUER`, package `vietjet-air`,
+tài liệu, và email demo `@vietjetsim.vn` → `@vietjetair.vn`.
 
-- địa chỉ email demo `@vietjetsim.vn` (migration `003`, `014`, `database-backup/`)
+Đổi email **không** sửa migration `014` đã chạy, mà thêm migration
+`migrations/022_rename_demo_email_domain.sql` để đổi dòng có sẵn trong DB.
+
+Chủ ý **chưa đổi** ở những nốt dễ vỡ:
+
 - dữ liệu đang có trong DB (`loyalty_programs.name = 'VietjetSim Rewards'`)
+- `database-backup/` — bản dump DB thật
 - thư mục `vietjetsim-main/`
-- khoá localStorage `vietjetsim-theme`
+- khoá localStorage `vietjetsim-theme` (đổi sẽ reset theme người dùng đã lưu)
 
-Đổi những chỗ này cần migration riêng, xem `docs/plans/`.
+Đổi 4 nốt trên cần migration riêng, xem `docs/plans/`.

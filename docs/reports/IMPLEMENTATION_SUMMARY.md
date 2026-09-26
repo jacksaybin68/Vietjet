@@ -72,7 +72,7 @@
     "enrolledAt": "2026-01-15T10:30:00Z"
   },
   "program": {
-    "name": "VietjetSim Rewards",
+    "name": "Vietjet Air Rewards",
     "pointsPerThousandVnd": 1.0,
     "minPointsToRedeem": 500
   },

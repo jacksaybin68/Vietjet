@@ -158,7 +158,7 @@ async function main() {
     await status('/api/xac-thuc/dang-nhap', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', cookie: csrfCookie.split(';')[0] },
-      body: JSON.stringify({ email: 'smoke@vietjetsim.vn', password: 'Smoke@12345' }),
+      body: JSON.stringify({ email: 'smoke@vietjetair.vn', password: 'Smoke@12345' }),
     }),
     401
   );

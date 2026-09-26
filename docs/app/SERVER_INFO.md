@@ -1,4 +1,4 @@
-# VietjetSim Server - Thông Tin Chạy Thử
+# Vietjet Air Server - Thông Tin Chạy Thử
 
 ## ✅ Trạng thái: hướng dẫn đã được kiểm chứng lại
 
@@ -41,13 +41,13 @@
 
 #### User (Người dùng thường)
 ```
-Email: user@vietjetsim.vn
+Email: user@vietjetair.vn
 Password: user123
 ```
 
 #### Admin (Quản trị viên)
 ```
-Email: admin@vietjetsim.vn
+Email: admin@vietjetair.vn
 Password: admin123
 ```
 

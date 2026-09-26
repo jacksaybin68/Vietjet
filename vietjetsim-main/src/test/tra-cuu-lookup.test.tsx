@@ -58,7 +58,7 @@ function renderPage() {
 describe('Tra cứu đặt chỗ', () => {
   beforeEach(() => {
     apiRequestMock.mockReset();
-    useAuthMock.mockReturnValue({ user: { email: 'user@vietjetsim.vn' } });
+    useAuthMock.mockReturnValue({ user: { email: 'user@vietjetair.vn' } });
   });
 
   // A 6-character booking code is enumerable, so a signed-out visitor must not

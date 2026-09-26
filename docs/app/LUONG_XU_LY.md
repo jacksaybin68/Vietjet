@@ -1,6 +1,6 @@
-# VietjetSim - Luồng Xử lý Dự án (Project Workflow)
+# Vietjet Air - Luồng Xử lý Dự án (Project Workflow)
 
-Tài liệu này mô tả các luồng nghiệp vụ chính của ứng dụng VietjetSim, từ phía người dùng (User) đến quản trị viên (Admin).
+Tài liệu này mô tả các luồng nghiệp vụ chính của ứng dụng Vietjet Air, từ phía người dùng (User) đến quản trị viên (Admin).
 
 ---
 

@@ -27,7 +27,7 @@
  */
 
 const BASE_URL = process.env.SITE_URL || 'http://localhost:4028';
-const ADMIN = { email: 'admin@vietjetsim.vn', password: 'admin123' };
+const ADMIN = { email: 'admin@vietjetair.vn', password: 'admin123' };
 
 // [flight_no, from, to, depart, durationMin, economyPrice, businessPrice, seats]
 const ROUTES = [

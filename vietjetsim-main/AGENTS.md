@@ -142,12 +142,13 @@ return response;` narrows correctly and avoids returning `undefined` from a hand
   `login_history` live in `src/lib/security-db.ts`; deletes are always scoped
   by `user_id` so a foreign session id is a silent no-op.
 - **The README demo passwords only apply to a fresh database.** `014_seed_demo_data.sql`
-  seeds `user@vietjetsim.vn` / `admin@vietjetsim.vn` with `ON CONFLICT (email) DO NOTHING`,
-  so on a database where those rows already exist with other hashes the migration is a
-  no-op and the documented logins fail. `npm run db:seed-demo`
-  (`scripts/seed-demo-accounts.cjs`) resets both accounts to the README credentials and
-  their intended roles. Keep the README table and that script's `DEMO_ACCOUNTS` in sync;
-  it writes to whatever `DATABASE_URL` points at.
+  still seeds the old `@vietjetsim.vn` domain, and `022_rename_demo_email_domain.sql`
+  then renames those two rows to `@vietjetair.vn`. Both statements are
+  `ON CONFLICT (email) DO NOTHING`-safe, so on a database where the rows already
+  exist with other hashes the migrations are a no-op and the documented logins fail.
+  `npm run db:seed-demo` (`scripts/seed-demo-accounts.cjs`) resets both accounts to the
+  README credentials and their intended roles. Keep the README table and that script's
+  `DEMO_ACCOUNTS` in sync; it writes to whatever `DATABASE_URL` points at.
 
 ## Chat (h·ªó tr·ª£ kh√°ch h√Ýng + tr·ª£ l√Ω AI)
 

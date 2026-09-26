@@ -1,4 +1,4 @@
-# KẾ HOẠCH TINH CHỈNH GIAO DIỆN — VietjetSim
+# KẾ HOẠCH TINH CHỈNH GIAO DIỆN — Vietjet Air
 
 **Ngày kiểm tra:** 24/09/2026
 **Người kiểm tra:** AI Agent (browser automation)

@@ -100,7 +100,7 @@ function createMockSql() {
   chatConversations.push({
     id: seedConversationId,
     user_id: 'mock-user-demo',
-    user_email: 'user@vietjetsim.vn',
+    user_email: 'user@vietjetair.vn',
     user_name: 'Người dùng Demo',
     status: 'active',
     last_message: 'Tôi cần hỗ trợ đổi ngày bay',

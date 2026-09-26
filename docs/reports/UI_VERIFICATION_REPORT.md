@@ -2,7 +2,7 @@
 
 **Ngày**: 2026-09-02T14:44:57Z  
 **Status**: ✅ **UI VERIFICATION COMPLETE**  
-**Project**: VietjetSim v0.1.0  
+**Project**: Vietjet Air v0.1.0  
 
 ---
 
@@ -568,4 +568,4 @@ Tất cả giao diện và API endpoints đã được kiểm tra và xác minh.
 ---
 
 *Report Generated: 2026-09-02T14:44:57Z*  
-*VietjetSim v0.1.0 - Vietjet Air Booking System*
+*Vietjet Air v0.1.0 - Vietjet Air Booking System*

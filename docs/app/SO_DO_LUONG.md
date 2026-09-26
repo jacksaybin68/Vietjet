@@ -1,6 +1,6 @@
-# Sơ đồ Luồng Xử lý Dự án (VietjetSim)
+# Sơ đồ Luồng Xử lý Dự án (Vietjet Air)
 
-Dưới đây là sơ đồ chi tiết các bước xử lý nghiệp vụ trong hệ thống VietjetSim sử dụng Mermaid.
+Dưới đây là sơ đồ chi tiết các bước xử lý nghiệp vụ trong hệ thống Vietjet Air sử dụng Mermaid.
 
 ## 1. Tổng quan Luồng Người Dùng & Quản Trị Viên
 

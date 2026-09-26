@@ -1,4 +1,4 @@
-# VietjetSim — Trạng Thái Tái Cấu Trúc
+# Vietjet Air — Trạng Thái Tái Cấu Trúc
 
 **Cập nhật:** 2026-09-23
 **Trạng thái:** Phase 1–6 HOÀN TẤT — TypeScript 0 lỗi, 309/309 tests passed, ESLint 0 lỗi, build thành công

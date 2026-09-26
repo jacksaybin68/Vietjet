@@ -1,4 +1,4 @@
-# 📊 Báo Cáo Xác Minh Build - VietjetSim
+# 📊 Báo Cáo Xác Minh Build - Vietjet Air
 
 **Ngày**: 2026-09-02  
 **Trạng thái**: ✅ SẴN SÀNG BUILD
@@ -7,7 +7,7 @@
 
 ## 🎯 Tóm Tắt
 
-Đã triển khai 3 API endpoints bị thiếu và 2 hàm cơ sở dữ liệu hỗ trợ cho hệ thống VietjetSim.
+Đã triển khai 3 API endpoints bị thiếu và 2 hàm cơ sở dữ liệu hỗ trợ cho hệ thống Vietjet Air.
 
 **Tất cả code đã được kiểm tra và không có lỗi cú pháp hoặc logic.**
 
@@ -38,7 +38,7 @@
     "enrolledAt": "2026-01-15T10:30:00Z"
   },
   "program": {
-    "name": "VietjetSim Rewards",
+    "name": "Vietjet Air Rewards",
     "pointsPerThousandVnd": 1.0,
     "minPointsToRedeem": 500
   },
