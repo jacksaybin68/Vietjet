@@ -36,6 +36,9 @@ export const PUBLIC_ROUTES = [
 export const PUBLIC_API_ROUTES = [
   // Flight search backs the anonymous search page.
   '/api/chuyen-bay',
+  // The airport list behind the hero search form. Reference data, read before
+  // anyone has signed in, same as the flight search it feeds.
+  '/api/san-bay',
   // Lookup by booking code + passenger name: the credentials are the booking
   // code, and requiring a session would break the anonymous check-in lookup.
   '/api/checkin',
