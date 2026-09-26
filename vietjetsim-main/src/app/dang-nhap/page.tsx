@@ -412,7 +412,7 @@ function SignUpLoginPageInner() {
           )}
 
           <div className="flex items-center justify-between">
-            <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-[#555960]">
+            <label className="flex cursor-pointer items-center gap-2 text-sm font-bold text-[#555960]">
               <input
                 id="remember-me"
                 name="remember"
@@ -423,7 +423,7 @@ function SignUpLoginPageInner() {
             </label>
             <Link
               href="/quen-mat-khau"
-              className="text-sm font-semibold text-[var(--primary)] hover:underline"
+              className="text-sm font-bold text-[var(--primary)] hover:underline"
             >
               Quên mật khẩu?
             </Link>
@@ -481,7 +481,7 @@ function SignUpLoginPageInner() {
                   viền / bo góc / nền của các ô nhập còn lại. Nhãn đặt tĩnh ở trên
                   vì select không dùng được kiểu floating label của input. */}
               <div>
-                <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6c6f76]">
+                <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.16em] text-[#6c6f76]">
                   Ngày sinh <span className="text-[var(--primary)]">*</span>
                 </span>
                 <div className="grid grid-cols-3 divide-x divide-[#d8dade] overflow-hidden rounded-md border border-[#d8dade] bg-white transition-all focus-within:border-[var(--primary)] focus-within:ring-2 focus-within:ring-[rgb(var(--primary-rgb))]/10">
@@ -511,7 +511,7 @@ function SignUpLoginPageInner() {
                   />
                 </div>
                 {birthError && (
-                  <p className="mt-1.5 text-xs font-medium text-[#dc2626]">{birthError}</p>
+                  <p className="mt-1.5 text-xs font-bold text-[#dc2626]">{birthError}</p>
                 )}
               </div>
 
@@ -683,7 +683,7 @@ function SignUpLoginPageInner() {
 
               <button
                 type="button"
-                className="mt-4 flex w-full cursor-pointer items-center justify-center gap-1 text-center text-sm font-medium text-[var(--foreground-muted)] transition-colors hover:text-primary"
+                className="mt-4 flex w-full cursor-pointer items-center justify-center gap-1 text-center text-sm font-bold text-[var(--foreground-muted)] transition-colors hover:text-primary"
                 onClick={() => {
                   setOtpRequested(false);
                   resetMessages();

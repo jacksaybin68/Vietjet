@@ -918,6 +918,24 @@ select option {
 .form-field-float {
   position: relative;
 }
+
+/*
+ * The auth forms are set in bold throughout — field values, floating labels,
+ * helper text. Applied through the hooks the auth pages already carry rather
+ * than by editing each class string, so a new auth field is bold by default.
+ * The label rule is scoped with `:has(.vj-auth-input)` on purpose: the booking
+ * wizard reuses `.form-label-float` and keeps its lighter label.
+ */
+.vj-auth-input,
+.vj-auth-submit,
+.vj-auth-input option,
+select option {
+  font-weight: 700;
+}
+.form-field-float:has(.vj-auth-input) .form-label-float {
+  font-weight: 700;
+}
+
 .form-field-float .form-label-float {
   position: absolute;
   left: 12px;
