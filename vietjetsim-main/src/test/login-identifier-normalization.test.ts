@@ -52,7 +52,7 @@ const CORRECT_PASSWORD = 'user123';
 
 const userRow = {
   id: 'user-1',
-  email: 'user@vietjetsim.vn',
+  email: 'user@vietjetair.vn',
   password_hash: 'stored-hash',
   full_name: 'Vietjet User',
   role: 'user',
@@ -87,16 +87,16 @@ beforeEach(() => {
 describe('Login identifier normalisation', () => {
   it('trims surrounding whitespace from the identifier before looking it up', async () => {
     const res = await login(
-      loginRequest({ email: '  user@vietjetsim.vn  ', password: CORRECT_PASSWORD })
+      loginRequest({ email: '  user@vietjetair.vn  ', password: CORRECT_PASSWORD })
     );
 
     expect(res.status).toBe(200);
-    expect(lookupParams()[0]).toBe('user@vietjetsim.vn');
+    expect(lookupParams()[0]).toBe('user@vietjetair.vn');
   });
 
   it('looks the account up case-insensitively', async () => {
     const res = await login(
-      loginRequest({ email: 'User@VietjetSim.VN', password: CORRECT_PASSWORD })
+      loginRequest({ email: 'User@VietjetAir.VN', password: CORRECT_PASSWORD })
     );
 
     expect(res.status).toBe(200);
@@ -108,18 +108,18 @@ describe('Login identifier normalisation', () => {
 
   it('still accepts the exact stored email', async () => {
     const res = await login(
-      loginRequest({ email: 'user@vietjetsim.vn', password: CORRECT_PASSWORD })
+      loginRequest({ email: 'user@vietjetair.vn', password: CORRECT_PASSWORD })
     );
 
     expect(res.status).toBe(200);
-    expect(lookupParams()[0]).toBe('user@vietjetsim.vn');
+    expect(lookupParams()[0]).toBe('user@vietjetair.vn');
   });
 });
 
 describe('Login password normalisation', () => {
   it('accepts a password padded with surrounding whitespace', async () => {
     const res = await login(
-      loginRequest({ email: 'user@vietjetsim.vn', password: `  ${CORRECT_PASSWORD}  ` })
+      loginRequest({ email: 'user@vietjetair.vn', password: `  ${CORRECT_PASSWORD}  ` })
     );
 
     expect(res.status).toBe(200);
@@ -131,7 +131,7 @@ describe('Login password normalisation', () => {
 
   it('does not retry the trimmed value when the password has no padding', async () => {
     const res = await login(
-      loginRequest({ email: 'user@vietjetsim.vn', password: CORRECT_PASSWORD })
+      loginRequest({ email: 'user@vietjetair.vn', password: CORRECT_PASSWORD })
     );
 
     expect(res.status).toBe(200);
@@ -142,7 +142,7 @@ describe('Login password normalisation', () => {
     compareMock.mockImplementation(async (plain: string) => plain === 'mat khau dai');
 
     const res = await login(
-      loginRequest({ email: 'user@vietjetsim.vn', password: 'mat khau dai' })
+      loginRequest({ email: 'user@vietjetair.vn', password: 'mat khau dai' })
     );
 
     expect(res.status).toBe(200);
@@ -152,7 +152,7 @@ describe('Login password normalisation', () => {
 describe('Login still rejects bad credentials', () => {
   it('returns 401 for a wrong password and issues no session cookie', async () => {
     const res = await login(
-      loginRequest({ email: 'user@vietjetsim.vn', password: 'wrong-password' })
+      loginRequest({ email: 'user@vietjetair.vn', password: 'wrong-password' })
     );
 
     expect(res.status).toBe(401);
@@ -169,7 +169,7 @@ describe('Login still rejects bad credentials', () => {
     sqlMock.mockResolvedValue([]);
 
     const res = await login(
-      loginRequest({ email: '  nobody@vietjetsim.vn  ', password: CORRECT_PASSWORD })
+      loginRequest({ email: '  nobody@vietjetair.vn  ', password: CORRECT_PASSWORD })
     );
 
     expect(res.status).toBe(401);

@@ -1,4 +1,4 @@
-# 🚀 Hướng Dẫn Setup & Build - VietjetSim
+# 🚀 Hướng Dẫn Setup & Build - Vietjet Air
 
 ## 📋 Yêu Cầu
 
@@ -180,8 +180,8 @@ curl -X POST http://localhost:4028/api/thanh-vien/doi-diem \
 
 | Email | Password | Role |
 |-------|----------|------|
-| user@vietjetsim.vn | user123 | User |
-| admin@vietjetsim.vn | admin123 | Admin |
+| user@vietjetair.vn | user123 | User |
+| admin@vietjetair.vn | admin123 | Admin |
 
 > ⚠️ Chỉ sử dụng trong development. Thay đổi cho production.
 
@@ -333,7 +333,7 @@ OPENCLAW_API_KEY=
 
 - Tài liệu: Xem `README.md`
 - Issues: GitHub Issues
-- Docs: Xem `HE_THONG_BAN_VE.md` và `LUONG_XU_LY.md`
+- Docs: Xem `../app/HE_THONG_BAN_VE.md` và `../app/LUONG_XU_LY.md`
 
 ---
 

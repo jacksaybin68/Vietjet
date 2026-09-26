@@ -1,4 +1,4 @@
-# Hệ Thống Bán Vé Máy Bay (VietjetSim) - Tài Liệu Chức Năng Chi Tiết
+# Hệ Thống Bán Vé Máy Bay (Vietjet Air) - Tài Liệu Chức Năng Chi Tiết
 
 Tài liệu này hệ thống lại toàn bộ các tính năng, cấu trúc cơ sở dữ liệu và luồng nghiệp vụ của dự án theo yêu cầu chi tiết.
 
@@ -98,4 +98,4 @@ flowchart LR
 ```
 
 ---
-*Tài liệu được biên soạn dựa trên cấu trúc hệ thống VietjetSim thực tế.*
+*Tài liệu được biên soạn dựa trên cấu trúc hệ thống Vietjet Air thực tế.*

@@ -1,4 +1,4 @@
-# BÁO CÁO TRẠNG THÁI HIỆN TẠI — VietjetSim
+# BÁO CÁO TRẠNG THÁI HIỆN TẠI — Vietjet Air
 
 **Cập nhật:** 25/09/2026 · Nguồn: source hiện tại + kết quả chạy thật
 (`type-check`, `lint`, `test`, `build`, `test:smoke`)

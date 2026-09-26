@@ -20,7 +20,7 @@ envContent.split('\n').forEach((line) => {
 });
 
 const DATABASE_URL = process.env.DATABASE_URL;
-const ADMIN_EMAIL = 'admin@vietjetsim.vn';
+const ADMIN_EMAIL = 'admin@vietjetair.vn';
 const NEW_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin@12345'; // Override via ADMIN_PASSWORD env
 
 async function resetAdminPassword() {
