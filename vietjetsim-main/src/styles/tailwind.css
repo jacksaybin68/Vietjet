@@ -4,6 +4,15 @@
 @tailwind utilities;
 
 :root {
+  /*
+   * The brand only ships a light presentation. Without this the browser paints
+   * the parts we do not own in the reader's OS scheme: a `<select>` popup, a
+   * date picker and the scrollbars all came up dark on a dark-mode machine and
+   * broke the all-white booking form. `color-scheme: light` tells the browser
+   * to render those from the light palette.
+   */
+  color-scheme: light;
+
   /* Brand tokens sampled from vietjetair.com production CSS/JS bundles. */
   --primary: #ec2029;
   --primary-dark: #d91a21;
