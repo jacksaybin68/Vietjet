@@ -14,6 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:smoke": "node scripts/smoke-test.cjs",
+    "clean": "node -e \"const fs=require('fs');['.next','tsconfig.tsbuildinfo'].forEach(p=>fs.rmSync(p,{recursive:true,force:true}));console.log('da xoa .next va tsconfig.tsbuildinfo')\"",
     "db:check": "ts-node src/lib/dbCheck.ts",
     "db:setup-admin": "node scripts/setup-admin.cjs",
     "db:seed-demo": "node scripts/seed-demo-accounts.cjs",
