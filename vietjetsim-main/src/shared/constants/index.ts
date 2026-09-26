@@ -118,3 +118,43 @@ export const PAGINATION = {
   DEFAULT_LIMIT: 20,
   MAX_LIMIT: 100,
 } as const;
+
+// Vietnamese airports
+//
+// The `airports` table is the source of truth for the hero picker's list, but
+// plenty of screens render a bare code from a booking record with no join to it
+// (the results step, "My bookings", the dashboard history). Those need a
+// code → city map in the bundle.
+//
+// This used to be three separate maps that had drifted apart: one called VCA
+// "Tam Kỳ" (VCA is Cần Thơ), one used PUI for Phù Cát (the real code is UIH),
+// one used VKO for Rạch Giá (VKG), and one spelled VDO "Vũng Tàu" (Vân Đồn).
+// A flight booked through the wrong entry showed a different city than the
+// ticket. Every entry below matches the `airports` table seeded by
+// migrations/014 and /025; add a new airport to both together.
+export const AIRPORT_CITIES: Record<string, string> = {
+  HAN: 'Hà Nội',
+  SGN: 'TP. Hồ Chí Minh',
+  DAD: 'Đà Nẵng',
+  PQC: 'Phú Quốc',
+  CXR: 'Nha Trang',
+  HPH: 'Hải Phòng',
+  HUI: 'Huế',
+  VDO: 'Quảng Ninh',
+  VCA: 'Cần Thơ',
+  PXU: 'Pleiku',
+  BMV: 'Buôn Ma Thuột',
+  DLI: 'Đà Lạt',
+  VCS: 'Côn Đảo',
+  THD: 'Thanh Hóa',
+  VII: 'Vinh',
+  VDH: 'Quảng Bình',
+  UIH: 'Quy Nhơn',
+  VCL: 'Chu Lai',
+  DIN: 'Điện Biên Phủ',
+  VKG: 'Rạch Giá',
+  HXX: 'Hà Giang',
+  TUQ: 'Tuyên Quang',
+  BBU: 'Quảng Trạch',
+  TBB: 'Phú Yên',
+};

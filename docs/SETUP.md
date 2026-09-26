@@ -32,7 +32,7 @@ cp .env.local.example .env.local
 ### 3. Thiết Lập Database
 ```bash
 # Chạy migrations trong Neon SQL Editor hoặc psql
-# Áp dụng MỌI tệp trong vietjetsim-main/migrations/ theo thứ tự tên tệp (000 → 016):
+# Áp dụng MỌI tệp trong vietjetsim-main/migrations/ theo thứ tự tên tệp (000 → 025):
 # - migrations/000_core_schema.sql
 # - migrations/001_bank_accounts.sql
 # - migrations/001_refresh_tokens.sql
@@ -52,6 +52,16 @@ cp .env.local.example .env.local
 # - migrations/014_seed_demo_data.sql   ← seed sân bay, chuyến bay, tài khoản demo
 # - migrations/015_agency_discounts.sql  ← bảng agencies (tab "Đại lý")
 # - migrations/016_normalize_phone_and_cleanup.sql
+# - migrations/017_missing_foreign_keys.sql
+# - migrations/018_passenger_contact_and_consents.sql
+# - migrations/019_role_permissions.sql
+# - migrations/020_refund_ticket_workflow.sql
+# - migrations/021_flight_status.sql
+# - migrations/022_rename_demo_email_domain.sql
+# - migrations/023_passenger_types.sql
+# - migrations/024_more_airports_and_flights.sql
+# - migrations/025_airport_codes_and_tuy_hoa.sql  ← sửa mã IATA sai, thêm Tuy Hòa
+# - migrations/026_fix_seed_flight_times.sql    ← sửa giờ bay lệch 7 giờ do múi giờ UTC
 
 # Không có tệp "complete schema" gộp — phải chạy lần lượt như trên.
 ```

@@ -10,6 +10,7 @@ import {
   ProfileSkeleton,
 } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
+import { AIRPORT_CITIES } from '@/shared/constants';
 
 // ─── Dynamic imports for heavy tab components (code-split) ──────────────
 const NotificationsTab = dynamic(() => import('./NotificationsTab'), {
@@ -182,29 +183,6 @@ const FALLBACK_HISTORY: UiBooking[] = [
     status: 'cancelled',
   },
 ];
-
-// IATA code → Vietnamese city name
-const AIRPORT_CITIES: Record<string, string> = {
-  HAN: 'Hà Nội',
-  SGN: 'TP. Hồ Chí Minh',
-  DAD: 'Đà Nẵng',
-  PQC: 'Phú Quốc',
-  CXR: 'Nha Trang',
-  HUI: 'Huế',
-  VDO: 'Vũng Tàu',
-  VCL: 'Chu Lai',
-  UIH: 'Phù Cát',
-  BMV: 'Bù Ma Thuột',
-  PUX: 'Phú Quôc',
-  HPH: 'Hải Phòng',
-  DIN: 'Điện Biên',
-  THD: 'Thọ Xuân',
-  VCA: 'Tam Kỳ',
-  VKO: 'Rạch Giá',
-  CAH: 'Cà Mau',
-  TBB: 'Tuy Hoà',
-  VCS: 'Côn Đảo',
-};
 
 /** Booking shape expected by the UI (upcoming cards + history table) */
 interface RefundApiRow {

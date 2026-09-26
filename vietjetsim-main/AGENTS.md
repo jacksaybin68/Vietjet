@@ -42,6 +42,28 @@ README demo accounts, so a freshly migrated database is usable without manual in
 relative to `CURRENT_DATE`, so date-filtered flight search only finds them on the
 following day.
 
+**IATA codes are reference data, not a UI detail.** `flights.from_code` /
+`to_code` are foreign keys on `airports(code)`, so an airport's code cannot be
+renamed in place — `025_airport_codes_and_tuy_hoa.sql` shows the required
+order: insert the new code, repoint the flights, then drop the old row. Codes
+must match the civil-aviation register (Điện Biên Phủ is DIN, Rạch Giá is VKG,
+Chu Lai is VCL); an invented code reaches the customer in the URL and the
+boarding pass. The airport list the hero picker serves comes from the
+`airports` table via `/api/san-bay`; the code → city map that screens without
+a join use lives in `AIRPORT_CITIES` in `src/shared/constants` and must stay
+in step with the table. Add an airport to both, plus a migration, together.
+
+**Write seed timestamps with an explicit +07:00 offset.** A `TIMESTAMPTZ` built
+from `CURRENT_DATE + make_interval(hours => n)` is read in the *session* time
+zone, and Neon sessions run `TimeZone = GMT` — a slot meant to be 06:00 lands
+at 13:00 in Vietnam. 014/024/025 all did this, and 026 had to delete and
+re-seed 440 rows to undo it. Format the local time as text with a literal
+`+07:00` (as `scripts/seed-future-flights.cjs` does) so the stored instant does
+not depend on the session. When correcting a wrong value, re-seed rather than
+shift: the five seed slots are symmetric, so a row that needs shifting and a
+row that is already correct are indistinguishable, and any relative `UPDATE`
+you can write will be wrong on its second run.
+
 **Agency-issued discount codes.** `015_agency_discounts.sql` adds `agencies` and
 `discount_codes.agency_id` (nullable, `ON DELETE SET NULL`) plus `issued_by`. Admins
 manage agencies at `/quan-tri` → "Đại lý" and pick one from the "Phát hành cho đại lý"

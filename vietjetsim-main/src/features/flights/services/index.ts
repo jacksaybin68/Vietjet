@@ -1,24 +1,7 @@
+import { API_ENDPOINTS, AIRPORT_CITIES } from '@/shared/constants';
 import { apiRequest } from '@/shared/services';
-import { API_ENDPOINTS } from '@/shared/constants';
 import type { FlightRecord } from '@/lib/db';
 import type { Flight, FlightSearchParams, FlightSearchResponse } from '../types';
-
-/** Airport code → Vietnamese city name, falling back to the raw code. */
-export const AIRPORT_CITIES: Record<string, string> = {
-  HAN: 'Hà Nội',
-  SGN: 'TP.HCM',
-  DAD: 'Đà Nẵng',
-  PQC: 'Phú Quốc',
-  CXR: 'Nha Trang',
-  HPH: 'Hải Phòng',
-  HUI: 'Huế',
-  VCL: 'Chu Lai',
-  PUI: 'Phù Cát',
-  VCS: 'Côn Đảo',
-  VCA: 'Phú Cat',
-  DLI: 'Lâm Đồng',
-  BMV: 'Buôn Ma Thuột',
-};
 
 export function getAirportCity(code: string): string {
   return AIRPORT_CITIES[code.toUpperCase()] || code;

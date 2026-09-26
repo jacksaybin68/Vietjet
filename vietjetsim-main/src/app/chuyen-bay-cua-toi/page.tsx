@@ -25,23 +25,12 @@ import { AppImage } from '@/shared/components/ui';
 import { MyFlightsStats } from '@/features/bookings';
 import { listBookings } from '@/features/bookings/services';
 import { apiRequest, getApiErrorMessage } from '@/shared/services';
+import { getAirportCity } from '@/features/flights';
 
 const TABS = [
   { id: 'booking', label: 'Đặt chỗ của tôi' },
   { id: 'eticket', label: 'Vé điện tử (VDT)' },
 ] as const;
-
-const AIRPORTS: Record<string, string> = {
-  HAN: 'Hà Nội (Nội Bài)',
-  SGN: 'TP. Hồ Chí Minh (Tân Sơn Nhất)',
-  DAD: 'Đà Nẵng',
-  PQC: 'Phú Quốc',
-  CXR: 'Nha Trang (Cam Ranh)',
-  HPH: 'Hải Phòng (Cát Bi)',
-  HUI: 'Huế (Phú Bài)',
-  VDO: 'Quảng Ninh (Vân Đồn)',
-  VII: 'Vinh',
-};
 
 interface FlightInfo {
   flight_no?: string;
@@ -203,7 +192,7 @@ export default function MyFlightsPage() {
       destCount[code] = (destCount[code] || 0) + 1;
     });
     const frequentDestinations = Object.entries(destCount)
-      .map(([code, count]) => ({ code, city: AIRPORTS[code] || code, count }))
+      .map(([code, count]) => ({ code, city: getAirportCity(code), count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
     return { totalBookings, completedFlights, pendingFlights, totalSpent, frequentDestinations };
@@ -522,7 +511,7 @@ export default function MyFlightsPage() {
                               {f.from_code || '--'}
                             </p>
                             <p className="text-[10px] text-[var(--foreground-muted)] mt-0.5">
-                              {AIRPORTS[f.from_code || '']?.split('(')[0] || '—'}
+                              {f.from_code ? getAirportCity(f.from_code) : '—'}
                             </p>
                             <p className="text-sm font-bold text-[var(--vj-red)] mt-1">
                               {formatTime(f.depart_time)}
@@ -552,7 +541,7 @@ export default function MyFlightsPage() {
                               {f.to_code || '--'}
                             </p>
                             <p className="text-[10px] text-[var(--foreground-muted)] mt-0.5">
-                              {AIRPORTS[f.to_code || '']?.split('(')[0] || '—'}
+                              {f.to_code ? getAirportCity(f.to_code) : '—'}
                             </p>
                             <p className="text-sm font-bold text-[var(--vj-red)] mt-1">
                               {formatTime(f.arrive_time)}
