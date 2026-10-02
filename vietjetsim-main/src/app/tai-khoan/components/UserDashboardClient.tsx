@@ -254,11 +254,27 @@ function mapDbBookingToUi(b: any): UiBooking {
   };
 }
 
+/**
+ * Every status `bookings.status` can hold, per the union in `@/lib/db`.
+ * Missing entries used to crash the whole dashboard: a `pending` booking made
+ * `statusBadge(booking.status).cls` throw `Cannot read properties of undefined`,
+ * which the page-level ErrorBoundary turned into a blank "Lỗi máy chủ" — the
+ * customer lost access to their wallet, loyalty points and profile because one
+ * row had a status the badge table forgot. `UNKNOWN_STATUS` below is the
+ * backstop for a status added after this file.
+ */
 const STATUS_MAP: Record<string, { label: string; cls: string }> = {
+  pending: { label: 'Chờ thanh toán', cls: 'badge-warning' },
   confirmed: { label: 'Đã xác nhận', cls: 'badge-success' },
   completed: { label: 'Hoàn thành', cls: 'badge-info' },
   cancelled: { label: 'Đã huỷ', cls: 'badge-error' },
+  refunded: { label: 'Đã hoàn tiền', cls: 'badge-neutral' },
 };
+
+const UNKNOWN_STATUS = { label: 'Không rõ', cls: 'badge-neutral' };
+
+/** Badge for a status, falling back rather than throwing on an unknown value. */
+const statusBadge = (status: string) => STATUS_MAP[status] ?? UNKNOWN_STATUS;
 
 export default function UserDashboardClient() {
   const { user } = useAuth();
@@ -539,7 +555,7 @@ export default function UserDashboardClient() {
       b.arriveTime,
       b.seat,
       b.price,
-      STATUS_MAP[b.status].label,
+      statusBadge(b.status).label,
     ]);
     const csvContent = [headers, ...rows]
       .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
@@ -567,7 +583,7 @@ export default function UserDashboardClient() {
         <td>${b.departTime} → ${b.arriveTime}</td>
         <td>${b.seat}</td>
         <td style="text-align:right">${b.price.toLocaleString('vi-VN')}₫</td>
-        <td><span style="padding:2px 8px;border-radius:999px;font-size:11px;background:${b.status === 'completed' ? '#dbeafe' : b.status === 'cancelled' ? '#fee2e2' : '#f0fdf4'};color:${b.status === 'completed' ? '#1d4ed8' : b.status === 'cancelled' ? '#dc2626' : '#16a34a'}">${STATUS_MAP[b.status].label}</span></td>
+        <td><span style="padding:2px 8px;border-radius:999px;font-size:11px;background:${b.status === 'completed' ? '#dbeafe' : b.status === 'cancelled' ? '#fee2e2' : '#f0fdf4'};color:${b.status === 'completed' ? '#1d4ed8' : b.status === 'cancelled' ? '#dc2626' : '#16a34a'}">${statusBadge(b.status).label}</span></td>
       </tr>`
       )
       .join('');
@@ -838,10 +854,10 @@ export default function UserDashboardClient() {
                                 </div>
                               </div>
                               <span
-                                className={`text-xs font-bold px-2 py-0.5 rounded-full ${STATUS_MAP[booking.status].cls}`}
+                                className={`text-xs font-bold px-2 py-0.5 rounded-full ${statusBadge(booking.status).cls}`}
                               >
                                 <span className="badge-dot" />
-                                {STATUS_MAP[booking.status].label}
+                                {statusBadge(booking.status).label}
                               </span>
                             </div>
                             <div className="flex items-center gap-4 mb-3">
@@ -1315,10 +1331,10 @@ export default function UserDashboardClient() {
                             </td>
                             <td className="px-4 py-2.5 text-center">
                               <span
-                                className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${STATUS_MAP[booking.status].cls}`}
+                                className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${statusBadge(booking.status).cls}`}
                               >
                                 <span className="badge-dot" />
-                                {STATUS_MAP[booking.status].label}
+                                {statusBadge(booking.status).label}
                               </span>
                             </td>
                           </tr>

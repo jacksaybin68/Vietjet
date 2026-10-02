@@ -60,16 +60,26 @@ airports (code) AS (
     ('VII'), ('VDH'), ('UIH'), ('VCL'), ('DIN'), ('VKG'), ('HXX'),
     ('TUQ'), ('BBU'), ('TBB')
 ),
-routes (from_code, to_code) AS (
-  SELECT a.code, h.code
+-- Every regional airport is linked to both hubs, and the two hubs are linked to
+-- each other. HAN↔SGN used to be excluded along with the hubs themselves, which
+-- left the busiest route in the country with nothing to sell all week — and it
+-- is the pair the hero form pre-fills, so the very first search a customer ran
+-- came back empty. `vj_hub` below gives it its own fare and block time: a
+-- 2h10m hop between the two cities is not a number anyone accepts.
+routes (from_code, to_code, is_hub) AS (
+  SELECT a.code, h.code, FALSE
   FROM airports a
   CROSS JOIN (VALUES ('HAN'), ('SGN')) AS h(code)
   WHERE a.code NOT IN ('HAN', 'SGN')
   UNION ALL
-  SELECT h.code, a.code
+  SELECT h.code, a.code, FALSE
   FROM airports a
   CROSS JOIN (VALUES ('HAN'), ('SGN')) AS h(code)
   WHERE a.code NOT IN ('HAN', 'SGN')
+  UNION ALL
+  SELECT 'HAN', 'SGN', TRUE
+  UNION ALL
+  SELECT 'SGN', 'HAN', TRUE
 ),
 -- Seven days starting two days out. Starting at +2 rather than today keeps
 -- the window open the same way 014/024/026 do, so a customer never lands on a
@@ -104,8 +114,12 @@ SELECT
   r.to_code,
   (d.vn_date || ' ' || LPAD(s.depart_hour::text, 2, '0') || ':00:00+07')::timestamptz,
   (d.vn_date || ' ' || LPAD(s.depart_hour::text, 2, '0') || ':00:00+07')::timestamptz
-    + INTERVAL '2 hours 10 minutes',
-  s.price,
+    + make_interval(mins => CASE WHEN r.is_hub THEN 125 ELSE 130 END),
+  -- Hanoi–HCMC is the trunk route, and the 749,000đ regional fare is about half
+  -- of what the real thing costs, so the hub pair gets the same ladder one step
+  -- up. Otherwise the app quotes the busiest flight in the country for less
+  -- than a taxi to Nội Bài.
+  round(s.price * CASE WHEN r.is_hub THEN 1.85 ELSE 1 END),
   s.class,
   s.available
 FROM routes r

@@ -22,23 +22,29 @@ function parseSeat(seatId: string): { row: number; col: number } | null {
   return { row: Number(match[1]), col: COLS.indexOf(match[2] as SeatCol) };
 }
 
-/** Seats sharing a side wall with `seatId`, so a child is seated together. */
+/**
+ * Seats sharing a side wall with `seatId`, so a child is seated together.
+ *
+ * The aisle test compares which half of the cabin the two seats are in, rather
+ * than special-casing a column index. The previous form tested the *origin*
+ * column on the way left — `col === AISLE_AFTER` — which dropped C's left-hand
+ * neighbour along with its right, so `adjacentSeats('12C')` returned only
+ * `['12D']` and a child sitting beside an adult in 12B was refused outright.
+ * C–D is the aisle; C–B is a shared armrest.
+ */
 export function adjacentSeats(seatId: string): string[] {
   const parsed = parseSeat(seatId);
   if (!parsed) return [];
   const { row, col } = parsed;
+  // Left half is A–C, right half is D–F. `AISLE_AFTER` is the last left column.
+  const half = (index: number) => (index <= AISLE_AFTER ? 0 : 1);
   const neighbours: string[] = [];
-  const push = (delta: number) => {
+  for (const delta of [-1, 1]) {
     const next = col + delta;
-    if (next < 0 || next >= COLS.length) return;
-    // The aisle breaks the cabin in two, so it also breaks adjacency.
-    if ((delta === -1 && col === AISLE_AFTER) || (delta === 1 && col === AISLE_AFTER - 1)) {
-      return;
-    }
+    if (next < 0 || next >= COLS.length) continue;
+    if (half(next) !== half(col)) continue;
     neighbours.push(`${row}${COLS[next]}`);
-  };
-  push(-1);
-  push(1);
+  }
   return neighbours;
 }
 

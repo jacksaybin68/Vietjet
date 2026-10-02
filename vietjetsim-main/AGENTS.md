@@ -91,6 +91,33 @@ both directions) and numbers its block from 1100 so it cannot collide with 027's
 twelve-month upgrade in November 2025, and offering it would send a customer to
 a terminal with no service.
 
+**Seat prices and seat adjacency are one module each, and both had two copies.**
+`getSeatPrice`/`getSeatCharge` in `pricing.ts` are the only seat price — the
+seat map in `SeatSelectionStep` calls them rather than keeping its own row
+bands. It used to carry separate bands (row 12 was 55,000₫ on the map, 70,000₫ on
+the server), so a customer agreed to 63,250₫ and was billed 80,500₫. Likewise
+`seat-adjacency.ts` had one `adjacentSeats`: the aisle test looked at the origin
+column, which dropped C's *left* neighbour along with its right, so
+`adjacentSeats('12C')` returned only `['12D']` and a child could not sit beside
+an adult in 12B — the picker showed "1 chỗ ngồi còn lại" forever. `src/test/
+seat-adjacency.test.ts` and the `seat pricing` block in `passenger-types.test.ts`
+pin both.
+
+**Never index a status map without a fallback.** `bookings.status` has five
+values; `/tai-khoan` knew three, so one `pending` booking threw
+`Cannot read properties of undefined (reading 'cls')` and the page-level
+ErrorBoundary turned the whole dashboard — wallet, loyalty, profile — into
+"Lỗi máy chủ". The admin `BookingsTab` was missing `refunded`, and `/tra-cuu`
+indexed its own map the same way. All three now go through a `statusBadge()` /
+`bookingBadge()` helper with a default, and `src/test/booking-status-badge.test.ts`
+sweeps `src/` for the bare pattern.
+
+**Every seeded route needs a customer to reach it.** `027` built its route list
+with `WHERE a.code NOT IN ('HAN', 'SGN')`, which excluded the hub-to-hub pair
+along with the hubs — leaving HAN↔SGN, the busiest route in the country and the
+one the hero form pre-fills, with nothing to sell for the whole week. When
+excluding a set to avoid self-links, check the pair that exclusion creates.
+
 **Agency-issued discount codes.** `015_agency_discounts.sql` adds `agencies` and
 `discount_codes.agency_id` (nullable, `ON DELETE SET NULL`) plus `issued_by`. Admins
 manage agencies at `/quan-tri` → "Đại lý" and pick one from the "Phát hành cho đại lý"

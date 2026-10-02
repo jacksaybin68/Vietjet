@@ -81,7 +81,7 @@ describe('POST /api/dat-ve passenger types', () => {
       ]),
       // Seats now reach the database with the price they were sold for, and the
       // chosen services come in a fourth argument, both priced server-side.
-      [{ seat_number: '12A', price: 80_500 }],
+      [{ seat_number: '12A', price: 63_250 }],
       [],
       CONSENTS
     );
@@ -188,9 +188,9 @@ describe('POST /api/dat-ve passenger types', () => {
       })
     );
     expect(res.status).toBe(201);
-    // 1,000,000 for one adult, plus 15% tax, plus the row-12 seat at 70,000 and
-    // its own 15% seat tax and service fee.
-    expect(createBooking.mock.calls[0][0].total_price).toBe(1_230_500);
+    // 1,000,000 for one adult, plus 15% tax, plus the row-12 seat: that band is
+    // 55,000 before its own 10% tax and 5% service fee.
+    expect(createBooking.mock.calls[0][0].total_price).toBe(1_213_250);
   });
   // The results page used to build its four fare cards by adding hard-coded
   // amounts to the base fare, and the API charged one stored fare regardless —
@@ -215,11 +215,11 @@ describe('POST /api/dat-ve passenger types', () => {
 
     // Economy 1,000,000 and Business 3,000,000 with the gap stepped evenly, so
     // Deluxe is 1,666,667 and SkyBOSS 2,333,333. Each plus 15% tax and the
-    // row-12 seat (70,000 + its own 15% = 80,500).
-    expect(await book('eco')).toBe(1_230_500);
-    expect(await book('deluxe')).toBe(1_997_167);
-    expect(await book('skyboss')).toBe(2_763_833);
-    expect(await book('business')).toBe(3_530_500);
+    // row-12 seat (55,000 + its own 15% = 63,250).
+    expect(await book('eco')).toBe(1_213_250);
+    expect(await book('deluxe')).toBe(1_979_917);
+    expect(await book('skyboss')).toBe(2_746_583);
+    expect(await book('business')).toBe(3_513_250);
   });
 
   it('falls back to the cheapest card when none is sent', async () => {
@@ -233,7 +233,7 @@ describe('POST /api/dat-ve passenger types', () => {
       })
     );
     expect(res.status).toBe(201);
-    expect(createBooking.mock.calls[0][0].total_price).toBe(1_230_500);
+    expect(createBooking.mock.calls[0][0].total_price).toBe(1_213_250);
   });
 
   // Silently downgrading would under-quote: a client asking for a bucket the

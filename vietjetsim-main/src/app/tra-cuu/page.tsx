@@ -22,7 +22,7 @@ interface BookingResult {
   passengerName: string;
   seat: string;
   class: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded';
   price: number;
 }
 
@@ -48,8 +48,20 @@ const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> =
   confirmed: { label: 'Đã xác nhận', color: '#059669', bg: '#d1fae5' },
   completed: { label: 'Hoàn thành', color: '#2563eb', bg: '#dbeafe' },
   cancelled: { label: 'Đã hủy', color: '#dc2626', bg: '#fee2e2' },
-  refunded: { label: 'Đã hoàn tiền', color: '#2563eb', bg: '#dbeafe' },
+  refunded: { label: 'Đã hoàn tiền', color: '#6b7280', bg: '#f3f4f6' },
 };
+
+/**
+ * Badge for a booking status, falling back rather than throwing.
+ *
+ * The lookups below indexed `STATUS_MAP` directly, so any status this table
+ * did not list — a `refunded` row before it was added, or a new one after —
+ * crashed the whole lookup page with `Cannot read properties of undefined`.
+ * The API answers with whatever the database holds, so the view has to expect
+ * to meet a value it has not been taught.
+ */
+const statusBadge = (status: string) =>
+  STATUS_MAP[status] ?? { label: 'Không rõ', color: '#6b7280', bg: '#f3f4f6' };
 
 /** `HH:MM` in the viewer's timezone, falling back to the raw value. */
 function toTime(value: string | null | undefined): string {
@@ -263,18 +275,18 @@ export default function TrackBookingPage() {
             {/* Status Banner */}
             <div
               className="px-5 py-3 rounded-xl flex items-center justify-between"
-              style={{ backgroundColor: STATUS_MAP[result.status].bg }}
+              style={{ backgroundColor: statusBadge(result.status).bg }}
             >
               <div className="flex items-center gap-2">
                 <div
                   className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: STATUS_MAP[result.status].color }}
+                  style={{ backgroundColor: statusBadge(result.status).color }}
                 />
                 <span
                   className="font-bold text-sm"
-                  style={{ color: STATUS_MAP[result.status].color }}
+                  style={{ color: statusBadge(result.status).color }}
                 >
-                  {STATUS_MAP[result.status].label}
+                  {statusBadge(result.status).label}
                 </span>
               </div>
               <button

@@ -142,7 +142,7 @@ describe('Booking Database Module', () => {
         [{ name: 'John Doe', dob: '1990-01-01', id_number: '123', gender: 'male' }],
         // Seats now carry the price they were sold for, so the total can be
         // re-derived from the rows rather than trusted from the client.
-        [{ seat_number: '12A', price: 80_500 }]
+        [{ seat_number: '12A', price: 63_250 }]
       );
 
       expect(sql).toHaveBeenCalledTimes(1);
