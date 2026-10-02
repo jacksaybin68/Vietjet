@@ -117,7 +117,7 @@ SEED_FLIGHT_DAYS=30 SEED_ADMIN_EMAIL=... SEED_ADMIN_PASSWORD=... npm run db:seed
 ```
 
 Script an toàn khi chạy lại: nó xoá các chuyến do chính nó tạo trước, nên chạy
-định kỳ không nhân bản dữ liệu. Nên bật cron hằng tuần — 21 ngày vẫn hết hạn nếu
+định kỳ không nhân bản dữ liệu. Nên bật cron hằng tuần — cửa sổ vẫn hết hạn nếu
 không ai chạy lại:
 
 ```cron
@@ -125,9 +125,18 @@ không ai chạy lại:
 0 3 * * 0 cd /duong/dan/vietjetsim-main && SEED_ADMIN_EMAIL=... SEED_ADMIN_PASSWORD=... npm run db:seed-flights >> /tmp/seed-flights.log 2>&1
 ```
 
-Tuyến vùng miền (Đà Nẵng–Huế, Cần Thơ–Phú Quốc…) do migration `032` seed, phủ
-cùng 21 ngày. Khi quá hạn, chạy lại:
-`node scripts/apply-migration.cjs migrations/032_regional_to_regional_routes.sql`.
+**Nâng `SEED_FLIGHT_DAYS` phải kèm migration 032.** Tuyến vùng miền (Đà Nẵng–Huế,
+Cần Thơ–Phú Quốc…) do migration `032` seed, mặc định phủ 30 ngày. Hai nửa mạng
+phải hết hạn cùng lúc — lệch nhau thì khách tìm được một tuyến mà không tìm được
+tuyến khác, cùng ngày, cùng bảng chọn sân bay. Khi quá hạn, chạy lại:
+
+```bash
+node scripts/apply-migration.cjs migrations/032_regional_to_regional_routes.sql
+node scripts/apply-migration.cjs migrations/031_unique_flight_numbers.sql
+```
+
+Lệnh thứ hai dọn số bay trùng trong ngày — cần chạy sau mỗi lần seed lại, vì các
+seed cũ để lại hàng chung số hiệu giữa hai khoang.
 
 ---
 
