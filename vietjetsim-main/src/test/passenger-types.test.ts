@@ -164,10 +164,26 @@ describe('seat pricing', () => {
     expect(getSeatPrice('4A')).not.toBe(SEAT_TIER_PRICES.business);
   });
 
-  it('prices the premium and standard bands apart', () => {
-    expect(getSeatPrice('5C')).toBe(SEAT_TIER_PRICES.hot);
-    expect(getSeatPrice('12B')).toBe(SEAT_TIER_PRICES.available);
-    expect(getSeatPrice('25A')).toBe(SEAT_TIER_PRICES.hot);
+  // Rows step down the further back they sit, which is how the seat map draws
+  // the cabin. The server once had its own, different bands: row 12 was
+  // 70,000₫ there and 55,000₫ on the map, so the customer was charged 15% of a
+  // seat they had not agreed to.
+  it('bậc giá theo dãy hàng, giảm dần về phía sau', () => {
+    expect(getSeatPrice('4C')).toBe(SEAT_TIER_PRICES.available);
+    expect(getSeatPrice('10F')).toBe(SEAT_TIER_PRICES.available);
+    expect(getSeatPrice('11A')).toBe(SEAT_TIER_PRICES.available - 15_000);
+    expect(getSeatPrice('20C')).toBe(SEAT_TIER_PRICES.available - 15_000);
+    expect(getSeatPrice('21A')).toBe(SEAT_TIER_PRICES.available - 25_000);
+    expect(getSeatPrice('30F')).toBe(SEAT_TIER_PRICES.available - 25_000);
+  });
+
+  it('không bao giờ tăng khi lùi ra sau', () => {
+    let previous = getSeatPrice('4A');
+    for (let row = 5; row <= 30; row += 1) {
+      const price = getSeatPrice(`${row}A`);
+      expect(price).toBeLessThanOrEqual(previous);
+      previous = price;
+    }
   });
 
   it('prices a seat by its row, not by its letter', () => {
@@ -178,8 +194,9 @@ describe('seat pricing', () => {
   });
 
   it('adds the seat tax and service fee to the headline price', () => {
-    // 15% on top: 10% tax + 5% service fee.
-    expect(getSeatCharge('12A')).toBe(Math.round(SEAT_TIER_PRICES.available * 1.15));
+    // 15% on top: 10% tax + 5% service fee, applied to the row's own band.
+    expect(getSeatCharge('12A')).toBe(Math.round((SEAT_TIER_PRICES.available - 15_000) * 1.15));
+    expect(getSeatCharge('25A')).toBe(Math.round((SEAT_TIER_PRICES.available - 25_000) * 1.15));
   });
 
   it('charges nothing for a seat number it cannot read', () => {

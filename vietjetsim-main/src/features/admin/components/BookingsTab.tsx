@@ -5,7 +5,8 @@ import { Pagination } from '@/shared/components/ui';
 import { createAdminInvoice } from '@/features/admin';
 import { getApiErrorMessage } from '@/shared/services';
 
-type BookingStatus = 'confirmed' | 'pending' | 'cancelled' | 'completed';
+/** Mirrors the `bookings.status` union in `@/lib/db`, including `refunded`. */
+type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded';
 
 interface Booking {
   id: string;
@@ -115,12 +116,23 @@ const BOOKINGS: Booking[] = [
   },
 ];
 
-const STATUS_MAP: Record<BookingStatus, { label: string; cls: string }> = {
-  confirmed: { label: 'Xác nhận', cls: 'badge-success' },
+/**
+ * All five statuses `bookings.status` can hold. `refunded` was missing, and the
+ * lookups below index the map directly, so a refunded booking threw
+ * `Cannot read properties of undefined (reading 'label')` and took the whole
+ * admin tab down with it. `bookingBadge` is the backstop for a status added
+ * after this file.
+ */
+const STATUS_MAP: Record<string, { label: string; cls: string }> = {
   pending: { label: 'Chờ duyệt', cls: 'badge-warning' },
+  confirmed: { label: 'Xác nhận', cls: 'badge-success' },
   cancelled: { label: 'Đã huỷ', cls: 'badge-error' },
   completed: { label: 'Hoàn thành', cls: 'badge-info' },
+  refunded: { label: 'Đã hoàn tiền', cls: 'badge-neutral' },
 };
+
+const bookingBadge = (status: string) =>
+  STATUS_MAP[status] ?? { label: status, cls: 'badge-neutral' };
 
 const PAGE_SIZE = 5;
 
@@ -255,7 +267,7 @@ export default function BookingsTab() {
       b.seat,
       b.payMethod,
       b.amount,
-      STATUS_MAP[b.status].label,
+      bookingBadge(b.status).label,
       b.createdAt,
     ]);
     const csvContent = [headers, ...rows]
@@ -282,7 +294,7 @@ export default function BookingsTab() {
         <td>${b.flightNo}<br/><small style="color:#78716c">${b.route} · ${b.date}</small></td>
         <td><small>${b.payMethod}</small></td>
         <td style="text-align:right;font-weight:700">${b.status === 'cancelled' ? '<s>' + b.amount.toLocaleString('vi-VN') + '₫</s>' : b.amount.toLocaleString('vi-VN') + '₫'}</td>
-        <td><span style="padding:2px 8px;border-radius:999px;font-size:11px;background:${b.status === 'confirmed' ? '#f0fdf4' : b.status === 'pending' ? '#fffbeb' : b.status === 'cancelled' ? '#fee2e2' : '#eff6ff'};color:${b.status === 'confirmed' ? '#16a34a' : b.status === 'pending' ? '#d97706' : b.status === 'cancelled' ? '#dc2626' : '#1d4ed8'}">${STATUS_MAP[b.status].label}</span></td>
+        <td><span style="padding:2px 8px;border-radius:999px;font-size:11px;background:${b.status === 'confirmed' ? '#f0fdf4' : b.status === 'pending' ? '#fffbeb' : b.status === 'cancelled' ? '#fee2e2' : '#eff6ff'};color:${b.status === 'confirmed' ? '#16a34a' : b.status === 'pending' ? '#d97706' : b.status === 'cancelled' ? '#dc2626' : '#1d4ed8'}">${bookingBadge(b.status).label}</span></td>
         <td><small style="color:#78716c">${b.createdAt}</small></td>
       </tr>`
       )
@@ -426,7 +438,7 @@ export default function BookingsTab() {
             </div>
             <div>
               <div class="label">Trạng thái</div>
-              <div class="value">${STATUS_MAP[booking.status].label}</div>
+              <div class="value">${bookingBadge(booking.status).label}</div>
             </div>
           </div>
           <div style="text-align: right; margin-top: 40px;">
@@ -1285,7 +1297,7 @@ export default function BookingsTab() {
                             <span
                               className={`text-[10px] font-black uppercase tracking-widest ${selectedBooking.status === 'confirmed' ? 'text-emerald-400' : selectedBooking.status === 'pending' ? 'text-amber-400' : 'text-rose-400'}`}
                             >
-                              {STATUS_MAP[selectedBooking.status].label}
+                              {bookingBadge(selectedBooking.status).label}
                             </span>
                           </div>
                         </>

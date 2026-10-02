@@ -22,20 +22,25 @@ export const SEAT_TIER_PRICES = {
 } as const;
 
 /**
- * What a seat costs, from its position in the cabin.
+ * What a seat costs before tax, from its position in the cabin.
  *
- * The picker draws the cabin in the same row bands (`SEAT_TIER_PRICES`), so a
- * seat's price follows from its number alone: the first three rows are business
- * class, rows 4–6 and 20–30 are the premium band, the rest sit at the standard
- * rate. Deriving it keeps the server from having to trust a client-sent amount.
+ * The rows are priced in bands, exactly as the seat map draws them
+ * (`generateSeats` in `SeatSelectionStep`): rows 1–3 are business, a handful
+ * of rows are flagged high-demand, and the rest step down the further back
+ * they sit. The band edges live here rather than in the component because the
+ * booking API has to charge the same amount the seat was quoted at — the two
+ * used to be separate tables, and a row-12 seat was priced 70,000₫ on the
+ * server while the map showed 55,000₫, so the customer was billed 15% of a
+ * seat they had not agreed to.
  */
 export function getSeatPrice(seatNumber: string): number {
   const match = /^(\d+)[A-F]$/.exec(seatNumber.trim().toUpperCase());
   if (!match) return 0;
   const row = Number(match[1]);
   if (row <= 3) return SEAT_TIER_PRICES.business;
-  if (row <= 6 || row >= 20) return SEAT_TIER_PRICES.hot;
-  return SEAT_TIER_PRICES.available;
+  if (row <= 10) return SEAT_TIER_PRICES.available;
+  if (row <= 20) return SEAT_TIER_PRICES.available - 15_000;
+  return SEAT_TIER_PRICES.available - 25_000;
 }
 
 /**

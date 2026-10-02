@@ -15,6 +15,7 @@ import {
   SEAT_TIER_PRICES,
   TAX_AND_FEE_RATE,
   getBookingTotals,
+  getSeatPrice,
   type AncillaryOption,
   type AncillaryId,
 } from '@/features/bookings/pricing';
@@ -108,33 +109,29 @@ function generateSeats(): Record<string, SeatInfo> {
     cols.forEach((col) => {
       const seatId = `${row}${col}`;
       let status: SeatInfo['status'];
-      let basePrice: number;
       let occupancyLevel: SeatInfo['occupancyLevel'];
 
       if (row <= 3) {
         status = 'business';
-        basePrice = SEAT_TIER_PRICES.business;
         occupancyLevel = 'high';
       } else if (occupied.includes(seatId)) {
         status = 'occupied';
-        basePrice = SEAT_TIER_PRICES.occupied;
         occupancyLevel = 'critical';
       } else if (hotSeats.includes(seatId)) {
         status = 'hot';
-        basePrice = SEAT_TIER_PRICES.hot;
         occupancyLevel = 'high';
       } else {
         status = 'available';
-        // Price varies by row proximity to front/exit rows
-        if (row <= 10) basePrice = SEAT_TIER_PRICES.available;
-        else if (row <= 20) basePrice = SEAT_TIER_PRICES.available - 15000;
-        else basePrice = SEAT_TIER_PRICES.available - 25000;
         // Assign occupancy level for heatmap
         if (row <= 6) occupancyLevel = 'high';
         else if (row <= 15) occupancyLevel = 'medium';
         else occupancyLevel = 'low';
       }
 
+      // One price source, shared with the booking API. The map used to carry
+      // its own row bands while `getSeatPrice` had different ones, so a seat
+      // the customer saw at 55,000đ was charged 70,000đ by the server.
+      const basePrice = getSeatPrice(seatId);
       const tax = Math.round(basePrice * SEAT_TAX_RATE);
       const fee = Math.round(basePrice * SEAT_SERVICE_FEE_RATE);
       const price = basePrice + tax + fee;
