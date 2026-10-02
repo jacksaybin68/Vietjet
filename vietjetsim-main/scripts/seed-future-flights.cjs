@@ -154,12 +154,16 @@ async function main() {
 
     for (const [no, from, to, depart, durationMin, ecoPrice, bizPrice, seats] of ROUTES) {
       const variants = [
-        { cls: 'economy', price: ecoPrice, available: seats, shift: 0 },
+        { cls: 'economy', price: ecoPrice, available: seats, shift: 0, suffix: '' },
         {
           cls: 'business',
           price: bizPrice,
           available: Math.max(20, Math.round(seats / 3)),
           shift: BUSINESS_SHIFT_MIN,
+          // A distinct number. Both waves used the base number, so a day held
+          // two rows under one `flight_no` and the results list printed the same
+          // service twice — which is what 031 exists to clean up after.
+          suffix: 'B',
         },
       ];
 
@@ -168,7 +172,7 @@ async function main() {
           method: 'POST',
           headers: { ...authHeaders, 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            flight_no: no,
+            flight_no: no + v.suffix,
             from_code: from,
             to_code: to,
             depart_time: vnTime(date, depart, v.shift),
