@@ -188,6 +188,8 @@ const FALLBACK_HISTORY: UiBooking[] = [
 interface RefundApiRow {
   id: string;
   booking_id: string;
+  /** PNR, so the customer sees the reference they typed. */
+  booking_code?: string | null;
   amount?: number | string;
   reason?: string;
   note?: string;
@@ -199,6 +201,8 @@ interface RefundApiRow {
 
 type UiBooking = {
   id: string;
+  /** PNR the customer quotes to support (migration 013). Absent on pre-013 rows. */
+  bookingCode?: string | null;
   flightNo: string;
   from: string;
   to: string;
@@ -240,6 +244,10 @@ function mapDbBookingToUi(b: any): UiBooking {
 
   return {
     id: b.id || '',
+    // The PNR, not the row id. The list printed `booking.id` under a column
+    // headed "Mã đặt chỗ", so every customer saw a 36-character UUID and had
+    // nothing to quote support.
+    bookingCode: b.booking_code || null,
     flightNo: flight.flight_no || 'VJ ???',
     from: flight.from_code || '???',
     to: flight.to_code || '???',
@@ -300,7 +308,10 @@ export default function UserDashboardClient() {
   const [refundRequests, setRefundRequests] = useState<
     {
       id: string;
+      /** Row id — used to re-open the booking. Never shown to the customer. */
       bookingId: string;
+      /** PNR the customer quoted; the only reference they recognise. */
+      bookingCode?: string | null;
       amount: number;
       reason: string;
       note: string;
@@ -380,6 +391,7 @@ export default function UserDashboardClient() {
       const searchLower = historySearch.toLowerCase();
       const matchesSearch =
         !historySearch ||
+        (booking.bookingCode ?? '').toLowerCase().includes(searchLower) ||
         booking.id.toLowerCase().includes(searchLower) ||
         booking.flightNo.toLowerCase().includes(searchLower) ||
         booking.fromCity.toLowerCase().includes(searchLower) ||
@@ -485,7 +497,10 @@ export default function UserDashboardClient() {
           return {
             id: r.id,
             bookingId: r.booking_id,
-            amount: Number(bankInfo.amount || 0),
+            bookingCode: r.booking_code,
+            // The column is the record. `bankInfo.amount` is the copy the form
+            // wrote before the column existed, so it is only a fallback.
+            amount: Number(r.amount ?? bankInfo.amount ?? 0) || 0,
             reason: r.reason || '',
             note: bankInfo.note || r.note || '',
             bankName: bankInfo.bank_name || '',
@@ -546,7 +561,7 @@ export default function UserDashboardClient() {
       'Trạng thái',
     ];
     const rows = filteredHistory.map((b) => [
-      b.id,
+      b.bookingCode || b.id,
       b.flightNo,
       `${b.from} - ${b.fromCity}`,
       `${b.to} - ${b.toCity}`,
@@ -576,7 +591,7 @@ export default function UserDashboardClient() {
       .map(
         (b) => `
       <tr>
-        <td>${b.id}</td>
+        <td>${b.bookingCode || b.id}</td>
         <td>${b.flightNo}</td>
         <td>${b.from} → ${b.to}</td>
         <td>${b.date}</td>
@@ -890,7 +905,7 @@ export default function UserDashboardClient() {
                                   <Icon name="TicketIcon" size={12} />
                                   Mã:{' '}
                                   <span className="font-bold text-[var(--foreground)]">
-                                    {booking.id}
+                                    {booking.bookingCode || booking.id}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
@@ -1282,7 +1297,7 @@ export default function UserDashboardClient() {
                           >
                             <td className="px-4 py-2.5">
                               <span className="font-mono font-bold text-sm text-[var(--foreground)]">
-                                {booking.id}
+                                {booking.bookingCode || booking.id}
                               </span>
                             </td>
                             <td className="px-4 py-2.5">
@@ -1961,12 +1976,11 @@ export default function UserDashboardClient() {
                               <div className="min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
                                   <span className="font-mono font-bold text-sm text-[var(--foreground)]">
-                                    {req.bookingId}
+                                    {req.bookingCode || req.bookingId}
                                   </span>
                                 </div>
                                 <div className="text-xs text-[var(--foreground-muted)]truncate">
-                                  Mã đặt chỗ: {req.bookingId} · Số tiền:{' '}
-                                  {req.amount.toLocaleString('vi-VN')}đ
+                                  Số tiền: {req.amount.toLocaleString('vi-VN')}đ
                                 </div>
                                 <div className="text-xs text-[var(--foreground-muted)]truncate">
                                   {req.bankName} · {req.accountHolder} · STK: {req.accountNumber}

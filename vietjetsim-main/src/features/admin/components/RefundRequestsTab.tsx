@@ -101,7 +101,11 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
     flightNo: row.flight_no || '',
     route: row.route || '',
     flightDate: row.flight_date || '',
-    amount: row.amount || 0,
+    // `amount` is NUMERIC, which the driver returns as a *string*. Summing those
+    // with `+` concatenates, so the header total rendered "01975873.00₫" and
+    // `amount > 0` became a string comparison. Coerce once, here, so every
+    // consumer below receives a number.
+    amount: Number(row.amount) || 0,
     reason: row.reason || '',
     note: row.note || '',
     bankName: row.bank_name || '',

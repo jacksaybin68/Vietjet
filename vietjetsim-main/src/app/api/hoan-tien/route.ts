@@ -119,6 +119,9 @@ export async function POST(request: NextRequest) {
       reason: normalizedReason,
       phone: normalizedPhone,
       booking_code: booking.booking_code || normalizedPnr || null,
+      // Also on the row itself, not just inside `bank_info`: the operator list
+      // reads this column, and the "Đã hoàn tiền" card sums it.
+      amount: refundAmount,
       bank_info: {
         bank_name: normalizedBank,
         account_number: normalizedAccount,

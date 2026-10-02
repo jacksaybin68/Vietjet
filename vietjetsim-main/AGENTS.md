@@ -130,6 +130,23 @@ searching in October. And the lookup is wrapped in its own `try`: it is a
 convenience on an answer that is already correct, so its failure must not turn
 a legitimate empty result into a 500.
 
+**Never print a row id where a customer is shown a reference.** `bookings.id` is
+a UUID; `bookings.booking_code` (migration 013) is the PNR. The history table, the
+upcoming cards, the CSV export, the print view and the refund tickets all
+rendered the UUID under a column headed "Mã đặt chỗ", so a customer had nothing
+to quote support with. `createBooking` also omitted `booking_code` from its
+`RETURNING`, which meant `POST /api/dat-ve` answered without one and the refund
+form could not be submitted at all. When a booking is displayed, carry
+`bookingCode` through the mapper and fall back to the id only for pre-013 rows.
+
+**`refund_requests.amount` is its own column.** The figure used to be packed into
+the `bank_info` JSON text, so the operator list showed an empty "Số tiền" and
+the "Đã hoàn tiền" card stayed at 0₫ no matter how many tickets were approved.
+`createRefund` writes the column; the admin tab coerces it with `Number()`
+(`NUMERIC` arrives as a string, so `reduce(+)` concatenated into "01975873.00₫"),
+and the customer view reads the column with `bank_info.amount` only as a
+fallback for tickets created before it existed.
+
 **Agency-issued discount codes.** `015_agency_discounts.sql` adds `agencies` and
 `discount_codes.agency_id` (nullable, `ON DELETE SET NULL`) plus `issued_by`. Admins
 manage agencies at `/quan-tri` → "Đại lý" and pick one from the "Phát hành cho đại lý"

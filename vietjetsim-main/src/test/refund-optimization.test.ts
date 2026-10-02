@@ -65,6 +65,42 @@ describe('Refund ticket visibility (migration 020)', () => {
     expect(text).toMatch(/visible_to_user\s*\)\s*VALUES[\s\S]*FALSE/i);
   });
 
+  // The payout figure rode inside `bank_info` only, so the operator list
+  // rendered an empty "Số tiền" for every ticket and the "Đã hoàn tiền" total
+  // stayed at 0₫ however many were approved. It belongs on the row.
+  it('ghi số tiền vào cột amount riêng, không chỉ nhét trong bank_info', async () => {
+    (sql as any).mockResolvedValueOnce([{ id: 'refund-2' }]);
+
+    await createRefund({
+      booking_id: 'booking-1',
+      user_id: 'user-1',
+      reason: 'Hủy chuyến',
+      amount: 1_975_873,
+      phone: '0912345678',
+      booking_code: 'VJ644052',
+      bank_info: { bank_name: 'MB Bank' },
+    });
+
+    const [strings, ...values] = (sql as any).mock.calls[0];
+    expect((strings as TemplateStringsArray).join(' ')).toMatch(
+      /INSERT INTO refund_requests[\s\S]*amount/
+    );
+    expect(values).toContain(1_975_873);
+  });
+
+  it('cho phép phiếu không khai báo số tiền', async () => {
+    (sql as any).mockResolvedValueOnce([{ id: 'refund-3' }]);
+
+    await createRefund({
+      booking_id: 'booking-1',
+      user_id: 'user-1',
+      reason: 'Hủy chuyến',
+    });
+
+    const values = (sql as any).mock.calls[0].slice(1);
+    expect(values).toContain(null);
+  });
+
   it('lets an operator reveal or re-hide a single ticket', async () => {
     (sql as any).mockResolvedValueOnce([{ id: 'refund-1' }]);
 

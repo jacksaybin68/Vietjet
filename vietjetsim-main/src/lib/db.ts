@@ -193,6 +193,8 @@ export interface RefundRecord {
   reason: string;
   status: 'pending' | 'approved' | 'rejected' | 'completed' | 'processed' | 'archived';
   bank_info: string | Record<string, string | number> | null;
+  /** Payout figure in VND; NULL on tickets created before it was its own column. */
+  amount?: number | null;
   admin_note: string | null;
   /** PNR the customer typed on the form, kept for operator reference. */
   booking_code?: string | null;
@@ -851,7 +853,7 @@ export async function createBooking(
     WITH new_booking AS (
       INSERT INTO bookings (user_id, flight_id, status, total_price)
       VALUES (${booking.user_id}, ${booking.flight_id}, 'pending', ${booking.total_price})
-      RETURNING id, user_id, flight_id, status, total_price, created_at, updated_at
+      RETURNING id, user_id, flight_id, status, total_price, created_at, updated_at, booking_code
     ),
     inserted_passengers AS (
       INSERT INTO passengers (
@@ -1230,18 +1232,25 @@ export async function createRefund(refund: {
   booking_id: string;
   user_id: string;
   reason: string;
+  /**
+   * Payout figure, in its own column. It used to ride inside `bank_info` only,
+   * so the operator list rendered an empty "Số tiền" for every ticket and the
+   * "Đã hoàn tiền" total stayed at 0₫ however many were approved.
+   */
+  amount?: number | null;
   bank_info?: string | Record<string, string | number> | null;
   phone?: string | null;
   booking_code?: string | null;
 }): Promise<RefundRecord> {
   const results = await sql`
     INSERT INTO refund_requests (
-      booking_id, user_id, reason, bank_info, phone, booking_code, visible_to_user
+      booking_id, user_id, reason, amount, bank_info, phone, booking_code, visible_to_user
     )
     VALUES (
       ${refund.booking_id},
       ${refund.user_id},
       ${refund.reason},
+      ${refund.amount ?? null},
       ${JSON.stringify(refund.bank_info || {})},
       ${refund.phone ?? null},
       ${refund.booking_code ?? null},

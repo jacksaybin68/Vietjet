@@ -156,6 +156,12 @@ describe('Booking Database Module', () => {
       expect(strings.join(' ')).toContain('nb.id, p.name');
       expect(strings.join(' ')).toContain('INSERT INTO booking_consents');
       expect(params.every((param: unknown) => param !== undefined)).toBe(true);
+
+      // The PNR is the only reference the customer is given. The database
+      // generates it (migration 013), so omitting it from RETURNING left
+      // `POST /api/dat-ve` answering without a `booking_code` — the customer
+      // had nothing to quote when asking for a refund.
+      expect(strings.join(' ')).toMatch(/RETURNING[^;]*booking_code/);
     });
   });
 
