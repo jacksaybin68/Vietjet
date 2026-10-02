@@ -147,6 +147,24 @@ the "Đã hoàn tiền" card stayed at 0₫ no matter how many tickets were appr
 and the customer view reads the column with `bank_info.amount` only as a
 fallback for tickets created before it existed.
 
+**`createFlight` must write a ladder, not a flat row.** Migration 030 made
+`economy_price` / `business_price` NOT NULL, and `createFlight` named neither, so
+every flight added through `/quan-tri` → "Thêm chuyến bay" came back 500 — the
+form had been unusable since that migration shipped. Filling both from `price`
+then satisfied the constraint but made all four fare cards print one number.
+`price` is the fare of the cabin the row itself seats, so the other cabin comes
+off it in the opposite direction: economy row multiplies by 2.77, business row
+divides. `scripts/seed-future-flights.cjs` sends one `price` per row and relies
+on this, so a change here reshapes its whole schedule.
+
+**Re-run the seed when the window runs out.** `npm run db:seed-flights` opens a
+21-day window (three weeks, not the seven the date strip shows — someone who
+returns next week still lands inside it) and covers 028's international routes,
+so HAN→ICN does not vanish when that migration's own week passes. Its admin
+credentials come from `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`: there is no
+single admin address in a real database, and a hard-coded one made the script
+exit 401 everywhere except the database it was written against.
+
 **Agency-issued discount codes.** `015_agency_discounts.sql` adds `agencies` and
 `discount_codes.agency_id` (nullable, `ON DELETE SET NULL`) plus `issued_by`. Admins
 manage agencies at `/quan-tri` → "Đại lý" and pick one from the "Phát hành cho đại lý"

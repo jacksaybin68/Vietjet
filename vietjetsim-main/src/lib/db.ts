@@ -569,12 +569,44 @@ export async function createFlight(flight: {
   depart_time: string;
   arrive_time: string;
   price: number;
+  /**
+   * Fare per cabin (migration 030). Both are NOT NULL there, and they are what
+   * the results cards and the booking API read — omitting them made every
+   * admin-created flight fail with a constraint violation, so the "Thêm chuyến
+   * bay" screen had been unusable since 030 shipped.
+   *
+   * A caller that sends only `price` gets a real ladder, not a flat one. Copying
+   * `price` into both columns satisfies the constraint while making all four
+   * fare cards on the results page print the same number, and it left the seeded
+   * schedule that way until a form sent the pair.
+   */
+  economyPrice?: number | null;
+  businessPrice?: number | null;
   class: string;
   available: number;
 }): Promise<FlightRecord> {
+  // The same ratio migration 030 seeds from, so a derived row is
+  // indistinguishable from a seeded one. `price` is the fare of the cabin the
+  // row itself seats, so the other cabin comes off it in whichever direction
+  // that implies — deriving both from `price` in the same direction would put a
+  // business row's economy fare at 2.77× its own, far above the business fare.
+  const FARE_LADDER_RATIO = 2.77;
+  const price = Number(flight.price) || 0;
+  const isBusinessRow = flight.class === 'business';
+  const economyPrice =
+    Number(flight.economyPrice) || (isBusinessRow ? Math.round(price / FARE_LADDER_RATIO) : price);
+  const businessPrice =
+    Number(flight.businessPrice) || (isBusinessRow ? price : Math.round(price * FARE_LADDER_RATIO));
   const results = await sql`
-    INSERT INTO flights (flight_no, from_code, to_code, depart_time, arrive_time, price, class, available)
-    VALUES (${flight.flight_no}, ${flight.from_code}, ${flight.to_code}, ${flight.depart_time}, ${flight.arrive_time}, ${flight.price}, ${flight.class}, ${flight.available})
+    INSERT INTO flights (
+      flight_no, from_code, to_code, depart_time, arrive_time, price,
+      economy_price, business_price, class, available
+    )
+    VALUES (
+      ${flight.flight_no}, ${flight.from_code}, ${flight.to_code},
+      ${flight.depart_time}, ${flight.arrive_time}, ${flight.price},
+      ${economyPrice}, ${businessPrice}, ${flight.class}, ${flight.available}
+    )
     RETURNING *
   `;
   return (results as FlightRecord[])[0];

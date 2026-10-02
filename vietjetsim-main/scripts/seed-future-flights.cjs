@@ -27,7 +27,18 @@
  */
 
 const BASE_URL = process.env.SITE_URL || 'http://localhost:4028';
-const ADMIN = { email: 'admin@vietjetair.vn', password: 'admin123' };
+/**
+ * Admin credentials, from the environment. There is no single admin address:
+ * migration 022 renames the demo rows to `@vietjetair.vn`, and a real
+ * database carries its own `admin@vietjetsim.vn` — `scripts/reset-admin.cjs`
+ * can set a third password. A hard-coded pair meant this script exited 401 on
+ * every database but the one it was written against, so the rolling window it
+ * exists to maintain silently stopped.
+ */
+const ADMIN = {
+  email: process.env.SEED_ADMIN_EMAIL || 'admin@vietjetair.vn',
+  password: process.env.SEED_ADMIN_PASSWORD || 'admin123',
+};
 
 // [flight_no, from, to, depart, durationMin, economyPrice, businessPrice, seats]
 const ROUTES = [
@@ -41,11 +52,35 @@ const ROUTES = [
   ['VJ371', 'SGN', 'DLI', '06:45', 115, 769000, 1990000, 150],
   ['VJ381', 'HUI', 'SGN', '11:30', 95, 659000, 1790000, 120],
   ['VJ391', 'VCA', 'SGN', '16:20', 80, 599000, 1690000, 120],
+  // International, matching 028's network and its real block times. Without
+  // these the rolling window covered the domestic list only, so a search for
+  // HAN→Seoul came back empty as soon as 028's own week ran out.
+  ['VJ401', 'HAN', 'SIN', '09:00', 210, 2450000, 6786500, 180],
+  ['VJ411', 'SIN', 'HAN', '13:30', 210, 2550000, 7053500, 180],
+  ['VJ421', 'SGN', 'ICN', '09:00', 320, 4900000, 13573000, 180],
+  ['VJ431', 'ICN', 'SGN', '14:00', 320, 5000000, 13850000, 180],
+  ['VJ441', 'HAN', 'BKK', '08:20', 165, 1650000, 4570500, 180],
+  ['VJ451', 'SGN', 'MNL', '10:40', 205, 2650000, 7340500, 160],
+  ['VJ461', 'HAN', 'KIX', '11:10', 350, 5600000, 15512000, 150],
+  ['VJ471', 'SGN', 'HKG', '07:50', 200, 3250000, 9002500, 170],
+  // Migration 028 flies Hanoi–Seoul in both directions; the rolling window
+  // has to cover the same pair or a repeat of that day's search finds nothing
+  // once 028's own week runs out.
+  ['VJ481', 'HAN', 'ICN', '08:30', 320, 5100000, 14127000, 170],
+  ['VJ491', 'SGN', 'BKK', '13:10', 165, 1750000, 4847500, 180],
 ];
 
 /** Business is scheduled as the second wave of the day, +3h from economy. */
 const BUSINESS_SHIFT_MIN = 180;
-const DAYS = 7;
+/**
+ * How far ahead the window reaches. Three weeks, not the week the date strip
+ * shows: the strip renders seven days, so a customer can only *reach* the first
+ * seven — but anyone who picks a date from a search result, follows a booking
+ * link, or simply comes back next week lands outside a seven-day window and
+ * finds nothing. Three weeks means forgetting to re-run this for a fortnight
+ * still leaves the site answerable.
+ */
+const DAYS = Number(process.env.SEED_FLIGHT_DAYS) || 21;
 
 const pad = (n) => String(n).padStart(2, '0');
 
@@ -80,7 +115,12 @@ async function main() {
     body: JSON.stringify(ADMIN),
   });
   if (login.status !== 200) {
-    console.error(`❌ Admin login failed (${login.status}). Run "npm run db:seed-demo" first.`);
+    console.error(`❌ Admin login failed (${login.status}) for ${ADMIN.email}`);
+    console.error('   The account or password does not match this database. Set them and re-run:');
+    console.error('     SEED_ADMIN_EMAIL=... SEED_ADMIN_PASSWORD=... npm run db:seed-flights');
+    console.error(
+      '   On a fresh database "npm run db:seed-demo" creates admin@vietjetair.vn/admin123.'
+    );
     process.exit(1);
   }
   const jar = cookiesFrom(login);

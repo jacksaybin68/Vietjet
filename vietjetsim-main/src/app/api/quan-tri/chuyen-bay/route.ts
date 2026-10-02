@@ -57,6 +57,8 @@ export async function POST(request: NextRequest) {
       depart_time,
       arrive_time,
       price,
+      economy_price: economyPrice,
+      business_price: businessPrice,
       class: seatClass,
       available,
     } = body;
@@ -99,6 +101,11 @@ export async function POST(request: NextRequest) {
       depart_time,
       arrive_time,
       price,
+      // Migration 030 made both fares NOT NULL and the results page reads them
+      // instead of `price`, so a flight created without them is invisible to
+      // pricing. Accepted from the form when it sends them, derived otherwise.
+      economyPrice,
+      businessPrice,
       class: normalizedClass,
       available,
     });
