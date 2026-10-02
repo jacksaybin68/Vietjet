@@ -211,7 +211,8 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
     departTime: '',
     arriveTime: '',
     date: '',
-    price: '',
+    economyPrice: '',
+    businessPrice: '',
     capacity: '',
   });
 
@@ -303,9 +304,27 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
       onToast?.error('Lỗi nhập liệu', 'Thời gian khởi hành phải trước thời gian đến');
       return false;
     }
-    if (parseInt(f.price) <= 0 || parseInt(f.capacity) <= 0) {
-      onToast?.error('Lỗi nhập liệu', 'Giá vé và tải lượng phải lớn hơn 0');
+    if (parseInt(f.economyPrice) <= 0 || parseInt(f.capacity) <= 0) {
+      onToast?.error('Lỗi nhập liệu', 'Giá vé Phổ thông và tải lượng phải lớn hơn 0');
       return false;
+    }
+    // Business is optional, but a number under the economy fare would be an
+    // inverted ladder — which `flights_fare_ladder_ordered` rejects anyway, so
+    // catching it here gives the operator the reason instead of a bare 500.
+    if (f.businessPrice.trim()) {
+      const economy = parseInt(f.economyPrice);
+      const business = parseInt(f.businessPrice);
+      if (business <= 0) {
+        onToast?.error('Lỗi nhập liệu', 'Giá vé Thương gia phải lớn hơn 0');
+        return false;
+      }
+      if (business < economy) {
+        onToast?.error(
+          'Lỗi nhập liệu',
+          `Giá Thương gia (${business.toLocaleString('vi-VN')}₫) không được thấp hơn giá Phổ thông (${economy.toLocaleString('vi-VN')}₫)`
+        );
+        return false;
+      }
     }
     return true;
   };
@@ -323,7 +342,15 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
         to_code: newFlight.to.toUpperCase(),
         depart_time: departTimeStr,
         arrive_time: arriveTimeStr,
-        price: parseInt(newFlight.price),
+        // `price` is the fare of the cabin the row seats; `economy_price` /
+        // `business_price` are what the results cards and the booking API read.
+        // Sending all three is what migration 030 needs — omitting the latter two
+        // made every flight added here come back 500.
+        price: parseInt(newFlight.economyPrice),
+        economy_price: parseInt(newFlight.economyPrice),
+        business_price: newFlight.businessPrice.trim()
+          ? parseInt(newFlight.businessPrice)
+          : Math.round(parseInt(newFlight.economyPrice) * 2.77),
         // Must be lowercase: flights.class has a CHECK constraint
         // `class IN ('economy','business')`, so 'Economy' is rejected by
         // Postgres with flights_class_check and the whole POST returns 500.
@@ -343,7 +370,8 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
         departTime: '',
         arriveTime: '',
         date: '',
-        price: '',
+        economyPrice: '',
+        businessPrice: '',
         capacity: '',
       });
       fetchFlights();
@@ -981,20 +1009,44 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1">
-                    Giá vé (₫)
+                    Giá vé Phổ thông (₫)
                   </label>
-                  <div className={`form-field-float ${newFlight.price ? 'has-value' : ''}`}>
+                  <div className={`form-field-float ${newFlight.economyPrice ? 'has-value' : ''}`}>
                     <input
                       type="number"
-                      value={newFlight.price}
-                      onChange={(e) => setNewFlight((p) => ({ ...p, price: e.target.value }))}
+                      value={newFlight.economyPrice}
+                      onChange={(e) =>
+                        setNewFlight((p) => ({ ...p, economyPrice: e.target.value }))
+                      }
                       placeholder=" "
-                      className={`w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm form-input ${Number(newFlight.price) > 0 ? 'form-input-valid' : ''}`}
+                      className={`w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm form-input ${Number(newFlight.economyPrice) > 0 ? 'form-input-valid' : ''}`}
                       required
                     />
                     <label className="form-label-float">499000</label>
                   </div>
                 </div>
+                {/* Optional. Blank means the 2.77 ratio migration 030 uses, and
+                    the hint says so rather than leaving the operator to guess why
+                    the thẻ Business trên trang kết quả lấy một con số từ đâu. */}
+                <div>
+                  <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1">
+                    Giá vé Thương gia (₫)
+                  </label>
+                  <div className={`form-field-float ${newFlight.businessPrice ? 'has-value' : ''}`}>
+                    <input
+                      type="number"
+                      value={newFlight.businessPrice}
+                      onChange={(e) =>
+                        setNewFlight((p) => ({ ...p, businessPrice: e.target.value }))
+                      }
+                      placeholder=" "
+                      className={`w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm form-input ${Number(newFlight.businessPrice) > 0 ? 'form-input-valid' : ''}`}
+                    />
+                    <label className="form-label-float">Để trống = ×2,77</label>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1">
                     Sức chứa

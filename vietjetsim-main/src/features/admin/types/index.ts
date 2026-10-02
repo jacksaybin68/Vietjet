@@ -98,6 +98,9 @@ export interface AdminFlight {
   depart_time: string;
   arrive_time: string;
   price: number;
+  /** Fare per cabin (migration 030). What the results cards and the booking API read. */
+  economy_price?: number;
+  business_price?: number;
   class: string;
   available: number;
   available_seats?: number;
