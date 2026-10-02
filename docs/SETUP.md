@@ -70,6 +70,9 @@ cp .env.local.example .env.local
 #   chuyến bay; giao diện và API cùng đọc từ đây nên giá hiển thị khớp giá thu
 # - migrations/031_unique_flight_numbers.sql      ← sửa số chuyến bị cắt còn 3 chữ số
 #   (LPAD cắt chuỗi dài hơn độ dài yêu cầu, khiến nhiều tuyến trùng "VJ 100")
+# - migrations/032_regional_to_regional_routes.sql ← thêm 32 tuyến vùng miền
+#   (Đà Nẵng–Huế, Cần Thơ–Phú Quốc, Buôn Ma Thuột–Đà Lạt…). Trước đó 0/462 cặp
+#   vùng miền có chuyến bay: 027 chỉ nối mỗi sân bay với HAN và SGN.
 
 # Không có tệp "complete schema" gộp — phải chạy lần lượt như trên.
 ```
@@ -93,6 +96,38 @@ npm run build
 # Chạy production server
 npm run start
 ```
+
+### Giữ lịch bay không bao giờ hết hạn
+
+Migrations seed một cửa sổ ngày cố định. Khi cửa sổ đó qua, mọi tìm kiếm trả về
+rỗng. Script sau mở lại cửa sổ **21 ngày** cho các tuyến hub và quốc tế:
+
+```bash
+cd vietjetsim-main
+
+# Biến môi trường bắt buộc trên database thật — không có một địa chỉ admin duy nhất.
+# Migration 022 đổi tài khoản demo sang @vietjetair.vn, nhưng database có thể dùng
+# địa chỉ khác (ví dụ @vietjetsim.vn) với mật khẩu đã đặt lại qua scripts/reset-admin.cjs.
+SEED_ADMIN_EMAIL=admin@vietjetair.vn \
+SEED_ADMIN_PASSWORD=admin123 \
+npm run db:seed-flights
+
+# Cửa sổ dài hơn nếu cần (mặc định 21 ngày)
+SEED_FLIGHT_DAYS=30 SEED_ADMIN_EMAIL=... SEED_ADMIN_PASSWORD=... npm run db:seed-flights
+```
+
+Script an toàn khi chạy lại: nó xoá các chuyến do chính nó tạo trước, nên chạy
+định kỳ không nhân bản dữ liệu. Nên bật cron hằng tuần — 21 ngày vẫn hết hạn nếu
+không ai chạy lại:
+
+```cron
+# crontab -e — mở rộng lịch bay mỗi chủ nhật 03:00
+0 3 * * 0 cd /duong/dan/vietjetsim-main && SEED_ADMIN_EMAIL=... SEED_ADMIN_PASSWORD=... npm run db:seed-flights >> /tmp/seed-flights.log 2>&1
+```
+
+Tuyến vùng miền (Đà Nẵng–Huế, Cần Thơ–Phú Quốc…) do migration `032` seed, phủ
+cùng 21 ngày. Khi quá hạn, chạy lại:
+`node scripts/apply-migration.cjs migrations/032_regional_to_regional_routes.sql`.
 
 ---
 
