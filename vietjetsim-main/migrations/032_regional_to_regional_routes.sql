@@ -106,12 +106,12 @@ schedule (depart_hour, class, price_factor, available_factor) AS (
     (8,  'economy',  1.00::numeric, 1.0),
     (14, 'business', 2.77::numeric, 0.15)
 ),
--- Three weeks starting two days out, matching the window
--- `scripts/seed-future-flights.cjs` opens for the hub routes. Seven days — what
--- 027 and 028 use — covers the date strip exactly and nothing beyond it, so a
--- customer who returns next week or follows a link to a later date finds these
--- regional pairs gone while the hub routes are still there. Twenty-one days
--- means forgetting to re-run either seed does not empty half the network.
+-- A month starting two days out. 027 and 028 use seven days, which covers the
+-- date strip exactly and nothing beyond it, so a customer who returns next week
+-- finds those routes gone. `scripts/seed-future-flights.cjs` opens 21 days by
+-- default and 30 with `SEED_FLIGHT_DAYS=30`; matching it here keeps the two
+-- halves of the network expiring on the same day, which is what leaves half the
+-- routes searchable and half not. Raise both together, never one on its own.
 --
 -- `vn_date` is the Vietnam calendar day, not the session's: a GMT session reads
 -- as the previous date, which is the whole bug 026 fixed. Formatting to text
@@ -121,7 +121,7 @@ days (vn_date) AS (
   SELECT to_char(d, 'YYYY-MM-DD')
   FROM generate_series(
          (now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date + 2,
-         (now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date + 22,
+         (now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date + 32,
          INTERVAL '1 day'
        ) AS d
 )
