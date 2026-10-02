@@ -40,11 +40,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Charge what the booking is actually worth. `amount` is taken from the
+    // browser for display purposes only: trusting it let a client pay one đồng
+    // and have the booking marked confirmed. A discount legitimately lowers the
+    // charge, so the floor is the discounted total rather than the full fare.
+    const discountedTotal = Math.max(0, booking.total_price - (discount_amount || 0));
+    if (amount < discountedTotal) {
+      return NextResponse.json(
+        {
+          error: 'Payment amount too low',
+          message: `Amount must cover the booking total of ${discountedTotal.toLocaleString('vi-VN')} VND`,
+        },
+        { status: 400 }
+      );
+    }
+
     // Create payment + confirm booking atomically (single transaction)
     const result = await createPaymentAndConfirmBooking({
       booking_id,
       method,
-      amount,
+      amount: discountedTotal,
       user_id: payload.userId,
       discount_code_id,
       discount_amount: discount_amount || 0,

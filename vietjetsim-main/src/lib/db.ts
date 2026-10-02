@@ -104,6 +104,9 @@ export interface FlightRecord {
   depart_time: string;
   arrive_time: string;
   price: number;
+  /** Fare per cabin (migration 030). The booking API prices from these. */
+  economy_price: number;
+  business_price: number;
   class: 'economy' | 'business';
   available: number;
   status: FlightStatus;
@@ -778,7 +781,10 @@ export async function createBooking(
     skyjoy_member_id?: string | null;
     passenger_type?: string | null;
   }[],
-  seats?: string[],
+  /** Seat numbers, each with the price it was sold for (migration 029). */
+  seats?: { seat_number: string; price: number }[],
+  /** Services bought, priced server-side from `ANCILLARY_OPTIONS` (migration 029). */
+  ancillaries?: { option_id: string; unit_price: number; quantity: number }[],
   consents: {
     marketing: boolean;
     survey: boolean;
@@ -843,11 +849,24 @@ export async function createBooking(
       RETURNING 1
     ),
     inserted_seats AS (
-      INSERT INTO seats (booking_id, flight_id, seat_number, status)
-      SELECT nb.id, nb.flight_id, s.seat_number, 'reserved'
+      INSERT INTO seats (booking_id, flight_id, seat_number, status, price)
+      SELECT nb.id, nb.flight_id, s.seat_number, 'reserved', s.price
       FROM new_booking nb
-      CROSS JOIN jsonb_to_recordset(${JSON.stringify((seats || []).map((n) => ({ seat_number: n })))}::jsonb)
-        AS s(seat_number text)
+      CROSS JOIN jsonb_to_recordset(${JSON.stringify(
+        (seats || []).map((seat) => ({
+          seat_number: seat.seat_number,
+          price: seat.price,
+        }))
+      )}::jsonb)
+        AS s(seat_number text, price numeric)
+      RETURNING 1
+    ),
+    inserted_ancillaries AS (
+      INSERT INTO booking_ancillaries (booking_id, option_id, unit_price, quantity)
+      SELECT nb.id, a.option_id, a.unit_price, a.quantity
+      FROM new_booking nb
+      CROSS JOIN jsonb_to_recordset(${JSON.stringify(ancillaries || [])}::jsonb)
+        AS a(option_id text, unit_price numeric, quantity integer)
       RETURNING 1
     )
     SELECT b.* FROM new_booking b

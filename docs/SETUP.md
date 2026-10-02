@@ -63,6 +63,13 @@ cp .env.local.example .env.local
 # - migrations/025_airport_codes_and_tuy_hoa.sql  ← sửa mã IATA sai, thêm Tuy Hòa
 # - migrations/026_fix_seed_flight_times.sql    ← sửa giờ bay lệch 7 giờ do múi giờ UTC
 # - migrations/027_seed_a_rolling_week.sql     ← mở rộng chuyến bay lên 7 ngày
+# - migrations/028_international_airports.sql   ← thêm sân bay quốc tế
+# - migrations/029_seat_and_ancillary_pricing.sql ← lưu giá ghế + bảng dịch vụ đã mua,
+#   để server tự tính giá thay vì tin total_price từ client
+# - migrations/030_flight_fare_classes.sql    ← giá riêng cho Economy/Business mỗi
+#   chuyến bay; giao diện và API cùng đọc từ đây nên giá hiển thị khớp giá thu
+# - migrations/031_unique_flight_numbers.sql      ← sửa số chuyến bị cắt còn 3 chữ số
+#   (LPAD cắt chuỗi dài hơn độ dài yêu cầu, khiến nhiều tuyến trùng "VJ 100")
 
 # Không có tệp "complete schema" gộp — phải chạy lần lượt như trên.
 ```
@@ -192,7 +199,9 @@ curl -X POST http://localhost:4028/api/thanh-vien/doi-diem \
 | Email | Password | Role |
 |-------|----------|------|
 | user@vietjetair.vn | user123 | User |
-| admin@vietjetair.vn | admin123 | Admin |
+| `Admin` | `Deohieusao123@` | Admin |
+
+> Đặt lại bằng `node scripts/reset-admin.cjs` (giữ nguyên `user_id` nên dữ liệu cũ không đứt liên kết).
 
 > ⚠️ Chỉ sử dụng trong development. Thay đổi cho production.
 

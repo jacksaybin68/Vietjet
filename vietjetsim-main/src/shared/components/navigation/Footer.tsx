@@ -65,12 +65,12 @@ export default function Footer() {
                 <h2 className="border-l-4 border-[var(--primary)] pl-3 text-sm font-black text-[var(--foreground)]">
                   {group.title}
                 </h2>
-                <ul className="mt-4 space-y-2.5">
+                <ul className="mt-3 space-y-0.5">
                   {group.links.map(([label, href]) => (
                     <li key={label}>
                       <Link
                         href={href}
-                        className="text-sm text-[var(--foreground-muted)] transition-colors hover:text-[var(--primary)]"
+                        className="inline-block py-1.5 text-sm text-[var(--foreground-muted)] transition-colors hover:text-[var(--primary)]"
                       >
                         {label}
                       </Link>
@@ -105,7 +105,7 @@ export default function Footer() {
       <div className="bg-[var(--vj-navy)] text-white">
         <div className="mx-auto flex max-w-[1240px] flex-col gap-2 px-4 py-4 text-xs text-white/70 sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 Vietjet Air · Dự án mô phỏng giao diện và nghiệp vụ đặt vé.</p>
-          <div className="flex flex-wrap gap-x-5 gap-y-2 font-semibold">
+          <div className="flex flex-wrap gap-x-5 font-semibold [&>a]:py-1.5">
             <Link href="/gioi-thieu" className="hover:text-[var(--accent)]">
               Điều khoản
             </Link>

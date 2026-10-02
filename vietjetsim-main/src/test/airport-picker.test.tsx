@@ -232,6 +232,58 @@ describe('AirportPicker', () => {
     expect(screen.getAllByRole('option')).toHaveLength(3);
   });
 
+  // The panel used to be absolutely positioned inside the field, but the hero
+  // seats the picker in a group box with `overflow-hidden` (needed to clip the
+  // segments to the rounded corners). The list was therefore clipped away and
+  // clicking the chevron did nothing at all.
+  it('escapes a clipping ancestor by portalling the panel to the body', () => {
+    setup();
+    fireEvent.click(screen.getByRole('button', { name: 'Điểm khởi hành' }));
+    const panel = screen.getByRole('listbox', { name: 'Điểm khởi hành' });
+    expect(panel.parentElement).toBe(document.body);
+    expect(panel).toHaveClass('fixed');
+  });
+
+  // Portalling takes the panel out of `containerRef`, so the outside-click guard
+  // has to test the panel too — otherwise a click on an airport both closes the
+  // list and misses the option.
+  it('stays open when the click lands inside the portalled panel', () => {
+    const { onChange } = setup();
+    fireEvent.click(screen.getByRole('button', { name: 'Điểm khởi hành' }));
+    const panel = screen.getByRole('listbox', { name: 'Điểm khởi hành' });
+    fireEvent.mouseDown(panel);
+    expect(screen.getByRole('listbox', { name: 'Điểm khởi hành' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('option', { name: /Phú Quốc/ }));
+    expect(onChange).toHaveBeenCalledWith('PQC');
+  });
+
+  it('still closes on a click outside the field and the panel', () => {
+    setup();
+    fireEvent.click(screen.getByRole('button', { name: 'Điểm khởi hành' }));
+    fireEvent.mouseDown(document.body);
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+  });
+
+  // A fixed panel is placed from the field's viewport rect, so it has to be
+  // re-placed when the page scrolls or it detaches from its field.
+  it('re-anchors the panel when the page scrolls', () => {
+    const bottom = { value: 300 };
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(
+      () => ({ bottom: bottom.value, left: 20, width: 300 }) as DOMRect
+    );
+    setup();
+    fireEvent.click(screen.getByRole('button', { name: 'Điểm khởi hành' }));
+    const panel = screen.getByRole('listbox', { name: 'Điểm khởi hành' });
+    expect(panel.style.top).toBe('304px');
+
+    bottom.value = 120;
+    act(() => {
+      window.dispatchEvent(new Event('scroll'));
+    });
+    expect(panel.style.top).toBe('124px');
+  });
+
   it('drops its own border in the flush variant so the group box stays single', () => {
     const onChange = vi.fn();
     const { container } = render(

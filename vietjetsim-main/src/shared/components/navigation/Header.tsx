@@ -107,12 +107,12 @@ export default function Header() {
     <header className="sticky top-0 z-40 border-b border-black/10 bg-[var(--vj-red)] shadow-[0_2px_16px_rgba(0,0,0,0.12)]">
       {announcementVisible && (
         <div className="vj-menubar text-white" aria-live="polite">
-          <div className="mx-auto flex min-h-9 max-w-[1240px] items-center gap-1 px-3 sm:px-4">
+          <div className="mx-auto flex min-h-11 max-w-[1240px] items-center gap-0.5 px-1.5 sm:min-h-9 sm:gap-1 sm:px-4">
             <button
               type="button"
               aria-label="Thông báo trước"
               onClick={() => shiftAnnouncement(-1)}
-              className="grid h-7 w-7 shrink-0 place-items-center rounded-full hover:bg-white/15"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full hover:bg-white/15 sm:h-7 sm:w-7"
             >
               <HiChevronLeft aria-hidden="true" />
             </button>
@@ -123,7 +123,7 @@ export default function Header() {
               type="button"
               aria-label="Thông báo tiếp theo"
               onClick={() => shiftAnnouncement(1)}
-              className="grid h-7 w-7 shrink-0 place-items-center rounded-full hover:bg-white/15"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full hover:bg-white/15 sm:h-7 sm:w-7"
             >
               <HiChevronRight aria-hidden="true" />
             </button>
@@ -131,7 +131,7 @@ export default function Header() {
               type="button"
               aria-label="Đóng thông báo"
               onClick={() => setAnnouncementVisible(false)}
-              className="grid h-7 w-7 shrink-0 place-items-center rounded-full hover:bg-white/15"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full hover:bg-white/15 sm:h-7 sm:w-7"
             >
               <HiOutlineX aria-hidden="true" />
             </button>

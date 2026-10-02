@@ -62,7 +62,14 @@ schedule (slot, depart_hour, price, class, available) AS (
 )
 INSERT INTO flights (flight_no, from_code, to_code, depart_time, arrive_time, price, class, available)
 SELECT
-  'VJ ' || LPAD((row_number() OVER () + 100)::text, 3, '0'),
+  -- `LPAD(x, 3, '0')` *truncates* when x is longer than 3, so the first number
+  -- past 999 silently lost a digit and two routes ended up under one flight
+  -- number. Pad to the number's own length with 3 as the floor.
+  'VJ ' || LPAD(
+    (row_number() OVER () + 100)::text,
+    GREATEST(3, length((row_number() OVER () + 100)::text)),
+    '0'
+  ),
   r.from_code,
   r.to_code,
   (CURRENT_DATE + INTERVAL '1 day') + make_interval(hours => s.depart_hour),

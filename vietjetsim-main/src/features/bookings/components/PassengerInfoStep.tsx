@@ -22,6 +22,19 @@ interface Props {
   onBack: () => void;
 }
 
+/**
+ * Field label for every passenger input.
+ *
+ * These were copy-pasted per field and drifted: the same label was written with
+ * three different class orders, and "Giới tính" alone got `mb-1.5 sm:mb-2`
+ * while the other seven got `mb-1`. The rendered result was a grid where the
+ * label baselines drifted by a pixel or two from field to field, which reads
+ * as sloppy rather than intentional. One constant makes drift impossible —
+ * a new field picks up the same typography instead of re-inventing it.
+ */
+const fieldLabelClass =
+  'block text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--foreground)] mb-1 font-koho';
+
 export default function PassengerInfoStep({
   flight,
   passengerCount,
@@ -80,7 +93,7 @@ export default function PassengerInfoStep({
   return (
     <>
       {/* pb: keep the last row clear of the sticky bottom totals bar. */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 pb-16 sm:pb-14">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 pb-32 lg:pb-16 lg:sm:pb-14">
         {/* Form */}
         <div className="lg:col-span-2">
           <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
@@ -138,293 +151,289 @@ export default function PassengerInfoStep({
           </div>
 
           <form id="passenger-info-form" onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-            {passengers.map((p, i) => (
-              <div
-                key={i}
-                className="bg-[var(--surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] overflow-hidden shadow-vj-sm"
-              >
-                {/* Card top accent bar */}
-                <div className="h-1 w-full bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
-                <div className="p-4 sm:p-6">
-                  <h3 className="font-black text-[var(--foreground)] mb-4 sm:mb-5 flex items-center gap-1.5 sm:gap-2 font-koho">
-                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-red text-white text-[10px] sm:text-xs font-black flex items-center justify-center shadow-sm">
-                      {i + 1}
-                    </div>
-                    Hành khách {i + 1}
-                    <span className="ml-1 inline-block rounded-md bg-[var(--vj-navy)] px-1.5 py-0.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-white">
-                      {PASSENGER_TYPE_LABELS[p.type ?? 'adult']}
-                    </span>
-                  </h3>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    {/* Gender - responsive */}
-                    <div className="sm:col-span-2">
-                      <label className="block text-[10px] sm:text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-1.5 sm:mb-2 font-koho">
-                        Giới tính
-                      </label>
-                      <div className="flex gap-2 sm:gap-3">
-                        {[
-                          ['male', 'Nam'],
-                          ['female', 'Nữ'],
-                        ].map(([val, label]) => (
-                          <label
-                            key={val}
-                            className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-2.5 rounded-xl border-2 cursor-pointer transition-all ${
-                              p.gender === val
-                                ? 'border-primary bg-primary/5 text-primary shadow-sm'
-                                : 'border-[var(--border)] text-[var(--foreground-muted)] hover:border-primary/40 hover:text-primary'
-                            }`}
-                          >
-                            <input
-                              id={`passenger-${i}-gender-${val}`}
-                              type="radio"
-                              name={`gender-${i}`}
-                              value={val}
-                              checked={p.gender === val}
-                              onChange={() => updatePassenger(i, 'gender', val)}
-                              className="hidden"
-                            />
-                            <span className="text-[11px] sm:text-sm font-bold">{label}</span>
-                          </label>
-                        ))}
+            {passengers.map((p, i) => {
+              // A child or an infant only needs what a carrier uses to identify
+              // them: gender, legal name, date of birth and address. Contact
+              // details, country of issue and the loyalty id belong to the adult
+              // travelling with them, so asking again is just noise.
+              const isAdult = (p.type ?? 'adult') === 'adult';
+              return (
+                <div
+                  key={i}
+                  className="bg-[var(--surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] overflow-hidden shadow-vj-sm"
+                >
+                  {/* Card top accent bar */}
+                  <div className="h-1 w-full bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
+                  <div className="p-4 sm:p-6">
+                    <h3 className="font-black text-[var(--foreground)] mb-4 sm:mb-5 flex items-center gap-1.5 sm:gap-2 font-koho">
+                      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-red text-white text-[10px] sm:text-xs font-black flex items-center justify-center shadow-sm">
+                        {i + 1}
                       </div>
-                    </div>
+                      Hành khách {i + 1}
+                      <span className="ml-1 inline-block rounded-md bg-[var(--vj-navy)] px-1.5 py-0.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-white">
+                        {PASSENGER_TYPE_LABELS[p.type ?? 'adult']}
+                      </span>
+                    </h3>
 
-                    {/* Name */}
-                    <div className="sm:col-span-2">
-                      <label
-                        htmlFor={`passenger-${i}-name`}
-                        className="block text-[10px] sm:text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-1 font-koho"
-                      >
-                        Họ và tên{' '}
-                        <span className="text-[var(--foreground-subtle)] font-normal normal-case">
-                          (như CMND/Hộ chiếu)
-                        </span>
-                      </label>
-                      <div className={`form-field-float ${p.name ? 'has-value' : ''}`}>
-                        <input
-                          id={`passenger-${i}-name`}
-                          name={`passenger-${i}-name`}
-                          type="text"
-                          value={p.name}
-                          onChange={(e) => updatePassenger(i, 'name', e.target.value)}
-                          placeholder=" "
-                          className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-[var(--foreground)] text-sm font-semibold form-input uppercase tracking-wide ${p.name.trim().length >= 2 ? 'form-input-valid' : ''}`}
-                          required
-                        />
-                        <label className="form-label-float font-koho">NGUYEN VAN A</label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      {/* Gender - responsive */}
+                      <div className="sm:col-span-2">
+                        <label className={fieldLabelClass}>Giới tính</label>
+                        <div className="flex gap-2 sm:gap-3">
+                          {[
+                            ['male', 'Nam'],
+                            ['female', 'Nữ'],
+                          ].map(([val, label]) => (
+                            <label
+                              key={val}
+                              className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-2.5 rounded-xl border-2 cursor-pointer transition-all ${
+                                p.gender === val
+                                  ? 'border-primary bg-primary/5 text-primary shadow-sm'
+                                  : 'border-[var(--border)] text-[var(--foreground-muted)] hover:border-primary/40 hover:text-primary'
+                              }`}
+                            >
+                              <input
+                                id={`passenger-${i}-gender-${val}`}
+                                type="radio"
+                                name={`gender-${i}`}
+                                value={val}
+                                checked={p.gender === val}
+                                onChange={() => updatePassenger(i, 'gender', val)}
+                                className="hidden"
+                              />
+                              <span className="text-[11px] sm:text-sm font-bold">{label}</span>
+                            </label>
+                          ))}
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Country and nationality */}
-                    <div>
-                      <label
-                        htmlFor={`passenger-${i}-countryCode`}
-                        className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)] font-koho sm:text-xs"
-                      >
-                        Quốc gia <span className="text-primary">*</span>
-                      </label>
-                      <div className="relative">
-                        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm">
-                          🇻🇳
-                        </span>
-                        <select
-                          id={`passenger-${i}-countryCode`}
-                          name={`passenger-${i}-countryCode`}
-                          value={p.countryCode}
-                          onChange={(event) =>
-                            updatePassenger(i, 'countryCode', event.target.value)
-                          }
-                          className="w-full appearance-none rounded-xl border border-[var(--border)] bg-[var(--surface-2)] py-2.5 pl-10 pr-3 text-sm text-[var(--foreground)] outline-none focus:border-primary sm:py-3"
-                          required
-                        >
-                          <option value="VN">Việt Nam (+84)</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* DOB */}
-                    <div>
-                      <label
-                        htmlFor={`passenger-${i}-dob`}
-                        className="block text-[10px] sm:text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-1 font-koho"
-                      >
-                        Ngày sinh
-                      </label>
-                      <input
-                        id={`passenger-${i}-dob`}
-                        name={`passenger-${i}-dob`}
-                        type="date"
-                        value={p.dob}
-                        onChange={(e) => updatePassenger(i, 'dob', e.target.value)}
-                        className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-[var(--foreground)] text-sm form-input ${p.dob ? 'form-input-valid' : ''}`}
-                        required
-                      />
-                    </div>
-
-                    {/* Phone */}
-                    <div>
-                      <label
-                        htmlFor={`passenger-${i}-phone`}
-                        className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)] font-koho sm:text-xs"
-                      >
-                        Số điện thoại <span className="text-primary">*</span>
-                      </label>
-                      <div className="flex overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-2)] focus-within:border-primary">
-                        <span className="flex items-center border-r border-[var(--border)] px-3 text-sm font-semibold text-[var(--foreground-muted)]">
-                          +84
-                        </span>
-                        <input
-                          id={`passenger-${i}-phone`}
-                          name={`passenger-${i}-phone`}
-                          type="tel"
-                          value={p.phone}
-                          onChange={(event) =>
-                            updatePassenger(i, 'phone', event.target.value.replace(/[^0-9\s]/g, ''))
-                          }
-                          onBlur={() =>
-                            setPhoneTouched((current) => {
-                              const next = [...current];
-                              next[i] = true;
-                              return next;
-                            })
-                          }
-                          aria-describedby={`passenger-${i}-phone-error`}
-                          aria-invalid={
-                            phoneTouched[i] && !/^0\d{8,9}$/.test(p.phone.replace(/\s/g, ''))
-                          }
-                          placeholder="0123456789"
-                          className="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-sm text-[var(--foreground)] outline-none sm:py-3"
-                          required
-                        />
-                      </div>
-                      {phoneTouched[i] && !/^0\d{8,9}$/.test(p.phone.replace(/\s/g, '')) && (
-                        <p
-                          id={`passenger-${i}-phone-error`}
-                          className="mt-1 text-[11px] font-medium text-primary"
-                        >
-                          Vui lòng nhập số điện thoại.
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Email */}
-                    <div>
-                      <label
-                        htmlFor={`passenger-${i}-email`}
-                        className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)] font-koho sm:text-xs"
-                      >
-                        Email <span className="text-primary">*</span>
-                      </label>
-                      <input
-                        id={`passenger-${i}-email`}
-                        name={`passenger-${i}-email`}
-                        type="email"
-                        value={p.email}
-                        onChange={(event) => updatePassenger(i, 'email', event.target.value)}
-                        onBlur={() =>
-                          setEmailTouched((current) => {
-                            const next = [...current];
-                            next[i] = true;
-                            return next;
-                          })
-                        }
-                        aria-describedby={`passenger-${i}-email-error`}
-                        aria-invalid={emailTouched[i] && !/^\S+@\S+\.\S+$/.test(p.email)}
-                        placeholder="email@example.com"
-                        className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2.5 text-sm text-[var(--foreground)] outline-none focus:border-primary sm:px-4 sm:py-3"
-                        required
-                      />
-                      {emailTouched[i] && !/^\S+@\S+\.\S+$/.test(p.email) && (
-                        <p
-                          id={`passenger-${i}-email-error`}
-                          className="mt-1 text-[11px] font-medium text-primary"
-                        >
-                          Vui lòng nhập địa chỉ email của bạn.
-                        </p>
-                      )}
-                    </div>
-
-                    {/* ID */}
-                    <div className="sm:col-span-2">
-                      <label
-                        htmlFor={`passenger-${i}-idNumber`}
-                        className="block text-[10px] sm:text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-1 font-koho"
-                      >
-                        CCCD / Hộ chiếu{' '}
-                        {requiresIdNumber(p.type) ? (
-                          <span className="text-primary">*</span>
-                        ) : (
-                          <span className="font-normal normal-case text-[var(--foreground-subtle)]">
-                            (không bắt buộc với em bé)
+                      {/* Name */}
+                      <div className="sm:col-span-2">
+                        <label htmlFor={`passenger-${i}-name`} className={fieldLabelClass}>
+                          Họ và tên{' '}
+                          <span className="text-[var(--foreground-subtle)] font-normal normal-case">
+                            (như CMND/Hộ chiếu)
                           </span>
-                        )}
-                        <span className="ml-1 font-normal normal-case text-[var(--foreground-subtle)]">
-                          (Theo giấy tờ tuỳ thân)
-                        </span>
-                      </label>
-                      <div className={`form-field-float ${p.idNumber ? 'has-value' : ''}`}>
-                        <input
-                          id={`passenger-${i}-idNumber`}
-                          name={`passenger-${i}-idNumber`}
-                          type="text"
-                          value={p.idNumber}
-                          onChange={(e) => updatePassenger(i, 'idNumber', e.target.value)}
-                          placeholder=" "
-                          className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-[var(--foreground)] text-sm form-input ${p.idNumber.replace(/\D/g, '').length >= 9 ? 'form-input-valid' : ''}`}
-                          required={requiresIdNumber(p.type)}
-                        />
-                        <label className="form-label-float">012345678</label>
+                        </label>
+                        <div className={`form-field-float ${p.name ? 'has-value' : ''}`}>
+                          <input
+                            id={`passenger-${i}-name`}
+                            name={`passenger-${i}-name`}
+                            type="text"
+                            value={p.name}
+                            onChange={(e) => updatePassenger(i, 'name', e.target.value)}
+                            placeholder=" "
+                            className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-[var(--foreground)] text-base font-semibold form-input uppercase sm:text-sm tracking-wide ${p.name.trim().length >= 2 ? 'form-input-valid' : ''}`}
+                            required
+                          />
+                          <label className="form-label-float font-koho">NGUYEN VAN A</label>
+                        </div>
                       </div>
-                    </div>
 
-                    <div>
-                      <label
-                        htmlFor={`passenger-${i}-residence`}
-                        className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)] font-koho sm:text-xs"
-                      >
-                        Nơi ở hiện tại
-                      </label>
-                      <input
-                        id={`passenger-${i}-residence`}
-                        name={`passenger-${i}-residence`}
-                        type="text"
-                        value={p.residence}
-                        onChange={(event) => updatePassenger(i, 'residence', event.target.value)}
-                        placeholder="Tỉnh/thành phố"
-                        className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2.5 text-sm text-[var(--foreground)] outline-none focus:border-primary sm:px-4 sm:py-3"
-                      />
-                    </div>
+                      {isAdult && (
+                        <div>
+                          <label htmlFor={`passenger-${i}-countryCode`} className={fieldLabelClass}>
+                            Quốc gia <span className="text-primary">*</span>
+                          </label>
+                          <div className="relative">
+                            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm">
+                              🇻🇳
+                            </span>
+                            <select
+                              id={`passenger-${i}-countryCode`}
+                              name={`passenger-${i}-countryCode`}
+                              value={p.countryCode}
+                              onChange={(event) =>
+                                updatePassenger(i, 'countryCode', event.target.value)
+                              }
+                              className="w-full appearance-none rounded-xl border border-[var(--border)] bg-[var(--surface-2)] py-2.5 pl-10 pr-3 text-base text-[var(--foreground)] outline-none focus:border-primary sm:py-3 sm:text-sm"
+                              required
+                            >
+                              <option value="VN">Việt Nam (+84)</option>
+                            </select>
+                          </div>
+                        </div>
+                      )}
+                      {/* DOB */}
+                      <div>
+                        <label htmlFor={`passenger-${i}-dob`} className={fieldLabelClass}>
+                          Ngày sinh
+                        </label>
+                        <input
+                          id={`passenger-${i}-dob`}
+                          name={`passenger-${i}-dob`}
+                          type="date"
+                          value={p.dob}
+                          onChange={(e) => updatePassenger(i, 'dob', e.target.value)}
+                          className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-[var(--foreground)] text-base form-input sm:text-sm ${p.dob ? 'form-input-valid' : ''}`}
+                          required
+                        />
+                      </div>
 
-                    <div>
-                      <label
-                        htmlFor={`passenger-${i}-skyJoyMemberId`}
-                        className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)] font-koho sm:text-xs"
-                      >
-                        Mã hội viên SkyJoy
-                      </label>
-                      <input
-                        id={`passenger-${i}-skyJoyMemberId`}
-                        name={`passenger-${i}-skyJoyMemberId`}
-                        type="text"
-                        value={p.skyJoyMemberId}
-                        onChange={(event) =>
-                          updatePassenger(
-                            i,
-                            'skyJoyMemberId',
-                            event.target.value.toUpperCase().replace(/\s/g, '')
-                          )
-                        }
-                        placeholder="SJxxxxxxxxxx"
-                        pattern="SJ[0-9]{8,10}"
-                        title="Mã SkyJoy gồm SJ và 8–10 chữ số"
-                        className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2.5 text-sm uppercase text-[var(--foreground)] outline-none focus:border-primary sm:px-4 sm:py-3"
-                      />
+                      {isAdult && (
+                        <div>
+                          <label htmlFor={`passenger-${i}-phone`} className={fieldLabelClass}>
+                            Số điện thoại <span className="text-primary">*</span>
+                          </label>
+                          <div className="flex overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-2)] focus-within:border-primary">
+                            <span className="flex items-center border-r border-[var(--border)] px-3 text-sm font-semibold text-[var(--foreground-muted)]">
+                              +84
+                            </span>
+                            <input
+                              id={`passenger-${i}-phone`}
+                              name={`passenger-${i}-phone`}
+                              type="tel"
+                              value={p.phone}
+                              onChange={(event) =>
+                                updatePassenger(
+                                  i,
+                                  'phone',
+                                  event.target.value.replace(/[^0-9\s]/g, '')
+                                )
+                              }
+                              onBlur={() =>
+                                setPhoneTouched((current) => {
+                                  const next = [...current];
+                                  next[i] = true;
+                                  return next;
+                                })
+                              }
+                              aria-describedby={`passenger-${i}-phone-error`}
+                              aria-invalid={
+                                phoneTouched[i] && !/^0\d{8,9}$/.test(p.phone.replace(/\s/g, ''))
+                              }
+                              placeholder="0123456789"
+                              className="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-base sm:text-sm text-[var(--foreground)] outline-none sm:py-3"
+                              required
+                            />
+                          </div>
+                          {phoneTouched[i] && !/^0\d{8,9}$/.test(p.phone.replace(/\s/g, '')) && (
+                            <p
+                              id={`passenger-${i}-phone-error`}
+                              className="mt-1 text-[11px] font-medium text-primary"
+                            >
+                              Vui lòng nhập số điện thoại.
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {isAdult && (
+                        <div>
+                          <label htmlFor={`passenger-${i}-email`} className={fieldLabelClass}>
+                            Email <span className="text-primary">*</span>
+                          </label>
+                          <input
+                            id={`passenger-${i}-email`}
+                            name={`passenger-${i}-email`}
+                            type="email"
+                            value={p.email}
+                            onChange={(event) => updatePassenger(i, 'email', event.target.value)}
+                            onBlur={() =>
+                              setEmailTouched((current) => {
+                                const next = [...current];
+                                next[i] = true;
+                                return next;
+                              })
+                            }
+                            aria-describedby={`passenger-${i}-email-error`}
+                            aria-invalid={emailTouched[i] && !/^\S+@\S+\.\S+$/.test(p.email)}
+                            placeholder="email@example.com"
+                            className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2.5 text-base sm:text-sm text-[var(--foreground)] outline-none focus:border-primary sm:px-4 sm:py-3"
+                            required
+                          />
+                          {emailTouched[i] && !/^\S+@\S+\.\S+$/.test(p.email) && (
+                            <p
+                              id={`passenger-${i}-email-error`}
+                              className="mt-1 text-[11px] font-medium text-primary"
+                            >
+                              Vui lòng nhập địa chỉ email của bạn.
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Every category except an infant is identified by a travel
+                          document (`requiresIdNumber`), so the field stays on a
+                          child's card as well as the adult's — the API rejects a
+                          booking whose child has no ID. Only the contact details
+                          above are the adult's alone. */}
+                      <div className="sm:col-span-2">
+                        <label htmlFor={`passenger-${i}-idNumber`} className={fieldLabelClass}>
+                          CCCD / Hộ chiếu{' '}
+                          {requiresIdNumber(p.type) ? (
+                            <span className="text-primary">*</span>
+                          ) : (
+                            <span className="font-normal normal-case text-[var(--foreground-subtle)]">
+                              (không bắt buộc với em bé)
+                            </span>
+                          )}
+                          <span className="ml-1 font-normal normal-case text-[var(--foreground-subtle)]">
+                            (Theo giấy tờ tuỳ thân)
+                          </span>
+                        </label>
+                        <div className={`form-field-float ${p.idNumber ? 'has-value' : ''}`}>
+                          <input
+                            id={`passenger-${i}-idNumber`}
+                            name={`passenger-${i}-idNumber`}
+                            type="text"
+                            value={p.idNumber}
+                            onChange={(e) => updatePassenger(i, 'idNumber', e.target.value)}
+                            placeholder=" "
+                            className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-[var(--foreground)] text-base form-input sm:text-sm ${p.idNumber.replace(/\D/g, '').length >= 9 ? 'form-input-valid' : ''}`}
+                            required={requiresIdNumber(p.type)}
+                          />
+                          <label className="form-label-float">012345678</label>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label htmlFor={`passenger-${i}-residence`} className={fieldLabelClass}>
+                          Địa chỉ
+                        </label>
+                        <input
+                          id={`passenger-${i}-residence`}
+                          name={`passenger-${i}-residence`}
+                          type="text"
+                          value={p.residence}
+                          onChange={(event) => updatePassenger(i, 'residence', event.target.value)}
+                          placeholder="Tỉnh/thành phố"
+                          className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2.5 text-base sm:text-sm text-[var(--foreground)] outline-none focus:border-primary sm:px-4 sm:py-3"
+                        />
+                      </div>
+
+                      {isAdult && (
+                        <div>
+                          <label
+                            htmlFor={`passenger-${i}-skyJoyMemberId`}
+                            className={fieldLabelClass}
+                          >
+                            Mã hội viên SkyJoy
+                          </label>
+                          <input
+                            id={`passenger-${i}-skyJoyMemberId`}
+                            name={`passenger-${i}-skyJoyMemberId`}
+                            type="text"
+                            value={p.skyJoyMemberId}
+                            onChange={(event) =>
+                              updatePassenger(
+                                i,
+                                'skyJoyMemberId',
+                                event.target.value.toUpperCase().replace(/\s/g, '')
+                              )
+                            }
+                            placeholder="SJxxxxxxxxxx"
+                            pattern="SJ[0-9]{8,10}"
+                            title="Mã SkyJoy gồm SJ và 8–10 chữ số"
+                            className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2.5 text-base sm:text-sm uppercase text-[var(--foreground)] outline-none focus:border-primary sm:px-4 sm:py-3"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             <section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5">
               <h3 className="font-black text-[var(--foreground)]">Quyền riêng tư và đồng ý</h3>

@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import { ChatWidgets } from '@/features/chat';
 import { SiteOverlays } from '@/shared/components/feedback/SiteOverlays';
 import NextTopLoader from 'nextjs-toploader';
+import MobileBottomNav from '@/shared/components/navigation/MobileBottomNav';
 import { NavigationOptimizer } from '@/shared/components/layouts';
 export const viewport: Viewport = {
   width: 'device-width',
@@ -99,6 +100,9 @@ export default function RootLayout({
         />
         <NextTopLoader color="#EC2029" showSpinner={false} />
         <NavigationOptimizer />
+        {/* Clears the mobile bottom bar so it never covers page content. */}
+        <div className="pb-[calc(60px+env(safe-area-inset-bottom))] lg:pb-0" />
+        <MobileBottomNav />
         <ThemeProvider>
           <AuthProvider>
             <PageTransition>{children}</PageTransition>

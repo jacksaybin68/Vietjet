@@ -25,6 +25,26 @@
 -- (from_code, to_code, depart_time), which a different day does not collide
 -- with, so the repetition is safe.
 
+-- ─── Stay order-agnostic ────────────────────────────────────────────────────
+-- This is the one seed that gets re-applied: the window it opens is a rolling
+-- week, so a database older than a week runs it again to extend the calendar.
+-- 029/030 added `flights.economy_price` / `business_price` and made both NOT
+-- NULL after this file was written, so a re-run would fail on the INSERT below
+-- (it names no fare) unless the constraint is relaxed for its duration. On a
+-- fresh database the columns do not exist yet, both DO blocks do nothing, and
+-- 030 prices these rows when it runs later, in filename order.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'flights'
+      AND column_name = 'economy_price'
+  ) THEN
+    ALTER TABLE flights ALTER COLUMN economy_price DROP NOT NULL;
+    ALTER TABLE flights ALTER COLUMN business_price DROP NOT NULL;
+  END IF;
+END $$;
+
 WITH schedule (depart_hour, price, class, available) AS (
   VALUES
     (6,  899000::numeric,  'economy',  180),
@@ -70,7 +90,16 @@ days (vn_date) AS (
 INSERT INTO flights (flight_no, from_code, to_code, depart_time, arrive_time, price, class, available)
 SELECT
   -- Numbered within the day, so the same service keeps its number all week.
-  'VJ ' || LPAD((row_number() OVER (PARTITION BY d.vn_date) + 600)::text, 3, '0'),
+  -- Pad to the number's own length with 3 as the floor, not `LPAD(x, 3, '0')`:
+  -- LPAD truncates a longer input, and this block is not 88 rows but 88 routes
+  -- x 5 slots = 440, so numbers 1000-1040 lost their last digit and collided
+  -- with 100-140. The file's own note about staying "inside three digits" only
+  -- holds if the padding never cuts.
+  'VJ ' || LPAD(
+    (row_number() OVER (PARTITION BY d.vn_date) + 600)::text,
+    GREATEST(3, length((row_number() OVER (PARTITION BY d.vn_date) + 600)::text)),
+    '0'
+  ),
   r.from_code,
   r.to_code,
   (d.vn_date || ' ' || LPAD(s.depart_hour::text, 2, '0') || ':00:00+07')::timestamptz,
@@ -83,3 +112,30 @@ FROM routes r
 CROSS JOIN schedule s
 CROSS JOIN days d
 ON CONFLICT (from_code, to_code, depart_time) DO NOTHING;
+
+-- Price whatever this file just inserted, with the same ladder 030 applies to
+-- the rows that already existed, then restore the constraint. No-op on a fresh
+-- database, where the columns do not exist yet.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'flights'
+      AND column_name = 'economy_price'
+  ) THEN
+    UPDATE flights
+    SET
+      economy_price = CASE
+        WHEN class = 'business' THEN ROUND(price / 2.77)
+        ELSE ROUND(price)
+      END,
+      business_price = CASE
+        WHEN class = 'business' THEN ROUND(price)
+        ELSE ROUND(price * 2.77)
+      END
+    WHERE economy_price IS NULL OR business_price IS NULL;
+
+    ALTER TABLE flights ALTER COLUMN economy_price SET NOT NULL;
+    ALTER TABLE flights ALTER COLUMN business_price SET NOT NULL;
+  END IF;
+END $$;

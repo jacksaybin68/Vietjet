@@ -64,6 +64,33 @@ shift: the five seed slots are symmetric, so a row that needs shifting and a
 row that is already correct are indistinguishable, and any relative `UPDATE`
 you can write will be wrong on its second run.
 
+**The server owns every amount in a booking.** `POST /api/dat-ve` re-derives
+the fare, the seats and the services from `features/bookings/pricing` and ignores
+`total_price`; the client sends only *which* seat, *which* service and *which*
+fare card. Migrations `029` (`seats.price`, `booking_ancillaries`) and `030`
+(`flights.economy_price` / `business_price`) are what make that possible — before
+them the browser's number was the record. Keep a new charge in `pricing.ts` and
+price it on the server; a total computed only in a component cannot be trusted.
+
+**A fare card names a bucket, never a cabin.** `flights` stores two fares, so
+the four cards (Eco, Deluxe, SkyBOSS, Business) cannot each have one. The two
+endpoints are the stored values and the middle two are stepped evenly between
+them by `getFareForClass` in `pricing.ts`, which both `FlightResultsStep` and
+`POST /api/dat-ve` call. Deriving the ladder inside the card and sending only
+`cabin` made SkyBOSS quote 10,682,000₫ and bill 13,573,000₫. **Coerce the two
+fares with `Number`**: a `NUMERIC(12, 2)` column comes back from the driver as a
+*string*, so plain arithmetic concatenates (`step` → `NaN`) and every
+interpolated card silently collapses onto the cheapest fare — the page quotes
+7,791,000₫ while the API charges 4,900,000₫. `flight_no` has the same hazard in
+seed files: `LPAD(x, 3, '0')` *truncates* 4-digit numbers, which is what
+`031_unique_flight_numbers.sql` repairs.
+
+**`028` adds the international network** (13 airports, flights from HAN/SGN in
+both directions) and numbers its block from 1100 so it cannot collide with 027's
+601–1040. Cà Mau (CAH) is deliberately absent: the airport closed for a
+twelve-month upgrade in November 2025, and offering it would send a customer to
+a terminal with no service.
+
 **Agency-issued discount codes.** `015_agency_discounts.sql` adds `agencies` and
 `discount_codes.agency_id` (nullable, `ON DELETE SET NULL`) plus `issued_by`. Admins
 manage agencies at `/quan-tri` → "Đại lý" and pick one from the "Phát hành cho đại lý"

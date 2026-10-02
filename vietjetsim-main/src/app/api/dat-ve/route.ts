@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthRequest } from '@/lib/auth';
-import { getBookingsByUserId, createBooking } from '@/lib/db';
+import { getBookingsByUserId, createBooking, getFlightById } from '@/lib/db';
 import { parsePaginationParams, getPaginationMeta } from '@/lib/pagination';
+import {
+  ANCILLARY_OPTIONS,
+  FARE_CLASSES,
+  FARE_RATE_BY_TYPE,
+  TAX_AND_FEE_RATE,
+  getFareForClass,
+  getSeatCharge,
+  type AncillaryId,
+  type FareClassId,
+} from '@/features/bookings/pricing';
+import type { PassengerType } from '@/features/bookings/types/booking-flow';
 
 export async function GET(request: NextRequest) {
   try {
@@ -43,23 +54,39 @@ export async function POST(request: NextRequest) {
 
     const userId = user.userId;
 
-    const body = await request.json();
-    const { flight_id, total_price, passengers, seats, consents } = body;
-    const parsedTotalPrice =
-      typeof total_price === 'number' ? total_price : Number.parseFloat(String(total_price));
+    // `seats` are numbers the client picked from the map, `ancillaries` the
+    // service ids it ticked, and `fareClass` the fare card it tapped. All three
+    // are re-priced below, so the client says what it chose, never what it costs.
+    const {
+      flight_id,
+      passengers,
+      seats,
+      ancillaries,
+      fareClass: requestedFareClass,
+      consents,
+    } = (await request.json()) as {
+      flight_id?: string;
+      passengers?: Record<string, unknown>[];
+      seats?: string[];
+      ancillaries?: AncillaryId[];
+      fareClass?: FareClassId;
+      consents?: {
+        marketing?: boolean;
+        survey?: boolean;
+        retainForFutureBooking?: boolean;
+        policyAccepted?: boolean;
+      };
+    };
 
-    if (
-      !flight_id ||
-      !Number.isFinite(parsedTotalPrice) ||
-      parsedTotalPrice <= 0 ||
-      !passengers ||
-      !Array.isArray(passengers) ||
-      passengers.length === 0
-    ) {
-      return NextResponse.json(
-        { error: 'flight_id, total_price (> 0), and passengers are required' },
-        { status: 400 }
-      );
+    // An unrecognised card is rejected rather than silently downgraded: it
+    // meant to buy a fare this flight does not sell, and quietly charging the
+    // cheapest one would under-quote the booking instead of failing it.
+    if (requestedFareClass !== undefined && !FARE_CLASSES.includes(requestedFareClass)) {
+      return NextResponse.json({ error: 'Unknown fare class' }, { status: 400 });
+    }
+
+    if (!flight_id || !passengers || !Array.isArray(passengers) || passengers.length === 0) {
+      return NextResponse.json({ error: 'flight_id and passengers are required' }, { status: 400 });
     }
 
     if (!consents || typeof consents !== 'object' || consents.policyAccepted !== true) {
@@ -69,19 +96,27 @@ export async function POST(request: NextRequest) {
     const PASSENGER_TYPES = ['adult', 'child', 'infant'] as const;
     const rawPassengers = passengers as Record<string, unknown>[];
 
-    // An infant has no passport of their own, so every other category still
-    // needs an identity document. Unrecognised values are rejected rather than
-    // coerced: a typo would otherwise silently price a child as an adult.
+    // A child (2-11) and an infant (under 2) are identified by name and date of
+    // birth only — the booking form asks them for nothing more, and the columns
+    // hold NULL for them (migration 018). Requiring contact details here made
+    // every booking that included a minor impossible to submit. The travelling
+    // adult is the one reachable during the flight, so their details are the
+    // ones worth collecting.
     const invalidPassenger = rawPassengers.some((passenger) => {
       const type = passenger.type ?? 'adult';
       if (!PASSENGER_TYPES.includes(type as (typeof PASSENGER_TYPES)[number])) return true;
-      if (!passenger.name || !passenger.dob || !passenger.phone || !passenger.email) return true;
+      if (!passenger.name || !passenger.dob) return true;
+      if (type === 'adult' && (!passenger.phone || !passenger.email)) return true;
+      // An infant has no passport of their own; everyone else needs one.
       if (type !== 'infant' && !passenger.idNumber) return true;
       return false;
     });
     if (invalidPassenger) {
       return NextResponse.json(
-        { error: 'Each passenger requires identity and contact details' },
+        {
+          error:
+            'Each passenger requires name and date of birth; adults also need contact details and everyone except infants needs an ID document',
+        },
         { status: 400 }
       );
     }
@@ -109,11 +144,76 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Price the whole booking here rather than trusting anything the browser
+    // sent: the fare, the seats and the services are all priced from
+    // `features/bookings/pricing`, the same module the UI sums with, so the two
+    // cannot drift. A client posting `total_price: 1` would otherwise buy a
+    // real seat for one đồng.
+    const flight = await getFlightById(flight_id);
+    if (!flight) {
+      return NextResponse.json({ error: 'Flight not found' }, { status: 404 });
+    }
+
+    const counts = { adult: 0, child: 0, infant: 0 };
+    for (const passenger of normalizedPassengers) {
+      counts[passenger.passenger_type as PassengerType] += 1;
+    }
+
+    // `fareClass` says which card the traveller tapped; the price for it comes
+    // from `flights` (migration 030) through the same ladder the results page
+    // drew it with, never from the browser. Defaulting to the cheapest card
+    // keeps a booking that arrives without one working.
+    const fareClass = FARE_CLASSES.includes(requestedFareClass as FareClassId)
+      ? (requestedFareClass as FareClassId)
+      : 'eco';
+    const farePerPassenger = getFareForClass(fareClass, {
+      economyPrice: flight.economy_price,
+      businessPrice: flight.business_price,
+    });
+    const taxableFare = farePerPassenger * (counts.adult + counts.child * FARE_RATE_BY_TYPE.child);
+
+    // Seats are sold per passenger, so each carries its own price and its own
+    // tax/fee. An unknown seat number prices at 0 rather than being rejected —
+    // the adjacency rule is a UX guard, not a money guarantee.
+    const seatRows = (seats || []).map((seat) => ({
+      seat_number: seat,
+      price: getSeatCharge(seat),
+    }));
+    const seatFee = seatRows.reduce((sum, seat) => sum + seat.price, 0);
+
+    // Services are priced from the catalogue and charged per seated passenger
+    // (an infant rides on a lap, so none apply to one). The client only says
+    // which ids it wants.
+    const seatedCount = counts.adult + counts.child;
+    const requestedAncillaries = (ancillaries || []).filter((id): id is AncillaryId =>
+      ANCILLARY_OPTIONS.some((option) => option.id === id)
+    );
+    const ancillaryRows = requestedAncillaries.map((id) => ({
+      option_id: id,
+      unit_price: ANCILLARY_OPTIONS.find((option) => option.id === id)!.price,
+      quantity: seatedCount,
+    }));
+    const ancillaryFee = ancillaryRows.reduce((sum, row) => sum + row.unit_price * row.quantity, 0);
+
+    const totalPrice = Math.round(
+      taxableFare +
+        farePerPassenger * counts.infant * FARE_RATE_BY_TYPE.infant +
+        taxableFare * TAX_AND_FEE_RATE +
+        seatFee +
+        ancillaryFee
+    );
+
     const booking = await createBooking(
-      { user_id: userId as string, flight_id, total_price: parsedTotalPrice },
+      { user_id: userId as string, flight_id, total_price: totalPrice },
       normalizedPassengers,
-      seats || [],
-      consents
+      seatRows,
+      ancillaryRows,
+      {
+        marketing: consents?.marketing ?? false,
+        survey: consents?.survey ?? false,
+        retainForFutureBooking: consents?.retainForFutureBooking ?? false,
+        policyAccepted: consents?.policyAccepted ?? false,
+      }
     );
 
     return NextResponse.json({ booking }, { status: 201 });

@@ -155,6 +155,10 @@ function FlightBookingClientInner() {
         total_price: totals.total,
         passengers,
         seats,
+        // The server re-prices everything from `pricing.ts`; sending the card id
+        // only tells it which fare was tapped, never what it costs.
+        fareClass: selectedFlight.fareClass ?? 'eco',
+        ancillaries,
         consents,
       });
       const bookingId = data.booking.id;

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
-import { Icon, Mascot } from '@/shared/components/ui';
+import { Icon } from '@/shared/components/ui';
 import { ApiRequestError } from '@/shared/services/apiClient';
 
 interface Message {
@@ -30,6 +30,13 @@ const QUICK_REPLIES = [
   { icon: 'ArrowPathIcon', label: 'Đổi ngày bay' },
   { icon: 'ReceiptRefundIcon', label: 'Hoàn / hủy vé' },
 ];
+
+/** localStorage key holding the dragged launcher position, in viewport pixels. */
+const LAUNCHER_POS_KEY = 'vj-chat-launcher-pos';
+/** Fallback launcher box size (px) used before the element has been measured. */
+const LAUNCHER_SIZE = 80;
+/** Gap kept between the launcher and every viewport edge, so it stays grabbable. */
+const MARGIN = 8;
 
 // ─── API ──────────────────────────────────────────────────────────────────────
 
@@ -66,6 +73,117 @@ export default function UserChat() {
   const lastMessageCountRef = useRef(0);
   /** Set once a poll returns 401 so the rest of the cycle skips silently. */
   const authErrorRef = useRef(false);
+
+  // ─── Draggable launcher ─────────────────────────────────────────────────────
+  // The launcher sits bottom-right by default but can be dragged anywhere, so
+  // it never covers a control the traveller needs (on the results page it used
+  // to land on the sticky totals bar). The drop position is remembered per
+  // browser; a stored position is discarded when the viewport shrinks so a
+  // launcher parked on a wide screen cannot end up off-screen on a phone.
+  const [launcherPos, setLauncherPos] = useState<{ x: number; y: number } | null>(null);
+  const launcherRef = useRef<HTMLButtonElement>(null);
+  const dragRef = useRef<{
+    pointerId: number;
+    offsetX: number;
+    offsetY: number;
+    moved: boolean;
+  } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  /** Swallows the click that ends a drag, so a drag never opens the panel. */
+  const suppressClickRef = useRef(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setLauncherPos(null);
+  }, [isOpen]);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(LAUNCHER_POS_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw) as { x: number; y: number };
+      if (typeof saved?.x !== 'number' || typeof saved?.y !== 'number') return;
+      // Off-screen after a viewport change? Fall back to the default corner.
+      if (saved.x > window.innerWidth - MARGIN || saved.y > window.innerHeight - MARGIN) return;
+      if (saved.x < 0 || saved.y < 0) return;
+      setLauncherPos(saved);
+    } catch {
+      /* corrupt value — keep the default position */
+    }
+  }, []);
+
+  const persistLauncherPos = (pos: { x: number; y: number } | null) => {
+    try {
+      if (pos) window.localStorage.setItem(LAUNCHER_POS_KEY, JSON.stringify(pos));
+      else window.localStorage.removeItem(LAUNCHER_POS_KEY);
+    } catch {
+      /* private mode or quota — the position just will not persist */
+    }
+  };
+
+  // The move/up listeners live on `window` for the duration of a drag rather
+  // than on the button: repositioning the launcher under the pointer makes the
+  // pointer leave the element, and a handler bound to the button would then
+  // stop firing after the first step.
+  const handleLauncherPointerDown = (event: React.PointerEvent<HTMLButtonElement>) => {
+    if (isOpen) return;
+    const el = launcherRef.current;
+    const rect = el?.getBoundingClientRect();
+    if (!el || !rect) return;
+    event.preventDefault();
+    dragRef.current = {
+      pointerId: event.pointerId,
+      offsetX: event.clientX - rect.left,
+      offsetY: event.clientY - rect.top,
+      moved: false,
+    };
+    setIsDragging(true);
+
+    const onMove = (moveEvent: PointerEvent) => {
+      const drag = dragRef.current;
+      if (!drag || drag.pointerId !== moveEvent.pointerId) return;
+      drag.moved = true;
+      const size = launcherRef.current?.offsetWidth ?? LAUNCHER_SIZE;
+      const x = Math.min(
+        Math.max(moveEvent.clientX - drag.offsetX, MARGIN),
+        window.innerWidth - size - MARGIN
+      );
+      const y = Math.min(
+        Math.max(moveEvent.clientY - drag.offsetY, MARGIN),
+        window.innerHeight - size - MARGIN
+      );
+      setLauncherPos({ x, y });
+    };
+
+    const onUp = (upEvent: PointerEvent) => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+      const drag = dragRef.current;
+      if (!drag || drag.pointerId !== upEvent.pointerId) return;
+      dragRef.current = null;
+      setIsDragging(false);
+      if (!drag.moved) return;
+      // A drag must not also count as the tap that opens the panel.
+      suppressClickRef.current = true;
+      setLauncherPos((current) => {
+        persistLauncherPos(current);
+        return current;
+      });
+    };
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+  };
+
+  const handleLauncherClick = () => {
+    if (suppressClickRef.current) {
+      suppressClickRef.current = false;
+      return;
+    }
+    setIsOpen((open) => !open);
+  };
 
   /** Cancel both poll timers (unmount, logout, or auth failure). */
   const stopPolling = useCallback(() => {
@@ -334,14 +452,32 @@ export default function UserChat() {
     <>
       {/* Launcher — local Vietjet Air support logo with its "Xin chào!" bubble.
           While the panel is open on mobile it steps aside, because the panel
-          header owns the close button there. */}
+          header owns the close button there. It can be dragged anywhere on the
+          screen: once the user has moved it, `launcherPos` pins it to that point
+          and the default corner classes drop away. A drag that never moved is
+          treated as a tap, so clicking still opens the panel. */}
       <button
+        ref={launcherRef}
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleLauncherClick}
+        onPointerDown={handleLauncherPointerDown}
         aria-label={isOpen ? 'Đóng chat hỗ trợ' : 'Mở chat hỗ trợ'}
         aria-expanded={isOpen}
-        className={`fixed bottom-0 right-2 z-50 items-end transition-transform duration-200 hover:-translate-y-0.5 active:scale-95 sm:right-6 touch-manipulation ${
-          isOpen ? 'hidden sm:flex' : 'flex'
+        style={
+          launcherPos
+            ? { left: launcherPos.x, top: launcherPos.y, right: 'auto', bottom: 'auto' }
+            : undefined
+        }
+        className={`fixed z-50 items-end touch-manipulation ${
+          isDragging ? 'cursor-grabbing' : 'cursor-grab'
+        } ${
+          launcherPos
+            ? isOpen
+              ? 'hidden sm:flex'
+              : 'flex'
+            : isOpen
+              ? 'bottom-[calc(128px+env(safe-area-inset-bottom))] right-2 hidden sm:flex sm:bottom-0 sm:right-6'
+              : 'bottom-[calc(128px+env(safe-area-inset-bottom))] right-2 flex transition-transform duration-200 hover:-translate-y-0.5 active:scale-95 sm:bottom-0 sm:right-6'
         }`}
       >
         {isOpen ? (
@@ -371,7 +507,7 @@ export default function UserChat() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed inset-x-0 bottom-0 z-50 flex h-[min(680px,100dvh)] flex-col overflow-hidden rounded-t-[28px] border border-white/60 bg-white shadow-2xl sm:inset-x-auto sm:bottom-24 sm:right-6 sm:h-[640px] sm:w-[400px] sm:rounded-[28px]">
+        <div className="fixed inset-x-0 bottom-[calc(128px+env(safe-area-inset-bottom))] z-50 flex h-[min(540px,calc(100dvh-128px))] flex-col overflow-hidden rounded-t-[28px] border border-white/60 bg-white shadow-2xl sm:inset-x-auto sm:bottom-24 sm:right-6 sm:h-[640px] sm:w-[400px] sm:rounded-[28px]">
           <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-accent via-primary to-accent" />
           {/* Header */}
           <div className="relative flex flex-shrink-0 items-center gap-3 overflow-hidden bg-gradient-vj px-4 py-4 text-white sm:px-5">
@@ -425,7 +561,6 @@ export default function UserChat() {
               </div>
             ) : isGuest ? (
               <div className="flex min-h-full flex-col items-center justify-center gap-3 text-center">
-                <Mascot greeting={null} className="h-28" />
                 <div>
                   <p className="text-navy font-bold text-sm">Xin chào! 👋</p>
                   <p className="text-gray-500 text-xs mt-1 leading-relaxed">
@@ -441,7 +576,6 @@ export default function UserChat() {
               </div>
             ) : messages.length === 0 ? (
               <div className="flex min-h-full flex-col items-center justify-center gap-4 text-center">
-                <Mascot greeting={null} className="h-28" />
                 <div>
                   <p className="text-navy font-bold text-sm">
                     Xin chào{user?.fullName ? ` ${user.fullName}` : ''}! 👋

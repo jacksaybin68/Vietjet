@@ -12,8 +12,6 @@ vi.mock('@/contexts/AuthContext', async (importOriginal) => ({
 
 import SignUpLoginPage from '@/app/dang-nhap/page';
 
-const DEMO_OTP = '123456';
-
 type Fields = ReturnType<typeof queryRegisterFields>;
 
 function queryRegisterFields() {
@@ -25,7 +23,6 @@ function queryRegisterFields() {
     phone: q<HTMLInputElement>('#phone')!,
     // Ô mật khẩu của tab đăng ký chưa có id, nên lấy theo type.
     password: q<HTMLInputElement>('input[type="password"]')!,
-    otp: q<HTMLInputElement>('#otp'),
   };
 }
 
@@ -107,14 +104,6 @@ describe('Sign-up — trường Ngày / Tháng / Năm sinh', () => {
     fireEvent.change(fields.year, { target: { value: '1990' } });
 
     fireEvent.click(screen.getByRole('button', { name: /Tiếp tục/i }));
-    // Bước OTP demo chờ 800ms trước khi chuyển màn hình.
-    await waitFor(() => expect(screen.getByText(/Mã OTP đã được gửi/)).toBeInTheDocument(), {
-      timeout: 5000,
-    });
-
-    const otp = document.querySelector('#otp') as HTMLInputElement;
-    fireEvent.change(otp, { target: { value: DEMO_OTP } });
-    fireEvent.click(screen.getByRole('button', { name: /Xác nhận đăng ký/i }));
 
     await waitFor(() =>
       expect(auth.signUp).toHaveBeenCalledWith(

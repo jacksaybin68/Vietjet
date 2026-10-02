@@ -18,6 +18,7 @@ import {
   type AncillaryOption,
   type AncillaryId,
 } from '@/features/bookings/pricing';
+import { canDeselectSeat, canSelectSeat } from '@/features/bookings/seat-adjacency';
 import BookingBottomBar from './BookingBottomBar';
 
 interface Props {
@@ -49,11 +50,24 @@ interface SeatInfo {
 
 interface TooltipState {
   seatId: string;
+  /** Viewport coordinates of the hovered seat's centre. */
   x: number;
   y: number;
 }
 
 const HOLD_TIMEOUT_SECONDS = 10 * 60; // 10 minutes
+
+// The map is 3+3 with a centre aisle. Row numbers are rendered on both sides so
+// a passenger can read their seat without tracing back across the cabin. These
+// must stay ahead of generateSeats(), which runs at module load.
+const COLS = ['A', 'B', 'C', 'D', 'E', 'F'] as const;
+const TOTAL_ROWS = 30;
+const AISLE_AFTER = 3;
+/** Rows 1-3 are the business cabin (mirrors generateSeats). */
+const BUSINESS_ROWS = 3;
+/** Rows beside the over-wing exits — more legroom, so they carry a tag. */
+const EXIT_ROWS = new Set([10, 11]);
+const EXIT_ROWS_MIN = Math.min(...EXIT_ROWS);
 
 /** Screen-reader labels for the seat grid (the seat text is rendered via CSS). */
 const SEAT_STATUS_LABELS: Record<SeatInfo['status'], string> = {
@@ -65,8 +79,8 @@ const SEAT_STATUS_LABELS: Record<SeatInfo['status'], string> = {
 
 function generateSeats(): Record<string, SeatInfo> {
   const seats: Record<string, SeatInfo> = {};
-  const rows = Array.from({ length: 30 }, (_, i) => i + 1);
-  const cols = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const rows = Array.from({ length: TOTAL_ROWS }, (_, i) => i + 1);
+  const cols = COLS;
   const occupied = [
     '2A',
     '2B',
@@ -135,7 +149,7 @@ const SEATS = generateSeats();
 
 export { SEATS, generateSeats };
 
-// Heatmap color based on occupancy
+/** Heatmap color based on occupancy */
 function getHeatmapClass(
   seatId: string,
   status: SeatInfo['status'],
@@ -145,28 +159,77 @@ function getHeatmapClass(
 ): string {
   if (isSelected) return 'seat-selected';
   if (status === 'occupied') return 'seat-occupied';
-  if (status === 'business') return 'seat-business hover:opacity-80';
+  if (status === 'business') return 'seat-business';
 
   if (!showHeatmap) {
-    if (status === 'hot')
-      return 'bg-[rgb(var(--orange-rgb))]/15 border-2 border-[var(--orange)] text-[var(--vj-text)] hover:bg-[rgb(var(--orange-rgb))]/25';
-    return 'seat-available hover:border-primary hover:bg-primary-50';
+    if (status === 'hot') return 'seat-hot';
+    return 'seat-available hover:border-primary hover:text-primary';
   }
 
-  // Heatmap mode: same 4-step ramp as the legend below, built from theme
-  // tokens so dark mode and the palette stay consistent.
+  // Heatmap mode: one class per level (see the .seat-heat-* block in
+  // tailwind.css for why these cannot be bg-* utilities).
   switch (occupancyLevel) {
     case 'critical':
-      return 'bg-[rgb(var(--primary-rgb))]/25 border-2 border-[var(--primary)] text-[var(--vj-text)] cursor-not-allowed opacity-70';
+      return 'seat-heat-critical';
     case 'high':
-      return 'bg-[rgb(var(--orange-rgb))]/15 border-2 border-[var(--orange)] text-[var(--vj-text)] hover:bg-[rgb(var(--orange-rgb))]/25';
+      return 'seat-heat-high';
     case 'medium':
-      return 'bg-[rgb(var(--accent-rgb))]/25 border-2 border-[var(--accent-dark)] text-[var(--vj-text)] hover:bg-[rgb(var(--accent-rgb))]/40';
+      return 'seat-heat-medium';
     case 'low':
-      return 'bg-[rgb(var(--vj-green-rgb))]/15 border-2 border-[var(--vj-green)] text-[var(--vj-text)] hover:bg-[rgb(var(--vj-green-rgb))]/25';
+      return 'seat-heat-low';
     default:
-      return 'seat-available hover:border-primary hover:bg-primary-50';
+      return 'seat-available hover:border-primary hover:text-primary';
   }
+}
+
+/** Heatmap ramp, low → high. Shared by the grid and the legend ramp below it. */
+const HEATMAP_RAMP = [
+  'seat-heat-low',
+  'seat-heat-medium',
+  'seat-heat-high',
+  'seat-heat-critical',
+] as const;
+
+/** Compact "45k" style price for the legend chips. */
+function formatSeatPrice(price: number): string {
+  return `${Math.round(price / 1000).toLocaleString('vi-VN')}k₫`;
+}
+
+/**
+ * Legend entries. `swatch` reuses the exact seat classes the grid applies, so a
+ * chip can never drift from the seat it describes.
+ */
+const SEAT_LEGEND: { label: string; note: string; swatch: string }[] = [
+  {
+    label: 'Phổ thông',
+    note: `${formatSeatPrice(SEAT_TIER_PRICES.available - 25000)}–${formatSeatPrice(SEAT_TIER_PRICES.available)}`,
+    swatch: 'seat seat-available',
+  },
+  {
+    label: 'Thương gia',
+    note: `${formatSeatPrice(SEAT_TIER_PRICES.business)}+`,
+    swatch: 'seat seat-business',
+  },
+  {
+    label: 'Ưa chuộng',
+    note: formatSeatPrice(SEAT_TIER_PRICES.hot),
+    swatch: 'seat seat-hot',
+  },
+  { label: 'Đã chọn', note: 'Của bạn', swatch: 'seat seat-selected' },
+  { label: 'Đã đặt', note: 'Không có', swatch: 'seat seat-occupied' },
+];
+
+/** Dashed rule with a caption, used to separate cabins and mark the exits. */
+function CabinDivider({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-2 py-1.5" role="presentation">
+      <span className="h-px flex-1 bg-[var(--border)]" />
+      <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-[var(--foreground-subtle)] font-koho whitespace-nowrap">
+        {label}
+      </span>
+      <span className="h-px flex-1 bg-[var(--border)]" />
+    </div>
+  );
 }
 
 function formatTime(seconds: number): string {
@@ -197,6 +260,8 @@ export default function SeatSelectionStep({
   // seat array the API receives is therefore shorter than the passenger list.
   const seatedPassengers = passengers.filter((passenger) => isSeated(passenger.type));
   const passengerCount = seatedPassengers.length;
+  const allSeatsPicked = selected.length >= passengerCount;
+  const rows = React.useMemo(() => Array.from({ length: TOTAL_ROWS }, (_, i) => i + 1), []);
 
   // Simulate seat data loading
   useEffect(() => {
@@ -239,36 +304,51 @@ export default function SeatSelectionStep({
     };
   }, [holdTimer]);
 
+  // A child must sit beside an adult; an infant is absent here because it
+  // rides on a lap and is filtered out of `seatedPassengers`.
+  const paxCounts = React.useMemo(() => {
+    const counts = countPassengerTypes(passengers);
+    return { adult: counts.adult, child: counts.child };
+  }, [passengers]);
+
   const toggleSeat = useCallback(
     (seatId: string) => {
       const info = SEATS[seatId];
       if (info.status === 'occupied') return;
       if (selected.includes(seatId)) {
-        setSelected((prev) => prev.filter((s) => s !== seatId));
-      } else if (selected.length < passengerCount) {
+        setSelected((prev) =>
+          canDeselectSeat({ seatId, selected: prev, paxCounts })
+            ? prev.filter((s) => s !== seatId)
+            : prev
+        );
+        return;
+      }
+      if (canSelectSeat({ seatId, selected, paxCounts })) {
         setSelected((prev) => [...prev, seatId]);
       }
     },
-    [selected, passengerCount]
+    [selected, paxCounts]
   );
 
-  const handleMouseEnter = useCallback((e: React.MouseEvent<HTMLButtonElement>, seatId: string) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const containerRect = e.currentTarget.closest('.seat-map-container')?.getBoundingClientRect();
-    if (!containerRect) return;
+  const handleSeatEnter = useCallback((target: HTMLElement, seatId: string) => {
+    const rect = target.getBoundingClientRect();
     setTooltip({
       seatId,
-      x: rect.left - containerRect.left + rect.width / 2,
-      y: rect.top - containerRect.top,
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
     });
   }, []);
+
+  const handleMouseEnter = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>, seatId: string) => {
+      handleSeatEnter(e.currentTarget, seatId);
+    },
+    [handleSeatEnter]
+  );
 
   const handleMouseLeave = useCallback(() => {
     setTooltip(null);
   }, []);
-
-  const rows = Array.from({ length: 30 }, (_, i) => i + 1);
-  const cols = ['A', 'B', 'C', 'D', 'E', 'F'];
 
   const timerUrgent = timeLeft <= 120; // last 2 minutes
   const timerWarning = timeLeft <= 300; // last 5 minutes
@@ -306,7 +386,7 @@ export default function SeatSelectionStep({
       ) : (
         <>
           {/* pb: keep the last row clear of the sticky bottom totals bar. */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 pb-16 sm:pb-14">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 pb-32 lg:pb-16 lg:sm:pb-14">
             {/* Seat Map */}
             <div className="lg:col-span-2 space-y-3 sm:space-y-4">
               {/* Hold Timeout Counter - responsive */}
@@ -429,243 +509,324 @@ export default function SeatSelectionStep({
                       Bản đồ nhiệt
                     </button>
                   </div>
-                  <p className="text-[11px] sm:text-sm text-[var(--foreground-muted)] mb-4 sm:mb-5">
-                    Chọn {passengerCount} chỗ ngồi ({selected.length}/{passengerCount} đã chọn)
-                  </p>
-
-                  {/* Seat Type Legend - responsive */}
-                  <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-2.5 sm:p-3 mb-4 sm:mb-5">
-                    <div className="text-[10px] sm:text-xs font-bold text-[var(--foreground)] uppercase tracking-wide mb-1.5 sm:mb-2 font-koho">
-                      Chú thích loại ghế
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-available border-2 border-[var(--border)] bg-[var(--surface)] flex-shrink-0" />
-                        <div>
-                          <div className="font-semibold text-[var(--foreground)]">Phổ thông</div>
-                          <div className="text-[var(--foreground-subtle)]">45k–70k₫</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-business flex-shrink-0" />
-                        <div>
-                          <div className="font-semibold text-[var(--foreground)]">Thương gia</div>
-                          <div className="text-[var(--foreground-subtle)]">350k₫+</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-[rgb(var(--orange-rgb))]/15 border-2 border-[var(--orange)] flex-shrink-0" />
-                        <div>
-                          <div className="font-semibold text-[var(--foreground)]">Ưa chuộng</div>
-                          <div className="text-[var(--foreground-subtle)]">Đặt nhiều</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-selected flex-shrink-0" />
-                        <div>
-                          <div className="font-semibold text-[var(--foreground)]">Đã chọn</div>
-                          <div className="text-[var(--foreground-subtle)]">Của bạn</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded seat seat-occupied flex-shrink-0" />
-                        <div>
-                          <div className="font-semibold text-[var(--foreground)]">Đã đặt</div>
-                          <div className="text-[var(--foreground-subtle)]">Không có</div>
-                        </div>
-                      </div>
-                      {showHeatmap && (
-                        <div className="flex items-center gap-1.5 sm:gap-2">
-                          <div className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-[rgb(var(--vj-green-rgb))]/15 border-2 border-[var(--vj-green)] flex-shrink-0" />
-                          <div>
-                            <div className="font-semibold text-[var(--foreground)]">Ít người</div>
-                            <div className="text-[var(--foreground-subtle)]">Còn nhiều</div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Heatmap scale - responsive */}
-                    {showHeatmap && (
-                      <div className="mt-2.5 sm:mt-3 pt-2.5 sm:pt-3 border-t border-[var(--border)] ">
-                        <div className="text-[10px] sm:text-xs font-bold text-[var(--foreground)] mb-1 sm:mb-1.5 font-koho">
-                          Mức độ lấp đầy
-                        </div>
-                        <div className="flex items-center gap-0.5 sm:gap-1">
-                          <span className="text-[8px] sm:text-xs text-[var(--foreground-subtle)]">
-                            Thấp
+                  {/* Progress — vietjetair.com states the remaining count in words
+                      and shows the fill as a bar, not as a "(1/1)" parenthetical. */}
+                  <div className="flex items-center gap-2.5 sm:gap-3 mb-3 sm:mb-4">
+                    <div className="flex-1">
+                      <p className="text-[11px] sm:text-sm text-[var(--foreground-muted)]">
+                        {allSeatsPicked ? (
+                          <span className="font-semibold text-primary">
+                            Đã chọn xong chỗ ngồi cho {passengerCount} hành khách
                           </span>
-                          <div className="flex gap-0.25 sm:gap-0.5 flex-1">
-                            <div className="h-2 sm:h-3 flex-1 rounded-l bg-[rgb(var(--vj-green-rgb))]/40" />
-                            <div className="h-2 sm:h-3 flex-1 bg-[rgb(var(--accent-rgb))]/50" />
-                            <div className="h-2 sm:h-3 flex-1 bg-[rgb(var(--orange-rgb))]/40" />
-                            <div className="h-2 sm:h-3 flex-1 rounded-r bg-[rgb(var(--primary-rgb))]/40" />
+                        ) : (
+                          <>
+                            Chọn{' '}
+                            <span className="font-semibold text-[var(--foreground)]">
+                              {passengerCount - selected.length}
+                            </span>{' '}
+                            chỗ ngồi còn lại
+                          </>
+                        )}
+                      </p>
+                      <div
+                        className="mt-1.5 h-1.5 rounded-full bg-[var(--surface-3)] overflow-hidden"
+                        role="progressbar"
+                        aria-valuemin={0}
+                        aria-valuemax={passengerCount}
+                        aria-valuenow={selected.length}
+                        aria-label="Tiến độ chọn chỗ ngồi"
+                      >
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-primary to-primary-dark transition-all duration-300"
+                          style={{
+                            width: `${
+                              passengerCount > 0 ? (selected.length / passengerCount) * 100 : 0
+                            }%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <span
+                      className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] sm:text-xs font-bold font-koho tabular-nums border ${
+                        allSeatsPicked
+                          ? 'bg-[rgb(var(--primary-rgb))]/10 text-primary border-[rgb(var(--primary-rgb))]/30'
+                          : 'bg-[var(--surface-2)] text-[var(--foreground-muted)] border-[var(--border)]'
+                      }`}
+                    >
+                      {selected.length}/{passengerCount}
+                    </span>
+                  </div>
+
+                  {/* Aircraft body */}
+                  <div className="seat-fuselage px-3 sm:px-5 pt-3 sm:pt-4 pb-4 sm:pb-5">
+                    {/* Nose */}
+                    <div className="flex flex-col items-center gap-1.5 mb-3 sm:mb-4">
+                      <svg
+                        viewBox="0 0 120 22"
+                        className="w-24 sm:w-28 h-4 sm:h-5"
+                        aria-hidden="true"
+                        focusable="false"
+                      >
+                        <path
+                          d="M60 2 L118 20 H2 Z"
+                          fill="rgb(var(--primary-rgb) / 0.08)"
+                          stroke="rgb(var(--primary-rgb) / 0.35)"
+                          strokeWidth="1.5"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--foreground-subtle)] font-koho">
+                        Mũi máy bay
+                      </span>
+                    </div>
+
+                    {/* Seat grid + tooltip. Rows are capped in height so the sidebar
+                      summary stays reachable on a 30-row cabin. */}
+                    <div className="overflow-x-auto no-scrollbar">
+                      <div className="seat-map-container relative mx-auto w-full min-w-[340px] sm:min-w-[330px] max-w-[400px]">
+                        {/* Column letters, aligned to the grid via the same
+                          spacer widths the rows use for the aisle. */}
+                        <div className="flex items-center mb-2">
+                          <span className="w-8 sm:w-7" />
+                          {COLS.map((col, i) => (
+                            <React.Fragment key={col}>
+                              {i === AISLE_AFTER && <span className="w-8 sm:w-8" />}
+                              <span className="w-8 sm:w-8 text-center text-[10px] sm:text-[11px] font-bold tracking-wide text-[var(--foreground-muted)]">
+                                {col}
+                              </span>
+                            </React.Fragment>
+                          ))}
+                          <span className="w-8 sm:w-7" />
+                        </div>
+
+                        {/* Rows */}
+                        <div
+                          className="space-y-1.5 max-h-[360px] sm:max-h-[430px] overflow-y-auto pr-1.5"
+                          onScroll={handleMouseLeave}
+                        >
+                          {rows.map((row) => (
+                            <React.Fragment key={row}>
+                              {row === 1 && <CabinDivider label="Hạng Thương gia" />}
+                              {row === BUSINESS_ROWS + 1 && <CabinDivider label="Hạng Phổ thông" />}
+                              {row === EXIT_ROWS_MIN && <CabinDivider label="Lối cứu thư" />}
+                              <div className="flex items-center">
+                                <span className="w-8 sm:w-7 text-[10px] sm:text-[11px] text-[var(--foreground-subtle)] font-medium tabular-nums text-center">
+                                  {row}
+                                </span>
+                                {COLS.map((col, i) => {
+                                  const seatId = `${row}${col}`;
+                                  const info = SEATS[seatId];
+                                  const isSelected = selected.includes(seatId);
+                                  return (
+                                    <React.Fragment key={col}>
+                                      {i === AISLE_AFTER && (
+                                        <span className="w-8 sm:w-8 seat-aisle self-stretch flex items-center justify-center">
+                                          {EXIT_ROWS.has(row) && (
+                                            <span className="seat-exit-tag">EXIT</span>
+                                          )}
+                                        </span>
+                                      )}
+                                      <button
+                                        type="button"
+                                        onClick={() => toggleSeat(seatId)}
+                                        onMouseEnter={(e) => handleMouseEnter(e, seatId)}
+                                        onMouseLeave={handleMouseLeave}
+                                        onFocus={(e) => handleSeatEnter(e.currentTarget, seatId)}
+                                        onBlur={handleMouseLeave}
+                                        disabled={info.status === 'occupied'}
+                                        aria-pressed={isSelected}
+                                        aria-label={`Ghế ${seatId}, ${SEAT_STATUS_LABELS[info.status]}${isSelected ? ', đã chọn' : ''}, ${info.price.toLocaleString('vi-VN')}₫`}
+                                        className={`w-8 h-8 sm:w-8 sm:h-8 rounded-[3px] text-[10px] sm:text-[11px] font-bold seat flex-shrink-0 ${getHeatmapClass(
+                                          seatId,
+                                          info.status,
+                                          info.occupancyLevel,
+                                          isSelected,
+                                          showHeatmap
+                                        )}`}
+                                      >
+                                        {isSelected ? '✓' : row}
+                                      </button>
+                                    </React.Fragment>
+                                  );
+                                })}
+                                <span className="w-8 sm:w-7 text-[10px] sm:text-[11px] text-[var(--foreground-subtle)] font-medium tabular-nums text-center">
+                                  {row}
+                                </span>
+                              </div>
+                            </React.Fragment>
+                          ))}
+                        </div>
+
+                        {/* Tooltip. Anchored to the viewport rather than the scroll
+                          container so it stays beside the seat while the cabin
+                          scrolls, and flipped below when there is no room above. */}
+                        {tooltip &&
+                          tooltipSeat &&
+                          (() => {
+                            const TIP_W = 176;
+                            const TIP_H = 150;
+                            const flipBelow = tooltip.y - TIP_H < 72;
+                            return (
+                              <div
+                                ref={tooltipRef}
+                                role="tooltip"
+                                className="fixed z-50 pointer-events-none"
+                                style={{
+                                  left: Math.min(
+                                    Math.max(tooltip.x - TIP_W / 2, 8),
+                                    window.innerWidth - TIP_W - 8
+                                  ),
+                                  top: flipBelow ? tooltip.y + 22 : tooltip.y - TIP_H,
+                                }}
+                              >
+                                <div className="bg-[var(--vj-navy)] text-white rounded-xl shadow-xl p-2.5 sm:p-3 w-44 text-[10px] sm:text-xs">
+                                  <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                                    <span className="font-black text-sm sm:text-base font-koho">
+                                      Ghế {tooltip.seatId}
+                                    </span>
+                                    <span
+                                      className={`px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold ${
+                                        tooltipSeat.status === 'business'
+                                          ? 'bg-accent text-[var(--vj-navy)]'
+                                          : tooltipSeat.status === 'hot'
+                                            ? 'bg-[var(--orange)] text-white'
+                                            : tooltipSeat.status === 'occupied'
+                                              ? 'bg-[var(--foreground-muted)] text-white'
+                                              : 'bg-primary text-white'
+                                      }`}
+                                    >
+                                      {tooltipSeat.status === 'business'
+                                        ? 'BIZ'
+                                        : tooltipSeat.status === 'hot'
+                                          ? 'HOT'
+                                          : tooltipSeat.status === 'occupied'
+                                            ? 'ĐẶT'
+                                            : 'ECO'}
+                                    </span>
+                                  </div>
+                                  {tooltipSeat.status !== 'occupied' && (
+                                    <>
+                                      <div className="space-y-0.5 sm:space-y-1 border-t border-white/10 pt-1.5 sm:pt-2">
+                                        <div className="flex justify-between">
+                                          <span className="text-white/60">Giá gốc</span>
+                                          <span>
+                                            {tooltipSeat.basePrice.toLocaleString('vi-VN')}₫
+                                          </span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                          <span className="text-white/60">
+                                            Thuế ({Math.round(SEAT_TAX_RATE * 100)}%)
+                                          </span>
+                                          <span>{tooltipSeat.tax.toLocaleString('vi-VN')}₫</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                          <span className="text-white/60">
+                                            Phí dịch vụ ({Math.round(SEAT_SERVICE_FEE_RATE * 100)}%)
+                                          </span>
+                                          <span>{tooltipSeat.fee.toLocaleString('vi-VN')}₫</span>
+                                        </div>
+                                        <div className="flex justify-between font-bold border-t border-white/10 pt-0.5 sm:pt-1 text-accent">
+                                          <span>Tổng</span>
+                                          <span>{tooltipSeat.price.toLocaleString('vi-VN')}₫</span>
+                                        </div>
+                                      </div>
+                                      <div className="mt-1.5 sm:mt-2 pt-1.5 sm:pt-2 border-t border-white/10">
+                                        <div className="flex items-center gap-0.5 sm:gap-1">
+                                          <div
+                                            className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
+                                              tooltipSeat.occupancyLevel === 'low'
+                                                ? 'bg-[var(--vj-green)]'
+                                                : tooltipSeat.occupancyLevel === 'medium'
+                                                  ? 'bg-accent'
+                                                  : tooltipSeat.occupancyLevel === 'high'
+                                                    ? 'bg-[var(--orange)]'
+                                                    : 'bg-primary'
+                                            }`}
+                                          />
+                                          <span className="text-white/60">
+                                            {tooltipSeat.occupancyLevel === 'low'
+                                              ? 'Còn nhiều chỗ'
+                                              : tooltipSeat.occupancyLevel === 'medium'
+                                                ? 'Đang lấp đầy'
+                                                : tooltipSeat.occupancyLevel === 'high'
+                                                  ? 'Ít chỗ trống'
+                                                  : 'Gần hết'}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </>
+                                  )}
+                                  {tooltipSeat.status === 'occupied' && (
+                                    <div className="text-white/50 text-center py-0.5 sm:py-1">
+                                      Ghế đã được đặt
+                                    </div>
+                                  )}
+                                  {/* Arrow — points back at the seat, so it flips with
+                                the tooltip body. */}
+                                  <div
+                                    className={`absolute left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[var(--vj-navy)] rotate-45 ${
+                                      flipBelow ? 'top-[-5px]' : 'bottom-[-5px]'
+                                    }`}
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })()}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Legend — a single compact row under the map, the way
+                      vietjetair.com presents it. Each chip reuses the grid's own
+                      seat class, so the two can never disagree. */}
+                  <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-[var(--border)]">
+                    <div className="flex flex-wrap items-center gap-x-3.5 sm:gap-x-5 gap-y-2">
+                      {SEAT_LEGEND.map((item) => (
+                        <div key={item.label} className="flex items-center gap-1.5 sm:gap-2">
+                          <span
+                            className={`w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-[3px] flex-shrink-0 ${item.swatch}`}
+                            aria-hidden="true"
+                          />
+                          <span className="leading-tight">
+                            <span className="block text-[10px] sm:text-xs font-semibold text-[var(--foreground)]">
+                              {item.label}
+                            </span>
+                            <span className="block text-[9px] sm:text-[10px] text-[var(--foreground-subtle)] tabular-nums">
+                              {item.note}
+                            </span>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Heatmap ramp, only while the overlay is on. The swatches
+                        reuse the seat classes so the ramp cannot drift. */}
+                    {showHeatmap && (
+                      <div className="mt-3 pt-3 border-t border-dashed border-[var(--border)]">
+                        <div className="flex items-center gap-2 text-[10px] sm:text-xs text-[var(--foreground-muted)]">
+                          <span>Mức độ lấp đầy</span>
+                          <div className="flex flex-1 items-center gap-1.5" aria-hidden="true">
+                            {HEATMAP_RAMP.map((level, i) => (
+                              <span
+                                key={level}
+                                className={`h-2.5 flex-1 seat ${level} ${
+                                  i === 0 ? 'rounded-l-sm' : ''
+                                } ${i === HEATMAP_RAMP.length - 1 ? 'rounded-r-sm' : ''}`}
+                              />
+                            ))}
                           </div>
-                          <span className="text-[8px] sm:text-xs text-[var(--foreground-subtle)]">
-                            Cao
+                          <span className="flex items-center gap-1">
+                            <span className="text-[var(--foreground-subtle)]">Thấp</span>
+                            <Icon
+                              name="ArrowRightIcon"
+                              size={10}
+                              className="text-[var(--foreground-subtle)]"
+                            />
+                            <span className="text-[var(--foreground-subtle)]">Cao</span>
                           </span>
                         </div>
                       </div>
                     )}
-                  </div>
-
-                  {/* Airplane nose - responsive */}
-                  <div className="text-center mb-3 sm:mb-4">
-                    <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-primary/5 text-[var(--foreground)] text-[10px] sm:text-xs px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-primary/10 font-semibold font-koho">
-                      <Icon name="PaperAirplaneIcon" size={12} className="text-primary" />
-                      Mũi máy bay
-                    </div>
-                  </div>
-
-                  {/* Seat map with tooltip - responsive */}
-                  <div className="overflow-x-auto">
-                    <div className="min-w-[300px] sm:min-w-[340px] seat-map-container relative">
-                      {/* Col headers */}
-                      <div className="flex items-center mb-1.5 sm:mb-2 pl-7 sm:pl-8">
-                        {cols.map((col, i) => (
-                          <React.Fragment key={col}>
-                            {i === 3 && <div className="w-5 sm:w-6" />}
-                            <div className="w-7 sm:w-8 text-center text-[10px] sm:text-xs font-bold text-[var(--foreground)]">
-                              {col}
-                            </div>
-                          </React.Fragment>
-                        ))}
-                      </div>
-
-                      {/* Rows - responsive */}
-                      <div className="space-y-1 max-h-[400px] sm:max-h-[480px] overflow-y-auto pr-1">
-                        {rows.map((row) => (
-                          <div key={row} className="flex items-center gap-0">
-                            <span className="w-6 sm:w-7 text-[10px] sm:text-xs text-[var(--foreground-subtle)] font-medium text-right mr-0.5 sm:mr-1">
-                              {row}
-                            </span>
-                            {cols.map((col, i) => {
-                              const seatId = `${row}${col}`;
-                              const info = SEATS[seatId];
-                              const isSelected = selected.includes(seatId);
-                              return (
-                                <React.Fragment key={col}>
-                                  {i === 3 && <div className="w-4 sm:w-5" />}
-                                  <button
-                                    onClick={() => toggleSeat(seatId)}
-                                    onMouseEnter={(e) => handleMouseEnter(e, seatId)}
-                                    onMouseLeave={handleMouseLeave}
-                                    disabled={info.status === 'occupied'}
-                                    aria-pressed={isSelected}
-                                    aria-label={`Ghế ${seatId}, ${SEAT_STATUS_LABELS[info.status]}${isSelected ? ', đã chọn' : ''}, ${info.price.toLocaleString('vi-VN')}₫`}
-                                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded text-[10px] sm:text-xs font-bold seat mx-0.25 sm:mx-0.5 transition-all relative ${getHeatmapClass(
-                                      seatId,
-                                      info.status,
-                                      info.occupancyLevel,
-                                      isSelected,
-                                      showHeatmap
-                                    )}`}
-                                  >
-                                    {isSelected ? '✓' : info.status === 'hot' ? '🔥' : ''}
-                                  </button>
-                                </React.Fragment>
-                              );
-                            })}
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Tooltip - responsive */}
-                      {tooltip && tooltipSeat && (
-                        <div
-                          ref={tooltipRef}
-                          className="absolute z-50 pointer-events-none"
-                          style={{
-                            left: Math.min(tooltip.x - 70, 200),
-                            top: tooltip.y - 140,
-                          }}
-                        >
-                          <div className="bg-[var(--vj-navy)] text-white rounded-xl shadow-xl p-2.5 sm:p-3 w-40 sm:w-44 text-[10px] sm:text-xs">
-                            <div className="flex items-center justify-between mb-1.5 sm:mb-2">
-                              <span className="font-black text-sm sm:text-base font-koho">
-                                Ghế {tooltip.seatId}
-                              </span>
-                              <span
-                                className={`px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold ${
-                                  tooltipSeat.status === 'business'
-                                    ? 'bg-accent text-[var(--vj-navy)]'
-                                    : tooltipSeat.status === 'hot'
-                                      ? 'bg-[var(--orange)] text-white'
-                                      : tooltipSeat.status === 'occupied'
-                                        ? 'bg-[var(--foreground-muted)] text-white'
-                                        : 'bg-primary text-white'
-                                }`}
-                              >
-                                {tooltipSeat.status === 'business'
-                                  ? 'BIZ'
-                                  : tooltipSeat.status === 'hot'
-                                    ? 'HOT'
-                                    : tooltipSeat.status === 'occupied'
-                                      ? 'ĐẶT'
-                                      : 'ECO'}
-                              </span>
-                            </div>
-                            {tooltipSeat.status !== 'occupied' && (
-                              <>
-                                <div className="space-y-0.5 sm:space-y-1 border-t border-white/10 pt-1.5 sm:pt-2">
-                                  <div className="flex justify-between">
-                                    <span className="text-white/60">Giá gốc</span>
-                                    <span>{tooltipSeat.basePrice.toLocaleString('vi-VN')}₫</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span className="text-white/60">
-                                      Thuế ({Math.round(SEAT_TAX_RATE * 100)}%)
-                                    </span>
-                                    <span>{tooltipSeat.tax.toLocaleString('vi-VN')}₫</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span className="text-white/60">
-                                      Phí dịch vụ ({Math.round(SEAT_SERVICE_FEE_RATE * 100)}%)
-                                    </span>
-                                    <span>{tooltipSeat.fee.toLocaleString('vi-VN')}₫</span>
-                                  </div>
-                                  <div className="flex justify-between font-bold border-t border-white/10 pt-0.5 sm:pt-1 text-accent">
-                                    <span>Tổng</span>
-                                    <span>{tooltipSeat.price.toLocaleString('vi-VN')}₫</span>
-                                  </div>
-                                </div>
-                                <div className="mt-1.5 sm:mt-2 pt-1.5 sm:pt-2 border-t border-white/10">
-                                  <div className="flex items-center gap-0.5 sm:gap-1">
-                                    <div
-                                      className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
-                                        tooltipSeat.occupancyLevel === 'low'
-                                          ? 'bg-[var(--vj-green)]'
-                                          : tooltipSeat.occupancyLevel === 'medium'
-                                            ? 'bg-accent'
-                                            : tooltipSeat.occupancyLevel === 'high'
-                                              ? 'bg-[var(--orange)]'
-                                              : 'bg-primary'
-                                      }`}
-                                    />
-                                    <span className="text-white/60">
-                                      {tooltipSeat.occupancyLevel === 'low'
-                                        ? 'Còn nhiều chỗ'
-                                        : tooltipSeat.occupancyLevel === 'medium'
-                                          ? 'Đang lấp đầy'
-                                          : tooltipSeat.occupancyLevel === 'high'
-                                            ? 'Ít chỗ trống'
-                                            : 'Gần hết'}
-                                    </span>
-                                  </div>
-                                </div>
-                              </>
-                            )}
-                            {tooltipSeat.status === 'occupied' && (
-                              <div className="text-white/50 text-center py-0.5 sm:py-1">
-                                Ghế đã được đặt
-                              </div>
-                            )}
-                            {/* Arrow */}
-                            <div className="absolute bottom-[-5px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[var(--vj-navy)] rotate-45" />
-                          </div>
-                        </div>
-                      )}
-                    </div>
                   </div>
                 </div>
               </div>
@@ -718,7 +879,7 @@ export default function SeatSelectionStep({
                             </div>
                             <button
                               onClick={() => setSelected((prev) => prev.filter((s) => s !== seat))}
-                              className="text-[var(--foreground-subtle)] hover:text-primary transition-colors"
+                              className="grid h-8 w-8 place-items-center rounded-lg text-[var(--foreground-subtle)] hover:bg-[rgb(var(--primary-rgb))/5] hover:text-primary transition-colors"
                             >
                               <Icon name="XMarkIcon" size={14} />
                             </button>

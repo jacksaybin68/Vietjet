@@ -168,7 +168,10 @@ in transactions with compensating rollback on failure.
 | Email | Password | Role |
 |-------|----------|------|
 | `user@vietjetair.vn` | `user123` | User |
-| `admin@vietjetair.vn` | `admin123` | Admin |
+| `Admin` | `Deohieusao123@` | Admin |
+>
+> Reset the admin in place (same `user_id`, so existing bookings and chats stay
+> attached): `node scripts/reset-admin.cjs`.
 
 > ⚠️ These are mock credentials for development. Register a real account through the app and promote it via `npm run db:setup-admin` for production.
 

@@ -1052,7 +1052,7 @@ export default function PaymentClient() {
                             value={cardNumber}
                             onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
                             placeholder=" "
-                            className={`w-full pl-10 pr-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-sm font-mono form-input ${cardNumber.replace(/\s/g, '').length === 16 ? 'form-input-valid' : ''}`}
+                            className={`w-full pl-10 pr-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-base font-mono form-input sm:text-sm ${cardNumber.replace(/\s/g, '').length === 16 ? 'form-input-valid' : ''}`}
                             maxLength={19}
                             required
                           />
@@ -1071,7 +1071,7 @@ export default function PaymentClient() {
                             value={cardName}
                             onChange={(e) => setCardName(e.target.value.toUpperCase())}
                             placeholder=" "
-                            className={`w-full px-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-sm font-semibold form-input uppercase ${cardName.trim().length >= 3 ? 'form-input-valid' : ''}`}
+                            className={`w-full px-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-base font-semibold form-input uppercase sm:text-sm ${cardName.trim().length >= 3 ? 'form-input-valid' : ''}`}
                             required
                           />
                           <label className="form-label-float">NGUYEN VAN A</label>
@@ -1093,7 +1093,7 @@ export default function PaymentClient() {
                                 setExpiry(v.length > 2 ? v.slice(0, 2) + '/' + v.slice(2) : v);
                               }}
                               placeholder=" "
-                              className={`w-full px-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-sm form-input ${expiry.length === 5 ? 'form-input-valid' : ''}`}
+                              className={`w-full px-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-base form-input sm:text-sm ${expiry.length === 5 ? 'form-input-valid' : ''}`}
                               maxLength={5}
                               required
                             />
@@ -1114,7 +1114,7 @@ export default function PaymentClient() {
                                 setCvv(e.target.value.replace(/\D/g, '').substring(0, 3))
                               }
                               placeholder=" "
-                              className={`w-full px-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-sm form-input ${cvv.length === 3 ? 'form-input-valid' : ''}`}
+                              className={`w-full px-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-base form-input sm:text-sm ${cvv.length === 3 ? 'form-input-valid' : ''}`}
                               maxLength={3}
                               required
                             />
@@ -1621,7 +1621,7 @@ export default function PaymentClient() {
                         }}
                         placeholder=" "
                         disabled={promoApplied}
-                        className={`w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm form-input font-mono disabled:opacity-50 ${promoApplied ? 'form-input-valid' : ''}`}
+                        className={`w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-base form-input font-mono sm:text-sm disabled:opacity-50 ${promoApplied ? 'form-input-valid' : ''}`}
                       />
                       <label className="form-label-float">VJ2026</label>
                     </div>
@@ -1701,7 +1701,7 @@ export default function PaymentClient() {
 
                 <Link
                   href="/tim-ve"
-                  className="mt-4 flex items-center gap-1.5 text-xs text-[var(--foreground-subtle)] hover:text-[var(--foreground-muted)] transition-colors"
+                  className="mt-3 flex min-h-9 items-center gap-1.5 text-xs text-[var(--foreground-subtle)] hover:text-[var(--foreground-muted)] transition-colors"
                 >
                   <Icon name="ArrowLeftIcon" size={12} />
                   Quay lại chọn chuyến bay

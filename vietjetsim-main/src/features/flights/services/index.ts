@@ -37,7 +37,13 @@ export function mapFlightRecordToFlight(row: FlightRecord): Flight {
     departTime: formatClock(row.depart_time),
     arriveTime: formatClock(row.arrive_time),
     duration: formatDuration(row.depart_time, row.arrive_time),
-    price: Number(row.price) || 0,
+    // A fare is whole đồng: rounding here means a stray decimal in the column
+    // can never reach the card as "898.916,97₫".
+    price: Math.round(Number(row.price) || 0),
+    // The fare ladder comes from the database (migration 030) so the card the
+    // traveller reads and the amount the API charges are the same number.
+    economyPrice: Math.round(Number(row.economy_price ?? row.price) || 0),
+    businessPrice: Math.round(Number(row.business_price ?? row.price) || 0),
     class: row.class === 'business' ? 'business' : 'economy',
     airline: resolveAirline(flightNo),
     flightNo,

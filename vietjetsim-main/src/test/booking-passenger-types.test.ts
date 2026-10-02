@@ -1,11 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { signAccessToken } from '@/lib/auth';
+import type { FareClassId } from '@/features/bookings/pricing';
 
 const createBooking = vi.hoisted(() => vi.fn());
+// The route now prices the fare from the database instead of trusting the
+// browser, so it looks the flight up before it writes anything.
+const getFlightById = vi.hoisted(() => vi.fn());
 vi.mock('@/lib/db', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/db')>();
-  return { ...actual, createBooking };
+  return { ...actual, createBooking, getFlightById };
 });
 
 const { POST } = await import('@/app/api/dat-ve/route');
@@ -49,6 +53,13 @@ describe('POST /api/dat-ve passenger types', () => {
   beforeEach(() => {
     createBooking.mockReset();
     createBooking.mockResolvedValue({ id: 'b1', total_price: 100 });
+    getFlightById.mockReset();
+    getFlightById.mockResolvedValue({
+      id: 'f1',
+      price: 1_000_000,
+      economy_price: 1_000_000,
+      business_price: 3_000_000,
+    });
   });
 
   it('accepts an infant with no identity document', async () => {
@@ -68,7 +79,10 @@ describe('POST /api/dat-ve passenger types', () => {
         expect.objectContaining({ passenger_type: 'adult' }),
         expect.objectContaining({ passenger_type: 'infant' }),
       ]),
-      ['12A'],
+      // Seats now reach the database with the price they were sold for, and the
+      // chosen services come in a fourth argument, both priced server-side.
+      [{ seat_number: '12A', price: 80_500 }],
+      [],
       CONSENTS
     );
   });
@@ -158,5 +172,84 @@ describe('POST /api/dat-ve passenger types', () => {
     );
     expect(res.status).toBe(201);
     expect(createBooking.mock.calls[0][1][0].passenger_type).toBe('adult');
+  });
+
+  // The fare is the whole point of the booking, so it is priced from the
+  // database rather than from `total_price`. A client that posted one đồng used
+  // to get a real, confirmed seat for it.
+  it('prices the fare from the flight, ignoring any total the client posts', async () => {
+    const res = await POST(
+      post({
+        flight_id: 'f1',
+        total_price: 1,
+        passengers: [adult()],
+        seats: ['12A'],
+        consents: CONSENTS,
+      })
+    );
+    expect(res.status).toBe(201);
+    // 1,000,000 for one adult, plus 15% tax, plus the row-12 seat at 70,000 and
+    // its own 15% seat tax and service fee.
+    expect(createBooking.mock.calls[0][0].total_price).toBe(1_230_500);
+  });
+  // The results page used to build its four fare cards by adding hard-coded
+  // amounts to the base fare, and the API charged one stored fare regardless —
+  // so SkyBOSS quoted 10,682,000₫ and was charged 13,573,000₫. The card id the
+  // traveller taps now names the bucket, and both sides run the same ladder.
+  it('charges each fare card the amount that card quoted', async () => {
+    const book = async (fareClass?: FareClassId) => {
+      createBooking.mockClear();
+      const res = await POST(
+        post({
+          flight_id: 'f1',
+          total_price: 1,
+          passengers: [adult()],
+          seats: ['12A'],
+          fareClass,
+          consents: CONSENTS,
+        })
+      );
+      expect(res.status).toBe(201);
+      return createBooking.mock.calls[0][0].total_price as number;
+    };
+
+    // Economy 1,000,000 and Business 3,000,000 with the gap stepped evenly, so
+    // Deluxe is 1,666,667 and SkyBOSS 2,333,333. Each plus 15% tax and the
+    // row-12 seat (70,000 + its own 15% = 80,500).
+    expect(await book('eco')).toBe(1_230_500);
+    expect(await book('deluxe')).toBe(1_997_167);
+    expect(await book('skyboss')).toBe(2_763_833);
+    expect(await book('business')).toBe(3_530_500);
+  });
+
+  it('falls back to the cheapest card when none is sent', async () => {
+    createBooking.mockClear();
+    const res = await POST(
+      post({
+        flight_id: 'f1',
+        passengers: [adult()],
+        seats: ['12A'],
+        consents: CONSENTS,
+      })
+    );
+    expect(res.status).toBe(201);
+    expect(createBooking.mock.calls[0][0].total_price).toBe(1_230_500);
+  });
+
+  // Silently downgrading would under-quote: a client asking for a bucket the
+  // flight does not sell would get the cheapest fare charged instead of an
+  // error it can act on.
+  it('rejects a fare card that is not in the ladder', async () => {
+    const res = await POST(
+      post({
+        flight_id: 'f1',
+        passengers: [adult()],
+        seats: ['12A'],
+        fareClass: 'first' as FareClassId,
+        consents: CONSENTS,
+      })
+    );
+    expect(res.status).toBe(400);
+    expect(createBooking).not.toHaveBeenCalled();
   });
 });

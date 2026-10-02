@@ -42,6 +42,22 @@ const FALLBACK_AIRPORTS: Airport[] = [
   { code: 'TUQ', city: 'Tuyên Quang', airport: 'Tuyên Quang' },
   { code: 'BBU', city: 'Quảng Trạch', airport: 'Bãi Bụt' },
   { code: 'TBB', city: 'Phú Yên', airport: 'Tuy Hòa' },
+  // International, added by 028 to keep this list in step with the table. Kept
+  // as literals rather than derived: this array has to be a plain value for the
+  // first paint, and the airports API replaces it moments later anyway.
+  { code: 'SIN', city: 'Singapore', airport: 'Changi' },
+  { code: 'BKK', city: 'Bangkok', airport: 'Suvarnabhumi' },
+  { code: 'DMK', city: 'Bangkok', airport: 'Don Mueang' },
+  { code: 'KUL', city: 'Kuala Lumpur', airport: 'Kuala Lumpur' },
+  { code: 'CGK', city: 'Jakarta', airport: 'Soekarno-Hatta' },
+  { code: 'MNL', city: 'Manila', airport: 'Ninoy Aquino' },
+  { code: 'PNH', city: 'Phnom Penh', airport: 'Phnom Penh' },
+  { code: 'RGN', city: 'Yangon', airport: 'Yangon' },
+  { code: 'VTE', city: 'Vientiane', airport: 'Wattay' },
+  { code: 'ICN', city: 'Seoul', airport: 'Incheon' },
+  { code: 'KIX', city: 'Osaka', airport: 'Kansai' },
+  { code: 'NRT', city: 'Tokyo', airport: 'Narita' },
+  { code: 'HKG', city: 'Hong Kong', airport: 'Hong Kong' },
 ];
 
 /**
@@ -74,8 +90,10 @@ const BOOKING_TABS = [
 
 const CURRENCIES = ['VND', 'USD'] as const;
 
+// 16px on mobile: anything smaller makes iOS Safari zoom the page the moment a
+// field takes focus, and the user never sees the form again.
 const inputClass =
-  'w-full min-w-0 border-0 bg-transparent px-0 text-sm font-extrabold text-[#333333] outline-none disabled:cursor-not-allowed disabled:text-[#8b9099]';
+  'w-full min-w-0 border-0 bg-transparent px-0 text-base font-extrabold text-[#333333] outline-none disabled:cursor-not-allowed disabled:text-[#8b9099] sm:text-sm';
 const labelClass =
   'block text-[10px] font-bold uppercase leading-none tracking-[0.06em] text-[#8c8c8c]';
 /**
@@ -85,12 +103,13 @@ const labelClass =
  * contributes padding, its own focus tint and — on mobile, where the halves
  * stack — the hairline that turns into a top border.
  */
-const pairedFieldClass = 'flex items-center gap-2 bg-white px-3 py-1.5 focus-within:bg-[#fffdf3]';
+const pairedFieldClass =
+  'flex items-center gap-2 bg-white px-3 py-2.5 focus-within:bg-[#fffdf3] sm:py-1.5';
 const pairedFieldWideClass = 'sm:col-span-2';
 const fieldGroupClass =
   'grid grid-cols-1 divide-y divide-[#e4e4e4] overflow-hidden rounded border border-[#e4e4e4] bg-white focus-within:border-[var(--accent)] sm:grid-cols-[2fr_1fr] sm:divide-x sm:divide-y-0';
 const fieldClass =
-  'flex items-center gap-2 rounded border border-[#e4e4e4] bg-white px-3 py-1.5 focus-within:border-[var(--accent)]';
+  'flex items-center gap-2 rounded border border-[#e4e4e4] bg-white px-3 py-2.5 focus-within:border-[var(--accent)] sm:py-1.5';
 const iconClass = 'shrink-0 text-lg text-[#4a4a4a]';
 const toInputDate = (date: Date) => date.toISOString().slice(0, 10);
 
@@ -204,49 +223,54 @@ export default function HeroSection() {
               );
             })}
           </nav>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pb-3">
+          {/* The multi-city link and the currency picker travel as one unbreakable
+              group: as three flex children they wrapped apart, leaving a line
+              that held only the currency box. */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pb-3">
             {[
               { value: true, label: 'Khứ hồi' },
               { value: false, label: 'Một chiều' },
             ].map(({ value, label }) => (
               <label
                 key={label}
-                className="flex cursor-pointer items-center gap-1.5 text-xs font-bold text-white"
+                className="flex min-h-9 cursor-pointer items-center gap-2 text-xs font-bold text-white"
               >
                 <input
                   type="radio"
                   name="trip-type"
                   checked={roundTrip === value}
                   onChange={() => setRoundTrip(value)}
-                  className="h-3.5 w-3.5 accent-[var(--accent)]"
+                  className="h-4 w-4 shrink-0 accent-[var(--accent)]"
                 />
                 <span>{label}</span>
               </label>
             ))}
 
-            <a
-              href="/trang-chu#hero-booking-form"
-              className="ml-auto flex items-center text-xs font-bold text-white hover:underline"
-            >
-              Nhiều chặng
-              <MdArrowOutward className="text-sm" />
-            </a>
-
-            <label className="flex items-center rounded border border-white/70 px-1.5 py-0.5">
-              <select
-                value={currency}
-                onChange={(event) => setCurrency(event.target.value)}
-                aria-label="Loại tiền tệ"
-                className="cursor-pointer appearance-none border-0 bg-transparent text-xs font-bold text-white outline-none"
+            <span className="ml-auto flex items-center gap-3">
+              <a
+                href="/trang-chu#hero-booking-form"
+                className="flex min-h-9 items-center text-xs font-bold text-white hover:underline"
               >
-                {CURRENCIES.map((code) => (
-                  <option key={code} value={code} className="text-[#333333]">
-                    {code}
-                  </option>
-                ))}
-              </select>
-              <MdExpandMore className="text-sm text-white" />
-            </label>
+                Nhiều chặng
+                <MdArrowOutward className="text-sm" />
+              </a>
+
+              <label className="flex min-h-9 items-center rounded border border-white/70 px-2.5">
+                <select
+                  value={currency}
+                  onChange={(event) => setCurrency(event.target.value)}
+                  aria-label="Loại tiền tệ"
+                  className="cursor-pointer appearance-none border-0 bg-transparent text-xs font-bold text-white outline-none"
+                >
+                  {CURRENCIES.map((code) => (
+                    <option key={code} value={code} className="text-[#333333]">
+                      {code}
+                    </option>
+                  ))}
+                </select>
+                <MdExpandMore className="text-sm text-white" />
+              </label>
+            </span>
           </div>
 
           {/* Departure / destination paired with their dates, with the swap
@@ -312,7 +336,7 @@ export default function HeroSection() {
                 setFrom(to);
                 setTo(from);
               }}
-              className="absolute -left-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full bg-white text-base text-[var(--primary)] shadow-[0_2px_8px_rgba(0,0,0,0.2)] hover:bg-[#fff3f3]"
+              className="absolute -left-3 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white text-xl text-[var(--primary)] shadow-[0_2px_8px_rgba(0,0,0,0.2)] hover:bg-[#fff3f3]"
             >
               <MdSwapHoriz />
             </button>
@@ -326,16 +350,16 @@ export default function HeroSection() {
               value={promoCode}
               onChange={(event) => setPromoCode(event.target.value)}
               placeholder="Mã khuyến mại"
-              className="min-w-0 flex-1 border-0 bg-transparent px-0 text-sm font-extrabold text-[#333333] outline-none placeholder:font-bold placeholder:text-[#8c8c8c]"
+              className="min-w-0 flex-1 border-0 bg-transparent px-0 text-base font-extrabold text-[#333333] outline-none placeholder:font-bold placeholder:text-[#8c8c8c] sm:text-sm"
             />
           </label>
 
-          <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm font-bold text-white">
+          <label className="mt-1.5 flex min-h-9 cursor-pointer items-center gap-2 text-sm font-bold text-white">
             <input
               type="checkbox"
               checked={cheapestOnly}
               onChange={(event) => setCheapestOnly(event.target.checked)}
-              className="h-4 w-4 accent-[var(--accent)]"
+              className="h-4 w-4 shrink-0 accent-[var(--accent)]"
             />
             <span>Tìm vé rẻ nhất</span>
           </label>
