@@ -451,6 +451,40 @@ export async function searchFlights(params: {
   `) as FlightRecord[];
 }
 
+/**
+ * Future departure dates that actually have flights on this route.
+ *
+ * A search for a day the schedule does not cover comes back empty, and the
+ * results page's only advice was "pick a nearby date in the strip above" — but
+ * the strip is built from today forward, so a date past the end of the seeded
+ * week sits next to six more empty days. This gives the empty state somewhere
+ * real to send the customer.
+ *
+ * **Today forward only.** The seeds leave past departures in the table, and
+ * ordering without a filter offered 28/08 for a search made in October — a
+ * button that empties the page again. The comparison is against today in
+ * Vietnam, the same calendar day `searchFlights`' window uses.
+ */
+export async function getAvailableDepartDates(params: {
+  from_code: string;
+  to_code: string;
+  limit?: number;
+}): Promise<string[]> {
+  const limit = Math.min(Math.max(params.limit ?? 5, 1), 14);
+  const rows = await sql`
+    SELECT DISTINCT to_char(depart_time AT TIME ZONE 'Asia/Ho_Chi_Minh', 'YYYY-MM-DD') AS day
+    FROM flights
+    WHERE from_code = ${params.from_code}
+      AND to_code = ${params.to_code}
+      AND available > 0
+      AND (depart_time AT TIME ZONE 'Asia/Ho_Chi_Minh')::date
+          >= (now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date
+    ORDER BY day ASC
+    LIMIT ${limit}
+  `;
+  return (rows as { day: string }[]).map((row) => row.day);
+}
+
 export async function getFlightById(flightId: string): Promise<FlightRecord | null> {
   const results = await sql`
     SELECT * FROM flights WHERE id = ${flightId}

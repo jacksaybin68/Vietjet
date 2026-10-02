@@ -66,3 +66,21 @@ export async function searchFlightsForUi(params: FlightSearchParams): Promise<Fl
   const { flights } = await searchFlights(params);
   return (flights || []).map(mapFlightRecordToFlight);
 }
+
+/**
+ * Search and keep the alternative dates.
+ *
+ * The results page needs both: the flights, and — when there are none — the
+ * dates that do have departures. A separate call would race two requests for
+ * what is one question, so the API answers with both in a single response.
+ */
+export async function searchFlightsWithDates(params: FlightSearchParams): Promise<{
+  flights: Flight[];
+  availableDates: string[];
+}> {
+  const response = await searchFlights(params);
+  return {
+    flights: (response.flights || []).map(mapFlightRecordToFlight),
+    availableDates: response.availableDates || [],
+  };
+}

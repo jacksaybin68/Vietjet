@@ -6,7 +6,7 @@ import BookingBottomBar from '@/features/bookings/components/BookingBottomBar';
 import { Icon, AppImage } from '@/shared/components/ui';
 import { FlightResultsSkeleton } from '@/shared/components/ui';
 import { getErrorMessage } from '@/lib/utils';
-import { searchFlightsForUi, getAirportCity } from '@/features/flights/services';
+import { searchFlightsWithDates, getAirportCity } from '@/features/flights/services';
 
 // Fare class config
 const FARE_CLASS_CONFIG: Record<
@@ -276,6 +276,11 @@ export default function FlightResultsStep({
   const [showComparison, setShowComparison] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showErrorModal, setShowErrorModal] = useState(false);
+  // Dates this route actually flies, sent by the API with an empty result. The
+  // date strip runs from today forward, so a search past the end of the seeded
+  // schedule otherwise leaves the customer on a strip of equally empty days
+  // and nothing to click.
+  const [availableDates, setAvailableDates] = useState<string[]>([]);
 
   // ─── Derived constants (computed from fetched flights) ─────────────────
   const allAirlines = useMemo(() => Array.from(new Set(flights.map((f) => f.airline))), [flights]);
@@ -322,23 +327,21 @@ export default function FlightResultsStep({
       const toCode = search?.to || '';
       const departDate = search?.depart || undefined;
 
-      const apiFlights =
+      const result =
         fromCode && toCode
-          ? await searchFlightsForUi({
+          ? await searchFlightsWithDates({
               from_code: fromCode,
               to_code: toCode,
               depart_date: departDate,
             })
-          : [];
+          : { flights: [], availableDates: [] };
 
-      if (apiFlights.length > 0) {
-        setFlights(apiFlights);
-      } else {
-        // A successful search with no rows is a real answer: no flight matches
-        // this route/date. Never substitute mock flights — their ids are not
-        // DB UUIDs, so booking one would fail server-side.
-        setFlights([]);
-      }
+      setAvailableDates(result.availableDates);
+
+      // A successful search with no rows is a real answer: no flight matches
+      // this route/date. Never substitute mock flights — their ids are not
+      // DB UUIDs, so booking one would fail server-side.
+      setFlights(result.flights);
     } catch (err: unknown) {
       const errorMessage = getErrorMessage(err);
       console.error('[FlightResultsStep] Fetch error:', errorMessage);
@@ -1137,6 +1140,38 @@ export default function FlightResultsStep({
 
                 {/* Action buttons - responsive */}
                 <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-center sm:justify-start">
+                  {/* Real departures, not advice. The date strip is built from
+                      today forward, so a date past the end of the seeded week
+                      sits among equally empty days; these are the days the
+                      route actually flies. */}
+                  {!searchQuery && availableDates.length > 0 && (
+                    <div className="w-full">
+                      <p className="text-[10px] sm:text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-2 font-koho">
+                        Ngày có chuyến bay
+                      </p>
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                        {availableDates.slice(0, 5).map((iso) => {
+                          const date = new Date(`${iso}T00:00:00`);
+                          return (
+                            <button
+                              key={iso}
+                              onClick={() => onDateChange?.(iso)}
+                              data-testid="available-date"
+                              aria-label={`Xem chuyến bay ngày ${iso}`}
+                              className="inline-flex items-center gap-1.5 rounded-xl border border-primary/30 bg-[var(--surface)] px-3 py-2 text-[11px] sm:text-xs font-bold text-primary transition-all hover:bg-primary hover:text-white"
+                            >
+                              <Icon name="CalendarDaysIcon" size={12} />
+                              {date.toLocaleDateString('vi-VN', {
+                                weekday: 'short',
+                                day: 'numeric',
+                                month: 'numeric',
+                              })}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}

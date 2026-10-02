@@ -3,10 +3,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
-const { searchFlightsForUi } = vi.hoisted(() => ({ searchFlightsForUi: vi.fn() }));
+const { searchFlightsWithDates } = vi.hoisted(() => ({ searchFlightsWithDates: vi.fn() }));
 
 vi.mock('@/features/flights/services', () => ({
-  searchFlightsForUi,
+  searchFlightsWithDates,
   getAirportCity: (code: string) => (code === 'HAN' ? 'Hà Nội' : 'TP.HCM'),
 }));
 
@@ -33,7 +33,7 @@ const flights = [
 describe('FlightResultsStep — card bố cục 1 hàng ngang', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    searchFlightsForUi.mockResolvedValue(flights);
+    searchFlightsWithDates.mockResolvedValue({ flights, availableDates: [] });
   });
 
   const renderResults = async () => {
