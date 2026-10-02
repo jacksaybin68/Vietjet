@@ -77,3 +77,34 @@ describe('không còn lookup bảng trạng thái nào thiếu fallback', () => 
     expect(offenders).toEqual([]);
   });
 });
+
+/**
+ * `NUMERIC` columns arrive from the driver as *strings*. Handing one to a
+ * reducer with `+` concatenates instead of adding, which is how the refund
+ * header rendered "01975873.00₫" — a figure no customer would recognise, on a
+ * screen the operator uses to decide what to pay.
+ *
+ * The failure is invisible in every other view of the same row (a badge, a
+ * name), so it is swept by shape: any row-mapper that copies a numeric column
+ * across without coercing it.
+ */
+describe('map row phải ép kiểu số trước khi dùng', () => {
+  const MAPPERS: { file: string; column: string }[] = [
+    { file: 'src/features/admin/components/RefundRequestsTab.tsx', column: 'amount' },
+  ];
+
+  it.each(MAPPERS)('$file ép $column bằng Number()', ({ file, column }) => {
+    const source = readFileSync(join(process.cwd(), file), 'utf8');
+    // Only the mapper matters: a type declaration and mock data carry no
+    // coercion requirement.
+    const mapRow = /const mapRow = \(row:[\s\S]*?\n {2}\}\);/.exec(source);
+    expect(mapRow).not.toBeNull();
+
+    const assignments = [...mapRow![0].matchAll(new RegExp(`${column}:\\s*[^,\\n]+`, 'g'))];
+    expect(assignments.length).toBeGreaterThan(0);
+    for (const match of assignments) {
+      // A passthrough (`row.amount || 0`) keeps the string; `Number(...)` does not.
+      expect(match[0]).toMatch(/Number\(/);
+    }
+  });
+});
