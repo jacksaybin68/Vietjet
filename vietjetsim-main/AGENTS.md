@@ -118,6 +118,18 @@ along with the hubs — leaving HAN↔SGN, the busiest route in the country and 
 one the hero form pre-fills, with nothing to sell for the whole week. When
 excluding a set to avoid self-links, check the pair that exclusion creates.
 
+**An empty search must offer a date that works.** `GET /api/chuyen-bay` answers
+an empty day with `availableDates` (`getAvailableDepartDates`), and the results
+page renders them as buttons. The advice it replaced — "pick a nearby date in
+the strip above" — was a dead end: the strip is generated from today forward, so
+once a week passes, six more empty days sit next to the empty result. Two
+details are load-bearing. The query filters
+`>= (now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date`, because the seeds leave past
+departures in `flights` and ordering without it offered 28/08 to someone
+searching in October. And the lookup is wrapped in its own `try`: it is a
+convenience on an answer that is already correct, so its failure must not turn
+a legitimate empty result into a 500.
+
 **Agency-issued discount codes.** `015_agency_discounts.sql` adds `agencies` and
 `discount_codes.agency_id` (nullable, `ON DELETE SET NULL`) plus `issued_by`. Admins
 manage agencies at `/quan-tri` → "Đại lý" and pick one from the "Phát hành cho đại lý"

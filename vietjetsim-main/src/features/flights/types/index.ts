@@ -38,6 +38,11 @@ export interface FlightSearchParams {
 
 export interface FlightSearchResponse {
   flights: FlightRecord[];
+  /**
+   * Departure dates that do have flights, sent only alongside an empty
+   * `flights` array so the results page can offer one instead of a dead end.
+   */
+  availableDates?: string[];
   error?: string;
 }
 

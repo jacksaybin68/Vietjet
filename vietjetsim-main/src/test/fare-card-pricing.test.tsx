@@ -3,10 +3,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getFareForClass, type FareClassId } from '@/features/bookings/pricing';
 import type { Flight } from '@/features/flights/types';
 
-const { searchFlightsForUi } = vi.hoisted(() => ({ searchFlightsForUi: vi.fn() }));
+const { searchFlightsWithDates } = vi.hoisted(() => ({ searchFlightsWithDates: vi.fn() }));
 
 vi.mock('@/features/flights/services', () => ({
-  searchFlightsForUi,
+  searchFlightsWithDates,
   getAirportCity: (code: string) => (code === 'HAN' ? 'Hà Nội' : 'TP.HCM'),
 }));
 
@@ -36,6 +36,48 @@ const flight: Flight = {
 
 const format = (amount: number) => `${amount.toLocaleString('vi-VN')}₫`;
 
+describe('trạng thái rỗng dẫn tới ngày có chuyến thật', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const renderEmpty = async (availableDates: string[], onDateChange = vi.fn()) => {
+    searchFlightsWithDates.mockResolvedValue({ flights: [], availableDates });
+    render(
+      <FlightResultsStep
+        onSelect={vi.fn()}
+        onDateChange={onDateChange}
+        search={{ from: 'HAN', to: 'SGN', depart: '2026-10-20' }}
+        pax="1"
+      />
+    );
+    await waitFor(() => expect(screen.getByText(/Không tìm thấy chuyến bay/)).toBeInTheDocument());
+    return onDateChange;
+  };
+
+  // The strip above is generated from today forward, so a search past the end
+  // of the seeded week used to leave the customer on six more empty days with
+  // advice and nothing to click.
+  it('hiện ngày có chuyến và bấm được', async () => {
+    const onDateChange = await renderEmpty(['2026-10-05', '2026-10-06']);
+
+    // Match the heading, not a formatted date: the button label is built with
+    // `toLocaleDateString('vi-VN')`, and jsdom's ICU renders that differently
+    // from the browser this code actually ships in.
+    expect(screen.getByText('Ngày có chuyến bay')).toBeInTheDocument();
+    const buttons = screen.getAllByTestId('available-date');
+    expect(buttons).toHaveLength(2);
+
+    buttons[0]!.click();
+    expect(onDateChange).toHaveBeenCalledWith('2026-10-05');
+  });
+
+  it('không hiện khối ngày khi tuyến không có chuyến nào', async () => {
+    await renderEmpty([]);
+    expect(screen.queryByText('Ngày có chuyến bay')).not.toBeInTheDocument();
+  });
+});
+
 /**
  * The printed amount on each card. Scoped to the element that carries the
  * `₫` suffix so an ancestor, which repeats the same text, is not counted.
@@ -49,7 +91,7 @@ function printedFares(fareGrid: HTMLElement): string[] {
 describe('giá thẻ hạng vé khớp với giá API thu', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    searchFlightsForUi.mockResolvedValue([flight]);
+    searchFlightsWithDates.mockResolvedValue({ flights: [flight], availableDates: [] });
   });
 
   const renderResults = async (onSelect: (f: Flight) => void) => {
