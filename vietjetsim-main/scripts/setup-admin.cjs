@@ -25,7 +25,10 @@ envContent.split('\n').forEach((line) => {
 });
 
 const DATABASE_URL = process.env.DATABASE_URL;
-const ADMIN_EMAIL = 'admin@vietjetair.vn';
+// `db:reset-admin` (scripts/reset-admin.cjs) is the one to reach for when the
+// account already exists — it updates in place and keeps the user_id. This
+// script only creates one, so it deliberately uses a different address.
+const ADMIN_EMAIL = 'admin@vietjetsim.vn';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin@123';
 const ADMIN_FULL_NAME = 'Administrator';
 const ADMIN_ROLE = 'admin';

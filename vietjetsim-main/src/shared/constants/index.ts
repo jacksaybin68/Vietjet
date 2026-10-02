@@ -157,4 +157,22 @@ export const AIRPORT_CITIES: Record<string, string> = {
   TUQ: 'Tuyên Quang',
   BBU: 'Quảng Trạch',
   TBB: 'Phú Yên',
+  // International, added by 028. These are needed here for the same reason the
+  // domestic entries are: the results step and "My bookings" render a bare code
+  // with no join, so a flight to Seoul would otherwise print "ICN" to the
+  // customer instead of "Seoul". Bangkok and Tokyo each have two airports in
+  // the table and so need two distinct entries.
+  SIN: 'Singapore',
+  BKK: 'Bangkok',
+  DMK: 'Bangkok',
+  KUL: 'Kuala Lumpur',
+  CGK: 'Jakarta',
+  MNL: 'Manila',
+  PNH: 'Phnom Penh',
+  RGN: 'Yangon',
+  VTE: 'Vientiane',
+  ICN: 'Seoul',
+  KIX: 'Osaka',
+  NRT: 'Tokyo',
+  HKG: 'Hong Kong',
 };

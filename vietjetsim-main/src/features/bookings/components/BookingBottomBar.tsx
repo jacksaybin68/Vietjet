@@ -36,7 +36,7 @@ export default function BookingBottomBar({
   const isSubmit = Boolean(formId);
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--border)] bg-[var(--surface)] shadow-[0_-2px_12px_rgba(0,0,0,0.08)]"
+      className="fixed inset-x-0 bottom-[calc(60px+env(safe-area-inset-bottom))] z-30 border-t border-[var(--border)] bg-[var(--surface)] shadow-[0_-2px_12px_rgba(0,0,0,0.08)] lg:bottom-0"
       data-testid={testId}
     >
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-3 py-2 sm:px-4 md:px-6">

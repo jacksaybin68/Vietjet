@@ -178,12 +178,12 @@ export default function FlyEverywhereSection() {
                   )}
                 </button>
                 {isOpen && region.routes.length > 0 && (
-                  <ul className="px-4 pb-3 pt-1 space-y-1.5 border-t border-gray-100">
+                  <ul className="border-t border-gray-100 px-4 pb-3 pt-0.5">
                     {region.routes.map((route) => (
                       <li key={route}>
                         <a
                           href={`/tim-ve?to=${encodeURIComponent(route)}`}
-                          className="text-xs sm:text-sm text-vj-gray hover:text-primary transition-colors block py-0.5"
+                          className="block py-1.5 text-xs text-vj-gray transition-colors hover:text-primary sm:text-sm"
                         >
                           • {route}
                         </a>

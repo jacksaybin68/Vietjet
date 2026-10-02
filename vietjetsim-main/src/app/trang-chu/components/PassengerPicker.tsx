@@ -41,12 +41,13 @@ export function describePax(counts: PaxCounts): string {
     .join(', ');
 }
 
+// 16px below `sm` so iOS Safari does not zoom the page when the field is tapped.
 const inputClass =
-  'w-full min-w-0 border-0 bg-transparent px-0 text-sm font-extrabold text-[#333333] outline-none';
+  'w-full min-w-0 border-0 bg-transparent px-0 text-base font-extrabold text-[#333333] outline-none sm:text-sm';
 const labelClass =
   'block text-[10px] font-bold uppercase leading-none tracking-[0.06em] text-[#8c8c8c]';
 const fieldClass =
-  'flex items-center gap-2 rounded border border-[#e4e4e4] bg-white px-3 py-1.5 focus-within:border-[var(--accent)]';
+  'flex items-center gap-2 rounded border border-[#e4e4e4] bg-white px-3 py-2.5 focus-within:border-[var(--accent)] sm:py-1.5';
 const iconClass = 'shrink-0 text-lg text-[#4a4a4a]';
 
 interface Props {
@@ -124,7 +125,7 @@ export default function PassengerPicker({ value, onChange }: Props) {
                   onClick={() => step(row.type, -1)}
                   disabled={value[row.type] <= row.min}
                   aria-label={`Giảm số ${PASSENGER_TYPE_LABELS[row.type]}`}
-                  className="grid h-7 w-7 place-items-center rounded-full border border-[#dcdcdc] text-[#333333] disabled:opacity-35"
+                  className="grid h-9 w-9 place-items-center rounded-full border border-[#dcdcdc] text-[#333333] disabled:opacity-35"
                 >
                   <MdRemove className="text-sm" />
                 </button>
@@ -136,7 +137,7 @@ export default function PassengerPicker({ value, onChange }: Props) {
                   onClick={() => step(row.type, 1)}
                   disabled={value[row.type] >= maxFor(value, row.type)}
                   aria-label={`Tăng số ${PASSENGER_TYPE_LABELS[row.type]}`}
-                  className="grid h-7 w-7 place-items-center rounded-full border border-[var(--accent)] text-[var(--accent)] disabled:opacity-35"
+                  className="grid h-9 w-9 place-items-center rounded-full border border-[var(--accent)] text-[var(--accent)] disabled:opacity-35"
                 >
                   <MdAdd className="text-sm" />
                 </button>

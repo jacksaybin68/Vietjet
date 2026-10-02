@@ -73,7 +73,14 @@ days (vn_date) AS (
 )
 INSERT INTO flights (flight_no, from_code, to_code, depart_time, arrive_time, price, class, available)
 SELECT
-  'VJ ' || LPAD((row_number() OVER () + 600)::text, 3, '0'),
+  -- Pad to the number's own length with 3 as the floor: `LPAD(x, 3, '0')`
+  -- truncates a longer input, and this block runs to 1040, so 41 rows a day
+  -- were sharing a flight number with a row 900 numbers away.
+  'VJ ' || LPAD(
+    (row_number() OVER () + 600)::text,
+    GREATEST(3, length((row_number() OVER () + 600)::text)),
+    '0'
+  ),
   r.from_code,
   r.to_code,
   (d.vn_date || ' ' || LPAD(s.depart_hour::text, 2, '0') || ':00:00+07')::timestamptz,

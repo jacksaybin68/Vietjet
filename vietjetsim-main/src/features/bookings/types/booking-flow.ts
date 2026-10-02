@@ -4,8 +4,8 @@ export type { Flight };
 
 /**
  * Passenger categories. Vietnam domestic fares follow the standard airline
- * split: a child (2-11) pays a reduced fare, an infant (under 2) travels on a
- * lap so it is neither seated nor charged seat/ancillary fees.
+ * split: a child (2-11) pays 75% of the adult fare, an infant (under 2) travels
+ * on a lap for free so it is neither seated nor charged fare, tax or fees.
  */
 export type PassengerType = 'adult' | 'child' | 'infant';
 

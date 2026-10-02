@@ -13,12 +13,27 @@ const flight = {
   arriveTime: '08:25',
   duration: '2h 25m',
   price: 899000,
+  economyPrice: 899000,
+  businessPrice: 2490000,
   class: 'economy' as const,
   airline: 'Vietjet Air',
   flightNo: 'VJ301',
   available: 20,
   stops: 0,
 };
+
+/** An untouched passenger, spread and then given a type per test case. */
+const blankPassenger = {
+  name: '',
+  gender: 'male',
+  dob: '',
+  countryCode: 'VN',
+  phone: '',
+  email: '',
+  idNumber: '',
+  residence: '',
+  skyJoyMemberId: '',
+} as const;
 
 describe('PassengerInfoStep extended contact and consent fields', () => {
   it('renders the requested contact, identity and privacy fields', () => {
@@ -31,7 +46,7 @@ describe('PassengerInfoStep extended contact and consent fields', () => {
     expect(screen.getByLabelText(/Số điện thoại/)).toBeRequired();
     expect(screen.getByLabelText(/Email/)).toHaveAttribute('type', 'email');
     expect(screen.getByLabelText(/CCCD \/ Hộ chiếu/)).toBeRequired();
-    expect(screen.getByLabelText(/Nơi ở hiện tại/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Địa chỉ/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Mã hội viên SkyJoy/)).toHaveAttribute(
       'placeholder',
       'SJxxxxxxxxxx'
@@ -39,6 +54,71 @@ describe('PassengerInfoStep extended contact and consent fields', () => {
     expect(screen.getByText(/Gửi thông tin khuyến mãi/)).toBeInTheDocument();
     expect(screen.getByText(/Thực hiện khảo sát/)).toBeInTheDocument();
     expect(screen.getByText(/Lưu thông tin hành khách/)).toBeInTheDocument();
+  });
+
+  // A carrier needs enough to identify a minor on the ticket, so a child or an
+  // infant is not asked to repeat the adult's contact details, country of issue
+  // or loyalty id. Name, birth date, address and the travel document stay — the
+  // API rejects a booking whose child carries no ID, so that field has to sit on
+  // a minor's card as well.
+
+  it('asks a child and an infant for name, birth date, address and ID only', () => {
+    render(
+      <PassengerInfoStep
+        flight={flight}
+        passengerCount={3}
+        initialPassengers={[
+          { ...blankPassenger, type: 'adult' },
+          { ...blankPassenger, type: 'child' },
+          { ...blankPassenger, type: 'infant' },
+        ]}
+        onSubmit={vi.fn()}
+        onBack={vi.fn()}
+      />
+    );
+
+    // Contact, country of issue and the loyalty id are the adult's alone.
+    [/Số điện thoại/, /Email/, /Quốc gia/, /Mã hội viên SkyJoy/].forEach((label) =>
+      expect(screen.getAllByLabelText(label)).toHaveLength(1)
+    );
+    // Everyone is identified by name, birth date, address and travel document.
+    expect(screen.getAllByLabelText(/Họ và tên/)).toHaveLength(3);
+    expect(screen.getAllByLabelText(/Ngày sinh/)).toHaveLength(3);
+    expect(screen.getAllByLabelText(/Địa chỉ/)).toHaveLength(3);
+    expect(screen.getAllByLabelText(/CCCD \/ Hộ chiếu/)).toHaveLength(3);
+  });
+
+  // Every field label used to be a copy-pasted class string that drifted into
+  // three different orders, and "Giới tính" alone got a larger bottom margin
+  // than the other seven — so the label baselines did not line up across the
+  // grid. One shared constant now owns the typography.
+  it('gives every field label the same typography', () => {
+    render(
+      <PassengerInfoStep flight={flight} passengerCount={1} onSubmit={vi.fn()} onBack={vi.fn()} />
+    );
+
+    const labels = [
+      'Giới tính',
+      /Họ và tên/,
+      /Quốc gia/,
+      /Ngày sinh/,
+      /Số điện thoại/,
+      /Email/,
+      /CCCD \/ Hộ chiếu/,
+      /Địa chỉ/,
+      /Mã hội viên SkyJoy/,
+    ].map((name) =>
+      typeof name === 'string'
+        ? screen.getByText(name)
+        : screen.getByText((_, el) => el?.tagName === 'LABEL' && name.test(el.textContent ?? ''))
+    );
+
+    // More than one distinct className means the labels have drifted apart again.
+    expect(new Set(labels.map((l) => l.className)).size).toBe(1);
+    // The uppercase tracked field-label treatment, and the KoHo face, are part of it.
+    expect(labels[0].className).toContain('uppercase');
+    expect(labels[0].className).toContain('tracking-wider');
+    expect(labels[0].className).toContain('font-koho');
   });
 
   it('shows validation messages and submits complete passenger plus policy consent', async () => {

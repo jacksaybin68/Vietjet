@@ -21,6 +21,31 @@ export const SEAT_TIER_PRICES = {
   occupied: 50000,
 } as const;
 
+/**
+ * What a seat costs, from its position in the cabin.
+ *
+ * The picker draws the cabin in the same row bands (`SEAT_TIER_PRICES`), so a
+ * seat's price follows from its number alone: the first three rows are business
+ * class, rows 4–6 and 20–30 are the premium band, the rest sit at the standard
+ * rate. Deriving it keeps the server from having to trust a client-sent amount.
+ */
+export function getSeatPrice(seatNumber: string): number {
+  const match = /^(\d+)[A-F]$/.exec(seatNumber.trim().toUpperCase());
+  if (!match) return 0;
+  const row = Number(match[1]);
+  if (row <= 3) return SEAT_TIER_PRICES.business;
+  if (row <= 6 || row >= 20) return SEAT_TIER_PRICES.hot;
+  return SEAT_TIER_PRICES.available;
+}
+
+/**
+ * What a seat adds to the booking: its price plus the seat tax and service fee,
+ * which the seat tooltip itemises separately from the air fare.
+ */
+export function getSeatCharge(seatNumber: string): number {
+  return Math.round(getSeatPrice(seatNumber) * (1 + SEAT_TAX_RATE + SEAT_SERVICE_FEE_RATE));
+}
+
 export type AncillaryId = 'baggage' | 'meal' | 'insurance';
 
 export interface AncillaryOption {
@@ -85,12 +110,79 @@ export interface BookingTotals {
   total: number;
 }
 
-/** Share of the adult fare charged per category. */
+/**
+ * Share of the adult fare charged per category.
+ *
+ * Adults pay the quoted fare; a child (2–11) pays 75% of it; an infant under 2
+ * travels on an adult's lap and is free. The infant rate is 0 rather than a
+ * small fraction, so the fare line itself is free — tax follows the fares
+ * actually flown and the infant contributes none.
+ */
 export const FARE_RATE_BY_TYPE: Record<PassengerType, number> = {
   adult: 1,
   child: 0.75,
-  infant: 0.1,
+  infant: 0,
 };
+
+/**
+ * The fare buckets the results page sells, cheapest first.
+ *
+ * `flights` stores two fares per row (migration 030), so four cards cannot each
+ * have a stored price. The two middle buckets are therefore stepped evenly
+ * between them — and that ladder lives here, not in the results component,
+ * because the booking API has to charge the bucket the traveller tapped. When
+ * it was derived in the card and the server read only `business_price`, the
+ * SkyBOSS card quoted 10,682,000₫ and charged 13,573,000₫.
+ */
+export const FARE_CLASSES = ['eco', 'deluxe', 'skyboss', 'business'] as const;
+
+export type FareClassId = (typeof FARE_CLASSES)[number];
+
+/** Cabin a fare bucket is sold in; the fare itself comes from the `flights` row. */
+export const FARE_CLASS_CABIN: Record<FareClassId, 'economy' | 'business'> = {
+  eco: 'economy',
+  deluxe: 'economy',
+  skyboss: 'business',
+  business: 'business',
+};
+
+/**
+ * Fare for one adult in `fareClass`, derived from the row's two stored fares.
+ *
+ * The endpoints are the stored values, so Economy and Business on the card are
+ * exactly the amounts the API charges for them; only the two middle buckets are
+ * interpolated. Ordering is guaranteed: `deluxe` and `skyboss` sit at one and
+ * two thirds of the gap, and migration 030's `flights_fare_ladder_ordered`
+ * CHECK keeps the gap from inverting.
+ *
+ * Both fares are coerced with `Number` because a `NUMERIC(12, 2)` column comes
+ * back from the driver as a *string* (`"4900000.00"`). Arithmetic on that
+ * concatenates instead of adding — `step` becomes `NaN` and every interpolated
+ * bucket silently collapses onto the cheapest fare, so the card would quote
+ * 7,791,000₫ and the API would charge 4,900,000₫. A NULL is still 0 rather than
+ * an error, so migration 030's NOT NULL is what keeps a missing fare from ever
+ * reaching this function.
+ */
+export function getFareForClass(
+  fareClass: FareClassId,
+  // `null` is in the type because that is what a nullable column serialises to;
+  // migration 030's NOT NULL is what stops it in practice, not the compiler.
+  fares: { economyPrice: number | string | null; businessPrice: number | string | null }
+): number {
+  const economyPrice = Number(fares.economyPrice);
+  const businessPrice = Number(fares.businessPrice);
+  const step = (businessPrice - economyPrice) / 3;
+  switch (fareClass) {
+    case 'business':
+      return Math.round(businessPrice);
+    case 'skyboss':
+      return Math.round(economyPrice + step * 2);
+    case 'deluxe':
+      return Math.round(economyPrice + step);
+    default:
+      return Math.round(economyPrice);
+  }
+}
 
 const round = (n: number) => Math.round(n);
 
@@ -120,8 +212,8 @@ export function getBookingTotals({
   const childCount = paxCounts?.child ?? 0;
   const infantCount = paxCounts?.infant ?? 0;
 
-  // Tax is charged on the fares actually flown: the adult and child fares, but
-  // not the infant lap fare, which carries no ticket of its own.
+  // Tax is charged on the fares actually flown: the adult and child fares. The
+  // infant rides on a lap for free, so it adds neither fare nor tax.
   const taxableFare = farePerPassenger * (adultCount + childCount * FARE_RATE_BY_TYPE.child);
   const fareSubtotal = round(
     taxableFare + farePerPassenger * infantCount * FARE_RATE_BY_TYPE.infant

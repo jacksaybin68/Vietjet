@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Flight } from '@/features/bookings/types/booking-flow';
-import { getBookingTotals } from '@/features/bookings/pricing';
+import { getBookingTotals, getFareForClass, type FareClassId } from '@/features/bookings/pricing';
 import BookingBottomBar from '@/features/bookings/components/BookingBottomBar';
 import { Icon, AppImage } from '@/shared/components/ui';
 import { FlightResultsSkeleton } from '@/shared/components/ui';
@@ -181,7 +181,7 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
   };
 
   const arrowClass =
-    'shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--foreground-muted)] hover:text-primary hover:border-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed';
+    'shrink-0 w-9 h-9 sm:w-8 sm:h-8 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--foreground-muted)] hover:text-primary hover:border-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed';
 
   return (
     <div
@@ -218,10 +218,18 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
               >
                 {WEEKDAY_LABELS[day.getDay()]}
               </span>
+              {/* "29 tháng 9" does not fit five-across on a 390px screen — the
+                  compact `29/9` form below `sm` is the same day, and the long
+                  form takes over once there is room for it. */}
               <span
                 className={`block text-xs sm:text-sm whitespace-nowrap ${isSelected ? 'font-black' : 'font-semibold'}`}
               >
-                {day.getDate()} tháng {day.getMonth() + 1}
+                <span className="sm:hidden">
+                  {day.getDate()}/{day.getMonth() + 1}
+                </span>
+                <span className="hidden sm:inline">
+                  {day.getDate()} tháng {day.getMonth() + 1}
+                </span>
               </span>
             </button>
           );
@@ -258,6 +266,10 @@ export default function FlightResultsStep({
     stops: [],
     maxDuration: Infinity,
   });
+  // Mobile keeps the filter panel collapsed: expanded it is a ~1500px scroll of
+  // sliders that buries the flight list, so the panel is opt-in below `md` and
+  // permanently open from `md` up, where it sits beside the results.
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [compareIds, setCompareIds] = useState<string[]>([]);
@@ -471,7 +483,7 @@ export default function FlightResultsStep({
     : 0;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 relative items-start pb-16 sm:pb-14">
+    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 relative items-start pb-16 sm:pb-14">
       {/* Search error modal */}
       {showErrorModal && loadError && (
         <SearchErrorModal
@@ -486,18 +498,41 @@ export default function FlightResultsStep({
       )}
 
       {/* Filter Sidebar */}
-      <aside className="lg:col-span-3 w-full min-w-0 space-y-3">
+      <aside className="md:col-span-3 w-full min-w-0 space-y-3">
         <div
-          className="bg-[var(--surface)] rounded-xl border border-[var(--border)] sticky top-[200px] sm:top-[230px] overflow-hidden"
+          className="bg-[var(--surface)] rounded-xl border border-[var(--border)] md:sticky md:top-[200px] md:top-[230px] overflow-hidden"
           style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}
         >
           {/* Red accent top bar */}
           <div className="h-0.5 w-full bg-gradient-to-r from-primary via-primary-light to-primary" />
-          {/* Filter Header - responsive */}
-          <div className="flex items-center justify-between px-2 sm:px-3 py-2 border-b border-[var(--border)] bg-[var(--surface-2)] ">
-            <h3 className="font-bold text-[var(--foreground)] text-sm flex items-center gap-1.5 font-koho">
+          {/* Filter header: a toggle below `md` (the panel is collapsible there) and a
+              plain heading from `md` up, where the panel is permanently open. */}
+          <div className="flex items-center justify-between gap-1 border-b border-[var(--border)] bg-[var(--surface-2)]">
+            <button
+              type="button"
+              onClick={() => setFiltersOpen((open) => !open)}
+              aria-expanded={filtersOpen}
+              aria-controls="flight-filters"
+              className="flex min-h-11 flex-1 items-center gap-1.5 px-3 text-left font-koho text-sm font-bold text-[var(--foreground)] md:hidden"
+            >
+              <Icon name="AdjustmentsHorizontalIcon" size={16} className="text-primary" />
+              Bộ lọc
+              {activeFilterCount > 0 && (
+                <span className="grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-white">
+                  {activeFilterCount}
+                </span>
+              )}
+              <Icon
+                name="ChevronDownIcon"
+                size={16}
+                className={`ml-auto text-[var(--foreground-muted)] transition-transform ${
+                  filtersOpen ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+            <h3 className="hidden flex-1 items-center gap-1.5 px-3 py-2 font-koho text-sm font-bold text-[var(--foreground)] md:flex">
               <Icon name="AdjustmentsHorizontalIcon" size={14} className="text-primary" />
-              <span className="hidden sm:inline">Bộ lọc</span>
+              Bộ lọc
               {activeFilterCount > 0 && (
                 <span className="text-[10px] font-bold bg-primary text-white rounded-full w-4 h-4 flex items-center justify-center">
                   {activeFilterCount}
@@ -506,207 +541,216 @@ export default function FlightResultsStep({
             </h3>
             {activeFilterCount > 0 && (
               <button
+                type="button"
                 onClick={resetFilters}
-                className="text-[10px] sm:text-[11px] text-primary font-semibold hover:underline"
+                className="min-h-11 shrink-0 px-3 text-[11px] font-semibold text-primary hover:underline"
               >
                 Xóa tất cả
               </button>
             )}
           </div>
 
-          <div className="p-2 sm:p-3 space-y-3 sm:space-y-4">
-            {/* Sort */}
-            <div>
-              <label className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1 font-koho">
-                Sắp xếp theo
-              </label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full text-sm border border-[var(--border)] rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 text-[var(--foreground)] focus:outline-none focus:border-primary bg-[var(--surface-2)] form-input"
-              >
-                {SORT_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Airline Filter */}
-            <div>
-              <label className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
-                Hãng hàng không
-              </label>
-              <div className="space-y-1">
-                {allAirlines.map((airline) => (
-                  <label key={airline} className="flex items-center gap-1.5 cursor-pointer group">
-                    <input
-                      id={`filter-airline-${airline}`}
-                      name="airline"
-                      type="checkbox"
-                      checked={filters.airlines.includes(airline)}
-                      onChange={() => toggleAirline(airline)}
-                      className="accent-primary w-3 h-3 rounded"
-                    />
-                    <span className="text-[11px] sm:text-xs text-[var(--foreground-muted)] group-hover:text-primary flex-1">
-                      {airline}
-                    </span>
-                    <span className="text-[9px] sm:text-[10px] text-[var(--foreground-subtle)]">
-                      {flights.filter((f) => f.airline === airline).length}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Price Range */}
-            <div>
-              <label className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
-                Khoảng giá
-              </label>
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-[10px] text-[var(--foreground-subtle)]">
-                  <span className="font-semibold text-primary">
-                    {minPrice.toLocaleString('vi-VN')}₫
-                  </span>
-                  <span className="font-semibold text-primary">
-                    {maxPrice.toLocaleString('vi-VN')}₫
-                  </span>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-1">
-                    <span className="text-[9px] sm:text-[10px] text-[var(--foreground-subtle)] w-5 sm:w-7">
-                      Thấp
-                    </span>
-                    <input
-                      id="min-price"
-                      name="minPrice"
-                      type="range"
-                      min={minPrice}
-                      max={maxPrice}
-                      step={50000}
-                      value={filters.minPrice}
-                      onChange={(e) => {
-                        const val = Number(e.target.value);
-                        if (val <= filters.maxPrice)
-                          setFilters((prev) => ({ ...prev, minPrice: val }));
-                      }}
-                      className="flex-1 accent-primary"
-                    />
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-[9px] sm:text-[10px] text-[var(--foreground-subtle)] w-5 sm:w-7">
-                      Cao
-                    </span>
-                    <input
-                      id="max-price"
-                      name="maxPrice"
-                      type="range"
-                      min={minPrice}
-                      max={maxPrice}
-                      step={50000}
-                      value={filters.maxPrice}
-                      onChange={(e) => {
-                        const val = Number(e.target.value);
-                        if (val >= filters.minPrice)
-                          setFilters((prev) => ({ ...prev, maxPrice: val }));
-                      }}
-                      className="flex-1 accent-primary"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Departure Time */}
-            <div>
-              <label className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
-                Giờ khởi hành
-              </label>
-              <div className="grid grid-cols-2 gap-1">
-                {DEPARTURE_TIME_SLOTS.map((slot, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => toggleSlot(idx)}
-                    className={`text-left px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-lg border text-[9px] sm:text-[10px] transition-all ${
-                      filters.departureSlots.includes(idx)
-                        ? 'border-primary bg-primary/5 text-primary font-semibold'
-                        : 'border-[var(--border)] text-[var(--foreground-muted)] hover:border-primary/40 hover:text-primary'
-                    }`}
-                  >
-                    <div className="font-semibold">{slot.label}</div>
-                    <div className="text-[var(--foreground-subtle)] text-[8px] sm:text-[9px] mt-0.5">
-                      {slot.sublabel}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Stop Count */}
-            <div>
-              <label className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
-                Số điểm dừng
-              </label>
-              <div className="space-y-1">
-                {[
-                  { value: 0, label: 'Bay thẳng' },
-                  { value: 1, label: '1 điểm dừng' },
-                  { value: 2, label: '2+ điểm dừng' },
-                ].map((opt) => (
-                  <label key={opt.value} className="flex items-center gap-1.5 cursor-pointer group">
-                    <input
-                      id={`filter-stops-${opt.value}`}
-                      name="stops"
-                      type="checkbox"
-                      checked={filters.stops.includes(opt.value)}
-                      onChange={() => toggleStop(opt.value)}
-                      className="accent-primary w-3 h-3 rounded"
-                    />
-                    <span className="text-[11px] sm:text-xs text-[var(--foreground-muted)] group-hover:text-primary">
+          <div id="flight-filters" className={`${filtersOpen ? 'block' : 'hidden'} md:block`}>
+            <div className="p-2 sm:p-3 space-y-3 sm:space-y-4">
+              {/* Sort */}
+              <div>
+                <label className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1 font-koho">
+                  Sắp xếp theo
+                </label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full text-base sm:text-sm border border-[var(--border)] rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 text-[var(--foreground)] focus:outline-none focus:border-primary bg-[var(--surface-2)] form-input"
+                >
+                  {SORT_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
                       {opt.label}
-                    </span>
-                    <span className="text-[9px] sm:text-[10px] text-[var(--foreground-subtle)] ml-auto">
-                      {
-                        flights.filter((f) =>
-                          opt.value === 2 ? f.stops >= 2 : f.stops === opt.value
-                        ).length
-                      }
-                    </span>
-                  </label>
-                ))}
+                    </option>
+                  ))}
+                </select>
               </div>
-            </div>
 
-            {/* Duration */}
-            <div>
-              <label className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
-                Thời gian bay tối đa:{' '}
-                <span className="text-primary">
-                  {Math.floor(shownMaxDuration / 60)}h{' '}
-                  {shownMaxDuration % 60 > 0 ? `${shownMaxDuration % 60}m` : ''}
-                </span>
-              </label>
-              <input
-                id="max-duration"
-                name="maxDuration"
-                type="range"
-                min={60}
-                max={maxDuration}
-                step={15}
-                value={filters.maxDuration === Infinity ? maxDuration : filters.maxDuration}
-                onChange={(e) =>
-                  setFilters((prev) => ({ ...prev, maxDuration: Number(e.target.value) }))
-                }
-                className="w-full accent-primary"
-              />
-              <div className="flex justify-between text-[9px] sm:text-[10px] text-[var(--foreground-subtle)] mt-1">
-                <span>1h</span>
-                <span>
-                  {Math.floor(maxDuration / 60)}h{' '}
-                  {maxDuration % 60 > 0 ? `${maxDuration % 60}m` : ''}
-                </span>
+              {/* Airline Filter */}
+              <div>
+                <label className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
+                  Hãng hàng không
+                </label>
+                <div className="space-y-1">
+                  {allAirlines.map((airline) => (
+                    <label
+                      key={airline}
+                      className="flex min-h-9 items-center gap-2.5 cursor-pointer group"
+                    >
+                      <input
+                        id={`filter-airline-${airline}`}
+                        name="airline"
+                        type="checkbox"
+                        checked={filters.airlines.includes(airline)}
+                        onChange={() => toggleAirline(airline)}
+                        className="accent-primary w-4 h-4 shrink-0 rounded"
+                      />
+                      <span className="text-[11px] sm:text-xs text-[var(--foreground-muted)] group-hover:text-primary flex-1">
+                        {airline}
+                      </span>
+                      <span className="text-[9px] sm:text-[10px] text-[var(--foreground-subtle)]">
+                        {flights.filter((f) => f.airline === airline).length}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Price Range */}
+              <div>
+                <label className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
+                  Khoảng giá
+                </label>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-[10px] text-[var(--foreground-subtle)]">
+                    <span className="font-semibold text-primary">
+                      {minPrice.toLocaleString('vi-VN')}₫
+                    </span>
+                    <span className="font-semibold text-primary">
+                      {maxPrice.toLocaleString('vi-VN')}₫
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1">
+                      <span className="text-[9px] sm:text-[10px] text-[var(--foreground-subtle)] w-5 sm:w-7">
+                        Thấp
+                      </span>
+                      <input
+                        id="min-price"
+                        name="minPrice"
+                        type="range"
+                        min={minPrice}
+                        max={maxPrice}
+                        step={50000}
+                        value={filters.minPrice}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          if (val <= filters.maxPrice)
+                            setFilters((prev) => ({ ...prev, minPrice: val }));
+                        }}
+                        className="flex-1 accent-primary"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-[9px] sm:text-[10px] text-[var(--foreground-subtle)] w-5 sm:w-7">
+                        Cao
+                      </span>
+                      <input
+                        id="max-price"
+                        name="maxPrice"
+                        type="range"
+                        min={minPrice}
+                        max={maxPrice}
+                        step={50000}
+                        value={filters.maxPrice}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          if (val >= filters.minPrice)
+                            setFilters((prev) => ({ ...prev, maxPrice: val }));
+                        }}
+                        className="flex-1 accent-primary"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Departure Time */}
+              <div>
+                <label className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
+                  Giờ khởi hành
+                </label>
+                <div className="grid grid-cols-2 gap-1">
+                  {DEPARTURE_TIME_SLOTS.map((slot, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => toggleSlot(idx)}
+                      className={`text-left px-1.5 sm:px-2 py-2 sm:py-1.5 rounded-lg border text-[9px] sm:text-[10px] transition-all ${
+                        filters.departureSlots.includes(idx)
+                          ? 'border-primary bg-primary/5 text-primary font-semibold'
+                          : 'border-[var(--border)] text-[var(--foreground-muted)] hover:border-primary/40 hover:text-primary'
+                      }`}
+                    >
+                      <div className="font-semibold">{slot.label}</div>
+                      <div className="text-[var(--foreground-subtle)] text-[8px] sm:text-[9px] mt-0.5">
+                        {slot.sublabel}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Stop Count */}
+              <div>
+                <label className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
+                  Số điểm dừng
+                </label>
+                <div className="space-y-1">
+                  {[
+                    { value: 0, label: 'Bay thẳng' },
+                    { value: 1, label: '1 điểm dừng' },
+                    { value: 2, label: '2+ điểm dừng' },
+                  ].map((opt) => (
+                    <label
+                      key={opt.value}
+                      className="flex min-h-9 items-center gap-2.5 cursor-pointer group"
+                    >
+                      <input
+                        id={`filter-stops-${opt.value}`}
+                        name="stops"
+                        type="checkbox"
+                        checked={filters.stops.includes(opt.value)}
+                        onChange={() => toggleStop(opt.value)}
+                        className="accent-primary w-4 h-4 shrink-0 rounded"
+                      />
+                      <span className="text-[11px] sm:text-xs text-[var(--foreground-muted)] group-hover:text-primary">
+                        {opt.label}
+                      </span>
+                      <span className="text-[9px] sm:text-[10px] text-[var(--foreground-subtle)] ml-auto">
+                        {
+                          flights.filter((f) =>
+                            opt.value === 2 ? f.stops >= 2 : f.stops === opt.value
+                          ).length
+                        }
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Duration */}
+              <div>
+                <label className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
+                  Thời gian bay tối đa:{' '}
+                  <span className="text-primary">
+                    {Math.floor(shownMaxDuration / 60)}h{' '}
+                    {shownMaxDuration % 60 > 0 ? `${shownMaxDuration % 60}m` : ''}
+                  </span>
+                </label>
+                <input
+                  id="max-duration"
+                  name="maxDuration"
+                  type="range"
+                  min={60}
+                  max={maxDuration}
+                  step={15}
+                  value={filters.maxDuration === Infinity ? maxDuration : filters.maxDuration}
+                  onChange={(e) =>
+                    setFilters((prev) => ({ ...prev, maxDuration: Number(e.target.value) }))
+                  }
+                  className="w-full accent-primary"
+                />
+                <div className="flex justify-between text-[9px] sm:text-[10px] text-[var(--foreground-subtle)] mt-1">
+                  <span>1h</span>
+                  <span>
+                    {Math.floor(maxDuration / 60)}h{' '}
+                    {maxDuration % 60 > 0 ? `${maxDuration % 60}m` : ''}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -714,7 +758,7 @@ export default function FlightResultsStep({
       </aside>
 
       {/* Flight List */}
-      <main className="lg:col-span-6 w-full min-w-0 space-y-3">
+      <main className="md:col-span-9 w-full min-w-0 space-y-3">
         {/* Route board — the real site repeats HAN → SGN above the results. */}
         {search?.from && search?.to && (
           <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] px-3 py-2.5 sm:px-4 sm:py-3">
@@ -761,7 +805,7 @@ export default function FlightResultsStep({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm theo số hiệu, hãng bay..."
-            className="w-full pl-8 sm:pl-9 pr-8 sm:pr-9 py-2 sm:py-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] placeholder-[var(--foreground-subtle)] focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all form-input text-sm"
+            className="w-full pl-8 sm:pl-9 pr-8 sm:pr-9 py-2 sm:py-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] placeholder-[var(--foreground-subtle)] focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all form-input text-base sm:text-sm"
           />
           {searchQuery && (
             <button
@@ -788,15 +832,17 @@ export default function FlightResultsStep({
               </>
             )}
           </h2>
-          <div className="flex items-center gap-1 flex-wrap">
-            <span className="text-[10px] sm:text-[11px] text-[var(--foreground-subtle)] font-semibold">
+          {/* Scrolls sideways instead of wrapping: five chips plus the label wrap
+              onto two rows on a 390px screen and push the flight list down. */}
+          <div className="-mx-1 flex items-center gap-1 overflow-x-auto px-1 pb-1">
+            <span className="shrink-0 text-[10px] sm:text-[11px] text-[var(--foreground-subtle)] font-semibold">
               Sắp xếp:
             </span>
             {SORT_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
                 onClick={() => setSortBy(opt.value)}
-                className={`text-[10px] sm:text-[11px] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border font-semibold transition-all ${
+                className={`shrink-0 text-[10px] sm:text-[11px] px-2 sm:px-2.5 py-1.5 sm:py-1 rounded-full border font-semibold transition-all ${
                   sortBy === opt.value
                     ? 'bg-primary text-white border-primary shadow-sm'
                     : 'border-[var(--border)] text-[var(--foreground-muted)] hover:border-primary/40 hover:text-primary'
@@ -844,13 +890,18 @@ export default function FlightResultsStep({
         {!isLoading &&
           !loadError &&
           filtered.map((flight, idx) => {
-            const basePrice = flight.price;
+            // Fares come from the flight row (migration 030), not from hard-coded
+            // offsets. The old `basePrice + 1_200_000` ladder showed a price the
+            // server then ignored, so the quoted and charged totals disagreed.
+            // Each card's amount comes from `getFareForClass` — the same ladder
+            // the booking API charges with — so tapping SkyBOSS cannot quote one
+            // figure and bill another.
+            const economyFare = flight.economyPrice || flight.price;
+            const businessFare = flight.businessPrice || flight.price;
             const fareClasses = [
               {
                 id: 'business',
-                cabin: 'business' as const,
                 name: 'Business',
-                price: basePrice + 1200000,
                 color:
                   'bg-[var(--surface-2)] text-[var(--primary)] border-transparent hover:border-[var(--primary)]',
                 headerClass: 'bg-[var(--primary)] text-white',
@@ -858,9 +909,7 @@ export default function FlightResultsStep({
               },
               {
                 id: 'skyboss',
-                cabin: 'business' as const,
                 name: 'SkyBOSS',
-                price: basePrice + 800000,
                 color:
                   'bg-[var(--surface-2)] text-[var(--foreground)] border-transparent hover:border-[var(--foreground)]',
                 headerClass: 'bg-[var(--vj-navy)] text-white',
@@ -868,9 +917,7 @@ export default function FlightResultsStep({
               },
               {
                 id: 'deluxe',
-                cabin: 'economy' as const,
                 name: 'Deluxe',
-                price: basePrice + 300000,
                 color:
                   'bg-[var(--surface-2)] text-[var(--foreground)] border-transparent hover:border-[var(--border)] ',
                 headerClass: 'bg-[var(--accent)] text-[var(--vj-navy)]',
@@ -878,15 +925,20 @@ export default function FlightResultsStep({
               },
               {
                 id: 'eco',
-                cabin: 'economy' as const,
                 name: 'Eco',
-                price: basePrice,
                 color:
                   'bg-[var(--surface)] text-[var(--foreground-muted)] border-[var(--border)] hover:border-[var(--primary)]:border-[var(--primary)] hover:text-[var(--primary)]:text-[var(--primary)]',
                 headerClass: 'bg-[var(--surface-2)] text-[var(--foreground-muted)]',
-                priceColor: 'text-[var(--foreground)]',
+                priceColor: 'text-[var(--foreground-muted)]',
               },
-            ];
+            ].map((fc) => ({
+              ...fc,
+              id: fc.id as FareClassId,
+              price: getFareForClass(fc.id as FareClassId, {
+                economyPrice: economyFare,
+                businessPrice: businessFare,
+              }),
+            }));
 
             return (
               <div
@@ -966,11 +1018,11 @@ export default function FlightResultsStep({
                         <div
                           className={`text-[8px] sm:text-[9px] 2xl:text-sm font-black ${fc.priceColor} font-koho mb-1.5 sm:mb-2 2xl:mb-3 leading-none break-words text-center`}
                         >
-                          {fc.price.toLocaleString('vi-VN')}₫
+                          {Math.round(fc.price).toLocaleString('vi-VN')}₫
                         </div>
                         <button
-                          onClick={() => onSelect({ ...flight, price: fc.price, class: fc.cabin })}
-                          className={`w-full py-1 rounded text-[8px] sm:text-[9px] 2xl:text-xs font-bold transition-all border ${fc.color}`}
+                          onClick={() => onSelect({ ...flight, price: fc.price, fareClass: fc.id })}
+                          className={`w-full min-h-9 py-1.5 rounded text-[8px] sm:text-[9px] 2xl:text-xs font-bold transition-all border ${fc.color}`}
                         >
                           Chọn
                         </button>
@@ -1268,7 +1320,7 @@ export default function FlightResultsStep({
                         <div
                           className={`text-xl font-black ${isBest ? 'text-[var(--vj-green)]' : 'text-primary'} font-koho`}
                         >
-                          {flight.price.toLocaleString('vi-VN')}₫
+                          {Math.round(flight.price).toLocaleString('vi-VN')}₫
                         </div>
                         <div className="text-xs text-[var(--foreground-muted)]">/ hành khách</div>
                       </CompareCell>
@@ -1375,7 +1427,7 @@ export default function FlightResultsStep({
                     return (
                       <CompareCell key={flight.id} size="sm" tone={isBest ? 'best' : 'plain'}>
                         <div className="text-sm font-semibold text-[var(--foreground)]">
-                          {flight.price.toLocaleString('vi-VN')}₫
+                          {Math.round(flight.price).toLocaleString('vi-VN')}₫
                         </div>
                       </CompareCell>
                     );
@@ -1390,7 +1442,7 @@ export default function FlightResultsStep({
                     return (
                       <CompareCell key={flight.id} size="sm" tone={isBest ? 'best' : 'plain'}>
                         <div className="text-sm font-semibold text-[var(--foreground-muted)]">
-                          +{flight.price.toLocaleString('vi-VN')}₫
+                          +{Math.round(flight.price).toLocaleString('vi-VN')}₫
                         </div>
                       </CompareCell>
                     );
@@ -1405,7 +1457,7 @@ export default function FlightResultsStep({
                     return (
                       <CompareCell key={flight.id} size="sm" tone={isBest ? 'best' : 'plain'}>
                         <div className="text-sm font-semibold text-[var(--foreground-muted)]">
-                          +{flight.price.toLocaleString('vi-VN')}₫
+                          +{Math.round(flight.price).toLocaleString('vi-VN')}₫
                         </div>
                       </CompareCell>
                     );
@@ -1420,7 +1472,7 @@ export default function FlightResultsStep({
                     return (
                       <CompareCell key={flight.id} size="sm" tone={isBest ? 'best' : 'plain'}>
                         <div className="text-sm font-semibold text-[var(--vj-green)]">
-                          -{flight.price.toLocaleString('vi-VN')}₫
+                          -{Math.round(flight.price).toLocaleString('vi-VN')}₫
                         </div>
                       </CompareCell>
                     );
@@ -1439,7 +1491,7 @@ export default function FlightResultsStep({
                     return (
                       <CompareCell key={flight.id} tone={isBest ? 'best' : 'plain'}>
                         <div className="text-lg font-black text-primary font-koho">
-                          {flight.price.toLocaleString('vi-VN')}₫
+                          {Math.round(flight.price).toLocaleString('vi-VN')}₫
                         </div>
                       </CompareCell>
                     );
@@ -1491,8 +1543,10 @@ export default function FlightResultsStep({
         )}
       </main>
 
-      {/* Booking Summary Sidebar */}
-      <aside className="lg:col-span-3 w-full min-w-0">
+      {/* Booking Summary Sidebar — desktop only. Below `lg` it would stack under
+          the flight list as a third full-width block, while the same totals are
+          already pinned in the sticky bar, so mobile drops it. */}
+      <aside className="hidden lg:col-span-3 w-full min-w-0 lg:block">
         <div className="bg-[var(--background)] rounded-xl border border-primary/20 sticky top-[160px] overflow-hidden shadow-sm">
           {/* Header bar — vietjetair.com paints this one solid red. */}
           <div className="bg-primary px-3 py-2 text-white flex items-center justify-center relative">
