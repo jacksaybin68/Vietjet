@@ -165,6 +165,22 @@ credentials come from `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`: there is no
 single admin address in a real database, and a hard-coded one made the script
 exit 401 everywhere except the database it was written against.
 
+**The network is hub-and-spoke plus the regional pairs that matter.** 027 links
+every airport to HAN and SGN; that covers each hub's 26 destinations and leaves
+all 462 regional-to-regional pairs unserved. `032` adds the 32 a traveller
+actually asks for — adjacent provinces on a corridor, plus each regional hub's
+own spokes — with real block times (Đà Nẵng–Huế is 90 minutes, not the 2h10m 027
+gives every hop) numbered from 1500, clear of 027's 601–1040, 028's 1100–1256
+and 031's 2001+. Seeding all 462 would be both false and unreadable in the
+results list. When adding routes, keep the block bands clear of those four
+ranges.
+
+**One `flight_no` per row, not per service.** `scripts/seed-future-flights.cjs`
+creates an economy row and a business wave for each route, and they used to
+share a number — 399 `(day, flight_no)` collisions, with the results list
+printing the same service twice. The business wave now carries a `B` suffix.
+`031` renumbers whatever a previous run left behind, so run it after reseeding.
+
 **Agency-issued discount codes.** `015_agency_discounts.sql` adds `agencies` and
 `discount_codes.agency_id` (nullable, `ON DELETE SET NULL`) plus `issued_by`. Admins
 manage agencies at `/quan-tri` → "Đại lý" and pick one from the "Phát hành cho đại lý"
