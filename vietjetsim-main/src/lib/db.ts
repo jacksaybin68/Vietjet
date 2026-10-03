@@ -621,6 +621,11 @@ export async function updateFlight(
     depart_time: string;
     arrive_time: string;
     price: number;
+    /** Fare per cabin (migration 030). Missing here while present in
+     * `createFlight` silently dropped every price edit — the form sent it and
+     * nothing persisted. */
+    economy_price?: number | null;
+    business_price?: number | null;
     class: string;
     available: number;
     status?: FlightStatus;
@@ -636,6 +641,8 @@ export async function updateFlight(
     'depart_time',
     'arrive_time',
     'price',
+    'economy_price',
+    'business_price',
     'class',
     'available',
     'status',

@@ -10,6 +10,9 @@ const ALLOWED_FIELDS = [
   'to_code',
   'depart_time',
   'arrive_time',
+  'price',
+  'economy_price',
+  'business_price',
   'status',
 ] as const;
 
@@ -21,8 +24,27 @@ const FIELD_LABELS: Record<AllowedField, string> = {
   to_code: 'Điểm đến',
   depart_time: 'Thời gian khởi hành',
   arrive_time: 'Thời gian đến',
+  price: 'Giá vé cơ sở',
+  // Displayed in the edit modal as one Economy/Business pair, kept as two
+  // columns because migration 030 prices every fare card from them.
+  economy_price: 'Giá vé Phổ thông',
+  business_price: 'Giá vé Thương gia',
   status: 'Trạng thái chuyến bay',
 };
+
+/**
+ * Read a fare from either side of the wire.
+ *
+ * A `NUMERIC` column reaches here as `"899000.00"` — the dot is a decimal
+ * point, so stripping it as a thousands separator reads the value as
+ * 89,900,000 and every ladder comparison inverts. Commas are what vi-VN
+ * formats with, and operator input arrives as plain digits from a
+ * `type="number"` field, so only whitespace and the symbol are removed
+ * unconditionally.
+ */
+function toFareAmount(value: unknown): number {
+  return Number(String(value).replace(/[₫\s]/g, '').replace(/,/g, ''));
+}
 
 function validateField(field: AllowedField, value: unknown): string | null {
   if (value === undefined || value === null || value === '') {
@@ -59,6 +81,19 @@ function validateField(field: AllowedField, value: unknown): string | null {
       const validStatuses = ['active', 'cancelled', 'delayed', 'boarding', 'landed', 'scheduled'];
       if (!validStatuses.includes(strVal)) {
         return `Trạng thái "${strVal}" không hợp lệ. Các giá trị cho phép: ${validStatuses.join(', ')}`;
+      }
+      break;
+    }
+
+    // A non-positive fare is never a real price; the DB would accept it and the
+    // results page would then quote the customer that number. Caught here so
+    // the operator sees the reason instead of debugging a 201 that printed ₫0.
+    case 'price':
+    case 'economy_price':
+    case 'business_price': {
+      const amount = toFareAmount(strVal);
+      if (!Number.isFinite(amount) || amount <= 0) {
+        return `${FIELD_LABELS[field]} phải là một số tiền lớn hơn 0.`;
       }
       break;
     }
@@ -153,6 +188,42 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       );
     }
 
+    // Business rule: the fare ladder must stay ordered. Migration 030 guards
+    // this with `flights_fare_ladder_ordered`, but a 500 from a CHECK failure
+    // tells the operator nothing. Only one side may be edited at a time, so the
+    // other is read off the row being edited — leaving it stale while writing
+    // the new one is what splits the ladder in the first place.
+    let derivedPrice: number | undefined;
+    if (body.economy_price !== undefined || body.business_price !== undefined) {
+      const nextEconomy =
+        body.economy_price !== undefined
+          ? toFareAmount(body.economy_price)
+          : toFareAmount(existingFlight.economy_price);
+      const nextBusiness =
+        body.business_price !== undefined
+          ? toFareAmount(body.business_price)
+          : toFareAmount(existingFlight.business_price);
+
+      if (
+        !Number.isFinite(nextEconomy) ||
+        !Number.isFinite(nextBusiness) ||
+        nextEconomy > nextBusiness
+      ) {
+        return NextResponse.json(
+          {
+            error: 'Validation Error',
+            message: `Thang giá bị đảo: Phổ thông (${nextEconomy}₫) cao hơn Thương gia (${nextBusiness}₫).`,
+          },
+          { status: 400 }
+        );
+      }
+
+      // `price` is what sorting and the price slider read; it must be the fare
+      // of the cabin this row seats, or the list orders on a value no card
+      // shows.
+      derivedPrice = existingFlight.class === 'business' ? nextBusiness : nextEconomy;
+    }
+
     // ─── 5. Build changes array for logging ───────────────────────────────
     const changes: Array<{ field: string; label: string; oldValue: unknown; newValue: unknown }> =
       [];
@@ -196,8 +267,24 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     for (const field of updateFields) {
       let val = body[field];
       if (field === 'from_code' || field === 'to_code') val = String(val).toUpperCase();
-      if (field === 'flight_no') val = String(val).trim().replace(/\s+/, ' ').toUpperCase();
+      if (field === 'flight_no') val = String(val).trim().replace(/\s+/g, ' ').toUpperCase();
       updates[field] = val;
+    }
+
+    // Keep `price` agreeing with the cabin's own fare when a fare moved. It is
+    // not in the request, so log it — an operator editing a fare should see the
+    // row's display price change with it, not find it diverging later.
+    if (derivedPrice !== undefined && body.price === undefined) {
+      const previous = toFareAmount(existingFlight.price);
+      if (derivedPrice !== previous) {
+        updates.price = derivedPrice;
+        changes.push({
+          field: 'price',
+          label: FIELD_LABELS.price,
+          oldValue: previous,
+          newValue: derivedPrice,
+        });
+      }
     }
 
     const updatedFlight = await updateFlight(flightId, updates);

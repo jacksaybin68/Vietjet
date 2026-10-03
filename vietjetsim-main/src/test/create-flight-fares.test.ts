@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
-import { createFlight } from '@/lib/db';
+import { createFlight, updateFlight } from '@/lib/db';
 
 vi.mock('@/lib/neon', () => {
   const queryMock = vi.fn();
@@ -15,6 +15,9 @@ import { sql } from '@/lib/neon';
 
 /** The mocked tagged-template function, typed for `mock.calls`. */
 const sqlMock = sql as unknown as Mock;
+
+/** Backing mock for `sql.query` — `updateFlight` goes through it, not the tag. */
+const queryMock = (sql as unknown as { query: Mock }).query;
 
 function statement(): { text: string; values: unknown[] } {
   const [strings, ...values] = sqlMock.mock.calls[0] as [TemplateStringsArray, ...unknown[]];
@@ -94,5 +97,28 @@ describe('createFlight', () => {
     await createFlight(BASE_FLIGHT);
     const { economy, business } = faresFor(BASE_FLIGHT.price);
     expect(business).toBeGreaterThanOrEqual(economy);
+  });
+});
+
+describe('updateFlight fare columns', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    sqlMock.mockResolvedValue([{ id: 'f1' }]);
+  });
+
+  // `createFlight` gained the two fare columns when 030 landed, but
+  // `updateFlight` kept its own whitelist without them — so PATCH took the
+  // field, reported success, and wrote nothing. The operator edits a fare, sees
+  // a green toast, and the results page still shows the old number.
+  it('ghi cả hai cột giá khi sửa giá', async () => {
+    queryMock.mockResolvedValue([{ id: 'f1' }]);
+
+    await updateFlight('flight-1', { economy_price: 949000, business_price: 3597000 });
+
+    const [sqlText, values] = queryMock.mock.calls[0] as [string, unknown[]];
+    expect(sqlText).toMatch(/UPDATE flights[\s\S]*economy_price/);
+    expect(sqlText).toMatch(/UPDATE flights[\s\S]*business_price/);
+    expect(values).toContain(949000);
+    expect(values).toContain(3597000);
   });
 });
