@@ -27,9 +27,18 @@ export interface Pagination {
   totalPages: number;
 }
 
+/**
+ * A payment row from the history list. Narrowed from `PaymentRecord`: the
+ * endpoint inner-joins `bookings`, so `booking_code` is always present and the
+ * UI prints it as "Mã đặt chỗ" instead of a row UUID.
+ */
+export interface PaymentHistoryEntry extends PaymentRecord {
+  booking_code: string;
+}
+
 export interface PaymentHistoryResponse {
   success: boolean;
-  payments: PaymentRecord[];
+  payments: PaymentHistoryEntry[];
   pagination: Pagination;
 }
 

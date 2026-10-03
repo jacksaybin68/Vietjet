@@ -148,6 +148,12 @@ export interface PassengerRecord {
 export interface PaymentRecord {
   id: string;
   booking_id: string;
+  /**
+   * PNR of the booking this payment settles. Not a column of `payments` —
+   * `getPaymentHistory` joins it in, so it is absent wherever the payment is
+   * fetched without the booking (e.g. `getPaymentById`).
+   */
+  booking_code?: string | null;
   method: string;
   status: 'pending' | 'completed' | 'failed' | 'refunded';
   amount: number;
@@ -1150,8 +1156,11 @@ export async function getPaymentHistory(
   const limit = params?.limit || 20;
   const offset = (page - 1) * limit;
 
+  // `b.booking_code` rides along because the history table labels a column "Mã
+  // đặt chỗ" and used to fill it with the first 8 chars of the row UUID — a
+  // reference the customer can neither read aloud nor use at check-in.
   const payments = (await sql`
-    SELECT p.* FROM payments p
+    SELECT p.*, b.booking_code FROM payments p
     INNER JOIN bookings b ON p.booking_id = b.id
     WHERE b.user_id = ${userId}
     ORDER BY p.created_at DESC
