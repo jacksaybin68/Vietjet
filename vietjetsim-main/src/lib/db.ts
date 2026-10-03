@@ -1788,6 +1788,38 @@ export async function insertSstkLog(
   `;
 }
 
+// ─── Bank Account (receiving account for bank transfers) ───────────────────
+
+export interface BankAccountRecord {
+  id: string;
+  bank_name: string;
+  account_number: string;
+  account_holder: string;
+  bank_bin?: string | null;
+  branch?: string | null;
+  logo_url?: string | null;
+  is_default?: boolean | null;
+  transfer_note_template?: string | null;
+}
+
+/**
+ * Active receiving accounts, default first.
+ *
+ * The payment route renders the transfer memo through each account's template
+ * so the memo it validates against is the same string the customer was shown;
+ * deriving it twice would let the two drift.
+ */
+export async function getActiveBankAccounts(): Promise<BankAccountRecord[]> {
+  const rows = await sql`
+    SELECT id, bank_name, account_number, account_holder,
+           bank_bin, branch, logo_url, is_default, transfer_note_template
+    FROM bank_accounts
+    WHERE is_active = true
+    ORDER BY is_default DESC, created_at DESC
+  `;
+  return rows as BankAccountRecord[];
+}
+
 // ─── Flight Update Log ──────────────────────────────────────────────────────
 
 export interface FlightUpdateLogRecord {
@@ -1839,7 +1871,7 @@ export async function insertFlightUpdateLog(log: {
     VALUES (
       ${log.flightId},
       ${log.flightNo},
-      log.updatedBy,
+      ${log.updatedBy},
       ${log.changesJson},
       ${log.previousSnapshot},
       ${log.ipAddress || null},
