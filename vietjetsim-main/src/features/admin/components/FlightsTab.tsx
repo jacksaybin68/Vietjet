@@ -29,7 +29,12 @@ interface Flight {
   departTime: string;
   arriveTime: string;
   date: string;
+  /** What the row seats, in VND — feeds `flights.price` on edit. */
   price: number;
+  /** Derived from the row's own fare columns. Kept on the row (not re-derived at
+   * save time) so the modal shows exactly what the results page priced from. */
+  economyPrice: number;
+  businessPrice: number;
   capacity: number;
   booked: number;
   status: FlightStatus;
@@ -45,6 +50,8 @@ const INITIAL_FLIGHTS: Flight[] = [
     arriveTime: '08:10',
     date: '2026-03-20',
     price: 899000,
+    economyPrice: 899000,
+    businessPrice: 2490000,
     capacity: 180,
     booked: 138,
     status: 'active',
@@ -58,6 +65,8 @@ const INITIAL_FLIGHTS: Flight[] = [
     arriveTime: '11:40',
     date: '2026-03-20',
     price: 1299000,
+    economyPrice: 1299000,
+    businessPrice: 3597000,
     capacity: 180,
     booked: 165,
     status: 'active',
@@ -71,6 +80,8 @@ const INITIAL_FLIGHTS: Flight[] = [
     arriveTime: '14:25',
     date: '2026-03-20',
     price: 749000,
+    economyPrice: 749000,
+    businessPrice: 2075000,
     capacity: 180,
     booked: 112,
     status: 'active',
@@ -84,6 +95,8 @@ const INITIAL_FLIGHTS: Flight[] = [
     arriveTime: '17:10',
     date: '2026-03-20',
     price: 2899000,
+    economyPrice: 2899000,
+    businessPrice: 8029000,
     capacity: 30,
     booked: 22,
     status: 'active',
@@ -97,6 +110,8 @@ const INITIAL_FLIGHTS: Flight[] = [
     arriveTime: '20:55',
     date: '2026-03-20',
     price: 599000,
+    economyPrice: 599000,
+    businessPrice: 1659000,
     capacity: 180,
     booked: 177,
     status: 'delayed',
@@ -110,6 +125,8 @@ const INITIAL_FLIGHTS: Flight[] = [
     arriveTime: '08:45',
     date: '2026-03-21',
     price: 499000,
+    economyPrice: 499000,
+    businessPrice: 1382000,
     capacity: 150,
     booked: 95,
     status: 'active',
@@ -123,6 +140,8 @@ const INITIAL_FLIGHTS: Flight[] = [
     arriveTime: '08:20',
     date: '2026-03-21',
     price: 449000,
+    economyPrice: 449000,
+    businessPrice: 1244000,
     capacity: 150,
     booked: 120,
     status: 'cancelled',
@@ -153,6 +172,10 @@ function toFlightRow(f: AdminFlight): Flight {
     arriveTime: f.arrive_time ? new Date(f.arrive_time).toTimeString().slice(0, 5) : '',
     date: f.depart_time ? f.depart_time.split('T')[0] : '',
     price: Number(f.price) || 0,
+    // `getAllFlights` does `SELECT *`, so both columns are present; the
+    // fallbacks mirror the server-side ladder for rows predating 030.
+    economyPrice: Number(f.economy_price ?? f.price) || 0,
+    businessPrice: Number(f.business_price ?? f.price) || 0,
     capacity: Number(f.available ?? f.available_seats ?? 0) || 0,
     booked: Math.floor(Math.random() * (Number(f.available ?? f.available_seats ?? 1) || 1)),
     status: (f.status as FlightStatus) || 'active',
@@ -432,6 +455,12 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
         to_code: editingFlight.to,
         depart_time: departTimeStr,
         arrive_time: arriveTimeStr,
+        // Priced per cabin since 030: send the pair or the ladder splits the
+        // next time anyone reads the row. `price` is deliberately absent — the
+        // server derives it from the row's own cabin, which this form cannot
+        // know, so sending it here would write a stale display price.
+        economy_price: editingFlight.economyPrice,
+        business_price: editingFlight.businessPrice,
         status: editingFlight.status,
       };
 
@@ -453,6 +482,11 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 departTime: editingFlight.departTime,
                 arriveTime: editingFlight.arriveTime,
                 date: editingFlight.date,
+                // Server echoes the row; fall back to the modal values so an
+                // optimistic update never blanks a fare the operator just set.
+                price: Number(data.flight?.price ?? editingFlight.price),
+                economyPrice: Number(data.flight?.economy_price ?? editingFlight.economyPrice),
+                businessPrice: Number(data.flight?.business_price ?? editingFlight.businessPrice),
                 status: (data.flight?.status as FlightStatus) || editingFlight.status,
               }
             : f
@@ -1264,7 +1298,71 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 </div>
               </div>
 
-              {/* Date picker for both times */}
+              {/* ── Fare pair: what the results cards price from (migration 030) ── */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded bg-emerald-50 text-emerald-700 flex items-center justify-center text-[10px] font-bold">
+                      ₫
+                    </span>
+                    Giá Phổ thông (₫)
+                    <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={editingFlight.economyPrice || ''}
+                    onChange={(e) =>
+                      setEditingFlight((p) =>
+                        p ? { ...p, economyPrice: Number(e.target.value) || 0 } : p
+                      )
+                    }
+                    placeholder="Ví dụ: 899000"
+                    className={`w-full px-3 py-2.5 bg-stone-50 border ${editingFlight.economyPrice > 0 ? 'border-green-300' : 'border-stone-200'} rounded-lg text-sm font-mono focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all`}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded bg-indigo-50 text-indigo-700 flex items-center justify-center text-[10px] font-bold">
+                      ₫
+                    </span>
+                    Giá Thương gia (₫)
+                    <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={editingFlight.businessPrice || ''}
+                    onChange={(e) =>
+                      setEditingFlight((p) =>
+                        p ? { ...p, businessPrice: Number(e.target.value) || 0 } : p
+                      )
+                    }
+                    placeholder="Ví dụ: 2490000"
+                    className={`w-full px-3 py-2.5 bg-stone-50 border ${editingFlight.businessPrice > 0 ? 'border-green-300' : 'border-stone-200'} rounded-lg text-sm font-mono focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all`}
+                    required
+                  />
+                </div>
+              </div>
+              {editingFlight.economyPrice > 0 &&
+                editingFlight.businessPrice > 0 &&
+                editingFlight.economyPrice > editingFlight.businessPrice && (
+                  <div
+                    className="rounded-lg p-2.5 flex items-center gap-2"
+                    style={{ background: '#FEF2F2', border: '1px solid #FECACA' }}
+                  >
+                    <Icon
+                      name="ExclamationTriangleIcon"
+                      size={14}
+                      className="text-red-500 flex-shrink-0"
+                    />
+                    <p className="text-xs font-medium" style={{ color: '#6F0000' }}>
+                      Giá Phổ thông không được cao hơn giá Thương gia — thang giá này sẽ bị từ chối
+                      khi lưu.
+                    </p>
+                  </div>
+                )}
               <div>
                 <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
                   <Icon name="CalendarDaysIcon" size={12} className="text-stone-400" />
@@ -1380,6 +1478,22 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                     </span>
                   </div>
                   <div className="flex justify-between">
+                    <span className="text-stone-400">Giá Phổ thông:</span>
+                    <span className="font-mono font-bold">
+                      {editingFlight.economyPrice > 0
+                        ? `${editingFlight.economyPrice.toLocaleString('vi-VN')}₫`
+                        : '—'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-stone-400">Giá Thương gia:</span>
+                    <span className="font-mono font-bold">
+                      {editingFlight.businessPrice > 0
+                        ? `${editingFlight.businessPrice.toLocaleString('vi-VN')}₫`
+                        : '—'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
                     <span className="text-stone-400">Trạng thái:</span>
                     <span
                       className={`font-bold ${STATUS_MAP[editingFlight.status]?.cls?.replace('badge-', 'text-') || ''}`}
@@ -1410,7 +1524,10 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                     !editingFlight.departTime ||
                     !editingFlight.arriveTime ||
                     editingFlight.from === editingFlight.to ||
-                    editingFlight.departTime >= editingFlight.arriveTime
+                    editingFlight.departTime >= editingFlight.arriveTime ||
+                    editingFlight.economyPrice <= 0 ||
+                    editingFlight.businessPrice <= 0 ||
+                    editingFlight.economyPrice > editingFlight.businessPrice
                   }
                   className="flex-1 text-white font-bold py-2.5 rounded-xl text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   style={{

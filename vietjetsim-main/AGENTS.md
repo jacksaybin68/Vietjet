@@ -157,6 +157,18 @@ off it in the opposite direction: economy row multiplies by 2.77, business row
 divides. `scripts/seed-future-flights.cjs` sends one `price` per row and relies
 on this, so a change here reshapes its whole schedule.
 
+**`updateFlight` needs the same fare columns `createFlight` got.** The PATCH
+route accepted `economy_price` / `business_price` from its `ALLOWED_FIELDS` from
+the start, but `updateFlight` filtered through its own whitelist and dropped
+both before SQL: an operator edited a fare, saw "Cập nhật thành công", and the
+results page still quoted the old number. Any new column added to a write path
+has to be added to *every* write path — `createFlight` and `updateFlight` keep
+separate whitelists, and only one being updated reads as "already handled".
+The route also derives `price` from whichever side of the ladder the row's own
+`class` seats and refuses an inverted pair with a 400, because migration 030's
+`flights_fare_ladder_ordered` CHECK only surfaces as a 500. `src/test/
+flight-fare-edit.test.ts` pins both columns reaching SQL.
+
 **Re-run the seed when the window runs out.** `npm run db:seed-flights` opens a
 21-day window (three weeks, not the seven the date strip shows — someone who
 returns next week still lands inside it) and covers 028's international routes,
