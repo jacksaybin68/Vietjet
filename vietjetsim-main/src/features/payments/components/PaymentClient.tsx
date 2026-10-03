@@ -11,9 +11,10 @@ import { TAX_AND_FEE_RATE, ANCILLARY_OPTIONS, type AncillaryId } from '@/feature
 import type { PaymentMethod } from '@/features/payments/types';
 import { apiRequest, ApiRequestError } from '@/shared/services';
 import { renderTransferNote } from '@/lib/transfer-note';
+import { validateBankTransferInput } from '@/lib/bank-transfer';
 
 interface BankAccount {
-  id: number;
+  id: string;
   admin_bank_name: string;
   admin_bank_account_number: string;
   admin_bank_account_holder: string;
@@ -23,89 +24,6 @@ interface BankAccount {
   is_default?: boolean;
   transfer_note_template?: string;
 }
-
-interface BankInfo {
-  id: string;
-  name: string;
-  fullName: string;
-  code: string;
-  color: string;
-}
-
-const BANKS: BankInfo[] = [
-  {
-    id: 'vietcombank',
-    name: 'Vietcombank',
-    fullName: 'Ngân hàng TMCP Ngoại Thương Việt Nam',
-    code: 'VCB',
-    color: '#006A4E',
-  },
-  {
-    id: 'techcombank',
-    name: 'Techcombank',
-    fullName: 'Ngân hàng TMCP Kỹ Thương Việt Nam',
-    code: 'TCB',
-    color: '#EE1C25',
-  },
-  {
-    id: 'mbbank',
-    name: 'MB Bank',
-    fullName: 'Ngân hàng TMCP Quân Đội',
-    code: 'MBB',
-    color: '#005BA1',
-  },
-  {
-    id: 'bidv',
-    name: 'BIDV',
-    fullName: 'Ngân hàng TMCP Đầu Tư và Phát Triển Việt Nam',
-    code: 'BIDV',
-    color: '#1B3A6B',
-  },
-  {
-    id: 'vpbank',
-    name: 'VPBank',
-    fullName: 'Ngân hàng TMCP Việt Nam Thịnh Vượng',
-    code: 'VPB',
-    color: '#F26522',
-  },
-  { id: 'acb', name: 'ACB', fullName: 'Ngân hàng TMCP Á Châu', code: 'ACB', color: '#F7941D' },
-  {
-    id: 'sacombank',
-    name: 'Sacombank',
-    fullName: 'Ngân hàng TMCP Sài Gòn Thương Tín',
-    code: 'STB',
-    color: '#ED1C24',
-  },
-  {
-    id: 'tpbank',
-    name: 'TPBank',
-    fullName: 'Ngân hàng TMCP Tiên Phong',
-    code: 'TPB',
-    color: '#8C52FF',
-  },
-  {
-    id: 'vib',
-    name: 'VIB',
-    fullName: 'Ngân hàng TMCP Quốc Tế Việt Nam',
-    code: 'VIB',
-    color: '#FFDD00',
-  },
-  {
-    id: 'shb',
-    name: 'SHB',
-    fullName: 'Ngân hàng TMCP Sài Gòn - Hà Nội',
-    code: 'SHB',
-    color: '#EC2029',
-  },
-  {
-    id: 'hdbank',
-    name: 'HDBank',
-    fullName: 'Ngân hàng TMCP Phát Triển TP.HCM',
-    code: 'HDB',
-    color: '#00A651',
-  },
-  { id: 'ocb', name: 'OCB', fullName: 'Ngân hàng TMCP Phương Đông', code: 'OCB', color: '#0068B5' },
-];
 
 const EWALLETS = ['MoMo', 'ZaloPay', 'VNPay'];
 
@@ -372,13 +290,10 @@ export default function PaymentClient() {
   const [cardName, setCardName] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvv, setCvv] = useState('');
-  const [selectedBank, setSelectedBank] = useState<BankInfo | null>(null);
-  const [bankAccountNumber, setBankAccountNumber] = useState('');
-  const [bankAccountHolder, setBankAccountHolder] = useState('');
-  const [saveAccount, setSaveAccount] = useState(false);
-  const [savedAccounts, setSavedAccounts] = useState<
-    Array<{ bankId: string; accountNumber: string; accountHolder: string }>
-  >([]);
+  // The bank tab no longer collects the customer's own account — it confirms a
+  // transfer they already made, by re-typing the memo and amount we displayed.
+  const [transferNoteInput, setTransferNoteInput] = useState('');
+  const [transferAmountInput, setTransferAmountInput] = useState('');
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoData, setPromoData] = useState<{
@@ -455,18 +370,6 @@ export default function PaymentClient() {
   useEffect(() => {
     const timer = setTimeout(() => setPageLoading(false), 50);
     return () => clearTimeout(timer);
-  }, []);
-
-  // Load saved bank accounts from localStorage
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('vjsim_saved_bank_accounts');
-      if (saved) {
-        setSavedAccounts(JSON.parse(saved));
-      }
-    } catch {
-      // Ignore parse errors
-    }
   }, []);
 
   // Read booking data from sessionStorage (set by FlightBookingClient)
@@ -564,20 +467,23 @@ export default function PaymentClient() {
 
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Validate bank transfer form
+
+    // A bank transfer is confirmed here: the customer re-types the memo and
+    // amount this page displayed. Checked against the values we rendered, so
+    // the same helper the API uses decides — the client copy exists only to
+    // fail fast, never to be the authority.
     if (paymentMethod === 'bank') {
-      if (!selectedBank) {
-        setPaymentError('Vui lòng chọn ngân hàng');
+      if (!selectedAdminAccount) {
+        setPaymentError('Chưa có thông tin tài khoản nhận. Vui lòng thử lại sau.');
         setShowErrorModal(true);
         return;
       }
-      if (!bankAccountNumber || bankAccountNumber.length < 6) {
-        setPaymentError('Vui lòng nhập số tài khoản hợp lệ (tối thiểu 6 số)');
-        setShowErrorModal(true);
-        return;
-      }
-      if (!bankAccountHolder || bankAccountHolder.trim().length < 2) {
-        setPaymentError('Vui lòng nhập tên chủ tài khoản');
+      const check = validateBankTransferInput(
+        { transferNote: transferNoteInput, amount: transferAmountInput },
+        { transferNote, amount: total }
+      );
+      if (!check.valid) {
+        setPaymentError(check.message);
         setShowErrorModal(true);
         return;
       }
@@ -600,31 +506,20 @@ export default function PaymentClient() {
         throw new Error('Không tìm thấy thông tin đặt chỗ');
       }
 
-      // M3: Call real POST /api/thanh-toan instead of fake timeout
       await createPayment({
         booking_id: booking.bookingId,
         method: paymentMethod,
         amount: total,
         discount_code_id: promoData?.id ?? undefined,
         discount_amount: discountAmount,
+        discount_code: promoData?.code,
+        bank_account_id: selectedAdminAccount?.id,
+        transfer_note: transferNoteInput,
+        transfer_amount: transferAmountInput,
       });
 
       setLoading(false);
       setConfirmed(true);
-      // Save bank account if user chose to
-      if (paymentMethod === 'bank' && selectedBank && saveAccount) {
-        const newAccount = {
-          bankId: selectedBank.id,
-          accountNumber: bankAccountNumber,
-          accountHolder: bankAccountHolder,
-        };
-        const updated = [
-          ...savedAccounts.filter((a) => a.accountNumber !== bankAccountNumber),
-          newAccount,
-        ];
-        setSavedAccounts(updated);
-        localStorage.setItem('vjsim_saved_bank_accounts', JSON.stringify(updated));
-      }
       toast.success('Thanh toán thành công!', 'Vé điện tử đã được gửi đến email của bạn.', {
         duration: 6000,
       });
@@ -849,28 +744,28 @@ export default function PaymentClient() {
                   </div>
                 ))}
 
-                {/* Bank Payment Info (if paid via bank transfer) */}
-                {paymentMethod === 'bank' && selectedBank && (
+                {/* Bank Payment Info — the receiving account, since the customer
+                    no longer enters an account of their own. */}
+                {paymentMethod === 'bank' && selectedAdminAccount && (
                   <div className="mt-4 bg-[rgb(var(--blue-rgb))]/10 border border-[rgb(var(--blue-rgb))]/30 rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-3">
-                      <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                        style={{ backgroundColor: selectedBank.color }}
-                      >
-                        {selectedBank.code.substring(0, 2)}
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0 bg-primary">
+                        {selectedAdminAccount.admin_bank_name.substring(0, 2)}
                       </div>
                       <div>
                         <span className="text-xs font-bold text-[var(--blue)] uppercase tracking-wider block">
                           Thanh toán qua ngân hàng
                         </span>
-                        <span className="text-xs text-[var(--blue)]">{selectedBank.fullName}</span>
+                        <span className="text-xs text-[var(--blue)]">
+                          {selectedAdminAccount.admin_bank_name}
+                        </span>
                       </div>
                     </div>
                     <div className="space-y-2 text-sm bg-[var(--background)] rounded-lg p-3 border border-[rgb(var(--blue-rgb))]/20">
                       <div className="flex justify-between items-center">
                         <span className="text-[var(--foreground-muted)] text-xs">Số tài khoản</span>
                         <span className="font-mono font-bold text-[var(--foreground)]">
-                          {bankAccountNumber}
+                          {selectedAdminAccount.admin_bank_account_number}
                         </span>
                       </div>
                       <div className="border-t border-dashed border-[var(--border)] " />
@@ -879,15 +774,15 @@ export default function PaymentClient() {
                           Chủ tài khoản
                         </span>
                         <span className="font-semibold text-[var(--foreground)]">
-                          {bankAccountHolder}
+                          {selectedAdminAccount.admin_bank_account_holder}
                         </span>
                       </div>
                       <div className="border-t border-dashed border-[var(--border)] " />
                       <div className="flex justify-between items-center">
-                        <span className="text-[var(--foreground-muted)] text-xs">Mã ngân hàng</span>
-                        <span className="font-mono text-xs font-semibold text-[var(--foreground-muted)]">
-                          {selectedBank.code}
+                        <span className="text-[var(--foreground-muted)] text-xs">
+                          Nội dung chuyển khoản
                         </span>
+                        <span className="font-mono font-bold text-primary">{transferNote}</span>
                       </div>
                     </div>
                   </div>
@@ -1128,151 +1023,6 @@ export default function PaymentClient() {
                   {/* Bank Transfer */}
                   {paymentMethod === 'bank' && (
                     <div className="space-y-4">
-                      <label className="block text-xs font-semibold text-[var(--foreground-subtle)] uppercase tracking-wider mb-2">
-                        Chọn ngân hàng
-                      </label>
-                      {/* Saved Accounts */}
-                      {savedAccounts.length > 0 && (
-                        <div className="mb-3">
-                          <label className="block text-xs font-semibold text-[var(--foreground-subtle)] uppercase tracking-wider mb-2">
-                            Tài khoản đã lưu
-                          </label>
-                          <div className="space-y-2">
-                            {savedAccounts.map(
-                              (
-                                acc: {
-                                  bankId: string;
-                                  accountNumber: string;
-                                  accountHolder: string;
-                                },
-                                idx: number
-                              ) => {
-                                const bank = BANKS.find((b) => b.id === acc.bankId);
-                                return (
-                                  <button
-                                    key={idx}
-                                    type="button"
-                                    onClick={() => {
-                                      if (bank) setSelectedBank(bank);
-                                      setBankAccountNumber(acc.accountNumber);
-                                      setBankAccountHolder(acc.accountHolder);
-                                    }}
-                                    className="w-full flex items-center gap-3 p-3 bg-[var(--surface)] hover:bg-primary-50 border border-[var(--border)] hover:border-primary rounded-xl transition-all text-left"
-                                  >
-                                    {bank && (
-                                      <div
-                                        className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                                        style={{ backgroundColor: bank.color }}
-                                      >
-                                        {bank.code.substring(0, 2)}
-                                      </div>
-                                    )}
-                                    <div className="flex-1 min-w-0">
-                                      <div className="text-sm font-semibold text-[var(--foreground)] truncate">
-                                        {acc.accountHolder}
-                                      </div>
-                                      <div className="text-xs text-[var(--foreground-muted)] font-mono">
-                                        **** {acc.accountNumber.slice(-4)}
-                                      </div>
-                                    </div>
-                                    <Icon
-                                      name="ArrowRightIcon"
-                                      size={16}
-                                      className="text-[var(--foreground-subtle)]"
-                                    />
-                                  </button>
-                                );
-                              }
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {BANKS.map((bank) => (
-                          <button
-                            key={bank.id}
-                            type="button"
-                            onClick={() => setSelectedBank(bank)}
-                            className={`relative py-3 px-3 border rounded-xl text-sm font-semibold transition-all flex flex-col items-center gap-1.5 ${
-                              selectedBank?.id === bank.id
-                                ? 'border-2 shadow-md'
-                                : 'bg-[var(--surface)] hover:bg-primary-50 hover:border-primary border-[var(--border)] text-[var(--foreground-muted)]'
-                            }`}
-                            style={
-                              selectedBank?.id === bank.id
-                                ? { borderColor: bank.color, backgroundColor: `${bank.color}08` }
-                                : undefined
-                            }
-                          >
-                            <div
-                              className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold"
-                              style={{ backgroundColor: bank.color }}
-                            >
-                              {bank.code.substring(0, 2)}
-                            </div>
-                            <span className="text-xs font-medium text-center leading-tight">
-                              {bank.name}
-                            </span>
-                            {selectedBank?.id === bank.id && (
-                              <div
-                                className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs"
-                                style={{ backgroundColor: bank.color }}
-                              >
-                                ✓
-                              </div>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Bank Account Form */}
-                      <div className="bg-white border border-[var(--border)] rounded-xl p-4 space-y-3 mt-2">
-                        <h4 className="text-sm font-bold text-[var(--foreground)] flex items-center gap-2">
-                          <Icon name="BanknotesIcon" size={18} className="text-primary" />
-                          Thông tin tài khoản thụ hưởng
-                        </h4>
-                        <div>
-                          <label className="block text-xs font-medium text-[var(--foreground-muted)] mb-1">
-                            Số tài khoản <span className="text-primary">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            value={bankAccountNumber}
-                            onChange={(e) =>
-                              setBankAccountNumber(e.target.value.replace(/\D/g, ''))
-                            }
-                            placeholder="Nhập số tài khoản"
-                            className="w-full px-3 py-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-[var(--foreground-muted)] mb-1">
-                            Tên chủ tài khoản <span className="text-primary">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            value={bankAccountHolder}
-                            onChange={(e) => setBankAccountHolder(e.target.value)}
-                            placeholder="Nhập tên chủ tài khoản"
-                            className="w-full px-3 py-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Save Account Checkbox */}
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={saveAccount}
-                          onChange={(e) => setSaveAccount(e.target.checked)}
-                          className="w-4 h-4 rounded border-[var(--border)] text-primary focus:ring-primary"
-                        />
-                        <span className="text-sm text-[var(--foreground-muted)]">
-                          Lưu tài khoản này cho lần thanh toán sau
-                        </span>
-                      </label>
-
                       {/* Transfer Instructions Redesign */}
                       {selectedAdminAccount && (
                         <div className="space-y-4">
@@ -1316,27 +1066,6 @@ export default function PaymentClient() {
                                     {selectedAdminAccount.admin_bank_name.substring(0, 3)}
                                   </div>
                                 </div>
-                              </div>
-
-                              {/* QR Code Section */}
-                              <div className="flex flex-col items-center justify-center py-4 bg-[var(--surface)] rounded-2xl border border-[var(--border)] mb-4">
-                                <div className="relative group cursor-pointer">
-                                  {/* QR must not be proxied/optimized: resizing corrupts scannability. */}
-                                  {}
-                                  <img
-                                    src={`https://img.vietqr.io/image/${selectedAdminAccount.bank_bin || 'VCB'}-${selectedAdminAccount.admin_bank_account_number}-compact2.png?amount=${total}&addInfo=${encodeURIComponent(transferNote)}&accountName=${encodeURIComponent(selectedAdminAccount.admin_bank_account_holder)}`}
-                                    alt="VietQR"
-                                    className="w-48 h-48 object-contain rounded-lg transition-transform group-hover:scale-105"
-                                  />
-                                  <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-all rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                    <span className="bg-primary text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg">
-                                      Quét để trả ngay
-                                    </span>
-                                  </div>
-                                </div>
-                                <p className="text-[10px] text-[var(--foreground-subtle)] mt-2 font-medium">
-                                  Sử dụng App Ngân hàng hoặc Ví để quét mã
-                                </p>
                               </div>
 
                               <div className="space-y-3">
@@ -1408,8 +1137,48 @@ export default function PaymentClient() {
                                 className="text-[var(--vj-green)]"
                               />
                               <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">
-                                Giao dịch bảo mật VietQR
+                                Giao dịch bảo mật
                               </span>
+                            </div>
+                          </div>
+
+                          {/* The transfer is confirmed here rather than by
+                              handing the customer a QR to scan: they re-type the
+                              memo and amount we just showed, which is the only
+                              proof of payment we can check without a banking
+                              integration. */}
+                          <div className="bg-white border border-[var(--border)] rounded-xl p-4 space-y-3">
+                            <h4 className="text-sm font-bold text-[var(--foreground)] flex items-center gap-2">
+                              <Icon name="CheckCircleIcon" size={18} className="text-primary" />
+                              Xác nhận đã chuyển khoản
+                            </h4>
+                            <p className="text-xs text-[var(--foreground-muted)]">
+                              Nhập đúng nội dung và số tiền đã chuyển để hoàn tất thanh toán.
+                            </p>
+                            <div>
+                              <label className="block text-xs font-medium text-[var(--foreground-muted)] mb-1">
+                                Nội dung chuyển khoản <span className="text-primary">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={transferNoteInput}
+                                onChange={(e) => setTransferNoteInput(e.target.value)}
+                                placeholder={transferNote}
+                                className="w-full px-3 py-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-[var(--foreground-muted)] mb-1">
+                                Số tiền đã chuyển <span className="text-primary">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                inputMode="numeric"
+                                value={transferAmountInput}
+                                onChange={(e) => setTransferAmountInput(e.target.value)}
+                                placeholder={String(total)}
+                                className="w-full px-3 py-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                              />
                             </div>
                           </div>
                         </div>

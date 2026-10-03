@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createPaymentAndConfirmBooking, getBookingById } from '@/lib/db';
+import { createPaymentAndConfirmBooking, getBookingById, getActiveBankAccounts } from '@/lib/db';
 import { verifyAuthRequest } from '@/lib/auth';
+import { renderTransferNote } from '@/lib/transfer-note';
+import { validateBankTransferInput } from '@/lib/bank-transfer';
 
 export async function POST(request: NextRequest) {
   // Validate CSRF token
@@ -11,7 +13,17 @@ export async function POST(request: NextRequest) {
     const payload = user;
 
     const body = await request.json();
-    const { booking_id, method, amount, discount_code_id, discount_amount } = body;
+    const {
+      booking_id,
+      method,
+      amount,
+      discount_code_id,
+      discount_amount,
+      discount_code,
+      bank_account_id,
+      transfer_note,
+      transfer_amount,
+    } = body;
 
     // Validation
     if (!booking_id || !method || amount === undefined) {
@@ -55,6 +67,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // A bank transfer is confirmed by re-typing the memo and the amount the
+    // page showed. Both are checked against values derived here, never against
+    // the ones the browser sent — an attacker controls those, so trusting them
+    // would make the confirmation decorative. Deriving the memo from the same
+    // template the page used keeps the two from drifting apart.
+    if (method === 'bank') {
+      const bankAccounts = await getActiveBankAccounts();
+      const account =
+        bankAccounts.find((a) => String(a.id) === String(bank_account_id)) ?? bankAccounts[0];
+
+      if (!account) {
+        return NextResponse.json(
+          { error: 'Bank transfer unavailable', message: 'Chưa cấu hình tài khoản nhận tiền.' },
+          { status: 503 }
+        );
+      }
+
+      const expectedNote = renderTransferNote(account.transfer_note_template, {
+        code: booking.booking_code ?? '',
+        originalAmount: booking.total_price,
+        discountAmount: discount_amount || 0,
+        amount: discountedTotal,
+        discountCode: discount_code || '',
+      });
+
+      const check = validateBankTransferInput(
+        { transferNote: transfer_note, amount: transfer_amount },
+        { transferNote: expectedNote, amount: discountedTotal }
+      );
+
+      if (!check.valid) {
+        return NextResponse.json(
+          { error: 'Transfer details do not match', message: check.message, field: check.field },
+          { status: 400 }
+        );
+      }
+    }
     // Create payment + confirm booking atomically (single transaction)
     const result = await createPaymentAndConfirmBooking({
       booking_id,

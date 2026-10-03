@@ -8,6 +8,16 @@ export interface CreatePaymentInput {
   amount: number;
   discount_code_id?: string;
   discount_amount?: number;
+  /** The promo code as typed, so the server can render `{discount_code}` in the memo. */
+  discount_code?: string;
+  /**
+   * Bank-transfer confirmation. The API re-derives the expected memo from the
+   * account's template and compares; these two are the customer's re-typed
+   * values and carry no authority of their own.
+   */
+  bank_account_id?: string | number;
+  transfer_note?: string;
+  transfer_amount?: string;
 }
 
 export interface Pagination {
