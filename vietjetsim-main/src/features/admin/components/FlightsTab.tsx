@@ -11,6 +11,7 @@ import {
 } from '@/features/admin';
 import { getApiErrorMessage } from '@/shared/services';
 import { AIRPORT_CITIES } from '@/shared/constants';
+import { toVietnamInstant, toVietnamWallClock } from '@/lib/utils';
 
 interface ToastAPI {
   success: (title: string, message?: string, options?: object) => void;
@@ -163,14 +164,16 @@ const STATUS_TABS: { value: 'all' | FlightStatus; label: string; color: string }
 
 /** Map the raw API flight shape onto this tab's display model. */
 function toFlightRow(f: AdminFlight): Flight {
+  const depart = toVietnamWallClock(f.depart_time);
+  const arrive = toVietnamWallClock(f.arrive_time);
   return {
     id: f.id,
     flightNo: f.flight_no,
     from: f.from_code,
     to: f.to_code,
-    departTime: f.depart_time ? new Date(f.depart_time).toTimeString().slice(0, 5) : '',
-    arriveTime: f.arrive_time ? new Date(f.arrive_time).toTimeString().slice(0, 5) : '',
-    date: f.depart_time ? f.depart_time.split('T')[0] : '',
+    departTime: depart.time,
+    arriveTime: arrive.time,
+    date: depart.date,
     price: Number(f.price) || 0,
     // `getAllFlights` does `SELECT *`, so both columns are present; the
     // fallbacks mirror the server-side ladder for rows predating 030.
@@ -357,8 +360,8 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
     if (!validateFlightForm(newFlight)) return;
     setIsAdding(true);
     try {
-      const departTimeStr = `${newFlight.date}T${newFlight.departTime}:00`;
-      const arriveTimeStr = `${newFlight.date}T${newFlight.arriveTime}:00`;
+      const departTimeStr = toVietnamInstant(newFlight.date, newFlight.departTime);
+      const arriveTimeStr = toVietnamInstant(newFlight.date, newFlight.arriveTime);
       const payload = {
         flight_no: newFlight.flightNo.toUpperCase(),
         from_code: newFlight.from.toUpperCase(),
@@ -442,11 +445,11 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
       // Build depart_time and arrive_time ISO strings from date + time
       const departTimeStr =
         editingFlight.date && editingFlight.departTime
-          ? `${editingFlight.date}T${editingFlight.departTime}:00`
+          ? toVietnamInstant(editingFlight.date, editingFlight.departTime)
           : editingFlight.departTime;
       const arriveTimeStr =
         editingFlight.date && editingFlight.arriveTime
-          ? `${editingFlight.date}T${editingFlight.arriveTime}:00`
+          ? toVietnamInstant(editingFlight.date, editingFlight.arriveTime)
           : editingFlight.arriveTime;
 
       const payload: Record<string, unknown> = {
