@@ -13,31 +13,44 @@ import { apiRequest, ApiRequestError, getApiErrorMessage } from '@/shared/servic
 interface BookingDetail {
   id: string;
   user_id: string;
+  /** The PNR the customer quotes — never the row UUID (see AGENTS.md). */
+  booking_code: string | null;
   flight_id: string;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded';
   total_price: number;
   created_at: string;
   updated_at: string;
-  flight_no: string;
-  from_code: string;
-  to_code: string;
-  depart_time: string;
-  arrive_time: string;
-  price: number;
-  class: string;
+  /**
+   * `getBookingById` nests the joined `flights` row under `flight`; it does not
+   * flatten `flight_no` / `depart_time` onto the booking. Reading them off the
+   * booking returned undefined and crashed the page.
+   */
+  flight: {
+    flight_no: string;
+    from_code: string;
+    to_code: string;
+    depart_time: string;
+    arrive_time: string;
+    price: number;
+    class: string;
+  } | null;
   passengers: Array<{
     id: string;
-    full_name: string;
+    name: string;
     seat_number?: string;
     passenger_type: string;
   }>;
-  payments: Array<{
+  /**
+   * `getBookingById` collapses the payment aggregate to a single record — the
+   * API does not send the `payments` array the SQL builds.
+   */
+  payment: {
     id: string;
     method: string;
     status: string;
     amount: number;
     created_at: string;
-  }>;
+  } | null;
   seats: Array<{
     id: string;
     seat_number: string;
@@ -82,14 +95,23 @@ export default function BookingDetailPage() {
     fetchBooking();
   }, [bookingId, router]);
 
+  // `getBookingById` can return a booking whose flight join failed; rendering an
+  // empty string beats dereferencing null in five places below.
+  const flight = booking?.flight ?? null;
+
   const handleCopyCode = useCallback(async () => {
-    if (booking?.id) {
-      await navigator.clipboard.writeText(booking.id);
-      toast.success('Đã sao chép', `Mã đặt chỗ ${booking.id} đã được sao chép`);
+    // `booking_code` is the reference printed on the ticket and typed into
+    // check-in; the UUID resolves in neither. Fall back only for rows predating
+    // migration 013, which cannot exist without a PNR.
+    const code = booking?.booking_code ?? booking?.id;
+    if (code) {
+      await navigator.clipboard.writeText(code);
+      toast.success('Đã sao chép', `Mã đặt chỗ ${code} đã được sao chép`);
     }
   }, [booking, toast]);
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '--';
     const d = new Date(dateStr);
     return d.toLocaleDateString('vi-VN', {
       weekday: 'long',
@@ -99,12 +121,14 @@ export default function BookingDetailPage() {
     });
   };
 
-  const formatTime = (dateStr: string) => {
+  const formatTime = (dateStr?: string) => {
+    if (!dateStr) return '--';
     const d = new Date(dateStr);
     return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
   };
 
-  const getDuration = (depart: string, arrive: string) => {
+  const getDuration = (depart?: string, arrive?: string) => {
+    if (!depart || !arrive) return '--';
     const diff = new Date(arrive).getTime() - new Date(depart).getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -219,7 +243,7 @@ export default function BookingDetailPage() {
                 Mã đặt chỗ
               </div>
               <div className="text-2xl sm:text-3xl font-black text-primary tracking-widest">
-                {booking.id}
+                {booking.booking_code ?? booking.id}
               </div>
             </div>
 
@@ -227,10 +251,10 @@ export default function BookingDetailPage() {
             <div className="px-4 sm:px-6 py-4 sm:py-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4 sm:mb-6">
                 <div className="text-[10px] sm:text-sm font-bold text-[var(--foreground-muted)]">
-                  {booking.flight_no}
+                  {flight?.flight_no}
                 </div>
                 <div className="text-[10px] sm:text-sm text-[var(--foreground-subtle)]">
-                  {formatDate(booking.depart_time)}
+                  {formatDate(flight?.depart_time)}
                 </div>
               </div>
 
@@ -238,17 +262,17 @@ export default function BookingDetailPage() {
                 {/* Departure */}
                 <div className="text-center">
                   <div className="text-2xl sm:text-3xl font-black text-[var(--foreground)]">
-                    {formatTime(booking.depart_time)}
+                    {formatTime(flight?.depart_time)}
                   </div>
                   <div className="text-base sm:text-lg font-bold text-[var(--foreground-muted)]mt-0.5 sm:mt-1">
-                    {booking.from_code}
+                    {flight?.from_code}
                   </div>
                 </div>
 
                 {/* Duration Line - responsive */}
                 <div className="flex-1 mx-4 sm:mx-6 flex flex-col items-center">
                   <div className="text-[10px] sm:text-xs text-[var(--foreground-subtle)]mb-0.5 sm:mb-1">
-                    {getDuration(booking.depart_time, booking.arrive_time)}
+                    {getDuration(flight?.depart_time, flight?.arrive_time)}
                   </div>
                   <div className="w-full h-px bg-[var(--border)]relative">
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[var(--surface)]px-1.5 sm:px-2">
@@ -263,10 +287,10 @@ export default function BookingDetailPage() {
                 {/* Arrival */}
                 <div className="text-center">
                   <div className="text-2xl sm:text-3xl font-black text-[var(--foreground)]">
-                    {formatTime(booking.arrive_time)}
+                    {formatTime(flight?.arrive_time)}
                   </div>
                   <div className="text-base sm:text-lg font-bold text-[var(--foreground-muted)]mt-0.5 sm:mt-1">
-                    {booking.to_code}
+                    {flight?.to_code}
                   </div>
                 </div>
               </div>
@@ -295,7 +319,7 @@ export default function BookingDetailPage() {
                       </div>
                       <div>
                         <div className="font-semibold text-[var(--foreground)]text-[11px] sm:text-sm">
-                          {p.full_name}
+                          {p.name}
                         </div>
                         <div className="text-[9px] sm:text-xs text-[var(--foreground-subtle)]capitalize">
                           {p.passenger_type}
@@ -307,7 +331,7 @@ export default function BookingDetailPage() {
                         Ghế {p.seat_number || 'Chưa chọn'}
                       </div>
                       <div className="text-[9px] sm:text-xs text-[var(--foreground-subtle)]capitalize">
-                        {booking.class}
+                        {flight?.class}
                       </div>
                     </div>
                   </div>
@@ -320,16 +344,20 @@ export default function BookingDetailPage() {
               <div className="flex justify-between items-center mb-1.5 sm:mb-2">
                 <span className="text-[var(--foreground-muted)]text-[10px] sm:text-sm">Giá vé</span>
                 <span className="font-semibold text-[var(--foreground)]">
-                  {booking.price.toLocaleString('vi-VN')}₫
+                  {(flight?.price ?? 0).toLocaleString('vi-VN')}₫
                 </span>
               </div>
-              {booking.payments.length > 0 && (
+              {/* `getBookingById` normalises the aggregate to a single `payment`
+                  (null when unpaid). Reading `booking.payments` here returned
+                  undefined and threw on `.length`, which took the whole page
+                  down to the global error boundary. */}
+              {booking.payment && (
                 <div className="flex justify-between items-center mb-1.5 sm:mb-2">
                   <span className="text-[var(--foreground-muted)]text-[10px] sm:text-sm">
                     Phương thức
                   </span>
                   <span className="font-semibold text-[var(--foreground)]capitalize">
-                    {booking.payments[0].method}
+                    {booking.payment.method}
                   </span>
                 </div>
               )}

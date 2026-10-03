@@ -200,7 +200,13 @@ export default function TrackBookingPage() {
           <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">
+                {/* `htmlFor`/`id` so the input has an accessible name. A screen
+                    reader otherwise announces an unnamed field, and assistive
+                    tech and tests have no way to target it. */}
+                <label
+                  htmlFor="pnr"
+                  className="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5"
+                >
                   Mã đặt chỗ (PNR)
                 </label>
                 <div className="relative">
@@ -211,12 +217,15 @@ export default function TrackBookingPage() {
                   />
                   <input
                     type="text"
+                    id="pnr"
                     value={pnr}
                     onChange={(e) => setPnr(e.target.value.toUpperCase())}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    placeholder="VD: VJ644052"
+                    placeholder="VD: FG7KH9"
                     className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                    maxLength={8}
+                    // 6 for the codes 034 generates, but legacy `VJ644052`
+                    // rows are 8 and must still resolve, so leave headroom.
+                    maxLength={12}
                   />
                 </div>
               </div>

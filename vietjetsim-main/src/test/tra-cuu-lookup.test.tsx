@@ -55,6 +55,18 @@ function renderPage() {
   return render(<TrackBookingPage />);
 }
 
+/**
+ * The PNR input, found by its accessible name rather than its placeholder.
+ *
+ * Migration 034 changed the placeholder from `VD: VJ644052` to `VD: FG7KH9`
+ * because the code is now six alphanumeric characters. Selecting on the
+ * placeholder text would break every time the example in it is reworded,
+ * while the label "Mã đặt chỗ (PNR)" is what the customer actually reads.
+ */
+function pnrInput(): HTMLElement {
+  return screen.getByRole('textbox', { name: /mã đặt chỗ/i });
+}
+
 describe('Tra cứu đặt chỗ', () => {
   beforeEach(() => {
     apiRequestMock.mockReset();
@@ -67,14 +79,14 @@ describe('Tra cứu đặt chỗ', () => {
     useAuthMock.mockReturnValue({ user: null });
     renderPage();
     expect(screen.getByText('Cần đăng nhập để tra cứu')).toBeInTheDocument();
-    expect(screen.queryByPlaceholderText(/VJ\d+/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('textbox', { name: /mã đặt chỗ/i })).not.toBeInTheDocument();
   });
 
   it('searches the session-scoped booking list, not a public lookup', async () => {
     apiRequestMock.mockResolvedValue({ bookings: [booking] });
     renderPage();
 
-    fireEvent.change(screen.getByPlaceholderText(/VJ\d+/), { target: { value: 'VJ644052' } });
+    fireEvent.change(pnrInput(), { target: { value: 'VJ644052' } });
     fireEvent.click(screen.getByRole('button', { name: 'Tra cứu' }));
 
     await waitFor(() => expect(apiRequestMock).toHaveBeenCalled());
@@ -86,7 +98,7 @@ describe('Tra cứu đặt chỗ', () => {
     apiRequestMock.mockResolvedValue({ bookings: [booking] });
     renderPage();
 
-    fireEvent.change(screen.getByPlaceholderText(/VJ\d+/), { target: { value: 'vj644052' } });
+    fireEvent.change(pnrInput(), { target: { value: 'vj644052' } });
     fireEvent.click(screen.getByRole('button', { name: 'Tra cứu' }));
 
     expect(await screen.findByText('VJ644052')).toBeInTheDocument();
@@ -96,7 +108,7 @@ describe('Tra cứu đặt chỗ', () => {
     apiRequestMock.mockResolvedValue({ bookings: [booking] });
     renderPage();
 
-    fireEvent.change(screen.getByPlaceholderText(/VJ\d+/), { target: { value: 'VJ000000' } });
+    fireEvent.change(pnrInput(), { target: { value: 'VJ000000' } });
     fireEvent.click(screen.getByRole('button', { name: 'Tra cứu' }));
 
     expect(await screen.findByText('Không tìm thấy đặt chỗ')).toBeInTheDocument();
@@ -106,7 +118,7 @@ describe('Tra cứu đặt chỗ', () => {
     apiRequestMock.mockRejectedValue(new Error('Mạng lỗi'));
     renderPage();
 
-    fireEvent.change(screen.getByPlaceholderText(/VJ\d+/), { target: { value: 'VJ644052' } });
+    fireEvent.change(pnrInput(), { target: { value: 'VJ644052' } });
     fireEvent.click(screen.getByRole('button', { name: 'Tra cứu' }));
 
     // The form must remain usable rather than leaving a stuck spinner.

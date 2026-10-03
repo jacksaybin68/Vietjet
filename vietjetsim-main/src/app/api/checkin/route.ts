@@ -51,6 +51,7 @@ export async function GET(request: NextRequest) {
       success: true,
       booking: {
         id: result.booking.id,
+        booking_code: result.booking.booking_code,
         status: result.booking.status,
         flightId: result.booking.flight_id,
         totalPrice: result.booking.total_price,

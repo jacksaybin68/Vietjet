@@ -238,7 +238,7 @@ export default function MyFlightsPage() {
     if (!bookingCode.trim()) {
       toast.show({
         title: 'Vui lòng nhập mã đặt chỗ',
-        message: 'Mã đặt chỗ là bắt buộc (ví dụ VD-12345678)',
+        message: 'Mã đặt chỗ gồm 6 ký tự chữ và số (ví dụ FG7KH9)',
       });
       return;
     }

@@ -781,7 +781,9 @@ export async function getBookingByCodeOrId(codeOrId: string): Promise<BookingDet
            f.flight_no, f.from_code, f.to_code, f.depart_time, f.arrive_time, f.price, f.class
     FROM bookings b
     JOIN flights f ON b.flight_id = f.id
-    WHERE b.booking_code = ${codeOrId} OR b.id::text = ${codeOrId}
+    -- Case-insensitive, like searchCheckIn: the PNR mixes letters and digits,
+    -- and a lower-case entry would otherwise miss the booking entirely.
+    WHERE UPPER(b.booking_code) = UPPER(${codeOrId}) OR b.id::text = ${codeOrId}
     LIMIT 1
   `;
 
@@ -2898,6 +2900,8 @@ interface CheckInStatusRow {
 export interface CheckInSearchResult {
   booking: {
     id: string;
+    /** The PNR, so the boarding pass does not print the row UUID. */
+    booking_code: string | null;
     status: string;
     flight_id: string;
     total_price: number;
@@ -2936,11 +2940,14 @@ export async function searchCheckIn(
 ): Promise<CheckInSearchResult | null> {
   const bookingResult = await sql`
     SELECT
-      b.id, b.status, b.flight_id, b.total_price, b.created_at,
+      b.id, b.booking_code, b.status, b.flight_id, b.total_price, b.created_at,
       f.flight_no, f.from_code, f.to_code, f.depart_time, f.arrive_time
     FROM bookings b
     JOIN flights f ON b.flight_id = f.id
-    WHERE (b.id::text = ${bookingCode} OR b.booking_code = ${bookingCode})
+    -- UPPER() on both sides: the PNR mixes letters and digits, and a customer
+    -- typing jkhbmi on a phone with caps-lock off must still find their
+    -- booking. Plain = was exact, so a lower-case entry silently 404s.
+    WHERE (b.id::text = ${bookingCode} OR UPPER(b.booking_code) = UPPER(${bookingCode}))
     LIMIT 1
   `;
 
@@ -2954,7 +2961,7 @@ export async function searchCheckIn(
     SELECT p.id, p.booking_id, p.name, p.dob, p.id_number, p.gender, p.created_at
     FROM passengers p
     JOIN bookings b ON p.booking_id = b.id
-    WHERE (b.id::text = ${bookingCode} OR b.booking_code = ${bookingCode})
+    WHERE (b.id::text = ${bookingCode} OR UPPER(b.booking_code) = UPPER(${bookingCode}))
     ORDER BY p.created_at
   `;
 
@@ -3004,6 +3011,7 @@ export async function searchCheckIn(
   return {
     booking: {
       id: booking.id,
+      booking_code: booking.booking_code,
       status: booking.status,
       flight_id: booking.flight_id,
       total_price: booking.total_price,
