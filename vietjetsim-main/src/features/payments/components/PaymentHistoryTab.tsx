@@ -5,9 +5,9 @@ import { Icon } from '@/shared/components/ui';
 import { useToast } from '@/hooks/useToast';
 import { Pagination } from '@/shared/components/ui';
 import { listPayments } from '@/features/payments/services';
-import type { PaymentRecord } from '@/features/payments/types';
+import type { PaymentHistoryEntry } from '@/features/payments/types';
 
-interface Payment extends PaymentRecord {
+interface Payment extends PaymentHistoryEntry {
   booking_status?: string;
 }
 
@@ -85,7 +85,7 @@ function PaymentDetailModal({ payment, onClose }: { payment: Payment; onClose: (
                 Mã đặt chỗ
               </span>
               <span className="text-sm font-semibold text-[#1A2948] font-[Be Vietnam Pro,sans-serif]">
-                {payment.booking_id.slice(0, 8).toUpperCase()}
+                {payment.booking_code}
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -153,7 +153,7 @@ export default function PaymentHistoryTab() {
     const headers = ['Mã GD', 'Mã đặt chỗ', 'Số tiền', 'Phương thức', 'Trạng thái', 'Ngày'];
     const rows = payments.map((p) => [
       p.id.slice(0, 8).toUpperCase(),
-      p.booking_id.slice(0, 8).toUpperCase(),
+      p.booking_code,
       p.amount,
       METHOD_LABELS[p.method] || p.method,
       STATUS_CONFIG[p.status]?.label || p.status,

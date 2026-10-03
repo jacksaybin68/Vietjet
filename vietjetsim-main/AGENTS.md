@@ -157,6 +157,19 @@ instead. Two consequences worth stating:
   8 characters and stay in the column — never add a `length(...)` guard, a
   `LIKE 'VJ%'` filter or a `maxLength` under 8 to any lookup or input.
 
+**A view headed "Mã đặt chỗ" must read the PNR, not the booking UUID.** Every such
+view now goes through one of two routes, and picking the wrong one is how the
+UUID got there in the first place: `bookings.booking_code` for rows that are
+bookings, or `getPaymentHistory` for rows that are payments — that query
+`SELECT p.*`, so it has to join `b.booking_code` explicitly. `payments` has no
+such column, so `PaymentRecord.booking_code` is optional at the type level and
+only `PaymentHistoryEntry` (which `GET /api/thanh-toan/lich-su` returns, via an
+inner join against a NOT NULL column) narrows it to `string`. That distinction
+exists so a caller that *can* prove the join cannot silently accept `undefined`
+and print `#AC5F3313` under a heading the customer will read out to support.
+`payment.id.slice(0, 8)` under "Mã giao dịch" is fine — it is a payment, not a
+booking, and there is no short reference for one.
+
 **`refund_requests.amount` is its own column.** The figure used to be packed into
 the `bank_info` JSON text, so the operator list showed an empty "Số tiền" and
 the "Đã hoàn tiền" card stayed at 0₫ no matter how many tickets were approved.
