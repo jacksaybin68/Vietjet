@@ -18,7 +18,10 @@ import {
 import { apiRequest, ApiRequestError } from '@/shared/services';
 
 interface CheckInData {
+  /** The PNR, shown on the boarding pass. */
   bookingId: string;
+  /** The row id. `POST /api/checkin` resolves this one, not the PNR. */
+  bookingUuid: string;
   flightNo: string;
   from: string;
   to: string;
@@ -83,7 +86,12 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
             terminal?: string;
             boarding_pass_number?: string;
           };
-          booking: { id: string; status?: string; flight?: Record<string, string> };
+          booking: {
+            id: string;
+            booking_code?: string | null;
+            status?: string;
+            flight?: Record<string, string>;
+          };
           passengers?: { name?: string }[];
         }>(
           `/api/checkin?bookingCode=${encodeURIComponent(bookingCode.trim())}` +
@@ -112,7 +120,10 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
         }
 
         setCheckInData({
-          bookingId: b.id,
+          bookingUuid: b.id,
+          // The PNR, not the row UUID: this is printed on the boarding pass, and
+          // the UUID resolves in neither check-in nor booking lookup.
+          bookingId: b.booking_code || b.id,
           flightNo: flight.flight_no || '--',
           from: flight.from_code || '--',
           to: flight.to_code || '--',
@@ -175,7 +186,9 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
       }>('/api/checkin', {
         method: 'POST',
         body: {
-          bookingId: checkInData.bookingId,
+          // The row id: `POST /api/checkin` calls `getBookingById`, which matches
+          // on `b.id` alone. Sending the PNR here would 404.
+          bookingId: checkInData.bookingUuid,
           seatNumber: checkInData.seat,
           flightNo: checkInData.flightNo,
           fromCode: checkInData.from,

@@ -139,6 +139,24 @@ to quote support with. `createBooking` also omitted `booking_code` from its
 form could not be submitted at all. When a booking is displayed, carry
 `bookingCode` through the mapper and fall back to the id only for pre-013 rows.
 
+**The PNR is six alphanumeric characters, and nothing may assume otherwise.**
+`generate_booking_code()` (rewritten in `034`) returns exactly six symbols from
+`A-Z0-9` — `FG7KH9` — with no prefix. 012's `VJ` prefix is gone and so are its
+digits-only body, which is what let it fall back to an 11-character code after
+ten collisions and quietly break the length guarantee; the loop now raises
+instead. Two consequences worth stating:
+
+- **Compare the code case-insensitively.** The PNR has letters in it now, so
+  `b.booking_code = $code` 404s a customer who typed `jkhbmi` with caps-lock off.
+  `searchCheckIn`, its passenger join and `getBookingByCodeOrId` all wrap both
+  sides in `UPPER()`; a new lookup added without that is a bug, not a style
+  choice.
+- **034 replaced the generator; it did not rewrite existing rows.** A PNR is
+  already printed on tickets and quoted in support chats, so reissuing one
+  invalidates a reference the customer is holding. Legacy `VJ644052` codes are
+  8 characters and stay in the column — never add a `length(...)` guard, a
+  `LIKE 'VJ%'` filter or a `maxLength` under 8 to any lookup or input.
+
 **`refund_requests.amount` is its own column.** The figure used to be packed into
 the `bank_info` JSON text, so the operator list showed an empty "Số tiền" and
 the "Đã hoàn tiền" card stayed at 0₫ no matter how many tickets were approved.

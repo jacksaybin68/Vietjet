@@ -68,6 +68,9 @@ psql "$DATABASE_URL" -f migrations/001_bank_accounts.sql
 # 027 spreads those flights over seven days instead of one, so a
 # departure can be booked on any date the form offers. A separate
 # file rather than an edit to 026, which is already applied.
+# 034 rewrites generate_booking_code() so a PNR is six alphanumeric
+# characters with no prefix (FG7KH9). Existing rows keep their old
+# `VJ644052` codes — they are on printed tickets and must keep resolving.
 #
 # CI runs a "Migrations" job that applies every file above to an empty
 # PostgreSQL instance and then re-applies them, so ordering mistakes and
