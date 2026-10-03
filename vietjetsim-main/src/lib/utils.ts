@@ -74,6 +74,67 @@ export function formatRelativeTime(date: Date | string): string {
 }
 
 /**
+ * The offset every departure time in this app is written in.
+ *
+ * Vietnam has no DST, so a fixed literal is correct year-round — and a literal
+ * is the point: a `TIMESTAMPTZ` without one is read in the *session* zone, and
+ * Neon sessions run `TimeZone = GMT`, which shifts every flight seven hours.
+ */
+const VIETNAM_UTC_OFFSET = '+07:00';
+
+/**
+ * Format a stored timestamp as the `YYYY-MM-DD` and `HH:mm` a Vietnamese
+ * operator sees, in Vietnam time.
+ *
+ * `toFlightRow` used `new Date(iso).toTimeString()` and `iso.split('T')[0]`,
+ * which read in the *browser's* zone. An admin in Hanoi happened to see the
+ * right numbers, so the bug stayed invisible there and appeared only as rows
+ * that looked wrong to a reviewer elsewhere. `Intl` with an explicit zone asks
+ * for the answer rather than inheriting whatever the machine happens to be set
+ * to.
+ */
+export function toVietnamWallClock(iso: string | null | undefined): {
+  date: string;
+  time: string;
+} {
+  const empty = { date: '', time: '' };
+  if (!iso) return empty;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return empty;
+
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(date);
+
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === type)?.value ?? '';
+  return {
+    date: `${get('year')}-${get('month')}-${get('day')}`,
+    time: `${get('hour')}:${get('minute')}`,
+  };
+}
+
+/**
+ * Build the instant string a flight's depart/arrive column is stored as.
+ *
+ * The admin forms collect a date and a `type="time"` field and concatenate
+ * them (`2026-11-03T14:00:00`). Postgres reads that offsetless string in the
+ * session zone, so a flight entered as 14:00 departed at 14:00 GMT — 21:00
+ * Hanoi — and every readback showed a time nobody had typed. This is the same
+ * trap 026 had to re-seed 440 rows over; appending the offset here keeps the
+ * stored instant independent of the session.
+ */
+export function toVietnamInstant(date: string, time: string): string {
+  return `${date}T${time}:00${VIETNAM_UTC_OFFSET}`;
+}
+
+/**
  * Normalize a Vietnamese phone number to a single canonical form.
  *
  * `user_profiles.phone` carries a UNIQUE constraint, yet registration and login
