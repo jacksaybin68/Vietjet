@@ -374,6 +374,37 @@ function checkDataInvariants() {
             HAVING count(*) > 1
           ) x;`) === '0'
   );
+
+  // Money invariants, added with migration 037. These are the checks a
+  // row-fingerprint diff cannot make: a seed that re-credits a wallet, or that
+  // re-applies a refund against a booking already paid back, produces a
+  // different balance on pass 2 — but the fingerprint covers seeded flights,
+  // not a customer's wallet.
+  check(
+    'no booking was refunded twice',
+    psql(`SELECT count(*) FROM (
+            SELECT reference_id FROM wallet_transactions
+            WHERE type = 'refund' AND reference_id IS NOT NULL
+            GROUP BY reference_id HAVING count(*) > 1
+          ) x;`) === '0',
+    '037 added wallet_transactions_one_refund_per_reference for this — a replay that trips it has a seed paying the same booking back twice'
+  );
+  // The partial-guard hole 037 closed: a NULL status satisfies neither branch of
+  // `idx_refund_requests_open_booking`, so two open tickets for one booking slip
+  // past the uniqueness check that is supposed to prevent a double payout.
+  check(
+    'at most one open refund ticket per booking',
+    psql(`SELECT count(*) FROM (
+            SELECT booking_id FROM refund_requests
+            WHERE status IN ('pending','approved')
+            GROUP BY booking_id HAVING count(*) > 1
+          ) x;`) === '0'
+  );
+  check(
+    'refund_requests.status is never null',
+    psql('SELECT count(*) FROM refund_requests WHERE status IS NULL;') === '0',
+    '037 sets NOT NULL — a null here means a write path supplies no status at all'
+  );
   // Staging tables are dropped at the end of each file rather than with
   // `ON COMMIT DROP` (CI runs `psql -f` with no `BEGIN`, so there is no single
   // commit to hang one on). A leftover one means a file died before its DROP.

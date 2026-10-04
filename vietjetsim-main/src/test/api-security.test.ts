@@ -683,6 +683,26 @@ describe('API & RBAC Security Logic', () => {
       expect(res.status).toBe(200);
       expect(refundWalletSpy).not.toHaveBeenCalled();
     });
+
+    /**
+     * The column's CHECK (migration 037) allows six states; the console reaches
+     * four. `processed` and `archived` are SQL-only, so accepting them from a
+     * client would let a ticket leave the operator's workflow through a value
+     * no UI renders.
+     */
+    it('PATCH - refuses a status the console cannot set', async () => {
+      const spy = vi.spyOn(db, 'updateRefundStatus');
+
+      const req = new NextRequest('http://localhost:4028/api/quan-tri/hoan-tien', {
+        method: 'PATCH',
+        headers: withCsrf(makeAdminToken()),
+        body: JSON.stringify({ refundId: 'r9', status: 'archived' }),
+      });
+      const res = (await updateAdminRefund(req))!;
+
+      expect(res.status).toBe(400);
+      expect(spy).not.toHaveBeenCalled();
+    });
   });
 
   describe('CSRF protection on user mutation routes', () => {

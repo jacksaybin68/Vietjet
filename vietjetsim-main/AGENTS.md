@@ -647,6 +647,46 @@ the console at all. Adding a flight-number pattern means editing
 `036_flight_no_shape_check.sql` and `flight-no.ts` together — the SQL and the
 regex must stay the same string or one of the two is decoration.
 
+**`refund_requests.status` is nullable no more, and one booking is paid back
+once.** The column had no CHECK, defaulted to `'pending'`, accepted NULL, and
+every layer disagreed about its legal values: migration 020's duplicate-guard
+index listed two, the PATCH route validated four, `RefundRecord['status']` typed
+six, and `RefundRequestsTab`'s `STATUS_MAP` had three. Two of those gaps were
+money.
+
+- **A nullable status column defeats a partial index built on it.** 020's
+  `idx_refund_requests_open_booking` covers `WHERE status IN ('pending',
+  'approved')`, so a ticket written with NULL is in *neither* branch and is not
+  in the index at all. Reproduced: two NULL tickets for one booking inserted
+  cleanly while the equivalent `pending` pair was correctly rejected — the
+  "at most one open ticket per booking" guarantee had a hole exactly where a
+  broken client would fall. 037 backfills NULL to `'pending'` and then sets
+  `NOT NULL`, which closes it without touching the index.
+- **`refundWallet` was not idempotent, so approving twice paid twice.**
+  Measured against Postgres 17: balance 100k → 1.1M after one approval → 2.1M
+  after pressing the same button on the same ticket, with two `'refund'` rows
+  of 1,000,000 against one booking. `refundWallet` read the balance, added to
+  it, and wrote it back, and `wallet_transactions` had no unique index on
+  `reference_id` to reject the second write. 037 adds
+  `wallet_transactions_one_refund_per_reference`, partial on
+  `type = 'refund'` — `reference_id` is shared with topups and withdrawals, so a
+  plain unique index would have rejected a customer's deposit for a booking
+  that had already been refunded.
+
+The ledger lookup inside `refundWallet` is not the enforcement — the index is —
+but it is what lets the PATCH route say "wallet was already refunded for this
+booking" instead of logging a credit failure for money that already moved.
+When you add a money-moving write path, the test has to sit *below* the mock:
+asserting that a handler reports a `refundWallet` rejection proves nothing about
+`refundWallet`, and passes with the guard deleted.
+
+**`processed` is a status nothing writes.** It was in the TypeScript union, in
+the CHECK (where it must stay — dropping it would abort 037 on a database with
+an archived row) and in `archiveOldRefunds`'s predicate, but no code path has
+ever produced it, and `completed` — the other settled state an operator can
+reach — was not in that predicate at all, so settled tickets were never
+archived. The predicate now names the two states that actually accumulate.
+
 **Re-run the seed when the window runs out.** `npm run db:seed-flights` opens a
 21-day window (three weeks, not the seven the date strip shows — someone who
 returns next week still lands inside it) and covers 028's international routes,
