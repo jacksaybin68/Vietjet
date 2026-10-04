@@ -47,26 +47,39 @@ following day.
 same database. It used to fail on five files; all five are fixed. None of the
 fixes is in `034`, and none came from the PNR work.
 
-To reproduce the check locally in under a minute, replay each file against the
-dev database with a `SAVEPOINT` per file — one failure otherwise poisons the
-transaction for every file after it — then roll the whole thing back:
+**Check it the way CI does, or you are checking something else.** The CI step is
+`psql -f <file>` with no `BEGIN` and no wrapping transaction, so *every statement
+in a migration is its own transaction*. A driver-based replay is not equivalent:
+`client.query(<whole file>)` sends the file through the simple-query protocol as
+one implicit transaction, so anything that depends on statement boundaries
+passes locally and dies in CI. Two real cases this repo has already hit:
 
-```js
-await client.query('BEGIN');
-for (const file of files) {
-  await client.query(`SAVEPOINT sp`);
-  try { await client.query(sql); } catch (e) { report(file, e); }
-  await client.query('ROLLBACK TO SAVEPOINT sp');
-}
-await client.query('ROLLBACK');
+- `CREATE TEMP TABLE ... ON COMMIT DROP` is created and destroyed before the
+  next statement can read it, because that next statement is a new transaction.
+  Seed files that stage ids this way drop the table explicitly at the end of the
+  file instead.
+- `ALTER TABLE ... DROP NOT NULL` is committed immediately, so a later
+  statement in the same file already sees the constraint gone. There is no
+  "all or nothing" across a migration file unless the caller wraps it.
 
-That harness proves every file *runs*. It does not prove the set is idempotent,
-because the rollback erases the first pass — and a seed that is wrong only on
-the second pass needs both. To check that, commit the whole set twice against a
-throwaway database and compare the row counts after each pass. Pass 1 legitimately
-grows (`027`'s rolling window is relative to "now", so each run seeds a new day,
-and `CURRENT_DATE`-based seeds move); pass 2 must grow by exactly zero. Anything
-else is a seed that will keep re-adding rows forever.
+The faithful local reproduction is Docker, not Node:
+
+```bash
+docker run -d --name pg -e POSTGRES_PASSWORD=pw -e POSTGRES_DB=app \
+  -p 5432:5432 postgres:16-alpine
+until docker exec pg pg_isready -U postgres -d app; do sleep 1; done
+for f in $(ls migrations/*.sql | sort); do
+  docker exec -i pg psql -U postgres -d app -v ON_ERROR_STOP=1 -q -f - < "$f" || break
+done
+```
+
+Run that loop twice: it reproduces both the fresh-apply and the re-apply step.
+Then run it a third time and compare `SELECT count(*) FROM flights` across
+passes. Pass 1 legitimately grows — `027`'s rolling window is relative to "now",
+so each run seeds a new day, and the `CURRENT_DATE`-based seeds move — but every
+pass after the first must add exactly zero rows. Anything else is a seed that
+will keep re-adding flights forever, and that is invisible in the tests because
+they run against the in-memory mock.
 
 - **030's fare columns are `NOT NULL` with no default, and every seed file
   predates them.** A seed cannot name `economy_price` in its column list — 030 has
@@ -84,15 +97,20 @@ else is a seed that will keep re-adding rows forever.
   across the whole range. Any pricing step scoped by a number range then misses
   them. This is why the number blocks in the seed comments look right and are
   still wrong; do not reason about a seed's rows from its numbering.
-  `014` and `024` now collect `RETURNING id` into a `CREATE TEMP TABLE
+  `014` and `024` now collect `RETURNING id` into `CREATE TEMP TABLE
   _vj_seeded_<file>` and price by id. `025` scopes by route (TBB) and `026` by
   number-plus-null, both of which the same replay invalidates less badly, but id
   is the only identifier that is exact. Name the temp table after the file: two
-  seed files can share one transaction in a replay harness.
+  seed files can share one session in a replay harness.
 - **A `SET NOT NULL` that fails tells you the pricing `WHERE` under-reached, not
   that the constraint is wrong.** It is the only reliable signal, and it fires
   after the damage is done. When it happens, count the orphans by flight number
   before assuming anything about which file owns them.
+- **A migration file is not a transaction.** CI runs each file with `psql -f` and
+  no `BEGIN`, so a failure halfway through leaves the earlier statements
+  committed. Anything that must be atomic has to say so inside the file. This is
+  also why staging rows through a temp table needs an explicit `DROP` at the end
+  rather than `ON COMMIT DROP`.
 - **022 renames the demo email only when the target is free.** 014 re-seeds the
   old domain on every run, so a replayed database holds `user@vietjetsim.vn`
   *and* `user@vietjetair.vn` at once; renaming then collides on
