@@ -53,13 +53,18 @@ $relax$;
 -- number advances even when `ON CONFLICT DO NOTHING` skips the row. On a
 -- replay the new rows land anywhere from 201 upward, not the tidy 201-370 block,
 -- and a number-range WHERE leaves the strays unpriced — which is what fails
--- 030's NOT NULL. The name is file-specific so a replay leaves no cross-file
--- residue if several seed files run inside one transaction.
+-- 030's NOT NULL. The name is file-specific so two seed files sharing one
+-- transaction cannot collide.
+--
+-- No `ON COMMIT DROP`: CI applies each file with `psql -f` and no `BEGIN`, so
+-- every statement is its own transaction and the table would be gone before the
+-- INSERT below could name it. Dropped explicitly at the end of the file, which
+-- behaves the same either way.
 CREATE TEMP TABLE _vj_seeded_024 (
   id           uuid PRIMARY KEY,
   class        text,
   price        numeric
-) ON COMMIT DROP;
+);
 
 WITH schedule (slot, depart_hour, price, class, available) AS (
   VALUES
@@ -149,3 +154,5 @@ BEGIN
   END IF;
 END
 $restore$;
+
+DROP TABLE IF EXISTS _vj_seeded_024;
