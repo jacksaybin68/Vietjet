@@ -11,6 +11,8 @@ npm run type-check # tsc --noEmit
 npm test           # vitest run
 npm run lint       # eslint .   (NOT `next lint` ‚Äî that is removed in Next 15)
 npm run lint:fix   # eslint . --fix
+npm run test:migrations # 4 migration passes on throwaway Docker Postgres (needs Docker)
+npm run test:smoke # post-build HTTP assertions against a running server
 ```
 
 Lint/format rules live in `eslint.config.mjs` (flat config, prettier printWidth 100,
@@ -62,7 +64,14 @@ passes locally and dies in CI. Two real cases this repo has already hit:
   statement in the same file already sees the constraint gone. There is no
   "all or nothing" across a migration file unless the caller wraps it.
 
-The faithful local reproduction is Docker, not Node:
+Run `npm run test:migrations` instead of pasting that loop. It applies the whole
+set four times against a throwaway `postgres:16-alpine` — the same image CI pins —
+and asserts, per pass: the row count does not grow, the full row fingerprint does
+not change, the CI "expected tables" step still holds, no flight is left without
+a fare, every fare matches the ladder its own class implies, no flight number
+repeats within a day, and no staging table survives. Exits non-zero on failure.
+
+The raw loop it wraps, if you need it by hand:
 
 ```bash
 docker run -d --name pg -e POSTGRES_PASSWORD=pw -e POSTGRES_DB=app \
@@ -73,25 +82,22 @@ for f in $(ls migrations/*.sql | sort); do
 done
 ```
 
-Run that loop twice: it reproduces both the fresh-apply and the re-apply step.
 Pass 1 legitimately grows — `027`'s rolling window is relative to "now", so each
 run seeds a new day, and the `CURRENT_DATE`-based seeds move — but every pass
 after the first must add exactly zero rows.
 
-Counting rows is the weaker check, because a seed that *rewrites* prices without
-adding rows passes it. Dump the rows and diff the two passes instead:
+Two limits worth knowing before you trust it:
 
-```bash
-q="SELECT flight_no,from_code,to_code,to_char(depart_time,'YYYY-MM-DD HH24:MI+07'),\
-price,class,available,coalesce(economy_price,-1),coalesce(business_price,-1) \
-FROM flights ORDER BY flight_no,from_code,to_code,depart_time"
-docker exec pg psql -U postgres -d app -tA -F'|' -c "$q" > /tmp/p1.txt
-# ... second pass ...
-diff /tmp/p1.txt /tmp/p2.txt   # must be empty
-```
+- **Counting rows is the weaker check**, because a seed that *rewrites* prices
+  without adding rows passes it. The script diffs a fingerprint of every row for
+  this reason.
+- **The fingerprint diff cannot see pass 1.** If a file prices rows it does not
+  own, pass 1 already holds the overwritten value and pass 2 matches it. The
+  per-row ladder check is what catches that; if you add a check, ask the same
+  question of it — would it have stayed green against a bug present in pass 1?
 
-Anything else is a seed that will keep changing flights forever. Neither failure
-is visible in the test suite, which runs against the in-memory mock.
+Neither failure is visible in the test suite, which runs against the in-memory
+mock and never executes a migration.
 
 - **030's fare columns are `NOT NULL` with no default, and every seed file
   predates them.** A seed cannot name `economy_price` in its column list — 030 has
@@ -100,15 +106,24 @@ is visible in the test suite, which runs against the in-memory mock.
   027 already had, is: drop `NOT NULL` in a guarded `DO` block before the INSERT,
   price the file's own rows with 030's formula, re-apply `NOT NULL` after. All
   three blocks no-op on a fresh database. Every seed file does this now.
-- **`WHERE economy_price IS NULL` is not a scope.** It reads like one — "price the
-  rows this file added" — but it matches *every* unpriced flight in the table, so
-  the file's pricing block also repaints whatever other migrations left null,
-  with this file's formula. Three files did this (`027`, `028`, `032`) and the
-  bug was invisible on a fresh database, where nothing is null yet and the
-  statement correctly does nothing; it only appeared on a replay. A predicate
-  that describes a *state* cannot scope a file's writes — scope by identity.
-  These files now stage `RETURNING id` in `CREATE TEMP TABLE _vj_seeded_<file>`
-  and price `WHERE f.id IN (...)`.
+- **`WHERE economy_price IS NULL` is not a scope, but it is not yet a bug
+  either.** It reads like one — "price the rows this file added" — yet it matches
+  *every* unpriced flight in the table, so the block also touches rows another
+  file left unpriced. Three files scoped this way (`027`, `028`, `032`) before
+  they staged ids. Two things keep it harmless *today*, and both are load-bearing
+  enough to be worth stating plainly:
+  - Every seed closes its own ratchet: `DROP NOT NULL` at the top, `SET NOT NULL`
+    at the bottom. A file that leaves a null behind fails its *own* `SET NOT NULL`
+    immediately, so no file can hand a null to the next one. Measured across all
+    35 files: the flight table never holds a null price between two files.
+  - Every seed copies `030`'s ladder verbatim, so "wrong file, right formula"
+    produces the same two numbers. A wide scope here rewrites rows to a value
+    they already had.
+  So the exposure is *latent*, not active: it opens the moment a file diverges
+  from `030`'s ladder, or the moment a file stops closing its ratchet. Both are
+  one edit away, and neither has a test. These files stage `RETURNING id` and
+  price `WHERE f.id IN (...)` so the scope is exact regardless. Do not cite this
+  as a fixed user-visible bug — it never was one.
 - **`row_number() OVER ()` cannot identify a file's own rows.** It numbers the
   *select*, not the insert, so the counter advances even for a row
   `ON CONFLICT DO NOTHING` then skips. On a first run that is invisible — the
