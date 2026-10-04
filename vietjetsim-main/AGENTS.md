@@ -165,21 +165,38 @@ mock and never executes a migration.
     constraint` — and the constraint was left at **0**, i.e. the file could not
     add the very key it exists to add. After `NOT VALID` → clear orphans →
     `VALIDATE`: constraint present, `convalidated = t`, orphan gone, and the
-    booking itself kept.
   - `023`: `ERROR: check constraint ... is violated by some row`, with
     `ADD COLUMN` already committed — so it left the half-migrated state the
     comment claimed to be avoiding (column present, CHECK absent). After the
     fix: `convalidated = t`, no abort.
-  The pattern is `ADD CONSTRAINT ... NOT VALID` → clean the offending rows →
-  `VALIDATE CONSTRAINT`. The four-pass replay test **cannot** catch this class:
-  it starts from an empty database, where there is nothing to violate. Only a
-  database carrying the damage exercises it, so build one by hand when adding
-  a constraint to a table that ships rows.
+  - `030` (fare ladder): the same abort, and worse in one respect — its
+    `ALTER COLUMN ... SET NOT NULL` had already committed, so the table ended
+    up with two NOT NULL fare columns and **no** `flights_fare_ladder_ordered`
+    at all. After `NOT VALID` → `LEAST`/`GREATEST` swap → `VALIDATE`: `t`, zero
+    inverted rows, and all 4242 flights still present (the repair reorders the
+    pair rather than deleting the row).
+  - `007` (phone UNIQUE): **UNIQUE has no `NOT VALID` form**, so the shape does
+    not apply. `ADD CONSTRAINT UNIQUE` aborted with `could not create unique
+    index` on a database holding two accounts on one number, which also cost
+    step 3 — `user_profiles_contact_check` was never created. It now checks for
+    duplicates first and *skips with a `RAISE NOTICE`* instead of aborting;
+    `016` then merges those accounts properly (it moves bookings, wallets and
+    loyalty before deleting a row) and re-adds the constraint. Measured end to
+    end: `007` no longer aborts, the duplicate survives until `016` handles it,
+    and afterwards the UNIQUE is present with zero duplicate numbers.
+  So the rule has two branches: `NOT VALID` → repair → `VALIDATE` where the
+  syntax allows it, and *detect and defer* where it does not (UNIQUE) — and
+  whichever branch is taken, a later file has to finish the job.
+  The replay test **cannot** catch this class: it starts from an empty database,
+  where there is nothing to violate. Only a database carrying the damage
+  exercises it, so build one by hand when adding a constraint to a table that
+  ships rows.
 - **A constraint guard must filter by table, not by name.** A constraint name is
   unique per *schema*, not per table. `023` checked only `conname`, so any
   constraint anywhere named `passengers_passenger_type_check` would skip the
   block and leave the column permanently unchecked. Add
-  `AND conrelid = '<table>'::regclass` — `017` already did.
+  `AND conrelid = '<table>'::regclass` — `017` already did, `007` and `016` did
+  not (three guards, all the same omission).
 - **A hand-written validator and a CHECK constraint are two copies of one list;
   keep them literally identical.** The admin PATCH validator at
   `src/app/api/quan-tri/chuyen-bay/[id]/route.ts` offered `boarding`, `landed`
