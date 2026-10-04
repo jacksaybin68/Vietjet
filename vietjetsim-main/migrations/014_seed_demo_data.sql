@@ -62,6 +62,31 @@ BEGIN
 END
 $relax$;
 
+-- No `economy_price` / `business_price` in the column list, and that has to stay:
+-- 030 is what creates those columns, so on a fresh database naming them here
+-- aborts this INSERT with "column economy_price does not exist" during the
+-- *first* apply. 030 then backfills whatever this file left null.
+--
+-- The replay is the other direction: the columns exist by then and reject a
+-- null, so the bare column list fails CI's "Re-applying migrations must be
+-- safe" step with "null value in column economy_price". The DO block below
+-- prices these rows when the columns are there and does nothing when they are
+-- not, which is the same shape as 027's own guard.
+--
+-- A CTE collects the rows this run actually inserted, so the pricing step
+-- addresses them by identity rather than by flight number. Numbering cannot do
+-- that job: `row_number() OVER ()` numbers the *select*, not the insert, so a
+-- number advances even when `ON CONFLICT DO NOTHING` skips the row. On a
+-- replay the new rows therefore land anywhere in the 101+ range instead of the
+-- tidy 101-160 block, and a number-range WHERE leaves the strays unpriced —
+-- which is what fails 030's NOT NULL. The name is file-specific so a replay
+-- leaves no cross-file residue if several seed files share one transaction.
+CREATE TEMP TABLE _vj_seeded_014 (
+  id           uuid PRIMARY KEY,
+  class        text,
+  price        numeric
+) ON COMMIT DROP;
+
 WITH routes (from_code, to_code) AS (
   VALUES
     ('SGN', 'HAN'), ('HAN', 'SGN'),
@@ -79,45 +104,38 @@ schedule (slot, depart_hour, price, class, available) AS (
     (3, 12, 749000::numeric,  'economy',  192),
     (4, 15, 1059000::numeric, 'economy',  150),
     (5, 19, 2490000::numeric, 'business', 24)
+),
+inserted AS (
+  INSERT INTO flights (flight_no, from_code, to_code, depart_time, arrive_time, price, class, available)
+  SELECT
+    -- Pad to the number's own length with 3 as the floor: `LPAD(x, 3, '0')`
+    -- *truncates* when x is longer than 3, so the first number past 999
+    -- silently lost a digit and two routes ended up under one flight number.
+    'VJ ' || LPAD(
+      (row_number() OVER () + 100)::text,
+      GREATEST(3, length((row_number() OVER () + 100)::text)),
+      '0'
+    ),
+    r.from_code,
+    r.to_code,
+    (CURRENT_DATE + INTERVAL '1 day') + make_interval(hours => s.depart_hour),
+    (CURRENT_DATE + INTERVAL '1 day') + make_interval(hours => s.depart_hour) + INTERVAL '2 hours 10 minutes',
+    s.price,
+    s.class,
+    s.available
+  FROM routes r
+  CROSS JOIN schedule s
+  ON CONFLICT (from_code, to_code, depart_time) DO NOTHING
+  RETURNING id, class, price
 )
--- No `economy_price` / `business_price` in the column list, and that has to stay:
--- 030 is what creates those columns, so on a fresh database naming them here
--- aborts this INSERT with "column economy_price does not exist" during the
--- *first* apply. 030 then backfills whatever this file left null.
---
--- The replay is the other direction: the columns exist by then and reject a
--- null, so the bare column list fails CI's "Re-applying migrations must be
--- safe" step with "null value in column economy_price". The DO block below
--- prices these rows when the columns are there and does nothing when they are
--- not, which is the same shape as 027's own guard.
-INSERT INTO flights (flight_no, from_code, to_code, depart_time, arrive_time, price, class, available)
-SELECT
-  -- `LPAD(x, 3, '0')` *truncates* when x is longer than 3, so the first number
-  -- past 999 silently lost a digit and two routes ended up under one flight
-  -- number. Pad to the number's own length with 3 as the floor.
-  'VJ ' || LPAD(
-    (row_number() OVER () + 100)::text,
-    GREATEST(3, length((row_number() OVER () + 100)::text)),
-    '0'
-  ),
-  r.from_code,
-  r.to_code,
-  (CURRENT_DATE + INTERVAL '1 day') + make_interval(hours => s.depart_hour),
-  (CURRENT_DATE + INTERVAL '1 day') + make_interval(hours => s.depart_hour) + INTERVAL '2 hours 10 minutes',
-  s.price,
-  s.class,
-  s.available
-FROM routes r
-CROSS JOIN schedule s
-ON CONFLICT (from_code, to_code, depart_time) DO NOTHING;
+INSERT INTO _vj_seeded_014 (id, class, price)
+SELECT id, class, price FROM inserted;
 
 -- 030's own formula, verbatim: a business row's economy fare is `price / 2.77`,
--- every other class takes `price` as its economy fare. Only runs once the
--- columns exist, so it is a no-op on a fresh database where 030 has yet to run.
---
--- Scoped to this file's own numbering block: 12 routes x 5 slots = 60 rows
--- numbered from 100, so 101-160. 024 owns 201-370 and the later seeds start
--- past 600, so neither is repainted here.
+-- every other class takes `price` as its economy fare. Addressed by the ids the
+-- CTE above collected, so it prices this run's rows and nothing else. Only runs
+-- once the columns exist, so it is a no-op on a fresh database where 030 has
+-- yet to run.
 DO $fare$
 BEGIN
   IF EXISTS (
@@ -130,9 +148,8 @@ BEGIN
                                 THEN round(f.price / 2.77) ELSE round(f.price) END,
            business_price = CASE WHEN f.class = 'business'
                                 THEN round(f.price) ELSE round(f.price * 2.77) END
-     WHERE (f.economy_price IS NULL OR f.business_price IS NULL)
-       AND split_part(f.flight_no, ' ', 2) ~ '^[0-9]+$'
-       AND split_part(f.flight_no, ' ', 2)::int BETWEEN 101 AND 160;
+      FROM _vj_seeded_014 s
+     WHERE f.id = s.id;
   END IF;
 END
 $fare$;

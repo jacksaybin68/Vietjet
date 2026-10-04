@@ -47,6 +47,20 @@ BEGIN
 END
 $relax$;
 
+-- A CTE collects the rows this run actually inserted, so the pricing step below
+-- addresses them by identity rather than by flight number. Numbering cannot do
+-- that job: `row_number() OVER ()` numbers the *select*, not the insert, so a
+-- number advances even when `ON CONFLICT DO NOTHING` skips the row. On a
+-- replay the new rows land anywhere from 201 upward, not the tidy 201-370 block,
+-- and a number-range WHERE leaves the strays unpriced — which is what fails
+-- 030's NOT NULL. The name is file-specific so a replay leaves no cross-file
+-- residue if several seed files run inside one transaction.
+CREATE TEMP TABLE _vj_seeded_024 (
+  id           uuid PRIMARY KEY,
+  class        text,
+  price        numeric
+) ON COMMIT DROP;
+
 WITH schedule (slot, depart_hour, price, class, available) AS (
   VALUES
     (1, 6,  899000::numeric,  'economy',  180),
@@ -73,30 +87,35 @@ routes (from_code, to_code) AS (
     ('DIH'), ('CXL'), ('HXX'), ('TUQ'), ('RKG'), ('BBU'), ('UIH')
   ) AS t(code)
   CROSS JOIN (VALUES ('HAN'), ('SGN')) AS h(code)
+),
+inserted AS (
+  INSERT INTO flights (flight_no, from_code, to_code, depart_time, arrive_time, price, class, available)
+  SELECT
+    -- Pad to the number's own length with 3 as the floor: `LPAD(x, 3, '0')`
+    -- truncates a longer input, which put two routes under one flight number.
+    'VJ ' || LPAD(
+      (row_number() OVER () + 200)::text,
+      GREATEST(3, length((row_number() OVER () + 200)::text)),
+      '0'
+    ),
+    r.from_code,
+    r.to_code,
+    (CURRENT_DATE + INTERVAL '2 days') + make_interval(hours => s.depart_hour),
+    (CURRENT_DATE + INTERVAL '2 days') + make_interval(hours => s.depart_hour) + INTERVAL '2 hours 10 minutes',
+    s.price,
+    s.class,
+    s.available
+  FROM routes r
+  CROSS JOIN schedule s
+  ON CONFLICT (from_code, to_code, depart_time) DO NOTHING
+  RETURNING id, class, price
 )
-INSERT INTO flights (flight_no, from_code, to_code, depart_time, arrive_time, price, class, available)
-SELECT
-  -- Pad to the number's own length with 3 as the floor: `LPAD(x, 3, '0')`
-  -- truncates a longer input, which put two routes under one flight number.
-  'VJ ' || LPAD(
-    (row_number() OVER () + 200)::text,
-    GREATEST(3, length((row_number() OVER () + 200)::text)),
-    '0'
-  ),
-  r.from_code,
-  r.to_code,
-  (CURRENT_DATE + INTERVAL '2 days') + make_interval(hours => s.depart_hour),
-  (CURRENT_DATE + INTERVAL '2 days') + make_interval(hours => s.depart_hour) + INTERVAL '2 hours 10 minutes',
-  s.price,
-  s.class,
-  s.available
-FROM routes r
-CROSS JOIN schedule s
-ON CONFLICT (from_code, to_code, depart_time) DO NOTHING;
+INSERT INTO _vj_seeded_024 (id, class, price)
+SELECT id, class, price FROM inserted;
 
--- 030's own formula, verbatim. Scoped to this file's own block: 17 airports x 2
--- directions x 5 slots = 170 rows numbered from 201, so 201-370. 014's block is
--- 101 upward and the later seeds start past 600, so nothing else is touched.
+-- 030's own formula, verbatim. Addressed by the ids the CTE above collected, so
+-- it prices this run's rows and nothing else. Only runs once the columns exist,
+-- so it is a no-op on a fresh database where 030 has yet to run.
 DO $fare$
 BEGIN
   IF EXISTS (
@@ -109,8 +128,8 @@ BEGIN
                                 THEN round(f.price / 2.77) ELSE round(f.price) END,
            business_price = CASE WHEN f.class = 'business'
                                 THEN round(f.price) ELSE round(f.price * 2.77) END
-     WHERE (f.economy_price IS NULL OR f.business_price IS NULL)
-       AND split_part(f.flight_no, ' ', 2) ~ '^[23][0-9]{2}$';
+      FROM _vj_seeded_024 s
+     WHERE f.id = s.id;
   END IF;
 END
 $fare$;
