@@ -82,60 +82,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Start Postgres
-        run: |
-          docker run -d --name pg -e POSTGRES_PASSWORD=pw -e POSTGRES_DB=app -p 5432:5432 postgres:16-alpine
-          for i in $(seq 1 30); do
-            if docker exec pg pg_isready -U postgres -d app >/dev/null 2>&1; then
-              echo "Postgres ready after ${i}s"
-              exit 0
-            fi
-            sleep 1
-          done
-          echo "::error::Postgres did not become ready within 30s"
-          docker logs pg
-          exit 1
-
-      # Applies every migrations/*.sql in filename order against an empty
-      # database. This is the check that catches ordering mistakes — e.g. an
-      # ALTER in 000 that references a table created by 003, which fails only on
-      # a fresh database and never in tests (they use the in-memory mock).
-      - name: Apply migrations in order
-        run: |
-          set -euo pipefail
-          for f in $(ls migrations/*.sql | sort); do
-            echo "::group::$f"
-            docker exec -i pg psql -U postgres -d app -v ON_ERROR_STOP=1 -q -f - < "$f"
-            echo "::endgroup::"
-          done
-
-      # CI re-applies the whole set. A migration that is not idempotent fails
-      # here, not in production.
-      - name: Re-applying migrations must be safe
-        run: |
-          set -euo pipefail
-          for f in $(ls migrations/*.sql | sort); do
-            docker exec -i pg psql -U postgres -d app -v ON_ERROR_STOP=1 -q -f - < "$f" >/dev/null
-          done
-
-      - name: Expected tables exist
-        run: |
-          docker exec pg psql -U postgres -d app -v ON_ERROR_STOP=1 -tAc \
-            "SELECT count(*) FROM information_schema.tables WHERE table_schema='public';" \
-            | grep -qxE '[0-9]{2,}'
-          docker exec pg psql -U postgres -d app -v ON_ERROR_STOP=1 -tAc \
-            "SELECT count(*) FROM pg_constraint WHERE conname='fk_bookings_discount_code';" \
-            | grep -qx '1'
-          # The booking flow writes here inside the same CTE that inserts the
-          # booking, so a missing table fails every booking with
-          # 'relation "booking_consents" does not exist'. It is created by 018.
-          docker exec pg psql -U postgres -d app -v ON_ERROR_STOP=1 -tAc \
-            "SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name='booking_consents';" \
-            | grep -qx '1'
-
-      - name: Stop Postgres
-        if: always()
-        run: docker rm -f pg
+      # Runs `npm run test:migrations`, which is the same four-pass replay this
+      # used to spell out by hand — it applies the whole set against an empty
+      # database, re-applies it three more times, and asserts the row count and
+      # a full row fingerprint are stable, plus the "expected tables" checks
+      # below. Keeping one command means CI and a local run cannot drift apart,
+      # which is how the old copy-pasted loop fell behind the files.
+      #
+      # No `npm ci`: the script only shells out to docker/psql, so there is
+      # nothing to install and this job stays fast.
+      - name: Migration replay
+        working-directory: vietjetsim-main
+        run: node scripts/test-migrations.cjs
 
   build:
     name: Build
