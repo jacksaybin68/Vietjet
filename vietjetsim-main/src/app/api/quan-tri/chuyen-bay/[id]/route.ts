@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { getFlightById, updateFlight, insertFlightUpdateLog } from '@/lib/db';
+import { FLIGHT_NO_PATTERN, normalizeFlightNo } from '@/lib/flight-no';
 
 // ─── Allowed update fields & their validators ────────────────────────────────
 
@@ -56,8 +57,12 @@ function validateField(field: AllowedField, value: unknown): string | null {
 
   switch (field) {
     case 'flight_no':
-      if (!/^[A-Z]{2}\s?\d{2,4}$/i.test(strVal.replace(/\s+/g, ' '))) {
-        return 'Số hiệu chuyến bay không hợp lệ. Định dạng: VJ 101, VN001...';
+      // Tested against the normalised value, not the raw one: `vj 101` and
+      // `VJ  101` both normalise to a number migration 036's CHECK accepts, and
+      // validating the raw input rejected them only to store a value the
+      // database would have refused with a bare 500.
+      if (!FLIGHT_NO_PATTERN.test(normalizeFlightNo(strVal))) {
+        return 'Số hiệu chuyến bay không hợp lệ. Định dạng: VJ 101, VJ 3001, VJ101-1000...';
       }
       break;
 
@@ -248,7 +253,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         newValue = String(newValue).toUpperCase();
       }
       if (field === 'flight_no') {
-        newValue = String(newValue).trim().replace(/\s+/, ' ').toUpperCase();
+        newValue = normalizeFlightNo(newValue);
       }
 
       // Skip if value hasn't changed
@@ -278,7 +283,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     for (const field of updateFields) {
       let val = body[field];
       if (field === 'from_code' || field === 'to_code') val = String(val).toUpperCase();
-      if (field === 'flight_no') val = String(val).trim().replace(/\s+/g, ' ').toUpperCase();
+      if (field === 'flight_no') val = normalizeFlightNo(val);
       updates[field] = val;
     }
 

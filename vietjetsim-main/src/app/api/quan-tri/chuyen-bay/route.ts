@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { getAllFlights, createFlight, updateFlight, deleteFlight } from '@/lib/db';
 import { parsePaginationParams, getPaginationMeta } from '@/lib/pagination';
+import { FLIGHT_NO_PATTERN, normalizeFlightNo } from '@/lib/flight-no';
 
 /**
  * Values allowed by the `flights_class_check` CHECK constraint on
@@ -94,8 +95,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Same reasoning as `class` above, and the same reason the PATCH handler
+    // already normalised: migration 036 put the shape in a CHECK, so an
+    // unvalidated insert becomes a bare 500 from Postgres rather than a 400
+    // naming the field. Normalising here also means `vj  101` is stored as
+    // `VJ 101`, which is what the booking-PNR join compares against.
+    const normalizedFlightNo = normalizeFlightNo(flight_no);
+    if (!FLIGHT_NO_PATTERN.test(normalizedFlightNo)) {
+      return NextResponse.json(
+        {
+          error: 'Bad Request',
+          message: `Invalid flight_no '${flight_no}'. Expected e.g. VJ 101, VJ 3001, VJ101-1000`,
+        },
+        { status: 400 }
+      );
+    }
+
     const flight = await createFlight({
-      flight_no,
+      flight_no: normalizedFlightNo,
       from_code,
       to_code,
       depart_time,

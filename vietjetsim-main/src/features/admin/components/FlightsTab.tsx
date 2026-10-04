@@ -11,6 +11,7 @@ import {
 } from '@/features/admin';
 import { getApiErrorMessage } from '@/shared/services';
 import { AIRPORT_CITIES } from '@/shared/constants';
+import { FLIGHT_NO_PATTERN, normalizeFlightNo } from '@/lib/flight-no';
 import { toVietnamInstant, toVietnamWallClock } from '@/lib/utils';
 
 interface ToastAPI {
@@ -312,8 +313,11 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
   };
 
   const validateFlightForm = (f: typeof newFlight) => {
-    if (!f.flightNo || !/^[A-Z]{2}\s?\d{2,4}$/i.test(f.flightNo.trim())) {
-      onToast?.error('Lỗi nhập liệu', 'Số hiệu chuyến bay không hợp lệ (VD: VJ 101)');
+    if (!f.flightNo || !FLIGHT_NO_PATTERN.test(normalizeFlightNo(f.flightNo))) {
+      onToast?.error(
+        'Lỗi nhập liệu',
+        'Số hiệu chuyến bay không hợp lệ (VD: VJ 101, VJ 3001, VJ101-1000)'
+      );
       return false;
     }
     if (!f.from || !f.to || f.from === f.to) {
