@@ -27,6 +27,12 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 
+# Database dumps. These hold customer rows and password hashes, and a dump is
+# only ever worth taking right before a risky change — never worth committing.
+# `neon_dump_latest.sql` is tracked from before this rule existed; removing it
+# from the index does not unpublish it, so rotate nothing on its account.
+database-backup/*.sql
+
 # Vercel deployment
 .vercel/
 
