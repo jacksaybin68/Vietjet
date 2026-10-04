@@ -154,12 +154,17 @@ function startPostgres() {
   ]);
 
   for (let i = 1; i <= READY_TIMEOUT_S; i++) {
+    // A real query, not `pg_isready`. The image starts Postgres twice — a
+    // temporary server for initdb, then the real one — and `pg_isready` answers
+    // the temporary one, so it reports ready and then the next statement fails
+    // with "the database system is shutting down". Waiting until a query
+    // actually round-trips cannot hit that window.
     const ready = spawnSync(
       'docker',
-      ['exec', CONTAINER, 'pg_isready', '-U', DB.user, '-d', DB.name],
+      ['exec', CONTAINER, 'psql', '-U', DB.user, '-d', DB.name, '-tAc', 'SELECT 1'],
       { encoding: 'utf8' }
     );
-    if (ready.status === 0) {
+    if (ready.status === 0 && ready.stdout.trim() === '1') {
       console.info(`  ok    Postgres ready after ${i}s`);
       return true;
     }
