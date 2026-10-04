@@ -114,16 +114,51 @@ all four enrolled customers pointed at. All 4 enrollments survived, still
 `Bronze`. Both keys are installed and `convalidated`, so the seed cannot
 multiply again.
 
-Two things deliberately **not** fixed there, because neither is this file's
-business:
-- **20 duplicate `(flight_no, day)` pairs survive in the 2001–2999 range**,
-  on days from 2026-09-26 to 10-03. Confirmed present in the pre-change dump,
-  so they predate any of this — they are the residue of repeated `025`/`026`/
-  `032` applies, and `031` only ever renumbered the surplus, never the seeds.
-- The dump used to reason about this is `database-backup/neon_dump_pre_003_020.sql`
-  (2.1 MB, taken before the change). Restoring it locally needs
-  `postgres:17-alpine` and the `pg_session_jwt` CREATE EXTENSION stripped — Neon
-  ships that extension and nothing else does.
+**The "20 duplicate flight numbers" were never a defect — they were the
+time-zone measurement, not the data.** Neon runs sessions with
+`TimeZone = GMT`, so `GROUP BY flight_no, depart_time::date` puts two
+different Vietnamese departures in the same bucket. `VJ 2010` on 2026-09-29 is
+09:00 and 2026-09-30 is 06:00 *Vietnam time* — two ordinary daily departures,
+one flight number, two consecutive local days. Counted in UTC they collide;
+counted in `Asia/Ho_Chi_Minh` they do not:
+
+```
+UTC-day dups = 20    VN-day dups = 0
+```
+
+`scripts/test-migrations.cjs:371` already groups by
+`(depart_time AT TIME ZONE 'Asia/Ho_Chi_Minh')::date`, which is why CI stayed
+green and why this never showed up as a failure. **Any count over a day
+boundary on this database must say which zone it means.** A "duplicate" found
+this way is usually two real flights, and renumbering them would have invented
+a defect that customers would then see in their booking history.
+
+**What that measurement did surface was a genuine defect one layer down:**
+1224 flights whose `flight_no` never matched `VJ <digits>` — 1174 written as
+`VJ351` / `VJ341B` (no space) and 50 as `VJ101-1000`. `035` moved all 89 of
+those numbers into the empty 3001–3089 block. Two consequences worth keeping:
+- `VJ341B` was **uneditable through the admin console** — the validator at
+  `src/app/api/quan-tri/chuyen-bay/[id]/route.ts:59` is
+  `/^[A-Z]{2}\s?\d{2,4}$/i`, which rejects a trailing `B`. Two thirds of this
+  data could not be managed by the screen meant to manage it. Every number in
+  the 3xxx block passes that validator.
+- The `B` suffix was doing real work: `VJ341` and `VJ341B` are both HAN-CXR,
+  one economy and one business. Dropping it is safe only because `class`
+  already carries the cabin on every row.
+
+`flight_no` is a lookup key, not a label — `getFlightStatusByNo`
+(`src/lib/db.ts:509`) resolves a flight by `UPPER(flight_no) =` for the
+tracking page and check-in, and `searchBookingsByPnr` joins on it. So `035`
+touches **no flight that has a booking**, and reports the ones it skipped
+instead of silently leaving them. Two remain on purpose, each with a live
+booking: `VJ101-1000` (VJDEMO01, completed) and `VJ789-1043` (VJ644052,
+confirmed). Widening the validator to accept their shape is still open.
+
+The dump used to reason about this is
+`database-backup/neon_dump_pre_003_020.sql` (2.1 MB, taken before these
+changes). Restoring it locally needs `postgres:17-alpine` and the
+`pg_session_jwt` CREATE EXTENSION stripped — Neon ships that extension and
+nothing else does.
 
 Pass 1 legitimately grows — `027`'s rolling window is relative to "now", so each
 run seeds a new day, and the `CURRENT_DATE`-based seeds move — but every pass
@@ -437,6 +472,17 @@ not depend on the session. When correcting a wrong value, re-seed rather than
 shift: the five seed slots are symmetric, so a row that needs shifting and a
 row that is already correct are indistinguishable, and any relative `UPDATE`
 you can write will be wrong on its second run.
+
+**And read timestamps back in Vietnam, too — not just write them.** The same
+`TimeZone = GMT` makes a *query* lie. `GROUP BY depart_time::date` is a UTC
+day, so `VJ 2010` departing 09:00 on the 29th and 06:00 on the 30th *Vietnam
+time* both fall in 2026-09-29 UTC, and the number looks like it flies twice a
+day. Counted in UTC: **20 duplicates**. Counted in
+`(depart_time AT TIME ZONE 'Asia/Ho_Chi_Minh')::date`: **0**. Those are two
+ordinary daily departures, and "fixing" them would have renamed flights
+customers had booked. Any day-boundary count on this database must state its
+zone; `scripts/test-migrations.cjs` already does, which is why this never
+surfaced as a failure.
 
 **The server owns every amount in a booking.** `POST /api/dat-ve` re-derives
 the fare, the seats and the services from `features/bookings/pricing` and ignores
