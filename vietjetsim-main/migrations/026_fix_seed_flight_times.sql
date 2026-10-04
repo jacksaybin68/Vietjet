@@ -70,6 +70,20 @@ BEGIN
   END IF;
 END
 $relax$;
+-- Stage the ids this run inserted so the pricing step below can address them by
+-- identity. A number range is not a scope: `row_number() OVER ()` numbers the
+-- *select*, not the insert, so on a replay the few rows that do get inserted
+-- take the numbers the skipped rows consumed and land scattered across the
+-- block. 027 numbers from 601 within the same range, so a range here would also
+-- repaint that file's rows.
+--
+-- No `ON COMMIT DROP`: CI applies each file with `psql -f` and no `BEGIN`, so
+-- every statement is its own transaction and the table would be gone before the
+-- INSERT could name it. Dropped explicitly at the end of the file instead.
+CREATE TEMP TABLE _vj_seeded_026 (
+  id uuid PRIMARY KEY
+);
+
 WITH schedule (depart_hour, price, class, available) AS (
   VALUES
     (6,  899000::numeric,  'economy',  180),
@@ -102,8 +116,9 @@ routes (from_code, to_code) AS (
 -- append its own local hour and a fixed +07:00.
 days (vn_date) AS (
   SELECT to_char((now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date + 2, 'YYYY-MM-DD')
-)
-INSERT INTO flights (flight_no, from_code, to_code, depart_time, arrive_time, price, class, available)
+),
+inserted AS (
+  INSERT INTO flights (flight_no, from_code, to_code, depart_time, arrive_time, price, class, available)
 SELECT
   -- Pad to the number's own length with 3 as the floor: `LPAD(x, 3, '0')`
   -- truncates a longer input, and this block runs to 1040, so 41 rows a day
@@ -124,12 +139,13 @@ SELECT
 FROM routes r
 CROSS JOIN schedule s
 CROSS JOIN days d
-ON CONFLICT (from_code, to_code, depart_time) DO NOTHING;
+ON CONFLICT (from_code, to_code, depart_time) DO NOTHING
+RETURNING id
+)
+INSERT INTO _vj_seeded_026 (id)
+SELECT id FROM inserted;
 
--- 030's own formula, verbatim. Scoped to this file's block, 601 upward. The
--- WHERE clause also requires the fare to be null, so on a database where 030
--- has already priced everything this statement is a no-op and no other
--- migration's rows are repainted.
+-- 030's own formula, verbatim, applied to the ids staged above.
 DO $fare$
 BEGIN
   IF EXISTS (
@@ -142,9 +158,7 @@ BEGIN
                                 THEN round(f.price / 2.77) ELSE round(f.price) END,
            business_price = CASE WHEN f.class = 'business'
                                 THEN round(f.price) ELSE round(f.price * 2.77) END
-     WHERE (f.economy_price IS NULL OR f.business_price IS NULL)
-       AND split_part(f.flight_no, ' ', 2) ~ '^[0-9]+$'
-       AND split_part(f.flight_no, ' ', 2)::int BETWEEN 601 AND 1999;
+     WHERE f.id IN (SELECT id FROM _vj_seeded_026);
   END IF;
 END
 $fare$;
@@ -163,3 +177,5 @@ BEGIN
   END IF;
 END
 $restore$;
+
+DROP TABLE IF EXISTS _vj_seeded_026;

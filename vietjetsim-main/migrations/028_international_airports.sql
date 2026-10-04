@@ -84,6 +84,18 @@ END $$;
 -- `block` is the sector's real airborne time, so the arrival reads sensibly
 -- against the departure instead of showing "2h10m" to Seoul.
 
+-- Stage the ids this run inserted so the pricing step below can address them by
+-- identity. `WHERE economy_price IS NULL` alone is not a scope: it matches every
+-- unpriced flight in the table, so one row of this file landing wrong would drag
+-- other migrations' rows into this file's pricing formula.
+--
+-- No `ON COMMIT DROP`: CI applies each file with `psql -f` and no `BEGIN`, so
+-- every statement is its own transaction and the table would be gone before the
+-- INSERT could name it. Dropped explicitly at the end of the file instead.
+CREATE TEMP TABLE _vj_seeded_028 (
+  id uuid PRIMARY KEY
+);
+
 WITH intl (code, block, economy) AS (
   VALUES
     ('SIN', 210, 2450000::numeric),
@@ -132,8 +144,9 @@ days (vn_date) AS (
          (now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date + 8,
          INTERVAL '1 day'
        ) AS d
-)
-INSERT INTO flights (flight_no, from_code, to_code, depart_time, arrive_time, price, class, available)
+),
+inserted AS (
+  INSERT INTO flights (flight_no, from_code, to_code, depart_time, arrive_time, price, class, available)
 SELECT
   -- Numbered within the day, the way 027 numbers the domestic week, so the same
   -- service keeps its number all week.
@@ -165,7 +178,11 @@ SELECT
 FROM routes r
 CROSS JOIN schedule s
 CROSS JOIN days d
-ON CONFLICT (from_code, to_code, depart_time) DO NOTHING;
+ON CONFLICT (from_code, to_code, depart_time) DO NOTHING
+RETURNING id
+)
+INSERT INTO _vj_seeded_028 (id)
+SELECT id FROM inserted;
 
 -- ─── 3. Price the rows that were just inserted ──────────────────────────────
 -- Only when 029/030 have already run (see 1b). The ladder is the same one 030
@@ -180,19 +197,21 @@ BEGIN
     WHERE table_schema = 'public' AND table_name = 'flights'
       AND column_name = 'economy_price'
   ) THEN
-    UPDATE flights
+    UPDATE flights f
     SET
       economy_price = CASE
-        WHEN class = 'business' THEN ROUND(price / 2.77)
-        ELSE ROUND(price)
+        WHEN f.class = 'business' THEN ROUND(f.price / 2.77)
+        ELSE ROUND(f.price)
       END,
       business_price = CASE
-        WHEN class = 'business' THEN ROUND(price)
-        ELSE ROUND(price * 2.77)
+        WHEN f.class = 'business' THEN ROUND(f.price)
+        ELSE ROUND(f.price * 2.77)
       END
-    WHERE economy_price IS NULL OR business_price IS NULL;
+    WHERE f.id IN (SELECT id FROM _vj_seeded_028);
 
     ALTER TABLE flights ALTER COLUMN economy_price SET NOT NULL;
     ALTER TABLE flights ALTER COLUMN business_price SET NOT NULL;
   END IF;
 END $$;
+
+DROP TABLE IF EXISTS _vj_seeded_028;
