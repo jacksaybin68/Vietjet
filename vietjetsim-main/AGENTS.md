@@ -44,32 +44,38 @@ following day.
 
 **The migration set is NOT re-applyable end to end, and that is known — do not
 "fix" it casually.** CI's "Re-applying migrations must be safe" step replays the
-whole set against the same database and currently fails on `025`. Applying the
-chain to an *empty* database does work: all 37 files apply clean and
-`generate_booking_code` then emits six-character PNRs. The failure is specific
-to a replay, and it is three independent bugs, none of them in `034`:
+whole set against the same database. Applying the chain to an *empty* database
+does work; the failures below are specific to a replay. None of them is in
+`034`, and none was introduced by the PNR work.
 
-- `014` inserts `flights` without `economy_price` / `business_price`, which `030`
-  made `NOT NULL` with no default. Re-applying aborts with "null value in column
-  economy_price". Same omission in `024`; `025` and `026` too.
-- `014` mints demo wallet numbers as `'970400' || row_number()`, and `022`
-  renames the demo emails, so the row order shifts on a replay and a wallet
-  number computed for one account lands on another — `user_wallets` has a unique
-  `account_number`, and on this database `970400000001` already belongs to a user
-  created through the UI, not to the seed.
+Replaying each file against a live database — one transaction per file, rolled
+back — reproduces exactly five failures, and every one of them is reproducible
+this way in under a minute:
+
+- `014` and `024` insert `flights` without `economy_price` / `business_price`,
+  which `030` added and then made `NOT NULL` with no default. The first apply is
+  fine because `030` backfills what the earlier files left null; the replay is
+  not, because by then the columns reject a null. `025` and `026` do name both
+  columns and are not affected.
 - `022` renames `user@vietjetsim.vn` to `user@vietjetair.vn` unconditionally. On a
-  replay `014` has just re-created the old-domain row alongside the already-renamed
-  one, so the rename collides on `user_profiles_email_key`.
+  replay `014` has just re-created the old-domain row next to the already-renamed
+  one, so the rename collides on `user_profiles_email_key`. The rename needs a
+  `WHERE` that only touches the old domain.
+- `025` repoints `flights.from_code` / `to_code` from the superseded codes
+  (`DIH`, `RKG`, `CXL`) to their replacements (`DIN`, `VKG`, `VCL`), while `027`
+  has already seeded routes under the replacement codes at the same departure
+  instants. The UPDATE therefore lands two rows on the same
+  `(from_code, to_code, depart_time)` and trips `idx_flights_route_depart_time`.
+  Fixing this means deciding which row survives a code rename — a data decision,
+  not a mechanical one.
+- `026` deletes the `^VJ [0-9]{3}$` block, which on a replay is `025`'s rows
+  rather than its own, and one of those is still referenced by a booking, so the
+  DELETE aborts on `bookings_flight_id_fkey`. This one only appears once the
+  files above have been replayed in order.
 
-And one that only surfaces once the set is applied twice in full:
-`025` repoints `flights.from_code`/`to_code` from the superseded codes
-(`DIH`, `RKG`, `CXL`) to their replacements (`DIN`, `VKG`, `VCL`), while `027`
-seeds routes under the replacement codes at the same departure instants.
-That UPDATE therefore produces two rows with the same
-`(from_code, to_code, depart_time)` and trips
-`idx_flights_route_depart_time`. Fixing it means choosing which row survives a
-code rename — a data decision, not a mechanical one, and not a change to make
-while landing something else.
+The first three are mechanical and safe to fix. The last two are entangled with
+each other — `025` creates the rows `026` then cannot delete — so they want a
+decision about flight identity, not a patch.
 
 **IATA codes are reference data, not a UI detail.** `flights.from_code` /
 `to_code` are foreign keys on `airports(code)`, so an airport's code cannot be
