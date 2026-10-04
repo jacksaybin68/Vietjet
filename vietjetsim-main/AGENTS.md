@@ -74,12 +74,24 @@ done
 ```
 
 Run that loop twice: it reproduces both the fresh-apply and the re-apply step.
-Then run it a third time and compare `SELECT count(*) FROM flights` across
-passes. Pass 1 legitimately grows — `027`'s rolling window is relative to "now",
-so each run seeds a new day, and the `CURRENT_DATE`-based seeds move — but every
-pass after the first must add exactly zero rows. Anything else is a seed that
-will keep re-adding flights forever, and that is invisible in the tests because
-they run against the in-memory mock.
+Pass 1 legitimately grows — `027`'s rolling window is relative to "now", so each
+run seeds a new day, and the `CURRENT_DATE`-based seeds move — but every pass
+after the first must add exactly zero rows.
+
+Counting rows is the weaker check, because a seed that *rewrites* prices without
+adding rows passes it. Dump the rows and diff the two passes instead:
+
+```bash
+q="SELECT flight_no,from_code,to_code,to_char(depart_time,'YYYY-MM-DD HH24:MI+07'),\
+price,class,available,coalesce(economy_price,-1),coalesce(business_price,-1) \
+FROM flights ORDER BY flight_no,from_code,to_code,depart_time"
+docker exec pg psql -U postgres -d app -tA -F'|' -c "$q" > /tmp/p1.txt
+# ... second pass ...
+diff /tmp/p1.txt /tmp/p2.txt   # must be empty
+```
+
+Anything else is a seed that will keep changing flights forever. Neither failure
+is visible in the test suite, which runs against the in-memory mock.
 
 - **030's fare columns are `NOT NULL` with no default, and every seed file
   predates them.** A seed cannot name `economy_price` in its column list — 030 has
@@ -87,7 +99,16 @@ they run against the in-memory mock.
   on "column does not exist". The shape every seed file now uses, and the one
   027 already had, is: drop `NOT NULL` in a guarded `DO` block before the INSERT,
   price the file's own rows with 030's formula, re-apply `NOT NULL` after. All
-  three blocks no-op on a fresh database. `014`, `024`, `025`, `026` do this.
+  three blocks no-op on a fresh database. Every seed file does this now.
+- **`WHERE economy_price IS NULL` is not a scope.** It reads like one — "price the
+  rows this file added" — but it matches *every* unpriced flight in the table, so
+  the file's pricing block also repaints whatever other migrations left null,
+  with this file's formula. Three files did this (`027`, `028`, `032`) and the
+  bug was invisible on a fresh database, where nothing is null yet and the
+  statement correctly does nothing; it only appeared on a replay. A predicate
+  that describes a *state* cannot scope a file's writes — scope by identity.
+  These files now stage `RETURNING id` in `CREATE TEMP TABLE _vj_seeded_<file>`
+  and price `WHERE f.id IN (...)`.
 - **`row_number() OVER ()` cannot identify a file's own rows.** It numbers the
   *select*, not the insert, so the counter advances even for a row
   `ON CONFLICT DO NOTHING` then skips. On a first run that is invisible — the
@@ -97,11 +118,19 @@ they run against the in-memory mock.
   across the whole range. Any pricing step scoped by a number range then misses
   them. This is why the number blocks in the seed comments look right and are
   still wrong; do not reason about a seed's rows from its numbering.
-  `014` and `024` now collect `RETURNING id` into `CREATE TEMP TABLE
-  _vj_seeded_<file>` and price by id. `025` scopes by route (TBB) and `026` by
-  number-plus-null, both of which the same replay invalidates less badly, but id
-  is the only identifier that is exact. Name the temp table after the file: two
-  seed files can share one session in a replay harness.
+  `014`, `024`, `026`, `027`, `028` and `032` all stage ids now. `025` scopes by
+  route (TBB) instead, which is exact because `025` is the only file that creates
+  a TBB route. Name the temp table after the file: two seed files can share one
+  session in a replay harness.
+- **A staging `CREATE TEMP TABLE` must precede the first `WITH`, and the INSERT
+  goes *inside* that same `WITH`.** Two shapes are wrong, and both fail at parse
+  time rather than run time: putting the `CREATE` between two `WITH` clauses
+  makes it a CTE body (`syntax error at or near "CREATE"`), and starting a
+  second `WITH inserted AS (` after the CTE list has already closed gives two
+  consecutive `WITH` keywords (`syntax error at or near "WITH"`). The working
+  shape is: `CREATE TEMP TABLE ...;` → one
+  `WITH cte AS (...), inserted AS (INSERT ... RETURNING id) INSERT INTO
+  _vj_seeded_x SELECT id FROM inserted;`.
 - **A `SET NOT NULL` that fails tells you the pricing `WHERE` under-reached, not
   that the constraint is wrong.** It is the only reliable signal, and it fires
   after the damage is done. When it happens, count the orphans by flight number
