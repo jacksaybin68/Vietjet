@@ -1,6 +1,10 @@
 # Node modules
+# node_modules/ only. `package-lock.json` is deliberately NOT ignored: CI runs
+# `npm ci` in four jobs, which fails without a lockfile. It was ignored here
+# from the first commit, which did nothing because the file was already tracked
+# — but it is a trap: once anyone deletes it, `git add .` can never bring it
+# back, and CI fails with a lockfile error instead of anything obvious.
 node_modules/
-package-lock.json
 
 # Environment variables
 .env
@@ -31,5 +35,6 @@ Vietjet/
 .idea/
 .ai/
 *.backup
-.DS_Store
-logs/
+# `logs/` alone only matches the directory; the dev server's log sits beside it
+# and was a 2 MB untracked file one `git add .` away from being pushed.
+*.log
