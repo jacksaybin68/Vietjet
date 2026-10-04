@@ -83,6 +83,15 @@ not change, the CI "expected tables" step still holds, no flight is left without
 a fare, every fare matches the ladder its own class implies, no flight number
 repeats within a day, and no staging table survives. Exits non-zero on failure.
 
+**CI pins Postgres 16; production runs 17.** `scripts/test-migrations.cjs` and
+the CI image are `postgres:16-alpine`, but the Neon instance behind
+`DATABASE_URL` reports `server_version: 17.11`. Everything in this file about a
+migration aborting was measured on 16, and this set ran clean on 17 as well —
+but nothing guarantees that, so **check the version before you trust a local
+run**: `pg_dump` alone will tell you, refusing a 17 server with
+`server version mismatch` when its client is 16. Use `postgres:17-alpine` for
+anything that talks to Neon, including a backup or a restore of a dump.
+
 The raw loop it wraps, if you need it by hand:
 
 ```bash
@@ -93,6 +102,28 @@ for f in $(ls migrations/*.sql | sort); do
   docker exec -i pg psql -U postgres -d app -v ON_ERROR_STOP=1 -q -f - < "$f" || break
 done
 ```
+
+**State of the live database as of 2026-10-05.** `003` and `020` have been
+applied to Neon, and the whole 35-file set then ran clean against it. The
+loyalty seed had accumulated damage that was visible only against real data:
+**20 programs named `VietjetSim Rewards` and 840 tier rows** (4 distinct tiers
+× 20 copies), from this file being re-applied before its conflict targets
+existed. `003` merged them to 1 program and 4 tiers, keeping
+`dd63d020-6d05-48af-a34c-e0a22264352d` — which was both the oldest and the one
+all four enrolled customers pointed at. All 4 enrollments survived, still
+`Bronze`. Both keys are installed and `convalidated`, so the seed cannot
+multiply again.
+
+Two things deliberately **not** fixed there, because neither is this file's
+business:
+- **20 duplicate `(flight_no, day)` pairs survive in the 2001–2999 range**,
+  on days from 2026-09-26 to 10-03. Confirmed present in the pre-change dump,
+  so they predate any of this — they are the residue of repeated `025`/`026`/
+  `032` applies, and `031` only ever renumbered the surplus, never the seeds.
+- The dump used to reason about this is `database-backup/neon_dump_pre_003_020.sql`
+  (2.1 MB, taken before the change). Restoring it locally needs
+  `postgres:17-alpine` and the `pg_session_jwt` CREATE EXTENSION stripped — Neon
+  ships that extension and nothing else does.
 
 Pass 1 legitimately grows — `027`'s rolling window is relative to "now", so each
 run seeds a new day, and the `CURRENT_DATE`-based seeds move — but every pass
