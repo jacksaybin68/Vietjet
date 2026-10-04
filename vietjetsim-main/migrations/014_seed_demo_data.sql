@@ -42,6 +42,26 @@ ON CONFLICT (code) DO UPDATE
 CREATE UNIQUE INDEX IF NOT EXISTS idx_flights_route_depart_time
   ON flights (from_code, to_code, depart_time);
 
+-- Relax the fare columns for this file's duration, then restore them below,
+-- the way 027 does. 030 creates them *and* makes them NOT NULL with no default,
+-- so on a replay the bare INSERT below is rejected on the null before any
+-- pricing statement can reach it. Dropping the constraint here is what lets
+-- the insert through; the DO block after it prices these rows, and the second
+-- block re-applies NOT NULL. On a fresh database the columns do not exist yet,
+-- every block here is a no-op, and 030 both creates and prices them later.
+DO $relax$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'flights'
+      AND column_name = 'economy_price'
+  ) THEN
+    ALTER TABLE flights ALTER COLUMN economy_price DROP NOT NULL;
+    ALTER TABLE flights ALTER COLUMN business_price DROP NOT NULL;
+  END IF;
+END
+$relax$;
+
 WITH routes (from_code, to_code) AS (
   VALUES
     ('SGN', 'HAN'), ('HAN', 'SGN'),
@@ -60,6 +80,16 @@ schedule (slot, depart_hour, price, class, available) AS (
     (4, 15, 1059000::numeric, 'economy',  150),
     (5, 19, 2490000::numeric, 'business', 24)
 )
+-- No `economy_price` / `business_price` in the column list, and that has to stay:
+-- 030 is what creates those columns, so on a fresh database naming them here
+-- aborts this INSERT with "column economy_price does not exist" during the
+-- *first* apply. 030 then backfills whatever this file left null.
+--
+-- The replay is the other direction: the columns exist by then and reject a
+-- null, so the bare column list fails CI's "Re-applying migrations must be
+-- safe" step with "null value in column economy_price". The DO block below
+-- prices these rows when the columns are there and does nothing when they are
+-- not, which is the same shape as 027's own guard.
 INSERT INTO flights (flight_no, from_code, to_code, depart_time, arrive_time, price, class, available)
 SELECT
   -- `LPAD(x, 3, '0')` *truncates* when x is longer than 3, so the first number
@@ -80,6 +110,48 @@ SELECT
 FROM routes r
 CROSS JOIN schedule s
 ON CONFLICT (from_code, to_code, depart_time) DO NOTHING;
+
+-- 030's own formula, verbatim: a business row's economy fare is `price / 2.77`,
+-- every other class takes `price` as its economy fare. Only runs once the
+-- columns exist, so it is a no-op on a fresh database where 030 has yet to run.
+--
+-- Scoped to this file's own numbering block: 12 routes x 5 slots = 60 rows
+-- numbered from 100, so 101-160. 024 owns 201-370 and the later seeds start
+-- past 600, so neither is repainted here.
+DO $fare$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'flights'
+      AND column_name = 'economy_price'
+  ) THEN
+    UPDATE flights f
+       SET economy_price = CASE WHEN f.class = 'business'
+                                THEN round(f.price / 2.77) ELSE round(f.price) END,
+           business_price = CASE WHEN f.class = 'business'
+                                THEN round(f.price) ELSE round(f.price * 2.77) END
+     WHERE (f.economy_price IS NULL OR f.business_price IS NULL)
+       AND split_part(f.flight_no, ' ', 2) ~ '^[0-9]+$'
+       AND split_part(f.flight_no, ' ', 2)::int BETWEEN 101 AND 160;
+  END IF;
+END
+$fare$;
+
+-- Re-apply NOT NULL, mirroring the block that dropped it above. Only safe
+-- because the pricing block covered this file's own rows and 030 already
+-- backfilled every other flight's fares, so nothing is left null here.
+DO $restore$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'flights'
+      AND column_name = 'economy_price'
+  ) THEN
+    ALTER TABLE flights ALTER COLUMN economy_price SET NOT NULL;
+    ALTER TABLE flights ALTER COLUMN business_price SET NOT NULL;
+  END IF;
+END
+$restore$;
 
 -- ─── Demo accounts ──────────────────────────────────────────────────────────
 -- Passwords are bcrypt (12 rounds) hashes of the README's documented demo

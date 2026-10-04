@@ -42,40 +42,57 @@ README demo accounts, so a freshly migrated database is usable without manual in
 relative to `CURRENT_DATE`, so date-filtered flight search only finds them on the
 following day.
 
-**The migration set is NOT re-applyable end to end, and that is known — do not
-"fix" it casually.** CI's "Re-applying migrations must be safe" step replays the
-whole set against the same database. Applying the chain to an *empty* database
-does work; the failures below are specific to a replay. None of them is in
-`034`, and none was introduced by the PNR work.
+**The migration set is now re-applyable end to end — keep it that way.** CI's
+"Re-applying migrations must be safe" step replays the whole set against the
+same database. It used to fail on five files; all five are fixed. None of the
+fixes is in `034`, and none came from the PNR work.
 
-Replaying each file against a live database — one transaction per file, rolled
-back — reproduces exactly five failures, and every one of them is reproducible
-this way in under a minute:
+To reproduce the check locally in under a minute, replay each file against the
+dev database with a `SAVEPOINT` per file — one failure otherwise poisons the
+transaction for every file after it — then roll the whole thing back:
 
-- `014` and `024` insert `flights` without `economy_price` / `business_price`,
-  which `030` added and then made `NOT NULL` with no default. The first apply is
-  fine because `030` backfills what the earlier files left null; the replay is
-  not, because by then the columns reject a null. `025` and `026` do name both
-  columns and are not affected.
-- `022` renames `user@vietjetsim.vn` to `user@vietjetair.vn` unconditionally. On a
-  replay `014` has just re-created the old-domain row next to the already-renamed
-  one, so the rename collides on `user_profiles_email_key`. The rename needs a
-  `WHERE` that only touches the old domain.
-- `025` repoints `flights.from_code` / `to_code` from the superseded codes
-  (`DIH`, `RKG`, `CXL`) to their replacements (`DIN`, `VKG`, `VCL`), while `027`
-  has already seeded routes under the replacement codes at the same departure
-  instants. The UPDATE therefore lands two rows on the same
-  `(from_code, to_code, depart_time)` and trips `idx_flights_route_depart_time`.
-  Fixing this means deciding which row survives a code rename — a data decision,
-  not a mechanical one.
-- `026` deletes the `^VJ [0-9]{3}$` block, which on a replay is `025`'s rows
-  rather than its own, and one of those is still referenced by a booking, so the
-  DELETE aborts on `bookings_flight_id_fkey`. This one only appears once the
-  files above have been replayed in order.
+```js
+await client.query('BEGIN');
+for (const file of files) {
+  await client.query(`SAVEPOINT sp`);
+  try { await client.query(sql); } catch (e) { report(file, e); }
+  await client.query('ROLLBACK TO SAVEPOINT sp');
+}
+await client.query('ROLLBACK');
+```
 
-The first three are mechanical and safe to fix. The last two are entangled with
-each other — `025` creates the rows `026` then cannot delete — so they want a
-decision about flight identity, not a patch.
+- **030's fare columns are `NOT NULL` with no default, and every seed file
+  predates them.** A seed cannot name `economy_price` in its column list — 030 has
+  not created the column yet on a fresh database, so the *first* apply would fail
+  on "column does not exist". The shape every seed file now uses, and the one
+  027 already had, is: drop `NOT NULL` in a guarded `DO` block before the INSERT,
+  price the file's own rows with 030's formula, re-apply `NOT NULL` after. All
+  three blocks no-op on a fresh database. `014`, `024`, `025`, `026` do this.
+- **Scope the pricing UPDATE to rows the file owns.** Numbering blocks overlap:
+  026 and 027 both number from 601, so a range like `BETWEEN 601 AND 610` would
+  repaint rows belonging to other files. `025` scopes by route instead — TBB is
+  the only thing identifying its rows — and `014` / `024` use their own blocks
+  (101-160, 201-370). The `WHERE` also requires the fare to be null, so a
+  database 030 already priced matches nothing.
+- **022 renames the demo email only when the target is free.** 014 re-seeds the
+  old domain on every run, so a replayed database holds `user@vietjetsim.vn`
+  *and* `user@vietjetair.vn` at once; renaming then collides on
+  `user_profiles_email_key`. The `NOT EXISTS` guard leaves both accounts intact
+  instead of aborting the migration.
+- **025 renames airport codes by dropping the duplicate, not by UPDATE.** 027 has
+  already seeded routes under the replacement codes at the same instants the
+  earlier seeds used the old ones, so renaming onto them trips
+  `idx_flights_route_depart_time`. The DELETE drops only the old-code row, only
+  where a same-instant row already carries the correct code, and only where no
+  booking points at it. The surviving row is the correctly-coded one, so no
+  flight is lost — the two rows describe the same departure.
+- **026 must not delete a booked flight.** Its `^VJ [0-9]{3}$` DELETE reaches
+  601-999, which on a replay is 025's block and on a live database holds booked
+  flights (this one has six bookings on `VJ 601`). The `NOT EXISTS (bookings)`
+  guard keeps them, and the INSERT then collides on the route index and skips
+  them too — correct, since the flight still exists with its booking attached.
+  The pattern is deliberately not widened to `^VJ [0-9]{3,4}$`: that would sweep
+  up those same bookings from the 1000s.
 
 **IATA codes are reference data, not a UI detail.** `flights.from_code` /
 `to_code` are foreign keys on `airports(code)`, so an airport's code cannot be
