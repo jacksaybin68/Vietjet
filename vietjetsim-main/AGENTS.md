@@ -155,11 +155,64 @@ mock and never executes a migration.
   committed. Anything that must be atomic has to say so inside the file. This is
   also why staging rows through a temp table needs an explicit `DROP` at the end
   rather than `ON COMMIT DROP`.
-- **022 renames the demo email only when the target is free.** 014 re-seeds the
-  old domain on every run, so a replayed database holds `user@vietjetsim.vn`
-  *and* `user@vietjetair.vn` at once; renaming then collides on
-  `user_profiles_email_key`. The `NOT EXISTS` guard leaves both accounts intact
-  instead of aborting the migration.
+- **`ADD CONSTRAINT` validates the rows already in the table — use `NOT VALID`
+  plus `VALIDATE` whenever the table holds real data.** `ADD CONSTRAINT ... CHECK`
+  and `ADD CONSTRAINT ... FOREIGN KEY` both check existing rows immediately, so
+  a file written to *repair* dirty data aborts on the very dirt it was written
+  for. `017` and `023` both shipped this way. Measured on a database seeded
+  with exactly the damage each file exists to fix:
+  - `017`: `ERROR: insert or update on table "bookings" violates foreign key
+    constraint` — and the constraint was left at **0**, i.e. the file could not
+    add the very key it exists to add. After `NOT VALID` → clear orphans →
+    `VALIDATE`: constraint present, `convalidated = t`, orphan gone, and the
+    booking itself kept.
+  - `023`: `ERROR: check constraint ... is violated by some row`, with
+    `ADD COLUMN` already committed — so it left the half-migrated state the
+    comment claimed to be avoiding (column present, CHECK absent). After the
+    fix: `convalidated = t`, no abort.
+  The pattern is `ADD CONSTRAINT ... NOT VALID` → clean the offending rows →
+  `VALIDATE CONSTRAINT`. The four-pass replay test **cannot** catch this class:
+  it starts from an empty database, where there is nothing to violate. Only a
+  database carrying the damage exercises it, so build one by hand when adding
+  a constraint to a table that ships rows.
+- **A constraint guard must filter by table, not by name.** A constraint name is
+  unique per *schema*, not per table. `023` checked only `conname`, so any
+  constraint anywhere named `passengers_passenger_type_check` would skip the
+  block and leave the column permanently unchecked. Add
+  `AND conrelid = '<table>'::regclass` — `017` already did.
+- **A hand-written validator and a CHECK constraint are two copies of one list;
+  keep them literally identical.** The admin PATCH validator at
+  `src/app/api/quan-tri/chuyen-bay/[id]/route.ts` offered `boarding`, `landed`
+  and `scheduled`, none of which `021`'s CHECK accepts, while the CHECK's
+  `completed` and `departed` were not offered. So `status: 'boarding'` passed
+  validation and then died as `new row ... violates check constraint
+  "flights_status_check"`, surfacing to the operator as a 500 with a raw driver
+  message. The same route already does this correctly for the fare ladder (it
+  returns a 400 explaining the inversion instead of letting the CHECK throw),
+  so the omission was inconsistent rather than deliberate.
+  Adding a status means editing `021` and that array together;
+  there is no test that ties them, which is why they drifted.
+- **The four-pass replay test proves idempotency, nothing else.** It starts from
+  an empty database, so it cannot see a constraint that would abort on real data
+  (above), a code path only reachable with pre-existing rows, or a validator
+  whose list disagrees with a constraint. Use it for what it covers — "running
+  the set again changes nothing" — and prove the rest by hand against a database
+  seeded with the damage in question.
+- **022 renames the demo email unconditionally, dropping the seed row on a
+  collision.** 014 re-seeds `@vietjetsim.vn` on every run, so a replayed database
+  can hold the old and the new address at once, and renaming would collide on
+  `user_profiles_email_key`. "Skip when the target is taken" — the obvious guard,
+  and the one this file used to have — is wrong in a way that only shows on a
+  real database: `scripts/setup-admin.sql` and `setup-admin.ts` both create
+  `admin@vietjetair.vn`, so wherever an admin was set up before this file ran,
+  the target is occupied, the rename is skipped, and `admin@vietjetsim.vn` is
+  left behind permanently. Measured: the set ended with both addresses present
+  and README/SETUP advertising only the new one, i.e. the advertised admin
+  login was a different account from the seeded one. The guard now checks the
+  source row's own id, and a leftover that cannot be renamed is deleted — it is
+  a seeded demo account, not customer data. Do not restore the "leave both"
+  behaviour: it trades a two-row cosmetic problem for a demo account that can
+  never be renamed again.
 - **025 renames airport codes by dropping the duplicate, not by UPDATE.** 027 has
   already seeded routes under the replacement codes at the same instants the
   earlier seeds used the old ones, so renaming onto them trips
