@@ -32,7 +32,17 @@ cp .env.local.example .env.local
 ### 3. Thiết Lập Database
 ```bash
 # Chạy migrations trong Neon SQL Editor hoặc psql
-# Áp dụng MỌI tệp trong vietjetsim-main/migrations/ theo thứ tự tên tệp (000 → 025):
+# Áp dụng MỌI tệp trong vietjetsim-main/migrations/ theo thứ tự tên tệp (000 → 034):
+# Liệt kê đầy đủ bên dưới CHỈ để đối chiếu — để chạy, dùng lệnh này, nó tự
+# lấy đúng thứ tự và không bao giờ bỏ sót file mới:
+#
+#   for f in $(ls vietjetsim-main/migrations/*.sql | sort); do
+#     psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f" || break
+#   done
+#
+# Hoặc chạy `npm run test:migrations` trong vietjetsim-main trước: nó dựng
+# Postgres trong Docker, áp cả bộ 4 lần và báo lỗi nếu file nào không chạy
+# lại được. Cần cho tới khi đổi đổi tên file.
 # - migrations/000_core_schema.sql
 # - migrations/001_bank_accounts.sql
 # - migrations/001_refresh_tokens.sql
@@ -73,6 +83,11 @@ cp .env.local.example .env.local
 # - migrations/032_regional_to_regional_routes.sql ← thêm 32 tuyến vùng miền
 #   (Đà Nẵng–Huế, Cần Thơ–Phú Quốc, Buôn Ma Thuột–Đà Lạt…). Trước đó 0/462 cặp
 #   vùng miền có chuyến bay: 027 chỉ nối mỗi sân bay với HAN và SGN.
+# - migrations/033_flight_update_logs.sql  ← lịch sử sửa chuyến bay: ảnh chụp
+#   dòng trước khi sửa + diff từng trường, để hoàn tác và truy vết. db.ts đã
+#   đọc/ghi bảng này từ lâu nhưng không migration nào tạo ra nó, nên mọi lần sửa
+#   giá vé trong bảng quản trị trả 200 rồi âm thầm hỏng.
+# - migrations/034_booking_code_six_alphanumeric.sql ← mã đặt chỗ 6 ký tự chữ+số
 
 # Không có tệp "complete schema" gộp — phải chạy lần lượt như trên.
 ```
@@ -106,8 +121,9 @@ rỗng. Script sau mở lại cửa sổ **21 ngày** cho các tuyến hub và q
 cd vietjetsim-main
 
 # Biến môi trường bắt buộc trên database thật — không có một địa chỉ admin duy nhất.
-# Migration 022 đổi tài khoản demo sang @vietjetair.vn, nhưng database có thể dùng
-# địa chỉ khác (ví dụ @vietjetsim.vn) với mật khẩu đã đặt lại qua scripts/reset-admin.cjs.
+# Migration 022 LUÔN đưa tài khoản demo về @vietjetair.vn: nếu địa chỉ đích đã bị
+# chiếm, nó xoá dòng seed cũ chứ không bỏ qua như trước. Tài khoản thật của bạn
+# vẫn nằm ở địa chỉ riêng, mật khẩu đặt qua scripts/reset-admin.cjs.
 SEED_ADMIN_EMAIL=admin@vietjetair.vn \
 SEED_ADMIN_PASSWORD=admin123 \
 npm run db:seed-flights

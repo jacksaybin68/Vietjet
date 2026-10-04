@@ -78,7 +78,18 @@ function validateField(field: AllowedField, value: unknown): string | null {
     }
 
     case 'status': {
-      const validStatuses = ['active', 'cancelled', 'delayed', 'boarding', 'landed', 'scheduled'];
+      // The list a PATCH may send, and the list migration 021's CHECK accepts,
+      // are one list — keep them identical. They were not: this validator
+      // offered `boarding`, `landed` and `scheduled`, none of which the CHECK
+      // allows, so a request that got this far passed validation and then
+      // died inside Postgres with
+      //   new row ... violates check constraint "flights_status_check"
+      // which surfaced to the operator as a 500 carrying a raw driver message.
+      // `validateField` exists so that cannot happen (see the fare-ladder
+      // check below, which does it properly), so the fix is to agree with the
+      // CHECK rather than to catch the error afterwards. Adding a status means
+      // adding it here and to 021 together.
+      const validStatuses = ['active', 'cancelled', 'delayed', 'completed', 'departed'];
       if (!validStatuses.includes(strVal)) {
         return `Trạng thái "${strVal}" không hợp lệ. Các giá trị cho phép: ${validStatuses.join(', ')}`;
       }
