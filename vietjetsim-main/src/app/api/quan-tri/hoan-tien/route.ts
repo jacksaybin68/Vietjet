@@ -10,7 +10,7 @@ import {
   isRefundFeatureEnabled,
   setRefundFeatureEnabled,
 } from '@/lib/db';
-import type { RefundRecord } from '@/lib/db';
+import type { OperatorRefundStatus } from '@/lib/db';
 import { parsePaginationParams, getPaginationMeta } from '@/lib/pagination';
 
 // ─── GET: Get all refund requests (admin) ───────────────────────────────────
@@ -132,8 +132,12 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const validStatuses = ['pending', 'approved', 'rejected', 'completed'];
-    if (!validStatuses.includes(status)) {
+    // The CHECK in migration 037 is the real enforcement; this list is what
+    // turns a violation into a 400 naming the field instead of a bare 500 from
+    // Postgres, so it must stay a subset of the four operator-reachable states
+    // exported by `updateRefundStatus`.
+    const validStatuses: OperatorRefundStatus[] = ['pending', 'approved', 'rejected', 'completed'];
+    if (!validStatuses.includes(status as OperatorRefundStatus)) {
       return NextResponse.json(
         {
           error: 'Bad Request',
@@ -167,6 +171,7 @@ export async function PATCH(request: NextRequest) {
           `;
           const payment = paymentResults[0];
           let walletRefunded = false;
+          let walletAlreadyPaid = false;
           if (payment?.method === 'wallet' && refundRecord.user_id) {
             const refundAmount = Number(refundRecord.amount) || Number(payment.amount);
             try {
@@ -178,7 +183,13 @@ export async function PATCH(request: NextRequest) {
               );
               walletRefunded = true;
             } catch (walletErr) {
-              // Do not block the refund approval if wallet credit fails; log for manual processing.
+              // `refundWallet` rejects a booking that already has a 'refund'
+              // row (migration 037's partial unique index). That is not a
+              // failure: it is the same ticket being approved twice, and the
+              // customer was already paid. Saying so beats logging it as a
+              // credit failure the operator would chase.
+              walletAlreadyPaid =
+                walletErr instanceof Error && walletErr.message.includes('đã được hoàn tiền');
               console.error(
                 `[REFUND] Failed to credit wallet for booking ${refundRecord.booking_id}:`,
                 walletErr
@@ -193,7 +204,9 @@ export async function PATCH(request: NextRequest) {
           `;
           refundSummary = walletRefunded
             ? ' Seats released, wallet credited and booking marked as refunded'
-            : ' Seats released and booking marked as refunded';
+            : walletAlreadyPaid
+              ? ' Seats released; wallet was already refunded for this booking'
+              : ' Seats released and booking marked as refunded';
           console.info(
             `[REFUND] Processing refund for booking ${refundRecord.booking_id}:${refundSummary}`
           );
@@ -209,7 +222,7 @@ export async function PATCH(request: NextRequest) {
     // cannot smuggle an unvalidated value through.
     const result = await updateRefundStatus(
       refundId,
-      status as RefundRecord['status'],
+      status as OperatorRefundStatus,
       operatorNote || undefined
     );
 

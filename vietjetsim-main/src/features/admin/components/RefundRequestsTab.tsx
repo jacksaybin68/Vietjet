@@ -19,7 +19,14 @@ interface ToastAPI {
   info: (title: string, message?: string, options?: object) => void;
 }
 
-type RefundStatus = 'pending' | 'approved' | 'rejected';
+/**
+ * All six states the column's CHECK (migration 037) allows, not just the three
+ * an operator can set. `completed`, `processed` and `archived` all reach this
+ * table: `completed` through the same approve/reject modal, and the other two
+ * through SQL. Rendering fell back to the raw English key for them, so a ticket
+ * the operator could see in the queue read "archived" in the status pill.
+ */
+type RefundStatus = 'pending' | 'approved' | 'rejected' | 'completed' | 'processed' | 'archived';
 
 interface RefundRequest {
   id: string;
@@ -45,7 +52,7 @@ interface RefundRequest {
   visibleToUser: boolean;
 }
 
-const STATUS_MAP: Record<RefundStatus, { label: string; cls: string; icon: string }> = {
+const STATUS_MAP: Partial<Record<RefundStatus, { label: string; cls: string; icon: string }>> = {
   pending: {
     label: 'Chờ duyệt',
     cls: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
@@ -60,6 +67,26 @@ const STATUS_MAP: Record<RefundStatus, { label: string; cls: string; icon: strin
     label: 'Từ chối',
     cls: 'bg-rose-500/10 text-rose-400 border border-rose-500/20',
     icon: 'XCircleIcon',
+  },
+  // Reachable through the same approve modal as `approved` — the route treats
+  // both as "settle the booking", and an operator told a customer the money was
+  // sent should see that on the ticket.
+  completed: {
+    label: 'Đã hoàn tiền',
+    cls: 'bg-teal-500/10 text-teal-300 border border-teal-500/20',
+    icon: 'BanknotesIcon',
+  },
+  // `processed` and `archived` have no writer in the app; they exist in the
+  // column's CHECK so an archived row renders properly if one is ever restored.
+  processed: {
+    label: 'Đã xử lý',
+    cls: 'bg-slate-500/10 text-slate-400 border border-slate-500/20',
+    icon: 'InboxIcon',
+  },
+  archived: {
+    label: 'Đã lưu trữ',
+    cls: 'bg-slate-500/10 text-slate-400 border border-slate-500/20',
+    icon: 'ArchiveBoxIcon',
   },
 };
 
@@ -114,7 +141,10 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
     bookingCode: row.booking_code || '',
     phone: row.phone || '',
     visibleToUser: row.visible_to_user === true,
-    status: (row.status as RefundStatus) || 'pending',
+    // Migration 037 made this column NOT NULL with a CHECK over six values, so
+    // the cast is now honest — this type used to claim three while the database
+    // could hand back anything.
+    status: (row.status as RefundStatus) ?? 'pending',
     adminNote: row.admin_note || '',
     createdAt: row.created_at
       ? new Date(row.created_at).toLocaleString('vi-VN', {
@@ -452,7 +482,10 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
             <option value="all">Tất cả trạng thái</option>
             <option value="pending">Chờ duyệt</option>
             <option value="approved">Đã duyệt</option>
+            <option value="completed">Đã hoàn tiền</option>
             <option value="rejected">Từ chối</option>
+            <option value="processed">Đã xử lý</option>
+            <option value="archived">Đã lưu trữ</option>
           </select>
           {(searchQuery || filterStatus !== 'all') && (
             <button

@@ -199,7 +199,12 @@ describe('Refund Optimization Verification', () => {
 
     expect(queryJoined).toContain('UPDATE refund_requests');
     expect(queryJoined).toContain("SET status = 'archived'");
-    expect(queryJoined).toContain("OR status = 'approved'");
+    // `processed` was one half of this predicate and nothing in the app has
+    // ever written that status, so no ticket could reach it. `completed` is the
+    // other settled state an operator can reach from the console and was never
+    // archived at all, which is why approved-and-settled tickets piled up.
+    expect(queryJoined).toContain("OR status = 'completed'");
+    expect(queryJoined).not.toContain("'processed'");
     expect(call[1]).toBe(90); // The days parameter
   });
 });

@@ -197,6 +197,7 @@ export interface RefundRecord {
   booking_id: string;
   user_id: string;
   reason: string;
+  /** `processed` and `archived` are reachable only from SQL; no code writes them. */
   status: 'pending' | 'approved' | 'rejected' | 'completed' | 'processed' | 'archived';
   bank_info: string | Record<string, string | number> | null;
   /** Payout figure in VND; NULL on tickets created before it was its own column. */
@@ -1448,9 +1449,17 @@ export async function getAllRefunds(params?: {
   };
 }
 
+/**
+ * The four states an operator can reach from the console. `processed` and
+ * `archived` exist in the column's CHECK (migration 037) because a row may
+ * carry them, but nothing in the app writes either — the only function that
+ * looked for `processed` had no caller and was removed.
+ */
+export type OperatorRefundStatus = 'pending' | 'approved' | 'rejected' | 'completed';
+
 export async function updateRefundStatus(
   refundId: string,
-  status: 'pending' | 'approved' | 'rejected' | 'completed' | 'processed' | 'archived',
+  status: OperatorRefundStatus,
   admin_note?: string
 ): Promise<RefundRecord> {
   const results = await sql`
@@ -1463,15 +1472,17 @@ export async function updateRefundStatus(
 }
 
 /**
- * Bulk archive old refund requests that have been processed or approved.
- * @param days Number of days since the last update (or creation) to consider for archival.
- * @returns The number of records archived.
+ * Bulk archive old refund requests. Reachable from the admin SSTK tool, so it
+ * is not dead — but the `'processed'` branch it used to carry was: no code path
+ * writes that status, so a ticket could never enter this query through it.
+ * `approved` is the state that actually accumulates, and `completed` is the
+ * other settled state an operator can reach, so both are archived.
  */
 export async function archiveOldRefunds(days: number = 90): Promise<number> {
   const result = await sql`
     UPDATE refund_requests
     SET status = 'archived', updated_at = NOW()
-    WHERE (status = 'processed' OR status = 'approved')
+    WHERE (status = 'approved' OR status = 'completed')
       AND (
         (updated_at IS NOT NULL AND updated_at < NOW() - (CAST(${days} || ' days' AS INTERVAL)))
         OR
@@ -2653,6 +2664,19 @@ export async function refundWallet(
   if (!Number.isFinite(amount) || amount <= 0) {
     throw new Error('Số tiền hoàn không hợp lệ');
   }
+  // Migration 037's `wallet_transactions_one_refund_per_reference` is what
+  // actually enforces this; the lookup is here so the caller learns *why* the
+  // booking was already paid out instead of reading a raw unique-violation
+  // from the ledger insert, which surfaces as a bare 500.
+  const alreadyRefunded = await sql`
+    SELECT id FROM wallet_transactions
+    WHERE type = 'refund' AND reference_id = ${referenceId}
+    LIMIT 1
+  `;
+  if (alreadyRefunded.length > 0) {
+    throw new Error(`Booking ${referenceId} đã được hoàn tiền trước đó`);
+  }
+
   const wallet = await getOrCreateWallet(userId);
   const balanceBefore = parseFloat(String(wallet.balance));
   const balanceAfter = balanceBefore + amount;
