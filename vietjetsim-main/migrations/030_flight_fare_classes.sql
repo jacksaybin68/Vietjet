@@ -47,11 +47,32 @@ ALTER TABLE flights
 -- business row's economy fare by multiplying instead of dividing, which put
 -- Business below Eco on the card for 713 flights. A constraint turns that class
 -- of mistake into a failed write rather than a wrong price on screen.
+--
+-- Installed `NOT VALID` and proved afterwards, like 017 and 023: the UPDATE
+-- above derives both fares from `price`, which is sound arithmetic but cannot
+-- rescue a database that already carries an inverted pair — an operator who
+-- hand-edited a fare, or a half-applied run of an earlier version of this file.
+-- Validated eagerly the ADD aborts, and since CI runs each file with `psql -f`
+-- and no `BEGIN`, the NOT NULL above would already be committed: two NOT NULL
+-- columns and no CHECK, which is the half-migrated state the constraint exists
+-- to rule out. So: block new inversions now, repair the old rows, then trust it.
 ALTER TABLE flights
   DROP CONSTRAINT IF EXISTS flights_fare_ladder_ordered;
 ALTER TABLE flights
   ADD CONSTRAINT flights_fare_ladder_ordered
-  CHECK (economy_price <= business_price);
+  CHECK (economy_price <= business_price) NOT VALID;
+
+-- Repair rather than delete: the flight is still a real departure with
+-- passengers on it. Which side is wrong cannot be told from the row alone, so
+-- the cheaper fare becomes Economy and the dearer one Business — the operator
+-- sees the pair on the card and can correct it if the reverse was meant.
+-- One UPDATE, so the CHECK never sees a half-swapped row.
+UPDATE flights
+SET economy_price  = LEAST(economy_price, business_price),
+    business_price = GREATEST(economy_price, business_price)
+WHERE economy_price > business_price;
+
+ALTER TABLE flights VALIDATE CONSTRAINT flights_fare_ladder_ordered;
 
 COMMENT ON COLUMN flights.economy_price IS
   'Giá vé Economy của chuyến bay này (VND). Nguồn giá duy nhất cho cả giao diện và API đặt vé.';

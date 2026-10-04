@@ -133,9 +133,24 @@ BEGIN
 END $$;
 
 -- Restore the unique guarantee now that every value is canonical and unique.
+--
+-- 007 cannot install this constraint on a database that already holds two
+-- accounts on one number - `ADD CONSTRAINT UNIQUE` aborts on the duplicate it
+-- finds, and with no `BEGIN` around that file it leaves `email NOT NULL` still
+-- in place. So 007 checks for duplicates first and *skips* the constraint,
+-- leaving the merge above to be what makes this statement possible. On a clean
+-- database 007 has already added it and this block is a no-op.
+--
+-- The `conrelid` filter matters: a constraint name is unique per schema, not
+-- per table, so without it a same-named constraint anywhere would make this
+-- block skip and leave `phone` unconstrained.
 DO $$
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'user_profiles_phone_key') THEN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'user_profiles_phone_key'
+          AND conrelid = 'user_profiles'::regclass
+    ) THEN
         ALTER TABLE user_profiles ADD CONSTRAINT user_profiles_phone_key UNIQUE (phone);
     END IF;
 END $$;
