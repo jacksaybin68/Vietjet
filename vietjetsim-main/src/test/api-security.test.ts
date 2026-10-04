@@ -325,6 +325,135 @@ describe('API & RBAC Security Logic', () => {
       });
 
       /**
+       * Migration 036 put the flight-number shape in a CHECK on
+       * `flights.flight_no`. Before it, this handler validated nothing and an
+       * operator could POST `VJ341B` straight into the column — a number the
+       * admin console then refused to edit, because its own validator rejected
+       * the letter suffix. The handler now answers 400 naming the field
+       * instead of letting Postgres raise and surfacing a bare 500.
+       */
+      it('POST - rejects a flight number migration 036 would refuse, before touching the DB', async () => {
+        const token = makeAdminToken();
+        const req = new NextRequest('http://localhost:4028/api/quan-tri/chuyen-bay', {
+          method: 'POST',
+          headers: withCsrf(token),
+          body: JSON.stringify({
+            flight_no: 'VJ341B',
+            from_code: 'HAN',
+            to_code: 'CXR',
+            depart_time: '2026-10-10T10:00:00Z',
+            arrive_time: '2026-10-10T12:00:00Z',
+            price: 1500000,
+            class: 'business',
+            available: 20,
+          }),
+        });
+
+        const spy = vi.spyOn(db, 'createFlight');
+
+        const res = (await createAdminFlight(req))!;
+        expect(res.status).toBe(400);
+        const body = await res.json();
+        expect(body.message).toMatch(/flight_no/);
+        expect(spy).not.toHaveBeenCalled();
+      });
+
+      /**
+       * `VJ101-1000` is the shape the demo seed produced and two live bookings
+       * still reference. Migration 035 left both flights alone precisely
+       * because `flight_no` is a lookup key, and 036's CHECK accepts the shape
+       * so an operator can finally edit them — this is the case the old
+       * `/^[A-Z]{2}\s?\d{2,4}$/i` rejected and 036 exists to admit.
+       */
+      it('POST - accepts the seeded `<route>-<block>` shape the old validator refused', async () => {
+        const token = makeAdminToken();
+        const req = new NextRequest('http://localhost:4028/api/quan-tri/chuyen-bay', {
+          method: 'POST',
+          headers: withCsrf(token),
+          body: JSON.stringify({
+            flight_no: 'VJ101-1000',
+            from_code: 'UIH',
+            to_code: 'SGN',
+            depart_time: '2026-10-10T10:00:00Z',
+            arrive_time: '2026-10-10T12:00:00Z',
+            price: 1500000,
+            class: 'economy',
+            available: 20,
+          }),
+        });
+
+        const spy = vi.spyOn(db, 'createFlight').mockResolvedValueOnce({
+          id: 'f1',
+          flight_no: 'VJ101-1000',
+          from_code: 'UIH',
+          to_code: 'SGN',
+          depart_time: '2026-10-10T10:00:00Z',
+          arrive_time: '2026-10-10T12:00:00Z',
+          price: 1500000,
+          economy_price: 1500000,
+          business_price: 1500000,
+          class: 'economy',
+          available: 20,
+          status: 'active',
+          gate: null,
+          terminal: null,
+          created_at: '2026-01-01T00:00:00Z',
+          updated_at: '2026-01-01T00:00:00Z',
+        });
+
+        const res = (await createAdminFlight(req))!;
+        expect(res.status).toBe(201);
+        expect(spy).toHaveBeenCalledWith(expect.objectContaining({ flight_no: 'VJ101-1000' }));
+      });
+
+      /**
+       * The CHECK is case-sensitive on purpose: `searchBookingsByPnr` joins on
+       * the raw column while `getFlightStatusByNo` uppercases first, so a
+       * lowercase row would be findable by tracking and invisible to a booking
+       * search. Normalising at the door means it can never be stored.
+       */
+      it('POST - uppercases a lowercase flight number instead of storing it unsearchable', async () => {
+        const token = makeAdminToken();
+        const req = new NextRequest('http://localhost:4028/api/quan-tri/chuyen-bay', {
+          method: 'POST',
+          headers: withCsrf(token),
+          body: JSON.stringify({
+            flight_no: 'vj  101',
+            from_code: 'HAN',
+            to_code: 'SGN',
+            depart_time: '2026-10-10T10:00:00Z',
+            arrive_time: '2026-10-10T12:00:00Z',
+            price: 1500000,
+            class: 'economy',
+            available: 180,
+          }),
+        });
+
+        const spy = vi.spyOn(db, 'createFlight').mockResolvedValueOnce({
+          id: 'f1',
+          flight_no: 'VJ 101',
+          from_code: 'HAN',
+          to_code: 'SGN',
+          depart_time: '2026-10-10T10:00:00Z',
+          arrive_time: '2026-10-10T12:00:00Z',
+          price: 1500000,
+          economy_price: 1500000,
+          business_price: 1500000,
+          class: 'economy',
+          available: 180,
+          status: 'active',
+          gate: null,
+          terminal: null,
+          created_at: '2026-01-01T00:00:00Z',
+          updated_at: '2026-01-01T00:00:00Z',
+        });
+
+        const res = (await createAdminFlight(req))!;
+        expect(res.status).toBe(201);
+        expect(spy).toHaveBeenCalledWith(expect.objectContaining({ flight_no: 'VJ 101' }));
+      });
+
+      /**
        * A unique index on (from_code, to_code, depart_time) means two flights
        * cannot occupy the same departure slot. That is a user mistake, so it
        * must read as 409, not as a server fault.

@@ -620,6 +620,33 @@ The route also derives `price` from whichever side of the ladder the row's own
 `flights_fare_ladder_ordered` CHECK only surfaces as a 500. `src/test/
 flight-fare-edit.test.ts` pins both columns reaching SQL.
 
+**A flight number has one definition, in `src/lib/flight-no.ts`, and the
+database enforces it.** Four writers disagreed before migration 036: the PATCH
+handler and the admin form each ran `/^[A-Z]{2}\s?\d{2,4}$/i`, while
+`createFlight` and the POST handler checked nothing at all. The pattern rejected
+`VJ101-1000` — a shape two live flights with live bookings still carry — so
+those two could not be priced, delayed or renumbered through the console meant
+to manage them. Two rules follow, and they are the same lesson as the fare
+columns above:
+
+- **A new CHECK column needs every write path to agree with it.** A CHECK
+  nothing validates against does not produce a helpful error; it produces a
+  bare 500 from the handler, which reads as a server fault to the operator and
+  as "already handled" to the next reader. Validate at the door and normalise
+  there, so the handler answers 400 naming the field.
+- **Normalise before you test, and test the normalised value.** PATCH had two
+  calls for the same job — `.replace(/\s+/, ' ')` at line 251 without the `g`
+  flag and with it at line 281 — so `VJ  101` passed on one path and failed on
+  the other. `normalizeFlightNo` exists to make that impossible.
+
+The CHECK is deliberately case-sensitive and rejects the old letter suffix
+`VJ341B`: `searchBookingsByPnr` joins on the raw column while
+`getFlightStatusByNo` uppercases first, so a lowercase row would be findable by
+tracking and invisible to a booking search, and a suffixed one is unreadable to
+the console at all. Adding a flight-number pattern means editing
+`036_flight_no_shape_check.sql` and `flight-no.ts` together — the SQL and the
+regex must stay the same string or one of the two is decoration.
+
 **Re-run the seed when the window runs out.** `npm run db:seed-flights` opens a
 21-day window (three weeks, not the seven the date strip shows — someone who
 returns next week still lands inside it) and covers 028's international routes,

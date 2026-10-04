@@ -134,3 +134,84 @@ describe('PATCH /api/quan-tri/chuyen-bay/[id] fare pair', () => {
     expect(body.error).toBe('Validation Error');
   });
 });
+
+/**
+ * The defect 036 exists to close.
+ *
+ * `VJ101-1000` and `VJ789-1043` are live flights carrying a booking each
+ * (VJDEMO01 completed, VJ644052 confirmed). Migration 035 deliberately left
+ * their numbers alone — `flight_no` is a lookup key, so renaming it would
+ * rewrite a customer's booking history — but the PATCH validator ran
+ * `/^[A-Z]{2}\s?\d{2,4}$/i`, which has no room for the `-1000` suffix. Those
+ * two flights therefore could not be edited, priced or delayed through the
+ * admin console at all. 036's CHECK admits the shape; this asserts the handler
+ * does too, on both the stored value and a re-save of the same number.
+ */
+describe('PATCH /api/quan-tri/chuyen-bay/[id] seeded flight-number shape', () => {
+  const LEGACY_NUMBERED = { ...FLIGHT, flight_no: 'VJ101-1000' };
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(db, 'getFlightById').mockResolvedValue(LEGACY_NUMBERED as never);
+  });
+
+  it('accepts the stored number itself, so the flight becomes editable at all', async () => {
+    const spy = vi.spyOn(db, 'updateFlight').mockResolvedValueOnce({
+      ...LEGACY_NUMBERED,
+      status: 'delayed',
+    } as never);
+
+    const res = await patchFlight(patchRequest({ status: 'delayed' }), {
+      params: Promise.resolve({ id: 'flight-1' }),
+    });
+
+    expect(res.status).toBe(200);
+    expect(spy).toHaveBeenCalledWith('flight-1', expect.objectContaining({ status: 'delayed' }));
+  });
+
+  it('accepts an unrelated edit while the row keeps that number', async () => {
+    // The failing case in production: the operator opens the flight, changes
+    // something else, and the whole save fails on the number they never touched.
+    const spy = vi.spyOn(db, 'updateFlight').mockResolvedValueOnce({
+      ...LEGACY_NUMBERED,
+      economy_price: 949000,
+    } as never);
+
+    const res = await patchFlight(patchRequest({ economy_price: 949000 }), {
+      params: Promise.resolve({ id: 'flight-1' }),
+    });
+
+    expect(res.status).toBe(200);
+    expect(spy).toHaveBeenCalledWith(
+      'flight-1',
+      expect.objectContaining({ economy_price: 949000 })
+    );
+  });
+
+  it('accepts the shape as a new value, not only as an existing one', async () => {
+    const spy = vi.spyOn(db, 'updateFlight').mockResolvedValueOnce({
+      ...LEGACY_NUMBERED,
+      flight_no: 'VJ789-1043',
+    } as never);
+
+    const res = await patchFlight(patchRequest({ flight_no: 'VJ789-1043' }), {
+      params: Promise.resolve({ id: 'flight-1' }),
+    });
+
+    expect(res.status).toBe(200);
+    expect(spy).toHaveBeenCalledWith(
+      'flight-1',
+      expect.objectContaining({ flight_no: 'VJ789-1043' })
+    );
+  });
+
+  it('still rejects the letter suffix 035 removed from the live data', async () => {
+    const res = await patchFlight(patchRequest({ flight_no: 'VJ341B' }), {
+      params: Promise.resolve({ id: 'flight-1' }),
+    });
+    const body = (await res.json()) as { message: string };
+
+    expect(res.status).toBe(400);
+    expect(body.message).toMatch(/không hợp lệ/);
+  });
+});
