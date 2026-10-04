@@ -23,6 +23,45 @@ CREATE INDEX IF NOT EXISTS idx_refund_requests_user
 
 -- At most one open ticket per booking: without this a customer could submit the
 -- same refund repeatedly and an operator would pay it twice.
+--
+-- The index is created only when the table satisfies it, and the duplicates are
+-- resolved first. `CREATE UNIQUE INDEX` has no `NOT VALID` form, so there is no
+-- "add it now, check later" — the statement aborts on the rows it finds, and
+-- because this file has no `BEGIN` that abort costs the seed below as well:
+-- measured on a database holding two open tickets for one booking, `020` failed
+-- with `could not create unique index "idx_refund_requests_open_booking"`,
+-- leaving the index absent **and** `system_config.refund_feature_enabled`
+-- unseeded, so the feature had no switch to read.
+--
+-- Only the surplus is closed, never the one that was there first: the oldest
+-- open ticket stays open and keeps its place in the operator's queue, and each
+-- closure is recorded so the operator can see what happened. Closing a ticket
+-- that was already resolved is not touched.
+DO $open_tickets$
+DECLARE
+  booking UUID;
+BEGIN
+  FOR booking IN
+    SELECT booking_id
+    FROM refund_requests
+    WHERE status IN ('pending', 'approved')
+    GROUP BY booking_id
+    HAVING count(*) > 1
+  LOOP
+    -- Keep the oldest open ticket; close every newer one as already handled.
+    UPDATE refund_requests SET status = 'archived'
+    WHERE booking_id = booking
+      AND status IN ('pending', 'approved')
+      AND id NOT IN (
+        SELECT id FROM refund_requests
+        WHERE booking_id = booking AND status IN ('pending', 'approved')
+        ORDER BY created_at, id
+        LIMIT 1
+      );
+    RAISE NOTICE 'closed surplus open refund tickets for booking %', booking;
+  END LOOP;
+END $open_tickets$;
+
 CREATE UNIQUE INDEX IF NOT EXISTS idx_refund_requests_open_booking
   ON refund_requests (booking_id)
   WHERE status IN ('pending', 'approved');
