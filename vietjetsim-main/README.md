@@ -75,6 +75,14 @@ psql "$DATABASE_URL" -f migrations/001_bank_accounts.sql
 # CI runs a "Migrations" job that applies every file above to an empty
 # PostgreSQL instance and then re-applies them, so ordering mistakes and
 # non-idempotent statements fail the build instead of production.
+#
+# KNOWN: the empty-database apply passes, but the re-apply step fails on
+# `025` — the code rename (DIH/RKG/CXL to DIN/VKG/VCL) collides with the
+# routes 027 seeds at the same departure instants. Four other files also
+# break the replay: 014/024/025/026 omit the NOT NULL fare columns, 014's
+# wallet numbers are derived from row order, and 022 renames an email that
+# 014 has already re-created. See AGENTS.md for the full list; this is
+# pre-existing and unrelated to the PNR work.
 ```
 
 ### 4. Start Development Server
