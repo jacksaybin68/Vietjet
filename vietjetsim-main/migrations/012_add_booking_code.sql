@@ -29,40 +29,65 @@ BEGIN
     
     -- Make booking_code non-nullable
     ALTER TABLE bookings ALTER COLUMN booking_code SET NOT NULL;
-    
-    -- Create a function to generate booking codes
-    CREATE OR REPLACE FUNCTION generate_booking_code()
-    RETURNS VARCHAR(20) AS $fn$
-    DECLARE
-      prefix TEXT := 'VJ';
-      random_part TEXT;
-      attempts INTEGER := 0;
-      code TEXT;
-      exists_check BOOLEAN;
-    BEGIN
-      LOOP
-        random_part := LPAD(CAST(FLOOR(RANDOM() * 999999) AS TEXT), 6, '0');
-        code := prefix || random_part;
-        
-        -- Check if code already exists
-        SELECT EXISTS(SELECT 1 FROM bookings WHERE booking_code = code) INTO exists_check;
-        
-        IF NOT exists_check THEN
-          RETURN code;
-        END IF;
-        
-        attempts := attempts + 1;
-        IF attempts > 10 THEN
-          -- Fallback: use longer code
-          random_part := LPAD(CAST(FLOOR(RANDOM() * 99999999) AS TEXT), 8, '0');
-          code := prefix || random_part;
-          RETURN code;
-        END IF;
-      END LOOP;
-    END;
-    $fn$ LANGUAGE plpgsql;
   END IF;
-END $do$
-;
+END $do$;
+
+-- `generate_booking_code()` lives *outside* the column guard above.
+--
+-- It used to be the last statement inside the `IF`, so the function's existence
+-- was conditional on the column's — and the column outlives any one attempt to
+-- add it. `CREATE OR REPLACE FUNCTION` is idempotent on its own, so guarding it
+-- against nothing bought no safety and cost correctness: on a database where
+-- the column is present and the function is not, re-running this file skipped
+-- both, and `013` — which does `ALTER TABLE bookings ALTER COLUMN
+-- booking_code SET DEFAULT generate_booking_code()` — aborted with
+-- `ERROR: function generate_booking_code() does not exist`.
+--
+-- That failure is invisible afterwards. The column is already NOT NULL with no
+-- default, which is exactly the shape that makes the feature impossible:
+-- nothing in the application supplies `booking_code`, so every insert failed
+-- with `null value in column "booking_code" of relation "bookings" violates
+-- not-null constraint` — no booking could be created at all, and the endpoint
+-- returns that driver error to the customer. Measured end to end on a database
+-- in that state: re-running `012` recreated nothing, `013` aborted, and the
+-- insert failed.
+--
+-- The body is 034's six-character alphanumeric generator, which supersedes the
+-- `VJ`-prefixed one this file used to define; keeping one definition means a
+-- `CREATE OR REPLACE` here and the one in `034` cannot drift. `013` only names
+-- the function, so it resolves to whichever definition ran last.
+CREATE OR REPLACE FUNCTION generate_booking_code()
+RETURNS VARCHAR(20) AS $fn$
+DECLARE
+  alphabet CONSTANT TEXT := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  code TEXT;
+  attempts INTEGER := 0;
+  exists_check BOOLEAN;
+BEGIN
+  LOOP
+    code := (
+      SELECT STRING_AGG(
+        SUBSTRING(alphabet FROM (FLOOR(RANDOM() * LENGTH(alphabet)) + 1)::INT FOR 1),
+        ''
+        ORDER BY i
+      )
+      FROM generate_series(1, 6) AS g(i)
+    );
+
+    SELECT EXISTS(SELECT 1 FROM bookings WHERE booking_code = code) INTO exists_check;
+    IF NOT exists_check THEN
+      RETURN code;
+    END IF;
+
+    attempts := attempts + 1;
+    IF attempts > 20 THEN
+      -- Raising beats the old fallback of returning a longer code: a PNR of the
+      -- wrong length would reach a boarding pass, and 36^6 makes 20 consecutive
+      -- collisions a fault worth surfacing rather than papering over.
+      RAISE EXCEPTION 'generate_booking_code: no free code after 20 attempts';
+    END IF;
+  END LOOP;
+END;
+$fn$ LANGUAGE plpgsql;
 
 -- Add booking_code to API responses and search queries

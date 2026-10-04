@@ -1,8 +1,25 @@
 -- 011_checkin_system.sql - Check-in System
 -- Adds check-in functionality for flight bookings
 
--- Drop existing check_in table if exists (for idempotent migrations)
-DROP TABLE IF EXISTS check_in CASCADE;
+-- The table is created if missing and every column below is added by a guarded
+-- `ADD COLUMN`, so this file is already idempotent without dropping anything.
+--
+-- It used to open with `DROP TABLE IF EXISTS check_in CASCADE`, added "for
+-- idempotent migrations" — which is backwards: `CREATE TABLE IF NOT EXISTS` and
+-- the per-column guards already make a re-run a no-op, so the DROP bought
+-- nothing and cost the table's contents on every replay. `psql -f` runs the
+-- whole set again on the same database in CI, and again on any deployment that
+-- re-applies migrations, so this was not a theoretical risk: a customer who had
+-- checked in came back to an empty `check_in` with the booking still
+-- `confirmed`, i.e. the boarding pass the gate scanned had vanished while the UI
+-- still offered to issue one. Measured on a database holding one check-in:
+-- before 1 row, after re-running this file alone 0 rows, with `bookings` and
+-- `passengers` untouched — the DROP removed only this table's data.
+--
+-- Nothing depends on the table being recreated: `check_in` is a leaf (no
+-- constraint anywhere references it, so `CASCADE` had nothing else to drop),
+-- the indexes are `CREATE INDEX IF NOT EXISTS`, and the trigger is recreated
+-- below after an explicit `DROP TRIGGER`.
 
 -- Create check_in table to track check-in status for passengers
 CREATE TABLE IF NOT EXISTS check_in (

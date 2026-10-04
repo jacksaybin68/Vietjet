@@ -49,6 +49,18 @@ following day.
 same database. It used to fail on five files; all five are fixed. None of the
 fixes is in `034`, and none came from the PNR work.
 
+**Re-applyable is not the same as safe, and the harness could only see the
+first half.** `scripts/test-migrations.cjs` counts and fingerprints `flights`
+and nothing else, so every defect below lived in a table it never queried — and
+a `DROP TABLE` is invisible even in principle, because the fingerprint diff
+catches a row that was *rewritten*, not one that was deleted. Six files shipped
+damage of that kind (`000`, `003`, `005`, `006`, `010`, `011`, `012`, `020`),
+each reproduced on a real Postgres 16 and each now measured before and after.
+The harness grows a canary customer — a booked, checked-in trip with a support
+conversation and a published notice — and asserts it survives every replay.
+When you add a table that holds user data, add it to `OPERATING_TABLES_SQL`;
+an unmeasured table is an unguarded one.
+
 **Check it the way CI does, or you are checking something else.** The CI step is
 `psql -f <file>` with no `BEGIN` and no wrapping transaction, so *every statement
 in a migration is its own transaction*. A driver-based replay is not equivalent:
@@ -191,12 +203,140 @@ mock and never executes a migration.
   where there is nothing to violate. Only a database carrying the damage
   exercises it, so build one by hand when adding a constraint to a table that
   ships rows.
+- **`DROP TABLE` in a migration is not idempotency, it is a data delete — and
+  because CI replays the whole set, "on every re-apply" is the real frequency.**
+  Three files shipped the same defect, each with its own table, and all three
+  were invisible to the harness for the same reason (below).
+  - `011_checkin_system.sql:5` opened with `DROP TABLE IF EXISTS check_in
+    CASCADE`, commented "for idempotent migrations". The same file already had
+    `CREATE TABLE IF NOT EXISTS` plus six guarded `ADD COLUMN` blocks, so the
+    DROP bought nothing and cost the table's contents: measured on a database
+    holding one check-in, 1 row before and **0** after re-running that file
+    alone, with `bookings` and `passengers` untouched. The boarding pass the gate
+    scanned was gone while the booking stayed `confirmed` and the UI still
+    offered to issue one. `check_in` is a leaf — no constraint anywhere
+    references it, so `CASCADE` had nothing else to drop.
+  - `000_core_schema.sql:107` had `DROP TABLE IF EXISTS announcements` followed
+    by a *bare* `CREATE TABLE`, in a file where every other table is
+    `IF NOT EXISTS`. 1 row before, 0 after; the operator's published notices at
+    `/api/quan-tri/thong-bao` came back blank.
+  - `010_chat.sql:5-7` dropped all three chat tables. This one *was* a deliberate
+    repair of an older minimal schema, which is why it cannot simply lose the
+    DROP — so it now drops only when a table is actually missing a column this
+    file defines, resolved children-first because both children hold an FK to
+    `chat_conversations`. Measured both ways on one database: with the shape
+    correct, 1 conversation and 1 message before and after; after dropping
+    `unread_by_admin`, the rebuild fired (three `NOTICE`s) and restored the
+    column.
+  The rule: reach for `CREATE TABLE IF NOT EXISTS`, a guard on
+  `information_schema`, or a guard on behaviour. Never a `DROP` for idempotency.
+- **The four-pass harness counts `flights` and nothing else — so every one of
+  those three tables was unmeasured.** `checkInvariants()` (script lines 194-214)
+  asserts two tables by name and one constraint; `checkDataInvariants()`
+  (216-259) only ever queries `flights`; the row count (274) and the
+  fingerprint (133-140) are both `SELECT … FROM flights`. A table the seed files
+  do not touch is not covered by "pass 2 added zero rows", and the fingerprint
+  diff cannot even *see* rows that were deleted rather than rewritten. If you
+  add a table that carries user data, either extend the harness to count it or
+  accept that CI is silent about it.
+- **A targetless `ON CONFLICT DO NOTHING` is not idempotency; it is a comment.**
+  It guards only the unique indexes the table *happens* to have, so it degrades
+  to "insert another row" the moment one is missing. `003_loyalty_program.sql`
+  seeded a program and four tiers with exactly that, and both tables had nothing
+  but `id UUID PRIMARY KEY` — so every re-apply inserted a fresh copy. Measured
+  after three extra runs: `loyalty_programs` 1 → **4**, `loyalty_tiers` 4 → **40**,
+  12 duplicate `(program_id, name)` pairs. `getUserLoyaltyWithProgram`
+  (`src/lib/db.ts:2820`) returns every tier of the program to the loyalty tab,
+  and `getOrEnrollLoyalty` picks `WHERE is_active = true LIMIT 1` with **no
+  `ORDER BY`**, so which program a customer was enrolled in could differ between
+  two calls.
+  The fix follows the `007`/`016` rule: `UNIQUE` has no `NOT VALID` form, so
+  merge first and add the key after. `003` now merges duplicate programs —
+  repointing `loyalty_tiers` *and* `user_loyalty` at the survivor before
+  deleting, because the FK blocks the delete and because `user_loyalty
+  .program_id` is what decides the ladder a customer sees — collapses duplicate
+  tiers, then adds both constraints under a `conrelid` guard. Every seed now
+  names its conflict target. Measured on a database left at 4 programs / 40
+  tiers with a customer enrolled on one of the duplicates: after one apply, 1
+  program, 4 tiers, the customer's `program_id` repointed and the row intact; three
+  further applies changed nothing.
+- **A `CREATE TABLE IF NOT EXISTS` does not upgrade a table that already
+  exists, so a constraint added inside the `CREATE` never lands on a database
+  that has been there longer than the migration.** Every `UNIQUE` in `003` is
+  written twice on purpose: once in the `CREATE TABLE` for a fresh database,
+  once as a guarded `ALTER TABLE … ADD CONSTRAINT` after the dedupe block for
+  every other one. Read a constraint declared inside `CREATE TABLE IF NOT
+  EXISTS` as applying to new databases only.
+- **Never put a statement that other files depend on inside another object's
+  existence guard — the guarded object outlives any one attempt to create
+  it.** `012` defined `generate_booking_code()` as the last statement inside
+  the `IF` that adds `bookings.booking_code`, so the function existed only if
+  the column did not. The column is the thing that persists: on a database
+  holding the column and not the function, re-running `012` recreated neither,
+  and `013` — `ALTER TABLE bookings ALTER COLUMN booking_code SET DEFAULT
+  generate_booking_code()` — aborted with `function generate_booking_code()
+  does not exist`.
+  The damage outlives the abort. The column is already `NOT NULL` with no
+  default, nothing in the application supplies `booking_code`, and so every
+  insert failed with `null value in column "booking_code" … violates not-null
+  constraint`: **no booking could be created at all**, and the driver error went
+  straight to the customer. Measured end to end on a database in that state —
+  re-run `012`, re-run `013`, then insert — before the fix the insert failed and
+  `fn=0 / default=NONE`; after it `fn=1 / default=generate_booking_code()` and
+  the insert returned a six-character PNR.
+  The function is now outside the guard, and carries `034`'s six-character
+  alphanumeric body rather than the `VJ`-prefixed one it replaced, so `012` and
+  `034` cannot drift into two different definitions. `CREATE OR REPLACE FUNCTION`
+  needs no guard of its own.
 - **A constraint guard must filter by table, not by name.** A constraint name is
   unique per *schema*, not per table. `023` checked only `conname`, so any
   constraint anywhere named `passengers_passenger_type_check` would skip the
   block and leave the column permanently unchecked. Add
   `AND conrelid = '<table>'::regclass` — `017` already did, `007` and `016` did
   not (three guards, all the same omission).
+- **An inline constraint on `ADD COLUMN IF NOT EXISTS` is never applied.** The
+  `IF NOT EXISTS` makes the whole statement a no-op when the column is already
+  there: Postgres emits `NOTICE: column … already exists, skipping` and discards
+  the rest of the definition, constraints included. No error, no warning that
+  anything was dropped — the constraint simply never lands, on any apply, ever.
+  `005` carried `ADD COLUMN IF NOT EXISTS gender VARCHAR(20) CHECK (gender IN
+  ('male','female','other'))`. Measured on a database whose `user_profiles.gender`
+  already existed without the CHECK — which is exactly the state that file meets,
+  since its own header tells the reader to paste it into a Neon console where the
+  column may have been added by hand — the constraint count was still 0 after
+  three applies, and only the `<select>` in `ProfileTab.tsx` was limiting the
+  value, with the profile route passing the field through unfiltered.
+  `006` had the same shape with `UNIQUE` on `user_wallets.account_number`.
+  Both now add the column bare and install the constraint separately.
+- **So a constraint on a column that may predate it needs both branches of the
+  rule, and which branch applies depends on the constraint type.**
+  `CHECK` gets `NOT VALID` → repair → `VALIDATE`: `005`'s gender block installs
+  the CHECK, resets an unrecognised value to the column's default (not to a
+  deleted row — the profile carries the customer's booking history), then
+  validates. Measured on a database holding `gender = 'xxx'`: after one apply, 0
+  bad values and the constraint present with `convalidated = t`.
+  `UNIQUE` cannot be deferred that way, so `006` detects and skips with a
+  `RAISE NOTICE` naming how many values are shared. Two wallets on one account
+  number is not a value to normalise — it means a payout account was recorded
+  twice and only the accounts team can say which is right. Measured both ways: on
+  the duplicated database it printed `1 value(s) are shared by more than one
+  wallet; skipping the UNIQUE constraint until an operator resolves them` and
+  exited 0; after the duplicate was resolved the same file installed the
+  constraint with no notice.
+- **A `CREATE UNIQUE INDEX` can abort a file just as badly as an inline
+  constraint fails to install — and the abort takes the rest of the file with
+  it.** `020` had `CREATE UNIQUE INDEX … ON refund_requests (booking_id) WHERE
+  status IN ('pending','approved')`, which is the right idea (one open ticket per
+  booking, so a customer cannot queue a refund twice) with no way to install it on
+  a database that already violates it. Measured on a database holding two open
+  tickets for one booking: `ERROR: could not create unique index
+  "idx_refund_requests_open_booking"`, and because the file has no `BEGIN`, the
+  `INSERT` below it never ran either — so the refund feature had no
+  `refund_feature_enabled` switch in `system_config` to read.
+  It now closes the surplus first, keeping the **oldest** open ticket so the one
+  already in the operator's queue survives, and marks the newer ones `archived`.
+  Measured after the fix: index present, switch seeded, the original ticket still
+  `pending`, the surplus `archived`, 0 duplicates left.
 - **A hand-written validator and a CHECK constraint are two copies of one list;
   keep them literally identical.** The admin PATCH validator at
   `src/app/api/quan-tri/chuyen-bay/[id]/route.ts` offered `boarding`, `landed`

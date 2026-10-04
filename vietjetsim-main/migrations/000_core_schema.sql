@@ -104,8 +104,16 @@ CREATE TABLE IF NOT EXISTS refund_requests (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-DROP TABLE IF EXISTS announcements;
-CREATE TABLE announcements (
+-- Created if missing, never dropped. The rest of this file is
+-- `CREATE TABLE IF NOT EXISTS`; `announcements` was the one table that opened
+-- with `DROP TABLE IF EXISTS` and a bare `CREATE TABLE`, so every replay of the
+-- set deleted the operator's published notices before recreating an empty
+-- table — the admin notifications list at /api/quan-tri/thong-bao came back
+-- blank while `is_active` rows were still expected to be live. Measured on a
+-- database holding one notice: 1 row before, 0 after re-running this file
+-- alone. `IF NOT EXISTS` alone would keep the data but silently skip a schema
+-- change, so it is paired with a comment saying which shape wins.
+CREATE TABLE IF NOT EXISTS announcements (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title VARCHAR(255) NOT NULL,
   content TEXT NOT NULL,

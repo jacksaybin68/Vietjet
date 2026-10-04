@@ -211,6 +211,132 @@ function checkInvariants() {
       "SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name='booking_consents';"
     ) === '1'
   );
+  // ── Tables no seed file writes to ──────────────────────────────────────
+  //
+  // `flights` is the only table the replay test counts and the only one it
+  // fingerprints, so a defect in any other table is invisible to it. That is not
+  // hypothetical: three tables were deleted outright on every re-apply — `011`
+  // opened with `DROP TABLE IF EXISTS check_in CASCADE`, `000` with
+  // `DROP TABLE IF EXISTS announcements`, `010` dropped all three chat tables —
+  // and the `flights` count never moved. Asserting that those tables *exist*
+  // would not have caught it either, because the following file recreates an
+  // empty one, so the table was present at every check. Only a row put in before
+  // a pass and looked for after it can tell deletion from recreation; see
+  // `seedOperatingRows` and `checkOperatingRows`, which do exactly that.
+  //
+  // What *is* worth asserting structurally is the keys `003`'s seeds conflict
+  // on. A targetless `ON CONFLICT DO NOTHING` guards only the unique indexes a
+  // table happens to have, so a missing key silently turns "seed once" into
+  // "seed forever" — measured at 4 programs and 40 tiers after three re-applies,
+  // every one of them served to the loyalty tab by `getUserLoyaltyWithProgram`.
+  for (const [table, name] of [
+    ['loyalty_programs', 'loyalty_programs_name_key'],
+    ['loyalty_tiers', 'loyalty_tiers_program_id_name_key'],
+  ]) {
+    check(
+      `${name} exists and is validated`,
+      psql(
+        "SELECT count(*) FROM pg_constraint WHERE conname='" +
+          name +
+          "' AND conrelid = '" +
+          table +
+          "'::regclass AND contype = 'u' AND convalidated;"
+      ) === '1'
+    );
+  }
+}
+
+/**
+ * Row counts for the tables no seed file writes to.
+ *
+ * The `flights` count and fingerprint above cannot see a row that was deleted
+ * rather than rewritten, which is why these tables need their own pass-to-pass
+ * comparison.
+ */
+const OPERATING_TABLES_SQL = `
+  SELECT 'check_in=' || count(*) FROM check_in
+  UNION ALL SELECT 'announcements=' || count(*) FROM announcements
+  UNION ALL SELECT 'chat_conversations=' || count(*) FROM chat_conversations
+  UNION ALL SELECT 'chat_messages=' || count(*) FROM chat_messages
+  UNION ALL SELECT 'loyalty_programs=' || count(*) FROM loyalty_programs
+  UNION ALL SELECT 'loyalty_tiers=' || count(*) FROM loyalty_tiers
+  ORDER BY 1
+`;
+
+/**
+ * One operating customer: a booked and checked-in trip, a support conversation
+ * with a message in it, a published notice and a loyalty enrollment.
+ *
+ * Real records rather than sentinels in a scratch column, because the point is
+ * to prove the files leave other people's data alone. Removed again before the
+ * next pass so the flight counts and fingerprints are unaffected.
+ */
+function seedOperatingRows() {
+  psql(`
+    INSERT INTO user_profiles (id, email, password_hash, full_name, phone)
+    SELECT gen_random_uuid()::text, 'migration-canary@vietjetsim.invalid', 'x',
+           'Migration Canary', '0900000777'
+    WHERE NOT EXISTS (SELECT 1 FROM user_profiles WHERE email = 'migration-canary@vietjetsim.invalid');
+
+    INSERT INTO bookings (user_id, flight_id, status, total_price)
+    SELECT u.id, f.id, 'confirmed', f.price
+    FROM user_profiles u, flights f
+    WHERE u.email = 'migration-canary@vietjetsim.invalid'
+      AND f.id = (SELECT id FROM flights ORDER BY id LIMIT 1)
+      AND NOT EXISTS (SELECT 1 FROM bookings b JOIN user_profiles u2 ON u2.id = b.user_id
+                      WHERE u2.email = 'migration-canary@vietjetsim.invalid');
+
+    INSERT INTO passengers (booking_id, name, dob, passenger_type)
+    SELECT b.id, 'CANARY', '1990-01-01', 'adult'
+    FROM bookings b JOIN user_profiles u ON u.id = b.user_id
+    WHERE u.email = 'migration-canary@vietjetsim.invalid'
+      AND NOT EXISTS (SELECT 1 FROM passengers p WHERE p.booking_id = b.id);
+
+    INSERT INTO check_in (booking_id, passenger_id, check_in_number, boarding_pass_number,
+                          seat_number, flight_no, from_code, to_code, depart_time, passenger_name)
+    SELECT b.id, p.id, 'CANARY-CI', 'CANARY-BP', '1A', f.flight_no, f.from_code, f.to_code,
+           f.depart_time, 'CANARY'
+    FROM bookings b JOIN user_profiles u ON u.id = b.user_id
+    JOIN passengers p ON p.booking_id = b.id JOIN flights f ON f.id = b.flight_id
+    WHERE u.email = 'migration-canary@vietjetsim.invalid'
+      AND NOT EXISTS (SELECT 1 FROM check_in c WHERE c.booking_id = b.id);
+
+    INSERT INTO chat_conversations (id, user_id, user_email, user_name, status, last_message)
+    SELECT gen_random_uuid(), u.id, u.email, u.full_name, 'active', 'canary'
+    FROM user_profiles u
+    WHERE u.email = 'migration-canary@vietjetsim.invalid'
+      AND NOT EXISTS (SELECT 1 FROM chat_conversations c WHERE c.user_id = u.id);
+
+    INSERT INTO chat_messages (conversation_id, sender_id, sender_role, content)
+    SELECT c.id, c.user_id, 'user', 'canary'
+    FROM chat_conversations c JOIN user_profiles u ON u.id = c.user_id
+    WHERE u.email = 'migration-canary@vietjetsim.invalid'
+      AND NOT EXISTS (SELECT 1 FROM chat_messages m WHERE m.conversation_id = c.id);
+
+    INSERT INTO announcements (title, content, type, is_active)
+    SELECT 'canary', 'canary', 'info', true
+    WHERE NOT EXISTS (SELECT 1 FROM announcements WHERE title = 'canary');
+
+    INSERT INTO user_loyalty (user_id, program_id, tier)
+    SELECT u.id, p.id, 'Bronze'
+    FROM user_profiles u CROSS JOIN loyalty_programs p
+    WHERE u.email = 'migration-canary@vietjetsim.invalid' AND p.is_active
+      AND NOT EXISTS (SELECT 1 FROM user_loyalty l WHERE l.user_id = u.id);
+  `);
+}
+/** The canary must survive every re-apply: an empty table means a file dropped it. */
+function checkOperatingRows(pass) {
+  const emptied = psql(OPERATING_TABLES_SQL)
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.endsWith('=0'));
+  check(
+    `pass ${pass} keeps the rows it does not own`,
+    emptied.length === 0,
+    emptied.length > 0
+      ? `replay emptied ${emptied.join(', ')} — a migration dropped a table it should have left alone`
+      : ''
+  );
 }
 
 function checkDataInvariants() {
@@ -269,7 +395,17 @@ function main() {
 
     for (let pass = 1; pass <= PASSES; pass++) {
       console.info(`\nPass ${pass}/${PASSES}`);
+
       if (!applyAll(pass)) break;
+
+      // The canary is inserted once the schema exists and re-checked after every
+      // later apply, so each replay has something real to lose. `flights` is the
+      // only table counted below and the only one fingerprinted, which is why
+      // these needed their own check rather than another assertion on the same
+      // query. The rows stay: clearing them after each pass would mean the next
+      // pass also starts empty and has nothing to lose either.
+      if (pass === 1) seedOperatingRows();
+      else checkOperatingRows(pass);
 
       const fingerprint = psql(FINGERPRINT_SQL);
       const rows = fingerprint ? fingerprint.split('\n').length : 0;
@@ -293,6 +429,7 @@ function main() {
           fingerprint === firstFingerprint,
           'seed rewrote rows it did not insert — scope the update by id, not by a state predicate'
         );
+        checkOperatingRows(pass);
       }
 
       checkInvariants();
