@@ -59,7 +59,14 @@ for (const file of files) {
   await client.query('ROLLBACK TO SAVEPOINT sp');
 }
 await client.query('ROLLBACK');
-```
+
+That harness proves every file *runs*. It does not prove the set is idempotent,
+because the rollback erases the first pass — and a seed that is wrong only on
+the second pass needs both. To check that, commit the whole set twice against a
+throwaway database and compare the row counts after each pass. Pass 1 legitimately
+grows (`027`'s rolling window is relative to "now", so each run seeds a new day,
+and `CURRENT_DATE`-based seeds move); pass 2 must grow by exactly zero. Anything
+else is a seed that will keep re-adding rows forever.
 
 - **030's fare columns are `NOT NULL` with no default, and every seed file
   predates them.** A seed cannot name `economy_price` in its column list — 030 has
@@ -68,12 +75,24 @@ await client.query('ROLLBACK');
   027 already had, is: drop `NOT NULL` in a guarded `DO` block before the INSERT,
   price the file's own rows with 030's formula, re-apply `NOT NULL` after. All
   three blocks no-op on a fresh database. `014`, `024`, `025`, `026` do this.
-- **Scope the pricing UPDATE to rows the file owns.** Numbering blocks overlap:
-  026 and 027 both number from 601, so a range like `BETWEEN 601 AND 610` would
-  repaint rows belonging to other files. `025` scopes by route instead — TBB is
-  the only thing identifying its rows — and `014` / `024` use their own blocks
-  (101-160, 201-370). The `WHERE` also requires the fare to be null, so a
-  database 030 already priced matches nothing.
+- **`row_number() OVER ()` cannot identify a file's own rows.** It numbers the
+  *select*, not the insert, so the counter advances even for a row
+  `ON CONFLICT DO NOTHING` then skips. On a first run that is invisible — the
+  numbers come out as the tidy block the author expected (014 → 101-160, 024 →
+  201-370). On a replay, where most rows already exist, the few that do get
+  inserted take the numbers the skipped rows consumed, and they land scattered
+  across the whole range. Any pricing step scoped by a number range then misses
+  them. This is why the number blocks in the seed comments look right and are
+  still wrong; do not reason about a seed's rows from its numbering.
+  `014` and `024` now collect `RETURNING id` into a `CREATE TEMP TABLE
+  _vj_seeded_<file>` and price by id. `025` scopes by route (TBB) and `026` by
+  number-plus-null, both of which the same replay invalidates less badly, but id
+  is the only identifier that is exact. Name the temp table after the file: two
+  seed files can share one transaction in a replay harness.
+- **A `SET NOT NULL` that fails tells you the pricing `WHERE` under-reached, not
+  that the constraint is wrong.** It is the only reliable signal, and it fires
+  after the damage is done. When it happens, count the orphans by flight number
+  before assuming anything about which file owns them.
 - **022 renames the demo email only when the target is free.** 014 re-seeds the
   old domain on every run, so a replayed database holds `user@vietjetsim.vn`
   *and* `user@vietjetair.vn` at once; renaming then collides on
