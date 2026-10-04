@@ -76,12 +76,9 @@ psql "$DATABASE_URL" -f migrations/001_bank_accounts.sql
 # PostgreSQL instance and then re-applies them, so ordering mistakes and
 # non-idempotent statements fail the build instead of production.
 #
-# KNOWN: the empty-database apply passes, but the re-apply step fails on five
-# files — 014 and 024 insert flights without the fare columns 030 made NOT
-# NULL, 022 renames an email that 014 has already re-created, 025 renames
-# airport codes that 027 has already seeded flights under, and 026 then
-# cannot delete rows a booking points at. See AGENTS.md for the full list.
-# This is pre-existing and unrelated to the PNR work.
+# The set is re-appliable: every seed file relaxes 030's NOT NULL fare columns,
+# prices its own rows, then restores the constraint, and no seed deletes a
+# booked flight. See AGENTS.md before touching any of them.
 ```
 
 ### 4. Start Development Server

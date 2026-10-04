@@ -28,6 +28,25 @@ ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, city = EXCLUDED.city;
 
 -- A seeded flight is identified by route plus exact departure time (the unique
 -- index from 014), so re-running this file adds nothing twice.
+-- No fare columns in the column list below, and the NOT NULL is dropped for
+-- this file's duration instead, the way 014 and 027 do it. 030 creates these
+-- columns and makes them NOT NULL with no default, so on a replay a bare INSERT
+-- is rejected on the null before any pricing statement can reach it. The block
+-- has to sit *before* the WITH, not inside it. On a fresh database the columns
+-- do not exist yet and every DO block in this file is a no-op.
+DO $relax$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'flights'
+      AND column_name = 'economy_price'
+  ) THEN
+    ALTER TABLE flights ALTER COLUMN economy_price DROP NOT NULL;
+    ALTER TABLE flights ALTER COLUMN business_price DROP NOT NULL;
+  END IF;
+END
+$relax$;
+
 WITH schedule (slot, depart_hour, price, class, available) AS (
   VALUES
     (1, 6,  899000::numeric,  'economy',  180),
@@ -74,3 +93,40 @@ SELECT
 FROM routes r
 CROSS JOIN schedule s
 ON CONFLICT (from_code, to_code, depart_time) DO NOTHING;
+
+-- 030's own formula, verbatim. Scoped to this file's own block: 17 airports x 2
+-- directions x 5 slots = 170 rows numbered from 201, so 201-370. 014's block is
+-- 101 upward and the later seeds start past 600, so nothing else is touched.
+DO $fare$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'flights'
+      AND column_name = 'economy_price'
+  ) THEN
+    UPDATE flights f
+       SET economy_price = CASE WHEN f.class = 'business'
+                                THEN round(f.price / 2.77) ELSE round(f.price) END,
+           business_price = CASE WHEN f.class = 'business'
+                                THEN round(f.price) ELSE round(f.price * 2.77) END
+     WHERE (f.economy_price IS NULL OR f.business_price IS NULL)
+       AND split_part(f.flight_no, ' ', 2) ~ '^[23][0-9]{2}$';
+  END IF;
+END
+$fare$;
+
+-- Re-apply NOT NULL, mirroring the block that dropped it above. Only safe
+-- because the pricing block covered this file's own rows and 030 already
+-- backfilled every other flight's fares, so nothing is left null here.
+DO $restore$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'flights'
+      AND column_name = 'economy_price'
+  ) THEN
+    ALTER TABLE flights ALTER COLUMN economy_price SET NOT NULL;
+    ALTER TABLE flights ALTER COLUMN business_price SET NOT NULL;
+  END IF;
+END
+$restore$;
