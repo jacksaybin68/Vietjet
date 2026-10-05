@@ -874,19 +874,27 @@ numeric number in 3001-3089 — the block 035 vacated — so it passes the CHECK
 migration 036 added and cannot collide with 027/028/031/032's bands. Sweep the
 block too when cleaning up, or every re-run doubles the business rows.
 
-**A duplicate departure is a 409, and getting there needs two fields.**
+**A duplicate departure is a 409, and the bridge decides whether that happens.**
 `flights` keeps `(from_code, to_code, depart_time)` unique as a plain unique
 *index*, so Postgres reports the violation with `code = 23505` and the index
-name in `constraint`. `isDuplicateFlightSchedule` checks both the code and the
-index name. Two ways this silently regressed to a bare 500: matching
-`err.constraint` against a *constraint* name when the database only has an
-index, and the HTTP bridge sending just five error fields — `message`,
-`severity`, `code`, `detail`, `hint`, `position` — so `constraint` and `routine`
-arrived undefined no matter what the application checked. `errorBody()` now
-copies the whole set the driver reads. A 409 is also not a failure for the
-seed: migrations 027/028 already fly HAN-SGN, HAN-SIN and SGN-ICN out of the
-same hub slots, which is 33 of its 840 requests, and the service being on sale
-already is the point of the rolling window.
+name in `constraint`. Measured on Postgres 16: `constraint` carries the name
+for an index just as it does for a constraint, and `routine` is the C function
+that raised it — `_bt_check_unique` for this index, `ExecConstraints` for a
+CHECK, `ri_ReportViolation` for a foreign key. An `err.routine` fallback
+matching the index name could therefore never fire; it is gone.
+
+The field never arrived at all in local development, because `errorBody()` in
+`scripts/neon-http-bridge.cjs` sent five fields — `message`, `severity`,
+`code`, `detail`, `hint`, `position` — while the driver copies sixteen off the
+400 body. Application code was correct and every 409 was still a 500.
+`src/test/neon-bridge-error.test.ts` pins the set against `NeonDbError`'s own
+keys, so a driver upgrade that renames a field fails the test rather than
+silently dropping it; it needs no database, so it runs in CI's unit job.
+
+A 409 is also not a failure for the seed: migrations 027/028 already fly
+HAN-SGN, HAN-SIN and SGN-ICN out of the same hub slots, which is 33 of its 840
+requests, and the service being on sale already is the point of the rolling
+window.
 
 **Agency-issued discount codes.** `015_agency_discounts.sql` adds `agencies` and
 `discount_codes.agency_id` (nullable, `ON DELETE SET NULL`) plus `issued_by`. Admins
