@@ -40,6 +40,26 @@ const ADMIN = {
   password: process.env.SEED_ADMIN_PASSWORD || 'admin123',
 };
 
+/**
+ * The business wave of each route, numbered in its own block.
+ *
+ * It used to be the same number with a trailing `B` — `VJ301B` — and every one
+ * of those rows was rejected with a 400. `FLIGHT_NO_PATTERN` allows an
+ * optional `-NNNN` block suffix but no letter, on purpose: `flights.class`
+ * already carries the cabin, migration 035 renumbered 593 legacy `VJ341B`
+ * rows into 3xxx for exactly that reason, and migration 036 put the shape in
+ * a CHECK so the database refuses it too. Re-running the seed therefore
+ * created 399 economy rows and silently lost all 441 business ones, leaving
+ * every route with no business cabin to sell.
+ *
+ * 3001-3089 is free on every database this seed has run against, and it is the
+ * block 035 vacated, so the two waves read as one pair and never collide with
+ * 027's 601-1040, 028's 1100-1256, 031's 2001+ or 032's 1500+.
+ */
+const BUSINESS_NO_BASE = 3001;
+
+/** The business wave's flight number: its own numeric block, same carrier. */
+const businessNo = (index) => `VJ${BUSINESS_NO_BASE + index}`;
 // [flight_no, from, to, depart, durationMin, economyPrice, businessPrice, seats]
 const ROUTES = [
   ['VJ301', 'HAN', 'SGN', '06:00', 145, 899000, 2490000, 189],
@@ -128,8 +148,12 @@ async function main() {
   const authHeaders = { cookie: toCookieHeader(jar), 'x-csrf-token': csrf };
 
   // Replace anything this script previously created so re-runs stay idempotent.
+  // Both waves are swept: the business block as well as the economy numbers.
+  // Cleaning up only the economy numbers left every business row from the
+  // previous run in place, so each run doubled them.
+  const sweepNumbers = [...ROUTES.map(([no]) => no), ...ROUTES.map((_, i) => businessNo(i))];
   let removed = 0;
-  for (const [no] of ROUTES) {
+  for (const no of sweepNumbers) {
     const list = await fetch(`${BASE_URL}/api/quan-tri/chuyen-bay?search=${no}&limit=100`, {
       headers: authHeaders,
     }).then((r) => r.json());
@@ -148,22 +172,29 @@ async function main() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  /**
+   * Slots migrations 027/028 already cover. A 409 means the service is already
+   * on sale for that day, which is all the rolling window is for, so it is
+   * counted rather than reported as a failure.
+   */
+  const alreadyThere = new Set();
+
   for (let day = 1; day <= DAYS; day += 1) {
     const date = new Date(today);
     date.setDate(date.getDate() + day);
 
-    for (const [no, from, to, depart, durationMin, ecoPrice, bizPrice, seats] of ROUTES) {
+    for (const [
+      index,
+      [no, from, to, depart, durationMin, ecoPrice, bizPrice, seats],
+    ] of ROUTES.entries()) {
       const variants = [
-        { cls: 'economy', price: ecoPrice, available: seats, shift: 0, suffix: '' },
+        { cls: 'economy', price: ecoPrice, available: seats, shift: 0, no },
         {
           cls: 'business',
           price: bizPrice,
           available: Math.max(20, Math.round(seats / 3)),
           shift: BUSINESS_SHIFT_MIN,
-          // A distinct number. Both waves used the base number, so a day held
-          // two rows under one `flight_no` and the results list printed the same
-          // service twice — which is what 031 exists to clean up after.
-          suffix: 'B',
+          no: businessNo(index),
         },
       ];
 
@@ -172,7 +203,7 @@ async function main() {
           method: 'POST',
           headers: { ...authHeaders, 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            flight_no: no + v.suffix,
+            flight_no: v.no,
             from_code: from,
             to_code: to,
             depart_time: vnTime(date, depart, v.shift),
@@ -185,6 +216,13 @@ async function main() {
         const text = await res.text();
         if (res.status === 201) {
           created.push(JSON.parse(text).flight);
+        } else if (res.status === 409) {
+          // Migrations 027/028 already fly HAN-SGN, HAN-SIN, SGN-ICN and
+          // ICN-SGN out of the same hub slots this script wants, and the
+          // database refuses two flights on one route at one minute. 28 of 840
+          // requests landed here, which is why a run printed `failed: 28`
+          // while the network was in fact complete.
+          alreadyThere.add(`${from}-${to}`);
         } else {
           failures.push({ status: res.status, body: text.slice(0, 160) });
         }
@@ -201,6 +239,11 @@ async function main() {
   }
 
   console.log(`✅ created: ${created.length}   failed: ${failures.length}`);
+  if (alreadyThere.size > 0) {
+    console.log(
+      `ℹ️  ${alreadyThere.size} routes already covered by a migration seed, not re-created: ${[...alreadyThere].join(', ')}`
+    );
+  }
   failures.slice(0, 8).forEach((f) => console.log(`   FAIL ${f.status} ${f.body}`));
   console.log('\nFlights per day (Hanoi time):');
   for (const [day, n] of [...byDate.entries()].sort()) {

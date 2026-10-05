@@ -861,11 +861,32 @@ and 031's 2001+. Seeding all 462 would be both false and unreadable in the
 results list. When adding routes, keep the block bands clear of those four
 ranges.
 
-**One `flight_no` per row, not per service.** `scripts/seed-future-flights.cjs`
-creates an economy row and a business wave for each route, and they used to
-share a number — 399 `(day, flight_no)` collisions, with the results list
-printing the same service twice. The business wave now carries a `B` suffix.
-`031` renumbers whatever a previous run left behind, so run it after reseeding.
+**One `flight_no` per row, not per service — and no letter suffix.**
+`scripts/seed-future-flights.cjs` creates an economy row and a business wave for
+each route. They used to share a number (399 `(day, flight_no)` collisions, with
+the results list printing the same service twice), then the business wave got a
+`B` suffix — and `FLIGHT_NO_PATTERN` allows an optional `-NNNN` but no letter,
+on purpose, because `flights.class` already carries the cabin and migration 035
+renumbered 593 legacy `VJ341B` rows for exactly that reason. So a seed run
+created 399 economy rows, got 400 on every business row, and silently left the
+network with no business cabin to sell. The business wave now carries its own
+numeric number in 3001-3089 — the block 035 vacated — so it passes the CHECK
+migration 036 added and cannot collide with 027/028/031/032's bands. Sweep the
+block too when cleaning up, or every re-run doubles the business rows.
+
+**A duplicate departure is a 409, and getting there needs two fields.**
+`flights` keeps `(from_code, to_code, depart_time)` unique as a plain unique
+*index*, so Postgres reports the violation with `code = 23505` and the index
+name in `constraint`. `isDuplicateFlightSchedule` checks both the code and the
+index name. Two ways this silently regressed to a bare 500: matching
+`err.constraint` against a *constraint* name when the database only has an
+index, and the HTTP bridge sending just five error fields — `message`,
+`severity`, `code`, `detail`, `hint`, `position` — so `constraint` and `routine`
+arrived undefined no matter what the application checked. `errorBody()` now
+copies the whole set the driver reads. A 409 is also not a failure for the
+seed: migrations 027/028 already fly HAN-SGN, HAN-SIN and SGN-ICN out of the
+same hub slots, which is 33 of its 840 requests, and the service being on sale
+already is the point of the rolling window.
 
 **Agency-issued discount codes.** `015_agency_discounts.sql` adds `agencies` and
 `discount_codes.agency_id` (nullable, `ON DELETE SET NULL`) plus `issued_by`. Admins
