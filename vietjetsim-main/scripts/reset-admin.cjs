@@ -11,30 +11,15 @@
 
 const { neon } = require('@neondatabase/serverless');
 const bcrypt = require('bcryptjs');
-const fs = require('fs');
-const path = require('path');
+const { resolveDatabaseUrl } = require('./db-target.cjs');
 
-const envPath = path.join(__dirname, '..', '.env.local');
-fs.readFileSync(envPath, 'utf-8')
-  .split('\n')
-  .forEach((line) => {
-    const [key, ...valueParts] = line.split('=');
-    if (key && valueParts.length > 0 && !key.startsWith('#')) {
-      process.env[key.trim()] = valueParts.join('=').trim();
-    }
-  });
-
-const DATABASE_URL = process.env.DATABASE_URL;
 const OLD_EMAIL = 'admin@vietjetair.vn';
 const NEW_EMAIL = process.env.ADMIN_EMAIL || 'Admin';
 const NEW_PASSWORD = process.env.ADMIN_PASSWORD || 'Deohieusao123@';
 const NEW_FULL_NAME = process.env.ADMIN_FULL_NAME || 'Administrator';
 
 async function resetAdmin() {
-  if (!DATABASE_URL) {
-    console.error('❌ DATABASE_URL not found in .env.local');
-    process.exit(1);
-  }
+  const DATABASE_URL = resolveDatabaseUrl();
 
   const sql = neon(DATABASE_URL);
 
@@ -91,4 +76,10 @@ async function resetAdmin() {
   }
 }
 
-resetAdmin().catch(console.error);
+resetAdmin().catch((error) => {
+  // Must exit non-zero: db-target's refusal happens before `sql` exists, so it
+  // never reaches the inner catch, and a script that "succeeds" while writing
+  // nothing is worse than one that crashes.
+  console.error(`❌ ${error.message}`);
+  process.exit(1);
+});

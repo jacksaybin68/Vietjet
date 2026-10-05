@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
  * Remove test bookings created while verifying the booking flow.
- * Run: node scripts/clean-test-bookings.cjs          (dry run — lists what would go)
- *      node scripts/clean-test-bookings.cjs --apply  (performs the delete)
+ * Run: node scripts/clean-test-bookings.cjs                       (dry run — lists what would go)
+ *      node scripts/clean-test-bookings.cjs --apply               (performs the delete)
+ *      node scripts/clean-test-bookings.cjs --apply --allow-remote --yes   (remote DB)
  *
  * Targets an explicit list of booking codes rather than a pattern, so the two
  * seeded demo bookings and the one a unit test references (`VJ644052`) can never
@@ -14,20 +15,9 @@
  */
 
 const { neon } = require('@neondatabase/serverless');
-const fs = require('fs');
-const path = require('path');
+const { resolveDatabaseUrl } = require('./db-target.cjs');
 
-const envPath = path.join(__dirname, '..', '.env.local');
-fs.readFileSync(envPath, 'utf-8')
-  .split('\n')
-  .forEach((line) => {
-    const [key, ...valueParts] = line.split('=');
-    if (key && valueParts.length > 0 && !key.startsWith('#')) {
-      process.env[key.trim()] = valueParts.join('=').trim();
-    }
-  });
-
-const DATABASE_URL = process.env.DATABASE_URL;
+const DATABASE_URL = resolveDatabaseUrl();
 const APPLY = process.argv.includes('--apply');
 
 /** Booking codes this repo's own verification runs created. */
@@ -51,10 +41,7 @@ const TEST_CODES = [
 ];
 
 async function main() {
-  if (!DATABASE_URL) {
-    console.error('❌ DATABASE_URL not found in .env.local');
-    process.exit(1);
-  }
+  console.log(`🎯 Target database: ${new URL(DATABASE_URL).hostname}`);
   const sql = neon(DATABASE_URL);
 
   const rows = await sql`

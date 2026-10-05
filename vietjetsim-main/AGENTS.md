@@ -735,6 +735,40 @@ the SQL really reads "balance + $2"). `sqlText` in `wallet.test.ts` re-inserts
 rather than on a mocked balance, because a mock cannot tell a guarded `UPDATE`
 from a read-then-write — it returns whatever the fixture says either way.
 
+**A script that writes must never let `.env.local` outrank the command line.**
+Five scripts (`seed-demo-accounts`, `setup-admin`, `reset-admin`,
+`reset-admin-password`, `clean-test-bookings`) each loaded `.env.local` with a
+hand-rolled loop doing `process.env[key] = value` — unconditionally, so a
+`DATABASE_URL=…` passed on the command line was silently discarded. That has
+already reset two demo accounts' passwords on the production Neon database: the
+run was given a local `DATABASE_URL`, printed `🎯 Target database: ep-cool-king-…`,
+and wrote there anyway. Nothing was lost (both accounts already existed and only
+`password_hash`/`role`/`email_verified` were rewritten, and the 8 bookings and
+wallet on `user@vietjetair.vn` survived), but a reset password is still a reset
+password.
+
+`scripts/db-target.cjs` is now the only loader. Two rules:
+
+- **An already-set variable wins**; `.env.local` fills in only what is missing.
+  `DATABASE_URL=… node scripts/seed-demo-accounts.cjs` reaches that database.
+- **A remote host needs `--allow-remote --yes`.** This repo's only real
+  database is remote, so refusing outright would make the scripts useless for
+  their actual job — but the flag pair means writing to production can never
+  happen by accident, which is the failure that already occurred.
+
+Both are pinned in `src/test/db-target.test.ts`, which points the loader at a
+temp file rather than rewriting the repo's `.env.local`. Do not "simplify" that
+test to touch the real file: a run that dies between the write and the restore
+would take a live connection string with it.
+
+Two details in there are load-bearing. The host comes from `new URL(url)
+.hostname`, not a `/.*@([^/]+)\//` regex — a regex mis-reads credentials
+containing `@`, and a mis-read host means the guard checks the wrong string,
+the one way a broken guard still looks like it works. And values are split on
+the *first* `=`, so a password containing `=` survives. `clean-test-bookings
+--apply` is the sharpest edge of the five: it deletes real bookings, which is
+why it prints its target host too.
+
 **Re-run the seed when the window runs out.** `npm run db:seed-flights` opens a
 21-day window (three weeks, not the seven the date strip shows — someone who
 returns next week still lands inside it) and covers 028's international routes,

@@ -11,26 +11,13 @@
  * database where those accounts already exist with a different hash, re-running
  * the migration is a no-op and the documented passwords still do not work.
  *
- * Writes to whatever DATABASE_URL points at, so confirm the target first.
+ * The target is `scripts/db-target.cjs`: an existing `DATABASE_URL` wins over
+ * `.env.local`, and a remote host needs `--allow-remote --yes`.
  */
 
 const { neon } = require('@neondatabase/serverless');
 const bcrypt = require('bcryptjs');
-const fs = require('fs');
-const path = require('path');
-
-// Load environment variables
-const envPath = path.join(__dirname, '..', '.env.local');
-fs.readFileSync(envPath, 'utf-8')
-  .split('\n')
-  .forEach((line) => {
-    const [key, ...valueParts] = line.split('=');
-    if (key && valueParts.length > 0 && !key.startsWith('#')) {
-      process.env[key.trim()] = valueParts.join('=').trim();
-    }
-  });
-
-const DATABASE_URL = process.env.DATABASE_URL;
+const { resolveDatabaseUrl } = require('./db-target.cjs');
 
 // Must stay in sync with README.md → "Default Test Accounts".
 const DEMO_ACCOUNTS = [
@@ -39,13 +26,8 @@ const DEMO_ACCOUNTS = [
 ];
 
 async function seedDemoAccounts() {
-  if (!DATABASE_URL) {
-    console.error('❌ DATABASE_URL not found in .env.local');
-    process.exit(1);
-  }
-
-  const host = DATABASE_URL.replace(/.*@([^/]+)\/.*/, '$1');
-  console.log(`🎯 Target database: ${host}\n`);
+  const DATABASE_URL = resolveDatabaseUrl();
+  console.log(`🎯 Target database: ${new URL(DATABASE_URL).hostname}\n`);
 
   const sql = neon(DATABASE_URL);
 
@@ -70,6 +52,8 @@ async function seedDemoAccounts() {
 }
 
 seedDemoAccounts().catch((error) => {
-  console.error('❌ Error:', error);
+  // A refusal from db-target is a decision, not a crash: its message says
+  // exactly what to type next, and a stack trace only buries that.
+  console.error(error.message.includes('--allow-remote') ? `\n❌ ${error.message}` : error);
   process.exit(1);
 });
