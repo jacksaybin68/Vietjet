@@ -17,24 +17,25 @@ const FLIGHT_CLASSES = ['economy', 'business'] as const;
  *
  * Driver errors are not `instanceof Error` across the bundler boundary, so this
  * matches on the stable shape instead: SQLSTATE 23505 plus the unique index
- * name.
+ * name in `constraint`.
  *
- * The database keeps its uniqueness on `(from_code, to_code, depart_time)` as a
- * plain unique *index*, not a table constraint, so a violation reaches this
- * process with `constraint` undefined and the index name in `routine`.
- * Matching on `err.constraint` alone — which is what this did — meant a
- * duplicate schedule always fell through to the generic 500, and the admin UI
- * showed an opaque failure for what is plainly a user mistake: two flights
- * cannot leave the same route at the same minute.
+ * `constraint` is the only field that can carry the name. Measured on Postgres
+ * 16: a violation of a *constraint* reports the constraint name there, but
+ * `flights` keeps its uniqueness on `(from_code, to_code, depart_time)` as a
+ * plain unique *index* — and an index name also arrives in `constraint`, while
+ * `routine` is always the C function that raised it (`_bt_check_unique` here).
+ * An earlier version of this checked `err.routine` for the index name as a
+ * fallback; that branch could never fire, and reading the two fields back is
+ * what made it look like the database used `routine` for the name.
+ *
+ * Both were undefined in local development even so, because the HTTP bridge
+ * used to forward five error fields and drop the rest — see
+ * `src/test/neon-bridge-error.test.ts`, which pins the whole field set.
  */
-function isDuplicateFlightSchedule(error: unknown): boolean {
+export function isDuplicateFlightSchedule(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false;
-  const err = error as { code?: unknown; constraint?: unknown; routine?: unknown };
-  if (err.code !== '23505') return false;
-  return (
-    err.constraint === 'idx_flights_route_depart_time' ||
-    err.routine === 'idx_flights_route_depart_time'
-  );
+  const err = error as { code?: unknown; constraint?: unknown };
+  return err.code === '23505' && err.constraint === 'idx_flights_route_depart_time';
 }
 
 export async function GET(request: NextRequest) {
