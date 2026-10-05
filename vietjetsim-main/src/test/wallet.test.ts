@@ -158,6 +158,34 @@ describe('Wallet Database Module', () => {
       expect(combined).toContain('WITH moved AS');
     });
 
+    /**
+     * `'${type}'` inside quotes was a real outage, not a style nit.
+     *
+     * The driver emits a placeholder for the interpolated value either way, so
+     * `SELECT id, '${type}', …` reaches Postgres as the *string literal*
+     * `'$5'`. No parameter occupies `$5`, so it cannot infer a type and the
+     * whole statement fails with 42P18, `could not determine data type of
+     * parameter $5`. A mocked `sql` never sees that: it just records the text,
+     * so the unit suite stayed green while every top-up 500'd against a real
+     * database. Only `scripts/wallet-e2e.cjs` — which drives the actual HTTP
+     * route through Postgres — caught it.
+     *
+     * So the assertion belongs here too: a `$n` wrapped in quotes is always a
+     * bug, whether or not any test currently executes the statement.
+     */
+    it('never puts a bound parameter inside SQL quotes', async () => {
+      (sql as any).mockResolvedValueOnce([]);
+      (sql as any).mockResolvedValueOnce([{ id: 'tx-q' }]);
+
+      await topupWallet('user-1', 50);
+
+      for (const statement of sqlStatements()) {
+        // Strip the placeholders back to their values, then look for one that
+        // ended up surrounded by quote characters.
+        expect(statement).not.toMatch(/'\s*\$\d+\s*'/);
+      }
+    });
+
     it('rejects negative topup amount (would drain wallet)', async () => {
       await expect(topupWallet('user-1', -50, 'pm-1')).rejects.toThrow('Số tiền nạp không hợp lệ');
       // Must fail BEFORE any DB call

@@ -2605,9 +2605,14 @@ async function moveWalletBalance(opts: {
 
   await ensureWallet(userId);
 
-  // `type` and the CASE branch cannot be parameterised — Postgres will not bind
-  // a parameter as an INSERT column list — so both are written out per caller
-  // through this switch. `delta` and everything else stay bound.
+  // Both `type` and `status` are bound, never spliced into the SQL text.
+  // `'${type}'` inside quotes is the trap: the driver still emits `$5`, so the
+  // query becomes the *string* `'$5'`, Postgres sees no parameter at that
+  // position, and it answers `could not determine data type of parameter $5`
+  // (42P18). Nothing catches that until a real database is behind the query —
+  // a unit test with a mocked `sql` passes happily. The casts give the
+  // parameters a type at parse time instead.
+
   const row = await (requireFunds
     ? sql`
         WITH moved AS (
@@ -2620,7 +2625,7 @@ async function moveWalletBalance(opts: {
           wallet_id, type, amount, balance_before, balance_after,
           description, payment_method_id, reference_id, status
         )
-        SELECT id, '${type}', ${delta}, balance_before, balance_after,
+        SELECT id, ${type}::varchar(20), ${delta}, balance_before, balance_after,
                ${description}, ${paymentMethodId}, ${referenceId}, 'completed'
         FROM moved
         RETURNING *
@@ -2636,7 +2641,7 @@ async function moveWalletBalance(opts: {
           wallet_id, type, amount, balance_before, balance_after,
           description, payment_method_id, reference_id, status
         )
-        SELECT id, '${type}', ${delta}, balance_before, balance_after,
+        SELECT id, ${type}::varchar(20), ${delta}, balance_before, balance_after,
                ${description}, ${paymentMethodId}, ${referenceId}, 'completed'
         FROM moved
         RETURNING *
