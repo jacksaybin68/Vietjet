@@ -64,15 +64,38 @@ const pool = new Pool({ connectionString: PG_URL, max: 8 });
  */
 for (const oid of [1082, 1114, 1184, 114, 3802]) types.setTypeParser(oid, 'text', (v) => v);
 
-/** Normalises a driver error into the shape the Neon driver would have sent. */
+/**
+ * Normalises a driver error into the shape the Neon driver would have sent.
+ *
+ * Every field the driver copies onto its own error object has to be here, and
+ * two of them decide application behaviour rather than just the text:
+ * `constraint` and `routine`. `isDuplicateFlightSchedule` in
+ * `app/api/quan-tri/chuyen-bay/route.ts` matches the unique index name to
+ * answer a duplicate schedule with a 409 instead of a bare 500, and through
+ * this bridge `constraint` arrived undefined — so every duplicate fell
+ * through to the generic handler, and the admin console showed an opaque
+ * failure for a plain user mistake. Read off `pg-types`' own list rather than
+ * picking fields by hand.
+ */
 function errorBody(error) {
   return {
     message: error.message,
-    severity: 'ERROR',
+    severity: error.severity || 'ERROR',
     code: error.code || 'XX000',
     detail: error.detail,
     hint: error.hint,
     position: error.position,
+    internalPosition: error.internalPosition,
+    internalQuery: error.internalQuery,
+    where: error.where,
+    schema: error.schema,
+    table: error.table,
+    column: error.column,
+    dataType: error.dataType,
+    constraint: error.constraint,
+    file: error.file,
+    line: error.line,
+    routine: error.routine,
   };
 }
 
