@@ -181,7 +181,10 @@ function FlightBookingClientInner() {
           toCity: selectedFlight.toCity,
           departTime: selectedFlight.departTime,
           arriveTime: selectedFlight.arriveTime,
-          date: new Date().toLocaleDateString('vi-VN'),
+          // The flight's own day, not today's. `new Date()` here stamped every
+          // booking with the day it was made, which is only ever right by
+          // accident.
+          date: selectedFlight.departDate,
           passengers: passengers.map((passenger, index) => ({
             name: passenger.name,
             seat: seats[index],
