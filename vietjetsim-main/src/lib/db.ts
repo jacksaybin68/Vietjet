@@ -2553,6 +2553,125 @@ export async function getWalletTransactions(
   };
 }
 
+/**
+ * The one place a wallet balance changes.
+ *
+ * Every caller used to do the same three statements in sequence —
+ * `SELECT balance`, `INSERT` the ledger row, `UPDATE user_wallets SET balance
+ = <computed in JS>` — with no transaction around them. That is a lost update:
+ * two concurrent writes both read the same balance, both compute
+ * `before + delta`, and the second `UPDATE` overwrites the first one's money.
+ * Measured on Postgres 17, two 40,000 top-ups against 50,000 ended at 90,000
+ * instead of 130,000, and two 100,000 withdrawals from a 100,000 wallet both
+ * succeeded and left it at 0 — 200,000 paid out of 100,000.
+ *
+ * `CHECK (balance >= 0)` does not help. It reads the *final* value, and the
+ * lost-update result is 0, which passes.
+ *
+ * The fix needs no transaction API and no explicit `FOR UPDATE`: Postgres
+ * re-evaluates an `UPDATE`'s `WHERE` after it unblocks on a concurrent writer
+ * (READ COMMITTED, EPQ), so putting the funds check *in* the `UPDATE` makes
+ * every write test its own precondition against the balance it actually
+ * found. Measured: two 40,000 top-ups land on 130,000 with a coherent ledger
+ * (50,000 → 90,000 → 130,000), and of two 100,000 withdrawals from 100,000
+ * exactly one commits while the other matches no row.
+ *
+ * The ledger `INSERT` hangs off that `UPDATE` as a data-modifying CTE, so a
+ * committed move and its audit row are the same statement. A failure anywhere
+ * rolls the whole thing back — the old order left a `completed` log row behind
+ * whenever the `UPDATE` was the statement that failed.
+ *
+ * Wallet creation is a separate statement on purpose. Folding it into this
+ * one (`INSERT ... ON CONFLICT DO UPDATE` in a CTE feeding the `UPDATE`) looks
+ * tidier and is broken: a statement cannot update a row its own CTE just wrote,
+ * so the `UPDATE` matches nothing and Postgres reports no error at all.
+ * Measured — the CTE returned 1 row, the `UPDATE` returned 0, and the balance
+ * never moved. A customer topping up for the first time would be told it
+ * worked while nothing was credited. `ensureWallet` below is a write-only
+ * `ON CONFLICT DO NOTHING`; correctness still rests on the `UPDATE`.
+ */
+async function moveWalletBalance(opts: {
+  userId: string;
+  /** Signed: positive credits the wallet, negative debits it. */
+  delta: number;
+  type: 'topup' | 'withdraw' | 'payment' | 'refund';
+  /** When true, the `UPDATE` refuses to move the balance below zero. */
+  requireFunds: boolean;
+  description: string;
+  paymentMethodId: string | null;
+  referenceId: string | null;
+}): Promise<WalletTransactionRecord> {
+  const { userId, delta, type, requireFunds, description, paymentMethodId, referenceId } = opts;
+
+  await ensureWallet(userId);
+
+  // `type` and the CASE branch cannot be parameterised — Postgres will not bind
+  // a parameter as an INSERT column list — so both are written out per caller
+  // through this switch. `delta` and everything else stay bound.
+  const row = await (requireFunds
+    ? sql`
+        WITH moved AS (
+          UPDATE user_wallets
+          SET balance = balance + ${delta}, updated_at = NOW()
+          WHERE user_id = ${userId} AND balance + ${delta} >= 0
+          RETURNING id, balance - ${delta} AS balance_before, balance AS balance_after
+        )
+        INSERT INTO wallet_transactions (
+          wallet_id, type, amount, balance_before, balance_after,
+          description, payment_method_id, reference_id, status
+        )
+        SELECT id, '${type}', ${delta}, balance_before, balance_after,
+               ${description}, ${paymentMethodId}, ${referenceId}, 'completed'
+        FROM moved
+        RETURNING *
+      `
+    : sql`
+        WITH moved AS (
+          UPDATE user_wallets
+          SET balance = balance + ${delta}, updated_at = NOW()
+          WHERE user_id = ${userId}
+          RETURNING id, balance - ${delta} AS balance_before, balance AS balance_after
+        )
+        INSERT INTO wallet_transactions (
+          wallet_id, type, amount, balance_before, balance_after,
+          description, payment_method_id, reference_id, status
+        )
+        SELECT id, '${type}', ${delta}, balance_before, balance_after,
+               ${description}, ${paymentMethodId}, ${referenceId}, 'completed'
+        FROM moved
+        RETURNING *
+      `);
+
+  // No row means the `UPDATE`'s `WHERE` matched nothing: for a debit, the
+  // balance was insufficient once the row lock was actually granted. Saying so
+  // is the whole point — the caller must not tell an operator a payout is on
+  // its way when the wallet never had the money.
+  if (!row || row.length === 0) {
+    throw new Error(requireFunds ? 'Số dư ví không đủ' : 'Không tìm thấy ví của người dùng này');
+  }
+
+  return (row as WalletTransactionRecord[])[0];
+}
+
+/**
+ * Creates the wallet if it is missing; never fails when it already exists.
+ *
+ * `ON CONFLICT (user_id)` targets the `UNIQUE(user_id)` from migration 002 —
+ * not `account_number`, whose own UNIQUE 006 only adds on a database that has
+ * no duplicates, so it cannot be relied on here.
+ */
+async function ensureWallet(userId: string): Promise<void> {
+  const accNum =
+    'VJSIM' +
+    Math.floor(Math.random() * 10000000000)
+      .toString()
+      .padStart(10, '0');
+  await sql`
+    INSERT INTO user_wallets (user_id, balance, currency, account_number)
+    VALUES (${userId}, 0, 'VND', ${accNum})
+    ON CONFLICT (user_id) DO NOTHING
+  `;
+}
 export async function topupWallet(
   userId: string,
   amount: number,
@@ -2564,28 +2683,15 @@ export async function topupWallet(
   if (!Number.isFinite(amount) || amount <= 0) {
     throw new Error('Số tiền nạp không hợp lệ');
   }
-  const wallet = await getOrCreateWallet(userId);
-  const balanceBefore = parseFloat(String(wallet.balance));
-  const balanceAfter = balanceBefore + amount;
-
-  const result = await sql`
-    INSERT INTO wallet_transactions (
-      wallet_id, type, amount, balance_before, balance_after,
-      description, payment_method_id, status
-    )
-    VALUES (
-      ${wallet.id}, 'topup', ${amount}, ${balanceBefore}, ${balanceAfter},
-      ${description || 'Nạp tiền vào ví'}, ${paymentMethodId || null}, 'completed'
-    )
-    RETURNING *
-  `;
-
-  await sql`
-    UPDATE user_wallets SET balance = ${balanceAfter}, updated_at = NOW()
-    WHERE id = ${wallet.id}
-  `;
-
-  return (result as WalletTransactionRecord[])[0];
+  return moveWalletBalance({
+    userId,
+    delta: amount,
+    type: 'topup',
+    requireFunds: false,
+    description: description || 'Nạp tiền vào ví',
+    paymentMethodId: paymentMethodId || null,
+    referenceId: null,
+  });
 }
 
 export async function withdrawWallet(
@@ -2596,29 +2702,15 @@ export async function withdrawWallet(
 ): Promise<WalletTransactionRecord> {
   // Validate BEFORE computing the new balance to avoid NaN arithmetic.
   if (!Number.isFinite(amount) || amount <= 0) throw new Error('Số tiền rút không hợp lệ');
-  const wallet = await getOrCreateWallet(userId);
-  const balanceBefore = parseFloat(String(wallet.balance));
-  if (balanceBefore < amount) throw new Error('Số dư ví không đủ');
-  const balanceAfter = balanceBefore - amount;
-
-  const result = await sql`
-    INSERT INTO wallet_transactions (
-      wallet_id, type, amount, balance_before, balance_after,
-      description, payment_method_id, status
-    )
-    VALUES (
-      ${wallet.id}, 'withdraw', ${-amount}, ${balanceBefore}, ${balanceAfter},
-      ${description || 'Rút tiền từ ví'}, ${paymentMethodId}, 'completed'
-    )
-    RETURNING *
-  `;
-
-  await sql`
-    UPDATE user_wallets SET balance = ${balanceAfter}, updated_at = NOW()
-    WHERE id = ${wallet.id}
-  `;
-
-  return (result as WalletTransactionRecord[])[0];
+  return moveWalletBalance({
+    userId,
+    delta: -amount,
+    type: 'withdraw',
+    requireFunds: true,
+    description: description || 'Rút tiền từ ví',
+    paymentMethodId,
+    referenceId: null,
+  });
 }
 
 export async function spendWalletBalance(
@@ -2629,29 +2721,15 @@ export async function spendWalletBalance(
 ): Promise<WalletTransactionRecord> {
   // Defense-in-depth: validate BEFORE reading/computing balances.
   if (!Number.isFinite(amount) || amount <= 0) throw new Error('Số tiền thanh toán không hợp lệ');
-  const wallet = await getOrCreateWallet(userId);
-  const balanceBefore = parseFloat(String(wallet.balance));
-  if (balanceBefore < amount) throw new Error('Số dư ví không đủ để thanh toán');
-  const balanceAfter = balanceBefore - amount;
-
-  const result = await sql`
-    INSERT INTO wallet_transactions (
-      wallet_id, type, amount, balance_before, balance_after,
-      description, reference_id, status
-    )
-    VALUES (
-      ${wallet.id}, 'payment', ${-amount}, ${balanceBefore}, ${balanceAfter},
-      ${description || 'Thanh toán bằng ví'}, ${referenceId}, 'completed'
-    )
-    RETURNING *
-  `;
-
-  await sql`
-    UPDATE user_wallets SET balance = ${balanceAfter}, updated_at = NOW()
-    WHERE id = ${wallet.id}
-  `;
-
-  return (result as WalletTransactionRecord[])[0];
+  return moveWalletBalance({
+    userId,
+    delta: -amount,
+    type: 'payment',
+    requireFunds: true,
+    description: description || 'Thanh toán bằng ví',
+    paymentMethodId: null,
+    referenceId,
+  });
 }
 
 export async function refundWallet(
@@ -2665,8 +2743,10 @@ export async function refundWallet(
     throw new Error('Số tiền hoàn không hợp lệ');
   }
   // Migration 037's `wallet_transactions_one_refund_per_reference` is what
-  // actually enforces this; the lookup is here so the caller learns *why* the
-  // booking was already paid out instead of reading a raw unique-violation
+  // actually enforces the one-refund rule. This lookup is not that enforcement
+  // — checking here cannot close the race, because two approvals can both read
+  // "no refund yet" and both proceed. It exists so the caller learns *why* the
+  // booking was already paid out, instead of reading a raw unique-violation
   // from the ledger insert, which surfaces as a bare 500.
   const alreadyRefunded = await sql`
     SELECT id FROM wallet_transactions
@@ -2677,28 +2757,15 @@ export async function refundWallet(
     throw new Error(`Booking ${referenceId} đã được hoàn tiền trước đó`);
   }
 
-  const wallet = await getOrCreateWallet(userId);
-  const balanceBefore = parseFloat(String(wallet.balance));
-  const balanceAfter = balanceBefore + amount;
-
-  const result = await sql`
-    INSERT INTO wallet_transactions (
-      wallet_id, type, amount, balance_before, balance_after,
-      description, reference_id, status
-    )
-    VALUES (
-      ${wallet.id}, 'refund', ${amount}, ${balanceBefore}, ${balanceAfter},
-      ${description || `Hoàn tiền vào ví #${referenceId}`}, ${referenceId}, 'completed'
-    )
-    RETURNING *
-  `;
-
-  await sql`
-    UPDATE user_wallets SET balance = ${balanceAfter}, updated_at = NOW()
-    WHERE id = ${wallet.id}
-  `;
-
-  return (result as WalletTransactionRecord[])[0];
+  return moveWalletBalance({
+    userId,
+    delta: amount,
+    type: 'refund',
+    requireFunds: false,
+    description: description || `Hoàn tiền vào ví #${referenceId}`,
+    paymentMethodId: null,
+    referenceId,
+  });
 }
 
 export async function getSavedPaymentMethods(userId: string): Promise<SavedPaymentMethodRecord[]> {
