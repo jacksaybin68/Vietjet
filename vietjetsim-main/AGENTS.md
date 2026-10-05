@@ -687,6 +687,54 @@ ever produced it, and `completed` — the other settled state an operator can
 reach — was not in that predicate at all, so settled tickets were never
 archived. The predicate now names the two states that actually accumulate.
 
+**Never move a wallet balance with a number computed in JavaScript.** Every
+wallet write used to be three bare statements — `SELECT balance`, `INSERT` the
+ledger row, `UPDATE user_wallets SET balance = <total computed in JS>` — with no
+transaction around them. That is a lost update: two concurrent writes read the
+same balance, both compute `before + delta`, and the second `UPDATE` overwrites
+the first one's money. Measured on Postgres 17:
+
+| Two concurrent writes | Old balance | Correct |
+|---|---|---|
+| two 40,000 top-ups against 50,000 | **90,000** | 130,000 |
+| two 100,000 withdrawals from 100,000 | **0** — both succeeded | one must fail |
+
+`CHECK (balance >= 0)` does **not** catch this. It reads the final value, and the
+lost-update answer is 0, which passes. It fired on only the third variant, where
+the race happened to push the balance negative.
+
+`moveWalletBalance` in `db.ts` is now the only place a balance changes, and it
+needs no transaction API and no `FOR UPDATE`: Postgres re-evaluates an
+`UPDATE`'s `WHERE` after it unblocks on a concurrent writer (READ COMMITTED,
+EPQ), so putting the funds check *inside* the `UPDATE` makes each write test
+its own precondition against the balance it actually found. Re-measured with
+the statements the function emits: two 40,000 top-ups land on 130,000 with a
+coherent ledger (50,000 → 90,000 → 130,000), and of two 100,000 withdrawals
+from 100,000 exactly one commits while the other matches no row and raises
+`Số dư ví không đủ`. The ledger `INSERT` hangs off that `UPDATE` as a
+data-modifying CTE, so a move and its audit row commit together — the old order
+left a `completed` ledger row behind whenever the `UPDATE` was what failed.
+
+**Do not fold wallet creation into that statement.** `INSERT ... ON CONFLICT
+DO UPDATE` in a CTE feeding the `UPDATE` looks tidier and is silently broken: a
+statement cannot update a row its own CTE just wrote, so the `UPDATE` matches
+nothing and Postgres reports **no error at all**. Measured — the CTE returned 1
+row, the `UPDATE` returned 0, the balance never moved. A customer topping up
+for the first time would be told it worked while nothing was credited, which is
+worse than the lost update it replaced. `ensureWallet` is a separate
+write-only `ON CONFLICT DO NOTHING`; correctness still rests on the `UPDATE`.
+Its `ON CONFLICT` target is `user_id` (from 002), never `account_number` —
+006 only adds that UNIQUE on a database with no duplicates, so it may not exist.
+
+**Reading back a `sql` call's text needs the placeholders rebuilt.** A tagged
+template hands the driver its literal chunks *separated* from the values, so
+`strings.join(' ')` — the obvious way to read a statement back out of a spy —
+silently drops every parameter and welds fragments together ("balance + ," where
+the SQL really reads "balance + $2"). `sqlText` in `wallet.test.ts` re-inserts
+`$1`, `$2`, … and the wallet tests assert on that. They also assert on the SQL
+rather than on a mocked balance, because a mock cannot tell a guarded `UPDATE`
+from a read-then-write — it returns whatever the fixture says either way.
+
 **Re-run the seed when the window runs out.** `npm run db:seed-flights` opens a
 21-day window (three weeks, not the seven the date strip shows — someone who
 returns next week still lands inside it) and covers 028's international routes,
