@@ -11,20 +11,8 @@
 
 const { neon } = require('@neondatabase/serverless');
 const bcrypt = require('bcryptjs');
-const fs = require('fs');
-const path = require('path');
+const { resolveDatabaseUrl } = require('./db-target.cjs');
 
-// Load environment variables
-const envPath = path.join(__dirname, '..', '.env.local');
-const envContent = fs.readFileSync(envPath, 'utf-8');
-envContent.split('\n').forEach((line) => {
-  const [key, ...valueParts] = line.split('=');
-  if (key && valueParts.length > 0 && !key.startsWith('#')) {
-    process.env[key.trim()] = valueParts.join('=').trim();
-  }
-});
-
-const DATABASE_URL = process.env.DATABASE_URL;
 // `db:reset-admin` (scripts/reset-admin.cjs) is the one to reach for when the
 // account already exists — it updates in place and keeps the user_id. This
 // script only creates one, so it deliberately uses a different address.
@@ -36,10 +24,7 @@ const ADMIN_ROLE = 'admin';
 async function setupAdminAccount() {
   console.log('🚀 Starting admin account setup...\n');
 
-  if (!DATABASE_URL) {
-    console.error('❌ DATABASE_URL not found in .env.local');
-    process.exit(1);
-  }
+  const DATABASE_URL = resolveDatabaseUrl();
 
   const sql = neon(DATABASE_URL);
 
@@ -91,4 +76,7 @@ async function setupAdminAccount() {
 }
 
 // Run the setup
-setupAdminAccount().catch(console.error);
+setupAdminAccount().catch((error) => {
+  console.error(`❌ ${error.message}`);
+  process.exit(1);
+});
