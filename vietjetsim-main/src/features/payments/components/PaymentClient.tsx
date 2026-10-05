@@ -284,6 +284,19 @@ function ErrorModal({ title, message, onRetry, onDismiss }: ErrorModalProps) {
   );
 }
 
+/**
+ * `YYYY-MM-DD` from the booking, as `d/M/yyyy`.
+ *
+ * This is a calendar date, not an instant, so it is split by hand: handing
+ * `'2026-10-07'` to `new Date()` would read it as UTC midnight and, anywhere
+ * west of GMT, print the day before.
+ */
+function formatBookingDay(day: string): string {
+  const [year, month, date] = day.split('-');
+  if (!year || !month || !date) return day;
+  return `${Number(date)}/${Number(month)}/${year}`;
+}
+
 export default function PaymentClient() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
   const [cardNumber, setCardNumber] = useState('');
@@ -681,7 +694,7 @@ export default function PaymentClient() {
                           {booking.flightNo}
                         </div>
                         <div className="text-xs text-[var(--foreground-subtle)]">
-                          {booking.date}
+                          {formatBookingDay(booking.date)}
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
@@ -1333,7 +1346,7 @@ export default function PaymentClient() {
                     </div>
                     <span className="font-bold text-primary text-sm">{booking?.flightNo}</span>
                     <span className="text-xs text-[var(--foreground-subtle)] ml-auto">
-                      {booking?.date}
+                      {booking?.date ? formatBookingDay(booking.date) : ''}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">

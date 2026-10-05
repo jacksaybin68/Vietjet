@@ -800,16 +800,48 @@ NODE_TLS_REJECT_UNAUTHORIZED=0 npm run test:wallet-e2e
 ```
 
 `src/lib/neon.ts` already honours `NEON_FETCH_ENDPOINT`, so no runtime code
-changed for this. Two things that are not optional in the bridge: decode with
-each field's `dataTypeID` via `pg.types` (the driver sends raw text, so a
-*mismatched* parser silently hands the app `"100000.00"` where it expects a
-number), and answer a 5-digit Postgres error code with HTTP 400, because the
-driver reads its error fields off a 400 body.
+changed for this. What the bridge has to get right is the *wire format*, and
+every mistake here fails silently rather than loudly:
+
+- **`pg` parses dates and JSON before the bridge ever sees them.** It ignores
+  the text format for `date`/`timestamp`/`timestamptz` and always runs its own
+  parsers, and it parses `json`/`jsonb` to objects. The driver, meanwhile,
+  re-parses every value on arrival from `dataTypeID`. Both sides parsing means
+  double encoding. Identity parsers
+  (`types.setTypeParser(oid, 'text', v => v)` for 1082/1114/1184/114/3802) hand
+  back the server's own text, which is the only spelling both halves accept.
+  Symptoms seen while getting this wrong: `getTypeParser(1184)(new Date(…))`
+  returns **null**, so every timestamp in every response became null and
+  `/tim-ve` reported "no flights found" with 6 226 rows sitting in the table;
+  and `JSON.parse` over an already-parsed `json_agg` object failed on any
+  value holding a comma, so `getBookingById` — and with it every payment —
+  died with `"[object Object]" is not valid JSON`.
+- **Do not re-serialise a `Date` by hand.** `toISOString()` looks correct and is
+  not: Postgres text output is `2026-10-06 23:00:00+00`, and the driver's 1184
+  parser returns null for the ISO form. `pg-types`' own stringifier gets the
+  session timezone right; a hand-rolled one silently shifts to UTC.
+- **A batch is `{queries: [...]}` in and `{results: [...]}` out.** Read out of
+  `node_modules/@neondatabase/serverless/index.js`, not guessed. The bridge read
+  a bare `{query}` and every `sql.transaction()` in the app — including the one
+  that commits a payment — failed with "A query must have either text or a
+  name". Run it in one explicit transaction; do not quietly execute statements
+  outside one.
+- **Answer a 5-digit Postgres error code with HTTP 400.** The driver reads its
+  error fields off a 400 body, so anything else surfaces as an opaque 500.
 
 `test:wallet-e2e` needs HTTPS: the session cookies are `Secure`, and curl's
 jar will not persist one over a self-signed certificate. It keeps its own jar
 and lets the caller trust the dev cert — it is not the file that should flip
 `NODE_TLS_REJECT_UNAUTHORIZED`.
+
+**A booking carried the day it was made, not the day it flies.**
+`FlightBookingClient` put `new Date().toLocaleDateString('vi-VN')` in the
+summary it hands to the payment screen, so a flight for 07/10 was confirmed as
+`5/10` — right only when the two happen to match. `Flight` now carries
+`departDate`, mapped from `depart_time` through `toVietnamWallClock`, and the
+payment screen formats that calendar date by splitting it rather than through
+`new Date()`, which would read `2026-10-07` as UTC midnight and print the day
+before anywhere west of GMT.
 
 **Re-run the seed when the window runs out.** `npm run db:seed-flights` opens a
 21-day window (three weeks, not the seven the date strip shows — someone who

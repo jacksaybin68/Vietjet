@@ -37,17 +37,32 @@ const PG_URL = process.env.PG_URL || 'postgresql://app:pw@localhost:5432/app';
 const pool = new Pool({ connectionString: PG_URL, max: 8 });
 
 /**
- * Decodes Neon's raw-text rows into JS values.
+ * Make `pg` hand back the raw text the server sent, for the types it otherwise
+ * parses before the bridge ever sees them.
  *
- * `Neon-Raw-Text-Output: true` means every value arrives as a string, so the
- * driver parses them with each field's `dataTypeID`. The bridge has to decode
- * identically or the app sees `"100000.00"` where it expected `100000` — which
- * would quietly change every balance comparison.
+ * `Neon-Raw-Text-Output: true` means the Neon driver parses every value on
+ * arrival with `pg-types`, keyed on `dataTypeID`. So the bridge's job is to put
+ * on the wire exactly the text a real Neon endpoint returns — and `pg` breaks
+ * that in two ways, each of which fails silently:
+ *
+ * - Date/time (1082 `date`, 1114 `timestamp`, 1184 `timestamptz`). `pg` ignores
+ *   the text format and always parses these to `Date`. Re-serialising by hand
+ *   with `toISOString()` looks right and is not — Postgres prints
+ *   `2026-10-06 23:00:00+00`, and the driver's 1184 parser returns **null** for
+ *   the ISO form. Every timestamp became null, which is what made `/tim-ve`
+ *   report "no flights found" while the rows were in the database.
+ * - JSON (114 `json`, 3802 `jsonb`). `pg` parses these to objects, so the bridge
+ *   serialised `{"a":1}` as a JSON *object*; the driver then ran `JSON.parse`
+ *   over it again and failed on anything holding a comma or a colon.
+ *   `getBookingById`'s `json_agg` columns went through this, and the payment
+ *   route 500'd with `"[object Object]" is not valid JSON`.
+ *
+ * Identity parsers fix both: `pg-types`' own stringifiers then emit Postgres'
+ * exact spelling, including the session timezone that `toISOString()` would
+ * have shifted to UTC. The bridge owns this `Pool` and closes it at exit, so
+ * nothing else consumes these module-level parsers.
  */
-function decodeRows(fields, rows) {
-  const parsers = fields.map((f) => types.getTypeParser(f.dataTypeID, 'text'));
-  return rows.map((row) => row.map((value, i) => (value === null ? null : parsers[i](value))));
-}
+for (const oid of [1082, 1114, 1184, 114, 3802]) types.setTypeParser(oid, 'text', (v) => v);
 
 /** Normalises a driver error into the shape the Neon driver would have sent. */
 function errorBody(error) {
@@ -80,11 +95,18 @@ const server = http.createServer((req, res) => {
       return;
     }
 
-    // The batch form is an array of the same objects. `test:migrations` relies
-    // on each statement being its own transaction, so a batch is run in one
-    // explicit transaction here rather than silently losing that guarantee.
-    const queries = Array.isArray(body) ? body : [body];
-    const batch = Array.isArray(body);
+    // A batch arrives as `{queries: [...]}` and is answered as
+    // `{results: [...]}` — that is the shape the driver sends and reads, read
+    // straight out of `node_modules/@neondatabase/serverless/index.js`.
+    // `sql.transaction()` uses it, so every multi-statement commit in the app
+    // depends on getting this right; it used to send an unwrapped `{query}` and
+    // the payment route failed with "A query must have either text or a name".
+    //
+    // The batch runs in one explicit transaction here: `test:migrations` relies
+    // on each statement being its own transaction, and silently running a
+    // batch outside one would drop that guarantee rather than enforce it.
+    const batch = Array.isArray(body?.queries);
+    const queries = batch ? body.queries : [body];
 
     try {
       const runOne = async (client, q) => {
@@ -124,13 +146,11 @@ const server = http.createServer((req, res) => {
         results = [await runOne(pool, queries[0])];
       }
 
-      // Encode before writing anything: a parser throwing here would otherwise
-      // reach the catch below and try to send a second set of headers.
       const payload = results.map((r) => ({
         command: r.command,
         fields: r.fields,
         rowCount: r.rowCount,
-        rows: decodeRows(r.fields, r.rows),
+        rows: r.rows,
         rowAsArray: true,
       }));
 

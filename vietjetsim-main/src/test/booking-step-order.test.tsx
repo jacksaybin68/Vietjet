@@ -9,6 +9,7 @@ const flight = {
   to: 'SGN',
   fromCity: 'Hà Nội',
   toCity: 'TP.HCM',
+  departDate: '2026-03-20',
   departTime: '06:00',
   arriveTime: '08:25',
   duration: '2h 25m',

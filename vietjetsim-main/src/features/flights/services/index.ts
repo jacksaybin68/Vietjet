@@ -1,6 +1,7 @@
 import { API_ENDPOINTS, AIRPORT_CITIES } from '@/shared/constants';
 import { apiRequest } from '@/shared/services';
 import type { FlightRecord } from '@/lib/db';
+import { toVietnamWallClock } from '@/lib/utils';
 import type { Flight, FlightSearchParams, FlightSearchResponse } from '../types';
 
 export function getAirportCity(code: string): string {
@@ -21,8 +22,7 @@ function formatDuration(departIso: string, arriveIso: string): string {
 }
 
 function formatClock(iso: string): string {
-  const date = new Date(iso);
-  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+  return toVietnamWallClock(iso).time;
 }
 
 /** Map a raw `flights` row onto the display-ready UI shape. */
@@ -36,6 +36,10 @@ export function mapFlightRecordToFlight(row: FlightRecord): Flight {
     toCity: getAirportCity(row.to_code || ''),
     departTime: formatClock(row.depart_time),
     arriveTime: formatClock(row.arrive_time),
+    // The departure *day*, in Vietnam, `YYYY-MM-DD`. The booking summary used
+    // to stamp today's date here, so a flight booked for next month carried
+    // the wrong day all the way to the payment screen.
+    departDate: toVietnamWallClock(row.depart_time).date,
     duration: formatDuration(row.depart_time, row.arrive_time),
     // A fare is whole đồng: rounding here means a stray decimal in the column
     // can never reach the card as "898.916,97₫".

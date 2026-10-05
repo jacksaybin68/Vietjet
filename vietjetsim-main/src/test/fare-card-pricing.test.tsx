@@ -19,6 +19,7 @@ const flight: Flight = {
   id: 'f-1',
   flightNo: 'VJ115',
   airline: 'Vietjet Air',
+  departDate: '2026-03-20',
   departTime: '09:00',
   arriveTime: '14:20',
   duration: '5h 20m',
