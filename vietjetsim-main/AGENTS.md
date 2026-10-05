@@ -769,6 +769,48 @@ the *first* `=`, so a password containing `=` survives. `clean-test-bookings
 --apply` is the sharpest edge of the five: it deletes real bookings, which is
 why it prints its target host too.
 
+**A bound parameter inside SQL quotes is a bug, and a mocked `sql` cannot see
+it.** `SELECT id, '${type}', …` looks interpolated; the driver emits a
+placeholder anyway, so the statement reaches Postgres as the *string literal*
+`'$5'`. No parameter occupies `$5`, so its type cannot be inferred and every
+call fails with 42P18, `could not determine data type of parameter $5`. The unit
+suite stayed green — a mocked `sql` records the text and never executes it —
+while each real top-up returned 500. Found only by `test:wallet-e2e`, which
+drives the actual route through Postgres. Fixed by binding properly
+(`${type}::varchar(20)`); `wallet.test.ts` now asserts no statement contains a
+`$n` wrapped in quotes, which goes red on the old form.
+
+**A local Postgres was unreachable from the app, and that hid it.**
+`@neondatabase/serverless` speaks HTTP only — it POSTs `{query, params}` to
+`https://<host>/sql` — so no `docker run postgres` could serve it, and
+`test:smoke` could only ever assert guards (401s, redirects). `wsproxy` is not
+the answer: it forwards to a Neon endpoint and requires the Host to match
+`*.neon.tech`. `scripts/neon-http-bridge.cjs` (`npm run db:bridge`) closes that
+gap by speaking the protocol the driver already uses, pinned to
+`node_modules/@neondatabase/serverless/index.js` rather than to a guess:
+
+```bash
+docker run -d -p 5432:5432 -e POSTGRES_USER=app -e POSTGRES_PASSWORD=pw \
+  -e POSTGRES_DB=app postgres:17-alpine
+for f in migrations/*.sql; do psql "$DATABASE_URL" -f "$f"; done
+npm run db:bridge &
+DATABASE_URL=postgresql://app:pw@localhost:5432/app \
+  NEON_FETCH_ENDPOINT=http://localhost:4444/sql npm run dev
+NODE_TLS_REJECT_UNAUTHORIZED=0 npm run test:wallet-e2e
+```
+
+`src/lib/neon.ts` already honours `NEON_FETCH_ENDPOINT`, so no runtime code
+changed for this. Two things that are not optional in the bridge: decode with
+each field's `dataTypeID` via `pg.types` (the driver sends raw text, so a
+*mismatched* parser silently hands the app `"100000.00"` where it expects a
+number), and answer a 5-digit Postgres error code with HTTP 400, because the
+driver reads its error fields off a 400 body.
+
+`test:wallet-e2e` needs HTTPS: the session cookies are `Secure`, and curl's
+jar will not persist one over a self-signed certificate. It keeps its own jar
+and lets the caller trust the dev cert — it is not the file that should flip
+`NODE_TLS_REJECT_UNAUTHORIZED`.
+
 **Re-run the seed when the window runs out.** `npm run db:seed-flights` opens a
 21-day window (three weeks, not the seven the date strip shows — someone who
 returns next week still lands inside it) and covers 028's international routes,
