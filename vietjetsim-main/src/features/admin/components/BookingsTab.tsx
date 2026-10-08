@@ -325,7 +325,7 @@ export default function BookingsTab() {
         code { font-family: monospace; font-weight: bold; }
         @media print { body { padding: 0; } }
       </style></head><body>
-      <h1>Quản lý đặt vé — VietJet Sim</h1>
+      <h1>Quản lý đặt vé — Vietjet Air</h1>
       <div class="meta">Xuất ngày: ${new Date().toLocaleDateString('vi-VN')} · ${sorted.filter((b) => b.status !== 'cancelled').length} đơn${filterDesc ? ' · Bộ lọc: ' + filterDesc : ''}</div>
       <table>
         <thead><tr>

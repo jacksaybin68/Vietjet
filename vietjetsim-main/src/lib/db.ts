@@ -1,4 +1,4 @@
-// VietjetSim Database Layer
+// Vietjet Air Database Layer
 import { sql } from '@/lib/neon';
 export { sql };
 import type { Permission } from '@/lib/rbac';

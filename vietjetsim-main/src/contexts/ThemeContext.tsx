@@ -27,7 +27,7 @@ interface ThemeProviderProps {
   storageKey?: string;
 }
 
-export function ThemeProvider({ children, storageKey = 'vietjetsim-theme' }: ThemeProviderProps) {
+export function ThemeProvider({ children, storageKey = 'vietjet-air-theme' }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>('light');
 
   // Vietjet Air uses one deliberate light presentation. Clear any preference

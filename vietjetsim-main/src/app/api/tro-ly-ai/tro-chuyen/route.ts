@@ -100,7 +100,7 @@ QUY TẮC:
       // Fallback khi gateway ngoại tuyến (chỉ development)
       if (process.env.NODE_ENV === 'development') {
         const researchText = isFlightRelated
-          ? `[Coordinator Context: Đã trích xuất thông tin lộ trình VietJet thực tế]`
+          ? `[Coordinator Context: Đã trích xuất thông tin lộ trình Vietjet thực tế]`
           : '';
         return NextResponse.json({
           content: `${researchText} Tôi là trợ lý Vietjet Air. Hệ thống AI hiện đang ngoại tuyến, nhưng tôi đã sẵn sàng hỗ trợ cập nhật chặng bay cho bạn.`,

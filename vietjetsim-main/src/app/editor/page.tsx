@@ -605,7 +605,7 @@ export default function VSCodeWebEditorPage() {
                 borderBottom: '1px solid #282828',
               }}
             >
-              <span>vietjetsim &gt; {activeTab.path.replace(/\//g, ' > ')}</span>
+              <span>vietjet-air &gt; {activeTab.path.replace(/\//g, ' > ')}</span>
             </div>
           )}
 
