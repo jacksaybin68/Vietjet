@@ -152,9 +152,9 @@ const INITIAL_FLIGHTS: Flight[] = [
 ];
 
 const STATUS_MAP: Record<FlightStatus, { label: string; cls: string }> = {
-  active: { label: 'Hoạt động', cls: 'badge-success' },
-  cancelled: { label: 'Đã huỷ', cls: 'badge-error' },
-  delayed: { label: 'Trễ giờ', cls: 'badge-warning' },
+  active: { label: 'Hoạt động', cls: 'bg-emerald-500/15 text-emerald-400' },
+  cancelled: { label: 'Đã huỷ', cls: 'bg-red-500/15 text-red-400' },
+  delayed: { label: 'Trễ giờ', cls: 'bg-amber-500/15 text-amber-400' },
 };
 
 const STATUS_TABS: { value: 'all' | FlightStatus; label: string; color: string }[] = [
