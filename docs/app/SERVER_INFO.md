@@ -33,6 +33,31 @@ cd vietjetsim-main && npm ci && npm run build
 pm2 restart vietjet
 ```
 
+### Tài khoản admin (DB production)
+
+- `Admin` / `admin@vietjetair.vn` — quản trị (`role: admin`)
+- `Booking@vietjet.shop` — mailbox Hostinger, dùng cho SMTP gửi mail
+  (xem `.env.local` trên VPS, KHÔNG commit vào repo)
+
+### Seed chuyến bay tương lai (chạy thủ công, không có cron)
+
+```bash
+cd /var/www/vietjet/vietjetsim-main
+SITE_URL=http://127.0.0.1:4028 SEED_ADMIN_EMAIL=Admin \
+  SEED_ADMIN_PASSWORD='<mat-khau-Admin>' \
+  node scripts/seed-future-flights.cjs
+```
+Script idempotent: window 21 ngày, flight numbers khối VJ3001+.
+Chạy lại khi sắp hết window (kiểm tra: `SELECT max(depart_time) FROM flights`).
+
+### Mail gửi (SMTP Hostinger)
+
+- Env trên VPS: `SMTP_HOST=smtp.hostinger.com`, port 465, user
+  `Booking@vietjet.shop`, `MAIL_FROM="Vietjet Air <Booking@vietjet.shop>"`
+- Test: `node scripts/test-mail.cjs [to@domain]`
+- Email xác nhận PNR gửi tự động sau thanh toán (`src/lib/mail.ts`,
+  fail-soft — lỗi SMTP không chặn response)
+
 ### Đổi tên miền chính sau này
 
 ```bash
