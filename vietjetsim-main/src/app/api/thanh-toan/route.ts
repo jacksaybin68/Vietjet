@@ -3,6 +3,7 @@ import { createPaymentAndConfirmBooking, getBookingById, getActiveBankAccounts }
 import { verifyAuthRequest } from '@/lib/auth';
 import { renderTransferNote } from '@/lib/transfer-note';
 import { validateBankTransferInput } from '@/lib/bank-transfer';
+import { sendBookingConfirmationEmail } from '@/lib/mail';
 
 export async function POST(request: NextRequest) {
   // Validate CSRF token
@@ -112,6 +113,15 @@ export async function POST(request: NextRequest) {
       user_id: payload.userId,
       discount_code_id,
       discount_amount: discount_amount || 0,
+    });
+
+    // Email xác nhận — fail-soft trong sendMail, không được chặn response.
+    void sendBookingConfirmationEmail({
+      to: payload.email,
+      fullName: payload.fullName,
+      bookingCode: result.booking.booking_code ?? null,
+      amount: discountedTotal,
+      method,
     });
 
     return NextResponse.json(
