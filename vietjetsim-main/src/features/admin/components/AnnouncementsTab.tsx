@@ -18,12 +18,11 @@ interface ToastAPI {
 }
 
 const PAGE_SIZE = 10;
-
 const TYPE_CONFIG: Record<string, { label: string; cls: string }> = {
-  info: { label: 'Thông tin', cls: 'badge-info' },
-  warning: { label: 'Cảnh báo', cls: 'badge-warning' },
-  promotion: { label: 'Khuyến mãi', cls: 'badge-success' },
-  system: { label: 'Hệ thống', cls: 'badge-neutral' },
+  info: { label: 'Thông tin', cls: 'bg-blue-500/15 text-blue-400' },
+  warning: { label: 'Cảnh báo', cls: 'bg-amber-500/15 text-amber-400' },
+  promotion: { label: 'Khuyến mãi', cls: 'bg-emerald-500/15 text-emerald-400' },
+  system: { label: 'Hệ thống', cls: 'bg-slate-500/15 text-slate-300' },
 };
 
 const TYPE_OPTIONS = [

@@ -26,15 +26,15 @@ interface ToastAPI {
 
 const PAGE_SIZE = 20;
 
-/** Dùng class badge global (có biến thể dark) để đồng bộ với các tab khác. */
+
 const ACTION_COLORS: Record<string, { label: string; cls: string }> = {
-  create: { label: 'Tạo mới', cls: 'badge-success' },
-  update: { label: 'Cập nhật', cls: 'badge-info' },
-  delete: { label: 'Xoá', cls: 'badge-error' },
-  login: { label: 'Đăng nhập', cls: 'badge-info' },
-  logout: { label: 'Đăng xuất', cls: 'badge-neutral' },
-  approve: { label: 'Duyệt', cls: 'badge-success' },
-  reject: { label: 'Từ chối', cls: 'badge-warning' },
+  create: { label: 'Tạo mới', cls: 'bg-emerald-500/15 text-emerald-400' },
+  update: { label: 'Cập nhật', cls: 'bg-blue-500/15 text-blue-400' },
+  delete: { label: 'Xoá', cls: 'bg-red-500/15 text-red-400' },
+  login: { label: 'Đăng nhập', cls: 'bg-blue-500/15 text-blue-400' },
+  logout: { label: 'Đăng xuất', cls: 'bg-slate-500/15 text-slate-300' },
+  approve: { label: 'Duyệt', cls: 'bg-emerald-500/15 text-emerald-400' },
+  reject: { label: 'Từ chối', cls: 'bg-amber-500/15 text-amber-400' },
 };
 
 export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
