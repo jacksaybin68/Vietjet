@@ -2,21 +2,25 @@
 
 ## 🖥️ Triển khai VPS (production)
 
-- **URL production**: http://156.67.214.184 (nginx → 127.0.0.1:4028)
-- **Tên miền**: `vib.it.com` (nginx site `/etc/nginx/sites-available/vib.it.com`
-  đã trỏ về Vietjet, SSL origin cert 2026–2041; backup cấu hình dichvucong cũ:
-  `vib.it.com.bak-dichvucong`). **Lưu ý**: DNS `vib.it.com` đang NXDOMAIN —
-  cần tạo A record `vib.it.com → 156.67.214.184` tại it.com dashboard trước
-  khi truy cập được.
+- **URL production**: https://vietjet.shop (www redirect, HTTP→HTTPS 301)
+- **Tên miền**: `vietjet.shop` (Hostinger DNS: A `@` → 156.67.214.184,
+  CNAME `www` → vietjet.shop). SSL Let's Encrypt qua `certbot --nginx`
+  (auto-renew bằng `certbot.timer`, hết hạn 2027-01-06)
+- **Tên miền dự phòng** (nginx sẵn sàng, chưa active):
+  - `vib.it.com` → `/etc/nginx/sites-available/vib.it.com` (origin cert
+    2026–2041; backup cấu hình dichvucong cũ: `vib.it.com.bak-dichvucong`;
+    DNS đang NXDOMAIN — chưa trỏ)
+  - `hoantienve.com` → `/etc/nginx/sites-available/vietjet-hoantienve`
+    (DNS trỏ 72.61.115.108 — site "CBR Mobile", chưa đổi)
+- **URL production cũ (vẫn hoạt động)**: http://156.67.214.184
+  (nginx site `/etc/nginx/sites-available/vietjet` → 127.0.0.1:4028)
 - **VPS**: Ubuntu 24.04, srv1520932.hstgr.cloud, Node v22.23.1
 - **Mã nguồn**: `/var/www/vietjet` (clone từ
   `https://github.com/jacksaybin68/Vietjet.git`, app ở `vietjetsim-main/`)
 - **Process manager**: pm2, app tên `vietjet`, auto-start qua systemd
   (`pm2 save` + `pm2 startup` đã chạy)
 - **Cấu hình pm2**: `/var/www/vietjet/ecosystem.config.js`
-- **Cấu hình nginx**: `/etc/nginx/sites-available/vietjet`
-  (reverse proxy `server_name 156.67.214.184` → `127.0.0.1:4028`)
-- **`.env.local`**: copy từ máy dev, `NEXT_PUBLIC_SITE_URL=http://156.67.214.184`
+- **`.env.local`**: `NEXT_PUBLIC_SITE_URL=https://vietjet.shop`
   (biến `NEXT_PUBLIC_*` được embed lúc build — sửa xong phải `npm run build`
   lại rồi `pm2 restart vietjet`)
 
@@ -29,11 +33,11 @@ cd vietjetsim-main && npm ci && npm run build
 pm2 restart vietjet
 ```
 
-### Khi DNS `vib.it.com` trỏ xong
+### Đổi tên miền chính sau này
 
 ```bash
 # 1. Đổi SITE_URL rồi build lại (biến NEXT_PUBLIC_* embed lúc build)
-sed -i 's|NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=https://vib.it.com|' \
+sed -i 's|NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=https://ten-moi.com|' \
   /var/www/vietjet/vietjetsim-main/.env.local
 cd /var/www/vietjet/vietjetsim-main && npm run build
 pm2 restart vietjet
