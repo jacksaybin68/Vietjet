@@ -3,6 +3,7 @@ import { sql } from '@/lib/neon';
 import { validateCsrfOrReject } from '@/lib/csrf';
 import { rateLimit } from '@/lib/rate-limit';
 import { createPasswordResetToken } from '@/lib/password-reset';
+import { sendPasswordResetEmail } from '@/lib/mail';
 
 /**
  * Request a password-reset link.
@@ -10,9 +11,8 @@ import { createPasswordResetToken } from '@/lib/password-reset';
  * Always answers with the same success payload so the endpoint cannot be used
  * to enumerate which emails/phones have an account.
  *
- * No mail transport is configured in this project, so outside production the
- * generated reset link is echoed in the response (`resetUrl`) to keep the demo
- * flow usable. Production never includes it — wire a real mailer here.
+ * Giao diện reset link: gửi qua email thật (sendPasswordResetEmail, fail-soft).
+ * Ngoài production response vẫn kèm `resetUrl` để demo/test không cần hộp thư.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -43,7 +43,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    const { token } = await createPasswordResetToken(user.id, user.email);
+    const { token, expiresAt } = await createPasswordResetToken(user.id, user.email);
+
+    if (user.email) {
+      void sendPasswordResetEmail({ to: user.email, token, expiresAt });
+    }
 
     const payload: { success: true; resetUrl?: string } = { success: true };
     if (process.env.NODE_ENV !== 'production') {
