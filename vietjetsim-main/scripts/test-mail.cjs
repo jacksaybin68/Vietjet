@@ -11,7 +11,7 @@ require('dotenv').config();
 
 const nodemailer = require('nodemailer');
 
-const to = process.argv[2] || process.env.MAIL_TEST_TO || 'bookbooking@vietjet.shop';
+const to = process.argv[2] || process.env.MAIL_TEST_TO || process.env.SMTP_USER;
 const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
 
 if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
