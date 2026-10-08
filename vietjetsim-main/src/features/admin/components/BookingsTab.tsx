@@ -4,6 +4,7 @@ import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
 import { createAdminInvoice } from '@/features/admin';
 import { getApiErrorMessage } from '@/shared/services';
+import { renderInvoiceHtml } from '@/features/admin/invoice';
 
 /** Mirrors the `bookings.status` union in `@/lib/db`, including `refunded`. */
 type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded';
@@ -394,64 +395,12 @@ export default function BookingsTab() {
   const printSingleInvoice = (booking: Booking) => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Hóa đơn ${booking.id}</title>
-          <style>
-            body { font-family: sans-serif; padding: 40px; color: #333; }
-            .header { display: flex; justify-content: space-between; border-bottom: 2px solid #EC2029; padding-bottom: 20px; margin-bottom: 30px; }
-            .logo { color: #EC2029; font-size: 24px; font-weight: 900; }
-            .invoice-title { font-size: 20px; font-weight: bold; }
-            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-            .label { font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 5px; }
-            .value { font-weight: bold; font-size: 16px; }
-            .footer { margin-top: 50px; border-top: 1px solid #eee; pt: 20px; text-align: center; color: #999; font-size: 12px; }
-            .amount { font-size: 24px; color: #EC2029; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="logo">VIETJET SIM</div>
-            <div class="invoice-title">HÓA ĐƠN ĐẶT VÉ</div>
-          </div>
-          <div class="grid">
-            <div>
-              <div class="label">Mã đặt chỗ</div>
-              <div class="value">${booking.id}</div>
-            </div>
-            <div>
-              <div class="label">Ngày đặt</div>
-              <div class="value">${booking.createdAt}</div>
-            </div>
-            <div>
-              <div class="label">Khách hàng</div>
-              <div class="value">${booking.userName}</div>
-            </div>
-            <div>
-              <div class="label">Chuyến bay</div>
-              <div class="value">${booking.flightNo} (${booking.route})</div>
-            </div>
-            <div>
-              <div class="label">Hình thức thanh toán</div>
-              <div class="value">${booking.payMethod}</div>
-            </div>
-            <div>
-              <div class="label">Trạng thái</div>
-              <div class="value">${bookingBadge(booking.status).label}</div>
-            </div>
-          </div>
-          <div style="text-align: right; margin-top: 40px;">
-            <div class="label">Tổng tiền (VNĐ)</div>
-            <div class="amount">${booking.amount.toLocaleString('vi-VN')} ₫</div>
-          </div>
-          <div class="footer">
-            Cảm ơn bạn đã sử dụng dịch vụ của Vietjet Air. Liên hệ 1900 xxxx để được hỗ trợ.
-          </div>
-          <script>window.print();</script>
-        </body>
-      </html>
-    `);
+    printWindow.document.write(
+      renderInvoiceHtml({
+        ...booking,
+        statusLabel: bookingBadge(booking.status).label,
+      })
+    );
     printWindow.document.close();
   };
 
