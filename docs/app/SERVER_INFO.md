@@ -3,6 +3,11 @@
 ## 🖥️ Triển khai VPS (production)
 
 - **URL production**: http://156.67.214.184 (nginx → 127.0.0.1:4028)
+- **Tên miền**: `vib.it.com` (nginx site `/etc/nginx/sites-available/vib.it.com`
+  đã trỏ về Vietjet, SSL origin cert 2026–2041; backup cấu hình dichvucong cũ:
+  `vib.it.com.bak-dichvucong`). **Lưu ý**: DNS `vib.it.com` đang NXDOMAIN —
+  cần tạo A record `vib.it.com → 156.67.214.184` tại it.com dashboard trước
+  khi truy cập được.
 - **VPS**: Ubuntu 24.04, srv1520932.hstgr.cloud, Node v22.23.1
 - **Mã nguồn**: `/var/www/vietjet` (clone từ
   `https://github.com/jacksaybin68/Vietjet.git`, app ở `vietjetsim-main/`)
@@ -21,6 +26,16 @@
 ssh root@156.67.214.184
 cd /var/www/vietjet && git pull
 cd vietjetsim-main && npm ci && npm run build
+pm2 restart vietjet
+```
+
+### Khi DNS `vib.it.com` trỏ xong
+
+```bash
+# 1. Đổi SITE_URL rồi build lại (biến NEXT_PUBLIC_* embed lúc build)
+sed -i 's|NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=https://vib.it.com|' \
+  /var/www/vietjet/vietjetsim-main/.env.local
+cd /var/www/vietjet/vietjetsim-main && npm run build
 pm2 restart vietjet
 ```
 
