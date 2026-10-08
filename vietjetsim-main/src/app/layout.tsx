@@ -18,7 +18,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:4028'),
   title: {
-    default: 'Vietjet Air — Mô phỏng đặt vé máy bay',
+    default: 'Vietjet - Đặt Vé Máy Bay',
     template: '%s | Vietjet Air',
   },
   description:
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     follow: false,
   },
   openGraph: {
-    title: 'Vietjet Air — Mô phỏng đặt vé máy bay',
+    title: 'Vietjet - Đặt Vé Máy Bay',
     description: 'Trải nghiệm mô phỏng tìm kiếm, đặt chỗ, chọn ghế và thanh toán chuyến bay.',
     url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:4028',
     siteName: 'Vietjet Air',
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Vietjet Air — Mô phỏng đặt vé máy bay',
+    title: 'Vietjet - Đặt Vé Máy Bay',
     description: 'Trải nghiệm mô phỏng tìm kiếm, đặt chỗ, chọn ghế và thanh toán chuyến bay.',
     images: ['/logo.png'],
   },
