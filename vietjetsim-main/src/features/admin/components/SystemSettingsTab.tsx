@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { getSystemSettings, updateSystemSettings } from '@/features/admin';
 import { getApiErrorMessage } from '@/shared/services';
+import { AdminTabHeader, ADMIN_CARD_STYLE, ADMIN_ACTION_BTN } from './AdminSection';
 
 interface SettingsObject {
   [key: string]: { value: string; description?: string };
@@ -180,16 +181,11 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
   if (isLoading) {
     return (
       <div className="space-y-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="font-bold text-stone-900">Cài đặt hệ thống</h2>
-            <p className="text-sm text-stone-400">Đang tải...</p>
-          </div>
-        </div>
-        <div className="bg-white rounded-2xl border border-stone-200 p-6">
+        <AdminTabHeader icon="CogIcon" title="Cài đặt hệ thống" subtitle="Đang tải..." />
+        <div className="rounded-2xl border p-6" style={ADMIN_CARD_STYLE}>
           <div className="animate-pulse space-y-4">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-16 bg-stone-100 rounded-lg" />
+              <div key={i} className="h-16 bg-slate-500/10 rounded-lg" />
             ))}
           </div>
         </div>
@@ -200,91 +196,79 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
   if (hasError) {
     return (
       <div className="space-y-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="font-bold text-stone-900">Cài đặt hệ thống</h2>
-            <p className="text-sm text-stone-400">Đã xảy ra lỗi</p>
-          </div>
-          <button
-            onClick={fetchSettings}
-            className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-bold px-4 py-2.5 rounded-xl transition-all text-sm"
-          >
-            <Icon name="ArrowPathIcon" size={16} />
-            Thử lại
-          </button>
-        </div>
-        <div className="bg-white rounded-2xl border border-stone-200 p-12 text-center">
+        <AdminTabHeader
+          icon="CogIcon"
+          title="Cài đặt hệ thống"
+          subtitle="Đã xảy ra lỗi"
+          actions={
+            <button
+              onClick={fetchSettings}
+              className={`${ADMIN_ACTION_BTN} text-white bg-indigo-500/20 border border-indigo-500/30 hover:bg-indigo-500/30`}
+            >
+              <Icon name="ArrowPathIcon" size={14} />
+              Thử lại
+            </button>
+          }
+        />
+        <div className="rounded-2xl border p-12 text-center" style={ADMIN_CARD_STYLE}>
           <Icon name="ExclamationTriangleIcon" size={48} className="text-red-400 mx-auto mb-4" />
-          <p className="font-bold text-stone-700">Không thể tải cài đặt</p>
-          <p className="text-sm text-stone-500 mt-2">Vui lòng thử lại sau</p>
+          <p className="font-bold text-white">Không thể tải cài đặt</p>
+          <p className="text-sm text-slate-400 mt-2">Vui lòng thử lại sau</p>
         </div>
       </div>
     );
   }
 
+
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div>
-          <h2 className="font-bold text-stone-900">Cài đặt hệ thống</h2>
-          <p className="text-sm text-stone-400">Quản lý các thông số cấu hình hệ thống</p>
-        </div>
-        <div className="flex items-center gap-2">
-          {hasChanges && (
-            <button
-              onClick={handleReset}
-              disabled={isSaving}
-              className="flex items-center gap-2 border border-stone-300 text-stone-600 font-semibold px-4 py-2.5 rounded-xl transition-all hover:bg-stone-50 text-sm disabled:opacity-50"
-            >
-              <Icon name="ArrowPathIcon" size={16} />
-              Đặt lại
-            </button>
-          )}
-          <button
-            onClick={handleSave}
-            disabled={isSaving || !hasChanges}
-            className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-bold px-4 py-2.5 rounded-xl transition-all shadow-glow-red hover:shadow-none text-sm disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {isSaving ? (
-              <>
-                <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                  />
-                </svg>
-                Đang lưu...
-              </>
-            ) : (
-              <>
-                <Icon name="CheckIcon" size={16} />
-                Lưu thay đổi
-              </>
+      <AdminTabHeader
+        icon="CogIcon"
+        title="Cài đặt hệ thống"
+        subtitle="Quản lý các thông số cấu hình hệ thống"
+        actions={
+          <>
+            {hasChanges && (
+              <button
+                onClick={handleReset}
+                disabled={isSaving}
+                className={`${ADMIN_ACTION_BTN} text-slate-300 border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-50`}
+              >
+                <Icon name="ArrowPathIcon" size={14} />
+                Đặt lại
+              </button>
             )}
-          </button>
-        </div>
-      </div>
-
+            <button
+              onClick={handleSave}
+              disabled={isSaving || !hasChanges}
+              className={`${ADMIN_ACTION_BTN} text-white bg-primary hover:bg-primary-dark disabled:opacity-60 disabled:cursor-not-allowed`}
+            >
+              {isSaving ? (
+                <>
+                  <Icon name="ArrowPathIcon" size={14} className="animate-spin" />
+                  Đang lưu...
+                </>
+              ) : (
+                <>
+                  <Icon name="CheckIcon" size={14} />
+                  Lưu thay đổi
+                </>
+              )}
+            </button>
+          </>
+        }
+      />
       {/* Categories Tabs */}
-      <div className="flex bg-white rounded-xl border border-stone-200 p-1.5 gap-1 overflow-x-auto">
+      <div className="flex rounded-xl border border-white/10 bg-slate-900/60 p-1.5 gap-1 overflow-x-auto">
         {SETTING_CATEGORIES.map((cat) => (
           <button
             key={cat.id}
             onClick={() => setActiveCategory(cat.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
               activeCategory === cat.id
-                ? 'bg-primary/10 text-primary'
-                : 'text-stone-500 hover:bg-stone-50 hover:text-stone-700'
+                ? 'bg-primary/15 text-primary'
+                : 'text-slate-400 hover:bg-white/5 hover:text-white'
             }`}
           >
             <Icon name={cat.icon} size={18} />
@@ -294,9 +278,9 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
       </div>
 
       {/* Settings List */}
-      <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
+      <div className="rounded-2xl border overflow-hidden" style={{ ...ADMIN_CARD_STYLE, padding: 0 }}>
         <div
-          className="p-5 border-b border-stone-100"
+          className="p-5 border-b border-white/5"
           style={{ background: 'linear-gradient(135deg, #1A2948 0%, #2D3E5F 100%)' }}
         >
           <div className="flex items-center gap-3">
@@ -322,24 +306,24 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
           </div>
         </div>
 
-        <div className="divide-y divide-stone-100">
+        <div className="divide-y divide-white/5">
           {DEFAULT_SETTINGS.filter((s) => s.category === activeCategory).map((setting) => {
             const value = getSettingValue(setting.key, setting.type);
 
             return (
-              <div key={setting.key} className="px-5 py-5 hover:bg-stone-50/50 transition-colors">
+              <div key={setting.key} className="px-5 py-5 hover:bg-white/5 transition-colors">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <h4 className="font-semibold text-stone-900">{setting.label}</h4>
+                      <h4 className="font-semibold text-white">{setting.label}</h4>
                       {hasChanges &&
                         localSettings[setting.key]?.value !== settings[setting.key]?.value && (
-                          <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
+                          <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/20">
                             Đã thay đổi
                           </span>
                         )}
                     </div>
-                    <p className="text-xs text-stone-500 mt-1 max-w-xl">{setting.description}</p>
+                    <p className="text-xs text-slate-400 mt-1 max-w-xl">{setting.description}</p>
                   </div>
                   <div className="w-full sm:w-64 flex-shrink-0">
                     {setting.type === 'boolean' ? (
@@ -349,7 +333,7 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
                             handleSettingChange(setting.key, value === 'true' ? 'false' : 'true')
                           }
                           className={`relative w-12 h-6 rounded-full transition-all duration-300 ${
-                            value === 'true' ? 'bg-green-500' : 'bg-stone-300'
+                            value === 'true' ? 'bg-emerald-500' : 'bg-slate-600'
                           }`}
                         >
                           <span
@@ -358,7 +342,7 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
                             }`}
                           />
                         </button>
-                        <span className="ml-3 text-xs font-semibold text-stone-400">
+                        <span className="ml-3 text-xs font-semibold text-slate-400">
                           {value === 'true' ? 'Đang bật' : 'Đang tắt'}
                         </span>
                       </div>
@@ -366,7 +350,7 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
                       <select
                         value={String(value)}
                         onChange={(e) => handleSettingChange(setting.key, e.target.value)}
-                        className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        className="w-full px-4 py-2.5 bg-slate-900/60 border border-white/10 rounded-xl text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                       >
                         {setting.options?.map((opt) => (
                           <option key={opt.value} value={opt.value}>
@@ -379,7 +363,7 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
                         type={setting.type === 'number' ? 'number' : 'text'}
                         value={String(value)}
                         onChange={(e) => handleSettingChange(setting.key, e.target.value)}
-                        className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-stone-300"
+                        className="w-full px-4 py-2.5 bg-slate-900/60 border border-white/10 rounded-xl text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-500"
                         min={0}
                         placeholder={setting.label}
                       />
@@ -393,15 +377,18 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
       </div>
 
       {/* Info Box */}
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
+      <div
+        className="rounded-xl border p-4 flex items-start gap-3"
+        style={{ background: 'rgba(59,130,246,0.08)', borderColor: 'rgba(59,130,246,0.2)' }}
+      >
         <Icon
           name="InformationCircleIcon"
           size={20}
-          className="text-blue-600 flex-shrink-0 mt-0.5"
+          className="text-blue-400 flex-shrink-0 mt-0.5"
         />
         <div>
-          <p className="text-sm font-semibold text-blue-900">Lưu ý khi thay đổi cài đặt</p>
-          <ul className="text-xs text-blue-700 mt-1 space-y-1">
+          <p className="text-sm font-semibold text-white">Lưu ý khi thay đổi cài đặt</p>
+          <ul className="text-xs text-slate-400 mt-1 space-y-1">
             <li>- Một số thay đổi có thể cần khởi động lại dịch vụ để có hiệu lực</li>
             <li>- Vui lòng kiểm tra kỹ trước khi bật chế độ bảo trì</li>
             <li>- Các thay đổi sẽ được ghi lại trong nhật ký hệ thống</li>

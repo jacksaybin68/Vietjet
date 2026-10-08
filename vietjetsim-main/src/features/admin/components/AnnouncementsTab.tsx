@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
+import { AdminTabHeader, ADMIN_CARD_STYLE, ADMIN_ACTION_BTN } from './AdminSection';
 import {
   createAnnouncement,
   deleteAnnouncement,
@@ -18,11 +19,11 @@ interface ToastAPI {
 
 const PAGE_SIZE = 10;
 
-const TYPE_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
-  info: { label: 'Thông tin', color: 'text-blue-700', bgColor: 'bg-blue-100' },
-  warning: { label: 'Cảnh báo', color: 'text-amber-700', bgColor: 'bg-amber-100' },
-  promotion: { label: 'Khuyến mãi', color: 'text-green-700', bgColor: 'bg-green-100' },
-  system: { label: 'Hệ thống', color: 'text-purple-700', bgColor: 'bg-purple-100' },
+const TYPE_CONFIG: Record<string, { label: string; cls: string }> = {
+  info: { label: 'Thông tin', cls: 'badge-info' },
+  warning: { label: 'Cảnh báo', cls: 'badge-warning' },
+  promotion: { label: 'Khuyến mãi', cls: 'badge-success' },
+  system: { label: 'Hệ thống', cls: 'badge-neutral' },
 };
 
 const TYPE_OPTIONS = [
@@ -183,38 +184,37 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
 
   return (
     <div className="space-y-5">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div>
-          <h2 className="font-bold text-stone-900">Quản lý thông báo</h2>
-          <p className="text-sm text-stone-400">{totalCount} thông báo trong hệ thống</p>
-        </div>
-        <button
-          onClick={() => {
-            resetForm();
-            setShowAddModal(true);
-          }}
-          className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-bold px-4 py-2.5 rounded-xl transition-all shadow-glow-red hover:shadow-none text-sm"
-        >
-          <Icon name="PlusIcon" size={16} />
-          Tạo thông báo
-        </button>
-      </div>
-
+      <AdminTabHeader
+        icon="MegaphoneIcon"
+        title="Quản lý thông báo"
+        subtitle={`${totalCount} thông báo trong hệ thống`}
+        actions={
+          <button
+            onClick={() => {
+              resetForm();
+              setShowAddModal(true);
+            }}
+            className={`${ADMIN_ACTION_BTN} text-white bg-primary hover:bg-primary-dark shadow-glow-red`}
+          >
+            <Icon name="PlusIcon" size={16} />
+            Tạo thông báo
+          </button>
+        }
+      />
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Icon
             name="MagnifyingGlassIcon"
             size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
           />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
             placeholder="Tìm theo tiêu đề, nội dung..."
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm form-input"
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-900/60 border border-white/10 rounded-xl text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50"
           />
         </div>
         <select
@@ -223,7 +223,7 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
             setTypeFilter(e.target.value);
             setCurrentPage(1);
           }}
-          className="px-3 py-2.5 bg-white border border-stone-200 rounded-xl text-sm form-input"
+          className="px-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500/50"
         >
           <option value="">Tất cả loại</option>
           {TYPE_OPTIONS.map((opt) => (
@@ -235,24 +235,24 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden">
+      <div className="rounded-2xl border overflow-hidden" style={{ ...ADMIN_CARD_STYLE, padding: 0 }}>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-stone-50 border-b border-stone-100">
-                <th className="text-left text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-3">
+              <tr className="border-b border-white/5">
+                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4">
                   Tiêu đề
                 </th>
-                <th className="text-left text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-3 hidden sm:table-cell">
+                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 hidden sm:table-cell">
                   Loại
                 </th>
-                <th className="text-left text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-3 hidden md:table-cell">
+                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 hidden md:table-cell">
                   Mục tiêu
                 </th>
-                <th className="text-center text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-3 hidden lg:table-cell">
+                <th className="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 hidden lg:table-cell">
                   Trạng thái
                 </th>
-                <th className="text-center text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-3">
+                <th className="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4">
                   Thao tác
                 </th>
               </tr>
@@ -261,31 +261,31 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
               {isLoading ? (
                 <>
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <tr key={i} className="border-b border-stone-50 animate-pulse">
-                      <td className="px-4 py-3">
-                        <div className="h-4 w-48 bg-stone-200 rounded-full" />
+                    <tr key={i} className="border-b border-white/5 animate-pulse">
+                      <td className="px-5 py-4">
+                        <div className="h-4 w-48 bg-slate-500/10 rounded-full" />
                       </td>
-                      <td className="px-4 py-3 hidden sm:table-cell">
-                        <div className="h-6 w-20 bg-stone-200 rounded-full" />
+                      <td className="px-5 py-4 hidden sm:table-cell">
+                        <div className="h-6 w-20 bg-slate-500/10 rounded-full" />
                       </td>
-                      <td className="px-4 py-3 hidden md:table-cell">
-                        <div className="h-6 w-16 bg-stone-200 rounded-full" />
+                      <td className="px-5 py-4 hidden md:table-cell">
+                        <div className="h-6 w-16 bg-slate-500/10 rounded-full" />
                       </td>
-                      <td className="px-4 py-3 hidden lg:table-cell">
-                        <div className="h-6 w-16 bg-stone-200 rounded-full mx-auto" />
+                      <td className="px-5 py-4 hidden lg:table-cell">
+                        <div className="h-6 w-16 bg-slate-500/10 rounded-full mx-auto" />
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="h-6 w-16 bg-stone-200 rounded mx-auto" />
+                      <td className="px-5 py-4">
+                        <div className="h-6 w-16 bg-slate-500/10 rounded mx-auto" />
                       </td>
                     </tr>
                   ))}
                 </>
               ) : hasError ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-16 text-center">
+                  <td colSpan={5} className="px-5 py-16 text-center">
                     <div className="flex flex-col items-center gap-3">
                       <Icon name="ExclamationTriangleIcon" size={32} className="text-red-400" />
-                      <p className="font-bold text-stone-700">Không thể tải dữ liệu</p>
+                      <p className="font-bold text-white">Không thể tải dữ liệu</p>
                       <button
                         onClick={() => fetchAnnouncements(1, searchQuery, typeFilter)}
                         className="text-xs font-semibold text-primary"
@@ -297,11 +297,11 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
                 </tr>
               ) : announcements.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center">
+                  <td colSpan={5} className="px-5 py-12 text-center">
                     <div className="flex flex-col items-center gap-3">
-                      <Icon name="MegaphoneIcon" size={32} className="text-stone-300" />
-                      <p className="font-bold text-stone-700">Chưa có thông báo nào</p>
-                      <p className="text-xs text-stone-400">Tạo thông báo đầu tiên</p>
+                      <Icon name="MegaphoneIcon" size={32} className="text-slate-600" />
+                      <p className="font-bold text-white">Chưa có thông báo nào</p>
+                      <p className="text-xs text-slate-500">Tạo thông báo đầu tiên</p>
                     </div>
                   </td>
                 </tr>
@@ -311,46 +311,42 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
                   return (
                     <tr
                       key={announcement.id}
-                      className={`border-b border-stone-50 hover:bg-stone-50 ${i % 2 === 0 ? '' : 'bg-stone-50/30'}`}
+                      className="border-b border-white/5 hover:bg-white/5 transition-colors"
                     >
-                      <td className="px-4 py-3">
+                      <td className="px-5 py-3.5">
                         <div>
-                          <p className="font-medium text-stone-900">{announcement.title}</p>
-                          <p className="text-xs text-stone-500 mt-0.5 line-clamp-1">
+                          <p className="font-medium text-white">{announcement.title}</p>
+                          <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">
                             {announcement.content}
                           </p>
                         </div>
                       </td>
-                      <td className="px-4 py-3 hidden sm:table-cell">
-                        <span
-                          className={`text-xs font-semibold px-2.5 py-1 rounded-full ${typeConfig.bgColor} ${typeConfig.color}`}
-                        >
-                          {typeConfig.label}
-                        </span>
+                      <td className="px-5 py-3.5 hidden sm:table-cell">
+                        <span className={typeConfig.cls}>{typeConfig.label}</span>
                       </td>
-                      <td className="px-4 py-3 hidden md:table-cell">
-                        <span className="text-xs text-stone-600">
+                      <td className="px-5 py-3.5 hidden md:table-cell">
+                        <span className="text-xs text-slate-400">
                           {ROLE_OPTIONS.find((r) => r.value === announcement.target_role)?.label ||
                             announcement.target_role}
                         </span>
                       </td>
-                      <td className="px-4 py-3 hidden lg:table-cell text-center">
+                      <td className="px-5 py-3.5 hidden lg:table-cell text-center">
                         <button
                           onClick={() => handleToggleActive(announcement)}
                           className={`text-xs font-semibold px-2.5 py-1 rounded-full transition-colors ${
                             announcement.is_active
-                              ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                              : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+                              ? 'bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25'
+                              : 'bg-slate-500/10 text-slate-400 hover:bg-slate-500/20'
                           }`}
                         >
                           {announcement.is_active ? 'Đang hiển thị' : 'Đã ẩn'}
                         </button>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-5 py-3.5">
                         <div className="flex items-center justify-center gap-1.5">
                           <button
                             onClick={() => openEditModal(announcement)}
-                            className="w-7 h-7 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center transition-colors"
+                            className="w-7 h-7 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg flex items-center justify-center transition-colors"
                             title="Sửa"
                           >
                             <Icon name="PencilIcon" size={14} />
@@ -358,7 +354,7 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
                           <button
                             onClick={() => handleDelete(announcement)}
                             disabled={deletingId === announcement.id}
-                            className="w-7 h-7 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50"
+                            className="w-7 h-7 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50"
                             title="Xoá"
                           >
                             <Icon name="TrashIcon" size={14} />
@@ -374,7 +370,7 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
         </div>
 
         {totalCount > PAGE_SIZE && (
-          <div className="px-4 py-3 border-t border-stone-100 bg-stone-50/50 flex justify-center">
+          <div className="px-5 py-3 border-t border-white/5 flex justify-center">
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -446,48 +442,51 @@ function AnnouncementModal({
 }) {
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-5 border-b border-stone-100">
-          <h3 className="font-bold text-stone-900">{title}</h3>
+      <div
+        className="rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border"
+        style={{ ...ADMIN_CARD_STYLE, background: '#1E293B' }}
+      >
+        <div className="flex items-center justify-between p-5 border-b border-white/5">
+          <h3 className="font-bold text-white">{title}</h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 bg-stone-100 hover:bg-stone-200 rounded-lg flex items-center justify-center transition-colors"
+            className="w-8 h-8 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-lg flex items-center justify-center transition-colors"
           >
             <Icon name="XMarkIcon" size={16} />
           </button>
         </div>
         <form onSubmit={onSubmit} className="p-5 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1">
-              Tiêu đề <span className="text-red-500">*</span>
+            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
+              Tiêu đề <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => setFormData((p) => ({ ...p, title: e.target.value }))}
               placeholder="Nhập tiêu đề thông báo"
-              className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"
+              className="w-full px-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-500/20"
               required
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1">
-              Nội dung <span className="text-red-500">*</span>
+            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
+              Nội dung <span className="text-red-400">*</span>
             </label>
             <textarea
               value={formData.content}
               onChange={(e) => setFormData((p) => ({ ...p, content: e.target.value }))}
               placeholder="Nhập nội dung thông báo"
               rows={4}
-              className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 resize-none"
+              className="w-full px-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-500/20 resize-none"
               required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1">
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
                 Loại thông báo
               </label>
               <select
@@ -498,7 +497,7 @@ function AnnouncementModal({
                     type: e.target.value as Announcement['type'],
                   }))
                 }
-                className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"
+                className="w-full px-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-500/20"
               >
                 {TYPE_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -508,13 +507,13 @@ function AnnouncementModal({
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1">
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
                 Mục tiêu
               </label>
               <select
                 value={formData.target_role}
                 onChange={(e) => setFormData((p) => ({ ...p, target_role: e.target.value }))}
-                className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"
+                className="w-full px-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-500/20"
               >
                 {ROLE_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -527,25 +526,25 @@ function AnnouncementModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1">
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
                 Ngày bắt đầu
               </label>
               <input
                 type="date"
                 value={formData.start_date}
                 onChange={(e) => setFormData((p) => ({ ...p, start_date: e.target.value }))}
-                className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"
+                className="w-full px-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-white [color-scheme:dark] focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-500/20"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1">
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
                 Ngày kết thúc
               </label>
               <input
                 type="date"
                 value={formData.end_date}
                 onChange={(e) => setFormData((p) => ({ ...p, end_date: e.target.value }))}
-                className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"
+                className="w-full px-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-white [color-scheme:dark] focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-500/20"
               />
             </div>
           </div>
@@ -556,9 +555,9 @@ function AnnouncementModal({
               id="is_active"
               checked={formData.is_active}
               onChange={(e) => setFormData((p) => ({ ...p, is_active: e.target.checked }))}
-              className="w-4 h-4 text-primary border-stone-300 rounded focus:ring-primary"
+              className="w-4 h-4 text-primary border-white/20 rounded focus:ring-primary bg-slate-900/60"
             />
-            <label htmlFor="is_active" className="text-sm text-stone-700">
+            <label htmlFor="is_active" className="text-sm text-slate-300">
               Hiển thị ngay sau khi tạo
             </label>
           </div>
@@ -568,7 +567,7 @@ function AnnouncementModal({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="flex-1 border border-stone-300 text-stone-600 font-semibold py-2.5 rounded-xl text-sm transition-all hover:bg-stone-50 disabled:opacity-50"
+              className="flex-1 border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10 font-semibold py-2.5 rounded-xl text-sm transition-all disabled:opacity-50"
             >
               Huỷ
             </button>

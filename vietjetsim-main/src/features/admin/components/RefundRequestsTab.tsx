@@ -10,6 +10,7 @@ import {
   setRefundFeatureLock,
 } from '@/features/admin';
 import type { AdminRefund } from '@/features/admin/types';
+import { ADMIN_CARD_STYLE } from './AdminSection';
 import { getApiErrorMessage } from '@/shared/services';
 
 interface ToastAPI {
@@ -504,30 +505,30 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden">
+      <div className="rounded-2xl border overflow-hidden" style={{ ...ADMIN_CARD_STYLE, padding: 0 }}>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-stone-50 border-b border-stone-100">
-                <th className="text-left text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-2 whitespace-nowrap">
+              <tr className="border-b border-white/5">
+                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 whitespace-nowrap">
                   Mã phiếu
                 </th>
-                <th className="text-left text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-2 whitespace-nowrap">
+                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 whitespace-nowrap">
                   Khách hàng
                 </th>
-                <th className="text-left text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-2 hidden sm:table-cell whitespace-nowrap">
+                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 hidden sm:table-cell whitespace-nowrap">
                   Chuyến bay
                 </th>
-                <th className="text-left text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-2 hidden md:table-cell">
+                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 hidden md:table-cell">
                   Lý do
                 </th>
-                <th className="text-right text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-2 whitespace-nowrap">
+                <th className="text-right text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 whitespace-nowrap">
                   Số tiền
                 </th>
-                <th className="text-center text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-2 whitespace-nowrap">
+                <th className="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 whitespace-nowrap">
                   Trạng thái
                 </th>
-                <th className="text-center text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-2 whitespace-nowrap">
+                <th className="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 whitespace-nowrap">
                   Thao tác
                 </th>
               </tr>
@@ -535,35 +536,35 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
             <tbody>
               {isLoading ? (
                 [1, 2, 3, 4, 5].map((i) => (
-                  <tr key={i} className="border-b border-stone-50 animate-pulse">
-                    <td className="px-4 py-2.5">
-                      <div className="h-4 w-16 bg-stone-200 rounded-full" />
+                  <tr key={i} className="border-b border-white/5 animate-pulse">
+                    <td className="px-5 py-3.5">
+                      <div className="h-4 w-16 bg-slate-500/10 rounded-full" />
                     </td>
-                    <td className="px-4 py-2.5">
-                      <div className="h-4 w-28 bg-stone-200 rounded-full mb-1.5" />
-                      <div className="h-3 w-20 bg-stone-100 rounded-full" />
+                    <td className="px-5 py-3.5">
+                      <div className="h-4 w-28 bg-slate-500/10 rounded-full mb-1.5" />
+                      <div className="h-3 w-20 bg-slate-500/10 rounded-full" />
                     </td>
-                    <td className="px-4 py-2.5 hidden sm:table-cell">
-                      <div className="h-4 w-16 bg-stone-200 rounded-full mb-1.5" />
-                      <div className="h-3 w-24 bg-stone-100 rounded-full" />
+                    <td className="px-5 py-3.5 hidden sm:table-cell">
+                      <div className="h-4 w-16 bg-slate-500/10 rounded-full mb-1.5" />
+                      <div className="h-3 w-24 bg-slate-500/10 rounded-full" />
                     </td>
-                    <td className="px-4 py-2.5 hidden md:table-cell">
-                      <div className="h-4 w-40 bg-stone-100 rounded-full" />
+                    <td className="px-5 py-3.5 hidden md:table-cell">
+                      <div className="h-4 w-40 bg-slate-500/10 rounded-full" />
                     </td>
-                    <td className="px-4 py-2.5 text-right">
-                      <div className="h-4 w-20 bg-stone-200 rounded-full ml-auto" />
+                    <td className="px-5 py-3.5 text-right">
+                      <div className="h-4 w-20 bg-slate-500/10 rounded-full ml-auto" />
                     </td>
-                    <td className="px-4 py-2.5 text-center">
-                      <div className="h-6 w-20 bg-stone-200 rounded-full mx-auto" />
+                    <td className="px-5 py-3.5 text-center">
+                      <div className="h-6 w-20 bg-slate-500/10 rounded-full mx-auto" />
                     </td>
-                    <td className="px-4 py-2.5 text-center">
-                      <div className="h-6 w-28 bg-stone-100 rounded-full mx-auto" />
+                    <td className="px-5 py-3.5 text-center">
+                      <div className="h-6 w-28 bg-slate-500/10 rounded-full mx-auto" />
                     </td>
                   </tr>
                 ))
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center">
+                  <td colSpan={7} className="px-5 py-12 text-center">
                     <div className="flex flex-col sm:flex-row items-center gap-6 max-w-md mx-auto text-left animate-[fadeInUp_0.35s_ease-out]">
                       {/* Illustrated empty state */}
                       <div className="shrink-0 w-32 h-32 flex items-center justify-center">
@@ -574,12 +575,12 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
                         />
                       </div>
                       <div className="text-center sm:text-left flex-1">
-                        <p className="font-black text-base mb-1.5 text-stone-800">
+                        <p className="font-black text-base mb-1.5 text-white">
                           {searchQuery || filterStatus !== 'all'
                             ? 'Không tìm thấy phiếu hoàn tiền'
                             : 'Chưa có yêu cầu hoàn tiền'}
                         </p>
-                        <p className="text-xs text-stone-400 mb-4 leading-relaxed max-w-xs">
+                        <p className="text-xs text-slate-400 mb-4 leading-relaxed max-w-xs">
                           {searchQuery || filterStatus !== 'all'
                             ? 'Bộ lọc hiện tại không khớp với phiếu nào. Hãy thử thay đổi tiêu chí tìm kiếm.'
                             : 'Chưa có yêu cầu hoàn tiền nào từ khách hàng. Các phiếu mới sẽ xuất hiện tại đây khi được gửi.'}
@@ -600,7 +601,7 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
                           )}
                           <button
                             onClick={loadRequests}
-                            className="flex items-center gap-1.5 text-xs font-semibold text-stone-600 border border-stone-200 hover:border-stone-300 hover:bg-stone-50 px-4 py-2 rounded-xl transition-all"
+                            className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 border border-white/10 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-xl transition-all"
                           >
                             <Icon name="ArrowPathIcon" size={13} />
                             Tải lại
@@ -614,37 +615,37 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
                 paginated.map((req, i) => (
                   <tr
                     key={req.id}
-                    className={`border-b border-stone-50 hover:bg-stone-50 transition-colors ${i % 2 === 0 ? '' : 'bg-stone-50/30'}`}
+                    className="border-b border-white/5 hover:bg-white/5 transition-colors"
                   >
-                    <td className="px-4 py-2.5">
-                      <div className="font-mono font-bold text-xs text-stone-900">
+                    <td className="px-5 py-3.5">
+                      <div className="font-mono font-bold text-xs text-white">
                         {req.id.slice(0, 8).toUpperCase()}
                       </div>
-                      <div className="text-xs text-stone-400 mt-0.5">#{req.bookingId}</div>
-                      <div className="text-xs text-stone-300 mt-0.5">{req.createdAt}</div>
+                      <div className="text-xs text-slate-500 mt-0.5">#{req.bookingId}</div>
+                      <div className="text-xs text-slate-600 mt-0.5">{req.createdAt}</div>
                     </td>
-                    <td className="px-4 py-2.5">
-                      <div className="font-medium text-stone-900 text-sm">{req.userName}</div>
-                      <div className="text-xs text-stone-400">{req.userEmail}</div>
+                    <td className="px-5 py-3.5">
+                      <div className="font-medium text-white text-sm">{req.userName}</div>
+                      <div className="text-xs text-slate-400">{req.userEmail}</div>
                     </td>
-                    <td className="px-4 py-2.5 hidden sm:table-cell">
-                      <div className="font-semibold text-stone-900 text-sm">
+                    <td className="px-5 py-3.5 hidden sm:table-cell">
+                      <div className="font-semibold text-white text-sm">
                         {req.flightNo || '—'}
                       </div>
-                      <div className="text-xs text-stone-500">
+                      <div className="text-xs text-slate-400">
                         {req.route}
                         {req.flightDate ? ` · ${req.flightDate}` : ''}
                       </div>
                     </td>
-                    <td className="px-4 py-2.5 hidden md:table-cell max-w-[200px]">
-                      <p className="text-xs text-stone-600 line-clamp-2">{req.reason}</p>
+                    <td className="px-5 py-3.5 hidden md:table-cell max-w-[200px]">
+                      <p className="text-xs text-slate-400 line-clamp-2">{req.reason}</p>
                     </td>
-                    <td className="px-4 py-2.5 text-right">
-                      <span className="font-black text-sm text-stone-900">
+                    <td className="px-5 py-3.5 text-right">
+                      <span className="font-black text-sm text-white">
                         {req.amount > 0 ? req.amount.toLocaleString('vi-VN') + '₫' : '—'}
                       </span>
                     </td>
-                    <td className="px-4 py-2.5 text-center">
+                    <td className="px-5 py-3.5 text-center">
                       <span
                         className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full ${STATUS_MAP[req.status]?.cls ?? ''}`}
                       >
@@ -655,12 +656,12 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
                         {STATUS_MAP[req.status]?.label ?? req.status}
                       </span>
                     </td>
-                    <td className="px-4 py-2.5 text-center">
+                    <td className="px-5 py-3.5 text-center">
                       <div className="flex items-center justify-center gap-1 mb-1.5">
                         <button
                           onClick={() => openEditModal(req)}
                           disabled={processingId === req.id}
-                          className="flex items-center gap-1 text-xs font-bold text-stone-700 bg-stone-100 hover:bg-stone-200 border border-stone-200 px-2 py-1 rounded-md transition-all disabled:opacity-50"
+                          className="flex items-center gap-1 text-xs font-bold text-slate-300 bg-white/5 hover:bg-white/10 border border-white/10 px-2 py-1 rounded-md transition-all disabled:opacity-50"
                           title="Chỉnh sửa thông tin phiếu"
                         >
                           <Icon name="PencilSquareIcon" size={11} />
@@ -671,8 +672,8 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
                           disabled={processingId === req.id}
                           className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md border transition-all disabled:opacity-50 ${
                             req.visibleToUser
-                              ? 'text-slate-600 bg-slate-50 hover:bg-slate-100 border-slate-200'
-                              : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-200'
+                              ? 'text-slate-400 bg-white/5 hover:bg-white/10 border-white/10'
+                              : 'text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/20'
                           }`}
                           title={
                             req.visibleToUser
@@ -689,7 +690,7 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
                           <button
                             onClick={() => openModal(req, 'approve')}
                             disabled={processingId === req.id}
-                            className="flex items-center gap-1 text-xs font-bold text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 px-2 py-1 rounded-md transition-all disabled:opacity-50"
+                            className="flex items-center gap-1 text-xs font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 px-2 py-1 rounded-md transition-all disabled:opacity-50"
                           >
                             <Icon name="CheckIcon" size={11} />
                             Duyệt
@@ -697,7 +698,7 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
                           <button
                             onClick={() => openModal(req, 'reject')}
                             disabled={processingId === req.id}
-                            className="flex items-center gap-1 text-xs font-bold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 px-2 py-1 rounded-md transition-all disabled:opacity-50"
+                            className="flex items-center gap-1 text-xs font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 px-2 py-1 rounded-md transition-all disabled:opacity-50"
                           >
                             <Icon name="XMarkIcon" size={11} />
                             Từ chối
@@ -705,10 +706,10 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
                         </div>
                       ) : (
                         <div className="text-center">
-                          <div className="text-xs text-stone-400">{req.processedAt}</div>
+                          <div className="text-xs text-slate-500">{req.processedAt}</div>
                           {req.adminNote && (
                             <div
-                              className="text-xs text-stone-500 mt-0.5 max-w-[140px] mx-auto line-clamp-1"
+                              className="text-xs text-slate-400 mt-0.5 max-w-[140px] mx-auto line-clamp-1"
                               title={req.adminNote}
                             >
                               {req.adminNote}
@@ -726,28 +727,28 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
 
         {/* Pagination */}
         {filtered.length > 0 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-2.5 border-t border-stone-100 bg-stone-50/50 gap-3">
+          <div className="flex flex-col sm:flex-row items-center justify-between px-5 py-3 border-t border-white/5 gap-3">
             <div className="flex items-center gap-3">
-              <p className="text-xs text-stone-400 font-medium">
+              <p className="text-xs text-slate-500 font-medium">
                 {filtered.length > pageSize
                   ? `Hiển thị ${(safePage - 1) * pageSize + 1}–${Math.min(safePage * pageSize, filtered.length)} / ${filtered.length} phiếu`
                   : `${filtered.length} phiếu`}
               </p>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-stone-400">Hiển thị:</span>
+                <span className="text-xs text-slate-500">Hiển thị:</span>
                 <select
                   value={pageSize}
                   onChange={(e) => {
                     setPageSize(Number(e.target.value));
                     setCurrentPage(1);
                   }}
-                  className="text-xs font-semibold border border-stone-200 rounded-lg px-2 py-1 bg-white text-stone-700 focus:outline-none focus:border-primary cursor-pointer"
+                  className="text-xs font-semibold border border-white/10 rounded-lg px-2 py-1 bg-slate-900/60 text-white focus:outline-none focus:border-primary cursor-pointer"
                 >
                   <option value={5}>5</option>
                   <option value={10}>10</option>
                   <option value={25}>25</option>
                 </select>
-                <span className="text-xs text-stone-400">hàng</span>
+                <span className="text-xs text-slate-500">hàng</span>
               </div>
             </div>
             {totalPages > 1 && (

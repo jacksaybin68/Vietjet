@@ -8,6 +8,7 @@ import {
   validatePassword,
 } from '@/lib/auth';
 import { normalizePhone } from '@/lib/utils';
+import { sendRegistrationSuccessEmail } from '@/lib/mail';
 
 export async function POST(request: NextRequest) {
   try {
@@ -91,6 +92,14 @@ export async function POST(request: NextRequest) {
 
     setAuthCookiesOnResponse(response, tokens);
     setCsrfCookieOnResponse(response);
+
+    // Email chào mừng — fail-soft trong sendMail, không chặn response.
+    if (userRecord.email) {
+      void sendRegistrationSuccessEmail({
+        to: userRecord.email,
+        fullName: userRecord.full_name,
+      });
+    }
 
     return response;
   } catch (error) {
