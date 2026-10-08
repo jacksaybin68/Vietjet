@@ -1,5 +1,31 @@
 # Vietjet Air Server - Thông Tin Chạy Thử
 
+## 🖥️ Triển khai VPS (production)
+
+- **URL production**: http://156.67.214.184 (nginx → 127.0.0.1:4028)
+- **VPS**: Ubuntu 24.04, srv1520932.hstgr.cloud, Node v22.23.1
+- **Mã nguồn**: `/var/www/vietjet` (clone từ
+  `https://github.com/jacksaybin68/Vietjet.git`, app ở `vietjetsim-main/`)
+- **Process manager**: pm2, app tên `vietjet`, auto-start qua systemd
+  (`pm2 save` + `pm2 startup` đã chạy)
+- **Cấu hình pm2**: `/var/www/vietjet/ecosystem.config.js`
+- **Cấu hình nginx**: `/etc/nginx/sites-available/vietjet`
+  (reverse proxy `server_name 156.67.214.184` → `127.0.0.1:4028`)
+- **`.env.local`**: copy từ máy dev, `NEXT_PUBLIC_SITE_URL=http://156.67.214.184`
+  (biến `NEXT_PUBLIC_*` được embed lúc build — sửa xong phải `npm run build`
+  lại rồi `pm2 restart vietjet`)
+
+### Deploy lại sau khi push code
+
+```bash
+ssh root@156.67.214.184
+cd /var/www/vietjet && git pull
+cd vietjetsim-main && npm ci && npm run build
+pm2 restart vietjet
+```
+
+---
+
 ## ✅ Trạng thái: hướng dẫn đã được kiểm chứng lại
 
 > Bản ghi chú trước nói phải dùng custom `server.js` để né "Node v26.7.0 bug".
