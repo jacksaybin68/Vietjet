@@ -39,16 +39,19 @@ pm2 restart vietjet
 - `Booking@vietjet.shop` — mailbox Hostinger, dùng cho SMTP gửi mail
   (xem `.env.local` trên VPS, KHÔNG commit vào repo)
 
-### Seed chuyến bay tương lai (chạy thủ công, không có cron)
+### Seed chuyến bay tương lai (cron tự động)
+
+- Cron root VPS: `0 3 * * 0` (Chủ nhật 03:00) chạy idempotent
+  `scripts/seed-future-flights.cjs`, log `/var/log/vietjet-seed.log`
+- Credentials trong `/root/.vietjet-seed.env` (chmod 600, KHÔNG trong repo)
+- Script giữ 21 ngày (khối VJ3001+); tuyến migration đã phủ thì bỏ qua
+- Chạy tay khi cần:
 
 ```bash
 cd /var/www/vietjet/vietjetsim-main
-SITE_URL=http://127.0.0.1:4028 SEED_ADMIN_EMAIL=Admin \
-  SEED_ADMIN_PASSWORD='<mat-khau-Admin>' \
+set -a; . /root/.vietjet-seed.env; set +a; SITE_URL=http://127.0.0.1:4028 \
   node scripts/seed-future-flights.cjs
 ```
-Script idempotent: window 21 ngày, flight numbers khối VJ3001+.
-Chạy lại khi sắp hết window (kiểm tra: `SELECT max(depart_time) FROM flights`).
 
 ### Mail gửi (SMTP Hostinger)
 
