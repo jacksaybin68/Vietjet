@@ -3,7 +3,7 @@
  *
  * This module provides the sql template tag for database queries.
  * In production, uses @neondatabase/serverless with connection pooling.
- * In development/demo mode, uses a mock implementation.
+ * In development mode (DATABASE_URL trống), uses a mock implementation.
  */
 
 import { neon, neonConfig } from '@neondatabase/serverless';
@@ -96,12 +96,12 @@ function createMockSql() {
   let chatSeq = 0;
   const nextChatId = (prefix: string) => `${prefix}-mock-${++chatSeq}`;
 
-  const seedConversationId = 'conv-mock-demo';
+  const seedConversationId = 'conv-mock-support';
   chatConversations.push({
     id: seedConversationId,
-    user_id: 'mock-user-demo',
+    user_id: 'mock-user-support',
     user_email: 'user@vietjetair.vn',
-    user_name: 'Người dùng Demo',
+    user_name: 'Khách hàng',
     status: 'active',
     last_message: 'Tôi cần hỗ trợ đổi ngày bay',
     unread_by_user: 0,
@@ -113,7 +113,7 @@ function createMockSql() {
     {
       id: nextChatId('msg'),
       conversation_id: seedConversationId,
-      sender_id: 'mock-user-demo',
+      sender_id: 'mock-user-support',
       sender_role: 'user',
       content: 'Xin chào, tôi cần hỗ trợ.',
       read_at: null,
@@ -122,7 +122,7 @@ function createMockSql() {
     {
       id: nextChatId('msg'),
       conversation_id: seedConversationId,
-      sender_id: 'mock-user-demo',
+      sender_id: 'mock-user-support',
       sender_role: 'user',
       content: 'Tôi cần hỗ trợ đổi ngày bay',
       read_at: null,

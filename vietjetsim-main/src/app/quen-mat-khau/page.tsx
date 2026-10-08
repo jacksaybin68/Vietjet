@@ -13,7 +13,7 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
-  const [demoResetUrl, setDemoResetUrl] = useState('');
+  const [directResetUrl, setDirectResetUrl] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,8 +22,8 @@ export default function ForgotPasswordPage() {
     try {
       const result = await requestPasswordReset(identifier.trim());
       setSent(true);
-      // The server echoes the link only outside production (no mailer wired up).
-      if (result.resetUrl) setDemoResetUrl(result.resetUrl);
+      // Server chỉ kèm link khi chạy ngoài production (không có hộp thư để nhận).
+      if (result.resetUrl) setDirectResetUrl(result.resetUrl);
     } catch (err) {
       setError(getApiErrorMessage(err, 'Không thể gửi yêu cầu. Vui lòng thử lại.'));
     } finally {
@@ -48,11 +48,11 @@ export default function ForgotPasswordPage() {
             trong 30 phút.
           </p>
 
-          {demoResetUrl && (
+          {directResetUrl && (
             <div className="rounded-xl border border-[rgb(var(--accent-rgb))]/40 bg-[rgb(var(--accent-rgb))]/10 px-4 py-3 text-xs text-[var(--foreground)]">
-              <p className="font-semibold">Chế độ demo (chưa cấu hình email)</p>
+              <p className="font-semibold">Môi trường phát triển — mở trực tiếp:</p>
               <Link
-                href={demoResetUrl}
+                href={directResetUrl}
                 className="mt-1 inline-block font-semibold text-primary hover:underline"
               >
                 Mở liên kết đặt lại mật khẩu →

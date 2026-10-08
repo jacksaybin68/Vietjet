@@ -22,14 +22,14 @@ export const metadata: Metadata = {
     template: '%s | Vietjet Air',
   },
   description:
-    'Vietjet Air là hệ thống mô phỏng trải nghiệm tìm kiếm, đặt chỗ, chọn ghế và thanh toán chuyến bay.',
+    'Vietjet Air — đặt vé máy bay trực tuyến: tìm kiếm, đặt chỗ, chọn ghế và thanh toán chuyến bay.',
   robots: {
     index: false,
     follow: false,
   },
   openGraph: {
     title: 'Vietjet - Đặt Vé Máy Bay',
-    description: 'Trải nghiệm mô phỏng tìm kiếm, đặt chỗ, chọn ghế và thanh toán chuyến bay.',
+    description: 'Tìm kiếm, đặt chỗ, chọn ghế và thanh toán chuyến bay Vietjet Air.',
     url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:4028',
     siteName: 'Vietjet Air',
     images: [
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Vietjet - Đặt Vé Máy Bay',
-    description: 'Trải nghiệm mô phỏng tìm kiếm, đặt chỗ, chọn ghế và thanh toán chuyến bay.',
+    description: 'Tìm kiếm, đặt chỗ, chọn ghế và thanh toán chuyến bay Vietjet Air.',
     images: ['/logo.png'],
   },
   icons: {

@@ -104,7 +104,7 @@ export default function Footer() {
 
       <div className="bg-[var(--vj-navy)] text-white">
         <div className="mx-auto flex max-w-[1240px] flex-col gap-2 px-4 py-4 text-xs text-white/70 sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 Vietjet Air · Dự án mô phỏng giao diện và nghiệp vụ đặt vé.</p>
+          <p>© 2026 Vietjet Air · Đặt vé máy bay trực tuyến.</p>
           <div className="flex flex-wrap gap-x-5 font-semibold [&>a]:py-1.5">
             <Link href="/gioi-thieu" className="hover:text-[var(--accent)]">
               Điều khoản

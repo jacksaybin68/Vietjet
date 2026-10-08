@@ -19,7 +19,7 @@
  * row, the suffix duplicated it, and a number with a letter in it cannot be
  * parsed by the admin console at all. Migration 035 moved all of them into the
  * numeric 3xxx block. The one shape still worth accepting is `VJ101-1000`:
- * `<route>-<block>` from the demo seed, which two live bookings reference and
+ * `<route>-<block>` from the original seed, which two live bookings reference and
  * which no re-numbering could touch.
  */
 
