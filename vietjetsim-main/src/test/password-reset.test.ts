@@ -21,6 +21,7 @@ vi.mock('bcryptjs', () => ({
 vi.mock('@/lib/db', () => ({
   updateUserPassword: vi.fn().mockResolvedValue(undefined),
   invalidateUserRefreshTokens: vi.fn().mockResolvedValue(undefined),
+  findUserById: vi.fn().mockResolvedValue({ id: 'user-1', email: 'u@x.com' }),
 }));
 
 vi.mock('@/lib/security-db', () => ({

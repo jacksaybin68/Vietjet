@@ -10,6 +10,7 @@ import {
   type AdminFlight,
 } from '@/features/admin';
 import { getApiErrorMessage } from '@/shared/services';
+import { AdminTabHeader, ADMIN_CARD_STYLE, ADMIN_ACTION_BTN } from './AdminSection';
 import { AIRPORT_CITIES } from '@/shared/constants';
 import { FLIGHT_NO_PATTERN, normalizeFlightNo } from '@/lib/flight-no';
 import { toVietnamInstant, toVietnamWallClock } from '@/lib/utils';
@@ -537,19 +538,20 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div>
-          <h2 className="font-bold text-stone-900">Quản lý chuyến bay</h2>
-          <p className="text-sm text-stone-400">{flights.length} chuyến bay trong hệ thống</p>
-        </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-bold px-4 py-2.5 rounded-xl transition-all shadow-glow-red hover:shadow-none text-sm"
-        >
-          <Icon name="PlusIcon" size={16} />
-          Thêm chuyến bay
-        </button>
-      </div>
+      <AdminTabHeader
+        icon="PaperAirplaneIcon"
+        title="Quản lý chuyến bay"
+        subtitle={`${flights.length} chuyến bay trong hệ thống`}
+        actions={
+          <button
+            onClick={() => setShowAddModal(true)}
+            className={`${ADMIN_ACTION_BTN} text-white bg-primary hover:bg-primary-dark shadow-glow-red`}
+          >
+            <Icon name="PlusIcon" size={14} />
+            Thêm chuyến bay
+          </button>
+        }
+      />
 
       {/* Search + Date Range */}
       <div className="flex flex-col sm:flex-row gap-3">
@@ -557,7 +559,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
           <Icon
             name="MagnifyingGlassIcon"
             size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
           />
           <input
             type="text"
@@ -567,7 +569,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               setCurrentPage(1);
             }}
             placeholder="Tìm theo số hiệu, điểm đi/đến..."
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm form-input"
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-900/60 border border-white/10 rounded-xl text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -575,7 +577,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
             <Icon
               name="CalendarDaysIcon"
               size={15}
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"
             />
             <input
               type="date"
@@ -584,16 +586,16 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 setDateFrom(e.target.value);
                 setCurrentPage(1);
               }}
-              className="pl-8 pr-3 py-2.5 bg-white border border-stone-200 rounded-xl text-sm form-input w-40"
+              className="pl-8 pr-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-xl text-sm text-white [color-scheme:dark] focus:outline-none focus:border-indigo-500/50 w-40"
               title="Từ ngày"
             />
           </div>
-          <span className="text-stone-400 text-sm font-medium">–</span>
+          <span className="text-slate-500 text-sm font-medium">–</span>
           <div className="relative">
             <Icon
               name="CalendarDaysIcon"
               size={15}
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"
             />
             <input
               type="date"
@@ -602,7 +604,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 setDateTo(e.target.value);
                 setCurrentPage(1);
               }}
-              className="pl-8 pr-3 py-2.5 bg-white border border-stone-200 rounded-xl text-sm form-input w-40"
+              className="pl-8 pr-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-xl text-sm text-white [color-scheme:dark] focus:outline-none focus:border-indigo-500/50 w-40"
               title="Đến ngày"
             />
           </div>
@@ -628,12 +630,12 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all border ${
                   isActive
                     ? `${tab.color} border-transparent shadow-sm`
-                    : 'bg-white border-stone-200 text-stone-500 hover:border-stone-300 hover:text-stone-700'
+                    : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'
                 }`}
               >
                 {tab.label}
                 <span
-                  className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${isActive ? 'bg-white/60' : 'bg-stone-100 text-stone-400'}`}
+                  className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${isActive ? 'bg-white/60' : 'bg-slate-500/10 text-slate-500'}`}
                 >
                   {count}
                 </span>
@@ -644,7 +646,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
         {(activeFilterCount > 0 || searchQuery) && (
           <button
             onClick={clearAllFilters}
-            className="flex items-center gap-1.5 text-xs font-semibold text-stone-500 hover:text-red-500 transition-colors px-3 py-1.5 rounded-full border border-stone-200 hover:border-red-200 hover:bg-red-50"
+            className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-red-400 transition-colors px-3 py-1.5 rounded-full border border-white/10 hover:border-red-500/30 hover:bg-red-500/10"
           >
             <Icon name="XMarkIcon" size={13} />
             Xoá bộ lọc
@@ -658,53 +660,53 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden">
+      <div className="rounded-2xl border overflow-hidden" style={{ ...ADMIN_CARD_STYLE, padding: 0 }}>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-stone-50 border-b border-stone-100">
+              <tr className="border-b border-white/5">
                 <th
-                  className="text-left text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-2 cursor-pointer hover:text-stone-600 select-none whitespace-nowrap"
+                  className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 cursor-pointer hover:text-slate-400 select-none whitespace-nowrap"
                   onClick={() => handleSort('flightNo')}
                 >
                   Số hiệu
                   <SortIcon col="flightNo" />
                 </th>
-                <th className="text-left text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-2">
+                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4">
                   Hành trình
                 </th>
-                <th className="text-left text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-2 hidden sm:table-cell">
+                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 hidden sm:table-cell">
                   Giờ bay
                 </th>
                 <th
-                  className="text-left text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-2 hidden md:table-cell cursor-pointer hover:text-stone-600 select-none whitespace-nowrap"
+                  className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 hidden md:table-cell cursor-pointer hover:text-slate-400 select-none whitespace-nowrap"
                   onClick={() => handleSort('date')}
                 >
                   Ngày
                   <SortIcon col="date" />
                 </th>
                 <th
-                  className="text-right text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-2 cursor-pointer hover:text-stone-600 select-none whitespace-nowrap"
+                  className="text-right text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 cursor-pointer hover:text-slate-400 select-none whitespace-nowrap"
                   onClick={() => handleSort('price')}
                 >
                   Giá vé
                   <SortIcon col="price" />
                 </th>
                 <th
-                  className="text-center text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-2 hidden lg:table-cell cursor-pointer hover:text-stone-600 select-none whitespace-nowrap"
+                  className="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 hidden lg:table-cell cursor-pointer hover:text-slate-400 select-none whitespace-nowrap"
                   onClick={() => handleSort('booked')}
                 >
                   Tải lượng
                   <SortIcon col="booked" />
                 </th>
                 <th
-                  className="text-center text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-2 cursor-pointer hover:text-stone-600 select-none whitespace-nowrap"
+                  className="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 cursor-pointer hover:text-slate-400 select-none whitespace-nowrap"
                   onClick={() => handleSort('status')}
                 >
                   Trạng thái
                   <SortIcon col="status" />
                 </th>
-                <th className="text-center text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-2">
+                <th className="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4">
                   Thao tác
                 </th>
               </tr>
@@ -713,33 +715,33 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               {isLoading ? (
                 <>
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <tr key={i} className="border-b border-stone-50 animate-pulse">
-                      <td className="px-4 py-2.5">
-                        <div className="h-4 w-16 bg-stone-200 rounded-full" />
+                    <tr key={i} className="border-b border-white/5 animate-pulse">
+                      <td className="px-5 py-3.5">
+                        <div className="h-4 w-16 bg-slate-500/10 rounded-full" />
                       </td>
-                      <td className="px-4 py-2.5">
-                        <div className="h-4 w-24 bg-stone-200 rounded-full mb-1.5" />
-                        <div className="h-3 w-16 bg-stone-100 rounded-full" />
+                      <td className="px-5 py-3.5">
+                        <div className="h-4 w-24 bg-slate-500/10 rounded-full mb-1.5" />
+                        <div className="h-3 w-16 bg-slate-500/10 rounded-full" />
                       </td>
-                      <td className="px-4 py-2.5 hidden sm:table-cell">
-                        <div className="h-4 w-20 bg-stone-200 rounded-full" />
+                      <td className="px-5 py-3.5 hidden sm:table-cell">
+                        <div className="h-4 w-20 bg-slate-500/10 rounded-full" />
                       </td>
-                      <td className="px-4 py-2.5 hidden md:table-cell">
-                        <div className="h-4 w-24 bg-stone-200 rounded-full" />
+                      <td className="px-5 py-3.5 hidden md:table-cell">
+                        <div className="h-4 w-24 bg-slate-500/10 rounded-full" />
                       </td>
-                      <td className="px-4 py-2.5 text-right">
-                        <div className="h-4 w-20 bg-stone-200 rounded-full ml-auto" />
+                      <td className="px-5 py-3.5 text-right">
+                        <div className="h-4 w-20 bg-slate-500/10 rounded-full ml-auto" />
                       </td>
-                      <td className="px-4 py-2.5 hidden lg:table-cell">
-                        <div className="h-2 w-full bg-stone-200 rounded-full" />
+                      <td className="px-5 py-3.5 hidden lg:table-cell">
+                        <div className="h-2 w-full bg-slate-500/10 rounded-full" />
                       </td>
-                      <td className="px-4 py-2.5 text-center">
-                        <div className="h-6 w-20 bg-stone-200 rounded-full mx-auto" />
+                      <td className="px-5 py-3.5 text-center">
+                        <div className="h-6 w-20 bg-slate-500/10 rounded-full mx-auto" />
                       </td>
-                      <td className="px-4 py-2.5 text-center">
+                      <td className="px-5 py-3.5 text-center">
                         <div className="flex items-center justify-center gap-1.5">
-                          <div className="h-6 w-6 bg-stone-200 rounded-md" />
-                          <div className="h-6 w-6 bg-stone-200 rounded-md" />
+                          <div className="h-6 w-6 bg-slate-500/10 rounded-md" />
+                          <div className="h-6 w-6 bg-slate-500/10 rounded-md" />
                         </div>
                       </td>
                     </tr>
@@ -747,14 +749,14 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 </>
               ) : hasError ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-16 text-center">
+                  <td colSpan={8} className="px-5 py-16 text-center">
                     <div className="flex flex-col items-center gap-3 animate-[fadeInUp_0.35s_ease-out]">
-                      <div className="w-16 h-16 bg-red-50 border border-red-100 rounded-2xl flex items-center justify-center">
+                      <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center justify-center">
                         <Icon name="ExclamationTriangleIcon" size={28} className="text-red-400" />
                       </div>
                       <div>
-                        <p className="font-bold text-stone-700 text-sm">Không thể tải dữ liệu</p>
-                        <p className="text-xs text-stone-400 mt-1 max-w-xs mx-auto">
+                        <p className="font-bold text-white text-sm">Không thể tải dữ liệu</p>
+                        <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
                           Đã xảy ra lỗi khi tải danh sách chuyến bay. Vui lòng thử lại.
                         </p>
                       </div>
@@ -770,16 +772,16 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-14 text-center">
+                  <td colSpan={8} className="px-5 py-14 text-center">
                     <div className="flex flex-col items-center gap-3 animate-[fadeInUp_0.35s_ease-out]">
-                      <div className="w-16 h-16 bg-stone-50 border border-stone-100 rounded-2xl flex items-center justify-center animate-[pulse_2.5s_ease-in-out_infinite]">
-                        <Icon name="PaperAirplaneIcon" size={28} className="text-stone-300" />
+                      <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center animate-[pulse_2.5s_ease-in-out_infinite]">
+                        <Icon name="PaperAirplaneIcon" size={28} className="text-slate-600" />
                       </div>
                       <div>
-                        <p className="font-bold text-stone-700 text-sm">
+                        <p className="font-bold text-white text-sm">
                           Không tìm thấy chuyến bay
                         </p>
-                        <p className="text-xs text-stone-400 mt-1 max-w-xs mx-auto">
+                        <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
                           {searchQuery || statusFilter !== 'all' || dateFrom || dateTo
                             ? 'Bộ lọc hiện tại không khớp với chuyến bay nào. Hãy thử thay đổi tiêu chí tìm kiếm.'
                             : 'Chưa có chuyến bay nào trong hệ thống.'}
@@ -797,7 +799,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                         )}
                         <button
                           onClick={retryLoad}
-                          className="flex items-center gap-1.5 text-xs font-semibold text-stone-600 border border-stone-200 hover:border-stone-300 hover:bg-stone-50 px-4 py-2 rounded-xl transition-all"
+                          className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 border border-white/10 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-xl transition-all"
                         >
                           <Icon name="ArrowPathIcon" size={13} />
                           Tải lại
@@ -813,43 +815,43 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                     onClick={() => setSelectedFlight(flight)}
                     className="border-b border-white/[0.03] hover:bg-white/[0.05] transition-all group cursor-pointer"
                   >
-                    <td className="px-4 py-2.5">
+                    <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2">
                         <div className="w-5 h-5 bg-gradient-red rounded flex items-center justify-center">
                           <Icon name="PaperAirplaneIcon" size={9} className="text-white" />
                         </div>
-                        <span className="font-bold text-sm text-stone-900">{flight.flightNo}</span>
+                        <span className="font-bold text-sm text-white">{flight.flightNo}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-2.5">
-                      <div className="flex items-center gap-1.5 text-sm font-semibold text-stone-900">
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-1.5 text-sm font-semibold text-white">
                         {flight.from}
-                        <Icon name="ArrowRightIcon" size={11} className="text-stone-400" />
+                        <Icon name="ArrowRightIcon" size={11} className="text-slate-500" />
                         {flight.to}
                       </div>
                     </td>
-                    <td className="px-4 py-2.5 hidden sm:table-cell">
-                      <div className="text-sm text-stone-600">
+                    <td className="px-5 py-3.5 hidden sm:table-cell">
+                      <div className="text-sm text-slate-400">
                         {flight.departTime} → {flight.arriveTime}
                       </div>
                     </td>
-                    <td className="px-4 py-2.5 hidden md:table-cell">
-                      <span className="text-sm text-stone-600">{flight.date}</span>
+                    <td className="px-5 py-3.5 hidden md:table-cell">
+                      <span className="text-sm text-slate-400">{flight.date}</span>
                     </td>
-                    <td className="px-4 py-2.5 text-right">
-                      <span className="font-bold text-stone-900 text-sm">
+                    <td className="px-5 py-3.5 text-right">
+                      <span className="font-bold text-white text-sm">
                         {flight.price.toLocaleString('vi-VN')}₫
                       </span>
                     </td>
-                    <td className="px-4 py-2.5 hidden lg:table-cell">
+                    <td className="px-5 py-3.5 hidden lg:table-cell">
                       <div className="flex items-center gap-2">
-                        <div className="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden">
+                        <div className="flex-1 h-1.5 bg-slate-500/10 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-primary rounded-full transition-all"
                             style={{ width: `${(flight.booked / flight.capacity) * 100}%` }}
                           />
                         </div>
-                        <span className="text-xs text-stone-500 whitespace-nowrap">
+                        <span className="text-xs text-slate-400 whitespace-nowrap">
                           {flight.booked}/{flight.capacity}
                         </span>
                       </div>
@@ -867,11 +869,11 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                         <option value="cancelled">Huỷ</option>
                       </select>
                     </td>
-                    <td className="px-4 py-2.5">
+                    <td className="px-5 py-3.5">
                       <div className="flex items-center justify-center gap-1.5">
                         <button
                           onClick={() => setEditingFlight(flight)}
-                          className="w-6 h-6 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md flex items-center justify-center transition-colors"
+                          className="w-6 h-6 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-md flex items-center justify-center transition-colors"
                           title="Chỉnh sửa"
                         >
                           <Icon name="PencilIcon" size={12} />
@@ -879,7 +881,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                         <button
                           onClick={() => handleDelete(flight.id)}
                           disabled={deletingId === flight.id}
-                          className="w-6 h-6 bg-red-50 hover:bg-red-100 text-red-500 rounded-md flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-6 h-6 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-md flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           title="Xoá"
                         >
                           {deletingId === flight.id ? (
@@ -911,28 +913,28 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
           </table>
         </div>
         {sorted.length > 0 && (
-          <div className="px-4 py-2.5 border-t border-stone-100 bg-stone-50/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="px-5 py-3 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <span className="text-xs text-stone-400">
+              <span className="text-xs text-slate-500">
                 {sorted.length > pageSize
                   ? `Hiển thị ${(safePage - 1) * pageSize + 1}–${Math.min(safePage * pageSize, sorted.length)} / ${sorted.length} chuyến bay`
                   : `${sorted.length} / ${flights.length} chuyến bay`}
               </span>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-stone-400">Hiển thị:</span>
+                <span className="text-xs text-slate-500">Hiển thị:</span>
                 <select
                   value={pageSize}
                   onChange={(e) => {
                     setPageSize(Number(e.target.value));
                     setCurrentPage(1);
                   }}
-                  className="text-xs font-semibold border border-stone-200 rounded-lg px-2 py-1 bg-white text-stone-700 focus:outline-none focus:border-primary cursor-pointer"
+                  className="text-xs font-semibold border border-white/10 rounded-lg px-2 py-1 bg-slate-900/60 text-white focus:outline-none focus:border-primary cursor-pointer"
                 >
                   <option value={10}>10</option>
                   <option value={25}>25</option>
                   <option value={50}>50</option>
                 </select>
-                <span className="text-xs text-stone-400">hàng</span>
+                <span className="text-xs text-slate-500">hàng</span>
               </div>
             </div>
             {totalPages > 1 && (
@@ -999,7 +1001,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   <select
                     value={newFlight.from}
                     onChange={(e) => setNewFlight((p) => ({ ...p, from: e.target.value }))}
-                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm form-input"
+                    className="w-full px-3 py-2 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500/50 form-input"
                   >
                     {AIRPORTS.map((a) => (
                       <option key={a}>{a}</option>
@@ -1007,13 +1009,13 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1">
+                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
                     Điểm đến
                   </label>
                   <select
                     value={newFlight.to}
                     onChange={(e) => setNewFlight((p) => ({ ...p, to: e.target.value }))}
-                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm form-input"
+                    className="w-full px-3 py-2 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500/50 form-input"
                   >
                     {AIRPORTS.map((a) => (
                       <option key={a}>{a}</option>
@@ -1023,33 +1025,33 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1">
+                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
                     Giờ đi
                   </label>
                   <input
                     type="time"
                     value={newFlight.departTime}
                     onChange={(e) => setNewFlight((p) => ({ ...p, departTime: e.target.value }))}
-                    className={`w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm form-input ${newFlight.departTime ? 'form-input-valid' : ''}`}
+                    className={`w-full px-3 py-2 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-white [color-scheme:dark] focus:outline-none focus:border-indigo-500/50 form-input ${newFlight.departTime ? 'form-input-valid' : ''}`}
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1">
+                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
                     Giờ đến
                   </label>
                   <input
                     type="time"
                     value={newFlight.arriveTime}
                     onChange={(e) => setNewFlight((p) => ({ ...p, arriveTime: e.target.value }))}
-                    className={`w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm form-input ${newFlight.arriveTime ? 'form-input-valid' : ''}`}
+                    className={`w-full px-3 py-2 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-white [color-scheme:dark] focus:outline-none focus:border-indigo-500/50 form-input ${newFlight.arriveTime ? 'form-input-valid' : ''}`}
                     required
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1">
+                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
                     Giá vé Phổ thông (₫)
                   </label>
                   <div className={`form-field-float ${newFlight.economyPrice ? 'has-value' : ''}`}>
@@ -1060,7 +1062,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                         setNewFlight((p) => ({ ...p, economyPrice: e.target.value }))
                       }
                       placeholder=" "
-                      className={`w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm form-input ${Number(newFlight.economyPrice) > 0 ? 'form-input-valid' : ''}`}
+                      className={`w-full px-3 py-2 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500/50 form-input ${Number(newFlight.economyPrice) > 0 ? 'form-input-valid' : ''}`}
                       required
                     />
                     <label className="form-label-float">499000</label>
@@ -1070,7 +1072,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                     the hint says so rather than leaving the operator to guess why
                     the thẻ Business trên trang kết quả lấy một con số từ đâu. */}
                 <div>
-                  <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1">
+                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
                     Giá vé Thương gia (₫)
                   </label>
                   <div className={`form-field-float ${newFlight.businessPrice ? 'has-value' : ''}`}>
@@ -1081,7 +1083,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                         setNewFlight((p) => ({ ...p, businessPrice: e.target.value }))
                       }
                       placeholder=" "
-                      className={`w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm form-input ${Number(newFlight.businessPrice) > 0 ? 'form-input-valid' : ''}`}
+                      className={`w-full px-3 py-2 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500/50 form-input ${Number(newFlight.businessPrice) > 0 ? 'form-input-valid' : ''}`}
                     />
                     <label className="form-label-float">Để trống = ×2,77</label>
                   </div>
@@ -1089,7 +1091,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1">
+                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
                     Sức chứa
                   </label>
                   <div className={`form-field-float ${newFlight.capacity ? 'has-value' : ''}`}>
@@ -1098,7 +1100,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                       value={newFlight.capacity}
                       onChange={(e) => setNewFlight((p) => ({ ...p, capacity: e.target.value }))}
                       placeholder=" "
-                      className={`w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm form-input ${Number(newFlight.capacity) > 0 ? 'form-input-valid' : ''}`}
+                      className={`w-full px-3 py-2 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500/50 form-input ${Number(newFlight.capacity) > 0 ? 'form-input-valid' : ''}`}
                       required
                     />
                     <label className="form-label-float">180</label>
@@ -1110,7 +1112,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   type="button"
                   onClick={() => setShowAddModal(false)}
                   disabled={isAdding}
-                  className="flex-1 border border-stone-300 text-stone-600 font-semibold py-2.5 rounded-xl text-sm transition-all hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10 font-semibold py-2.5 rounded-xl text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Huỷ
                 </button>
@@ -1151,9 +1153,9 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
       {/* Edit Modal — Full flight update form */}
       {editingFlight && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+          <div className="rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border" style={{ ...ADMIN_CARD_STYLE, padding: 0 }}>
             <div
-              className="flex items-center justify-between p-5 border-b border-stone-100"
+              className="flex items-center justify-between p-5 border-b border-white/5"
               style={{ background: 'linear-gradient(135deg, #1A2948 0%, #2D3E5F 100%)' }}
             >
               <div>
@@ -1175,8 +1177,8 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
             <form onSubmit={handleSaveEdit} className="p-5 space-y-4">
               {/* ── Field 1: Số hiệu chuyến bay (flight_no) ── */}
               <div>
-                <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                  <span className="w-5 h-5 rounded bg-red-50 text-red-600 flex items-center justify-center text-[10px] font-bold">
+                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                  <span className="w-5 h-5 rounded bg-red-500/10 text-red-400 flex items-center justify-center text-[10px] font-bold">
                     1
                   </span>
                   Số hiệu chuyến bay
@@ -1192,10 +1194,10 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   }
                   placeholder="Ví dụ: VJ 101"
                   maxLength={10}
-                  className={`w-full px-3 py-2.5 bg-stone-50 border ${editingFlight.flightNo.length >= 3 ? 'border-green-300' : 'border-stone-200'} rounded-lg text-sm font-mono font-bold focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all`}
+                  className={`w-full px-3 py-2.5 bg-slate-900/60 border ${editingFlight.flightNo.length >= 3 ? 'border-emerald-500/40' : 'border-white/10'} rounded-lg text-sm text-white font-mono font-bold focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-500/20 transition-all`}
                   required
                 />
-                <p className="text-[11px] text-stone-400 mt-1">
+                <p className="text-[11px] text-slate-500 mt-1">
                   Định dạng: VJ 101, VN001, BL 202...
                 </p>
               </div>
@@ -1203,8 +1205,8 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               {/* ── Field 2 & 3: Điểm đi / Điểm đến ── */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded bg-blue-50 text-blue-600 flex items-center justify-center text-[10px] font-bold">
+                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded bg-blue-500/10 text-blue-400 flex items-center justify-center text-[10px] font-bold">
                       2
                     </span>
                     Điểm đi
@@ -1217,7 +1219,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                         p ? { ...p, from: e.target.value.toUpperCase() } : p
                       )
                     }
-                    className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm font-mono font-bold focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
+                    className="w-full px-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-white font-mono font-bold focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-all"
                     required
                   >
                     {AIRPORTS.map((a) => (
@@ -1226,8 +1228,8 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded bg-blue-50 text-blue-600 flex items-center justify-center text-[10px] font-bold">
+                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded bg-blue-500/10 text-blue-400 flex items-center justify-center text-[10px] font-bold">
                       3
                     </span>
                     Điểm đến
@@ -1238,7 +1240,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                     onChange={(e) =>
                       setEditingFlight((p) => (p ? { ...p, to: e.target.value.toUpperCase() } : p))
                     }
-                    className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm font-mono font-bold focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
+                    className="w-full px-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-white font-mono font-bold focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-all"
                     required
                   >
                     {AIRPORTS.map((a) => (
@@ -1252,14 +1254,14 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               {editingFlight.from === editingFlight.to && editingFlight.from !== '' && (
                 <div
                   className="rounded-lg p-2.5 flex items-center gap-2"
-                  style={{ background: '#FEF2F2', border: '1px solid #FECACA' }}
+                  style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)' }}
                 >
                   <Icon
                     name="ExclamationTriangleIcon"
                     size={14}
                     className="text-red-500 flex-shrink-0"
                   />
-                  <p className="text-xs font-medium" style={{ color: '#6F0000' }}>
+                  <p className="text-xs font-medium text-red-400">
                     Điểm đi và điểm đến không được trùng nhau!
                   </p>
                 </div>
@@ -1268,8 +1270,8 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               {/* ── Field 4 & 5: Thời gian khởi hành / Thời gian đến ── */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded bg-amber-50 text-amber-700 flex items-center justify-center text-[10px] font-bold">
+                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded bg-amber-500/10 text-amber-400 flex items-center justify-center text-[10px] font-bold">
                       4
                     </span>
                     Giờ khởi hành
@@ -1281,13 +1283,13 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                     onChange={(e) =>
                       setEditingFlight((p) => (p ? { ...p, departTime: e.target.value } : p))
                     }
-                    className={`w-full px-3 py-2.5 bg-stone-50 border ${editingFlight.departTime ? 'border-green-300' : 'border-stone-200'} rounded-lg text-sm font-mono focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all`}
+                    className={`w-full px-3 py-2.5 bg-slate-900/60 border ${editingFlight.departTime ? 'border-emerald-500/40' : 'border-white/10'} rounded-lg text-sm text-white font-mono [color-scheme:dark] focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 transition-all`}
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded bg-amber-50 text-amber-700 flex items-center justify-center text-[10px] font-bold">
+                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded bg-amber-500/10 text-amber-400 flex items-center justify-center text-[10px] font-bold">
                       5
                     </span>
                     Giờ đến
@@ -1299,7 +1301,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                     onChange={(e) =>
                       setEditingFlight((p) => (p ? { ...p, arriveTime: e.target.value } : p))
                     }
-                    className={`w-full px-3 py-2.5 bg-stone-50 border ${editingFlight.arriveTime ? 'border-green-300' : 'border-stone-200'} rounded-lg text-sm font-mono focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all`}
+                    className={`w-full px-3 py-2.5 bg-slate-900/60 border ${editingFlight.arriveTime ? 'border-emerald-500/40' : 'border-white/10'} rounded-lg text-sm text-white font-mono [color-scheme:dark] focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 transition-all`}
                     required
                   />
                 </div>
@@ -1308,8 +1310,8 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               {/* ── Fare pair: what the results cards price from (migration 030) ── */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded bg-emerald-50 text-emerald-700 flex items-center justify-center text-[10px] font-bold">
+                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[10px] font-bold">
                       ₫
                     </span>
                     Giá Phổ thông (₫)
@@ -1325,13 +1327,13 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                       )
                     }
                     placeholder="Ví dụ: 899000"
-                    className={`w-full px-3 py-2.5 bg-stone-50 border ${editingFlight.economyPrice > 0 ? 'border-green-300' : 'border-stone-200'} rounded-lg text-sm font-mono focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all`}
+                    className={`w-full px-3 py-2.5 bg-slate-900/60 border ${editingFlight.economyPrice > 0 ? 'border-emerald-500/40' : 'border-white/10'} rounded-lg text-sm text-white font-mono focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20 transition-all`}
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded bg-indigo-50 text-indigo-700 flex items-center justify-center text-[10px] font-bold">
+                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-[10px] font-bold">
                       ₫
                     </span>
                     Giá Thương gia (₫)
@@ -1347,7 +1349,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                       )
                     }
                     placeholder="Ví dụ: 2490000"
-                    className={`w-full px-3 py-2.5 bg-stone-50 border ${editingFlight.businessPrice > 0 ? 'border-green-300' : 'border-stone-200'} rounded-lg text-sm font-mono focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all`}
+                    className={`w-full px-3 py-2.5 bg-slate-900/60 border ${editingFlight.businessPrice > 0 ? 'border-emerald-500/40' : 'border-white/10'} rounded-lg text-sm text-white font-mono focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 transition-all`}
                     required
                   />
                 </div>
@@ -1357,22 +1359,22 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 editingFlight.economyPrice > editingFlight.businessPrice && (
                   <div
                     className="rounded-lg p-2.5 flex items-center gap-2"
-                    style={{ background: '#FEF2F2', border: '1px solid #FECACA' }}
+                    style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)' }}
                   >
                     <Icon
                       name="ExclamationTriangleIcon"
                       size={14}
                       className="text-red-500 flex-shrink-0"
                     />
-                    <p className="text-xs font-medium" style={{ color: '#6F0000' }}>
+                    <p className="text-xs font-medium text-red-400">
                       Giá Phổ thông không được cao hơn giá Thương gia — thang giá này sẽ bị từ chối
                       khi lưu.
                     </p>
                   </div>
                 )}
               <div>
-                <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                  <Icon name="CalendarDaysIcon" size={12} className="text-stone-400" />
+                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                  <Icon name="CalendarDaysIcon" size={12} className="text-slate-500" />
                   Ngày bay
                 </label>
                 <input
@@ -1381,7 +1383,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   onChange={(e) =>
                     setEditingFlight((p) => (p ? { ...p, date: e.target.value } : p))
                   }
-                  className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all"
+                  className="w-full px-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-white [color-scheme:dark] focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-500/20 transition-all"
                 />
               </div>
 
@@ -1391,14 +1393,14 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 editingFlight.departTime >= editingFlight.arriveTime && (
                   <div
                     className="rounded-lg p-2.5 flex items-center gap-2"
-                    style={{ background: '#FFFBEB', border: '1px solid #FDE68A' }}
+                    style={{ background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.25)' }}
                   >
                     <Icon
                       name="ExclamationTriangleIcon"
                       size={14}
                       className="text-yellow-600 flex-shrink-0"
                     />
-                    <p className="text-xs font-medium" style={{ color: '#92400E' }}>
+                    <p className="text-xs font-medium text-amber-400">
                       Thời gian khởi hành phải sớm hơn thời gian đến!
                     </p>
                   </div>
@@ -1406,8 +1408,8 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
 
               {/* ── Field 6: Trạng thái chuyến bay ── */}
               <div>
-                <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                  <span className="w-5 h-5 rounded bg-purple-50 text-purple-600 flex items-center justify-center text-[10px] font-bold">
+                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                  <span className="w-5 h-5 rounded bg-purple-500/10 text-purple-400 flex items-center justify-center text-[10px] font-bold">
                     6
                   </span>
                   Trạng thái chuyến bay
@@ -1419,19 +1421,19 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                       val: 'active',
                       label: 'Hoạt động',
                       icon: 'CheckCircleIcon',
-                      cls: 'bg-green-50 border-green-300 text-green-700',
+                      cls: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
                     },
                     {
                       val: 'delayed',
                       label: 'Trễ giờ',
                       icon: 'ClockIcon',
-                      cls: 'bg-amber-50 border-amber-300 text-amber-700',
+                      cls: 'bg-amber-500/10 border-amber-500/30 text-amber-400',
                     },
                     {
                       val: 'cancelled',
                       label: 'Đã huỷ',
                       icon: 'XCircleIcon',
-                      cls: 'bg-red-50 border-red-300 text-red-700',
+                      cls: 'bg-red-500/10 border-red-500/30 text-red-400',
                     },
                   ].map((opt) => (
                     <button
@@ -1443,7 +1445,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                       className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-bold border-2 transition-all ${
                         editingFlight.status === opt.val
                           ? `${opt.cls} shadow-sm`
-                          : 'bg-stone-50 border-stone-200 text-stone-500 hover:bg-stone-100'
+                          : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
                       }`}
                     >
                       <Icon name={opt.icon} size={13} />
@@ -1451,57 +1453,53 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                     </button>
                   ))}
                 </div>
-                <p className="text-[11px] text-stone-400 mt-1.5">
+                <p className="text-[11px] text-slate-500 mt-1.5">
                   Chọn trạng thái hiện tại của chuyến bay trong hệ thống.
                 </p>
               </div>
 
               {/* Change summary preview */}
               <div
-                className="rounded-xl p-3 space-y-1.5"
-                style={{ background: '#F8FAFC', border: '1px solid #E2E8F0' }}
+                className="rounded-xl p-3 space-y-1.5 bg-slate-900/40 border border-white/10"
               >
-                <p
-                  className="text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5"
-                  style={{ color: '#64748B' }}
-                >
+                <p className="text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 text-slate-400">
                   <Icon name="EyeIcon" size={12} /> Xem trước thay đổi
                 </p>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                   <div className="flex justify-between">
-                    <span className="text-stone-400">Số hiệu:</span>
-                    <span className="font-mono font-bold">{editingFlight.flightNo || '—'}</span>
+                    <span className="text-slate-500">Số hiệu:</span>
+                    <span className="font-mono font-bold text-white">{editingFlight.flightNo || '—'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-stone-400">Hành trình:</span>
-                    <span className="font-mono font-bold">
+                    <span className="text-slate-500">Hành trình:</span>
+                    <span className="font-mono font-bold text-white">
                       {editingFlight.from} → {editingFlight.to}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-stone-400">Giờ bay:</span>
-                    <span className="font-mono">
+                    <span className="text-slate-500">Giờ bay:</span>
+                    <span className="font-mono text-slate-300">
                       {editingFlight.departTime || '—'} → {editingFlight.arriveTime || '—'}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-stone-400">Giá Phổ thông:</span>
-                    <span className="font-mono font-bold">
+                    <span className="text-slate-500">Giá Phổ thông:</span>
+                    <span className="font-mono font-bold text-white">
                       {editingFlight.economyPrice > 0
                         ? `${editingFlight.economyPrice.toLocaleString('vi-VN')}₫`
                         : '—'}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-stone-400">Giá Thương gia:</span>
-                    <span className="font-mono font-bold">
+                    <span className="text-slate-500">Giá Thương gia:</span>
+                    <span className="font-mono font-bold text-white">
                       {editingFlight.businessPrice > 0
                         ? `${editingFlight.businessPrice.toLocaleString('vi-VN')}₫`
                         : '—'}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-stone-400">Trạng thái:</span>
+                    <span className="text-slate-500">Trạng thái:</span>
                     <span
                       className={`font-bold ${STATUS_MAP[editingFlight.status]?.cls?.replace('badge-', 'text-') || ''}`}
                     >
@@ -1517,7 +1515,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   type="button"
                   onClick={() => setEditingFlight(null)}
                   disabled={isSavingEdit}
-                  className="flex-1 border border-stone-300 text-stone-600 font-semibold py-2.5 rounded-xl text-sm transition-all hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed font-koho"
+                  className="flex-1 border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10 font-semibold py-2.5 rounded-xl text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed font-koho"
                 >
                   Huỷ bỏ
                 </button>

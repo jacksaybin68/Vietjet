@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validateCsrfOrReject } from '@/lib/csrf';
 import { rateLimit } from '@/lib/rate-limit';
 import { hashPassword, validatePassword } from '@/lib/auth';
-import { updateUserPassword, invalidateUserRefreshTokens } from '@/lib/db';
+import { findUserById, updateUserPassword, invalidateUserRefreshTokens } from '@/lib/db';
+import { sendPasswordChangedEmail } from '@/lib/mail';
 import { consumeResetToken, getValidResetRequest } from '@/lib/password-reset';
 import { deleteAllUserSessions } from '@/lib/security-db';
 
@@ -58,6 +59,13 @@ export async function POST(request: NextRequest) {
       invalidateUserRefreshTokens(recovery.user_id).catch(() => undefined),
       deleteAllUserSessions(recovery.user_id).catch(() => undefined),
     ]);
+
+    // Thông báo bảo mật — fail-soft, không chặn response.
+    findUserById(recovery.user_id)
+      .then((account) => {
+        if (account?.email) void sendPasswordChangedEmail({ to: account.email });
+      })
+      .catch(() => undefined);
 
     return NextResponse.json({ success: true });
   } catch (error) {

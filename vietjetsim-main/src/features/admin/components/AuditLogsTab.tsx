@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
 import { listAuditLogs } from '@/features/admin';
+import { AdminTabHeader, ADMIN_CARD_STYLE, ADMIN_ACTION_BTN } from './AdminSection';
 
 interface AuditLog {
   id: string;
@@ -25,14 +26,15 @@ interface ToastAPI {
 
 const PAGE_SIZE = 20;
 
-const ACTION_COLORS: Record<string, { label: string; color: string; bgColor: string }> = {
-  create: { label: 'Tạo mới', color: 'text-green-700', bgColor: 'bg-green-100' },
-  update: { label: 'Cập nhật', color: 'text-blue-700', bgColor: 'bg-blue-100' },
-  delete: { label: 'Xoá', color: 'text-red-700', bgColor: 'bg-red-100' },
-  login: { label: 'Đăng nhập', color: 'text-purple-700', bgColor: 'bg-purple-100' },
-  logout: { label: 'Đăng xuất', color: 'text-gray-700', bgColor: 'bg-gray-100' },
-  approve: { label: 'Duyệt', color: 'text-emerald-700', bgColor: 'bg-emerald-100' },
-  reject: { label: 'Từ chối', color: 'text-orange-700', bgColor: 'bg-orange-100' },
+/** Dùng class badge global (có biến thể dark) để đồng bộ với các tab khác. */
+const ACTION_COLORS: Record<string, { label: string; cls: string }> = {
+  create: { label: 'Tạo mới', cls: 'badge-success' },
+  update: { label: 'Cập nhật', cls: 'badge-info' },
+  delete: { label: 'Xoá', cls: 'badge-error' },
+  login: { label: 'Đăng nhập', cls: 'badge-info' },
+  logout: { label: 'Đăng xuất', cls: 'badge-neutral' },
+  approve: { label: 'Duyệt', cls: 'badge-success' },
+  reject: { label: 'Từ chối', cls: 'badge-warning' },
 };
 
 export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
@@ -132,20 +134,21 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div>
-          <h2 className="font-bold text-stone-900">Nhật ký hoạt động</h2>
-          <p className="text-sm text-stone-400">{totalCount} bản ghi trong hệ thống</p>
-        </div>
-        <button
-          onClick={handleExportCSV}
-          disabled={logs.length === 0}
-          className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2.5 rounded-xl transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Icon name="ArrowDownTrayIcon" size={16} />
-          Xuất CSV
-        </button>
-      </div>
+      <AdminTabHeader
+        icon="ClipboardDocumentListIcon"
+        title="Nhật ký hoạt động"
+        subtitle={`${totalCount} bản ghi trong hệ thống`}
+        actions={
+          <button
+            onClick={handleExportCSV}
+            disabled={logs.length === 0}
+            className={`${ADMIN_ACTION_BTN} text-white bg-emerald-500/20 border border-emerald-500/30 hover:bg-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed`}
+          >
+            <Icon name="ArrowDownTrayIcon" size={14} />
+            Xuất CSV
+          </button>
+        }
+      />
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
@@ -153,7 +156,7 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
           <Icon
             name="MagnifyingGlassIcon"
             size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
           />
           <input
             type="text"
@@ -163,7 +166,7 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
               setCurrentPage(1);
             }}
             placeholder="Tìm kiếm hành động, tài nguyên..."
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm form-input"
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-900/60 border border-white/10 rounded-xl text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50"
           />
         </div>
 
@@ -173,7 +176,7 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
             setActionFilter(e.target.value);
             setCurrentPage(1);
           }}
-          className="px-3 py-2.5 bg-white border border-stone-200 rounded-xl text-sm form-input min-w-[150px]"
+          className="px-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500/50 min-w-[150px]"
         >
           <option value="">Tất cả hành động</option>
           {availableActions.map((action) => (
@@ -188,7 +191,7 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
             <Icon
               name="CalendarDaysIcon"
               size={15}
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"
             />
             <input
               type="date"
@@ -197,16 +200,16 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
                 setDateFrom(e.target.value);
                 setCurrentPage(1);
               }}
-              className="pl-8 pr-3 py-2.5 bg-white border border-stone-200 rounded-xl text-sm form-input w-36"
+              className="pl-8 pr-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-xl text-sm text-white [color-scheme:dark] focus:outline-none focus:border-indigo-500/50 w-36"
               title="Từ ngày"
             />
           </div>
-          <span className="text-stone-400 text-sm">–</span>
+          <span className="text-slate-500 text-sm">–</span>
           <div className="relative">
             <Icon
               name="CalendarDaysIcon"
               size={15}
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"
             />
             <input
               type="date"
@@ -215,7 +218,7 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
                 setDateTo(e.target.value);
                 setCurrentPage(1);
               }}
-              className="pl-8 pr-3 py-2.5 bg-white border border-stone-200 rounded-xl text-sm form-input w-36"
+              className="pl-8 pr-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-xl text-sm text-white [color-scheme:dark] focus:outline-none focus:border-indigo-500/50 w-36"
               title="Đến ngày"
             />
           </div>
@@ -230,7 +233,7 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
               setDateTo('');
               setCurrentPage(1);
             }}
-            className="flex items-center gap-1.5 text-xs font-semibold text-stone-500 hover:text-red-500 transition-colors px-3 py-2.5 rounded-xl border border-stone-200 hover:border-red-200 hover:bg-red-50"
+            className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-red-400 transition-colors px-3 py-2.5 rounded-xl border border-white/10 hover:border-red-500/30 hover:bg-red-500/10"
           >
             <Icon name="XMarkIcon" size={13} />
             Xoá bộ lọc
@@ -239,24 +242,24 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden">
+      <div className="rounded-2xl border overflow-hidden" style={{ ...ADMIN_CARD_STYLE, padding: 0 }}>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-stone-50 border-b border-stone-100">
-                <th className="text-left text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-3">
+              <tr className="border-b border-white/5">
+                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4">
                   Thời gian
                 </th>
-                <th className="text-left text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-3">
+                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4">
                   Hành động
                 </th>
-                <th className="text-left text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-3 hidden sm:table-cell">
+                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 hidden sm:table-cell">
                   Tài nguyên
                 </th>
-                <th className="text-left text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-3 hidden md:table-cell">
+                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 hidden md:table-cell">
                   Người dùng
                 </th>
-                <th className="text-center text-xs font-bold text-stone-400 uppercase tracking-wider px-4 py-3">
+                <th className="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4">
                   Chi tiết
                 </th>
               </tr>
@@ -265,31 +268,31 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
               {isLoading ? (
                 <>
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <tr key={i} className="border-b border-stone-50 animate-pulse">
-                      <td className="px-4 py-3">
-                        <div className="h-4 w-32 bg-stone-200 rounded-full" />
+                    <tr key={i} className="border-b border-white/5 animate-pulse">
+                      <td className="px-5 py-4">
+                        <div className="h-4 w-32 bg-slate-500/10 rounded-full" />
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="h-6 w-20 bg-stone-200 rounded-full" />
+                      <td className="px-5 py-4">
+                        <div className="h-6 w-20 bg-slate-500/10 rounded-full" />
                       </td>
-                      <td className="px-4 py-3 hidden sm:table-cell">
-                        <div className="h-4 w-24 bg-stone-200 rounded-full" />
+                      <td className="px-5 py-4 hidden sm:table-cell">
+                        <div className="h-4 w-24 bg-slate-500/10 rounded-full" />
                       </td>
-                      <td className="px-4 py-3 hidden md:table-cell">
-                        <div className="h-4 w-28 bg-stone-200 rounded-full" />
+                      <td className="px-5 py-4 hidden md:table-cell">
+                        <div className="h-4 w-28 bg-slate-500/10 rounded-full" />
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="h-6 w-8 bg-stone-200 rounded mx-auto" />
+                      <td className="px-5 py-4">
+                        <div className="h-6 w-8 bg-slate-500/10 rounded mx-auto" />
                       </td>
                     </tr>
                   ))}
                 </>
               ) : hasError ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-16 text-center">
+                  <td colSpan={5} className="px-5 py-16 text-center">
                     <div className="flex flex-col items-center gap-3">
                       <Icon name="ExclamationTriangleIcon" size={32} className="text-red-400" />
-                      <p className="font-bold text-stone-700">Không thể tải dữ liệu</p>
+                      <p className="font-bold text-white">Không thể tải dữ liệu</p>
                       <button
                         onClick={() => fetchLogs(1)}
                         className="text-xs font-semibold text-primary"
@@ -301,11 +304,11 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
                 </tr>
               ) : logs.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center">
+                  <td colSpan={5} className="px-5 py-12 text-center">
                     <div className="flex flex-col items-center gap-3">
-                      <Icon name="ClipboardDocumentListIcon" size={32} className="text-stone-300" />
-                      <p className="font-bold text-stone-700">Không có nhật ký nào</p>
-                      <p className="text-xs text-stone-400">
+                      <Icon name="ClipboardDocumentListIcon" size={32} className="text-slate-600" />
+                      <p className="font-bold text-white">Không có nhật ký nào</p>
+                      <p className="text-xs text-slate-500">
                         Các hoạt động sẽ được ghi lại tại đây
                       </p>
                     </div>
@@ -319,44 +322,44 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
                   return (
                     <React.Fragment key={log.id}>
                       <tr
-                        className={`border-b border-stone-50 hover:bg-stone-50/50 transition-colors ${i % 2 === 0 ? '' : 'bg-stone-50/30'}`}
+                        className="border-b border-white/5 hover:bg-white/5 transition-colors"
                       >
-                        <td className="px-4 py-3">
-                          <span className="text-xs text-stone-600 font-medium">
+                        <td className="px-5 py-3.5">
+                          <span className="text-xs text-slate-400 font-medium">
                             {formatDate(log.created_at)}
                           </span>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-5 py-3.5">
                           <span
-                            className={`text-xs font-semibold px-2.5 py-1 rounded-full ${actionConfig.bgColor} ${actionConfig.color}`}
+                            className={actionConfig.cls}
                           >
                             {log.action}
                           </span>
                         </td>
-                        <td className="px-4 py-3 hidden sm:table-cell">
-                          <span className="text-xs text-stone-600">
+                        <td className="px-5 py-3.5 hidden sm:table-cell">
+                          <span className="text-xs text-slate-400">
                             {log.resource}
                             {log.resource_id && (
-                              <span className="text-stone-400 ml-1">
+                              <span className="text-slate-500 ml-1">
                                 #{log.resource_id.slice(0, 8)}
                               </span>
                             )}
                           </span>
                         </td>
-                        <td className="px-4 py-3 hidden md:table-cell">
+                        <td className="px-5 py-3.5 hidden md:table-cell">
                           <div>
-                            <p className="text-xs font-medium text-stone-700">
+                            <p className="text-xs font-medium text-white">
                               {log.user_name || 'Hệ thống'}
                             </p>
                             {log.user_email && (
-                              <p className="text-[11px] text-stone-400">{log.user_email}</p>
+                              <p className="text-[11px] text-slate-500">{log.user_email}</p>
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-center">
+                        <td className="px-5 py-3.5 text-center">
                           <button
                             onClick={() => setExpandedLog(isExpanded ? null : log.id)}
-                            className="w-7 h-7 bg-stone-100 hover:bg-stone-200 text-stone-500 rounded-lg flex items-center justify-center transition-colors"
+                            className="w-7 h-7 bg-white/5 hover:bg-white/10 text-slate-400 rounded-lg flex items-center justify-center transition-colors"
                             title={isExpanded ? 'Ẩn chi tiết' : 'Xem chi tiết'}
                           >
                             <Icon
@@ -367,37 +370,37 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
                         </td>
                       </tr>
                       {isExpanded && (
-                        <tr className="bg-slate-50/50">
-                          <td colSpan={5} className="px-4 py-3">
-                            <div className="bg-white rounded-lg p-4 border border-stone-200">
+                        <tr className="bg-white/[0.03]">
+                          <td colSpan={5} className="px-5 py-3">
+                            <div className="rounded-lg p-4 border border-white/10 bg-slate-900/40">
                               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
                                 <div>
-                                  <p className="text-stone-400 font-medium mb-1">ID bản ghi</p>
-                                  <p className="font-mono text-stone-700">{log.id}</p>
+                                  <p className="text-slate-500 font-medium mb-1">ID bản ghi</p>
+                                  <p className="font-mono text-slate-300">{log.id}</p>
                                 </div>
                                 {log.resource_id && (
                                   <div>
-                                    <p className="text-stone-400 font-medium mb-1">ID tài nguyên</p>
-                                    <p className="font-mono text-stone-700">{log.resource_id}</p>
+                                    <p className="text-slate-500 font-medium mb-1">ID tài nguyên</p>
+                                    <p className="font-mono text-slate-300">{log.resource_id}</p>
                                   </div>
                                 )}
                                 {log.ip_address && (
                                   <div>
-                                    <p className="text-stone-400 font-medium mb-1">Địa chỉ IP</p>
-                                    <p className="font-mono text-stone-700">{log.ip_address}</p>
+                                    <p className="text-slate-500 font-medium mb-1">Địa chỉ IP</p>
+                                    <p className="font-mono text-slate-300">{log.ip_address}</p>
                                   </div>
                                 )}
                                 {log.user_role && (
                                   <div>
-                                    <p className="text-stone-400 font-medium mb-1">Vai trò</p>
-                                    <p className="text-stone-700">{log.user_role}</p>
+                                    <p className="text-slate-500 font-medium mb-1">Vai trò</p>
+                                    <p className="text-slate-300">{log.user_role}</p>
                                   </div>
                                 )}
                               </div>
                               {log.details != null && (
-                                <div className="mt-3 pt-3 border-t border-stone-100">
-                                  <p className="text-stone-400 font-medium mb-1">Chi tiết</p>
-                                  <pre className="text-xs text-stone-600 bg-slate-100 rounded p-2 overflow-x-auto">
+                                <div className="mt-3 pt-3 border-t border-white/10">
+                                  <p className="text-slate-500 font-medium mb-1">Chi tiết</p>
+                                  <pre className="text-xs text-slate-300 bg-slate-900/60 rounded p-2 overflow-x-auto">
                                     {typeof log.details === 'string'
                                       ? log.details
                                       : (JSON.stringify(log.details, null, 2) ?? '')}
@@ -405,9 +408,9 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
                                 </div>
                               )}
                               {log.user_agent && (
-                                <div className="mt-3 pt-3 border-t border-stone-100">
-                                  <p className="text-stone-400 font-medium mb-1">Trình duyệt</p>
-                                  <p className="text-xs text-stone-500 truncate">
+                                <div className="mt-3 pt-3 border-t border-white/10">
+                                  <p className="text-slate-500 font-medium mb-1">Trình duyệt</p>
+                                  <p className="text-xs text-slate-400 truncate">
                                     {log.user_agent}
                                   </p>
                                 </div>
@@ -425,7 +428,7 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
         </div>
 
         {totalCount > PAGE_SIZE && (
-          <div className="px-4 py-3 border-t border-stone-100 bg-stone-50/50 flex justify-center">
+          <div className="px-5 py-3 border-t border-white/5 flex justify-center">
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
