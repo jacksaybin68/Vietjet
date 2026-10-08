@@ -1,5 +1,5 @@
 /**
- * Mẫu hóa đơn đặt vé (mô phỏng) — HTML in A4 dùng cho `window.print()`.
+ * Mẫu hóa đơn đặt vé — HTML in A4 dùng cho `window.print()`.
  *
  * Pure function, không chạm DOM: render ra string nên test được bằng vitest
  * và tái dùng ở mọi nơi cần in (admin tab, tài khoản, email).
@@ -143,7 +143,7 @@ export function renderInvoiceHtml(booking: InvoiceBooking): string {
 <body>
 <div class="sheet">
   <div class="brandbar">
-    <div class="brand">✈ VIETJET AIR<small>Công ty Cổ phần Hàng không VietJet — Hóa đơn mô phỏng</small></div>
+    <div class="brand">✈ VIETJET AIR<small>Công ty Cổ phần Hàng không VietJet</small></div>
     <div class="doc-title"><h1>HÓA ĐƠN ĐẶT VÉ</h1><p>Số: ${no}</p></div>
   </div>
 
@@ -188,7 +188,7 @@ export function renderInvoiceHtml(booking: InvoiceBooking): string {
     <div>ĐẠI DIỆN VIETJET AIR<div class="name">&nbsp;</div></div>
   </div>
 
-  <div class="foot">Cảm ơn quý khách đã sử dụng dịch vụ của VietJet Air. Hóa đơn mô phỏng phục vụ demo, không có giá trị thuế.</div>
+  <div class="foot">Cảm ơn quý khách đã sử dụng dịch vụ của VietJet Air. Hotline hỗ trợ: 1900 1886.</div>
 </div>
 <script>window.print();</script>
 </body>

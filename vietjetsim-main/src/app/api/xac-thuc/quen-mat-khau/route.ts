@@ -11,8 +11,7 @@ import { sendPasswordResetEmail } from '@/lib/mail';
  * Always answers with the same success payload so the endpoint cannot be used
  * to enumerate which emails/phones have an account.
  *
- * Giao diện reset link: gửi qua email thật (sendPasswordResetEmail, fail-soft).
- * Ngoài production response vẫn kèm `resetUrl` để demo/test không cần hộp thư.
+ * Ngoài production response vẫn kèm `resetUrl` để kiểm thử không cần hộp thư.
  */
 export async function POST(request: NextRequest) {
   try {
