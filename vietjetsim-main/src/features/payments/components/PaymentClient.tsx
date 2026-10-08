@@ -576,14 +576,14 @@ export default function PaymentClient() {
   }, [bookingCode]);
 
   const shareText = useMemo(() => {
-    if (!booking) return 'Tôi vừa đặt vé thành công trên VietJet!';
-    return `Tôi vừa đặt vé thành công trên VietJet!\n✈️ ${booking.flightNo}: ${booking.fromCity} → ${booking.toCity}\n📅 ${booking.date} | ${booking.departTime} - ${booking.arriveTime}\n🎫 Mã đặt chỗ: ${bookingCodeLabel}`;
+    if (!booking) return 'Tôi vừa đặt vé thành công trên Vietjet Air!';
+    return `Tôi vừa đặt vé thành công trên Vietjet Air!\n✈️ ${booking.flightNo}: ${booking.fromCity} → ${booking.toCity}\n📅 ${booking.date} | ${booking.departTime} - ${booking.arriveTime}\n🎫 Mã đặt chỗ: ${bookingCodeLabel}`;
   }, [booking, bookingCodeLabel]);
 
   const handleShareNative = useCallback(async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Đặt vé VietJet thành công!', text: shareText });
+        await navigator.share({ title: 'Đặt vé Vietjet Air thành công!', text: shareText });
       } catch {
         /* ignore */
       }

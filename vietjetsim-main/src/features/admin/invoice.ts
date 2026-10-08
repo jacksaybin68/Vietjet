@@ -143,7 +143,7 @@ export function renderInvoiceHtml(booking: InvoiceBooking): string {
 <body>
 <div class="sheet">
   <div class="brandbar">
-    <div class="brand">✈ VIETJET AIR<small>Công ty Cổ phần Hàng không VietJet</small></div>
+    <div class="brand">✈ VIETJET AIR<small>Công ty Cổ phần Hàng không Vietjet</small></div>
     <div class="doc-title"><h1>HÓA ĐƠN ĐẶT VÉ</h1><p>Số: ${no}</p></div>
   </div>
 
@@ -152,7 +152,7 @@ export function renderInvoiceHtml(booking: InvoiceBooking): string {
   <div class="parties">
     <div class="card">
       <h3>Đơn vị cung cấp</h3>
-      <p><b>Công ty Cổ phần Hàng không VietJet</b></p>
+      <p><b>Công ty Cổ phần Hàng không Vietjet</b></p>
       <p>302 Kim Mã, Ba Đình, Hà Nội</p>
       <p>Hotline: 1900 1886 · ${escapeHtml(SITE_URL)}</p>
     </div>
@@ -188,7 +188,7 @@ export function renderInvoiceHtml(booking: InvoiceBooking): string {
     <div>ĐẠI DIỆN VIETJET AIR<div class="name">&nbsp;</div></div>
   </div>
 
-  <div class="foot">Cảm ơn quý khách đã sử dụng dịch vụ của VietJet Air. Hotline hỗ trợ: 1900 1886.</div>
+  <div class="foot">Cảm ơn quý khách đã sử dụng dịch vụ của Vietjet Air. Hotline hỗ trợ: 1900 1886.</div>
 </div>
 <script>window.print();</script>
 </body>

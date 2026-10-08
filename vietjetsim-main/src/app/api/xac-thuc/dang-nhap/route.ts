@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     // matched on the canonical form too, so someone who registered as
     // `0986349061` can still sign in with `+84 986 349 061`.
     // Email comparison is case-insensitive: addresses are not case-sensitive
-    // per RFC 5321 and users habitually type `User@VietjetSim.vn`.
+    // per RFC 5321 and users habitually type `User@VietjetAir.vn`.
     // The cast is required: a bare parameter in `IS NOT NULL` leaves Postgres
     // unable to infer a type and the query fails with "could not determine
     // data type of parameter $3".
