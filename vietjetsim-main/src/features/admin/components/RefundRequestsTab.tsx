@@ -123,9 +123,8 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
     id: row.id,
     bookingId: row.booking_id ?? '',
     userId: row.user_id ?? '',
-    userName:
-      row.user_profiles?.full_name || row.user_profiles?.email?.split('@')[0] || 'Khách hàng',
-    userEmail: row.user_profiles?.email || '',
+    userName: row.user_name || row.user_email?.split('@')[0] || 'Khách hàng',
+    userEmail: row.user_email || '',
     flightNo: row.flight_no || '',
     route: row.route || '',
     flightDate: row.flight_date || '',

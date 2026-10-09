@@ -1403,14 +1403,21 @@ export async function setRefundFeatureEnabled(enabled: boolean, updatedBy: strin
   );
 }
 
+/** Một phiếu hoàn tiền kèm thông tin người dùng và chuyến bay để bảng admin hiển thị. */
+export interface AdminRefundRow extends RefundRecord {
+  user_email: string;
+  user_name: string;
+  booking_total: number;
+  flight_no: string;
+  route: string;
+  flight_date: string;
+}
+
 export async function getAllRefunds(params?: {
   page?: number;
   limit?: number;
   status?: string;
-}): Promise<{
-  refunds: Array<RefundRecord & { user_email: string; user_name: string; booking_total: number }>;
-  total: number;
-}> {
+}): Promise<{ refunds: AdminRefundRow[]; total: number }> {
   const page = params?.page || 1;
   const limit = params?.limit || 50;
   const offset = (page - 1) * limit;
@@ -1423,11 +1430,17 @@ export async function getAllRefunds(params?: {
     whereClause += ` AND r.status = $${filterValues.length}`;
   }
 
+  // flight_no / route / flight_date are what the admin refund table renders;
+  // LEFT JOIN so a refund is never hidden by a missing flight row.
   const refundsQuery = `
-    SELECT r.*, u.email as user_email, u.full_name as user_name, b.total_price as booking_total
+    SELECT r.*, u.email as user_email, u.full_name as user_name, b.total_price as booking_total,
+           f.flight_no as flight_no,
+           COALESCE(f.from_code || ' → ' || f.to_code, '') as route,
+           COALESCE(to_char(f.depart_time, 'DD/MM/YYYY'), '') as flight_date
     FROM refund_requests r
     JOIN user_profiles u ON r.user_id = u.id
     JOIN bookings b ON r.booking_id = b.id
+    LEFT JOIN flights f ON b.flight_id = f.id
     ${whereClause}
     ORDER BY r.created_at DESC
     LIMIT $${filterValues.length + 1} OFFSET $${filterValues.length + 2}
@@ -1440,11 +1453,7 @@ export async function getAllRefunds(params?: {
   const total = totalOf(countResult);
 
   return {
-    refunds: refundsResult as (RefundRecord & {
-      user_email: string;
-      user_name: string;
-      booking_total: number;
-    })[],
+    refunds: refundsResult as unknown as AdminRefundRow[],
     total,
   };
 }
