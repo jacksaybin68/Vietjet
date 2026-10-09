@@ -181,7 +181,10 @@ export interface AdminRefund {
   reason?: string;
   created_at?: string;
   user_id?: string;
-  user_profiles?: { full_name?: string | null; email?: string | null } | null;
+  /** Người yêu cầu hoàn — `getAllRefunds` join thẳng `user_profiles`. */
+  user_email?: string | null;
+  user_name?: string | null;
+  /** Chuyến bay của booking (LEFT JOIN flights). */
   flight_no?: string | null;
   route?: string | null;
   flight_date?: string | null;
