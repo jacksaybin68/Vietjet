@@ -328,7 +328,7 @@ export default function MyFlightsPage() {
                 <div className="relative">
                   <label
                     htmlFor="booking-code"
-                    className="pointer-events-none absolute left-3 top-1 text-[11px] font-bold text-[var(--vj-text-muted)]"
+                    className="pointer-events-none absolute left-3 top-1 text-[11px] font-bold text-[var(--foreground)]"
                   >
                     Mã đặt chỗ <span className="text-[var(--vj-red)]">*</span>
                   </label>
@@ -339,7 +339,7 @@ export default function MyFlightsPage() {
                     value={bookingCode}
                     onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
                     placeholder=" "
-                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 pb-1.5 pt-4 font-heading-900 text-sm font-bold uppercase text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
+                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 pb-1.5 pt-4 font-heading-900 text-sm font-black uppercase text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
                   />
                 </div>
                 <div className="relative">
