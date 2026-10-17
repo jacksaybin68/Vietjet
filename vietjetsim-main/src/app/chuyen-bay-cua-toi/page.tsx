@@ -293,8 +293,8 @@ export default function MyFlightsPage() {
                   }}
                   className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition-colors ${
                     active
-                      ? 'bg-white text-[var(--vj-red)] shadow-vj-btn ring-1 ring-white/70'
-                      : 'bg-white/50 text-[var(--vj-text-gray)] hover:text-[var(--vj-red)]'
+                      ? 'bg-[var(--vj-red)] text-white shadow-vj-btn ring-1 ring-[var(--vj-red)]'
+                      : 'bg-white text-[var(--foreground)] ring-1 ring-[var(--border)] shadow-sm hover:text-[var(--vj-red)] hover:ring-[rgb(var(--vj-red-rgb))]/60'
                   }`}
                 >
                   <Icon name={chip.icon} size={15} />
@@ -328,7 +328,7 @@ export default function MyFlightsPage() {
                 <div className="relative">
                   <label
                     htmlFor="booking-code"
-                    className="pointer-events-none absolute left-3 top-2 text-[11px] font-bold text-[var(--vj-text-muted)]"
+                    className="pointer-events-none absolute left-3 top-1 text-[11px] font-bold text-[var(--vj-text-muted)]"
                   >
                     Mã đặt chỗ <span className="text-[var(--vj-red)]">*</span>
                   </label>
@@ -339,7 +339,7 @@ export default function MyFlightsPage() {
                     value={bookingCode}
                     onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
                     placeholder=" "
-                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 pb-2 pt-6 font-heading-900 text-base uppercase text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
+                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 pb-1.5 pt-4 font-heading-900 text-sm font-bold uppercase text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
                   />
                 </div>
                 <div className="relative">

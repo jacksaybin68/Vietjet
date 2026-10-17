@@ -428,7 +428,9 @@ describe('tuyến trợ lý dùng Ollama', () => {
 
   it('câu nêu ý cập nhật đi bằng đường lệnh, không qua model', async () => {
     vi.stubEnv('OLLAMA_MODEL', 'qwen3:0.6b');
-    const fetchMock = vi.fn().mockResolvedValue(fakeResponse({ message: { content: 'model foi hỏi' } }));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(fakeResponse({ message: { content: 'model foi hỏi' } }));
     vi.stubGlobal('fetch', fetchMock);
 
     const req = new NextRequest('http://localhost:4028/api/tro-ly-ai/tro-chuyen', {
@@ -451,7 +453,9 @@ describe('tuyến trợ lý dùng Ollama', () => {
 
   it('câu lệnh thiếu dữ liệu được trả lời bằng quy tắc, kèm mẫu lệnh', async () => {
     vi.stubEnv('OLLAMA_MODEL', 'qwen3:0.6b');
-    const fetchMock = vi.fn().mockResolvedValue(fakeResponse({ message: { content: 'model foi hỏi' } }));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(fakeResponse({ message: { content: 'model foi hỏi' } }));
     vi.stubGlobal('fetch', fetchMock);
 
     const req = new NextRequest('http://localhost:4028/api/tro-ly-ai/tro-chuyen', {
