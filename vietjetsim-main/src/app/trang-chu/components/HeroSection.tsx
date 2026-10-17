@@ -322,7 +322,7 @@ export default function HeroSection() {
                       min={departDate}
                       onChange={(event) => setReturnDate(event.target.value)}
                       aria-label="Ngày về"
-                      className={`${inputClass} cursor-pointer`}
+                      className={`${inputClass} vj-no-native-icon cursor-pointer`}
                     />
                   </span>
                 </label>
