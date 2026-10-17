@@ -388,6 +388,15 @@ NEXT_PUBLIC_OPENCLAW_API_URL=
 # OpenClaw API key (không share với client)
 OPENCLAW_API_KEY=
 
+# ============ Ollama (LLM local cho trợ lý OpenClaw) ============
+# Trợ lý admin (/api/tro-ly-ai/tro-chuyen) tự chuyển sang Ollama khi có một
+# trong các biến OLLAMA_* dưới đây; không đặt gì thì vẫn dùng gateway OpenClaw.
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=qwen3:0.6b
+# OPENCLAW_PROVIDER=ollama        # ép backend: 'ollama' | 'openclaw'
+# OLLAMA_TIMEOUT_MS=60000
+# OLLAMA_THINK=false              # tắt chế độ suy nghĩ của qwen3
+
 # ============ Optional ============
 # NODE_ENV=production (tự động set bởi Next.js)
 ```
