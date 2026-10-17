@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Icon } from '@/shared/components/ui';
+import { ToastContainer } from '@/shared/components/feedback';
 import { useToast } from '@/hooks/useToast';
+import { apiRequest, getApiErrorMessage } from '@/shared/services';
 
 /** Get display info for a role (label + badge color) */
 function getRoleDisplay(role: string): { label: string; bg: string } {
@@ -38,6 +40,33 @@ interface ProfileForm {
   address: string;
 }
 
+/** Phần `profile` của `GET/PUT /api/nguoi-dung/profile`. */
+interface ProfileApiProfile {
+  id: string;
+  email: string;
+  fullName: string;
+  role: string;
+  phone: string | null;
+  avatarUrl: string | null;
+  dob: string | null;
+  gender: string | null;
+  address: string | null;
+}
+
+interface ProfileApiResponse {
+  profile: ProfileApiProfile;
+}
+
+/**
+ * `input[type="date"]` chỉ nhận `YYYY-MM-DD`. Route hồ sơ đã trả `dob` đúng dạng
+ * đó (cột `date` được chuẩn hoá ở `toDateOnly` trong route, vì driver đọc nó
+ * thành một `Date` và `JSON.stringify` sẽ kéo theo cả múi giờ), nên ở đây chỉ
+ * cần lấy phần ngày.
+ */
+function toDateInputValue(value: string | null): string {
+  return value ? value.slice(0, 10) : '';
+}
+
 interface PasswordForm {
   currentPassword: string;
   newPassword: string;
@@ -55,7 +84,6 @@ interface ValidationErrors {
 
 export default function ProfileTab({ user }: { user: User }) {
   const toast = useToast();
-  const [isEditing, setIsEditing] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(user.avatarUrl || null);
 
@@ -77,6 +105,41 @@ export default function ProfileTab({ user }: { user: User }) {
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [isSaving, setIsSaving] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  /**
+   * Nạp hồ sơ đã lưu. Component trước đây chỉ đọc `user` từ phiên đăng nhập —
+   * prop đó không mang `dob`/`gender`/`address`, và ngày sinh thì chỉ được ghi
+   * một lần lúc đăng ký — nên ba ô đó luôn rỗng dù dữ liệu vẫn nằm trong DB.
+   */
+  useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const data = await apiRequest<ProfileApiResponse>('/api/nguoi-dung/profile');
+        if (cancelled) return;
+        setProfile({
+          fullName: data.profile.fullName || '',
+          email: data.profile.email || '',
+          phone: data.profile.phone || '',
+          dob: toDateInputValue(data.profile.dob),
+          gender: data.profile.gender || '',
+          address: data.profile.address || '',
+        });
+      } catch {
+        // Đây là lượt làm đầy thêm trên một trang đã có nội dung (tên/email/số
+        // điện thoại từ phiên đăng nhập), nên thất bại ở đây không được dựng
+        // màn hình lỗi — chỉ giữ nguyên những gì đang có.
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const validateProfile = useCallback((): boolean => {
     const newErrors: ValidationErrors = {};
@@ -85,11 +148,8 @@ export default function ProfileTab({ user }: { user: User }) {
       newErrors.fullName = 'Tên phải có ít nhất 2 ký tự';
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(profile.email)) {
-      newErrors.email = 'Email không hợp lệ';
-    }
-
+    // Email không kiểm ở đây: nó là định danh đăng nhập và `PUT
+    // /api/nguoi-dung/profile` không nhận trường này, nên nó chỉ đọc.
     if (profile.phone && profile.phone.replace(/\D/g, '').length < 9) {
       newErrors.phone = 'Số điện thoại phải có ít nhất 9 chữ số';
     }
@@ -137,12 +197,31 @@ export default function ProfileTab({ user }: { user: User }) {
 
     setIsSaving(true);
     try {
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      // Ghi thật vào `user_profiles`. Bản cũ chỉ `setTimeout` rồi báo thành
+      // công, nên sửa hồ sơ xong tải lại là mất — cùng gốc với việc thông tin
+      // đăng ký "không hiển thị".
+      const data = await apiRequest<ProfileApiResponse>('/api/nguoi-dung/profile', {
+        method: 'PUT',
+        body: {
+          full_name: profile.fullName.trim(),
+          phone: profile.phone || null,
+          // `''` không phải giá trị hợp lệ cho cột `date`; null mới là cách xoá.
+          dob: profile.dob || null,
+          gender: profile.gender || null,
+          address: profile.address || null,
+        },
+      });
+      setProfile((prev) => ({
+        ...prev,
+        fullName: data.profile.fullName || '',
+        phone: data.profile.phone || '',
+        dob: toDateInputValue(data.profile.dob),
+        gender: data.profile.gender || '',
+        address: data.profile.address || '',
+      }));
       toast.success('Lưu thành công', 'Thông tin hồ sơ đã được cập nhật.');
-      setIsEditing(false);
-    } catch {
-      toast.error('Lỗi', 'Không thể lưu thông tin. Vui lòng thử lại.');
+    } catch (error) {
+      toast.error('Lỗi', getApiErrorMessage(error, 'Không thể lưu thông tin. Vui lòng thử lại.'));
     } finally {
       setIsSaving(false);
     }
@@ -178,23 +257,10 @@ export default function ProfileTab({ user }: { user: User }) {
     }
   };
 
-  const handleCancelEdit = () => {
-    setProfile({
-      fullName: user.fullName || '',
-      email: user.email || '',
-      phone: user.phone || '',
-      dob: profile.dob,
-      gender: profile.gender,
-      address: profile.address,
-    });
-    setErrors({});
-    setIsEditing(false);
-  };
-
   const inputBaseClass =
-    'w-full px-4 py-3 bg-[var(--surface-2)]border border-[var(--border)]rounded-xl text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/20 focus:border-[var(--primary)]';
+    'w-full px-4 py-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/20 focus:border-[var(--primary)]';
   const inputDisabledClass =
-    'bg-[var(--surface-2)]text-[var(--foreground-muted)]cursor-not-allowed';
+    'bg-[var(--surface-2)] text-[var(--foreground-muted)] cursor-not-allowed';
   const inputErrorClass = 'border-[var(--primary)] bg-red-50/10';
   const labelClass =
     'block text-sm font-medium mb-1.5 font-[KoHo,sans-serif] text-[var(--foreground)]';
@@ -203,31 +269,22 @@ export default function ProfileTab({ user }: { user: User }) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[var(--foreground)]">
-            Hồ sơ cá nhân
-          </h2>
-          <p className="text-sm text-[var(--foreground-muted)]mt-1 font-[Be Vietnam Pro,sans-serif]">
-            Quản lý thông tin tài khoản và mật khẩu của bạn
-          </p>
-        </div>
-        {!isEditing && (
-          <button
-            onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[var(--primary)] text-white rounded-xl font-semibold text-sm font-[KoHo,sans-serif] hover:bg-[var(--primary-dark)] transition-all duration-200 shadow-md hover:shadow-lg active:scale-95"
-          >
-            <Icon name="PencilSquareIcon" size={18} />
-            Chỉnh sửa
-          </button>
-        )}
+      {/* Nút "Chỉnh sửa" đã bỏ: form luôn sửa được, không cần bật một chế độ
+          riêng rồi mới thấy dữ liệu. */}
+      <div>
+        <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[var(--foreground)]">
+          Hồ sơ cá nhân
+        </h2>
+        <p className="text-sm text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
+          Quản lý thông tin tài khoản và mật khẩu của bạn
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Avatar & Quick Info */}
         <div className="lg:col-span-1">
           <div
-            className="bg-[var(--surface)]rounded-2xl border border-[var(--border)]p-6 text-center"
+            className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] p-6 text-center"
             style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
           >
             {/* Avatar */}
@@ -248,27 +305,25 @@ export default function ProfileTab({ user }: { user: User }) {
                   </div>
                 )}
               </div>
-              {isEditing && (
-                <label
-                  htmlFor="avatar-upload"
-                  className="absolute bottom-0 right-0 w-10 h-10 bg-[var(--primary)] rounded-full flex items-center justify-center cursor-pointer hover:bg-[var(--primary-dark)] transition-colors shadow-lg"
-                >
-                  <Icon name="CameraIcon" size={18} className="text-white" />
-                  <input
-                    id="avatar-upload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleAvatarUpload}
-                  />
-                </label>
-              )}
+              <label
+                htmlFor="avatar-upload"
+                className="absolute bottom-0 right-0 w-10 h-10 bg-[var(--primary)] rounded-full flex items-center justify-center cursor-pointer hover:bg-[var(--primary-dark)] transition-colors shadow-lg"
+              >
+                <Icon name="CameraIcon" size={18} className="text-white" />
+                <input
+                  id="avatar-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarUpload}
+                />
+              </label>
             </div>
 
             <h3 className="text-lg font-bold font-[KoHo,sans-serif] text-[var(--foreground)]">
               {user.fullName || 'Người dùng'}
             </h3>
-            <p className="text-sm text-[var(--foreground-muted)]mt-1 font-[Be Vietnam Pro,sans-serif]">
+            <p className="text-sm text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
               {user.email}
             </p>
             <span
@@ -282,7 +337,7 @@ export default function ProfileTab({ user }: { user: User }) {
             </span>
 
             {user.createdAt && (
-              <p className="text-xs text-[var(--foreground-subtle)]mt-4 font-[Be Vietnam Pro,sans-serif]">
+              <p className="text-xs text-[var(--foreground-subtle)] mt-4 font-[Be Vietnam Pro,sans-serif]">
                 Tham gia từ{' '}
                 {new Date(user.createdAt).toLocaleDateString('vi-VN', {
                   month: 'long',
@@ -297,7 +352,7 @@ export default function ProfileTab({ user }: { user: User }) {
         <div className="lg:col-span-2">
           <form
             onSubmit={handleSaveProfile}
-            className="bg-[var(--surface)]rounded-2xl border border-[var(--border)]overflow-hidden shadow-vj-card"
+            className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] overflow-hidden shadow-vj-card"
           >
             <div className="p-6 border-b border-[var(--border)]">
               <h3 className="text-lg font-bold font-[KoHo,sans-serif] flex items-center gap-2 text-[var(--foreground)]">
@@ -314,8 +369,8 @@ export default function ProfileTab({ user }: { user: User }) {
                   type="text"
                   value={profile.fullName}
                   onChange={(e) => handleProfileChange('fullName', e.target.value)}
-                  disabled={!isEditing}
-                  className={`${inputBaseClass} ${!isEditing ? inputDisabledClass : ''} ${errors.fullName ? inputErrorClass : ''}`}
+                  disabled={isLoading}
+                  className={`${inputBaseClass} ${isLoading ? inputDisabledClass : ''} ${errors.fullName ? inputErrorClass : ''}`}
                   placeholder="Nhập họ và tên"
                 />
                 {errors.fullName && <p className={errorTextClass}>{errors.fullName}</p>}
@@ -328,11 +383,13 @@ export default function ProfileTab({ user }: { user: User }) {
                   type="email"
                   value={profile.email}
                   onChange={(e) => handleProfileChange('email', e.target.value)}
-                  disabled={!isEditing}
-                  className={`${inputBaseClass} ${!isEditing ? inputDisabledClass : ''} ${errors.email ? inputErrorClass : ''}`}
+                  disabled
+                  className={`${inputBaseClass} ${inputDisabledClass}`}
                   placeholder="email@example.com"
                 />
-                {errors.email && <p className={errorTextClass}>{errors.email}</p>}
+                <p className="text-xs text-[var(--foreground-subtle)] mt-1 font-[Be Vietnam Pro,sans-serif]">
+                  Email là tên đăng nhập, không thay đổi được.
+                </p>
               </div>
 
               {/* Phone */}
@@ -342,8 +399,8 @@ export default function ProfileTab({ user }: { user: User }) {
                   type="tel"
                   value={profile.phone}
                   onChange={(e) => handleProfileChange('phone', e.target.value)}
-                  disabled={!isEditing}
-                  className={`${inputBaseClass} ${!isEditing ? inputDisabledClass : ''} ${errors.phone ? inputErrorClass : ''}`}
+                  disabled={isLoading}
+                  className={`${inputBaseClass} ${isLoading ? inputDisabledClass : ''} ${errors.phone ? inputErrorClass : ''}`}
                   placeholder="0901234567"
                 />
                 {errors.phone && <p className={errorTextClass}>{errors.phone}</p>}
@@ -357,8 +414,8 @@ export default function ProfileTab({ user }: { user: User }) {
                     type="date"
                     value={profile.dob}
                     onChange={(e) => handleProfileChange('dob', e.target.value)}
-                    disabled={!isEditing}
-                    className={`${inputBaseClass} ${!isEditing ? inputDisabledClass : ''}`}
+                    disabled={isLoading}
+                    className={`${inputBaseClass} ${isLoading ? inputDisabledClass : ''}`}
                   />
                 </div>
                 <div>
@@ -366,8 +423,8 @@ export default function ProfileTab({ user }: { user: User }) {
                   <select
                     value={profile.gender}
                     onChange={(e) => handleProfileChange('gender', e.target.value)}
-                    disabled={!isEditing}
-                    className={`${inputBaseClass} ${!isEditing ? inputDisabledClass : ''}`}
+                    disabled={isLoading}
+                    className={`${inputBaseClass} ${isLoading ? inputDisabledClass : ''}`}
                   >
                     <option value="">-- Chọn giới tính --</option>
                     <option value="male">Nam</option>
@@ -383,51 +440,42 @@ export default function ProfileTab({ user }: { user: User }) {
                 <textarea
                   value={profile.address}
                   onChange={(e) => handleProfileChange('address', e.target.value)}
-                  disabled={!isEditing}
+                  disabled={isLoading}
                   rows={3}
-                  className={`${inputBaseClass} resize-none ${!isEditing ? inputDisabledClass : ''}`}
+                  className={`${inputBaseClass} resize-none ${isLoading ? inputDisabledClass : ''}`}
                   placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"
                 />
               </div>
 
-              {/* Action Buttons */}
-              {isEditing && (
-                <div className="flex items-center gap-3 pt-4 border-t border-[var(--border)]">
-                  <button
-                    type="submit"
-                    disabled={isSaving}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-[var(--primary)] text-white rounded-xl font-semibold text-sm font-[KoHo,sans-serif] hover:bg-[var(--primary-dark)] transition-all duration-200 shadow-md hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSaving ? (
-                      <>
-                        <Icon name="ArrowPathIcon" size={18} className="animate-spin" />
-                        Đang lưu...
-                      </>
-                    ) : (
-                      <>
-                        <Icon name="CheckCircleIcon" size={18} />
-                        Lưu thay đổi
-                      </>
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCancelEdit}
-                    disabled={isSaving}
-                    className="px-6 py-2.5 bg-[var(--surface-2)]text-[var(--foreground-muted)]rounded-xl font-semibold text-sm font-[KoHo,sans-serif] hover:bg-[var(--surface)]:bg-[var(--dark-surface)] transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Hủy
-                  </button>
-                </div>
-              )}
+              {/* Chỉ còn một hành động: bỏ được chế độ "đang chỉnh sửa" thì cũng
+                  bỏ luôn nút Huỷ, vì không có gì để huỷ về. */}
+              <div className="flex items-center gap-3 pt-4 border-t border-[var(--border)]">
+                <button
+                  type="submit"
+                  disabled={isSaving || isLoading}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-[var(--primary)] text-white rounded-xl font-semibold text-sm font-[KoHo,sans-serif] hover:bg-[var(--primary-dark)] transition-all duration-200 shadow-md hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSaving ? (
+                    <>
+                      <Icon name="ArrowPathIcon" size={18} className="animate-spin" />
+                      Đang lưu...
+                    </>
+                  ) : (
+                    <>
+                      <Icon name="CheckCircleIcon" size={18} />
+                      Lưu thay đổi
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </form>
         </div>
       </div>
 
       {/* Password Change Section */}
-      <div className="bg-[var(--surface)]rounded-2xl border border-[var(--border)]overflow-hidden shadow-vj-card">
-        <div className="p-6 border-b border-[var(--border)]flex items-center justify-between">
+      <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] overflow-hidden shadow-vj-card">
+        <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
           <h3 className="text-lg font-bold font-[KoHo,sans-serif] flex items-center gap-2 text-[var(--foreground)]">
             <Icon name="KeyIcon" size={22} className="text-[var(--vj-navy)]" />
             Đổi mật khẩu
@@ -516,7 +564,7 @@ export default function ProfileTab({ user }: { user: User }) {
                     setErrors({});
                   }}
                   disabled={isChangingPassword}
-                  className="px-6 py-2.5 bg-[var(--surface-2)]text-[var(--foreground-muted)]rounded-xl font-semibold text-sm font-[KoHo,sans-serif] hover:bg-[var(--surface)]:bg-[var(--dark-surface)] transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2.5 bg-[var(--surface-2)] text-[var(--foreground-muted)] rounded-xl font-semibold text-sm font-[KoHo,sans-serif] hover:bg-[var(--surface-3)] transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Hủy
                 </button>
@@ -525,6 +573,11 @@ export default function ProfileTab({ user }: { user: User }) {
           </form>
         )}
       </div>
+
+      {/* `useToast` giữ state riêng cho từng lần gọi, nên tab này phải tự render
+          container: thiếu nó thì thông báo lưu thành công (và cả thông báo lỗi)
+          không bao giờ hiện ra. */}
+      <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
     </div>
   );
 }

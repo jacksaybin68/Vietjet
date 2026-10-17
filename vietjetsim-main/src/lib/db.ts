@@ -318,7 +318,10 @@ export async function createUser(
 
 export async function updateUserProfile(
   userId: string,
-  updates: { full_name?: string; phone?: string; avatar_url?: string }
+  // `phone` is nullable on purpose: a cleared number must be stored as NULL, not
+  // `''`, because `user_profiles_phone_key` (007) is unique and would then let
+  // exactly one account hold the empty value.
+  updates: { full_name?: string; phone?: string | null; avatar_url?: string }
 ): Promise<UserRecord> {
   // Whitelist of allowed column names (prevent SQL key injection)
   const ALLOWED_COLUMNS = ['full_name', 'phone', 'avatar_url'] as const;
