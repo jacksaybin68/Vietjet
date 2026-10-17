@@ -476,8 +476,8 @@ export default function UserChat() {
               ? 'hidden sm:flex'
               : 'flex'
             : isOpen
-              ? 'bottom-[calc(128px+env(safe-area-inset-bottom))] right-2 hidden sm:flex sm:bottom-0 sm:right-6'
-              : 'bottom-[calc(128px+env(safe-area-inset-bottom))] right-2 flex transition-transform duration-200 hover:-translate-y-0.5 active:scale-95 sm:bottom-0 sm:right-6'
+              ? 'bottom-[calc(128px+env(safe-area-inset-bottom))] right-2 hidden sm:flex sm:bottom-4 sm:right-4'
+              : 'bottom-[calc(128px+env(safe-area-inset-bottom))] right-2 flex transition-transform duration-200 hover:-translate-y-0.5 active:scale-95 sm:bottom-4 sm:right-4'
         }`}
       >
         {isOpen ? (
@@ -485,12 +485,12 @@ export default function UserChat() {
             <Icon name="XMarkIcon" size={22} />
           </span>
         ) : (
-          <span className="relative flex h-16 w-16 items-center justify-center sm:h-20 sm:w-20">
+          <span className="relative flex h-12 w-12 items-center justify-center sm:h-14 sm:w-14">
             <img
               src="/assets/images/app_logo.png"
               alt="Logo hỗ trợ Vietjet Air"
-              width={80}
-              height={80}
+              width={56}
+              height={56}
               className="h-full w-full object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.28)]"
             />
             <span className="absolute -top-9 right-0 whitespace-nowrap rounded-2xl rounded-br-sm bg-white px-3 py-1.5 text-[13px] font-bold text-[var(--vj-navy)] shadow-[0_6px_18px_rgba(0,0,0,0.16)] ring-1 ring-black/5">
