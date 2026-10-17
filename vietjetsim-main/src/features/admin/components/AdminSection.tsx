@@ -60,7 +60,12 @@ interface AdminStatCardProps {
   label: string;
 }
 
-export function AdminStatCard({ icon, iconClassName = 'text-indigo-400', value, label }: AdminStatCardProps) {
+export function AdminStatCard({
+  icon,
+  iconClassName = 'text-indigo-400',
+  value,
+  label,
+}: AdminStatCardProps) {
   return (
     <div className={ADMIN_CARD_CLASS} style={ADMIN_CARD_STYLE}>
       <div className="flex items-start justify-between mb-4">

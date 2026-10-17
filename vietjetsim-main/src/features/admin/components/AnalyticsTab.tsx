@@ -88,7 +88,10 @@ export default function AnalyticsTab() {
           title="Thống kê tổng quan"
           subtitle="Dữ liệu thống kê từ hệ thống"
         />
-        <div className={ADMIN_CARD_CLASS} style={{ ...ADMIN_CARD_STYLE, textAlign: 'center', padding: '3rem' }}>
+        <div
+          className={ADMIN_CARD_CLASS}
+          style={{ ...ADMIN_CARD_STYLE, textAlign: 'center', padding: '3rem' }}
+        >
           <Icon name="ExclamationTriangleIcon" size={32} className="text-primary mx-auto mb-3" />
           <h3 className="font-bold text-white mb-1">Không thể tải dữ liệu thống kê</h3>
           <p className="text-sm text-slate-400 mb-5">{error}</p>

@@ -53,7 +53,10 @@ const CustomTooltip = ({
 }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-xl border border-white/10 p-3 text-xs" style={{ background: '#0f172a' }}>
+      <div
+        className="rounded-xl border border-white/10 p-3 text-xs"
+        style={{ background: '#0f172a' }}
+      >
         <div className="font-bold text-white mb-1">{label}</div>
         {payload.map((p, i) => (
           <div key={i} className="text-slate-400">
@@ -134,7 +137,10 @@ export default function RevenueTab() {
           title="Thống kê doanh thu"
           subtitle="Doanh thu theo thời gian thực"
         />
-        <div className={ADMIN_CARD_CLASS} style={{ ...ADMIN_CARD_STYLE, textAlign: 'center', padding: '3rem' }}>
+        <div
+          className={ADMIN_CARD_CLASS}
+          style={{ ...ADMIN_CARD_STYLE, textAlign: 'center', padding: '3rem' }}
+        >
           <Icon name="ExclamationTriangleIcon" size={32} className="text-primary mx-auto mb-3" />
           <h3 className="font-bold text-white mb-1">Lỗi tải dữ liệu</h3>
           <p className="text-sm text-slate-400 mb-5">{error}</p>
@@ -181,9 +187,7 @@ export default function RevenueTab() {
                 key={val}
                 onClick={() => setPeriod(val as '6m' | '3m' | '1m')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  period === val
-                    ? 'bg-primary text-white'
-                    : 'text-slate-400 hover:text-white'
+                  period === val ? 'bg-primary text-white' : 'text-slate-400 hover:text-white'
                 }`}
               >
                 {label}
@@ -304,7 +308,10 @@ export default function RevenueTab() {
       </div>
 
       {/* Route Revenue Table */}
-      <div className={ADMIN_CARD_CLASS} style={{ ...ADMIN_CARD_STYLE, padding: 0, overflow: 'hidden' }}>
+      <div
+        className={ADMIN_CARD_CLASS}
+        style={{ ...ADMIN_CARD_STYLE, padding: 0, overflow: 'hidden' }}
+      >
         <div className="p-5 border-b border-white/5">
           <h3 className="font-bold text-white">Doanh thu theo đường bay</h3>
         </div>

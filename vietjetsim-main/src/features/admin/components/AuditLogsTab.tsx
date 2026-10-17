@@ -26,7 +26,6 @@ interface ToastAPI {
 
 const PAGE_SIZE = 20;
 
-
 const ACTION_COLORS: Record<string, { label: string; cls: string }> = {
   create: { label: 'Tạo mới', cls: 'bg-emerald-500/15 text-emerald-400' },
   update: { label: 'Cập nhật', cls: 'bg-blue-500/15 text-blue-400' },
@@ -242,7 +241,10 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl border overflow-hidden" style={{ ...ADMIN_CARD_STYLE, padding: 0 }}>
+      <div
+        className="rounded-2xl border overflow-hidden"
+        style={{ ...ADMIN_CARD_STYLE, padding: 0 }}
+      >
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -315,26 +317,20 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
                   </td>
                 </tr>
               ) : (
-                logs.map((log, i) => {
+                logs.map((log) => {
                   const actionConfig = getActionConfig(log.action);
                   const isExpanded = expandedLog === log.id;
 
                   return (
                     <React.Fragment key={log.id}>
-                      <tr
-                        className="border-b border-white/5 hover:bg-white/5 transition-colors"
-                      >
+                      <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
                         <td className="px-5 py-3.5">
                           <span className="text-xs text-slate-400 font-medium">
                             {formatDate(log.created_at)}
                           </span>
                         </td>
                         <td className="px-5 py-3.5">
-                          <span
-                            className={actionConfig.cls}
-                          >
-                            {log.action}
-                          </span>
+                          <span className={actionConfig.cls}>{log.action}</span>
                         </td>
                         <td className="px-5 py-3.5 hidden sm:table-cell">
                           <span className="text-xs text-slate-400">
