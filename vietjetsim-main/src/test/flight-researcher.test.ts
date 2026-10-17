@@ -98,6 +98,29 @@ describe('tách chặng và ngày từ câu hỏi', () => {
     expect(parseFlightDate('chuyến bay 25/12', TODAY)).toBe('2026-12-25');
   });
 
+  it('câu hỏi thật của quản trị viên tách ra đúng chặng và ngày', () => {
+    // Đây là câu đã hỏi trợ lý thật. Nếu nó tách ra chặng/ngày khác thì ngữ
+    // cảnh đưa cho model sai, và câu trả lời sai là lỗi dây nối chứ không phải
+    // lỗi của model.
+    expect(parseFlightQuery('Chuyến bay HAN-SGN ngày 6/2 (Tết) có chuyến nào không?', TODAY)).toEqual({
+      origin: 'HAN',
+      destination: 'SGN',
+      date: '2027-02-06',
+    });
+    expect(parseFlightQuery('Chuyến bay Hà Nội đi Phú Quốc giá bao nhiêu?', TODAY)).toEqual({
+      origin: 'HAN',
+      destination: 'PQC',
+      date: TODAY,
+    });
+    // "danh sách chuyến bay nội địa từ nay đến Tết" không nêu chặng nào thì hỏi
+    // cặp mặc định, hôm nay.
+    expect(parseFlightQuery('danh sách chuyến bay nội địa từ nay đến Tết', TODAY)).toEqual({
+      origin: 'HAN',
+      destination: 'SGN',
+      date: TODAY,
+    });
+  });
+
   it('mã trùng lặp chỉ tính một lần và theo thứ tự xuất hiện', () => {
     expect(collectAirportCodes('HAN-SGN, rồi HAN-DAD')).toEqual(['HAN', 'SGN', 'DAD']);
   });
