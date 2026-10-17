@@ -5,6 +5,16 @@ import {
   researchVietjetFlights,
 } from '@/lib/openclaw/flight-researcher';
 import {
+  applyFlightCommand,
+  formatCommandConfirmPreview,
+  isConfirmationMessage,
+  parseFlightCommand,
+  setPendingCommand,
+  takePendingCommand,
+  type UpdatePriceCommand,
+  type UpdateTimeCommand,
+} from '@/lib/openclaw/flight-command';
+import {
   askOllama,
   getOllamaConfig,
   getOpenClawGatewayUrl,
@@ -25,8 +35,7 @@ const MAX_HISTORY_ITEMS = 20;
 /**
  * Gateway OpenClaw: `POST /chat` với `{message, context, stream}`; câu trả lời
  * nằm ở `reply` / `content` / `message` tuỳ phiên bản gateway.
- */
-async function askOpenClawGateway(
+ */ async function askOpenClawGateway(
   message: string,
   context: AssistantMessage[]
 ): Promise<{ content: string; model: string | null }> {
@@ -94,7 +103,7 @@ export async function POST(req: NextRequest) {
   try {
     // Admin-only surface: the sole caller is the admin console widget. This
     // helper enforces CSRF first, then authentication and the admin role.
-    const { error, response } = await verifyAdminRequest(req);
+    const { error, response, payload } = await verifyAdminRequest(req);
     if (error) return response;
 
     const { message, history = [] } = await req.json();
@@ -102,6 +111,84 @@ export async function POST(req: NextRequest) {
     if (!message) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
+
+    // ─── OpenClaw Command Lane: lệnh cập nhật đi bằng quy tắc, không qua model ─
+    // Lỗi từng thấy ở đường chỉ đọc: quản trị hỏi "cập nhật giá thành 950000"
+    // và model trả lời như thể đã có giá 950.000 trong bảng. Đường lệnh giải
+    // quyết gốc: parse bằng regex, con số đến từ câu chữ, và chỉ GHI sau khi
+    // quản trị trả lời "xác nhận" — model không bao giờ tham gia đường ghi.
+    const adminId = String(payload.userId || payload.email || 'admin');
+    const commandText = String(message).trim();
+
+    if (isConfirmationMessage(commandText)) {
+      const pending = takePendingCommand(adminId);
+      if (!pending) {
+        return NextResponse.json({
+          content:
+            'Không có lệnh nào đang chờ xác nhận. Hãy nêu lệnh trước (ví dụ: "cập nhật giá vé VJ 3017 ngày mai phổ thông thành 950000"), rồi hỏi tôi thêm lần nữa.',
+          model: null,
+          provider: 'openclaw-command',
+          id: Date.now().toString(),
+        });
+      }
+      // Sửa quyền chặt bằng cả bảng quyền của lượt XÁC NHẬN, trùng quyền của
+      // PATCH /api/quan-tri/chuyen-bay/[id] (flight:price_edit).
+      const permission = await verifyAdminRequest(req, 'flight:price_edit');
+      if (permission.error || permission.response) return permission.response!;
+
+      try {
+        const result = await applyFlightCommand(pending, { adminId });
+        if (result.status === 'applied') {
+          return NextResponse.json({
+            content: `Đã áp dụng lên chuyến ${pending.flightNo}:\n• ${result.changes.join('\n• ')}\n\nKiểm tra lại ở tab Chuyến bay nếu cần.`,
+            model: null,
+            provider: 'openclaw-command',
+            id: Date.now().toString(),
+          });
+        }
+        return NextResponse.json({
+          content:
+            result.status === 'not-found'
+              ? `${result.message}\n${result.nearby.length ? `Các thời điểm gần nhất còn thấy chuyến ${pending.flightNo}: ${result.nearby.map((n) => `${n.date} ${n.time}`).join(', ')}.` : 'Trong ±3 ngày không thấy chuyến nào cùng số hiệu.'}`
+              : result.message,
+          model: null,
+          provider: 'openclaw-command',
+          id: Date.now().toString(),
+        });
+      } catch (applyError) {
+        console.error('OpenClaw applyFlightCommand error:', applyError);
+        return NextResponse.json(
+          { error: getApiErrorMessage(applyError, 'Không áp dụng được lệnh cập nhật chuyến bay.') },
+          { status: 500 }
+        );
+      }
+    }
+
+    const command = parseFlightCommand(commandText);
+    if (command && command.kind === 'invalid') {
+      return NextResponse.json({
+        content: `Chưa hiểu lệnh:\n${command.reasons.map((reason) => `• ${reason}`).join('\n')}\n\nHai dạng lệnh hợp lệ:\n• "cập nhật giá vé VJ 3017 ngày 2026-10-19 phổ thông thành 950.000"\n• "đổi giờ bay VJ 3040 ngày mai sang 10:00"`,
+        model: null,
+        provider: 'openclaw-command',
+        id: Date.now().toString(),
+      });
+    }
+
+    if (command && (command.kind === 'update-price' || command.kind === 'update-time')) {
+      // Quyền chặt kiểm từ lượt đề xuất luôn: một role không có quyền sửa giá
+      // không cần thấy preview rồi mới bị chặn ở lượt xác nhận.
+      const permission = await verifyAdminRequest(req, 'flight:price_edit');
+      if (permission.error || permission.response) return permission.response!;
+
+      setPendingCommand(adminId, command as UpdatePriceCommand | UpdateTimeCommand);
+      return NextResponse.json({
+        content: `Sẵn sàng thay đổi (chưa ghi):\n• ${formatCommandConfirmPreview(command as UpdatePriceCommand | UpdateTimeCommand)}\n\nTrả lời "xác nhận" để áp dụng. Lệnh chờ hết hạn sau 5 phút.`,
+        model: null,
+        provider: 'openclaw-command',
+        id: Date.now().toString(),
+      });
+    }
+    // ─────────────────────────────────────────────────────────────────────────────
 
     // ─── OpenClaw Role Enforcement: COORDINATOR (Real-Time Flight Updates ONLY) ─
     const coordinatorSystem: AssistantMessage = {
@@ -112,7 +199,8 @@ QUY TẮC:
 1. Chỉ trả lời các vấn đề liên quan đến chuyến bay, giá vé, giờ bay, chặng bay và việc cập nhật thông tin chuyến bay vào admin dashboard.
 2. Từ chối lịch sự mọi câu hỏi về eSIM, gói cước, hoặc hỗ trợ khách hàng chung.
 3. Khi hệ thống cung cấp phần dữ liệu chuyến bay ngay sau đây, chỉ được dùng số liệu trong đó — tuyệt đối không bịa số hiệu, giờ bay, giá hay chặng. Nếu hệ thống không có chuyến cho ngày được hỏi thì nói rõ là không có và gợi ý ngày gần nhất.
-4. Luôn kèm link tra cứu trên VietjetAir.`,
+4. Luôn kèm link tra cứu trên VietjetAir.
+5. Bạn KHÔNG tự sửa dữ liệu. Việc thay đổi giá/giờ chỉ diễn ra khi quản trị gõ đúng mẫu lệnh (vd "cập nhật giá vé VJ 3017 ngày 2026-10-19 phổ thông thành 950.000" hoặc "đổi giờ bay VJ 3040 ngày mai sang 10:00") và hệ thống chờ chữ "xác nhận". Khi người dùng nêu ý cập nhật ở dạng tự do, hãy chỉ dẫn cách viết lệnh theo mẫu trên và TUYỆT ĐỐI không khẳng định "đã cập nhật" hay lấy số họ vừa gõ trình bày như số hiện tại trong bảng.`,
     };
 
     // `message` là câu hỏi mới, `history` là các lượt trước. Cắt history TRƯỚC

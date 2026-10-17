@@ -135,6 +135,21 @@ export function toVietnamInstant(date: string, time: string): string {
 }
 
 /**
+ * Cộng/trừ ngày trên một ngày tháng thuần `YYYY-MM-DD`.
+ *
+ * Tính trên lịch UTC, không qua `Asia/Ho_Chi_Minh`, nên kết quả không phụ thuộc
+ * múi giờ nơi chạy — một hàm thuần để cả `parseFlightDate` ("ngày mai") và
+ * `getFlightDatesNear` (cửa sổ ±3 ngày) dùng chung thay vì mỗi bên tự dựng một
+ * `Date` và tự trừ.
+ */
+export function addDateDays(date: string, days: number): string {
+  const base = new Date(`${date}T00:00:00Z`);
+  if (Number.isNaN(base.getTime())) return date;
+  base.setUTCDate(base.getUTCDate() + days);
+  return base.toISOString().slice(0, 10);
+}
+
+/**
  * Normalize a Vietnamese phone number to a single canonical form.
  *
  * `user_profiles.phone` carries a UNIQUE constraint, yet registration and login

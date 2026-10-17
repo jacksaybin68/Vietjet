@@ -16,7 +16,7 @@
  */
 import { getAvailableDepartDates, searchFlights, type FlightRecord } from '@/lib/db';
 import { AIRPORT_CITIES } from '@/shared/constants';
-import { toVietnamWallClock } from '@/lib/utils';
+import { addDateDays, toVietnamWallClock } from '@/lib/utils';
 
 export interface ResearchedFlight {
   flightNo: string;
@@ -130,6 +130,28 @@ const ISO_DATE = /(\d{4})-(\d{2})-(\d{2})/;
 const SHORT_DATE = /(?<!\d)(\d{1,2})[/-](\d{1,2})(?:[/-](\d{4}))?(?!\d)/;
 
 /**
+ * Ngày tương đối trong câu hỏi: "hôm nay", "mai", "mốt", "hôm qua" và
+ * "N ngày nữa/sau". Trả về số ngày lệch so với hôm nay, `null` khi câu không
+ * nói ngày tương đối nào.
+ *
+ * `\b` là ranh giới từ ASCII, nên "mai" trong "email" không khớp — ký tự
+ * quanh nó vẫn là ký tự từ. Nhận cả hai dạng vì "ngày mai" là cụm tự nhiên
+ * còn "mai bay" cũng xuất hiện.
+ */
+export function relativeDateOffset(text: string): number | null {
+  const lower = text.toLowerCase();
+  if (/hôm qua/.test(lower)) return -1;
+  if (/hôm nay/.test(lower)) return 0;
+  if (/(?<!\w)mai(?!\w)/.test(lower)) return 1;
+  if (/(?<!\w)(?:mốt|ngày kia)(?!\w)/.test(lower)) return 2;
+  // Hai trật tự từ đều có người viết: "3 ngày nữa"/"3 ngày sau" và "sau 3 ngày".
+  const n =
+    lower.match(/(?<!\d)(\d+)\s*ngày\s*(?:nữa|sau|tới|tiếp)/) ?? lower.match(/sau\s*(\d+)\s*ngày/);
+  if (n) return Number(n[1]);
+  return null;
+}
+
+/**
  * Ngày khách hỏi. Không có ngày trong câu thì là hôm nay (giờ Việt Nam).
  *
  * Một ngày không ghi năm mà đã qua thì hiểu là năm sau: hỏi "chuyến bay ngày
@@ -153,6 +175,12 @@ export function parseFlightDate(text: string, today = todayInVietnam()): string 
       return candidate;
     }
   }
+
+  // Ngày tương đối ("mai", "hôm nay", "5 ngày nữa") chỉ được dùng khi câu không
+  // mang ngày viết ra — ngày viết ra luôn thắng.
+  const relative = relativeDateOffset(text);
+  if (relative !== null) return addDateDays(today, relative);
+
   return today;
 }
 

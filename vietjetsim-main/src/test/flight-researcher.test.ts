@@ -98,11 +98,30 @@ describe('tách chặng và ngày từ câu hỏi', () => {
     expect(parseFlightDate('chuyến bay 25/12', TODAY)).toBe('2026-12-25');
   });
 
+  it('ngày nói bằng lời hiểu theo hôm nay giờ Việt Nam', () => {
+    // Trước đây "ngày mai" không được hiểu và lọt về TODAY: trợ lý tra nhầm
+    // chính ngày hôm nay rồi trả lời mơ hồ đúng lúc quản trị đang cần ngày sau.
+    expect(parseFlightDate('chuyến bay HAN-SGN ngày mai', TODAY)).toBe('2026-10-19');
+    expect(parseFlightDate('mai có chuyến nào không', TODAY)).toBe('2026-10-19');
+    expect(parseFlightDate('cập nhật giá vé VJ 3017 ngày mốt', TODAY)).toBe('2026-10-20');
+    expect(parseFlightDate('tra cứu chuyến bay hôm nay', TODAY)).toBe(TODAY);
+    expect(parseFlightDate('chuyến VJ 3017 sau 3 ngày còn gì?', TODAY)).toBe('2026-10-21');
+    // Ngày viết ra luôn thắng ngày tương đối.
+    expect(parseFlightDate('ngày mai 2026-12-01 có gì', TODAY)).toBe('2026-12-01');
+  });
+
+  it('"mai" không được nuốt từ một từ khác', () => {
+    // "email" chứa "mai" nhưng boundary \w giữ nó ra ngoài.
+    expect(parseFlightDate('gửi email cho tôi lộ trình', TODAY)).toBe(TODAY);
+  });
+
   it('câu hỏi thật của quản trị viên tách ra đúng chặng và ngày', () => {
     // Đây là câu đã hỏi trợ lý thật. Nếu nó tách ra chặng/ngày khác thì ngữ
     // cảnh đưa cho model sai, và câu trả lời sai là lỗi dây nối chứ không phải
     // lỗi của model.
-    expect(parseFlightQuery('Chuyến bay HAN-SGN ngày 6/2 (Tết) có chuyến nào không?', TODAY)).toEqual({
+    expect(
+      parseFlightQuery('Chuyến bay HAN-SGN ngày 6/2 (Tết) có chuyến nào không?', TODAY)
+    ).toEqual({
       origin: 'HAN',
       destination: 'SGN',
       date: '2027-02-06',

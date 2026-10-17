@@ -2,6 +2,7 @@
 import { sql } from '@/lib/neon';
 export { sql };
 import type { Permission } from '@/lib/rbac';
+import { addDateDays } from '@/lib/utils';
 
 // ─── Result Helpers ─────────────────────────────────────────────────────────
 
@@ -499,6 +500,66 @@ export async function getFlightById(flightId: string): Promise<FlightRecord | nu
     SELECT * FROM flights WHERE id = ${flightId}
   `;
   return (results as FlightRecord[])[0] || null;
+}
+
+/**
+ * Tìm chuyến bay theo số hiệu + ngày giờ Việt Nam — đường tra của lệnh cập nhật
+ * qua trợ lý OpenClaw (`flight-command.ts`).
+ *
+ * `UPPER(flight_no)` cả hai vế với cùng lý do `getFlightStatusByNo` làm vậy:
+ * PNR/số hiệu giờ có chữ, và khách/quản trị gõ không hoa. Ngày so theo lịch
+ * `Asia/Ho_Chi_Minh`, không theo UTC — một chuyến 06:00 giờ VN trôi vào ngày
+ * hôm trước khi nhìn qua GMT.
+ */
+/**
+ * Tìm chuyến bay theo số hiệu + ngày giờ Việt Nam — đường tra của lệnh cập nhật
+ * qua trợ lý OpenClaw (`flight-command.ts`).
+ *
+ * So sánh bỏ hết khoảng trắng: `getFlightStatusByNo` yêu cầu `UPPER()` vì PNR
+ * giờ có chữ, nhưng lệnh chat thêm một trạng thái nữa — quản trị gõ `VJ 3040`
+ * trong khi dòng dữ liệu ghi `VJ3040` (hoặc ngược lại). Cả hai hợp lệ theo
+ * `FLIGHT_NO_PATTERN` (dấu cách là tùy chọn), so chặt một vế sẽ chỉ tìm thấy
+ * một trong hai cách viết. Ngày so theo lịch `Asia/Ho_Chi_Minh`, không theo
+ * UTC — một chuyến 06:00 giờ VN trôi vào ngày hôm trước khi nhìn qua GMT.
+ */
+export async function getFlightByNoAndDate(
+  flightNo: string,
+  departDate: string
+): Promise<FlightRecord[]> {
+  const results = await sql`
+    SELECT * FROM flights
+    WHERE UPPER(REGEXP_REPLACE(flight_no, '\\s+', '', 'g'))
+          = ${flightNo.replace(/\s+/g, '').toUpperCase()}
+      AND (depart_time AT TIME ZONE 'Asia/Ho_Chi_Minh')::date
+          = ${departDate}::date
+    ORDER BY depart_time ASC
+  `;
+  return results as FlightRecord[];
+}
+
+/**
+ * Những ngày lân cận (±3 ngày quanh `departDate`) còn xuất hiện cùng số hiệu —
+ * dùng để gợi ý khi ngày được hỏi không có chuyến, thay vì để câu trả lời dừng
+ * ở "không tìm thấy".
+ */
+export async function getFlightDatesNear(
+  flightNo: string,
+  departDate: string
+): Promise<Array<{ date: string; time: string }>> {
+  const from = addDateDays(departDate, -3);
+  const to = addDateDays(departDate, 3);
+  const results = await sql`
+    SELECT to_char(depart_time AT TIME ZONE 'Asia/Ho_Chi_Minh', 'YYYY-MM-DD') AS date,
+           to_char(depart_time AT TIME ZONE 'Asia/Ho_Chi_Minh', 'HH24:MI') AS time
+    FROM flights
+    WHERE UPPER(REGEXP_REPLACE(flight_no, '\\s+', '', 'g'))
+          = ${flightNo.replace(/\s+/g, '').toUpperCase()}
+      AND (depart_time AT TIME ZONE 'Asia/Ho_Chi_Minh')::date
+          BETWEEN ${from}::date AND ${to}::date
+    ORDER BY depart_time ASC
+    LIMIT 8
+  `;
+  return results as Array<{ date: string; time: string }>;
 }
 
 /**

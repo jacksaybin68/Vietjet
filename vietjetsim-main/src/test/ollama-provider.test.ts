@@ -36,6 +36,15 @@ vi.mock('@/lib/neon', () => {
   return { sql: sqlMock };
 });
 
+// Đường lệnh kiểm quyền `flight:price_edit` như PATCH /quan-tri/chuyen-bay — ở
+// test này bảng quyền trong mock DB trả rỗng sẽ 403 cả lượt đề xuất. Cho vượt
+// qua cổng bảng quyền (không đụng tới cổng CSRF/role) để test đúng về đường
+// lệnh, không phải về RBAC (đã ghim ở api-security / flight-fare-edit).
+vi.mock('@/lib/role-permissions', () => ({
+  getRolePermissionsFromDb: vi.fn(async () => new Set<never>([])),
+  bypassesPermissionTable: () => true,
+}));
+
 const CSRF_TOKEN = 'test-csrf-token';
 
 const adminToken = () =>
@@ -385,13 +394,16 @@ describe('tuyến trợ lý dùng Ollama', () => {
     // 17:09 UTC ngày 17/10 = 00:09 ngày 18/10 giờ Việt Nam (UTC+7). Đúng khoảng
     // 00:00–07:00 mà `toISOString().split('T')[0]` trả về hôm qua: câu trả lời
     // ghi sai ngày và link tra cứu mở sai ngày.
+    //
+    // Câu hỏi phải không có động từ cập nhật ("cập nhật"...) — câu có nó giờ
+    // rơi vào đường lệnh và được trả lời bằng quy tắc, không qua model.
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-10-17T17:09:00Z'));
     try {
       const req = new NextRequest('http://localhost:4028/api/tro-ly-ai/tro-chuyen', {
         method: 'POST',
         headers: adminHeaders(),
-        body: JSON.stringify({ message: 'cập nhật chuyến bay HAN-SGN hôm nay' }),
+        body: JSON.stringify({ message: 'chuyến bay HAN-SGN hôm nay có gì' }),
       });
       await postAssistant(req);
     } finally {
@@ -412,6 +424,46 @@ describe('tuyến trợ lý dùng Ollama', () => {
     // "Đã tìm thấy lộ trình thực tế" trong khi không hề tra gì, và model bịa theo.
     expect(coordinator[0].content).not.toContain('Đã tìm thấy lộ trình thực tế');
     expect(coordinator[0].content).toContain('KHÔNG có chuyến nào');
+  });
+
+  it('câu nêu ý cập nhật đi bằng đường lệnh, không qua model', async () => {
+    vi.stubEnv('OLLAMA_MODEL', 'qwen3:0.6b');
+    const fetchMock = vi.fn().mockResolvedValue(fakeResponse({ message: { content: 'model foi hỏi' } }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const req = new NextRequest('http://localhost:4028/api/tro-ly-ai/tro-chuyen', {
+      method: 'POST',
+      headers: adminHeaders(),
+      body: JSON.stringify({
+        message: 'cập nhật giá vé VJ 3017 ngày 2026-10-19 phổ thông thành 950.000',
+      }),
+    });
+    const body = await (await postAssistant(req)).json();
+
+    // Ghi chưa diễn ra — lượt này chỉ lưu lệnh chờ, vì thế fetch không được
+    // gọi và câu trả lời không đến từ model.
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(body.provider).toBe('openclaw-command');
+    expect(body.content).toContain('Sẵn sàng thay đổi');
+    expect(body.content).toContain('950.000');
+    expect(body.content).toContain('xác nhận');
+  });
+
+  it('câu lệnh thiếu dữ liệu được trả lời bằng quy tắc, kèm mẫu lệnh', async () => {
+    vi.stubEnv('OLLAMA_MODEL', 'qwen3:0.6b');
+    const fetchMock = vi.fn().mockResolvedValue(fakeResponse({ message: { content: 'model foi hỏi' } }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const req = new NextRequest('http://localhost:4028/api/tro-ly-ai/tro-chuyen', {
+      method: 'POST',
+      headers: adminHeaders(),
+      body: JSON.stringify({ message: 'cập nhật chuyến bay cho tôi' }),
+    });
+    const body = await (await postAssistant(req)).json();
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(body.provider).toBe('openclaw-command');
+    expect(body.content).toContain('Chưa hiểu lệnh');
   });
 
   it('Ollama chết thì rớt về gateway OpenClaw khi gateway có cấu hình', async () => {
