@@ -328,7 +328,7 @@ export default function MyFlightsPage() {
                 <div className="relative">
                   <label
                     htmlFor="booking-code"
-                    className="pointer-events-none absolute left-3 top-1 text-[11px] font-bold text-[var(--foreground)]"
+                    className="pointer-events-none absolute left-3 top-1.5 text-xs font-bold text-[var(--foreground)]"
                   >
                     Mã đặt chỗ <span className="text-[var(--vj-red)]">*</span>
                   </label>
@@ -339,13 +339,13 @@ export default function MyFlightsPage() {
                     value={bookingCode}
                     onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
                     placeholder=" "
-                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 pb-1.5 pt-4 font-heading-900 text-sm font-black uppercase text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
+                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 pb-1.5 pt-5 font-heading-900 text-base font-black uppercase text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
                   />
                 </div>
                 <div className="relative">
                   <label
                     htmlFor="surname"
-                    className="pointer-events-none absolute left-3 top-1 text-[11px] font-bold text-[var(--foreground)]"
+                    className="pointer-events-none absolute left-3 top-1.5 text-xs font-bold text-[var(--foreground)]"
                   >
                     Họ
                   </label>
@@ -355,13 +355,13 @@ export default function MyFlightsPage() {
                     value={surname}
                     onChange={(e) => setSurname(e.target.value)}
                     placeholder=" "
-                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 pb-1.5 pt-4 text-sm font-bold text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
+                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 pb-1.5 pt-5 text-base font-bold text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
                   />
                 </div>
                 <div className="relative">
                   <label
                     htmlFor="given-name"
-                    className="pointer-events-none absolute left-3 top-1 text-[11px] font-bold text-[var(--foreground)]"
+                    className="pointer-events-none absolute left-3 top-1.5 text-xs font-bold text-[var(--foreground)]"
                   >
                     Tên đệm &amp; Tên
                   </label>
@@ -371,13 +371,13 @@ export default function MyFlightsPage() {
                     value={givenName}
                     onChange={(e) => setGivenName(e.target.value)}
                     placeholder=" "
-                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 pb-1.5 pt-4 text-sm font-bold text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
+                    className="w-full rounded-lg border border-[var(--border)] bg-white px-3 pb-1.5 pt-5 text-base font-bold text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/50"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="vj-cta mt-1 inline-flex h-11 items-center justify-center self-start rounded-lg px-7 text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                  className="vj-cta mt-1 inline-flex h-11 items-center justify-center self-start rounded-lg px-7 text-base font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loading ? 'Đang tìm…' : 'Tìm kiếm'}
                 </button>
