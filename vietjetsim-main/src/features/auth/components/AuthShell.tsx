@@ -26,7 +26,10 @@ export default function AuthShell({ eyebrow, title, subtitle, children }: AuthSh
       {/* `pb-36` keeps the floating chat mascot (fixed bottom-right) clear of the
           form card on phones, where the card otherwise reaches the viewport edge. */}
       <div className="pb-36">
-        <div className="mx-auto grid max-w-[1180px] gap-6 px-4 pt-6 sm:px-6 lg:grid-cols-[minmax(0,560px)_minmax(0,1fr)] lg:px-8">
+        {/* Cột form hẹp lại (560 → 470) để nhường bề ngang cho banner bên phải:
+            banner là ảnh 750×650 có chữ bám sát mép phải ("Hỗ trợ toàn quốc"), nên
+            cột càng hẹp thì ảnh càng bị cắt và chữ trên ảnh càng khó đọc. */}
+        <div className="mx-auto grid max-w-[1180px] gap-6 px-4 pt-6 sm:px-6 lg:grid-cols-[minmax(0,470px)_minmax(0,1fr)] lg:px-8">
           {/* Site thật để form đặt thẳng trên nền mây, không bọc card trắng. */}
           <section className="px-1 py-2 sm:px-2">
             <Link href="/trang-chu" className="mb-6 inline-flex lg:hidden">
@@ -49,11 +52,16 @@ export default function AuthShell({ eyebrow, title, subtitle, children }: AuthSh
             </p>
           </section>
 
-          <div className="relative hidden overflow-hidden rounded-xl shadow-[0_16px_48px_rgba(26,41,72,0.16)] lg:block">
+          {/* Ảnh để cao theo đúng tỉ lệ gốc (`w-full h-auto`) thay vì kéo đầy
+              chiều cao form rồi `object-cover`: cover cắt cạnh khi cột hẹp hơn
+              chiều cao × tỉ lệ ảnh, và cạnh bị cắt đúng là chỗ có chữ. `self-start`
+              giữ ảnh ở đầu cột khi form (tab Đăng ký) cao hơn ảnh, để nó không bị
+              kéo giãn. */}
+          <div className="relative hidden self-start overflow-hidden rounded-xl shadow-[0_16px_48px_rgba(26,41,72,0.16)] lg:block">
             <img
               src="/images/hero/banner-quang-cao-ngoai-te.jpg"
               alt="Mua ngoại tệ dễ dàng khi đặt vé"
-              className="h-full w-full object-cover object-left"
+              className="block h-auto w-full"
             />
           </div>
         </div>
