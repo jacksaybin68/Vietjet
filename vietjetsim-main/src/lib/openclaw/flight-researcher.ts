@@ -10,9 +10,11 @@
  * thứ khách thật sự mua được — và khi ngày đó không có chuyến thì nói thẳng là
  * không có, kèm những ngày gần nhất còn chỗ.
  *
- * Không có nguồn nào từ vietjetair.com ở đây: trang đó là một SPA sau AWS WAF,
- * `/api/flights` chỉ trả HTML, nên dữ liệu giá vé thị trường không lấy được
- * bằng HTTP. Nguồn sự thật của hệ thống là cơ sở dữ liệu.
+ * Lưu ý nguồn ngoài (đo được 2026-10-18, xem web-collection.ts): mạng lưới
+ * sân bay/tuyến bay lấy được thật từ CMS `vietjetcms-api.vietjetair.com`;
+ * còn lịch bay từng ngày + giá thì gateway `/booking` chặn 403 (WAF). Trong
+ * module này vẫn chỉ đọc cơ sở dữ liệu — nguồn sự thật mà khách mua vé với.
+ * Hướng thu thập web đi theo lệnh "thu thập" ở web-collection.ts.
  */
 import { getAvailableDepartDates, searchFlights, type FlightRecord } from '@/lib/db';
 import { AIRPORT_CITIES } from '@/shared/constants';
