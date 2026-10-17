@@ -1302,8 +1302,12 @@ export default function UserDashboardClient() {
                             </td>
                             <td className="px-4 py-2.5">
                               <div className="flex items-center gap-2">
-                                <div className="w-5 h-5 bg-gradient-red rounded flex items-center justify-center">
-                                  <Icon name="PaperAirplaneIcon" size={9} className="text-white" />
+                                <div className="h-6 px-1.5 bg-gradient-red rounded-lg flex items-center justify-center shrink-0">
+                                  <img
+                                    src="/logo-vj.svg"
+                                    alt="Vietjet Air"
+                                    className="h-3 w-auto brightness-0 invert"
+                                  />
                                 </div>
                                 <span className="font-semibold text-sm text-[var(--foreground)]">
                                   {booking.flightNo}

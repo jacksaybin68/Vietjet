@@ -1,0 +1,106 @@
+# Lịch bay Vietjet — dữ liệu curated cho trình mô phỏng.
+#
+# Nguồn: số liệu công khai trên vietjetair.com (trang giá vé, trang tuyến bay,
+# trang giới thiệu đội tàu) cùng thời gian bay đã công bố. KHÔNG thu thập từ
+# API đặt vé: endpoint đó nằm sau AWS WAF + chữ ký HMAC + proof-of-work nên
+# không truy cập tự động được (mọi lời gọi trần đều trả 403).
+#
+# Cột:
+#   flight_no      số hiệu hạng Eco (hạng Business suy ra theo vị trí dòng)
+#   from_code/to_code  mã IATA, phải có trong bảng `airports`
+#   depart_time    giờ khởi hành theo giờ Việt Nam (script thêm offset +07:00)
+#   block_minutes  thời gian bay thực tế của chặng
+#   economy_price  giá cơ bản một chiều, CHƯA thuế/phí
+#   business_price = round(economy_price × 2.77) — bậc giá của migration 030
+#   seats          sức chứa cabin của loại tàu bay đang khai thác
+#   aircraft       A320-200 / A321-200 / A321neo / A330-300
+#   source         nơi đối chiếu số liệu
+#
+# Thứ tự dòng PHẢI giữ nguyên thứ tự số hiệu: số hiệu hạng Business sinh theo
+# vị trí dòng (VJ3001 + index), nên đổi thứ tự là đổi số hiệu và script seed
+# (thay hàng theo flight_no) sẽ để lại bản cũ.
+flight_no,from_code,to_code,depart_time,block_minutes,economy_price,business_price,seats,aircraft,source
+VJ301,HAN,SGN,06:00,130,1290000,3573300,230,A321neo,vietjet.com/fare-page
+VJ302,SGN,HAN,09:15,130,1290000,3573300,230,A321neo,vietjet.com/fare-page
+VJ303,HAN,DAD,06:30,80,890000,2465300,230,A321neo,vietjet.com/route-page
+VJ304,DAD,HAN,12:20,80,890000,2465300,230,A321neo,vietjet.com/route-page
+VJ305,SGN,DAD,06:45,85,890000,2465300,230,A321neo,vietjet.com/route-page
+VJ306,DAD,SGN,13:05,85,890000,2465300,230,A321neo,vietjet.com/route-page
+VJ307,HAN,PQC,07:00,130,1390000,3850300,220,A321,vietjet.com/route-page
+VJ308,PQC,HAN,12:40,130,1320000,3656400,220,A321,vietjet.com/route-page
+VJ309,SGN,PQC,07:30,60,890000,2465300,220,A321,vietjet.com/route-page
+VJ310,PQC,SGN,13:20,60,850000,2354500,220,A321,vietjet.com/route-page
+VJ311,HAN,CXR,07:45,110,1190000,3296300,220,A321,vietjet.com/route-page
+VJ312,CXR,HAN,13:40,110,1130000,3130100,220,A321,vietjet.com/route-page
+VJ313,SGN,CXR,08:10,70,790000,2188300,220,A321,vietjet.com/route-page
+VJ314,CXR,SGN,14:20,70,750000,2077500,220,A321,vietjet.com/route-page
+VJ315,HAN,HUI,08:20,80,890000,2465300,220,A321,vietjet.com/route-page
+VJ316,HUI,HAN,14:00,80,890000,2465300,220,A321,vietjet.com/route-page
+VJ317,SGN,HUI,08:50,85,990000,2742300,220,A321,vietjet.com/route-page
+VJ318,HUI,SGN,15:10,85,940000,2603800,220,A321,vietjet.com/route-page
+VJ319,HAN,VCA,09:00,135,1490000,4127300,220,A321,vietjet.com/route-page
+VJ320,VCA,HAN,14:50,135,1410000,3905700,220,A321,vietjet.com/route-page
+VJ321,SGN,VCA,09:20,45,690000,1911300,220,A321,vietjet.com/route-page
+VJ322,VCA,SGN,15:40,45,660000,1828200,220,A321,vietjet.com/route-page
+VJ323,HAN,HPH,09:40,60,590000,1634300,180,A320,vietjet.com/route-page
+VJ324,HPH,HAN,15:30,60,590000,1634300,180,A320,vietjet.com/route-page
+VJ325,SGN,HPH,10:10,125,1190000,3296300,220,A321,vietjet.com/route-page
+VJ326,HPH,SGN,16:40,125,1130000,3130100,220,A321,vietjet.com/route-page
+VJ327,HAN,VII,10:30,55,590000,1634300,180,A320,vietjet.com/route-page
+VJ328,VII,HAN,16:20,55,590000,1634300,180,A320,vietjet.com/route-page
+VJ329,SGN,VII,10:50,120,1190000,3296300,220,A321,vietjet.com/route-page
+VJ330,VII,SGN,17:20,120,1130000,3130100,220,A321,vietjet.com/route-page
+VJ331,HAN,THD,11:10,70,690000,1911300,220,A321,vietjet.com/route-page
+VJ332,THD,HAN,17:00,70,660000,1828200,220,A321,vietjet.com/route-page
+VJ333,SGN,THD,11:40,125,1190000,3296300,220,A321,vietjet.com/route-page
+VJ334,THD,SGN,18:00,125,1130000,3130100,220,A321,vietjet.com/route-page
+VJ335,HAN,UIH,06:10,100,990000,2742300,220,A321,vietjet.com/route-page
+VJ336,UIH,HAN,12:10,100,940000,2603800,220,A321,vietjet.com/route-page
+VJ337,SGN,UIH,06:40,75,890000,2465300,220,A321,vietjet.com/route-page
+VJ338,UIH,SGN,13:00,75,850000,2354500,220,A321,vietjet.com/route-page
+VJ339,HAN,TBB,06:50,95,990000,2742300,220,A321,vietjet.com/route-page
+VJ340,TBB,HAN,12:50,95,940000,2603800,220,A321,vietjet.com/route-page
+VJ341,SGN,TBB,07:10,80,890000,2465300,220,A321,vietjet.com/route-page
+VJ342,TBB,SGN,13:30,80,850000,2354500,220,A321,vietjet.com/route-page
+VJ343,HAN,PXU,07:30,105,1090000,3019300,220,A321,vietjet.com/route-page
+VJ344,PXU,HAN,13:30,105,1040000,2880800,220,A321,vietjet.com/route-page
+VJ345,SGN,PXU,07:50,70,890000,2465300,220,A321,vietjet.com/route-page
+VJ346,PXU,SGN,14:10,70,850000,2354500,220,A321,vietjet.com/route-page
+VJ347,HAN,BMV,08:10,110,1090000,3019300,220,A321,vietjet.com/route-page
+VJ348,BMV,HAN,14:10,110,1040000,2880800,220,A321,vietjet.com/route-page
+VJ349,SGN,BMV,08:40,60,790000,2188300,220,A321,vietjet.com/route-page
+VJ350,BMV,SGN,15:00,60,750000,2077500,220,A321,vietjet.com/route-page
+VJ351,HAN,DLI,09:10,110,990000,2742300,220,A321,vietjet.com/route-page
+VJ352,DLI,HAN,15:00,110,940000,2603800,220,A321,vietjet.com/route-page
+VJ353,SGN,DLI,09:30,55,790000,2188300,220,A321,vietjet.com/route-page
+VJ354,DLI,SGN,15:50,55,750000,2077500,220,A321,vietjet.com/route-page
+VJ355,HAN,DIN,09:50,65,890000,2465300,180,A320,vietjet.com/route-page
+VJ356,DIN,HAN,15:40,65,850000,2354500,180,A320,vietjet.com/route-page
+VJ357,SGN,DIN,10:20,150,1390000,3850300,220,A321,vietjet.com/route-page
+VJ358,DIN,SGN,16:50,150,1320000,3656400,220,A321,vietjet.com/route-page
+VJ359,HAN,VCL,10:40,95,890000,2465300,220,A321,vietjet.com/route-page
+VJ360,VCL,HAN,16:30,95,850000,2354500,220,A321,vietjet.com/route-page
+VJ361,SGN,VCL,11:00,90,990000,2742300,220,A321,vietjet.com/route-page
+VJ362,VCL,SGN,17:30,90,940000,2603800,220,A321,vietjet.com/route-page
+VJ363,HAN,VDO,11:20,65,690000,1911300,180,A320,vietjet.com/route-page
+VJ364,VDO,HAN,17:10,65,660000,1828200,180,A320,vietjet.com/route-page
+VJ365,SGN,VDO,11:50,135,1290000,3573300,220,A321,vietjet.com/route-page
+VJ366,VDO,SGN,18:20,135,1230000,3407100,220,A321,vietjet.com/route-page
+VJ367,HAN,VDH,06:20,75,790000,2188300,220,A321,vietjet.com/route-page
+VJ368,VDH,HAN,12:20,75,750000,2077500,220,A321,vietjet.com/route-page
+VJ369,SGN,VDH,06:50,105,990000,2742300,220,A321,vietjet.com/route-page
+VJ370,VDH,SGN,13:10,105,940000,2603800,220,A321,vietjet.com/route-page
+VJ371,SGN,VCS,07:20,60,890000,2465300,180,A320,vietjet.com/route-page
+VJ372,VCS,SGN,13:50,60,850000,2354500,180,A320,vietjet.com/route-page
+VJ373,SGN,VKG,08:00,55,790000,2188300,180,A320,vietjet.com/route-page
+VJ374,VKG,SGN,14:30,55,750000,2077500,180,A320,vietjet.com/route-page
+VJ401,HAN,SIN,09:00,200,2450000,6786500,230,A321neo,vietjet.com/fare-page
+VJ411,SIN,HAN,13:40,200,2550000,7063500,230,A321neo,vietjet.com/fare-page
+VJ421,SGN,ICN,09:30,320,4900000,13573000,377,A330,vietjet.com/fare-page
+VJ431,ICN,SGN,14:20,320,5000000,13850000,377,A330,vietjet.com/fare-page
+VJ441,HAN,BKK,08:30,125,1650000,4570500,220,A321,vietjet.com/fare-page
+VJ451,SGN,MNL,10:40,170,2650000,7340500,220,A321,vietjet.com/fare-page
+VJ461,HAN,KIX,11:10,275,5600000,15512000,230,A321neo,vietjet.com/fare-page
+VJ471,SGN,HKG,07:50,170,3250000,9002500,220,A321,vietjet.com/fare-page
+VJ481,HAN,ICN,08:40,275,5100000,14127000,230,A321neo,vietjet.com/fare-page
+VJ491,SGN,BKK,13:10,90,1750000,4847500,220,A321,vietjet.com/fare-page

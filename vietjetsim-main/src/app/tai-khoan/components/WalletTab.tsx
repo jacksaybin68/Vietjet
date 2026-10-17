@@ -182,22 +182,23 @@ function AddPaymentMethodModal({
   };
 
   const inputClass =
-    'w-full px-4 py-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#EC2029]/20 focus:border-[#EC2029]';
-  const labelClass = 'block text-sm font-semibold mb-1.5 text-[#1A2948] font-[KoHo,sans-serif]';
+    'w-full px-4 py-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/20 focus:border-[var(--primary)]';
+  const labelClass =
+    'block text-sm font-semibold mb-1.5 text-[var(--foreground)] font-[KoHo,sans-serif]';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
+        className="bg-[var(--background)] rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
         style={{ maxHeight: '90vh', overflowY: 'auto' }}
       >
         <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
-          <h3 className="text-lg font-bold font-[KoHo,sans-serif] text-[#1A2948]">
+          <h3 className="text-lg font-bold font-[KoHo,sans-serif] text-[var(--foreground)]">
             Thêm phương thức thanh toán
           </h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--surface-2)]transition-colors"
+            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--surface-2)] transition-colors"
           >
             <Icon name="XMarkIcon" size={20} className="text-[var(--foreground-muted)]" />
           </button>
@@ -205,14 +206,14 @@ function AddPaymentMethodModal({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* Type Tabs */}
-          <div className="flex gap-2 p-1 bg-[var(--surface-2)]rounded-xl">
+          <div className="flex gap-2 p-1 bg-[var(--surface-2)] rounded-xl">
             <button
               type="button"
               onClick={() => setMethodType('card')}
               className={`flex-1 py-2.5 rounded-lg text-sm font-semibold font-[KoHo,sans-serif] transition-all ${
                 methodType === 'card'
-                  ? 'bg-white text-[#EC2029] shadow-sm'
-                  : 'text-[var(--foreground-muted)]hover:text-[var(--foreground)]'
+                  ? 'bg-white text-[var(--primary)] shadow-sm'
+                  : 'text-[var(--foreground-muted)] hover:text-[var(--foreground)]'
               }`}
             >
               <Icon name="CreditCardIcon" size={16} className="inline mr-1.5" />
@@ -223,8 +224,8 @@ function AddPaymentMethodModal({
               onClick={() => setMethodType('bank')}
               className={`flex-1 py-2.5 rounded-lg text-sm font-semibold font-[KoHo,sans-serif] transition-all ${
                 methodType === 'bank'
-                  ? 'bg-white text-[#EC2029] shadow-sm'
-                  : 'text-[var(--foreground-muted)]hover:text-[var(--foreground)]'
+                  ? 'bg-white text-[var(--primary)] shadow-sm'
+                  : 'text-[var(--foreground-muted)] hover:text-[var(--foreground)]'
               }`}
             >
               <Icon name="BuildingColumnsIcon" size={16} className="inline mr-1.5" />
@@ -354,7 +355,7 @@ function AddPaymentMethodModal({
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#EC2029] text-white rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-primary-dark transition-all shadow-md hover:shadow-lg active:scale-95 disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[var(--primary)] text-white rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-[var(--primary-dark)] transition-all shadow-md hover:shadow-lg active:scale-95 disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -371,7 +372,7 @@ function AddPaymentMethodModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-3 bg-[var(--surface-2)]text-[var(--foreground-muted)] rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-[var(--surface-3)] transition-all"
+              className="px-6 py-3 bg-[var(--surface-2)] text-[var(--foreground-muted)] rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-[var(--surface-3)] transition-all"
             >
               Hủy
             </button>
@@ -583,31 +584,33 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
 
   if (loading) {
     return (
-      <div className="space-y-4 p-4">
-        <div className="h-48 bg-[var(--surface-2)]rounded-2xl animate-pulse" />
-        <div className="h-32 bg-[var(--surface-2)]rounded-2xl animate-pulse" />
-        <div className="h-24 bg-[var(--surface-2)]rounded-2xl animate-pulse" />
+      <div className="space-y-4">
+        <div className="h-48 bg-[var(--surface-2)] rounded-2xl animate-pulse" />
+        <div className="h-32 bg-[var(--surface-2)] rounded-2xl animate-pulse" />
+        <div className="h-24 bg-[var(--surface-2)] rounded-2xl animate-pulse" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 p-4">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[#1A2948]">
+          <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[var(--foreground)]">
             Ví Vietjet Air
           </h2>
-          <p className="text-sm text-[var(--foreground-muted)]mt-1 font-[Be Vietnam Pro,sans-serif]">
+          <p className="text-sm text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
             Quản lý số dư và phương thức thanh toán
           </p>
         </div>
       </div>
 
-      <div className="bg-amber-50 border border-[rgb(var(--accent-rgb))]/30 rounded-2xl p-4">
-        <p className="text-sm font-semibold text-amber-900 mb-2">Thiết lập ví để đặt vé</p>
-        <div className="space-y-1 text-xs text-amber-800">
+      <div className="bg-[rgb(var(--accent-rgb))]/10 border border-[rgb(var(--accent-rgb))]/30 rounded-2xl p-4">
+        <p className="text-sm font-semibold text-[var(--foreground)] mb-2">
+          Thiết lập ví để đặt vé
+        </p>
+        <div className="space-y-1 text-xs text-[var(--foreground-muted)]">
           <p>{methods.length > 0 ? '✓' : '•'} Bước 1: Liên kết tài khoản/thẻ thanh toán</p>
           <p>{(wallet?.balance || 0) > 0 ? '✓' : '•'} Bước 2: Nạp tiền vào ví</p>
           <p>• Bước 3: Dùng số dư ví để thanh toán vé tại trang thanh toán</p>
@@ -616,7 +619,7 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
 
       {/* Balance Card */}
       <div
-        className="rounded-2xl p-6 text-white relative overflow-hidden"
+        className="rounded-2xl p-6 sm:p-7 text-white relative overflow-hidden shadow-vj-card-md"
         style={{
           background:
             'linear-gradient(135deg, var(--vj-grad-red-from) 0%, var(--primary) 50%, var(--vj-grad-red-to) 100%)',
@@ -704,7 +707,7 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
               <button
                 onClick={handleTopup}
                 disabled={topupLoading || !topupAmount || !selectedTopupMethod}
-                className="px-6 py-3 bg-white text-[#EC2029] rounded-xl font-bold text-sm font-[KoHo,sans-serif] hover:bg-white/90 transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                className="px-6 py-3 bg-white text-[var(--primary)] rounded-xl font-bold text-sm font-[KoHo,sans-serif] hover:bg-white/90 transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               >
                 {topupLoading ? (
                   <Icon name="ArrowPathIcon" size={18} className="animate-spin" />
@@ -736,17 +739,17 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
       </div>
 
       {/* Payment Methods */}
-      <div className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden shadow-vj-card">
+      <div className="bg-[var(--background)] rounded-2xl border border-[var(--border)] overflow-hidden shadow-vj-card">
         <div className="p-5 border-b border-[var(--border)] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Icon name="CreditCardIcon" size={20} className="text-[#EC2029]" />
-            <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948]">
+            <Icon name="CreditCardIcon" size={20} className="text-[var(--primary)]" />
+            <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[var(--foreground)]">
               Phương thức thanh toán
             </h3>
           </div>
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#EC2029] text-white rounded-lg text-sm font-semibold font-[KoHo,sans-serif] hover:bg-primary-dark transition-all active:scale-95 shadow-sm"
+            className="flex items-center gap-1.5 px-4 py-2 bg-[var(--primary)] text-white rounded-lg text-sm font-semibold font-[KoHo,sans-serif] hover:bg-[var(--primary-dark)] transition-all active:scale-95 shadow-sm"
           >
             <Icon name="PlusIcon" size={16} />
             Thêm mới
@@ -756,13 +759,13 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
         <div className="divide-y divide-[var(--border)]">
           {methods.length === 0 ? (
             <div className="p-8 text-center">
-              <div className="w-16 h-16 bg-[var(--surface-2)]rounded-full flex items-center justify-center mx-auto mb-3">
+              <div className="w-16 h-16 bg-[var(--surface-2)] rounded-full flex items-center justify-center mx-auto mb-3">
                 <Icon name="CreditCardIcon" size={28} className="text-[var(--foreground-subtle)]" />
               </div>
-              <p className="text-[var(--foreground-muted)]text-sm font-[Be Vietnam Pro,sans-serif]">
+              <p className="text-[var(--foreground-muted)] text-sm font-[Be Vietnam Pro,sans-serif]">
                 Chưa có phương thức thanh toán nào.
               </p>
-              <p className="text-[var(--foreground-subtle)]text-xs mt-1 font-[Be Vietnam Pro,sans-serif]">
+              <p className="text-[var(--foreground-subtle)] text-xs mt-1 font-[Be Vietnam Pro,sans-serif]">
                 Thêm thẻ hoặc tài khoản ngân hàng để thanh toán nhanh hơn.
               </p>
             </div>
@@ -781,25 +784,29 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
                       style={{ color: getCardBrandColor(method.cardBrand) }}
                     />
                   ) : (
-                    <Icon name="BuildingColumnsIcon" size={22} className="text-[#1A2948]" />
+                    <Icon
+                      name="BuildingColumnsIcon"
+                      size={22}
+                      className="text-[var(--foreground)]"
+                    />
                   )}
                 </div>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm text-[#1A2948] font-[KoHo,sans-serif]">
+                    <span className="font-semibold text-sm text-[var(--foreground)] font-[KoHo,sans-serif]">
                       {method.type === 'card'
                         ? `${getCardBrandLabel(method.cardBrand)} •••• ${method.lastFour}`
                         : method.bankName || 'Ngân hàng'}
                     </span>
                     {method.isDefault && (
-                      <span className="px-2 py-0.5 bg-[#FFDD00]/20 text-[#1A2948] rounded-full text-xs font-semibold font-[Be Vietnam Pro,sans-serif]">
+                      <span className="px-2 py-0.5 bg-[rgb(var(--accent-rgb))]/25 text-[var(--foreground)] rounded-full text-xs font-semibold font-[Be Vietnam Pro,sans-serif]">
                         Mặc định
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-[var(--foreground-muted)]mt-0.5 font-[Be Vietnam Pro,sans-serif]">
+                  <p className="text-xs text-[var(--foreground-muted)] mt-0.5 font-[Be Vietnam Pro,sans-serif]">
                     {method.type === 'card'
                       ? `${method.cardHolderName || ''}${method.expiryMonth ? ` · Hết hạn ${method.expiryMonth.toString().padStart(2, '0')}/${method.expiryYear}` : ''}`
                       : method.bankId
@@ -813,7 +820,7 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
                   {!method.isDefault && (
                     <button
                       onClick={() => handleSetDefault(method.id)}
-                      className="px-3 py-1.5 text-xs text-[var(--foreground-muted)]hover:text-[#EC2029] hover:bg-[var(--surface-2)]rounded-lg transition-colors font-semibold font-[Be Vietnam Pro,sans-serif]"
+                      className="px-3 py-1.5 text-xs text-[var(--foreground-muted)] hover:text-[var(--primary)] hover:bg-[var(--surface-2)] rounded-lg transition-colors font-semibold font-[Be Vietnam Pro,sans-serif]"
                     >
                       Đặt mặc định
                     </button>
@@ -821,7 +828,7 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
                   <button
                     onClick={() => handleDelete(method.id)}
                     disabled={deletingId === method.id}
-                    className="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--foreground-subtle)]hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--foreground-subtle)] hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
                   >
                     <Icon
                       name="TrashIcon"
@@ -837,10 +844,10 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white rounded-2xl border border-[var(--border)] p-5 shadow-vj-card">
+        <div className="bg-[var(--background)] rounded-2xl border border-[var(--border)] p-5 shadow-vj-card">
           <div className="flex items-center gap-2 mb-3">
-            <Icon name="BuildingColumnsIcon" size={18} className="text-[#EC2029]" />
-            <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948]">
+            <Icon name="BuildingColumnsIcon" size={18} className="text-[var(--primary)]" />
+            <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[var(--foreground)]">
               Rút tiền về tài khoản liên kết
             </h3>
           </div>
@@ -858,7 +865,7 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-[var(--foreground-muted)]mb-2 font-[Be Vietnam Pro,sans-serif]">
+              <p className="text-xs text-[var(--foreground-muted)] mb-2 font-[Be Vietnam Pro,sans-serif]">
                 Tài khoản nhận: {selectedWithdrawBank?.bankName} - {selectedWithdrawBank?.bankId}
               </p>
               <div className="flex items-center gap-2">
@@ -875,28 +882,28 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
                 <button
                   onClick={handleWithdraw}
                   disabled={withdrawLoading || !withdrawAmount}
-                  className="px-4 py-3 bg-[#1A2948] text-white rounded-xl text-sm font-semibold hover:bg-[#121d35] disabled:opacity-50"
+                  className="px-4 py-3 bg-[var(--vj-navy)] text-white rounded-xl text-sm font-semibold hover:bg-[var(--vj-navy-2)] disabled:opacity-50"
                 >
                   {withdrawLoading ? 'Đang rút...' : 'Rút tiền'}
                 </button>
               </div>
             </>
           ) : (
-            <p className="text-sm text-[var(--foreground-muted)]font-[Be Vietnam Pro,sans-serif]">
+            <p className="text-sm text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
               Bạn cần liên kết tài khoản ngân hàng để rút tiền về STK.
             </p>
           )}
         </div>
 
-        <div className="bg-white rounded-2xl border border-[var(--border)] p-5 shadow-vj-card">
+        <div className="bg-[var(--background)] rounded-2xl border border-[var(--border)] p-5 shadow-vj-card">
           <div className="flex items-center gap-2 mb-3">
-            <Icon name="ClockIcon" size={18} className="text-[#EC2029]" />
-            <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948]">
+            <Icon name="ClockIcon" size={18} className="text-[var(--primary)]" />
+            <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[var(--foreground)]">
               Giao dịch gần đây
             </h3>
           </div>
           {transactions.length === 0 ? (
-            <p className="text-sm text-[var(--foreground-muted)]font-[Be Vietnam Pro,sans-serif]">
+            <p className="text-sm text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
               Chưa có giao dịch.
             </p>
           ) : (
@@ -909,7 +916,7 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
                     className="flex items-center justify-between bg-[var(--surface-2)] rounded-xl p-3"
                   >
                     <div>
-                      <p className="text-sm font-semibold text-[#1A2948]">
+                      <p className="text-sm font-semibold text-[var(--foreground)]">
                         {tx.description || 'Giao dịch ví'}
                       </p>
                       <p className="text-xs text-[var(--foreground-muted)]">

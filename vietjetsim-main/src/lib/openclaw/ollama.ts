@@ -5,12 +5,12 @@
  * backend: gateway OpenClaw (`NEXT_PUBLIC_OPENCLAW_API_URL`, mặc định
  * http://localhost:18789). Module này bổ sung backend thứ hai là Ollama chạy
  * cùng máy chủ — `/api/chat` — để trợ lý vẫn trả lời được khi không có gateway,
- * bằng model local (vd `qwen3:0.6b`).
+ * bằng model local (vd `qwen3:1.7b`).
  *
  * Cấu hình:
  *   OLLAMA_BASE_URL   gốc server Ollama, mặc định http://localhost:11434
  *                     (`OLLAMA_HOST` cũng được nhận, thiếu scheme cũng được)
- *   OLLAMA_MODEL      model dùng cho chat, mặc định qwen3:0.6b
+ *   OLLAMA_MODEL      model dùng cho chat, mặc định qwen3:1.7b
  *   OLLAMA_TIMEOUT_MS thời gian chờ một lượt, mặc định 60000
  *   OLLAMA_THINK      'false' để tắt chế độ suy nghĩ của model qwen3
  *   OPENCLAW_PROVIDER 'ollama' | 'openclaw' — ép backend, bỏ qua suy luận
@@ -45,7 +45,7 @@ export type AssistantProvider = 'ollama' | 'openclaw';
 export type EnvLike = Record<string, string | undefined>;
 
 export const DEFAULT_OLLAMA_BASE_URL = 'http://localhost:11434';
-export const DEFAULT_OLLAMA_MODEL = 'qwen3:0.6b';
+export const DEFAULT_OLLAMA_MODEL = 'qwen3:1.7b';
 export const DEFAULT_OLLAMA_TIMEOUT_MS = 60_000;
 
 const ASSISTANT_ROLES: AssistantRole[] = ['system', 'user', 'assistant'];

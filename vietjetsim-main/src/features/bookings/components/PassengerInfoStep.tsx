@@ -543,8 +543,12 @@ export default function PassengerInfoStep({
               </h3>
               <div className="bg-primary/5 border border-primary/10 rounded-xl p-3 sm:p-4 mb-3 sm:mb-4">
                 <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gradient-red rounded-lg flex items-center justify-center shadow-sm">
-                    <Icon name="PaperAirplaneIcon" size={10} className="text-white" />
+                  <div className="h-6 sm:h-7 px-1.5 sm:px-2 bg-gradient-red rounded-lg flex items-center justify-center shadow-sm">
+                    <img
+                      src="/logo-vj.svg"
+                      alt="Vietjet Air"
+                      className="h-2.5 sm:h-3 w-auto brightness-0 invert"
+                    />
                   </div>
                   <span className="text-[10px] sm:text-xs font-black text-primary font-koho">
                     {flight.flightNo}

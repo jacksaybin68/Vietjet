@@ -5,8 +5,7 @@ import type { IconType } from 'react-icons';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  HiChevronLeft,
-  HiChevronRight,
+  HiOutlineGlobeAlt,
   HiOutlineLogout,
   HiOutlineMenu,
   HiOutlineUserCircle,
@@ -24,12 +23,6 @@ import {
   RiVipCrownLine,
 } from 'react-icons/ri';
 import { useAuth } from '@/contexts/AuthContext';
-
-const ANNOUNCEMENTS = [
-  'Lưu ý thời gian thay đổi nhà ga và lịch bay trước khi khởi hành.',
-  'Hành lý, ghế ngồi và dịch vụ bổ sung có thể được chọn khi đặt vé.',
-  'Bạn có thể tra cứu chuyến bay bằng mã đặt chỗ và họ tên hành khách.',
-];
 
 // Nav theo đúng bốn mục của vietjetair.com (site thật render uppercase qua CSS);
 // "Trang chủ" đi qua logo; thao tác đặt vé luôn dẫn về form booking trên trang chủ.
@@ -64,24 +57,18 @@ const isActivePath = (pathname: string, href: string) =>
 export default function Header() {
   const { user, signOut } = useAuth();
   const pathname = usePathname();
-  const [announcementIndex, setAnnouncementIndex] = useState(0);
-  const [announcementVisible, setAnnouncementVisible] = useState(true);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
 
   // Menu tài khoản chỉ dành cho khách đã đăng nhập. Khách chưa đăng nhập thấy
-  // "Đăng nhập" / "Đăng ký" ngay trên thanh header, không qua menu này.
+  // "Đăng nhập" / "Đăng ký" trên hàng tiện ích phía trên, không qua menu này.
   const accountLinks = [
     ['Tài khoản của tôi', '/tai-khoan'],
     ['Chuyến bay của tôi', '/chuyen-bay-cua-toi'],
     ['Ví và thanh toán', '/tai-khoan?tab=wallet'],
     ['Cài đặt bảo mật', '/tai-khoan?tab=security'],
   ] as const;
-
-  const shiftAnnouncement = (delta: number) => {
-    setAnnouncementIndex((index) => (index + delta + ANNOUNCEMENTS.length) % ANNOUNCEMENTS.length);
-  };
 
   useEffect(() => {
     const closeMenu = (event: MouseEvent) => {
@@ -105,41 +92,34 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-black/10 bg-[var(--vj-red)] shadow-[0_2px_16px_rgba(0,0,0,0.12)]">
-      {announcementVisible && (
-        <div className="vj-menubar text-white" aria-live="polite">
-          <div className="mx-auto flex min-h-11 max-w-[1240px] items-center gap-0.5 px-1.5 sm:min-h-9 sm:gap-1 sm:px-4">
-            <button
-              type="button"
-              aria-label="Thông báo trước"
-              onClick={() => shiftAnnouncement(-1)}
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-full hover:bg-white/15 sm:h-7 sm:w-7"
-            >
-              <HiChevronLeft aria-hidden="true" />
-            </button>
-            <p className="min-w-0 flex-1 truncate text-center text-[10px] font-semibold sm:text-xs">
-              {ANNOUNCEMENTS[announcementIndex]}
-            </p>
-            <button
-              type="button"
-              aria-label="Thông báo tiếp theo"
-              onClick={() => shiftAnnouncement(1)}
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-full hover:bg-white/15 sm:h-7 sm:w-7"
-            >
-              <HiChevronRight aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              aria-label="Đóng thông báo"
-              onClick={() => setAnnouncementVisible(false)}
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-full hover:bg-white/15 sm:h-7 sm:w-7"
-            >
-              <HiOutlineX aria-hidden="true" />
-            </button>
-          </div>
+      {/* Hàng tiện ích trên cùng: hỗ trợ, đăng ký, đăng nhập, ngôn ngữ — nền đỏ
+          Vietjet đồng nhất với hàng chính, chỉ ngăn bằng đường kẻ mảnh. Ẩn dưới
+          `lg`: màn nhỏ dùng menu hamburger, nơi đã có Đăng nhập/Đăng ký. */}
+      <div className="hidden border-b border-white/15 lg:block">
+        <div className="mx-auto flex h-9 max-w-[1240px] items-center justify-end gap-5 px-4 text-xs font-semibold text-white/90">
+          <a
+            href="tel:19001166"
+            className="flex items-center gap-1.5 transition-colors hover:text-white"
+          >
+            <RiPhoneLine aria-hidden="true" className="text-base" />
+            Hỗ trợ 1900 1166
+          </a>
+          <Link href="/dang-nhap?tab=register" className="transition-colors hover:text-white">
+            Đăng ký
+          </Link>
+          <Link href="/dang-nhap" className="transition-colors hover:text-white">
+            Đăng nhập
+          </Link>
+          <span className="flex items-center gap-1.5">
+            <HiOutlineGlobeAlt aria-hidden="true" className="text-base" />
+            Tiếng Việt
+          </span>
         </div>
-      )}
+      </div>
 
-      <div className="mx-auto flex h-[68px] max-w-[1240px] items-center gap-5 px-3 sm:px-4 lg:h-[76px]">
+      {/* Hàng chính: logo bên trái, menu nằm ngang sát bên phải logo (bỏ bố cục
+          căn giữa cũ tạo khoảng trống lớn), chiều cao 68–70px như thiết kế. */}
+      <div className="mx-auto flex h-[68px] max-w-[1240px] items-center gap-4 px-3 sm:px-4 lg:h-[70px]">
         <Link href="/trang-chu" aria-label="Vietjet Air - Trang chủ" className="shrink-0">
           <img
             src="/logo-vj.svg"
@@ -148,10 +128,7 @@ export default function Header() {
           />
         </Link>
 
-        <nav
-          aria-label="Điều hướng chính"
-          className="hidden flex-1 items-center justify-center gap-1 lg:flex"
-        >
+        <nav aria-label="Điều hướng chính" className="hidden items-center lg:flex">
           {NAV_LINKS.map((link) => {
             const active = isActivePath(pathname, link.href);
             return (
@@ -175,8 +152,8 @@ export default function Header() {
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
-          {/* Đã đăng nhập: menu tài khoản. Chưa đăng nhập: "Đăng nhập" / "Đăng ký"
-              nằm thẳng trên thanh header, không chui vào dropdown nữa. */}
+          {/* Đã đăng nhập: menu tài khoản. Chưa đăng nhập: không có gì trên hàng
+              chính — "Đăng nhập" / "Đăng ký" đã chuyển lên hàng tiện ích trên cùng. */}
           {user ? (
             <div ref={accountMenuRef} className="relative">
               <button
@@ -219,23 +196,7 @@ export default function Header() {
                 </div>
               )}
             </div>
-          ) : (
-            <>
-              <Link
-                href="/dang-nhap"
-                className="hidden min-h-10 items-center gap-1.5 rounded-lg px-2.5 text-xs font-bold text-white/85 transition-colors hover:bg-white/10 hover:text-white sm:flex"
-              >
-                <HiOutlineUserCircle aria-hidden="true" className="text-base" />
-                Đăng nhập
-              </Link>
-              <Link
-                href="/dang-nhap?tab=register"
-                className="hidden min-h-10 items-center rounded-lg border border-white/70 bg-white px-3.5 text-xs font-black text-[var(--vj-red)] transition-colors hover:bg-white/85 sm:flex"
-              >
-                Đăng ký
-              </Link>
-            </>
-          )}
+          ) : null}
           <button
             type="button"
             onClick={() => setMobileMenuOpen((open) => !open)}
@@ -296,8 +257,9 @@ export default function Header() {
               </Link>
             ))}
           </nav>
-          {/* Mobile không hiện 2 link trên thanh header, nên menu phải giữ chúng
-              để khách chưa đăng nhập vẫn vào được màn hình đăng nhập/đăng ký. */}
+          {/* Mobile và tablet không thấy hàng tiện ích trên cùng (ẩn dưới `lg`),
+              nên menu phải giữ 2 link này để khách chưa đăng nhập vẫn vào được
+              màn hình đăng nhập/đăng ký. */}
           {!user && (
             <nav
               aria-label="Đăng nhập và đăng ký"

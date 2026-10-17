@@ -362,3 +362,174 @@ export function listAuditLogs(query: AuditLogQuery = {}) {
     AdminList<'logs', AdminAuditLog> & { filters?: { actions?: string[]; resources?: string[] } }
   >(`${EP.AUDIT_LOGS}${suffix ? `?${suffix}` : ''}`);
 }
+
+// ─── OpenClaw Data Collection ───────────────────────────────────────────────
+
+export interface CollectNetworkResponse {
+  added: Array<{ id?: string; code: string; name: string; city: string; country?: string }>;
+  existing: string[];
+  total: number;
+  routesCount?: number;
+  source: string;
+  dryRun?: boolean;
+}
+
+export function collectAdminNetwork(dryRun = false) {
+  return apiRequest<CollectNetworkResponse>(EP.COLLECT_NETWORK, {
+    method: 'POST',
+    body: { dryRun },
+  });
+}
+
+export interface CollectScheduleInput {
+  from: string;
+  to: string;
+  date: string;
+  wafCookie?: string;
+  importOnSuccess?: boolean;
+}
+
+export interface CollectedFlightItem {
+  flightNo: string;
+  from: string;
+  to: string;
+  departTime: string;
+  arriveTime: string;
+  price: number;
+  fares: Array<{ cabin: string; amount: number }>;
+}
+
+export interface CollectScheduleResponse {
+  reachable: boolean;
+  route?: string;
+  date?: string;
+  flights?: CollectedFlightItem[];
+  reason?: string;
+  hint?: string;
+  imported?: string[];
+  skipped?: string[];
+}
+
+export function collectAdminSchedule(input: CollectScheduleInput) {
+  return apiRequest<CollectScheduleResponse>(EP.COLLECT_SCHEDULE, {
+    method: 'POST',
+    body: input,
+  });
+}
+
+export function importCollectedFlights(input: {
+  from: string;
+  to: string;
+  date: string;
+  flights: CollectedFlightItem[];
+}) {
+  return apiRequest<{
+    success: boolean;
+    imported: string[];
+    skipped: string[];
+  }>(EP.COLLECT_SCHEDULE, {
+    method: 'POST',
+    body: { ...input, action: 'import' },
+  });
+}
+
+// ─── OpenClaw Bulk Collection ────────────────────────────────────────────────
+
+export interface BulkCollectRoute {
+  from: string;
+  to: string;
+}
+
+export interface BulkCollectInput {
+  routes: BulkCollectRoute[];
+  dates: string[];
+  wafCookie?: string;
+  importOnSuccess?: boolean;
+  concurrency?: number;
+}
+
+export interface BulkCollectItem {
+  from: string;
+  to: string;
+  date: string;
+  route: string;
+  status: 'success' | 'waf_blocked' | 'error' | 'empty';
+  flights: CollectedFlightItem[];
+  imported?: string[];
+  skipped?: string[];
+  reason?: string;
+}
+
+export interface BulkCollectResponse {
+  total: number;
+  succeeded: number;
+  blocked: number;
+  failed: number;
+  imported: number;
+  results: BulkCollectItem[];
+}
+
+export function collectAdminBulk(input: BulkCollectInput) {
+  return apiRequest<BulkCollectResponse>(EP.COLLECT_BULK, {
+    method: 'POST',
+    body: input,
+  });
+}
+
+// ─── OpenClaw Auto Sync Automation ──────────────────────────────────────────
+
+export interface AutoSyncConfigData {
+  enabled: boolean;
+  networkIntervalHours: number;
+  scheduleDaysAhead: number;
+  keyRoutes: Array<{ from: string; to: string }>;
+  autoImport: boolean;
+  lastNetworkSync?: string;
+  lastScheduleSync?: string;
+}
+
+export interface AutoSyncReportData {
+  network: {
+    status: 'skipped' | 'success' | 'error';
+    airportsAdded?: number;
+    totalAirports?: number;
+    error?: string;
+  };
+  schedule: {
+    status: 'skipped' | 'success' | 'partial' | 'error';
+    totalCombos: number;
+    successfulCombos: number;
+    importedFlights: number;
+    skippedFlights: number;
+    details: Array<{ route: string; date: string; count: number; imported: number }>;
+    error?: string;
+  };
+  executedAt: string;
+}
+
+export function getAdminAutoSyncConfig() {
+  return apiRequest<{ success: boolean; config: AutoSyncConfigData }>(EP.COLLECT_AUTO);
+}
+
+export function updateAdminAutoSyncConfig(config: Partial<AutoSyncConfigData>) {
+  return apiRequest<{ success: boolean; config: AutoSyncConfigData }>(EP.COLLECT_AUTO, {
+    method: 'POST',
+    body: { config },
+  });
+}
+
+export function triggerAdminAutoSyncRunNow(force = false) {
+  return apiRequest<{ success: boolean; report: AutoSyncReportData }>(EP.COLLECT_AUTO, {
+    method: 'POST',
+    body: { action: 'run_now', force },
+  });
+}
+
+export function triggerAdminSolveWaf() {
+  return apiRequest<{ success: boolean; message: string; tokenPreview?: string }>(
+    EP.COLLECT_SOLVE_WAF,
+    {
+      method: 'POST',
+    }
+  );
+}

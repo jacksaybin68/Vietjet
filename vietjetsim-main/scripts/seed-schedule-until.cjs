@@ -4,6 +4,7 @@
  *
  *   node scripts/seed-schedule-until.cjs --dry-run
  *   node scripts/seed-schedule-until.cjs --until 2027-02-20 --allow-remote --yes
+ *   node scripts/seed-schedule-until.cjs --replace --allow-remote --yes
  *
  * Vì sao có script này thay vì chỉ tăng `SEED_FLIGHT_DAYS` của
  * `seed-future-flights.cjs`: script kia đăng từng chuyến qua HTTP API, và mỗi
@@ -11,16 +12,31 @@
  * × ~84 tuyến × 2 sóng ≈ 21.000 chuyến, tức ~21.000 vòng — hàng chục phút và
  * đủ để timeout giữa đường. Ở đây mỗi 1.000 chuyến đi trong một câu lệnh.
  *
- * Ghi theo lô cũng an toàn hơn cho dữ liệu đã có người đặt: script này **chỉ
- * thêm**, `ON CONFLICT (from_code, to_code, depart_time) DO NOTHING`, không xoá
- * gì cả. Lần chạy lại không nhân bản và không đụng tới chuyến đã có booking.
+ * Ghi theo lô cũng an toàn hơn cho dữ liệu đã có người đặt: mặc định script
+ * **chỉ thêm**, `ON CONFLICT (from_code, to_code, depart_time) DO NOTHING`,
+ * không xoá gì cả.
+ *
+ * `--replace` là chế độ *cập nhật* lịch, không phải thêm: nó xoá trước mọi hàng
+ * của chính các số hiệu trong `flight-schedule.cjs` nằm trong khoảng ngày, rồi
+ * tạo lại bằng giá/giờ mới. Cần chế độ này khi `data/vietjet-schedule.csv` đổi
+ * giá hoặc giờ khởi hành — `ON CONFLICT` khoá theo (tuyến, giờ), nên hàng cũ ở
+ * giờ cũ sẽ nằm lại cạnh hàng mới chứ không bị ghi đè, và kết quả là mỗi tuyến
+ * hiện hai chuyến. Xoá vẫn chừa chuyến đã có booking (`NOT EXISTS` trên
+ * `bookings.flight_id`), nên không có vé nào bị mất.
+ *
+ * Vì sao không dùng `seed-future-flights.cjs` để cập nhật: script đó cũng xoá
+ * theo số hiệu, nhưng đi qua HTTP API và đăng nhập **một lần**. Access token
+ * sống 15 phút, còn pha quét của nó (168 số hiệu × GET + DELETE) chậm hơn thế
+ * khi dev server đang HMR — token hết hạn giữa đường, mọi POST sau đó trả 401,
+ * và lần chạy đã xoá hàng loạt mà tạo được 0 hàng. Ở đây không có token và
+ * không phụ thuộc dev server.
  *
  * Ghi vào đúng database mà `DATABASE_URL` chỉ tới, qua `scripts/db-target.cjs`,
  * nên host từ xa cần `--allow-remote --yes`.
  */
 
 const { resolveDatabaseUrl } = require('./db-target.cjs');
-const { buildSchedule, ROUTES } = require('./flight-schedule.cjs');
+const { buildSchedule, ROUTES, businessNo } = require('./flight-schedule.cjs');
 
 const argv = process.argv.slice(2);
 const flag = (name) => {
@@ -29,6 +45,8 @@ const flag = (name) => {
 };
 
 const DRY_RUN = argv.includes('--dry-run');
+/** Cập nhật (xoá hàng cũ của chính mình rồi tạo lại) thay vì chỉ thêm. */
+const REPLACE = argv.includes('--replace');
 const CHUNK = 1000;
 
 const pad = (n) => String(n).padStart(2, '0');
@@ -70,7 +88,9 @@ async function main() {
   const rows = buildSchedule({ from, until });
   console.log(`📅 Lịch: ${from.toDateString()} → ${until.toDateString()}`);
   console.log(`🛫 Tuyến: ${ROUTES.length}  •  chuyến sẽ dựng: ${rows.length}`);
-  console.log(`🎯 Chế độ: ${DRY_RUN ? 'DRY-RUN (không ghi gì)' : 'GHI THẬT'}\n`);
+  console.log(
+    `🎯 Chế độ: ${DRY_RUN ? 'DRY-RUN (không ghi gì)' : REPLACE ? 'GHI THẬT — THAY THẾ (xoá hàng cũ của chính lịch này rồi tạo lại)' : 'GHI THẬT — CHỈ THÊM'}\n`
+  );
 
   const byMonth = new Map();
   for (const r of rows) {
@@ -84,7 +104,7 @@ async function main() {
 
   if (DRY_RUN) {
     console.log(
-      `\n✅ Dry-run xong. Chạy thật:\n   node scripts/seed-schedule-until.cjs --until ${dayString(until)} --allow-remote --yes`
+      `\n✅ Dry-run xong. Chạy thật:\n   node scripts/seed-schedule-until.cjs${REPLACE ? ' --replace' : ''} --until ${dayString(until)} --allow-remote --yes`
     );
     return;
   }
@@ -94,6 +114,22 @@ async function main() {
   console.log(`\n🗄️  Ghi vào: ${host}`);
   const { neon } = require('@neondatabase/serverless');
   const sql = neon(url);
+
+  if (REPLACE) {
+    const numbers = [...ROUTES.map(([no]) => no), ...ROUTES.map((_, i) => businessNo(i))];
+    const deleted = await sql`
+      WITH del AS (
+        DELETE FROM flights f
+        WHERE f.flight_no = ANY(string_to_array(${numbers.join(',')}, ',')::text[])
+          AND (f.depart_time AT TIME ZONE 'Asia/Ho_Chi_Minh')::date
+              BETWEEN ${dayString(from)}::date AND ${dayString(until)}::date
+          AND NOT EXISTS (SELECT 1 FROM bookings b WHERE b.flight_id = f.id)
+        RETURNING 1
+      )
+      SELECT count(*)::int AS n FROM del
+    `;
+    console.log(`\n🧹 Đã xoá ${deleted[0].n} hàng cũ (chừa chuyến có booking).`);
+  }
 
   let inserted = 0;
   for (let i = 0; i < rows.length; i += CHUNK) {
@@ -126,7 +162,9 @@ async function main() {
   console.log(
     `\n\n✅ Thêm mới: ${inserted}` +
       `\nℹ️  Bỏ qua (đã có chuyến cùng tuyến và giờ): ${rows.length - inserted}` +
-      '\n   Không xoá chuyến nào.'
+      (REPLACE
+        ? '\n   Hàng cũ của lịch này đã bị xoá trước khi tạo lại.'
+        : '\n   Không xoá chuyến nào.')
   );
 }
 

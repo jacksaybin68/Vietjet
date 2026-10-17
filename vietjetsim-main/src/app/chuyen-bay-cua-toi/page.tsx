@@ -271,8 +271,8 @@ export default function MyFlightsPage() {
       <Header />
 
       {/* ===== Đầu trang: 2 chip + tiêu đề (bố cục vietjetair.com/vi/my/search-booking) ===== */}
-      <section className="relative overflow-hidden border-b border-[var(--border)] bg-gradient-to-b from-[#d9e9f8] via-[#eef4fa] to-[var(--background)]">
-        <div className="relative mx-auto max-w-5xl px-4 pt-8 pb-10 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden border-b border-[var(--border)] bg-[url('/sky-clouds.svg')] bg-cover bg-center bg-no-repeat">
+        <div className="relative mx-auto max-w-[1000px] px-4 pt-12 pb-10 sm:px-6 lg:px-8">
           <div role="tablist" aria-label="Chuyến bay của tôi" className="flex flex-wrap gap-2">
             {(
               [
@@ -318,7 +318,7 @@ export default function MyFlightsPage() {
               khi nút đổi chữ sang "Đang tìm…" lúc đang tải. */}
           <form
             onSubmit={handleSearchBooking}
-            className={`mt-6 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6 shadow-vj-md md:min-h-[400px] lg:p-8 ${
+            className={`mt-6 rounded-[10px] border border-[var(--border)] bg-white/75 p-6 shadow-vj-md lg:p-8 ${
               view === 'search' ? '' : 'hidden'
             }`}
           >

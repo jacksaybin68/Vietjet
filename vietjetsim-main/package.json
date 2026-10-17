@@ -24,6 +24,7 @@
     "db:reset-admin": "node scripts/reset-admin.cjs",
     "db:clean-test-bookings": "node scripts/clean-test-bookings.cjs",
     "db:seed-demo": "node scripts/seed-demo-accounts.cjs",
+    "db:preview-flights": "node scripts/preview-flight-schedule.cjs",
     "db:seed-flights": "node scripts/seed-future-flights.cjs",
     "db:seed-schedule": "node scripts/seed-schedule-until.cjs",
     "db:bridge": "node scripts/neon-http-bridge.cjs"
@@ -45,6 +46,7 @@
     "nextjs-toploader": "^3.9.17",
     "nodemailer": "^10.0.16",
     "otplib": "^13.4.0",
+    "puppeteer-core": "^25.14.0",
     "qrcode": "^1.5.4",
     "react": "19.0.3",
     "react-dom": "19.0.3",

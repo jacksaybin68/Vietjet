@@ -45,6 +45,13 @@ const ADMIN = {
  * `flight-schedule.cjs`, so this rolling-window refresher and the bulk schedule
  * seeder cannot drift into two different networks. `BUSINESS_SHIFT_MIN` is the
  * gap between one route's economy and business waves.
+ *
+ * The values themselves (block times, departure times, fares, aircraft) are
+ * curated from public Vietjet references and live in `data/vietjet-schedule.csv`
+ * — `flight-schedule.cjs` loads and validates that file. Because this script
+ * sweeps rows by `flight_no` and re-creates them, a bad fare replaces the data
+ * on sale rather than sitting beside it, so preview first with
+ * `npm run db:preview-flights` before running this one.
  */
 const { ROUTES, BUSINESS_SHIFT_MIN, businessNo, vnTime } = require('./flight-schedule.cjs');
 /**
@@ -72,16 +79,18 @@ const toCookieHeader = (jar) =>
     .map(([k, v]) => `${k}=${v}`)
     .join('; ');
 
-async function main() {
-  console.log(`🎯 Target API: ${BASE_URL}\n`);
+/** Cookie + CSRF của phiên admin hiện tại; đăng nhập lại sẽ thay cả hai. */
+let authHeaders;
 
-  const login = await fetch(`${BASE_URL}/api/xac-thuc/dang-nhap`, {
+/** Đăng nhập admin và cất header dùng cho các request sau. */
+async function login() {
+  const res = await fetch(`${BASE_URL}/api/xac-thuc/dang-nhap`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(ADMIN),
   });
-  if (login.status !== 200) {
-    console.error(`❌ Admin login failed (${login.status}) for ${ADMIN.email}`);
+  if (res.status !== 200) {
+    console.error(`❌ Admin login failed (${res.status}) for ${ADMIN.email}`);
     console.error('   The account or password does not match this database. Set them and re-run:');
     console.error('     SEED_ADMIN_EMAIL=... SEED_ADMIN_PASSWORD=... npm run db:seed-flights');
     console.error(
@@ -89,9 +98,32 @@ async function main() {
     );
     process.exit(1);
   }
-  const jar = cookiesFrom(login);
-  const csrf = jar['csrf_token'];
-  const authHeaders = { cookie: toCookieHeader(jar), 'x-csrf-token': csrf };
+  const jar = cookiesFrom(res);
+  authHeaders = { cookie: toCookieHeader(jar), 'x-csrf-token': jar['csrf_token'] };
+  return authHeaders;
+}
+
+/**
+ * One admin login, but the access token it mints lives 15 minutes — and the
+ * sweep (168 flight numbers × GET + DELETE) outlasts that whenever the dev
+ * server is recompiling under HMR. A run that reached the create phase on an
+ * expired token deleted its rows and then failed every POST with 401, leaving
+ * 31 flight numbers with no rows at all while the script still exited 0. So a
+ * 401 re-authenticates and retries once, and a long run cannot destroy the
+ * network it came to refresh.
+ */
+async function authedFetch(url, init = {}) {
+  const send = () => fetch(url, { ...init, headers: { ...authHeaders, ...(init.headers ?? {}) } });
+  const res = await send();
+  if (res.status !== 401) return res;
+  await login();
+  return send();
+}
+
+async function main() {
+  console.log(`🎯 Target API: ${BASE_URL}\n`);
+
+  await login();
 
   // Replace anything this script previously created so re-runs stay idempotent.
   // Both waves are swept: the business block as well as the economy numbers.
@@ -100,13 +132,12 @@ async function main() {
   const sweepNumbers = [...ROUTES.map(([no]) => no), ...ROUTES.map((_, i) => businessNo(i))];
   let removed = 0;
   for (const no of sweepNumbers) {
-    const list = await fetch(`${BASE_URL}/api/quan-tri/chuyen-bay?search=${no}&limit=100`, {
-      headers: authHeaders,
-    }).then((r) => r.json());
+    const list = await authedFetch(
+      `${BASE_URL}/api/quan-tri/chuyen-bay?search=${no}&limit=100`
+    ).then((r) => r.json());
     for (const f of list.flights ?? []) {
-      const del = await fetch(`${BASE_URL}/api/quan-tri/chuyen-bay?flight_id=${f.id}`, {
+      const del = await authedFetch(`${BASE_URL}/api/quan-tri/chuyen-bay?flight_id=${f.id}`, {
         method: 'DELETE',
-        headers: authHeaders,
       });
       if (del.status === 200) removed += 1;
     }
@@ -145,9 +176,9 @@ async function main() {
       ];
 
       for (const v of variants) {
-        const res = await fetch(`${BASE_URL}/api/quan-tri/chuyen-bay`, {
+        const res = await authedFetch(`${BASE_URL}/api/quan-tri/chuyen-bay`, {
           method: 'POST',
-          headers: { ...authHeaders, 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             flight_no: v.no,
             from_code: from,
