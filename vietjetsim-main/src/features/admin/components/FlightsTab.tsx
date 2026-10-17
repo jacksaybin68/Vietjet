@@ -7,13 +7,20 @@ import {
   createAdminFlight,
   updateAdminFlight,
   deleteAdminFlight,
+  collectAdminNetwork,
+  collectAdminSchedule,
+  importCollectedFlights,
   type AdminFlight,
+  type CollectNetworkResponse,
+  type CollectScheduleResponse,
 } from '@/features/admin';
 import { getApiErrorMessage } from '@/shared/services';
 import { AdminTabHeader, ADMIN_CARD_STYLE, ADMIN_ACTION_BTN } from './AdminSection';
 import { AIRPORT_CITIES } from '@/shared/constants';
 import { FLIGHT_NO_PATTERN, normalizeFlightNo } from '@/lib/flight-no';
 import { toVietnamInstant, toVietnamWallClock } from '@/lib/utils';
+import BulkCollectPanel from './BulkCollectPanel';
+import AutoSyncSettingsPanel from './AutoSyncSettingsPanel';
 
 interface ToastAPI {
   success: (title: string, message?: string, options?: object) => void;
@@ -207,6 +214,154 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
+
+  // ─── OpenClaw Web Collection State ──────────────────────────────────────────
+  const [showWebCollectPanel, setShowWebCollectPanel] = useState(true);
+  const [activeWebTab, setActiveWebTab] = useState<'network' | 'schedule' | 'bulk' | 'auto'>(
+    'network'
+  );
+
+  // Network sync state
+  const [isSyncingNetwork, setIsSyncingNetwork] = useState(false);
+  const [isImportingAirports, setIsImportingAirports] = useState(false);
+  const [networkResult, setNetworkResult] = useState<CollectNetworkResponse | null>(null);
+  const [networkError, setNetworkError] = useState<string | null>(null);
+
+  // Schedule collect state
+  const [scheduleFrom, setScheduleFrom] = useState('SGN');
+  const [scheduleTo, setScheduleTo] = useState('HAN');
+  const [scheduleDate, setScheduleDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [wafCookie, setWafCookie] = useState('');
+  const [importOnSuccess, setImportOnSuccess] = useState(false);
+  const [isCollectingSchedule, setIsCollectingSchedule] = useState(false);
+  const [isImportingFlights, setIsImportingFlights] = useState(false);
+  const [scheduleResult, setScheduleResult] = useState<CollectScheduleResponse | null>(null);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
+
+  const handleFetchNetwork = async (dryRun = true) => {
+    setIsSyncingNetwork(true);
+    setNetworkError(null);
+    try {
+      const data = await collectAdminNetwork(dryRun);
+      setNetworkResult(data);
+      if (dryRun) {
+        onToast?.info(
+          'Đã tải mạng lưới Vietjet',
+          `Tìm thấy ${data.total} sân bay, ${data.routesCount ?? 0} tuyến. Phát hiện ${data.added.length} sân bay mới.`
+        );
+      }
+    } catch (err) {
+      const msg = getApiErrorMessage(err, 'Không thể kết nối đến máy chủ CMS vietjetair.com');
+      setNetworkError(msg);
+      onToast?.error('Lỗi thu thập mạng lưới', msg);
+    } finally {
+      setIsSyncingNetwork(false);
+    }
+  };
+
+  const handleImportNewAirports = async () => {
+    setIsImportingAirports(true);
+    setNetworkError(null);
+    try {
+      const data = await collectAdminNetwork(false);
+      setNetworkResult(data);
+      onToast?.success(
+        'Nhập sân bay thành công',
+        `Đã thêm ${data.added.length} sân bay mới vào cơ sở dữ liệu.`
+      );
+    } catch (err) {
+      const msg = getApiErrorMessage(err, 'Không thể nhập sân bay mới vào hệ thống');
+      setNetworkError(msg);
+      onToast?.error('Lỗi nhập sân bay', msg);
+    } finally {
+      setIsImportingAirports(false);
+    }
+  };
+
+  const handleCollectSchedule = async () => {
+    if (scheduleFrom === scheduleTo) {
+      onToast?.warning('Điểm đi và đến trùng nhau', 'Vui lòng chọn 2 sân bay khác nhau.');
+      return;
+    }
+    if (!scheduleDate) {
+      onToast?.warning('Chưa chọn ngày', 'Vui lòng chọn ngày bay.');
+      return;
+    }
+    setIsCollectingSchedule(true);
+    setScheduleError(null);
+    setScheduleResult(null);
+    try {
+      const data = await collectAdminSchedule({
+        from: scheduleFrom,
+        to: scheduleTo,
+        date: scheduleDate,
+        wafCookie: wafCookie.trim() || undefined,
+        importOnSuccess,
+      });
+      setScheduleResult(data);
+      if (!data.reachable) {
+        onToast?.warning('Không thể lấy lịch bay', data.reason || 'Bị chặn bởi WAF');
+      } else {
+        const count = data.flights?.length ?? 0;
+        if (data.imported && data.imported.length > 0) {
+          onToast?.success(
+            'Thu thập và nhập thành công',
+            `Đã nhập ${data.imported.length} chuyến bay vào hệ thống.`
+          );
+          fetchFlights();
+        } else {
+          onToast?.success(
+            'Thu thập lịch bay thành công',
+            `Tìm thấy ${count} chuyến bay chặng ${data.route ?? `${scheduleFrom}-${scheduleTo}`}.`
+          );
+        }
+      }
+    } catch (err) {
+      const msg = getApiErrorMessage(err, 'Không thể kết nối API lịch bay vietjetair.com');
+      setScheduleError(msg);
+      onToast?.error('Lỗi thu thập lịch bay', msg);
+    } finally {
+      setIsCollectingSchedule(false);
+    }
+  };
+
+  const handleImportFlights = async () => {
+    if (!scheduleResult?.flights || scheduleResult.flights.length === 0) return;
+    setIsImportingFlights(true);
+    try {
+      const res = await importCollectedFlights({
+        from: scheduleFrom,
+        to: scheduleTo,
+        date: scheduleDate,
+        flights: scheduleResult.flights,
+      });
+      onToast?.success(
+        'Nhập chuyến bay thành công',
+        `Đã nhập ${res.imported.length} chuyến, bỏ qua ${res.skipped.length} chuyến.`
+      );
+      setScheduleResult((prev) =>
+        prev
+          ? {
+              ...prev,
+              imported: res.imported,
+              skipped: res.skipped,
+            }
+          : prev
+      );
+      fetchFlights();
+    } catch (err) {
+      const msg = getApiErrorMessage(err, 'Không thể nhập chuyến bay vào cơ sở dữ liệu');
+      onToast?.error('Lỗi nhập chuyến bay', msg);
+    } finally {
+      setIsImportingFlights(false);
+    }
+  };
+
+  const handleSwapAirports = () => {
+    const temp = scheduleFrom;
+    setScheduleFrom(scheduleTo);
+    setScheduleTo(temp);
+  };
 
   const fetchFlights = async () => {
     setIsLoading(true);
@@ -543,15 +698,554 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
         title="Quản lý chuyến bay"
         subtitle={`${flights.length} chuyến bay trong hệ thống`}
         actions={
-          <button
-            onClick={() => setShowAddModal(true)}
-            className={`${ADMIN_ACTION_BTN} text-white bg-primary hover:bg-primary-dark shadow-glow-red`}
-          >
-            <Icon name="PlusIcon" size={14} />
-            Thêm chuyến bay
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowWebCollectPanel((prev) => !prev)}
+              className={`${ADMIN_ACTION_BTN} ${showWebCollectPanel ? 'bg-indigo-600 text-white' : 'bg-white/5 text-slate-300 hover:text-white border border-white/10'}`}
+            >
+              <Icon name="GlobeAltIcon" size={14} />
+              Thu thập dữ liệu web
+            </button>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className={`${ADMIN_ACTION_BTN} text-white bg-primary hover:bg-primary-dark shadow-glow-red`}
+            >
+              <Icon name="PlusIcon" size={14} />
+              Thêm chuyến bay
+            </button>
+          </div>
         }
       />
+
+      {/* Panel Thu Thập Dữ Liệu Web (OpenClaw) */}
+      <div
+        className="rounded-2xl border transition-all duration-300 overflow-hidden"
+        style={ADMIN_CARD_STYLE}
+      >
+        {/* Panel Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 border-b border-white/5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+              <Icon name="GlobeAltIcon" size={20} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-white">Thu Thập Dữ Liệu Web</h3>
+                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                  OpenClaw
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Đồng bộ mạng lưới sân bay &amp; thu thập lịch bay trực tiếp từ vietjetair.com
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Sub-tab Switcher */}
+            <div className="bg-slate-900/80 p-1 rounded-xl border border-white/10 flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setActiveWebTab('network')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  activeWebTab === 'network'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Icon name="MapPinIcon" size={14} />
+                Mạng lưới
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveWebTab('schedule')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  activeWebTab === 'schedule'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Icon name="CalendarDaysIcon" size={14} />
+                Lịch bay
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveWebTab('bulk')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  activeWebTab === 'bulk'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Icon name="BoltIcon" size={14} />
+                Hàng loạt
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveWebTab('auto')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  activeWebTab === 'auto'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Icon name="CpuChipIcon" size={14} />
+                Tự động hóa
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowWebCollectPanel((prev) => !prev)}
+              className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-white/5 transition-all"
+              title={showWebCollectPanel ? 'Thu gọn' : 'Mở rộng'}
+            >
+              <Icon name={showWebCollectPanel ? 'ChevronUpIcon' : 'ChevronDownIcon'} size={16} />
+            </button>
+          </div>
+        </div>
+
+        {/* Panel Content (collapsible) */}
+        {showWebCollectPanel && (
+          <div className="p-5 space-y-5">
+            {/* SUB-TAB 3: THU THẬP HÀNG LOẠT */}
+            {activeWebTab === 'bulk' && (
+              <BulkCollectPanel onToast={onToast} onFlightsImported={fetchFlights} />
+            )}
+
+            {/* SUB-TAB 4: TỰ ĐỘNG HÓA BACKGROUND */}
+            {activeWebTab === 'auto' && (
+              <AutoSyncSettingsPanel onToast={onToast} onFlightsUpdated={fetchFlights} />
+            )}
+
+            {/* SUB-TAB 1: MẠNG LƯỚI (NETWORK SYNC) */}
+            {activeWebTab === 'network' && (
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/[0.02] border border-white/5 p-4 rounded-xl">
+                  <div>
+                    <p className="text-sm font-semibold text-white">
+                      Đồng bộ danh sách sân bay &amp; cặp tuyến bay
+                    </p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Nguồn:{' '}
+                      <code className="text-indigo-400">
+                        vietjetcms-api.vietjetair.com/api/v1/citypair
+                      </code>{' '}
+                      (API mở, không cần token).
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleFetchNetwork(true)}
+                    disabled={isSyncingNetwork || isImportingAirports}
+                    className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/20 active:scale-95 whitespace-nowrap self-start sm:self-center"
+                  >
+                    <Icon
+                      name="ArrowPathIcon"
+                      size={14}
+                      className={isSyncingNetwork ? 'animate-spin' : ''}
+                    />
+                    {isSyncingNetwork
+                      ? 'Đang kiểm tra...'
+                      : 'Lấy danh sách sân bay & tuyến bay từ vietjetair.com'}
+                  </button>
+                </div>
+
+                {/* Network Error */}
+                {networkError && (
+                  <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
+                    <Icon name="ExclamationTriangleIcon" size={16} className="shrink-0" />
+                    <span>{networkError}</span>
+                  </div>
+                )}
+
+                {/* Network Results */}
+                {networkResult && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                        <p className="text-xs font-medium text-slate-400">Tổng sân bay từ web</p>
+                        <p className="text-2xl font-black text-white mt-1">{networkResult.total}</p>
+                      </div>
+                      <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                        <p className="text-xs font-medium text-slate-400">Tổng tuyến đang bán</p>
+                        <p className="text-2xl font-black text-indigo-400 mt-1">
+                          {networkResult.routesCount ?? '—'}
+                        </p>
+                      </div>
+                      <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                        <p className="text-xs font-medium text-slate-400">
+                          Sân bay mới chưa có trong DB
+                        </p>
+                        <p
+                          className={`text-2xl font-black mt-1 ${networkResult.added.length > 0 ? 'text-amber-400' : 'text-emerald-400'}`}
+                        >
+                          {networkResult.added.length}
+                        </p>
+                      </div>
+                    </div>
+
+                    {networkResult.added.length > 0 ? (
+                      <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/15 space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-bold text-amber-300">
+                              Phát hiện {networkResult.added.length} sân bay mới từ vietjetair.com
+                            </p>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                              Các sân bay này đã có trên hệ thống Vietjet nhưng chưa được lưu trong
+                              cơ sở dữ liệu VietjetSim.
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleImportNewAirports}
+                            disabled={isImportingAirports}
+                            className="px-4 py-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-black rounded-xl text-xs transition-all flex items-center gap-2 shadow-lg shadow-amber-500/20 active:scale-95 whitespace-nowrap"
+                          >
+                            <Icon
+                              name="PlusIcon"
+                              size={14}
+                              className={isImportingAirports ? 'animate-spin' : ''}
+                            />
+                            {isImportingAirports
+                              ? 'Đang nhập...'
+                              : `Nhập ${networkResult.added.length} sân bay mới vào hệ thống`}
+                          </button>
+                        </div>
+
+                        {/* List of new airports */}
+                        <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
+                          {networkResult.added.map((ap) => (
+                            <div
+                              key={ap.code}
+                              className="flex items-center justify-between p-2 rounded-lg bg-black/20 text-xs"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="px-2 py-0.5 rounded font-black bg-indigo-500/20 text-indigo-300 font-mono">
+                                  {ap.code}
+                                </span>
+                                <span className="font-semibold text-white">{ap.name}</span>
+                                <span className="text-slate-400">({ap.city})</span>
+                              </div>
+                              <span className="text-slate-400 text-[11px] font-medium">
+                                {ap.country ?? 'Quốc tế'}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2">
+                        <Icon name="CheckCircleIcon" size={16} className="shrink-0" />
+                        <span>
+                          Tất cả {networkResult.total} sân bay từ vietjetair.com đã có đầy đủ trong
+                          cơ sở dữ liệu.
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SUB-TAB 2: LỊCH BAY (SCHEDULE COLLECT) */}
+            {activeWebTab === 'schedule' && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                  {/* From */}
+                  <div className="md:col-span-3">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5 block">
+                      Điểm đi
+                    </label>
+                    <select
+                      value={scheduleFrom}
+                      onChange={(e) => setScheduleFrom(e.target.value)}
+                      className="w-full bg-slate-900/60 border border-white/10 rounded-xl text-sm text-white px-3 py-2.5 focus:outline-none focus:border-indigo-500/50"
+                    >
+                      {AIRPORTS.map((code) => (
+                        <option
+                          key={`from-${code}`}
+                          value={code}
+                          className="bg-slate-900 text-white"
+                        >
+                          {code} - {AIRPORT_CITIES[code] || code}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Swap Button */}
+                  <div className="md:col-span-1 flex justify-center pb-1">
+                    <button
+                      type="button"
+                      onClick={handleSwapAirports}
+                      className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/10 transition-all active:scale-90"
+                      title="Đổi chiều bay"
+                    >
+                      <Icon name="ArrowPathRoundedSquareIcon" size={16} />
+                    </button>
+                  </div>
+
+                  {/* To */}
+                  <div className="md:col-span-3">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5 block">
+                      Điểm đến
+                    </label>
+                    <select
+                      value={scheduleTo}
+                      onChange={(e) => setScheduleTo(e.target.value)}
+                      className="w-full bg-slate-900/60 border border-white/10 rounded-xl text-sm text-white px-3 py-2.5 focus:outline-none focus:border-indigo-500/50"
+                    >
+                      {AIRPORTS.map((code) => (
+                        <option key={`to-${code}`} value={code} className="bg-slate-900 text-white">
+                          {code} - {AIRPORT_CITIES[code] || code}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Date */}
+                  <div className="md:col-span-3">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5 block">
+                      Ngày bay
+                    </label>
+                    <input
+                      type="date"
+                      value={scheduleDate}
+                      onChange={(e) => setScheduleDate(e.target.value)}
+                      className="w-full bg-slate-900/60 border border-white/10 rounded-xl text-sm text-white px-3 py-2.5 [color-scheme:dark] focus:outline-none focus:border-indigo-500/50"
+                    />
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="md:col-span-2">
+                    <button
+                      type="button"
+                      onClick={handleCollectSchedule}
+                      disabled={isCollectingSchedule}
+                      className="w-full px-4 py-2.5 bg-primary hover:bg-primary-dark disabled:opacity-50 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-glow-red flex items-center justify-center gap-2 active:scale-95"
+                    >
+                      <Icon
+                        name="MagnifyingGlassIcon"
+                        size={14}
+                        className={isCollectingSchedule ? 'animate-spin' : ''}
+                      />
+                      {isCollectingSchedule ? 'Đang lấy...' : 'Thu thập'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* WAF Cookie + Option Row */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                    <span>WAF Cookie (Tùy chọn - Dùng khi bị chặn CloudFront / AWS WAF 403)</span>
+                    <span className="text-slate-500 lowercase font-normal">
+                      Ví dụ: aws-waf-token=...
+                    </span>
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={wafCookie}
+                    onChange={(e) => setWafCookie(e.target.value)}
+                    placeholder="aws-waf-token=... (Lấy từ DevTools của trình duyệt khi duyệt vietjetair.com)"
+                    className="w-full bg-slate-900/60 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-600 px-3 py-2 font-mono focus:outline-none focus:border-indigo-500/50"
+                  />
+                  <div className="flex items-center gap-2 pt-1">
+                    <input
+                      type="checkbox"
+                      id="importOnSuccessCheck"
+                      checked={importOnSuccess}
+                      onChange={(e) => setImportOnSuccess(e.target.checked)}
+                      className="w-4 h-4 rounded border-white/20 bg-slate-900 text-indigo-600 focus:ring-0 cursor-pointer"
+                    />
+                    <label
+                      htmlFor="importOnSuccessCheck"
+                      className="text-xs text-slate-300 cursor-pointer select-none"
+                    >
+                      Nhập ngay vào cơ sở dữ liệu sau khi thu thập thành công
+                    </label>
+                  </div>
+                </div>
+
+                {/* Schedule Error */}
+                {scheduleError && (
+                  <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
+                    <Icon name="ExclamationTriangleIcon" size={16} className="shrink-0" />
+                    <span>{scheduleError}</span>
+                  </div>
+                )}
+
+                {/* Schedule Results */}
+                {scheduleResult && (
+                  <div className="space-y-4 pt-2 border-t border-white/5">
+                    {/* WAF 403 Notice */}
+                    {!scheduleResult.reachable ? (
+                      <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 space-y-2">
+                        <div className="flex items-center gap-2 font-bold text-sm">
+                          <Icon
+                            name="ShieldExclamationIcon"
+                            size={18}
+                            className="text-amber-400 shrink-0"
+                          />
+                          <span>AWS WAF Chặn Yêu Cầu (HTTP 403)</span>
+                        </div>
+                        <p className="text-xs text-slate-300">{scheduleResult.reason}</p>
+                        <div className="p-3 bg-black/30 rounded-lg text-xs space-y-1.5 text-slate-400 border border-white/5">
+                          <p className="font-bold text-white flex items-center gap-1.5">
+                            <Icon
+                              name="InformationCircleIcon"
+                              size={14}
+                              className="text-indigo-400"
+                            />
+                            Hướng dẫn lấy WAF Cookie từ trình duyệt:
+                          </p>
+                          <ol className="list-decimal list-inside space-y-1 text-slate-300">
+                            <li>
+                              Mở trình duyệt và truy cập{' '}
+                              <code className="text-indigo-300">https://www.vietjetair.com</code>
+                            </li>
+                            <li>
+                              Tìm kiếm chuyến bay bất kỳ (trình duyệt sẽ vượt qua AWS WAF Captcha/JS
+                              challenge)
+                            </li>
+                            <li>
+                              Nhấn F12 (DevTools) &gt; Tab <strong>Application</strong> (hoặc
+                              Storage) &gt; <strong>Cookies</strong> &gt;{' '}
+                              <code className="text-indigo-300">https://www.vietjetair.com</code>
+                            </li>
+                            <li>
+                              Sao chép toàn bộ giá trị cookie{' '}
+                              <code className="text-amber-300">aws-waf-token</code>
+                            </li>
+                            <li>
+                              Dán vào ô <strong>WAF Cookie</strong> ở trên và bấm{' '}
+                              <strong>Thu thập</strong> lại
+                            </li>
+                          </ol>
+                        </div>
+                      </div>
+                    ) : (
+                      /* Reachable = true */
+                      <div className="space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-bold text-white">
+                              Kết quả thu thập: Chặng {scheduleResult.route} ({scheduleResult.date})
+                            </p>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                              Tìm thấy {scheduleResult.flights?.length ?? 0} chuyến bay thực tế từ
+                              vietjetair.com
+                            </p>
+                          </div>
+
+                          {/* Import Button if not yet imported */}
+                          {scheduleResult.flights &&
+                            scheduleResult.flights.length > 0 &&
+                            (!scheduleResult.imported || scheduleResult.imported.length === 0) && (
+                              <button
+                                type="button"
+                                onClick={handleImportFlights}
+                                disabled={isImportingFlights}
+                                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold rounded-xl text-xs transition-all flex items-center gap-2 shadow-lg shadow-emerald-600/20 active:scale-95 whitespace-nowrap self-start sm:self-center"
+                              >
+                                <Icon
+                                  name="ArrowDownTrayIcon"
+                                  size={14}
+                                  className={isImportingFlights ? 'animate-spin' : ''}
+                                />
+                                {isImportingFlights
+                                  ? 'Đang nhập...'
+                                  : `Nhập ${scheduleResult.flights.length} chuyến vào bảng chuyến bay`}
+                              </button>
+                            )}
+                        </div>
+
+                        {/* Import summary status */}
+                        {scheduleResult.imported && scheduleResult.imported.length > 0 && (
+                          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs space-y-1">
+                            <p className="font-bold">
+                              ✓ Đã nhập thành công {scheduleResult.imported.length} chuyến vào cơ sở
+                              dữ liệu:
+                            </p>
+                            <p className="text-slate-300 font-mono">
+                              {scheduleResult.imported.join(', ')}
+                            </p>
+                            {scheduleResult.skipped && scheduleResult.skipped.length > 0 && (
+                              <p className="text-slate-400 mt-1">
+                                (Bỏ qua {scheduleResult.skipped.length} chuyến đã có sẵn hoặc không
+                                đạt chuẩn)
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Flights Table */}
+                        {scheduleResult.flights && scheduleResult.flights.length > 0 ? (
+                          <div className="overflow-x-auto rounded-xl border border-white/5 bg-black/20">
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr className="border-b border-white/5 text-slate-500 text-[10px] font-black uppercase tracking-wider text-left">
+                                  <th className="px-4 py-2.5">Số hiệu</th>
+                                  <th className="px-4 py-2.5">Chặng</th>
+                                  <th className="px-4 py-2.5">Giờ đi</th>
+                                  <th className="px-4 py-2.5">Giờ đến</th>
+                                  <th className="px-4 py-2.5 text-right">Giá cơ bản</th>
+                                  <th className="px-4 py-2.5">Các hạng vé</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-white/5">
+                                {scheduleResult.flights.map((f, idx) => (
+                                  <tr
+                                    key={`${f.flightNo}-${idx}`}
+                                    className="hover:bg-white/[0.02]"
+                                  >
+                                    <td className="px-4 py-2.5 font-black text-indigo-400 font-mono">
+                                      {f.flightNo}
+                                    </td>
+                                    <td className="px-4 py-2.5 text-slate-300">
+                                      {f.from} → {f.to}
+                                    </td>
+                                    <td className="px-4 py-2.5 text-white font-bold">
+                                      {f.departTime}
+                                    </td>
+                                    <td className="px-4 py-2.5 text-white font-bold">
+                                      {f.arriveTime}
+                                    </td>
+                                    <td className="px-4 py-2.5 text-right font-black text-emerald-400 font-mono">
+                                      {f.price.toLocaleString('vi-VN')} ₫
+                                    </td>
+                                    <td className="px-4 py-2.5 text-slate-400">
+                                      {f.fares && f.fares.length > 0
+                                        ? f.fares
+                                            .map(
+                                              (fare) =>
+                                                `${fare.cabin}: ${fare.amount.toLocaleString('vi-VN')}₫`
+                                            )
+                                            .join(' | ')
+                                        : '—'}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        ) : (
+                          <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 text-center text-xs text-slate-400">
+                            Không tìm thấy chuyến bay nào cho chặng và ngày này trên trang web
+                            Vietjet.
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Search + Date Range */}
       <div className="flex flex-col sm:flex-row gap-3">
@@ -818,8 +1512,12 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   >
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 bg-gradient-red rounded flex items-center justify-center">
-                          <Icon name="PaperAirplaneIcon" size={9} className="text-white" />
+                        <div className="h-6 px-1.5 bg-gradient-red rounded-lg flex items-center justify-center shrink-0">
+                          <img
+                            src="/logo-vj.svg"
+                            alt="Vietjet Air"
+                            className="h-3 w-auto brightness-0 invert"
+                          />
                         </div>
                         <span className="font-bold text-sm text-white">{flight.flightNo}</span>
                       </div>

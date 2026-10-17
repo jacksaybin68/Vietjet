@@ -1316,14 +1316,12 @@ export default function FlightResultsStep({
                         )}
                         <div className="flex items-center gap-2 mb-1">
                           <div
-                            className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${flight.class === 'business' ? 'bg-accent' : 'bg-gradient-red'}`}
+                            className={`h-7 px-2 rounded-lg flex items-center justify-center shrink-0 ${flight.class === 'business' ? 'bg-accent' : 'bg-gradient-red'}`}
                           >
-                            <Icon
-                              name="PaperAirplaneIcon"
-                              size={12}
-                              className={
-                                flight.class === 'business' ? 'text-[var(--vj-navy)]' : 'text-white'
-                              }
+                            <img
+                              src="/logo-vj.svg"
+                              alt="Vietjet Air"
+                              className={`h-3 w-auto ${flight.class === 'business' ? '' : 'brightness-0 invert'}`}
                             />
                           </div>
                           <div>

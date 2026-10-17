@@ -1,66 +1,152 @@
 #!/usr/bin/env node
 /**
- * Lịch bay dùng chung cho các script seed.
+ * Lịch bay dùng chung cho các script seed — nạp từ `data/vietjet-schedule.csv`.
  *
- * Trước đây danh sách tuyến nằm riêng trong `seed-future-flights.cjs` và chỉ có
- * 20 tuyến, nên bảy sân bay nội địa đang khai thác thật — Điện Biên (DIN),
- * Pleiku (PXU), Tuy Hòa/Phú Yên (TBB), Quy Nhơn (UIH), Chu Lai (VCL), Đồng Hới
- * (VDH), Vân Đồn (VDO) — không có chuyến nào để bán, và các chặng trục thiếu
- * như HAN-PQC, SGN-DAD. Tách ra đây để hai script cùng dùng một lịch.
+ * Dữ liệu là bản *curated* theo số liệu công khai của Vietjet (trang giá vé,
+ * trang tuyến bay, trang đội tàu trên vietjetair.com, cùng thời gian bay đã
+ * công bố). Không thu thập từ API đặt vé của hãng: endpoint đó nằm sau AWS WAF
+ * + chữ ký HMAC + proof-of-work, mọi lời gọi trần đều trả 403. Vì vậy giá và
+ * giờ ở đây là mức tham chiếu hợp lý, không phải bản chụp giá theo thời gian
+ * thực.
  *
- * Đây là lịch demo của một trình mô phỏng, dựng theo hình hub-and-spoke mà
- * migration 027 đã dùng (mọi sân bay nối Hà Nội và TP.HCM), với thời gian bay
- * và giá hợp lý chứ không phải bảng giờ thật của hãng. Tuyến không có thật thì
- * không dựng: Côn Đảo (VCS) và Rạch Giá (VKG) chỉ có từ TP.HCM.
+ * Vì sao tách CSV ra khỏi code: trước đây tuyến/giờ/giá là hằng số trong file
+ * này, nên muốn đối chiếu với hãng phải đọc JavaScript. CSV để người duyệt đọc
+ * và sửa được, còn file này chỉ còn nhiệm vụ nạp + kiểm tra + dựng lịch.
  *
- * `businessNo` giữ nguyên quy ước cũ: mỗi tuyến có hai số, sóng economy trong
- * 3xx và sóng business trong 30xx, vì `flights.class` đã mang cabin nên hậu tố
- * chữ cái (`VJ341B`) là thừa và bị CHECK của migration 036 từ chối.
+ * Các bất biến được kiểm ngay lúc nạp, vì đây là chốt duy nhất giữa dữ liệu
+ * người viết và database sẽ từ chối nếu sai:
+ *   - `flight_no` khớp CHECK của migration 036
+ *   - khoá duy nhất `(from_code, to_code, depart_time)` không tự trùng
+ *   - giá dương, và economy <= business
+ *   - `business_price` = round(economy_price × 2.77) — bậc giá của migration 030
+ *
+ * Số hiệu hạng Business sinh theo VỊ TRÍ DÒNG (`BUSINESS_NO_BASE + index`), nên
+ * thứ tự trong CSV chính là thứ tự số hiệu. Đổi thứ tự là đổi số hiệu, và script
+ * seed (thay hàng theo `flight_no`) sẽ để lại bản cũ — xem đầu file CSV.
  */
+
+const fs = require('fs');
+const path = require('path');
 
 /** Số hiệu sóng business; mỗi tuyến lấy `BUSINESS_NO_BASE + index` trong ROUTES. */
 const BUSINESS_NO_BASE = 3001;
 const businessNo = (index) => `VJ${BUSINESS_NO_BASE + index}`;
 
-/**
- * Sân bay nội địa, cùng [thời gian bay (phút), giá economy] từ mỗi đầu trục.
- * `han: null` nghĩa là tuyến đó không tồn tại trên thực tế và không được dựng.
- */
-const DOMESTIC_SPOKES = {
-  DAD: { han: [85, 749000], sgn: [95, 899000] },
-  PQC: { han: [130, 999000], sgn: [60, 699000] },
-  CXR: { han: [105, 829000], sgn: [70, 759000] },
-  HUI: { han: [80, 699000], sgn: [95, 799000] },
-  VCA: { han: [135, 949000], sgn: [45, 599000] },
-  HPH: { han: [60, 449000], sgn: [125, 899000] },
-  VII: { han: [55, 499000], sgn: [120, 849000] },
-  THD: { han: [70, 549000], sgn: [125, 899000] },
-  UIH: { han: [100, 799000], sgn: [75, 699000] },
-  TBB: { han: [95, 749000], sgn: [80, 729000] },
-  PXU: { han: [105, 799000], sgn: [70, 699000] },
-  BMV: { han: [110, 849000], sgn: [60, 649000] },
-  DLI: { han: [110, 769000], sgn: [55, 649000] },
-  DIN: { han: [65, 649000], sgn: [150, 1059000] },
-  VCL: { han: [95, 699000], sgn: [90, 749000] },
-  VDO: { han: [65, 559000], sgn: [135, 949000] },
-  VDH: { han: [75, 599000], sgn: [105, 799000] },
-  VCS: { han: null, sgn: [60, 649000] },
-  VKG: { han: null, sgn: [55, 599000] },
-};
+/** Business là sóng thứ hai trong ngày, sau economy 3 tiếng. */
+const BUSINESS_SHIFT_MIN = 180;
 
-/** Tuyến quốc tế, theo mạng của migration 028 và thời gian bay thật của nó. */
-const INTERNATIONAL = [
-  ['VJ401', 'HAN', 'SIN', '09:00', 210, 2450000, 6786500, 180],
-  ['VJ411', 'SIN', 'HAN', '13:30', 210, 2550000, 7053500, 180],
-  ['VJ421', 'SGN', 'ICN', '09:00', 320, 4900000, 13573000, 180],
-  ['VJ431', 'ICN', 'SGN', '14:00', 320, 5000000, 13850000, 180],
-  ['VJ441', 'HAN', 'BKK', '08:20', 165, 1650000, 4570500, 180],
-  ['VJ451', 'SGN', 'MNL', '10:40', 205, 2650000, 7340500, 160],
-  ['VJ461', 'HAN', 'KIX', '11:10', 350, 5600000, 15512000, 150],
-  ['VJ471', 'SGN', 'HKG', '07:50', 200, 3250000, 9002500, 170],
-  ['VJ481', 'HAN', 'ICN', '08:30', 320, 5100000, 14127000, 170],
-  ['VJ491', 'SGN', 'BKK', '13:10', 165, 1750000, 4847500, 180],
+/** Khớp `FLIGHT_NO_PATTERN` của src/lib/flight-no.ts và CHECK của migration 036. */
+const FLIGHT_NO_PATTERN = /^[A-Z]{2} ?[0-9]{2,4}(-[0-9]{4})?$/;
+
+const CSV_PATH = path.join(__dirname, '..', 'data', 'vietjet-schedule.csv');
+
+const REQUIRED_COLUMNS = [
+  'flight_no',
+  'from_code',
+  'to_code',
+  'depart_time',
+  'block_minutes',
+  'economy_price',
+  'business_price',
+  'seats',
+  'aircraft',
+  'source',
 ];
+
+/**
+ * Bậc giá của migration 030, nguyên văn: hàng business lấy `price / 2.77` làm
+ * giá economy, mọi hạng khác lấy `price`; chiều ngược lại nhân 2.77. Giữ đúng
+ * công thức này để hàng seed không lệch bậc so với hàng tạo qua admin.
+ */
+const fareLadder = (cls, price) =>
+  cls === 'business'
+    ? { economy_price: Math.round(price / 2.77), business_price: Math.round(price) }
+    : { economy_price: Math.round(price), business_price: Math.round(price * 2.77) };
+
+/** CSV nhỏ và không có dấu phẩy trong ô, nên tách bằng dấu phẩy là đủ — nhưng
+ * vẫn từ chối ô thừa/thiếu thay vì im lặng nhận dữ liệu lệch cột. */
+function parseCsv(text) {
+  const rows = [];
+  const lines = text.split(/\r?\n/);
+  let header = null;
+
+  lines.forEach((raw, i) => {
+    const line = raw.trim();
+    if (!line || line.startsWith('#')) return; // chú thích nguồn ở đầu file
+
+    const cells = line.split(',').map((c) => c.trim());
+    if (!header) {
+      header = cells;
+      const missing = REQUIRED_COLUMNS.filter((c) => !header.includes(c));
+      if (missing.length) {
+        throw new Error(`vietjet-schedule.csv thiếu cột: ${missing.join(', ')}`);
+      }
+      return;
+    }
+
+    if (cells.length !== header.length) {
+      throw new Error(
+        `vietjet-schedule.csv dòng ${i + 1}: ${cells.length} ô, mong đợi ${header.length}`
+      );
+    }
+    const row = {};
+    header.forEach((key, col) => (row[key] = cells[col]));
+    rows.push(row);
+  });
+
+  if (!rows.length) throw new Error('vietjet-schedule.csv không có dòng dữ liệu nào');
+  return rows;
+}
+
+/** Nạp CSV thành tuple đúng hình dạng `seed-future-flights.cjs` đang đọc. */
+function loadRoutes() {
+  const rows = parseCsv(fs.readFileSync(CSV_PATH, 'utf8'));
+  const seen = new Set();
+
+  return rows.map((row, index) => {
+    const { flight_no, from_code, to_code, depart_time } = row;
+    const block_minutes = Number(row.block_minutes);
+    const economy_price = Number(row.economy_price);
+    const business_price = Number(row.business_price);
+    const seats = Number(row.seats);
+
+    const fail = (why) => {
+      throw new Error(`vietjet-schedule.csv dòng ${index + 2} (${flight_no}): ${why}`);
+    };
+
+    if (!FLIGHT_NO_PATTERN.test(flight_no)) fail(`số hiệu không khớp CHECK của 036`);
+    if (![from_code, to_code, depart_time].every(Boolean)) fail('thiếu sân bay/giờ khởi hành');
+    if (!/^\d{2}:\d{2}$/.test(depart_time)) fail(`giờ khởi hành "${depart_time}" không phải HH:MM`);
+    if (!Number.isFinite(block_minutes) || block_minutes <= 0) fail('block_minutes không hợp lệ');
+    if (!Number.isFinite(seats) || seats <= 0) fail('seats không hợp lệ');
+    if (!Number.isFinite(economy_price) || economy_price <= 0) fail('economy_price không hợp lệ');
+
+    const expectedBusiness = Math.round(economy_price * 2.77);
+    if (business_price !== expectedBusiness) {
+      fail(
+        `business_price ${business_price} ≠ round(${economy_price} × 2.77) = ${expectedBusiness}`
+      );
+    }
+    if (economy_price > business_price) fail('economy_price > business_price (030 từ chối)');
+
+    const key = `${from_code}-${to_code}-${depart_time}`;
+    if (seen.has(key)) fail(`trùng khoá duy nhất (from, to, depart_time): ${key}`);
+    seen.add(key);
+
+    return [
+      flight_no,
+      from_code,
+      to_code,
+      depart_time,
+      block_minutes,
+      economy_price,
+      business_price,
+      seats,
+    ];
+  });
+}
+
+const ROUTES = loadRoutes();
 
 const pad = (n) => String(n).padStart(2, '0');
 
@@ -77,69 +163,6 @@ const shiftTime = (hhmm, extraMin) => {
   const total = h * 60 + m + extraMin;
   return `${pad(Math.floor(total / 60) % 24)}:${pad(total % 60)}`;
 };
-
-/**
- * Bậc giá của migration 030, nguyên văn: hàng business lấy `price / 2.77` làm
- * giá economy, mọi hạng khác lấy `price`; chiều ngược lại nhân 2.77. Giữ đúng
- * công thức này để hàng seed không lệch bậc so với hàng tạo qua admin.
- */
-const fareLadder = (cls, price) =>
-  cls === 'business'
-    ? { economy_price: Math.round(price / 2.77), business_price: Math.round(price) }
-    : { economy_price: Math.round(price), business_price: Math.round(price * 2.77) };
-
-/**
- * Danh sách tuyến: `[flight_no, from, to, depart, durationMin, economyPrice,
- * businessPrice, seats]` — giữ nguyên hình dạng mà `seed-future-flights.cjs`
- * đang đọc.
- */
-function buildRoutes() {
-  const routes = [];
-  let eco = 301;
-  const push = (from, to, depart, durationMin, economyPrice, seats) => {
-    routes.push([
-      `VJ${eco++}`,
-      from,
-      to,
-      depart,
-      durationMin,
-      economyPrice,
-      Math.round(economyPrice * 2.77),
-      seats,
-    ]);
-  };
-
-  // Trục Bắc–Nam, tuyến đông khách nhất nước.
-  push('HAN', 'SGN', '06:00', 145, 899000, 189);
-  push('SGN', 'HAN', '09:15', 145, 949000, 189);
-
-  const codes = Object.keys(DOMESTIC_SPOKES);
-  codes.forEach((code, i) => {
-    const spread = (i % 8) * 45;
-    const seats = i % 3 === 0 ? 189 : 150;
-    const spoke = DOMESTIC_SPOKES[code];
-
-    if (spoke.han) {
-      const [minutes, price] = spoke.han;
-      push('HAN', code, shiftTime('06:00', spread), minutes, price, seats);
-      push(code, 'HAN', shiftTime('12:00', spread), minutes, Math.round(price * 0.94), seats);
-    }
-    if (spoke.sgn) {
-      const [minutes, price] = spoke.sgn;
-      push('SGN', code, shiftTime('06:30', spread), minutes, price, seats);
-      push(code, 'SGN', shiftTime('13:00', spread), minutes, Math.round(price * 0.94), seats);
-    }
-  });
-
-  for (const entry of INTERNATIONAL) routes.push(entry);
-
-  return routes;
-}
-
-const ROUTES = buildRoutes();
-
-/** Business là sóng thứ hai trong ngày, sau economy 3 tiếng. */
-const BUSINESS_SHIFT_MIN = 180;
 
 /**
  * Mọi chuyến của lịch trong khoảng `[from, until]` (bao gồm hai đầu), mỗi tuyến
@@ -189,6 +212,7 @@ module.exports = {
   ROUTES,
   BUSINESS_NO_BASE,
   BUSINESS_SHIFT_MIN,
+  CSV_PATH,
   businessNo,
   buildSchedule,
   fareLadder,

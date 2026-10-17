@@ -852,6 +852,24 @@ credentials come from `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`: there is no
 single admin address in a real database, and a hard-coded one made the script
 exit 401 everywhere except the database it was written against.
 
+**The schedule's values live in a CSV, not in the seed script.** Block times,
+departure times, fares, aircraft and capacity are in
+`data/vietjet-schedule.csv`; `scripts/flight-schedule.cjs` only loads, validates
+and shapes them. They are *curated* from public Vietjet references — the
+`vietjetair.com` fare/route/fleet pages and published block times — **not**
+scraped. The booking API (`vietjet-api.vietjetair.com/booking/api/v1/…`) sits
+behind AWS WAF, an HMAC `X-Signature` plus proof-of-work and a reCAPTCHA
+Enterprise key, so every plain request answers `403 Request blocked`; do not try
+to reimplement that signing. The loader fails loudly on anything the database
+would reject: a `flight_no` outside 036's shape, a duplicate
+`(from_code, to_code, depart_time)`, `economy_price > business_price`, or a
+`business_price` that is not `round(economy_price × 2.77)` per 030's ladder. A
+route's business number is its **row position** (`BUSINESS_NO_BASE + index`), so
+re-ordering the CSV renumbers the business wave and leaves the old rows behind —
+keep the numeric flight-number order. Review with `npm run db:preview-flights`
+before running `db:seed-flights`, which sweeps rows by `flight_no` and re-creates
+them, so a wrong fare replaces what is on sale rather than sitting beside it.
+
 **The network is hub-and-spoke plus the regional pairs that matter.** 027 links
 every airport to HAN and SGN; that covers each hub's 26 destinations and leaves
 all 462 regional-to-regional pairs unserved. `032` adds the 32 a traveller

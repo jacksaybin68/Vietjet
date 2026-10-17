@@ -289,60 +289,63 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
 
       <main className="mx-auto max-w-[1200px] flex-1 px-4 py-6">
         {/* ============ BƯỚC 1: TRA CỨU ============ */}
-        {/* Form đứng trên, full chiều rộng; phần hướng dẫn bên dưới chảy thành
-            hai cột chữ từ `lg`. Ba khung xếp dọc cũ khiến trang dài 1426px ở
-            desktop trong khi mỗi dòng chữ chỉ chiếm nửa bề ngang — chia cột rút
-            ngắn trang mà không phải thu hẹp khung form. (`position: sticky` cho
-            khung form không dùng được: `.page-transition-wrapper` có
-            `overflow-x: hidden` nên nó là scroll container, sticky sẽ bám vào đó
-            chứ không bám viewport.) Trên mobile vẫn một cột như cũ. */}
+        {/* Hai nền trắng (form + hướng dẫn) được gắn liền nhau trong một khung
+            duy nhất: cột trái (form) chiếm 2 phần, cột phải (hướng dẫn) chiếm 3
+            phần — trái hẹp hơn phải — và hai phần ngăn cách bằng đường kẻ mảnh
+            thay vì khoảng hở giữa hai thẻ rời. Trên mobile hai phần vẫn xếp
+            dọc. (`position: sticky` cho khung form không dùng được:
+            `.page-transition-wrapper` có `overflow-x: hidden` nên nó là scroll
+            container, sticky sẽ bám vào đó chứ không bám viewport.) */}
         {step === 'search' && (
-          <div className="flex flex-col gap-6">
-            <div className="rounded-2xl bg-white/70 p-5 ring-1 ring-white/70 shadow-vj-md">
+          <div className="grid grid-cols-1 overflow-hidden rounded-2xl bg-white/70 ring-1 ring-white/70 shadow-vj-md lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+            {/* Cột trái: Form tìm kiếm (hẹp hơn cột phải) */}
+            <div className="p-5 sm:p-6">
               <form onSubmit={handleSearch} className="flex flex-col gap-4">
-                <div className="flex items-end gap-4">
-                  <div className="relative flex-1">
-                    <label className="pointer-events-none absolute left-3 top-2 text-[11px] font-bold text-[var(--vj-text-muted)]">
-                      Mã đặt chỗ <span className="text-[var(--vj-red)]">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={bookingCode}
-                      onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
-                      placeholder=" "
-                      className={`${fieldClass} pb-2 pt-6 text-black font-bold uppercase`}
-                    />
-                  </div>
-                  <div className="relative flex-1">
-                    <label className="pointer-events-none absolute left-3 top-2 text-[11px] font-bold text-[var(--vj-text-muted)]">
-                      Họ <span className="text-[var(--vj-red)]">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      placeholder=" "
-                      className={`${fieldClass} pb-2 pt-6`}
-                    />
-                  </div>
-                  <div className="shrink-0">
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="vj-cta h-10 items-center justify-center rounded-lg px-7 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {loading ? 'Đang tra cứu…' : 'Tìm kiếm'}
-                    </button>
-                  </div>
+                {/* Mã đặt chỗ */}
+                <div className="relative w-full">
+                  <label className="pointer-events-none absolute left-3 top-2 text-[11px] font-bold text-[var(--vj-text-muted)]">
+                    Mã đặt chỗ <span className="text-[var(--vj-red)]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={bookingCode}
+                    onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
+                    placeholder=" "
+                    className={`${fieldClass} pb-2 pt-6 text-black font-bold uppercase`}
+                  />
+                </div>
+
+                {/* Họ */}
+                <div className="relative w-full mt-4">
+                  <label className="pointer-events-none absolute left-3 top-2 text-[11px] font-bold text-[var(--vj-text-muted)]">
+                    Họ <span className="text-[var(--vj-red)]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value.toUpperCase())}
+                    placeholder=" "
+                    className={`${fieldClass} pb-2 pt-6 text-black font-bold uppercase`}
+                  />
+                </div>
+
+                {/* Nút Tìm kiếm */}
+                <div className="mt-6">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="vj-cta w-full h-[54px] items-center justify-center rounded-lg px-7 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {loading ? 'Đang tra cứu…' : 'Tìm kiếm'}
+                  </button>
                 </div>
               </form>
             </div>
 
-            {/* Hướng dẫn: một khung duy nhất, chữ chảy hai cột từ `lg`. Mỗi khối
-                giữ `break-inside-avoid` để tiêu đề không bị tách khỏi nội dung. */}
-            <div className="rounded-2xl bg-white/70 p-5 text-[13px] leading-6 text-[var(--vj-text-gray)] ring-1 ring-white/70 shadow-vj-md lg:p-6">
+            {/* Cột phải: Văn bản giới thiệu (rộng hơn cột trái) */}
+            <div className="border-t border-[var(--vj-sky)] p-5 text-[15px] leading-relaxed text-[var(--vj-text)] lg:border-l lg:border-t-0 lg:p-6">
               <div className="lg:columns-2 lg:gap-8">
                 <div className="mb-5 break-inside-avoid">
                   <p>
@@ -351,7 +354,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                     <strong className="text-[var(--vj-text)]">24 giờ đến 60 phút</strong> trước giờ
                     khởi hành (thời gian kết thúc có thể thay đổi tùy sân bay).
                   </p>
-                  <h3 className="mt-4 text-sm font-black text-[var(--vj-text)]">
+                  <h3 className="mt-4 text-lg font-black text-[var(--vj-text)]">
                     Tiện lợi – nhanh chóng – tiết kiệm thời gian
                   </h3>
                   <p className="mt-1">
@@ -362,7 +365,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
 
                 <div className="mb-5 space-y-6 break-inside-avoid">
                   <div>
-                    <h3 className="text-sm font-black text-[var(--vj-text)]">
+                    <h3 className="text-lg font-black text-[var(--vj-text)]">
                       Lưu ý sau khi Online Check-in:
                     </h3>
                     <p className="mt-3 font-bold text-[var(--vj-text)]">Không có hành lý ký gửi:</p>
@@ -378,7 +381,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                     </p>
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-[var(--vj-text)]">Lưu ý quan trọng:</h3>
+                    <h3 className="text-lg font-black text-[var(--vj-text)]">Lưu ý quan trọng:</h3>
                     <p className="mt-3">
                       Nếu có thay đổi chuyến bay sau khi đã Online Check-in, Quý khách cần thực hiện
                       Online Check-in lại để nhận Thẻ lên tàu bay mới và sử dụng đúng thẻ lên tàu
@@ -391,7 +394,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                   </div>
                 </div>
                 <div className="break-inside-avoid border-t border-[var(--vj-sky)] pt-5">
-                  <h3 className="text-sm font-black text-[var(--vj-text)]">
+                  <h3 className="text-lg font-black text-[var(--vj-text)]">
                     3. Chuyến bay quốc tế:
                   </h3>
                   <p className="mt-2 font-bold text-[var(--vj-text)]">

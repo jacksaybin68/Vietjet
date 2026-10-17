@@ -61,15 +61,22 @@ export type Fetcher = (
 }>;
 
 /** WAF token của trình duyệt (nếu người vận hành đặt `VIETJET_WAF_COOKIE`) — ép vào Cookie. */
-function wafCookieHeader(): string | null {
+export function wafCookieHeader(): string | null {
   const token = process.env.VIETJET_WAF_COOKIE?.trim();
-  return token ? token.replace(/^Cookie:/i, '').trim() : null;
+  if (token) return token.replace(/^Cookie:\s*/i, '').trim();
+  return null;
 }
 
-async function getJson(fetcher: Fetcher, url: string): Promise<Json> {
-  const headers = { ...BROWSER_HEADERS };
-  const cookie = wafCookieHeader();
-  if (cookie) headers.Cookie = cookie;
+async function getJson(
+  fetcher: Fetcher,
+  url: string,
+  customHeaders?: Record<string, string>
+): Promise<Json> {
+  const headers = { ...BROWSER_HEADERS, ...(customHeaders || {}) };
+  if (!headers.Cookie) {
+    const cookie = wafCookieHeader();
+    if (cookie) headers.Cookie = cookie;
+  }
 
   let response: Awaited<ReturnType<Fetcher>>;
   try {

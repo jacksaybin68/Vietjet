@@ -1368,11 +1368,11 @@ export default function PaymentClient() {
                 {/* Flight summary */}
                 <div className="bg-primary-50 rounded-xl p-4 mb-4">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-7 h-7 rounded-lg overflow-hidden flex items-center justify-center bg-primary-50 border border-[var(--border)]">
+                    <div className="h-7 px-2 bg-gradient-red rounded-lg flex items-center justify-center shrink-0">
                       <img
                         src="/logo-vj.svg"
                         alt="Vietjet Air"
-                        className="w-5 h-5 object-contain"
+                        className="h-3 w-auto brightness-0 invert"
                       />
                     </div>
                     <span className="font-bold text-primary text-sm">{booking?.flightNo}</span>
