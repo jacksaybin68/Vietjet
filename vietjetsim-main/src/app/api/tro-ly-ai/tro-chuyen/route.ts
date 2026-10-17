@@ -14,6 +14,7 @@ import {
 } from '@/lib/openclaw/ollama';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { getApiErrorMessage } from '@/shared/services';
+import { toVietnamWallClock } from '@/lib/utils';
 
 /** Câu hỏi dài nhất được gửi kèm; khớp với giới hạn của `/api/claude/chat`. */
 const MAX_HISTORY_ITEMS = 20;
@@ -148,7 +149,10 @@ QUY TẮC:
     if (isFlightRelated) {
       const origin = lowerMsg.includes('han') || lowerMsg.includes('hà nội') ? 'HAN' : 'SGN';
       const destination = lowerMsg.includes('sgn') || lowerMsg.includes('sài gòn') ? 'SGN' : 'HAN';
-      const date = new Date().toISOString().split('T')[0];
+      // "Hôm nay" phải là hôm nay ở Việt Nam. `toISOString()` trả ngày UTC, nên
+      // từ 00:00 tới 07:00 giờ VN (UTC+7) nó lùi một ngày: lúc 00:09 ngày 18/10
+      // ở Hà Nội, câu trả lời ghi 17/10 và link tra cứu mở sai ngày.
+      const date = toVietnamWallClock(new Date().toISOString()).date;
 
       try {
         const research = await researchVietjetFlights(origin, destination, date);
