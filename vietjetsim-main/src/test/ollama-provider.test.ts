@@ -408,6 +408,10 @@ describe('tuyến trợ lý dùng Ollama', () => {
     // Link tra cứu cũng phải mở đúng ngày Việt Nam, không phải ngày UTC.
     expect(coordinator[0].content).toContain('departureDate=2026-10-18');
     expect(coordinator[0].content).not.toContain('2026-10-17');
+    // Không được tuyên bố sai rằng đã tra được dữ liệu từ VietjetAir: bản cũ ghi
+    // "Đã tìm thấy lộ trình thực tế" trong khi không hề tra gì, và model bịa theo.
+    expect(coordinator[0].content).not.toContain('Đã tìm thấy lộ trình thực tế');
+    expect(coordinator[0].content).toContain('KHÔNG có chuyến nào');
   });
 
   it('Ollama chết thì rớt về gateway OpenClaw khi gateway có cấu hình', async () => {

@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { researchVietjetFlights } from '@/lib/openclaw/flight-researcher';
+import {
+  buildCoordinatorContext,
+  parseFlightQuery,
+  researchVietjetFlights,
+} from '@/lib/openclaw/flight-researcher';
 import {
   askOllama,
   getOllamaConfig,
@@ -14,7 +18,6 @@ import {
 } from '@/lib/openclaw/ollama';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { getApiErrorMessage } from '@/shared/services';
-import { toVietnamWallClock } from '@/lib/utils';
 
 /** Câu hỏi dài nhất được gửi kèm; khớp với giới hạn của `/api/claude/chat`. */
 const MAX_HISTORY_ITEMS = 20;
@@ -104,11 +107,12 @@ export async function POST(req: NextRequest) {
     const coordinatorSystem: AssistantMessage = {
       role: 'system',
       content: `Bạn là OpenClaw Coordinator. 
-CHỨC NĂNG DUY NHẤT: Điều phối cập nhật chặng bay thực tế từ VietjetAir.com vào cơ sở dữ liệu.
+CHỨC NĂNG DUY NHẤT: Tra cứu và cập nhật chuyến bay, giá vé, giờ bay, chặng bay đang bán trong cơ sở dữ liệu của hệ thống cho quản trị viên.
 QUY TẮC: 
-1. Chỉ trả lời các vấn đề liên quan đến tra cứu chuyến bay thực tế, lộ trình và cập nhật thông tin chuyến bay vào admin dashboard.
+1. Chỉ trả lời các vấn đề liên quan đến chuyến bay, giá vé, giờ bay, chặng bay và việc cập nhật thông tin chuyến bay vào admin dashboard.
 2. Từ chối lịch sự mọi câu hỏi về eSIM, gói cước, hoặc hỗ trợ khách hàng chung.
-3. Luôn cung cấp link tra cứu từ VietjetAir dựa trên thông tin tra cứu được.`,
+3. Khi hệ thống cung cấp phần dữ liệu chuyến bay ngay sau đây, chỉ được dùng số liệu trong đó — tuyệt đối không bịa số hiệu, giờ bay, giá hay chặng. Nếu hệ thống không có chuyến cho ngày được hỏi thì nói rõ là không có và gợi ý ngày gần nhất.
+4. Luôn kèm link tra cứu trên VietjetAir.`,
     };
 
     // `message` là câu hỏi mới, `history` là các lượt trước. Cắt history TRƯỚC
@@ -147,21 +151,19 @@ QUY TẮC:
     const isFlightRelated = flightKeywords.some((key) => lowerMsg.includes(key));
 
     if (isFlightRelated) {
-      const origin = lowerMsg.includes('han') || lowerMsg.includes('hà nội') ? 'HAN' : 'SGN';
-      const destination = lowerMsg.includes('sgn') || lowerMsg.includes('sài gòn') ? 'SGN' : 'HAN';
-      // "Hôm nay" phải là hôm nay ở Việt Nam. `toISOString()` trả ngày UTC, nên
-      // từ 00:00 tới 07:00 giờ VN (UTC+7) nó lùi một ngày: lúc 00:09 ngày 18/10
-      // ở Hà Nội, câu trả lời ghi 17/10 và link tra cứu mở sai ngày.
-      const date = toVietnamWallClock(new Date().toISOString()).date;
-
+      // Chặng và ngày lấy từ câu hỏi; không có ngày thì là hôm nay giờ Việt Nam
+      // (xem `parseFlightDate` — "hôm nay" theo UTC sẽ lùi một ngày từ 00:00 tới
+      // 07:00 giờ VN và link tra cứu mở sai ngày).
+      const { origin, destination, date } = parseFlightQuery(String(message));
       try {
         const research = await researchVietjetFlights(origin, destination, date);
-        context.push({
-          role: 'system',
-          content: `TRẠNG THÁI HIỆN TẠI: Đã tìm thấy lộ trình thực tế ${origin}-${destination} (${date}) tại VietjetAir. Link cập nhật: ${research.bookingUrl}. Hãy hướng dẫn người dùng sử dụng link này để đồng bộ dữ liệu vào hệ thống.`,
-        });
+        context.push({ role: 'system', content: buildCoordinatorContext(research) });
       } catch (e) {
         console.error('Coordinator research failed:', e);
+        context.push({
+          role: 'system',
+          content: `KHÔNG truy vấn được dữ liệu chuyến bay ${origin}-${destination} (${date}) từ cơ sở dữ liệu. Phải nói với người dùng là chưa tra được; tuyệt đối không bịa số hiệu, giờ bay hay giá.`,
+        });
       }
     }
     // ─────────────────────────────────────────────────────────────────────────────
