@@ -14,6 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:smoke": "node scripts/smoke-test.cjs",
+    "test:ui": "node scripts/ui-check.cjs",
     "test:mail": "node scripts/test-mail.cjs",
     "test:migrations": "node scripts/test-migrations.cjs",
     "test:wallet-e2e": "node scripts/wallet-e2e.cjs",
