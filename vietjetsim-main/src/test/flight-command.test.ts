@@ -143,12 +143,50 @@ describe('nhận dạng lệnh cập nhật', () => {
     });
   });
 
-  it('tách lệnh: cả giá lẫn giờ trong một câu là không hợp lệ', () => {
-    const command = parseFlightCommand(
-      'cập nhật giá và giờ VJ 3017 ngày mai thành 950000 lúc 10:00',
-      TODAY
+  it('"lúc HH:MM" là cách chọn chuyến, không phải giờ mới', () => {
+    // Lệnh giá kèm thời điểm chọn lượt: hợp lệ, thời điểm vào command.selectTime.
+    expect(
+      parseFlightCommand('cập nhật giá vé VJ 3017 ngày mai lúc 06:00 phổ thông thành 950k', TODAY)
+    ).toMatchObject({
+      kind: 'update-price',
+      amount: 950000,
+      selectTime: '06:00',
+    });
+    // Lệnh giờ chỉ ghép "lúc" nhưng không nói "sang giờ nào": chưa đủ thông tin
+    // để ghi — không được đoán giờ mới từ chính thời điểm đang chọn.
+    expect(parseFlightCommand('đổi giờ bay chuyến VJ 3040 ngày mai lúc 09:00', TODAY)?.kind).toBe(
+      'invalid'
     );
-    expect(command?.kind).toBe('invalid');
+    // Lệnh giờ cả chọn lượt lẫn giờ mới: hai giá trị phải tách đúng.
+    expect(parseFlightCommand('đổi giờ bay VJ 3017 ngày mai lúc 06:00 sang 07:30', TODAY)).toEqual({
+      kind: 'update-time',
+      flightNo: 'VJ 3017',
+      date: '2026-10-19',
+      time: '07:30',
+      selectTime: '06:00',
+    });
+  });
+
+  it('lệnh giá có ý "sang giờ" vẫn bị chặn là hai thay đổi', () => {
+    expect(
+      parseFlightCommand('cập nhật giá VJ 3017 ngày mai thành 950k và giờ sang 10:00', TODAY)?.kind
+    ).toBe('invalid');
+  });
+
+  it('tách lệnh: giá kèm ý đổi giờ trong một câu là không hợp lệ', () => {
+    // "lúc 10:00" là điều kiện (chọn lượt) nên lệnh giá vẫn hợp lệ; nhưng
+    // "sang/thành giờ" là MUỐN ĐỔI — hai thay đổi trong một câu thì chặn lại.
+    expect(
+      parseFlightCommand('cập nhật giá và giờ VJ 3017 ngày mai thành 950000 lúc 10:00', TODAY)
+    ).toMatchObject({
+      kind: 'update-price',
+      amount: 950000,
+      selectTime: '10:00',
+    });
+    expect(
+      parseFlightCommand('cập nhật giá và giờ VJ 3017 ngày mai thành 950000 sang 10:00', TODAY)
+        ?.kind
+    ).toBe('invalid');
   });
 
   it('thiếu số hiệu hoặc không nói rõ giá mới đều bóc lỗi cụ thể', () => {
@@ -294,10 +332,10 @@ describe('thực thi lệnh', () => {
     expect(log.updatedBy).toBe('admin-1');
   });
 
-  it('nhiều chuyến cùng số hiệu Daynày: hỏi rõ lại, không đoán', async () => {
+  it('nhiều chuyến cùng số hiệu trong ngày: hỏi rõ lại, không đoán', async () => {
     vi.mocked(getFlightByNoAndDate).mockResolvedValue([
       flightRow(),
-      flightRow({ id: 'f2', depart_time: '2026-10-18T02:00:00.000Z' }),
+      flightRow({ id: 'f2', depart_time: '2026-10-19T04:45:00.000Z' }), // 11:45 VN
     ]);
     const result = await applyFlightCommand(
       {
@@ -312,6 +350,94 @@ describe('thực thi lệnh', () => {
     expect(result.status).toBe('rejected');
     const message = result.status === 'applied' ? '' : result.message;
     expect(message).toContain('2 chuyến');
+  });
+
+  it('nhiều chuyến nhưng lệnh có "lúc 06:00": chọn đúng lượt có thể ghi', async () => {
+    const row6 = flightRow({
+      id: 'a',
+      depart_time: '2026-10-18T23:00:00.000Z', // 06:00 VN
+      economy_price: '899000',
+    });
+    const row11 = flightRow({
+      id: 'b',
+      depart_time: '2026-10-19T04:45:00.000Z', // 11:45 VN
+      economy_price: '799000',
+    });
+    vi.mocked(getFlightByNoAndDate).mockResolvedValue([row6, row11]);
+    vi.mocked(updateFlight).mockResolvedValue(row6);
+
+    const result = await applyFlightCommand(
+      {
+        kind: 'update-price',
+        flightNo: 'VJ 3017',
+        date: '2026-10-19',
+        fare: 'economy',
+        amount: 950000,
+        selectTime: '06:00',
+      },
+      { adminId: 'admin-1' }
+    );
+
+    expect(result.status).toBe('applied');
+    expect(vi.mocked(updateFlight)).toHaveBeenCalledWith('a', {
+      economy_price: 950000,
+      price: 950000,
+    });
+  });
+
+  it('lệnh giờ kèm "lúc 06:00": lọc đúng lượt trước khi dịch sang 07:30', async () => {
+    const row6 = flightRow({
+      id: 'a',
+      depart_time: '2026-10-18T23:00:00.000Z', // 06:00 VN
+      arrive_time: '2026-10-19T01:00:00.000Z', // 08:00 VN
+    });
+    const row11 = flightRow({
+      id: 'b',
+      depart_time: '2026-10-19T04:45:00.000Z', // 11:45 VN
+      arrive_time: '2026-10-19T06:45:00.000Z',
+    });
+    vi.mocked(getFlightByNoAndDate).mockResolvedValue([row6, row11]);
+    vi.mocked(updateFlight).mockResolvedValue(row6);
+
+    const result = await applyFlightCommand(
+      {
+        kind: 'update-time',
+        flightNo: 'VJ 3017',
+        date: '2026-10-19',
+        time: '07:30',
+        selectTime: '06:00',
+      },
+      { adminId: 'admin-1' }
+    );
+
+    expect(result.status).toBe('applied');
+    expect(vi.mocked(updateFlight)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(updateFlight)).toHaveBeenCalledWith('a', {
+      // toVietnamInstant ghi kèm offset +07:00 (AGENTS: seed timestamp phải rõ múi giờ)
+      depart_time: '2026-10-19T07:30:00+07:00',
+      arrive_time: '2026-10-19T09:30:00+07:00', // giữ nguyên 2h00 thời lượng
+    });
+    // Lệnh giờ KHÔNG được lọc theo giờ mới (07:30) — từng dính lỗi này.
+  });
+
+  it('giờ chọn "lúc" không khớp lượt nào: từ chối và nêu các lượt hiện có', async () => {
+    const row11 = flightRow({ id: 'b', depart_time: '2026-10-19T04:45:00.000Z' });
+    vi.mocked(getFlightByNoAndDate).mockResolvedValue([row11]);
+    const result = await applyFlightCommand(
+      {
+        kind: 'update-price',
+        flightNo: 'VJ 3017',
+        date: '2026-10-19',
+        fare: 'economy',
+        amount: 950000,
+        selectTime: '06:00',
+      },
+      { adminId: 'admin-1' }
+    );
+    expect(result.status).toBe('rejected');
+    const message = result.status === 'applied' ? '' : result.message;
+    expect(message).toContain('Không có chuyến');
+    expect(message).toContain('11:45');
   });
 });
 

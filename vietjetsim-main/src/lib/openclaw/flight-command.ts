@@ -44,14 +44,23 @@ export interface UpdatePriceCommand {
   fare: FareSide;
   /** Giá mới, đồng đã đổi hết đơn (950k → 950000). */
   amount: number;
+  /**
+   * Lọc chọn chuyến trong ngày khi cùng số hiệu bay nhiều lượt ("lúc 06:00").
+   * Riêng với lệnh GIỜ thì giờ mới nằm ở `time` (lệnh update-time), hai nghĩa
+   * này tách hẳn: applyFlightCommand từng lọc cả hai kiểu theo cùng một giờ và
+   * "đổi ... sang 07:30" trên tuần có 06:00/11:45 rơi vào "không tìm thấy".
+   */
+  selectTime?: string;
 }
 
 export interface UpdateTimeCommand {
   kind: 'update-time';
   flightNo: string;
   date: string;
-  /** Giờ khởi hành mới theo lịch Việt Nam, `HH:MM`. */
+  /** Giờ khởi hành MỚI theo lịch Việt Nam, `HH:MM`. */
   time: string;
+  /** Chọn lượt bay khi cùng ngày có nhiều chuyến cùng số hiệu ("lúc 06:00"). */
+  selectTime?: string;
 }
 
 export interface InvalidCommand {
@@ -156,9 +165,43 @@ export function parseFlightCommand(text: string, today = todayInVietnam()): Flig
   const timeHit = lower.match(TIME_GROUP);
   const amount = parseNewAmount(text);
 
+  // "lúc HH:MM" là điều kiện CHỌN chuyến trong ngày ("lúc 06:00"). Nghĩa đổi
+  // giờ là mọi thời điểm KHÔNG đứng sau "lúc": "sang 10:00", "thành 10:00",
+  // hay "đổi giờ bay VJ 3040 ngày mai 10h30" (động từ `đổi giờ` tự nói thay).
+  // Lệnh giá có một thời điểm "lúc" là hợp lệ; lệnh giá có một thời điểm đổi
+  // là hai thay đổi trong một câu → chặn.
+  let changeTimeMatch: RegExpMatchArray | null = null;
+  const plainTime = lower.match(/(?:sang|thành)\s*(\d{1,2})(?::|h)(\d{2})/) ?? null;
+  if (plainTime) {
+    changeTimeMatch = plainTime;
+  } else {
+    const bare = lower.match(/(?:^|\s)(\d{1,2})(?::|h)(\d{2})/);
+    if (bare) {
+      const start = bare.index ?? 0;
+      const before = lower.slice(Math.max(0, start - 5), start);
+      // "lúc 06:00" → chọn; còn lại ("10h30", "giờ 10:00"...) → đổi thành.
+      if (!/lúc\s*$/.test(before)) changeTimeMatch = bare;
+    }
+  }
+  const changeTime = Boolean(changeTimeMatch);
+
+  const rowTimeMatch = lower.match(/lúc\s*(\d{1,2})(?::|h)(\d{2})/);
+  let selectTime: string | null = null;
+  if (rowTimeMatch) {
+    const rowHh = Number(rowTimeMatch[1]);
+    const rowMm = Number(rowTimeMatch[2]);
+    const candidate = `${String(rowHh).padStart(2, '0')}:${String(rowMm).padStart(2, '0')}`;
+    // "lúc 06:00" là điều kiện chọn lượt — kể cả khi câu còn có giờ đổi khác
+    // ("lúc 06:00 sang 07:30"). Chỉ bỏ qua khi nó trùng chính giờ mới.
+    const changeHit = changeTimeMatch;
+    const sameAsChange =
+      changeHit && Number(changeHit[1]) === rowHh && Number(changeHit[2]) === rowMm;
+    if (rowHh <= 23 && rowMm <= 59 && !sameAsChange) selectTime = candidate;
+  }
+
   // Một lượt chỉ thay đổi một thứ: cả giá lẫn giờ trong cùng câu là chỗ
   // mà khung lệnh rời rạc dễ ghi nhầm nửa sau.
-  if (wantsPrice && amount && timeHit) {
+  if (wantsPrice && amount && changeTime) {
     return {
       kind: 'invalid',
       reasons: ['Một lượt chỉ sửa được một thứ: giá hoặc giờ bay. Hãy tách thành hai lệnh riêng.'],
@@ -189,6 +232,7 @@ export function parseFlightCommand(text: string, today = todayInVietnam()): Flig
       date: parseFlightDate(text, today),
       fare,
       amount,
+      ...(selectTime ? { selectTime } : {}),
     };
   }
 
@@ -197,13 +241,25 @@ export function parseFlightCommand(text: string, today = todayInVietnam()): Flig
       kind: 'invalid',
       reasons: [
         'Chưa nói rõ giá mới. Ví dụ: "cập nhật giá vé VJ 3017 ngày mai phổ thông thành 950.000".',
+        'Nếu cùng ngày có nhiều chuyến cùng số hiệu, thêm thời điểm: "... lúc 06:00 phổ thông thành 950.000".',
       ],
     };
   }
 
   if (timeHit) {
-    const hh = Number(timeHit[1]);
-    const mm = Number(timeHit[2]);
+    const source = changeTimeMatch;
+    if (!source) {
+      // Giờ duy nhất còn lại chỉ đến sau "lúc" → là điều kiện, không phải
+      // giờ mới. Chưa nói rõ muốn đổi thành giờ nào.
+      return {
+        kind: 'invalid',
+        reasons: [
+          'Chưa nói rõ giờ bay mới. Hãy dùng "sang HH:MM": "đổi giờ bay VJ 3040 ngày mai sang 10:00".',
+        ],
+      };
+    }
+    const hh = Number(source[1]);
+    const mm = Number(source[2]);
     if (!flightNo) {
       return {
         kind: 'invalid',
@@ -213,7 +269,7 @@ export function parseFlightCommand(text: string, today = todayInVietnam()): Flig
     if (hh > 23 || mm > 59) {
       return {
         kind: 'invalid',
-        reasons: [`Giờ "${timeHit[0]}" không hợp lệ (khung HH:MM, 00:00–23:59).`],
+        reasons: [`Giờ "${source[0].trim()}" không hợp lệ (khung HH:MM, 00:00–23:59).`],
       };
     }
     return {
@@ -221,6 +277,7 @@ export function parseFlightCommand(text: string, today = todayInVietnam()): Flig
       flightNo,
       date: parseFlightDate(text, today),
       time: `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`,
+      ...(selectTime ? { selectTime } : {}),
     };
   }
 
@@ -281,10 +338,11 @@ export function clearPendingCommands(): void {
 export function formatCommandConfirmPreview(
   command: UpdatePriceCommand | UpdateTimeCommand
 ): string {
+  const at = command.selectTime ? ` lúc ${command.selectTime}` : '';
   if (command.kind === 'update-price') {
-    return `Sửa giá ${command.fare === 'economy' ? 'Phổ thông' : 'Thương gia'} chuyến ${command.flightNo} ngày ${command.date} thành ${vnd(command.amount)} đ`;
+    return `Sửa giá ${command.fare === 'economy' ? 'Phổ thông' : 'Thương gia'} chuyến ${command.flightNo} ngày ${command.date}${at} thành ${vnd(command.amount)} đ`;
   }
-  return `Đổi giờ khởi hành chuyến ${command.flightNo} ngày ${command.date} sang ${command.time} (giờ Việt Nam)`;
+  return `Đổi giờ khởi hành chuyến ${command.flightNo} ngày ${command.date}${at} sang ${command.time} (giờ Việt Nam)`;
 }
 
 // ─── Thực thi lệnh đã xác nhận ──────────────────────────────────────────────
@@ -325,7 +383,27 @@ export async function applyFlightCommand(
   command: UpdatePriceCommand | UpdateTimeCommand,
   options: ApplyOptions
 ): Promise<ApplyResult> {
-  const rows = await getFlightByNoAndDate(command.flightNo, command.date);
+  let rows = await getFlightByNoAndDate(command.flightNo, command.date);
+
+  // Lệnh có "lúc HH:MM" chọn đúng lượt trong ngày (cả lệnh giá lẫn lệnh giờ —
+  // giờ MỚI của lệnh giờ nằm ở `time`, không phải điều kiện lọc; từng lọc cả
+  // hai theo cùng một giờ và "đổi ... sang 07:30" rơi vào "không tìm thấy").
+  if (rows.length > 0 && command.selectTime) {
+    const filtered = rows.filter(
+      (row) => toVietnamWallClock(row.depart_time).time === command.selectTime
+    );
+    if (filtered.length === 0) {
+      const times = rows
+        .map((row) => toVietnamWallClock(row.depart_time).time)
+        .filter(Boolean)
+        .join(', ');
+      return {
+        status: 'rejected',
+        message: `Không có chuyến ${command.flightNo} nào khởi hành lúc ${command.selectTime} ngày ${command.date}. Các lượt trong ngày: ${times}.`,
+      };
+    }
+    rows = filtered;
+  }
 
   if (rows.length === 0) {
     let nearby: Array<{ date: string; time: string }> = [];
@@ -348,7 +426,7 @@ export async function applyFlightCommand(
       .join(', ');
     return {
       status: 'rejected',
-      message: `Chuyến ${command.flightNo} ngày ${command.date} có ${rows.length} chuyến (${times}). Nói rõ giờ khởi hành của chuyến cần sửa.`,
+      message: `Chuyến ${command.flightNo} ngày ${command.date} có ${rows.length} chuyến (${times}). Nói rõ giờ khởi hành của chuyến cần sửa, vd: "cập nhật giá vé ${command.flightNo} ngày ${command.date} lúc ${rows[0] ? toVietnamWallClock(rows[0].depart_time).time : 'HH:MM'} ..."`,
     };
   }
 
@@ -415,10 +493,16 @@ export async function applyFlightCommand(
 
   const departTime = toVietnamWallClock(row.depart_time);
   // Ghi mới với offset +07:00 (AGENTS: timestamp seed phải kèm múi giờ rõ), theo
-  // cùng công cụ `toVietnamInstant` form quản trị dùng.
+  // cùng công cụ `toVietnamInstant` form quản trị dùng. Cả hai cột trong cùng
+  // một UPDATE phải cùng dạng: depart dùng toVietnamInstant trực tiếp, arrive
+  // đọc lại giờ Việt Nam từ thời điểm đích rồi format lại — từng cột này ra
+  // dạng `Z` từ toISOString() trong khi kia là `+07:00`, cùng thời điểm nhưng
+  // hai chuỗi khác nhau gây bối rối khi đọc audit log.
   const newDepart = toVietnamInstant(command.date, command.time);
   const newDepartMs = new Date(newDepart).getTime();
-  const newArrive = new Date(newDepartMs + durationMs).toISOString();
+  const arriveMs = new Date(newDepartMs + durationMs).toISOString();
+  const arriveWc = toVietnamWallClock(arriveMs);
+  const newArrive = toVietnamInstant(arriveWc.date, arriveWc.time);
 
   const after = await updateFlight(row.id, {
     depart_time: newDepart,
