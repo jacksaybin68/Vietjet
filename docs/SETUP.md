@@ -401,6 +401,41 @@ OLLAMA_MODEL=qwen3:0.6b
 # NODE_ENV=production (tự động set bởi Next.js)
 ```
 
+### Cài Ollama trên macOS
+
+```bash
+# 1. Cài (bản chính thức, universal x86_64 + arm64)
+curl -fL -o /tmp/Ollama-darwin.zip https://ollama.com/download/Ollama-darwin.zip
+ditto -x -k /tmp/Ollama-darwin.zip /tmp/OllamaExtract
+ditto /tmp/OllamaExtract/Ollama.app /Applications/Ollama.app
+xattr -dr com.apple.quarantine /Applications/Ollama.app
+
+# 2. Chạy server (hoặc mở app: `open -a Ollama` để có cả biểu tượng menu bar)
+/Applications/Ollama.app/Contents/Resources/ollama serve
+
+# 3. Tải model và kiểm tra
+ollama pull qwen3:0.6b
+ollama list
+curl -s http://127.0.0.1:11434/api/tags
+```
+
+Trợ lý admin tự chuyển sang Ollama khi `OLLAMA_*` có mặt: mở khung chat ở
+`/quan-tri` sẽ thấy nhãn **"Đang trực tuyến • Ollama qwen3:0.6b"**. Muốn kiểm tra
+không cần giao diện:
+
+```bash
+curl -s http://localhost:4028/api/tro-ly-ai/tro-chuyen   # cần session admin
+```
+
+**Không dùng `brew install ollama` trên macOS Intel.** Homebrew đã ngừng build
+bottle cho `x86_64` (tháng 8/2025) và formula `ollama` khi đó **biên dịch từ mã
+nguồn**, kéo theo LLVM, Rust, Go và Ruby — mất hàng giờ và dễ hỏng giữa chừng.
+Bản `.zip` chính thức ở trên là universal binary, chạy thẳng trên Intel.
+
+> Ghi chú: `ollama serve` chạy nền như trên sẽ tắt khi đăng xuất/khởi động lại.
+> Muốn tự chạy cùng máy, mở app một lần (`open -a Ollama`) và bật "Launch at login",
+> hoặc tạo một LaunchAgent cho `/Applications/Ollama.app/Contents/Resources/ollama serve`.
+
 ---
 
 ## ✅ Checklist Trước Deploy
