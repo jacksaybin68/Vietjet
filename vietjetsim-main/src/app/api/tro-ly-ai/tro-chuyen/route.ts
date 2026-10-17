@@ -26,6 +26,16 @@ import {
   toAssistantMessages,
   type AssistantMessage,
 } from '@/lib/openclaw/ollama';
+import {
+  buildNetworkReply,
+  buildScheduleReply,
+  collectVietjetNetwork,
+  collectVietjetSchedule,
+  importWebFlights,
+  parseCollectCommand,
+  setPendingImport,
+  takePendingImport,
+} from '@/lib/openclaw/web-collection';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { getApiErrorMessage } from '@/shared/services';
 
@@ -120,6 +130,102 @@ export async function POST(req: NextRequest) {
     const adminId = String(payload.userId || payload.email || 'admin');
     const commandText = String(message).trim();
 
+    // Xác nhận cho Nhập web → flights (một lệnh "thu thập" đã xem trước).
+    if (isConfirmationMessage(commandText)) {
+      const pendingImport = takePendingImport(adminId);
+      if (pendingImport) {
+        const importPermission = await verifyAdminRequest(req, 'flight:price_edit');
+        if (importPermission.error || importPermission.response) return importPermission.response!;
+        try {
+          const result = await importWebFlights(
+            { from: pendingImport.from, to: pendingImport.to },
+            pendingImport.date,
+            pendingImport.flights
+          );
+          return NextResponse.json({
+            content:
+              result.imported.length > 0
+                ? `Đã nhập ${result.imported.length} lượt từ vietjetair.com vào bảng chuyến:\n• ${result.imported.join(
+                    '\n• '
+                  )}${result.skipped.length ? `\n\nBỏ qua ${result.skipped.length} lượt:\n• ${result.skipped.join('\n• ')}` : ''}`
+                : `Không nhập được lượt nào:\n• ${result.skipped.join('\n• ')}`,
+            model: null,
+            provider: 'openclaw-command',
+            id: Date.now().toString(),
+          });
+        } catch (importError) {
+          console.error('OpenClaw importWebFlights error:', importError);
+          return NextResponse.json(
+            { error: getApiErrorMessage(importError, 'Không nhập được lịch bay thu được.') },
+            { status: 500 }
+          );
+        }
+      }
+      // Chưa có lệnh nhập web → tiếp tục các lệnh giá/giờ như cũ.
+    }
+
+    // ─── OpenClaw Lane thu thập dữ liệu web: quy tắc, không qua model ─────────
+    const collectCommand = parseCollectCommand(commandText);
+    if (collectCommand?.kind === 'collect-invalid') {
+      return NextResponse.json({
+        content: `Chưa hiểu lệnh thu thập:\n${collectCommand.reasons.map((reason) => `• ${reason}`).join('\n')}`,
+        model: null,
+        provider: 'openclaw-command',
+        id: Date.now().toString(),
+      });
+    }
+
+    if (collectCommand?.kind === 'collect-network') {
+      try {
+        return NextResponse.json({
+          content: buildNetworkReply(await collectVietjetNetwork()),
+          model: null,
+          provider: 'openclaw-command',
+          id: Date.now().toString(),
+        });
+      } catch (networkError) {
+        // Thất bại nói rõ nguyên nhân — tuyệt đối không bịa danh sách sân bay.
+        return NextResponse.json({
+          content: `Không thu thập được mạng lưới từ vietjetair.com: ${
+            networkError instanceof Error ? networkError.message : 'lỗi chưa rõ'
+          }.`,
+          model: null,
+          provider: 'openclaw-command',
+          id: Date.now().toString(),
+        });
+      }
+    }
+
+    if (collectCommand?.kind === 'collect-schedule') {
+      // Nhập viết giá lên bảng chuyến → cần đúng cổng quyền như PATCH
+      // /api/quan-tri/chuyen-bay/[id] (preview được chặn trước lượt xác nhận).
+      const permission = await verifyAdminRequest(req, 'flight:price_edit');
+      if (permission.error || permission.response) return permission.response!;
+      const webResult = await collectVietjetSchedule(
+        collectCommand.from,
+        collectCommand.to,
+        collectCommand.date
+      );
+      if (webResult.reachable && webResult.flights.length > 0) {
+        const [webFrom, webTo] = webResult.route.split('-');
+        setPendingImport(adminId, {
+          kind: 'import-web-flights',
+          from: webFrom ?? collectCommand.from,
+          to: webTo ?? collectCommand.to,
+          date: webResult.date,
+          flights: webResult.flights,
+          createdAt: Date.now(),
+        });
+      }
+      return NextResponse.json({
+        content: buildScheduleReply(webResult),
+        model: null,
+        provider: 'openclaw-command',
+        id: Date.now().toString(),
+      });
+    }
+    // ─────────────────────────────────────────────────────────────────────────────
+
     if (isConfirmationMessage(commandText)) {
       const pending = takePendingCommand(adminId);
       if (!pending) {
@@ -200,7 +306,7 @@ QUY TẮC:
 2. Từ chối lịch sự mọi câu hỏi về eSIM, gói cước, hoặc hỗ trợ khách hàng chung.
 3. Khi hệ thống cung cấp phần dữ liệu chuyến bay ngay sau đây, chỉ được dùng số liệu trong đó — tuyệt đối không bịa số hiệu, giờ bay, giá hay chặng. Nếu hệ thống không có chuyến cho ngày được hỏi thì nói rõ là không có và gợi ý ngày gần nhất.
 4. Luôn kèm link tra cứu trên VietjetAir.
-5. Bạn KHÔNG tự sửa dữ liệu. Việc thay đổi giá/giờ chỉ diễn ra khi quản trị gõ đúng mẫu lệnh (vd "cập nhật giá vé VJ 3017 ngày 2026-10-19 phổ thông thành 950.000" hoặc "đổi giờ bay VJ 3040 ngày mai sang 10:00") và hệ thống chờ chữ "xác nhận". Khi người dùng nêu ý cập nhật ở dạng tự do, hãy chỉ dẫn cách viết lệnh theo mẫu trên và TUYỆT ĐỐI không khẳng định "đã cập nhật" hay lấy số họ vừa gõ trình bày như số hiện tại trong bảng.`,
+5. Thu thập dữ liệu từ vietjetair.com chỉ qua mẫu lệnh "thu thập ..." (ví dụ "thu thập sân bay và tuyến bay từ vietjetair.com" hoặc "thu thập chuyến bay SGN-HAN ngày mai") — lệnh chạy bằng hệ thống và chờ chữ "xác nhận" của quản trị trước khi nhập bảng chuyến. Khi quản trị nêu ý thu thập ở tự do đất, hãy chỉ dẫn đúng mẫu lệnh này. Việc thay đổi giá/giờ chỉ diễn ra khi quản trị gõ đúng mẫu lệnh (vd "cập nhật giá vé VJ 3017 ngày 2026-10-19 phổ thông thành 950.000" hoặc "đổi giờ bay VJ 3040 ngày mai sang 10:00") và hệ thống chờ chữ "xác nhận". Khi người dùng nêu ý cập nhật ở dạng tự do, hãy chỉ dẫn cách viết lệnh theo mẫu trên và TUYỆT ĐỐI không khẳng định "đã cập nhật" hay lấy số họ vừa gõ trình bày như số hiện tại trong bảng.`,
     };
 
     // `message` là câu hỏi mới, `history` là các lượt trước. Cắt history TRƯỚC

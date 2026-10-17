@@ -28,6 +28,7 @@ import {
   toAssistantMessages,
 } from '@/lib/openclaw/ollama';
 import { GET as getAssistant, POST as postAssistant } from '@/app/api/tro-ly-ai/tro-chuyen/route';
+import { clearAllPendingImports, setPendingImport } from '@/lib/openclaw/web-collection';
 
 vi.mock('@/lib/neon', () => {
   const sqlMock = Object.assign(vi.fn().mockResolvedValue([]), {
@@ -69,7 +70,7 @@ const fakeResponse = (body: unknown, status = 200) => ({
 });
 
 describe('cấu hình Ollama', () => {
-  it('mặc định trỏ vào Ollama local với model qwen3:0.6b', () => {
+  it('mặc định trỏ vào Ollama local với model qwen3:1.7b', () => {
     expect(getOllamaConfig({})).toEqual({
       baseUrl: DEFAULT_OLLAMA_BASE_URL,
       model: DEFAULT_OLLAMA_MODEL,
@@ -87,11 +88,11 @@ describe('cấu hình Ollama', () => {
 
   it('đọc model, timeout và think từ môi trường', () => {
     const config = getOllamaConfig({
-      OLLAMA_MODEL: 'qwen3:0.6b',
+      OLLAMA_MODEL: 'qwen3:1.7b',
       OLLAMA_TIMEOUT_MS: '1500',
       OLLAMA_THINK: 'false',
     });
-    expect(config).toMatchObject({ model: 'qwen3:0.6b', timeoutMs: 1500, think: false });
+    expect(config).toMatchObject({ model: 'qwen3:1.7b', timeoutMs: 1500, think: false });
   });
 
   it('timeout sai định dạng thì quay về mặc định', () => {
@@ -113,7 +114,7 @@ describe('chọn provider cho trợ lý', () => {
   });
 
   it('có biến OLLAMA_* thì chuyển sang Ollama', () => {
-    expect(resolveAssistantProvider({ OLLAMA_MODEL: 'qwen3:0.6b' })).toBe('ollama');
+    expect(resolveAssistantProvider({ OLLAMA_MODEL: 'qwen3:1.7b' })).toBe('ollama');
     expect(resolveAssistantProvider({ OLLAMA_HOST: '10.0.0.5:11434' })).toBe('ollama');
   });
 
@@ -132,7 +133,7 @@ describe('chọn provider cho trợ lý', () => {
       'ollama',
       'openclaw',
     ]);
-    expect(getProviderAttempts('openclaw', { OLLAMA_MODEL: 'qwen3:0.6b' })).toEqual([
+    expect(getProviderAttempts('openclaw', { OLLAMA_MODEL: 'qwen3:1.7b' })).toEqual([
       'openclaw',
       'ollama',
     ]);
@@ -141,7 +142,7 @@ describe('chọn provider cho trợ lý', () => {
 });
 
 describe('payload và câu trả lời của Ollama', () => {
-  const config = getOllamaConfig({ OLLAMA_MODEL: 'qwen3:0.6b' });
+  const config = getOllamaConfig({ OLLAMA_MODEL: 'qwen3:1.7b' });
 
   it('dựng body /api/chat: model + messages + stream=false', () => {
     const payload = buildOllamaChatPayload(
@@ -152,7 +153,7 @@ describe('payload và câu trả lời của Ollama', () => {
       config
     );
     expect(payload).toEqual({
-      model: 'qwen3:0.6b',
+      model: 'qwen3:1.7b',
       messages: [
         { role: 'system', content: 'Bạn là OpenClaw Coordinator.' },
         { role: 'user', content: 'chuyến bay HAN-SGN' },
@@ -193,8 +194,8 @@ describe('payload và câu trả lời của Ollama', () => {
   });
 
   it('đọc thông báo lỗi của Ollama', () => {
-    expect(parseOllamaError({ error: 'model "qwen3:0.6b" not found' }, 404)).toBe(
-      'model "qwen3:0.6b" not found'
+    expect(parseOllamaError({ error: 'model "qwen3:1.7b" not found' }, 404)).toBe(
+      'model "qwen3:1.7b" not found'
     );
     expect(parseOllamaError(undefined, 500)).toBe('Ollama trả về mã 500');
   });
@@ -209,19 +210,19 @@ describe('gọi Ollama', () => {
   it('POST /api/chat và trả về nội dung + model', async () => {
     const fetchMock = vi
       .fn()
-      .mockResolvedValue(fakeResponse({ model: 'qwen3:0.6b', message: { content: 'Chào bạn' } }));
+      .mockResolvedValue(fakeResponse({ model: 'qwen3:1.7b', message: { content: 'Chào bạn' } }));
     vi.stubGlobal('fetch', fetchMock);
 
     const answer = await askOllama([{ role: 'user', content: 'xin chào' }], {
       OLLAMA_BASE_URL: 'http://localhost:11434',
-      OLLAMA_MODEL: 'qwen3:0.6b',
+      OLLAMA_MODEL: 'qwen3:1.7b',
     });
 
-    expect(answer).toEqual({ content: 'Chào bạn', model: 'qwen3:0.6b' });
+    expect(answer).toEqual({ content: 'Chào bạn', model: 'qwen3:1.7b' });
     const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe('http://localhost:11434/api/chat');
     expect(JSON.parse(String(init.body))).toMatchObject({
-      model: 'qwen3:0.6b',
+      model: 'qwen3:1.7b',
       stream: false,
       messages: [{ role: 'user', content: 'xin chào' }],
     });
@@ -269,12 +270,12 @@ describe('gọi Ollama', () => {
       'fetch',
       vi
         .fn()
-        .mockResolvedValue(fakeResponse({ models: [{ name: 'qwen3:0.6b' }, { name: 'llama3' }] }))
+        .mockResolvedValue(fakeResponse({ models: [{ name: 'qwen3:1.7b' }, { name: 'llama3' }] }))
     );
     await expect(listOllamaModels({})).resolves.toEqual({
       baseUrl: DEFAULT_OLLAMA_BASE_URL,
       reachable: true,
-      models: ['qwen3:0.6b', 'llama3'],
+      models: ['qwen3:1.7b', 'llama3'],
     });
   });
 });
@@ -291,10 +292,10 @@ describe('tuyến trợ lý dùng Ollama', () => {
   });
 
   it('có cấu hình Ollama thì lượt chat đi tới Ollama, không tới gateway', async () => {
-    vi.stubEnv('OLLAMA_MODEL', 'qwen3:0.6b');
+    vi.stubEnv('OLLAMA_MODEL', 'qwen3:1.7b');
     const fetchMock = vi
       .fn()
-      .mockResolvedValue(fakeResponse({ model: 'qwen3:0.6b', message: { content: 'Xin chào' } }));
+      .mockResolvedValue(fakeResponse({ model: 'qwen3:1.7b', message: { content: 'Xin chào' } }));
     vi.stubGlobal('fetch', fetchMock);
 
     const req = new NextRequest('http://localhost:4028/api/tro-ly-ai/tro-chuyen', {
@@ -306,12 +307,12 @@ describe('tuyến trợ lý dùng Ollama', () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body).toMatchObject({ content: 'Xin chào', provider: 'ollama', model: 'qwen3:0.6b' });
+    expect(body).toMatchObject({ content: 'Xin chào', provider: 'ollama', model: 'qwen3:1.7b' });
     expect(fetchMock.mock.calls[0][0]).toBe(`${DEFAULT_OLLAMA_BASE_URL}/api/chat`);
   });
 
   it('câu hỏi mới là message user cuối cùng gửi tới Ollama', async () => {
-    vi.stubEnv('OLLAMA_MODEL', 'qwen3:0.6b');
+    vi.stubEnv('OLLAMA_MODEL', 'qwen3:1.7b');
     const fetchMock = vi.fn().mockResolvedValue(fakeResponse({ message: { content: 'ok' } }));
     vi.stubGlobal('fetch', fetchMock);
 
@@ -338,7 +339,7 @@ describe('tuyến trợ lý dùng Ollama', () => {
   });
 
   it('không gửi trùng khi client để câu hỏi mới ở cuối history', async () => {
-    vi.stubEnv('OLLAMA_MODEL', 'qwen3:0.6b');
+    vi.stubEnv('OLLAMA_MODEL', 'qwen3:1.7b');
     const fetchMock = vi.fn().mockResolvedValue(fakeResponse({ message: { content: 'ok' } }));
     vi.stubGlobal('fetch', fetchMock);
 
@@ -360,7 +361,7 @@ describe('tuyến trợ lý dùng Ollama', () => {
   });
 
   it('history dài không nuốt mất system prompt điều phối', async () => {
-    vi.stubEnv('OLLAMA_MODEL', 'qwen3:0.6b');
+    vi.stubEnv('OLLAMA_MODEL', 'qwen3:1.7b');
     const fetchMock = vi.fn().mockResolvedValue(fakeResponse({ message: { content: 'ok' } }));
     vi.stubGlobal('fetch', fetchMock);
 
@@ -387,7 +388,7 @@ describe('tuyến trợ lý dùng Ollama', () => {
   });
 
   it('"hôm nay" của điều phối là hôm nay ở Việt Nam, không phải ngày UTC', async () => {
-    vi.stubEnv('OLLAMA_MODEL', 'qwen3:0.6b');
+    vi.stubEnv('OLLAMA_MODEL', 'qwen3:1.7b');
     const fetchMock = vi.fn().mockResolvedValue(fakeResponse({ message: { content: 'ok' } }));
     vi.stubGlobal('fetch', fetchMock);
 
@@ -427,7 +428,7 @@ describe('tuyến trợ lý dùng Ollama', () => {
   });
 
   it('câu nêu ý cập nhật đi bằng đường lệnh, không qua model', async () => {
-    vi.stubEnv('OLLAMA_MODEL', 'qwen3:0.6b');
+    vi.stubEnv('OLLAMA_MODEL', 'qwen3:1.7b');
     const fetchMock = vi
       .fn()
       .mockResolvedValue(fakeResponse({ message: { content: 'model foi hỏi' } }));
@@ -452,7 +453,7 @@ describe('tuyến trợ lý dùng Ollama', () => {
   });
 
   it('câu lệnh thiếu dữ liệu được trả lời bằng quy tắc, kèm mẫu lệnh', async () => {
-    vi.stubEnv('OLLAMA_MODEL', 'qwen3:0.6b');
+    vi.stubEnv('OLLAMA_MODEL', 'qwen3:1.7b');
     const fetchMock = vi
       .fn()
       .mockResolvedValue(fakeResponse({ message: { content: 'model foi hỏi' } }));
@@ -471,7 +472,7 @@ describe('tuyến trợ lý dùng Ollama', () => {
   });
 
   it('Ollama chết thì rớt về gateway OpenClaw khi gateway có cấu hình', async () => {
-    vi.stubEnv('OLLAMA_MODEL', 'qwen3:0.6b');
+    vi.stubEnv('OLLAMA_MODEL', 'qwen3:1.7b');
     vi.stubEnv('OPENCLAW_API_KEY', 'gateway-key');
     const fetchMock = vi.fn(async (url: string) =>
       String(url).includes('/api/chat')
@@ -492,10 +493,10 @@ describe('tuyến trợ lý dùng Ollama', () => {
   });
 
   it('GET trả về backend đang dùng và danh sách model của Ollama', async () => {
-    vi.stubEnv('OLLAMA_MODEL', 'qwen3:0.6b');
+    vi.stubEnv('OLLAMA_MODEL', 'qwen3:1.7b');
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue(fakeResponse({ models: [{ name: 'qwen3:0.6b' }] }))
+      vi.fn().mockResolvedValue(fakeResponse({ models: [{ name: 'qwen3:1.7b' }] }))
     );
 
     const req = new NextRequest('http://localhost:4028/api/tro-ly-ai/tro-chuyen', {
@@ -506,13 +507,13 @@ describe('tuyến trợ lý dùng Ollama', () => {
 
     const body = await res.json();
     expect(body.provider).toBe('ollama');
-    expect(body.model).toBe('qwen3:0.6b');
+    expect(body.model).toBe('qwen3:1.7b');
     expect(body.ollama).toMatchObject({
       baseUrl: DEFAULT_OLLAMA_BASE_URL,
-      model: 'qwen3:0.6b',
+      model: 'qwen3:1.7b',
       configured: true,
       reachable: true,
-      models: ['qwen3:0.6b'],
+      models: ['qwen3:1.7b'],
     });
   });
 
@@ -520,5 +521,131 @@ describe('tuyến trợ lý dùng Ollama', () => {
     const req = new NextRequest('http://localhost:4028/api/tro-ly-ai/tro-chuyen');
     const res = await getAssistant(req);
     expect(res.status).toBe(401);
+  });
+});
+
+// ─── Lane thu thập dữ liệu web (parseCollectCommand trước model) ─────────────
+
+const CITYPAIR_FIXTURE = {
+  status: true,
+  citypairs: [
+    {
+      airportDepartureName: [
+        {
+          identifier: 'HAN-SGN',
+          airportDepartureName: {
+            code: 'HAN',
+            name: 'Sân bay Nội Bài',
+            province: { provinceName: 'Hà Nội' },
+          },
+          airportArrivalName: {
+            code: 'SGN',
+            name: 'Sân bay Tân Sơn Nhất',
+            province: { provinceName: 'TP. Hồ Chí Minh' },
+          },
+        },
+      ],
+    },
+  ],
+};
+
+const jsonResponse = (payload: unknown, status = 200) =>
+  new Response(JSON.stringify(payload), { status });
+
+describe('lane thu thập dữ liệu web', () => {
+  beforeEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+    clearAllPendingImports();
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+    clearAllPendingImports();
+  });
+
+  it('lệnh thu thập mạng lưới đi bằng lane, không đụng model', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(CITYPAIR_FIXTURE));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const req = new NextRequest('http://localhost:4028/api/tro-ly-ai/tro-chuyen', {
+      method: 'POST',
+      headers: adminHeaders(),
+      body: JSON.stringify({ message: 'thu thập sân bay và tuyến bay từ vietjetair.com' }),
+    });
+    const res = await postAssistant(req);
+    const body = await res.json();
+
+    expect(body.provider).toBe('openclaw-command');
+    expect(body.content).toContain('Đã thu thập từ vietjetair.com');
+    expect(body.content).toContain('2 sân bay');
+    // Chỉ gọi đúng CMS, không mở phiên model
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(String(fetchMock.mock.calls[0][0])).toContain('vietjetcms-api.vietjetair.com');
+  });
+
+  it('lịch bay bị WAF 403 → trả lời nêu nguyên nhân, không có số liệu bịa', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        new Response('<H1>ERROR: The request could not be satisfied</H1>', { status: 403 })
+      );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const req = new NextRequest('http://localhost:4028/api/tro-ly-ai/tro-chuyen', {
+      method: 'POST',
+      headers: adminHeaders(),
+      body: JSON.stringify({ message: 'thu thập chuyến bay SGN-HAN ngày mai' }),
+    });
+    const body = await (await postAssistant(req)).json();
+
+    expect(body.provider).toBe('openclaw-command');
+    expect(body.content).toContain('Không lấy được lịch bay');
+    expect(body.content).toContain('aws-waf-token');
+    expect(String(fetchMock.mock.calls[0][0])).toContain('search-flight');
+  });
+
+  it('"xác nhận" sau preview lịch web → nhập vào bảng chuyến', async () => {
+    const { sql } = await import('@/lib/neon');
+    const sqlMock = sql as unknown as {
+      mock: { calls: Array<Array<unknown>> };
+      mockResolvedValueOnce: (v: unknown) => void;
+    };
+    sqlMock.mock.calls.length = 0;
+    // INSERT RETURNING trong bộ mock neon mặc định trả [] — nhập thành công cần 1 dòng.
+    sqlMock.mockResolvedValueOnce([{ id: 'inserted-row' }]);
+    setPendingImport('admin-1', {
+      kind: 'import-web-flights',
+      from: 'SGN',
+      to: 'HAN',
+      date: '2026-10-19',
+      flights: [
+        {
+          flightNo: 'VJ 310',
+          from: 'SGN',
+          to: 'HAN',
+          departTime: '06:00',
+          arriveTime: '08:10',
+          price: 1150000,
+          fares: [],
+        },
+      ],
+      createdAt: Date.now(),
+    });
+
+    const req = new NextRequest('http://localhost:4028/api/tro-ly-ai/tro-chuyen', {
+      method: 'POST',
+      headers: adminHeaders(),
+      body: JSON.stringify({ message: 'xác nhận' }),
+    });
+    const body = await (await postAssistant(req)).json();
+
+    expect(body.provider).toBe('openclaw-command');
+    expect(body.content).toContain('Đã nhập 1 lượt');
+    expect(body.content).toContain('VJ 310 06:00');
+    // INSERT từ lượt chat dùng cùng khuôn ON CONFLICT như đường seed chuẩn
+    expect(String(sqlMock.mock.calls[0][0])).toContain(
+      'ON CONFLICT (from_code, to_code, depart_time) DO NOTHING'
+    );
   });
 });
