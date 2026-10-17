@@ -1023,6 +1023,22 @@ with services in `src/features/chat/services` and APIs under `src/app/api/tro-ch
 - **`/api/tro-ly-ai/tro-chuyen` is admin-only** and gated by `verifyAdminRequest`, which
   enforces CSRF before auth. Its sole caller is the Admin console widget; call it through
   `askAssistant()` rather than raw fetch.
+- **The assistant has two backends; Ollama is only picked when it is configured.**
+  `resolveAssistantProvider` (`src/lib/openclaw/ollama.ts`) answers `ollama` as soon as any
+  `OLLAMA_*` variable exists (`OPENCLAW_PROVIDER` overrides the guess) and `openclaw`
+  otherwise, so an environment without Ollama config keeps calling the gateway exactly as
+  before — that default is pinned in `src/test/ollama-provider.test.ts`. The chosen backend
+  is tried first and the other only when it is configured (`getProviderAttempts`), so one
+  dead backend does not fail the turn while the other is alive. A `GET` on the same route
+  reports which backend is live and what `GET /api/tags` offers, which is also what the
+  widget prints under "Đang trực tuyến".
+- **The new question travels as the last `user` message, not only in `history`.**
+  The widget sends the typed text in `message` and only the *previous* turns in `history`,
+  so a turn assembled from `history` alone answers the previous question — measured against
+  a stub Ollama before `ollamaMessages = [...context, question]` existed. Two details came
+  with the fix: a duplicate-tail guard (a client that also puts the question at the end of
+  `history` must not send it twice) and `OLLAMA_THINK` only forwarded when set, because
+  older Ollama builds do not know the `think` field.
 - **Archiving is a real `status` column**, not a UI-only flag. `PATCH
   /api/tro-chuyen/cuoc-hoi-thoai` is admin-only, rejects any status other than
   `active`/`closed`, and backs the Admin `ChatTab` "L∆∞u tr·ªØ" filter and its

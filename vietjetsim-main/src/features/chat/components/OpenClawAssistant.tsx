@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePathname } from 'next/navigation';
 import { Icon } from '@/shared/components/ui';
-import { askAssistant } from '../services';
+import { askAssistant, getAssistantStatus } from '../services';
 
 interface Message {
   id: string;
@@ -23,6 +23,8 @@ export default function OpenClawAssistant() {
   const [inputText, setInputText] = useState('');
   const [sending, setSending] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  // Backend đang phục vụ: Ollama chạy local hoặc gateway OpenClaw.
+  const [engine, setEngine] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -50,6 +52,31 @@ export default function OpenClawAssistant() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping, scrollToBottom]);
+
+  // Hỏi backend đang phục vụ mỗi lần mở khung chat, để thấy ngay là đang chạy
+  // model Ollama local hay gateway OpenClaw. Lỗi ở đây không được làm phiền
+  // người dùng: widget vẫn chat được kể cả khi không đọc nổi trạng thái.
+  useEffect(() => {
+    if (!isOpen || !isAdmin) return;
+    let cancelled = false;
+
+    getAssistantStatus()
+      .then((status) => {
+        if (cancelled) return;
+        setEngine(
+          status.provider === 'ollama'
+            ? `Ollama ${status.ollama.model}${status.ollama.reachable ? '' : ' (ngoại tuyến)'}`
+            : `OpenClaw Gateway${status.openclaw.configured ? '' : ' (chưa cấu hình)'}`
+        );
+      })
+      .catch(() => {
+        /* trạng thái chỉ là thông tin thêm */
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, isAdmin]);
 
   if (!isAdmin || !isInsideAdmin) return null;
 
@@ -87,6 +114,9 @@ export default function OpenClawAssistant() {
           created_at: new Date().toISOString(),
         },
       ]);
+
+      // Lượt chat này đi qua Ollama → ghim tên model lên phần trạng thái.
+      if (data.provider === 'ollama' && data.model) setEngine(`Ollama ${data.model}`);
     } catch (err) {
       console.error('OpenClaw Chat Error:', err);
       setMessages((prev) => [
@@ -165,7 +195,7 @@ export default function OpenClawAssistant() {
               </div>
               <div className="text-white/70 text-xs flex items-center gap-1.5 mt-0.5">
                 <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-                Đang trực tuyến (AI được cá nhân hóa)
+                {engine ? `Đang trực tuyến • ${engine}` : 'Đang trực tuyến (AI được cá nhân hóa)'}
               </div>
             </div>
 

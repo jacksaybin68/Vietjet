@@ -75,15 +75,45 @@ export function markConversationRead(conversationId: string): Promise<{ success:
   });
 }
 
+/** Câu trả lời của trợ lý admin, kèm backend đã phục vụ lượt chat. */
+export interface AssistantReply {
+  content: string;
+  id: string;
+  provider?: 'ollama' | 'openclaw';
+  model?: string | null;
+}
+
+/** Trạng thái backend của trợ lý (Ollama chạy local hay gateway OpenClaw). */
+export interface AssistantStatus {
+  provider: 'ollama' | 'openclaw';
+  model: string | null;
+  openclaw: { url: string; configured: boolean };
+  ollama: {
+    baseUrl: string;
+    model: string;
+    configured: boolean;
+    reachable: boolean;
+    models: string[];
+  };
+}
+
 /** Admin-only: agentic flight-research assistant. */
 export function askAssistant(
   message: string,
   history: Array<{ role: string; content: string }> = []
-): Promise<{ content: string; id: string }> {
-  return apiRequest(CHAT.ASSISTANT, {
+): Promise<AssistantReply> {
+  return apiRequest<AssistantReply>(CHAT.ASSISTANT, {
     method: 'POST',
     body: { message, history },
   });
+}
+
+/**
+ * Admin-only: backend nào đang phục vụ trợ lý và Ollama có model gì.
+ * Dùng để hiển thị engine trên widget và để kiểm tra cấu hình.
+ */
+export function getAssistantStatus(): Promise<AssistantStatus> {
+  return apiRequest<AssistantStatus>(CHAT.ASSISTANT);
 }
 
 /** Admin-only: close or reopen a support thread. */
