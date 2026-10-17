@@ -3,7 +3,9 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-const PREFETCH_ROUTES = ['/trang-chu', '/tim-ve', '/dat-ve', '/tai-khoan'];
+// Chỉ những route tĩnh mới prefetch được. `/dat-ve` là route động (`/dat-ve/[id]`)
+// nên không có trang nào để tải trước — prefetch nó trả 404 RSC trên MỌI trang.
+const PREFETCH_ROUTES = ['/trang-chu', '/tim-ve', '/tai-khoan'];
 
 export default function NavigationOptimizer() {
   const router = useRouter();
