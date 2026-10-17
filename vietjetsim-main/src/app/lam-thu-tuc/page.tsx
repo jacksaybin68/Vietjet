@@ -251,11 +251,16 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
       <Header />
       <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
 
-      {/* ===== Đầu trang: 2 chip + tiêu đề (bố cục vietjetair.com/vi/checkin) ===== */}
-      <section className="border-b border-[var(--border)] bg-transparent">
-        <div className="mx-auto max-w-[1000px] px-4 pt-7">
+      {/* ===== Đầu trang: 2 chip + tiêu đề (bố cục vietjetair.com/vi/checkin) =====
+          Đây là cặp chip y hệt khối đầu trang của `/chuyen-bay-cua-toi`, nên dùng
+          luôn cách đã chốt ở đó: chip đang dùng nền đỏ thương hiệu chữ trắng, chip
+          còn lại nền trắng viền rõ. Nền trang đã là dải trời nhạt, nên chip nền
+          trắng cũ chìm hẳn vào đó; nền đỏ làm chip đang chọn đọc ra ngay. Khối
+          cũng có đệm dưới để không dính vào nội dung bên dưới. */}
+      <section className="relative overflow-hidden border-b border-[var(--border)] bg-transparent">
+        <div className="relative mx-auto max-w-[1000px] px-4 pt-8 pb-10 sm:px-6">
           <div className="flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-[var(--vj-red)] shadow-vj-btn ring-1 ring-white/70">
+            <span className="inline-flex items-center gap-2 rounded-full bg-[var(--vj-red)] px-4 py-2 text-xs font-bold text-white shadow-vj-btn ring-1 ring-[var(--vj-red)]">
               <MdConfirmationNumber className="h-3.5 w-3.5" />
               Tìm kiếm mã đặt chỗ
             </span>
@@ -263,14 +268,14 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                 chip thứ hai trỏ thẳng tới đó thay vì giả lập một tab rỗng. */}
             <Link
               href="/chuyen-bay-cua-toi"
-              className="inline-flex items-center gap-2 rounded-full bg-white/50 px-4 py-2 text-xs font-bold text-[var(--vj-text-gray)] transition-colors hover:text-[var(--vj-red)]"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-[var(--foreground)] shadow-sm ring-1 ring-[var(--border)] transition-colors hover:text-[var(--vj-red)] hover:ring-[rgb(var(--vj-red-rgb))]/60"
             >
               <FlightIcon className="h-3.5 w-3.5" />
               Chuyến bay sắp tới
             </Link>
           </div>
 
-          <h1 className="mt-5 text-lg font-black uppercase tracking-tight text-[var(--vj-text)] sm:text-xl">
+          <h1 className="mt-6 text-lg font-black uppercase tracking-tight text-[var(--vj-text)] sm:text-xl">
             Check-in
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--vj-text-gray)]">
@@ -295,7 +300,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
           <div className="flex flex-col gap-6">
             <div className="rounded-2xl bg-white/70 p-5 ring-1 ring-white/70 shadow-vj-md">
               <form onSubmit={handleSearch} className="flex flex-col gap-4">
-                <div className="flex items-center gap-4">
+                <div className="flex items-end gap-4">
                   <div className="relative flex-1">
                     <label className="pointer-events-none absolute left-3 top-2 text-[11px] font-bold text-[var(--vj-text-muted)]">
                       Mã đặt chỗ <span className="text-[var(--vj-red)]">*</span>
@@ -322,16 +327,15 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                       className={`${fieldClass} pb-2 pt-6`}
                     />
                   </div>
-                </div>
-
-                <div className="mt-4">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full vj-cta h-10 items-center justify-center rounded-lg px-7 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {loading ? 'Đang tra cứu…' : 'Tìm kiếm'}
-                  </button>
+                  <div className="shrink-0">
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="vj-cta h-10 items-center justify-center rounded-lg px-7 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {loading ? 'Đang tra cứu…' : 'Tìm kiếm'}
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>
