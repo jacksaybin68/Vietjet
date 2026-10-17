@@ -906,35 +906,62 @@ export default function PaymentClient() {
                 style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
               >
                 <h2 className="font-bold text-[var(--foreground)] mb-4">Phương thức thanh toán</h2>
-                <div className="grid grid-cols-3 gap-3 mb-5">
+                <div className="grid grid-cols-2 gap-3 mb-6">
                   {(
                     [
-                      ['card', 'Thẻ tín dụng', 'CreditCardIcon'],
-                      ['bank', 'Ngân hàng', 'BuildingLibraryIcon'],
-                      ['wallet', 'Số dư Ví', 'WalletIcon'],
-                      ['e_wallet', 'Ví MoMo/VNPay', 'DevicePhoneMobileIcon'],
-                    ] as [
-                      PaymentMethod,
-                      string,
-                      (
-                        | 'CreditCardIcon'
-                        | 'BuildingLibraryIcon'
-                        | 'DevicePhoneMobileIcon'
-                        | 'WalletIcon'
-                      ),
-                    ][]
-                  ).map(([val, label, icon]) => (
+                      {
+                        val: 'card',
+                        label: 'Thẻ tín dụng',
+                        desc: 'Visa · MasterCard · JCB · AMEX',
+                        icon: 'CreditCardIcon',
+                        color: 'text-primary',
+                      },
+                      {
+                        val: 'bank',
+                        label: 'Ngân hàng',
+                        desc: 'Chuyển khoản trực tiếp',
+                        icon: 'BuildingLibraryIcon',
+                        color: 'text-[var(--foreground)]',
+                      },
+                      {
+                        val: 'wallet',
+                        label: 'Số dư Ví',
+                        desc: 'Thanh toán nhanh từ ví',
+                        icon: 'WalletIcon',
+                        color: 'text-[var(--vj-green)]',
+                      },
+                      {
+                        val: 'e_wallet',
+                        label: 'Ví MoMo / VNPay',
+                        desc: 'Ví điện tử phổ biến',
+                        icon: 'DevicePhoneMobileIcon',
+                        color: 'text-[var(--vj-green)]',
+                      },
+                    ] as const
+                  ).map((method) => (
                     <button
-                      key={val}
-                      onClick={() => setPaymentMethod(val)}
-                      className={`flex flex-col items-center gap-2 py-4 rounded-xl border-2 transition-all text-sm font-semibold ${
-                        paymentMethod === val
-                          ? 'border-primary bg-primary-50 text-primary'
-                          : 'border-[var(--border)] text-[var(--foreground-muted)] hover:border-[var(--border)] '
+                      key={method.val}
+                      type="button"
+                      onClick={() => setPaymentMethod(method.val)}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all text-sm font-semibold ${
+                        paymentMethod === method.val
+                          ? `border-primary bg-primary-50 ${method.color} shadow-sm shadow-primary/10`
+                          : 'border-[var(--border)] text-[var(--foreground-muted)] hover:border-[var(--border)] hover:bg-[var(--surface-2)]'
                       }`}
                     >
-                      <Icon name={icon} size={22} />
-                      <span className="text-xs">{label}</span>
+                      <div
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                          paymentMethod === method.val
+                            ? 'bg-primary text-white'
+                            : 'bg-[var(--surface-2)] text-[var(--foreground-muted)]'
+                        }`}
+                      >
+                        <Icon name={method.icon} size={20} />
+                      </div>
+                      <span className="text-xs font-bold leading-none">{method.label}</span>
+                      <span className="text-[10px] text-[var(--foreground-subtle)] leading-none">
+                        {method.desc}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -1341,8 +1368,12 @@ export default function PaymentClient() {
                 {/* Flight summary */}
                 <div className="bg-primary-50 rounded-xl p-4 mb-4">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-7 h-7 bg-gradient-red rounded-lg flex items-center justify-center">
-                      <Icon name="PaperAirplaneIcon" size={12} className="text-white" />
+                    <div className="w-7 h-7 rounded-lg overflow-hidden flex items-center justify-center bg-primary-50 border border-[var(--border)]">
+                      <img
+                        src="/logo-vj.svg"
+                        alt="Vietjet Air"
+                        className="w-5 h-5 object-contain"
+                      />
                     </div>
                     <span className="font-bold text-primary text-sm">{booking?.flightNo}</span>
                     <span className="text-xs text-[var(--foreground-subtle)] ml-auto">
