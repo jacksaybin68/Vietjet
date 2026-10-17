@@ -660,7 +660,10 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl border overflow-hidden" style={{ ...ADMIN_CARD_STYLE, padding: 0 }}>
+      <div
+        className="rounded-2xl border overflow-hidden"
+        style={{ ...ADMIN_CARD_STYLE, padding: 0 }}
+      >
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -778,9 +781,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                         <Icon name="PaperAirplaneIcon" size={28} className="text-slate-600" />
                       </div>
                       <div>
-                        <p className="font-bold text-white text-sm">
-                          Không tìm thấy chuyến bay
-                        </p>
+                        <p className="font-bold text-white text-sm">Không tìm thấy chuyến bay</p>
                         <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
                           {searchQuery || statusFilter !== 'all' || dateFrom || dateTo
                             ? 'Bộ lọc hiện tại không khớp với chuyến bay nào. Hãy thử thay đổi tiêu chí tìm kiếm.'
@@ -1153,7 +1154,10 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
       {/* Edit Modal — Full flight update form */}
       {editingFlight && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border" style={{ ...ADMIN_CARD_STYLE, padding: 0 }}>
+          <div
+            className="rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border"
+            style={{ ...ADMIN_CARD_STYLE, padding: 0 }}
+          >
             <div
               className="flex items-center justify-between p-5 border-b border-white/5"
               style={{ background: 'linear-gradient(135deg, #1A2948 0%, #2D3E5F 100%)' }}
@@ -1254,7 +1258,10 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               {editingFlight.from === editingFlight.to && editingFlight.from !== '' && (
                 <div
                   className="rounded-lg p-2.5 flex items-center gap-2"
-                  style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)' }}
+                  style={{
+                    background: 'rgba(239,68,68,0.1)',
+                    border: '1px solid rgba(239,68,68,0.25)',
+                  }}
                 >
                   <Icon
                     name="ExclamationTriangleIcon"
@@ -1359,7 +1366,10 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 editingFlight.economyPrice > editingFlight.businessPrice && (
                   <div
                     className="rounded-lg p-2.5 flex items-center gap-2"
-                    style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)' }}
+                    style={{
+                      background: 'rgba(239,68,68,0.1)',
+                      border: '1px solid rgba(239,68,68,0.25)',
+                    }}
                   >
                     <Icon
                       name="ExclamationTriangleIcon"
@@ -1393,7 +1403,10 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 editingFlight.departTime >= editingFlight.arriveTime && (
                   <div
                     className="rounded-lg p-2.5 flex items-center gap-2"
-                    style={{ background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.25)' }}
+                    style={{
+                      background: 'rgba(234,179,8,0.1)',
+                      border: '1px solid rgba(234,179,8,0.25)',
+                    }}
                   >
                     <Icon
                       name="ExclamationTriangleIcon"
@@ -1459,16 +1472,16 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               </div>
 
               {/* Change summary preview */}
-              <div
-                className="rounded-xl p-3 space-y-1.5 bg-slate-900/40 border border-white/10"
-              >
+              <div className="rounded-xl p-3 space-y-1.5 bg-slate-900/40 border border-white/10">
                 <p className="text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 text-slate-400">
                   <Icon name="EyeIcon" size={12} /> Xem trước thay đổi
                 </p>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Số hiệu:</span>
-                    <span className="font-mono font-bold text-white">{editingFlight.flightNo || '—'}</span>
+                    <span className="font-mono font-bold text-white">
+                      {editingFlight.flightNo || '—'}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Hành trình:</span>

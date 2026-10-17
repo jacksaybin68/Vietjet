@@ -34,9 +34,7 @@ describe('formatVnd', () => {
 
 describe('amountInWords', () => {
   it('đọc số tiền phổ biến', () => {
-    expect(amountInWords(1038900)).toBe(
-      'Một triệu không trăm ba mươi tám nghìn chín trăm đồng'
-    );
+    expect(amountInWords(1038900)).toBe('Một triệu không trăm ba mươi tám nghìn chín trăm đồng');
   });
   it('đọc đúng lẻ / mốt / lăm', () => {
     expect(amountInWords(1005)).toBe('Một nghìn không trăm lẻ năm đồng');

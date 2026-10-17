@@ -20,8 +20,7 @@ export interface InvoiceBooking {
 }
 
 const SITE_URL =
-  (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_SITE_URL) ||
-  'https://vietjet.shop';
+  (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_SITE_URL) || 'https://vietjet.shop';
 
 /** "123456" → "123.456 ₫". Số âm/không hợp lệ về 0. */
 export function formatVnd(amount: number): string {
@@ -50,8 +49,10 @@ function readTriple(n: number, full = false): string {
     parts.push(`${DIGITS[chuc]} mươi`);
   }
   if (donvi > 0) {
-    if (chuc === 0) parts.push(DIGITS[donvi]); // "lẻ năm", "một trăm năm"
-    else if (chuc === 1) parts.push(donvi === 5 ? 'lăm' : DIGITS[donvi]); // "mười lăm"
+    if (chuc === 0)
+      parts.push(DIGITS[donvi]); // "lẻ năm", "một trăm năm"
+    else if (chuc === 1)
+      parts.push(donvi === 5 ? 'lăm' : DIGITS[donvi]); // "mười lăm"
     else parts.push(donvi === 1 ? 'mốt' : donvi === 5 ? 'lăm' : DIGITS[donvi]);
   }
   return parts.join(' ');

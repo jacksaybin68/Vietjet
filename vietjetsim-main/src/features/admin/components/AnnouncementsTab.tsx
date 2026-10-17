@@ -234,7 +234,10 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl border overflow-hidden" style={{ ...ADMIN_CARD_STYLE, padding: 0 }}>
+      <div
+        className="rounded-2xl border overflow-hidden"
+        style={{ ...ADMIN_CARD_STYLE, padding: 0 }}
+      >
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -305,7 +308,7 @@ export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {
                   </td>
                 </tr>
               ) : (
-                announcements.map((announcement, i) => {
+                announcements.map((announcement) => {
                   const typeConfig = TYPE_CONFIG[announcement.type] || TYPE_CONFIG.info;
                   return (
                     <tr

@@ -219,7 +219,6 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
     );
   }
 
-
   return (
     <div className="space-y-5">
       {/* Header */}
@@ -278,7 +277,10 @@ export default function SystemSettingsTab({ onToast }: { onToast?: ToastAPI }) {
       </div>
 
       {/* Settings List */}
-      <div className="rounded-2xl border overflow-hidden" style={{ ...ADMIN_CARD_STYLE, padding: 0 }}>
+      <div
+        className="rounded-2xl border overflow-hidden"
+        style={{ ...ADMIN_CARD_STYLE, padding: 0 }}
+      >
         <div
           className="p-5 border-b border-white/5"
           style={{ background: 'linear-gradient(135deg, #1A2948 0%, #2D3E5F 100%)' }}

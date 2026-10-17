@@ -504,7 +504,10 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl border overflow-hidden" style={{ ...ADMIN_CARD_STYLE, padding: 0 }}>
+      <div
+        className="rounded-2xl border overflow-hidden"
+        style={{ ...ADMIN_CARD_STYLE, padding: 0 }}
+      >
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -611,7 +614,7 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
                   </td>
                 </tr>
               ) : (
-                paginated.map((req, i) => (
+                paginated.map((req) => (
                   <tr
                     key={req.id}
                     className="border-b border-white/5 hover:bg-white/5 transition-colors"
@@ -628,9 +631,7 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
                       <div className="text-xs text-slate-400">{req.userEmail}</div>
                     </td>
                     <td className="px-5 py-3.5 hidden sm:table-cell">
-                      <div className="font-semibold text-white text-sm">
-                        {req.flightNo || '—'}
-                      </div>
+                      <div className="font-semibold text-white text-sm">{req.flightNo || '—'}</div>
                       <div className="text-xs text-slate-400">
                         {req.route}
                         {req.flightDate ? ` · ${req.flightDate}` : ''}

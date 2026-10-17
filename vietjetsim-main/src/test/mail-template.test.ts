@@ -135,7 +135,9 @@ describe('logo thật trong header', () => {
 
   it('MAIL_LOGO_URL ghi đè khi cần', () => {
     expect(
-      mailLogoUrl({ MAIL_LOGO_URL: 'https://cdn.example.com/l.png' } as unknown as NodeJS.ProcessEnv)
+      mailLogoUrl({
+        MAIL_LOGO_URL: 'https://cdn.example.com/l.png',
+      } as unknown as NodeJS.ProcessEnv)
     ).toBe('https://cdn.example.com/l.png');
   });
 });
