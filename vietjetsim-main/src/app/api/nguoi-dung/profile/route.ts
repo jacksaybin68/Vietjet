@@ -1,9 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
 import { findUserById, updateUserProfile } from '@/lib/db';
+import { normalizePhone } from '@/lib/utils';
 import { verifyAuthRequest } from '@/lib/auth';
 
 // ─── GET: Get current user profile ──────────────────────────────────────────
+
+/**
+ * `dob` là cột `date`, không có giờ và không có múi giờ. Driver đọc nó bằng
+ * `new Date(y, m-1, d)` theo giờ **máy chủ**, nên `JSON.stringify` biến một ngày
+ * lịch thành một thời điểm: `1954-02-11` thành `1954-02-10T17:00:00.000Z` trên
+ * máy chủ ở +07, và trình duyệt hiển thị nó thành ngày 10 — lệch một ngày so
+ * với thứ người dùng đã nhập. Trả về đúng dạng ngày mà `input[type="date"]` cần.
+ */
+function toDateOnly(value: unknown): string | null {
+  if (!value) return null;
+  // Chuỗi thì đã là ngày dạng text (cột `date` qua bridge/identity parser).
+  if (typeof value === 'string') return value.slice(0, 10);
+  if (value instanceof Date) {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    // Getter local hoàn tác đúng cách driver dựng ngày, nên ra đúng ngày đã lưu
+    // bất kể máy chủ chạy múi giờ nào.
+    return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`;
+  }
+  return null;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,7 +47,7 @@ export async function GET(request: NextRequest) {
         avatarUrl: user.avatar_url,
         createdAt: user.created_at,
         updatedAt: user.updated_at,
-        dob: user.dob || null,
+        dob: toDateOnly(user.dob),
         gender: user.gender || null,
         address: user.address || null,
         city: user.city || null,
@@ -63,9 +84,13 @@ export async function PUT(request: NextRequest) {
       preferred_language,
     } = body;
 
-    const updates: Record<string, string> = {};
+    const updates: { full_name?: string; phone?: string | null; avatar_url?: string } = {};
     if (full_name !== undefined) updates.full_name = full_name;
-    if (phone !== undefined) updates.phone = phone;
+    // `phone` carries a UNIQUE index, so it has to land in the canonical form
+    // `normalizePhone` produces; storing the raw string would let the same
+    // number exist twice ('+84 986…' beside '0986…'). A cleared number is NULL
+    // rather than '' for the same reason.
+    if (phone !== undefined) updates.phone = normalizePhone(phone) ?? null;
     if (avatar_url !== undefined) updates.avatar_url = avatar_url;
 
     // Build and execute dynamic query for enhanced profile fields
@@ -117,7 +142,7 @@ export async function PUT(request: NextRequest) {
         avatarUrl: updatedUser.avatar_url,
         createdAt: updatedUser.created_at,
         updatedAt: updatedUser.updated_at,
-        dob: updatedUser.dob || null,
+        dob: toDateOnly(updatedUser.dob),
         gender: updatedUser.gender || null,
         address: updatedUser.address || null,
         city: updatedUser.city || null,
