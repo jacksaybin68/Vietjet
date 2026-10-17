@@ -41,57 +41,12 @@ const ADMIN = {
 };
 
 /**
- * The business wave of each route, numbered in its own block.
- *
- * It used to be the same number with a trailing `B` — `VJ301B` — and every one
- * of those rows was rejected with a 400. `FLIGHT_NO_PATTERN` allows an
- * optional `-NNNN` block suffix but no letter, on purpose: `flights.class`
- * already carries the cabin, migration 035 renumbered 593 legacy `VJ341B`
- * rows into 3xxx for exactly that reason, and migration 036 put the shape in
- * a CHECK so the database refuses it too. Re-running the seed therefore
- * created 399 economy rows and silently lost all 441 business ones, leaving
- * every route with no business cabin to sell.
- *
- * 3001-3089 is free on every database this seed has run against, and it is the
- * block 035 vacated, so the two waves read as one pair and never collide with
- * 027's 601-1040, 028's 1100-1256, 031's 2001+ or 032's 1500+.
+ * The route list, its flight numbering and the +07:00 timestamp helper live in
+ * `flight-schedule.cjs`, so this rolling-window refresher and the bulk schedule
+ * seeder cannot drift into two different networks. `BUSINESS_SHIFT_MIN` is the
+ * gap between one route's economy and business waves.
  */
-const BUSINESS_NO_BASE = 3001;
-
-/** The business wave's flight number: its own numeric block, same carrier. */
-const businessNo = (index) => `VJ${BUSINESS_NO_BASE + index}`;
-// [flight_no, from, to, depart, durationMin, economyPrice, businessPrice, seats]
-const ROUTES = [
-  ['VJ301', 'HAN', 'SGN', '06:00', 145, 899000, 2490000, 189],
-  ['VJ311', 'SGN', 'HAN', '09:15', 145, 949000, 2590000, 189],
-  ['VJ321', 'HAN', 'DAD', '07:30', 85, 749000, 1990000, 189],
-  ['VJ331', 'DAD', 'HAN', '12:40', 85, 699000, 1890000, 189],
-  ['VJ341', 'HAN', 'CXR', '08:20', 105, 829000, 2190000, 150],
-  ['VJ351', 'SGN', 'PQC', '10:05', 80, 699000, 1890000, 150],
-  ['VJ361', 'HAN', 'HPH', '14:10', 60, 449000, 1290000, 100],
-  ['VJ371', 'SGN', 'DLI', '06:45', 115, 769000, 1990000, 150],
-  ['VJ381', 'HUI', 'SGN', '11:30', 95, 659000, 1790000, 120],
-  ['VJ391', 'VCA', 'SGN', '16:20', 80, 599000, 1690000, 120],
-  // International, matching 028's network and its real block times. Without
-  // these the rolling window covered the domestic list only, so a search for
-  // HAN→Seoul came back empty as soon as 028's own week ran out.
-  ['VJ401', 'HAN', 'SIN', '09:00', 210, 2450000, 6786500, 180],
-  ['VJ411', 'SIN', 'HAN', '13:30', 210, 2550000, 7053500, 180],
-  ['VJ421', 'SGN', 'ICN', '09:00', 320, 4900000, 13573000, 180],
-  ['VJ431', 'ICN', 'SGN', '14:00', 320, 5000000, 13850000, 180],
-  ['VJ441', 'HAN', 'BKK', '08:20', 165, 1650000, 4570500, 180],
-  ['VJ451', 'SGN', 'MNL', '10:40', 205, 2650000, 7340500, 160],
-  ['VJ461', 'HAN', 'KIX', '11:10', 350, 5600000, 15512000, 150],
-  ['VJ471', 'SGN', 'HKG', '07:50', 200, 3250000, 9002500, 170],
-  // Migration 028 flies Hanoi–Seoul in both directions; the rolling window
-  // has to cover the same pair or a repeat of that day's search finds nothing
-  // once 028's own week runs out.
-  ['VJ481', 'HAN', 'ICN', '08:30', 320, 5100000, 14127000, 170],
-  ['VJ491', 'SGN', 'BKK', '13:10', 165, 1750000, 4847500, 180],
-];
-
-/** Business is scheduled as the second wave of the day, +3h from economy. */
-const BUSINESS_SHIFT_MIN = 180;
+const { ROUTES, BUSINESS_SHIFT_MIN, businessNo, vnTime } = require('./flight-schedule.cjs');
 /**
  * How far ahead the window reaches. Three weeks, not the week the date strip
  * shows: the strip renders seven days, so a customer can only *reach* the first
@@ -101,15 +56,6 @@ const BUSINESS_SHIFT_MIN = 180;
  * still leaves the site answerable.
  */
 const DAYS = Number(process.env.SEED_FLIGHT_DAYS) || 21;
-
-const pad = (n) => String(n).padStart(2, '0');
-
-/** Vietnam-local ISO timestamp with an explicit +07:00 offset. */
-function vnTime(date, hhmm, extraMin = 0) {
-  const [h, m] = hhmm.split(':').map(Number);
-  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate(), h, m + extraMin);
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00+07:00`;
-}
 
 function cookiesFrom(res) {
   const out = {};
