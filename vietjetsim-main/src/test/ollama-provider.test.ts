@@ -377,6 +377,39 @@ describe('tuyến trợ lý dùng Ollama', () => {
     expect(sent.messages).toHaveLength(22);
   });
 
+  it('"hôm nay" của điều phối là hôm nay ở Việt Nam, không phải ngày UTC', async () => {
+    vi.stubEnv('OLLAMA_MODEL', 'qwen3:0.6b');
+    const fetchMock = vi.fn().mockResolvedValue(fakeResponse({ message: { content: 'ok' } }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    // 17:09 UTC ngày 17/10 = 00:09 ngày 18/10 giờ Việt Nam (UTC+7). Đúng khoảng
+    // 00:00–07:00 mà `toISOString().split('T')[0]` trả về hôm qua: câu trả lời
+    // ghi sai ngày và link tra cứu mở sai ngày.
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-10-17T17:09:00Z'));
+    try {
+      const req = new NextRequest('http://localhost:4028/api/tro-ly-ai/tro-chuyen', {
+        method: 'POST',
+        headers: adminHeaders(),
+        body: JSON.stringify({ message: 'cập nhật chuyến bay HAN-SGN hôm nay' }),
+      });
+      await postAssistant(req);
+    } finally {
+      vi.useRealTimers();
+    }
+
+    const sent = JSON.parse(String(fetchMock.mock.calls[0][1].body)) as {
+      messages: Array<{ role: string; content: string }>;
+    };
+    const coordinator = sent.messages.filter((m) => m.content.includes('TRẠNG THÁI HIỆN TẠI'));
+
+    expect(coordinator).toHaveLength(1);
+    expect(coordinator[0].content).toContain('(2026-10-18)');
+    // Link tra cứu cũng phải mở đúng ngày Việt Nam, không phải ngày UTC.
+    expect(coordinator[0].content).toContain('departureDate=2026-10-18');
+    expect(coordinator[0].content).not.toContain('2026-10-17');
+  });
+
   it('Ollama chết thì rớt về gateway OpenClaw khi gateway có cấu hình', async () => {
     vi.stubEnv('OLLAMA_MODEL', 'qwen3:0.6b');
     vi.stubEnv('OPENCLAW_API_KEY', 'gateway-key');
