@@ -22,6 +22,19 @@ interface AppImageProps {
   [key: string]: unknown;
 }
 
+/**
+ * `''` is a valid `string`, so a caller like `src={booking.image || ''}` type-checks
+ * and still reaches `<img>`. An empty `src` makes the browser resolve the attribute
+ * against the document URL and re-download the whole page as an image (React warns
+ * about exactly this), so the `onError` that swaps in `fallbackSrc` fires only after
+ * that wasted request. Normalising here fixes every caller at once — the placeholder
+ * was always the intent.
+ */
+export function resolveImageSrc(src: string | null | undefined, fallbackSrc: string): string {
+  const value = typeof src === 'string' ? src.trim() : '';
+  return value || fallbackSrc;
+}
+
 const AppImage = memo(function AppImage({
   src,
   alt,
@@ -40,7 +53,7 @@ const AppImage = memo(function AppImage({
   unoptimized = false,
   ...props
 }: AppImageProps) {
-  const [imageSrc, setImageSrc] = useState(src);
+  const [imageSrc, setImageSrc] = useState(() => resolveImageSrc(src, fallbackSrc));
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
