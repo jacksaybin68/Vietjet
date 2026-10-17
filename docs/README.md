@@ -28,6 +28,9 @@ tới các đường dẫn cũ, nên việc di chuyển không ảnh hưởng bu
 ## qa/ — minh chứng giao diện
 
 - `screenshots/` — 14 ảnh chụp màn hình qua các bước kiểm thử
+- `screenshots/production-2026-10-17/` — 16 ảnh của lượt `npm run test:ui` trên bản
+  production (14 màn hình + widget OpenClaw), kèm `report.json`. Sinh bằng
+  `UI_CHECK_SHOTS_DIR=<thư mục> npm run test:ui`.
 - `design_mau_giao_dien_nguoi_dung.html` — bản mẫu giao diện người dùng
 
 ## Khác
