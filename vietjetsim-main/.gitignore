@@ -47,5 +47,8 @@ jest-test-results.json
 .vscode/
 .idea/
 
+# Build riêng cho UI gate, không đè .next của dev server (next.config.mjs đọc DIST_DIR).
+.next-uicheck/
+
 # Optional: if using TurboRepo or monorepo
 turbo/
