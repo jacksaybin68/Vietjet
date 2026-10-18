@@ -99,9 +99,17 @@ Các cổng khác:
   vấn đề có trước thay đổi này, không phải do nó, nhưng trước đây `<main>` của layout che
   mất. Muốn hết hẳn thì phải đưa phần đọc `searchParams` lên server component, ngoài phạm
   vi Phase 1.
-- **Bằng chứng hành vi của skip link** (Tab → Enter → Tab tiếp theo rơi vào nội dung) chưa
-  được kiểm tự động; cả hai cổng chỉ khẳng định *cấu trúc* làm cho hành vi đó đúng:
-  `#main-content` tồn tại, duy nhất, và nằm sau `<header>`.
+- **Hành vi của skip link đã được kiểm tự động** — `ui-check.cjs` bấm phím thật qua CDP,
+  một lần mỗi lượt chạy, trên `/trang-chu` ở viewport desktop:
+  1. Tab đầu tiên → focus đúng skip link: `true`.
+  2. Enter → `location.hash = "#main-content"`.
+  3. Tab kế tiếp → focus nằm **trong** `#main-content`: `true`, phần tử nhận focus là
+     `BUTTON.h-2` (một nút trong hero) — tức là đã đi qua toàn bộ announcement bar, thanh
+     điều hướng và logo.
+  Phép thử này không thể xanh vì "không làm gì": nếu Tab không di chuyển focus thì phần tử
+  đang focus vẫn là chính skip link, mà skip link nằm ngoài `#main-content` → `false`.
+- Phép kiểm *cấu trúc* đã chứng minh được nó bắt lỗi thật: lần chạy đầu tiên của cổng mới
+  báo 2/35 cờ ở `/quan-tri` (mục 4), trước khi có bất kỳ thay đổi nào ở tầng đó.
 
 ## 6. Lệnh tái lập
 
