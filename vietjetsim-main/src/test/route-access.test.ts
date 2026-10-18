@@ -47,6 +47,12 @@ describe('route access classification', () => {
       expect(isPublicApiRoute('/api/cong-khai/cau-hinh-ngan-hang')).toBe(true);
     });
 
+    it('allows the header notice bar to read published announcements signed out', () => {
+      expect(isPublicApiRoute('/api/cong-khai/thong-bao')).toBe(true);
+      // The admin console's own announcement route stays behind a session.
+      expect(isPublicApiRoute('/api/quan-tri/thong-bao')).toBe(false);
+    });
+
     it('allows the CSRF bootstrap and refresh-token rotation without a session', () => {
       expect(isPublicApiRoute('/api/csrf')).toBe(true);
       expect(isPublicApiRoute('/api/xac-thuc/lam-moi')).toBe(true);

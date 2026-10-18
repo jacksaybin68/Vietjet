@@ -4,18 +4,18 @@ import HeroSection from '@/app/trang-chu/components/HeroSection';
 
 describe('HeroSection Banner', () => {
   it('renders the flight search form', () => {
-    render(<HeroSection />);
-    expect(
-      screen.getByText('Khám phá hàng ngàn điểm đến với mức giá cực kỳ ưu đãi.')
-    ).toBeInTheDocument();
+    const { container } = render(<HeroSection />);
+    expect(container.querySelector('#hero-booking-form')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Tìm chuyến bay/i })).toBeInTheDocument();
   });
 
-  // The hero headline lives in the hero artwork itself. An HTML `<h1>` used to
-  // repeat it on top of that image, overlapping it — removed on design feedback.
-  it('does not repeat the hero headline as an HTML heading', () => {
+  // The campaign headline belongs to the hero artwork, so the only `<h1>` is the
+  // screen-reader one — nothing is painted over the image (design feedback).
+  it('paints no visible hero headline over the artwork', () => {
     const { container } = render(<HeroSection />);
-    expect(container.querySelector('h1')).toBeNull();
+    container.querySelectorAll('h1').forEach((heading) => {
+      expect(heading).toHaveClass('sr-only');
+    });
   });
 
   it('renders round-trip and one-way options', () => {

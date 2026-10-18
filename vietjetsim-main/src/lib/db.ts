@@ -3317,3 +3317,39 @@ export async function createCheckIn(data: {
     boarding_pass_number: string;
   }>(result)!;
 }
+
+// ─── Thông báo công khai ─────────────────────────────────────────────────────
+
+/**
+ * Thông báo đang hiệu lực, dùng cho thanh thông báo trên header
+ * (`AnnouncementBar`) — nội dung mà khách *chưa* đăng nhập cũng đọc được.
+ *
+ * Chỉ chọn ba cột mà thanh này thực sự hiển thị; `created_by` và `id` không cần
+ * thiết cho giao diện công khai nên không trả ra ngoài.
+ *
+ * `target_role = 'all'` là điều kiện bắt buộc, không phải bộ lọc làm đẹp: thanh
+ * này render trước khi biết người xem là ai, nên một thông báo nhắm riêng
+ * `user`/`admin` sẽ lộ cho khách vãng lai. `start_date` / `end_date` là khoảng
+ * hiệu lực do quản trị viên đặt, thiếu một đầu nghĩa là mở ở đầu đó.
+ */
+export interface PublicAnnouncementRecord {
+  id: string;
+  title: string;
+  content: string;
+  type: 'info' | 'warning' | 'promotion' | 'system';
+}
+
+export async function getActiveAnnouncements(limit = 10): Promise<PublicAnnouncementRecord[]> {
+  const rows = await sql`
+    SELECT id, title, content, type
+    FROM announcements
+    WHERE is_active = true
+      AND target_role = 'all'
+      AND (start_date IS NULL OR start_date <= now())
+      AND (end_date IS NULL OR end_date >= now())
+    ORDER BY created_at DESC
+    LIMIT ${limit}
+  `;
+
+  return asRows<PublicAnnouncementRecord>(rows);
+}
