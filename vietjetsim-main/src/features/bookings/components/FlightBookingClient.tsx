@@ -63,7 +63,11 @@ function describePax(counts: Record<PassengerType, number>): string {
     .join(', ');
 }
 
-function FlightBookingClientInner() {
+function FlightBookingClientInner({
+  onFlightSelect,
+}: {
+  onFlightSelect?: (flightNo: string, fareClass: string, fare: number) => void;
+}) {
   const searchParams = useSearchParams();
   const params: SearchParams = {
     from: searchParams.get('from') || undefined,
@@ -336,6 +340,7 @@ function FlightBookingClientInner() {
           <ErrorBoundary inline variant="api" retryLabel="Tìm lại chuyến bay">
             <FlightResultsStep
               onSelect={handleFlightSelect}
+              onFlightSelect={onFlightSelect}
               search={params}
               onDateChange={handleDateChange}
               pax={params.pax}
@@ -376,10 +381,14 @@ function FlightBookingClientInner() {
   );
 }
 
-export default function FlightBookingClient() {
+export default function FlightBookingClient({
+  onFlightSelect,
+}: {
+  onFlightSelect?: (flightNo: string, fareClass: string, fare: number) => void;
+}) {
   return (
     <Suspense fallback={<FlightSearchSkeleton />}>
-      <FlightBookingClientInner />
+      <FlightBookingClientInner onFlightSelect={onFlightSelect} />
     </Suspense>
   );
 }

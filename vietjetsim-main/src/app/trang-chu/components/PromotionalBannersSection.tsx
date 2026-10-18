@@ -3,20 +3,108 @@ import AppImage from '@/shared/components/ui/AppImage';
 
 const promotions = [
   {
-    eyebrow: 'Dành cho nhóm từ 10 khách',
-    title: 'Bay cùng đồng đội, vui trọn hành trình',
-    description: 'Nhận tư vấn hành trình và ưu đãi phù hợp cho chuyến đi của đoàn.',
-    action: 'Nhận tư vấn đoàn',
-    image: '/assets/images/banners/services.png',
+    eyebrow: 'Bay theo đoàn',
+    title: 'Bay theo đoàn vui ngập tràn',
+    description: 'Dành cho đoàn từ 10 khách trở lên',
+    action: 'Xem chi tiết',
+    image: '/images/promos/1.webp',
     href: '/lien-he',
+    isVisual: true,
   },
   {
-    eyebrow: 'Ưu đãi vé bay',
-    title: 'Săn vé tốt, khởi hành thật dễ',
-    description: 'Khám phá lựa chọn chuyến bay phù hợp cho hành trình nội địa và quốc tế.',
-    action: 'Tìm chuyến bay',
-    image: '/assets/images/banners/destinations.png',
+    eyebrow: 'Vé Tết',
+    title: 'Vé Tết hời, mời bạn bay!',
+    description: 'Ưu đãi đặc biệt cho mùa Tết 2027',
+    action: 'Săn vé ngay',
+    image: '/images/promos/2.webp',
     href: '/tim-ve',
+    isVisual: true,
+  },
+  {
+    eyebrow: 'Hợp tác DiDi',
+    title: 'Vi vu khắp Trung Quốc cùng DiDi',
+    description: 'Ưu đãi đặt xe khi bay cùng Vietjet',
+    action: 'Tìm hiểu thêm',
+    image: '/images/promos/3.webp',
+    href: '/dich-vu',
+    isVisual: true,
+  },
+  {
+    eyebrow: 'Bay khắp thế giới',
+    title: 'Bay khắp thế giới, chạm đỉnh cao mới',
+    description: 'Khám phá các điểm đến từ Đà Nẵng',
+    action: 'Xem hành trình',
+    image: '/images/promos/4.webp',
+    href: '/tim-ve',
+    isVisual: true,
+  },
+  {
+    eyebrow: 'Ưu đãi đặc biệt',
+    title: 'Khám phá hành trình mới',
+    description: 'Ưu đãi độc quyền cho khách hàng thân thiết',
+    action: 'Xem ngay',
+    image: '/images/promos/5.png',
+    href: '/tim-ve',
+    isVisual: true,
+  },
+  {
+    eyebrow: 'Ưu đãi độc quyền',
+    title: 'Bay xa hơn, tiết kiệm hơn',
+    description: 'Nhận ngay voucher giảm giá cho chuyến bay tiếp theo',
+    action: 'Nhận ưu đãi',
+    image:
+      'https://vj-prod-website-cms.s3.ap-southeast-1.amazonaws.com/2-top-banner-mb-1790133377712.jpg',
+    href: '/tim-ve',
+    isVisual: true,
+  },
+  {
+    eyebrow: 'Hành trình mùa hè',
+    title: 'Hè rực rỡ, bay cùng Vietjet',
+    description: 'Ưu đãi vé hè cho mọi điểm đến nội địa',
+    action: 'Đặt vé ngay',
+    image:
+      'https://vj-prod-website-cms.s3.ap-southeast-1.amazonaws.com/2-top-banner-mb-1786359790593.jpg',
+    href: '/tim-ve',
+    isVisual: true,
+  },
+  {
+    eyebrow: 'Khám phá Á Đông',
+    title: 'Điểm đến mơ ước, giá hời bất ngờ',
+    description: 'Ưu đãi đặc biệt cho các chặng bay quốc tế',
+    action: 'Xem chi tiết',
+    image:
+      'https://vj-prod-website-cms.s3.ap-southeast-1.amazonaws.com/2-top-banner-mb-1785556231844.jpg',
+    href: '/tim-ve',
+    isVisual: true,
+  },
+  {
+    eyebrow: 'Ưu đãi chớp nhoáng',
+    title: 'Săn deal hời, bay mỏi tay',
+    description: 'Giảm giá sâu cho các khung giờ vàng trong ngày',
+    action: 'Săn ngay',
+    image:
+      'https://vj-prod-website-cms.s3.ap-southeast-1.amazonaws.com/2-topbannermb-1790215742466.jpg',
+    href: '/tim-ve',
+    isVisual: true,
+  },
+  {
+    eyebrow: 'Chào đón mùa lễ hội',
+    title: 'Vui lễ hội, bay cùng bạn bè',
+    description: 'Ưu đãi đặc biệt dành cho nhóm bạn đi cùng nhau',
+    action: 'Đặt chỗ ngay',
+    image:
+      'https://vj-prod-website-cms.s3.ap-southeast-1.amazonaws.com/2topbannermbvn-1791347143265.jpg',
+    href: '/tim-ve',
+    isVisual: true,
+  },
+  {
+    eyebrow: 'Ưu đãi mới nhất',
+    title: 'Bay cùng Vietjet, trọn vẹn niềm vui',
+    description: 'Khám phá những ưu đãi mới nhất từ chúng tôi',
+    action: 'Xem thêm',
+    image: '/images/promos/6.png',
+    href: '/tim-ve',
+    isVisual: true,
   },
   {
     eyebrow: 'Dịch vụ cho trẻ em',
@@ -25,6 +113,7 @@ const promotions = [
     action: 'Xem dịch vụ',
     image: '/assets/images/banners/sky_space.png',
     href: '/dich-vu',
+    isVisual: false,
   },
 ];
 
@@ -52,10 +141,11 @@ export default function PromotionalBannersSection() {
           </p>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {promotions.map((promotion) => (
-            <article
+            <Link
               key={promotion.title}
+              href={promotion.href}
               className="group flex min-h-[330px] overflow-hidden rounded-xl bg-white shadow-[0_8px_24px_rgba(36,36,36,.10)] transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(36,36,36,.16)] focus-within:ring-2 focus-within:ring-[#EC2029] focus-within:ring-offset-2"
             >
               <div className="relative flex flex-1 flex-col justify-end overflow-hidden">
@@ -64,24 +154,34 @@ export default function PromotionalBannersSection() {
                   alt=""
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-tr from-[#EC2029]/90 via-[#8075D6]/55 to-[#2563D4]/45" />
-                <div className="relative p-6 text-white">
-                  <p className="text-[11px] font-extrabold uppercase tracking-[.14em] text-[#FFDD00]">
-                    {promotion.eyebrow}
-                  </p>
-                  <h3 className="mt-2 text-2xl font-black italic leading-tight">
-                    {promotion.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-5 text-white/90">{promotion.description}</p>
-                  <Link
-                    href={promotion.href}
-                    className="mt-5 inline-flex rounded-sm border-2 border-[#FFDD00] bg-[#FFDD00] px-4 py-2 text-sm font-extrabold text-[#333] transition-colors hover:border-white hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                  >
-                    {promotion.action}
-                  </Link>
-                </div>
+                {!promotion.isVisual && (
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-tr from-[#EC2029]/90 via-[#8075D6]/55 to-[#2563D4]/45" />
+                    <div className="relative p-6 text-white">
+                      <p className="text-[11px] font-extrabold uppercase tracking-[.14em] text-[#FFDD00]">
+                        {promotion.eyebrow}
+                      </p>
+                      <h3 className="mt-2 text-2xl font-black italic leading-tight">
+                        {promotion.title}
+                      </h3>
+                      <p className="mt-3 text-sm leading-5 text-white/90">
+                        {promotion.description}
+                      </p>
+                      <div className="mt-5 inline-flex rounded-sm border-2 border-[#FFDD00] bg-[#FFDD00] px-4 py-2 text-sm font-extrabold text-[#333] transition-colors group-hover:border-white group-hover:bg-white">
+                        {promotion.action}
+                      </div>
+                    </div>
+                  </>
+                )}
+                {promotion.isVisual && (
+                  <div className="absolute bottom-4 right-4">
+                    <div className="rounded-sm border-2 border-white bg-white/90 px-3 py-1.5 text-xs font-extrabold text-vjred shadow-sm backdrop-blur-sm transition-colors group-hover:bg-white">
+                      {promotion.action}
+                    </div>
+                  </div>
+                )}
               </div>
-            </article>
+            </Link>
           ))}
         </div>
       </div>

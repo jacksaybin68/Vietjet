@@ -17,13 +17,17 @@ export function SiteOverlays() {
   const [showPromo, setShowPromo] = useState(false);
 
   useEffect(() => {
-    if (!localStorage.getItem(COOKIE_KEY)) setShowCookie(true);
-    if (!sessionStorage.getItem(PROMO_KEY)) setShowPromo(true);
+    const hasCookieDecision = Boolean(localStorage.getItem(COOKIE_KEY));
+    setShowCookie(!hasCookieDecision);
+    setShowPromo(hasCookieDecision && !sessionStorage.getItem(PROMO_KEY));
   }, []);
 
   const decideCookie = (value: 'accepted' | 'rejected') => {
     localStorage.setItem(COOKIE_KEY, value);
     setShowCookie(false);
+    if (!sessionStorage.getItem(PROMO_KEY)) {
+      window.setTimeout(() => setShowPromo(true), 300);
+    }
   };
 
   const closePromo = () => {

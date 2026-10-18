@@ -1,0 +1,402 @@
+{
+  "base": "http://localhost:4028",
+  "results": [
+    {
+      "screen": "01-trang-chu",
+      "requestedUrl": "http://localhost:4028/trang-chu",
+      "stable": true,
+      "probe": {
+        "url": "/trang-chu",
+        "title": "Vietjet - Đặt Vé Máy Bay",
+        "h1": [
+          "Bay cùng Vietjet - Bay là thích ngay"
+        ],
+        "header": true,
+        "footer": true,
+        "overflowX": 0,
+        "bodyText": 8865,
+        "buttons": 56,
+        "inputs": 6,
+        "images": 76,
+        "emptySrcImages": 0,
+        "overlappedBoxes": [],
+        "theme": "light",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "httpErrors": [],
+      "file": "shots/01-trang-chu.png"
+    },
+    {
+      "screen": "02-trang-chu-mobile",
+      "requestedUrl": "http://localhost:4028/trang-chu",
+      "stable": true,
+      "probe": {
+        "url": "/trang-chu",
+        "title": "Vietjet - Đặt Vé Máy Bay",
+        "h1": [
+          "Bay cùng Vietjet - Bay là thích ngay"
+        ],
+        "header": true,
+        "footer": true,
+        "overflowX": 0,
+        "bodyText": 8738,
+        "buttons": 56,
+        "inputs": 6,
+        "images": 76,
+        "emptySrcImages": 0,
+        "overlappedBoxes": [],
+        "theme": "light",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "httpErrors": [],
+      "file": "shots/02-trang-chu-mobile.png"
+    },
+    {
+      "screen": "03-ket-qua-tim-ve",
+      "requestedUrl": "http://localhost:4028/tim-ve?from=HAN&to=SGN&depart=2026-10-19",
+      "stable": true,
+      "probe": {
+        "url": "/tim-ve?from=HAN&to=SGN&depart=2026-10-19",
+        "title": "Vietjet - Đặt Vé Máy Bay",
+        "h1": [],
+        "header": true,
+        "footer": true,
+        "overflowX": 0,
+        "bodyText": 5948,
+        "buttons": 121,
+        "inputs": 8,
+        "images": 3,
+        "emptySrcImages": 0,
+        "overlappedBoxes": [],
+        "theme": "light",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "httpErrors": [],
+      "file": "shots/03-ket-qua-tim-ve.png"
+    },
+    {
+      "screen": "04-ket-qua-tim-ve-mobile",
+      "requestedUrl": "http://localhost:4028/tim-ve?from=HAN&to=SGN&depart=2026-10-19",
+      "stable": true,
+      "probe": {
+        "url": "/tim-ve?from=HAN&to=SGN&depart=2026-10-19",
+        "title": "Vietjet - Đặt Vé Máy Bay",
+        "h1": [],
+        "header": true,
+        "footer": true,
+        "overflowX": 0,
+        "bodyText": 4932,
+        "buttons": 121,
+        "inputs": 8,
+        "images": 3,
+        "emptySrcImages": 0,
+        "overlappedBoxes": [],
+        "theme": "light",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "httpErrors": [],
+      "file": "shots/04-ket-qua-tim-ve-mobile.png"
+    },
+    {
+      "screen": "05-dang-nhap",
+      "requestedUrl": "http://localhost:4028/dang-nhap",
+      "stable": true,
+      "probe": {
+        "url": "/dang-nhap",
+        "title": "Đăng nhập / Đăng ký | Vietjet Air",
+        "h1": [],
+        "header": true,
+        "footer": false,
+        "overflowX": 0,
+        "bodyText": 716,
+        "buttons": 11,
+        "inputs": 3,
+        "images": 4,
+        "emptySrcImages": 0,
+        "overlappedBoxes": [],
+        "theme": "light",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "httpErrors": [],
+      "file": "shots/05-dang-nhap.png"
+    },
+    {
+      "screen": "06-tra-cuu",
+      "requestedUrl": "http://localhost:4028/tra-cuu",
+      "stable": true,
+      "probe": {
+        "url": "/tra-cuu",
+        "title": "Vietjet - Đặt Vé Máy Bay",
+        "h1": [
+          "Tra Cứu Đặt Chỗ"
+        ],
+        "header": true,
+        "footer": true,
+        "overflowX": 0,
+        "bodyText": 1303,
+        "buttons": 7,
+        "inputs": 0,
+        "images": 3,
+        "emptySrcImages": 0,
+        "overlappedBoxes": [],
+        "theme": "light",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "httpErrors": [],
+      "file": "shots/06-tra-cuu.png"
+    },
+    {
+      "screen": "07-lam-thu-tuc",
+      "requestedUrl": "http://localhost:4028/lam-thu-tuc",
+      "stable": true,
+      "probe": {
+        "url": "/lam-thu-tuc",
+        "title": "Vietjet - Đặt Vé Máy Bay",
+        "h1": [
+          "CHECK-IN"
+        ],
+        "header": true,
+        "footer": true,
+        "overflowX": 0,
+        "bodyText": 3450,
+        "buttons": 8,
+        "inputs": 2,
+        "images": 3,
+        "emptySrcImages": 0,
+        "overlappedBoxes": [],
+        "theme": "light",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "httpErrors": [],
+      "file": "shots/07-lam-thu-tuc.png"
+    },
+    {
+      "screen": "08-chuyen-bay-cua-toi",
+      "requestedUrl": "http://localhost:4028/chuyen-bay-cua-toi",
+      "stable": true,
+      "probe": {
+        "url": "/chuyen-bay-cua-toi",
+        "title": "Vietjet - Đặt Vé Máy Bay",
+        "h1": [
+          "CHUYẾN BAY CỦA TÔI"
+        ],
+        "header": true,
+        "footer": true,
+        "overflowX": 0,
+        "bodyText": 1246,
+        "buttons": 12,
+        "inputs": 3,
+        "images": 4,
+        "emptySrcImages": 0,
+        "overlappedBoxes": [],
+        "theme": "light",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "httpErrors": [],
+      "file": "shots/08-chuyen-bay-cua-toi.png"
+    },
+    {
+      "screen": "09-dich-vu-hanh-ly",
+      "requestedUrl": "http://localhost:4028/dich-vu?service=baggage",
+      "stable": true,
+      "probe": {
+        "url": "/dich-vu?service=baggage",
+        "title": "Vietjet - Đặt Vé Máy Bay",
+        "h1": [
+          "Dịch Vụ Chuyến Bay"
+        ],
+        "header": true,
+        "footer": true,
+        "overflowX": 0,
+        "bodyText": 2553,
+        "buttons": 16,
+        "inputs": 0,
+        "images": 3,
+        "emptySrcImages": 0,
+        "overlappedBoxes": [],
+        "theme": "light",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "httpErrors": [],
+      "file": "shots/09-dich-vu-hanh-ly.png"
+    },
+    {
+      "screen": "10-gioi-thieu",
+      "requestedUrl": "http://localhost:4028/gioi-thieu",
+      "stable": true,
+      "probe": {
+        "url": "/gioi-thieu",
+        "title": "Vietjet - Đặt Vé Máy Bay",
+        "h1": [
+          "Về Vietjet Air"
+        ],
+        "header": true,
+        "footer": true,
+        "overflowX": 0,
+        "bodyText": 2129,
+        "buttons": 7,
+        "inputs": 0,
+        "images": 3,
+        "emptySrcImages": 0,
+        "overlappedBoxes": [],
+        "theme": "light",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "httpErrors": [],
+      "file": "shots/10-gioi-thieu.png"
+    },
+    {
+      "screen": "11-hoi-dap",
+      "requestedUrl": "http://localhost:4028/hoi-dap",
+      "stable": true,
+      "probe": {
+        "url": "/hoi-dap",
+        "title": "Vietjet - Đặt Vé Máy Bay",
+        "h1": [
+          "Câu hỏi thường gặp"
+        ],
+        "header": true,
+        "footer": true,
+        "overflowX": 0,
+        "bodyText": 3751,
+        "buttons": 27,
+        "inputs": 1,
+        "images": 3,
+        "emptySrcImages": 0,
+        "overlappedBoxes": [],
+        "theme": "light",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "httpErrors": [],
+      "file": "shots/11-hoi-dap.png"
+    },
+    {
+      "screen": "12-lien-he",
+      "requestedUrl": "http://localhost:4028/lien-he",
+      "stable": true,
+      "probe": {
+        "url": "/lien-he",
+        "title": "Vietjet - Đặt Vé Máy Bay",
+        "h1": [
+          "Liên hệ với chúng tôi"
+        ],
+        "header": true,
+        "footer": true,
+        "overflowX": 0,
+        "bodyText": 1526,
+        "buttons": 8,
+        "inputs": 3,
+        "images": 3,
+        "emptySrcImages": 0,
+        "overlappedBoxes": [],
+        "theme": "light",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "httpErrors": [],
+      "file": "shots/12-lien-he.png"
+    },
+    {
+      "screen": "13-tai-khoan-vi",
+      "requestedUrl": "http://localhost:4028/tai-khoan",
+      "stable": true,
+      "probe": {
+        "url": "/tai-khoan",
+        "title": "Vietjet - Đặt Vé Máy Bay",
+        "h1": [],
+        "header": true,
+        "footer": true,
+        "overflowX": 0,
+        "bodyText": 2196,
+        "buttons": 27,
+        "inputs": 0,
+        "images": 9,
+        "emptySrcImages": 0,
+        "overlappedBoxes": [],
+        "theme": "light",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "httpErrors": [],
+      "file": "shots/13-tai-khoan-vi.png"
+    },
+    {
+      "screen": "14-quan-tri-tong-quan",
+      "requestedUrl": "http://localhost:4028/quan-tri",
+      "stable": true,
+      "probe": {
+        "url": "/quan-tri",
+        "title": "Vietjet - Đặt Vé Máy Bay",
+        "h1": [],
+        "header": true,
+        "footer": false,
+        "overflowX": 0,
+        "bodyText": 1373,
+        "buttons": 32,
+        "inputs": 0,
+        "images": 0,
+        "emptySrcImages": 0,
+        "overlappedBoxes": [],
+        "theme": "light",
+        "bg": "rgb(255, 255, 255)"
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "httpErrors": [],
+      "file": "shots/14-quan-tri-tong-quan.png"
+    }
+  ],
+  "widget": {
+    "launcherFound": true,
+    "panel": {
+      "statusLabel": "Đang trực tuyến • Ollama qwen3:1.7b",
+      "hasInput": true,
+      "inputPlaceholder": "Hỏi trợ lý OpenClaw..."
+    },
+    "file": "shots/15-openclaw-widget.png",
+    "send": {
+      "typed": true,
+      "clicked": true
+    },
+    "afterSend": {
+      "hasOfflineNotice": false,
+      "hasErrorBubble": false,
+      "tail": " website, vui lòng nhấn “đồng ý” để chấp nhận việc sử dụng cookies và không hiển thị thông báo này trong lần truy cập tiếp theo. Để tìm hiểu về cookies và cách quản lý cookies, vui lòng bấm vào đây. Từ chối tất cả Đồng ý"
+    },
+    "afterSendFile": "shots/16-openclaw-sau-khi-gui.png"
+  },
+  "logins": {
+    "user": {
+      "status": 200,
+      "role": "user"
+    },
+    "admin": {
+      "status": 200,
+      "role": "admin"
+    }
+  }
+}

@@ -278,27 +278,32 @@ describe('nhập lượt thu được (sau "xác nhận")', () => {
 
   it('lượt nặng gần như thật → INSERT với giá economy = giá rẻ nhất, Thương gia 2.77×', async () => {
     const { sql } = await import('@/lib/neon');
-    const result = await importWebFlights({ from: 'SGN', to: 'HAN' }, TOMORROW, [
-      {
-        flightNo: 'VJ 310',
-        from: 'SGN',
-        to: 'HAN',
-        departTime: '06:00',
-        arriveTime: '08:10',
-        price: 1150000,
-        fares: [],
-      },
-      // Bay trá đêm: 22:30 → 00:45 (+1 ngày)
-      {
-        flightNo: 'VJ 320',
-        from: 'SGN',
-        to: 'HAN',
-        departTime: '22:30',
-        arriveTime: '00:45',
-        price: 700000,
-        fares: [],
-      },
-    ]);
+    const result = await importWebFlights(
+      { from: 'SGN', to: 'HAN' },
+      TOMORROW,
+      [
+        {
+          flightNo: 'VJ 310',
+          from: 'SGN',
+          to: 'HAN',
+          departTime: '06:00',
+          arriveTime: '08:10',
+          price: 1150000,
+          fares: [],
+        },
+        // Bay trá đêm: 22:30 → 00:45 (+1 ngày)
+        {
+          flightNo: 'VJ 320',
+          from: 'SGN',
+          to: 'HAN',
+          departTime: '22:30',
+          arriveTime: '00:45',
+          price: 700000,
+          fares: [],
+        },
+      ],
+      0
+    );
     expect(result.imported).toEqual(['VJ 310 06:00', 'VJ 320 22:30']);
     expect(result.skipped).toEqual([]);
     const sqlMock = sql as unknown as { mock: { calls: Array<Array<unknown>> } };

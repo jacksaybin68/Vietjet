@@ -13,7 +13,16 @@ export async function POST(req: NextRequest) {
     if (error) return response;
 
     const body = await req.json();
-    const { from, to, date, wafCookie, importOnSuccess = false, action, flights } = body || {};
+    const {
+      from,
+      to,
+      date,
+      wafCookie,
+      importOnSuccess = false,
+      action,
+      flights,
+      discountVnd,
+    } = body || {};
 
     if (!from || !to || !date) {
       return NextResponse.json(
@@ -45,7 +54,8 @@ export async function POST(req: NextRequest) {
       const importResult = await importWebFlights(
         { from: fromCode, to: toCode },
         dateStr,
-        flights as WebFlight[]
+        flights as WebFlight[],
+        typeof discountVnd === 'number' ? discountVnd : undefined
       );
       return NextResponse.json({
         success: true,
@@ -120,7 +130,8 @@ export async function POST(req: NextRequest) {
       const importResult = await importWebFlights(
         { from: fromCode, to: toCode },
         dateStr,
-        scheduleResult.flights
+        scheduleResult.flights,
+        typeof discountVnd === 'number' ? discountVnd : undefined
       );
       return NextResponse.json({
         ...scheduleResult,

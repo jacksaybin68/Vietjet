@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthRequest } from '@/lib/auth';
 import { isAdminRole } from '@/lib/roles';
-import { getBookingById } from '@/lib/db';
+import { getBookingById, getFlightById } from '@/lib/db';
 import { sql } from '@/lib/neon';
 import { searchCheckIn, createCheckIn, getCheckInStatusByBookingId } from '@/lib/db';
 import { rateLimit } from '@/lib/rate-limit';
@@ -23,10 +23,7 @@ export async function GET(request: NextRequest) {
 
     if (!bookingCode || !lastName) {
       return NextResponse.json(
-        {
-          error: 'Bad Request',
-          message: 'Missing required parameters: bookingCode, lastName',
-        },
+        { error: 'Bad Request', message: 'Mã đặt chỗ và họ là bắt buộc' },
         { status: 400 }
       );
     }
@@ -35,11 +32,7 @@ export async function GET(request: NextRequest) {
 
     if (!result) {
       return NextResponse.json(
-        {
-          success: false,
-          error: 'Not Found',
-          message: 'Không tìm thấy thông tin đặt chỗ hoặc tên hành khách không khớp',
-        },
+        { error: 'Not Found', message: 'Không tìm thấy đặt chỗ phù hợp' },
         { status: 404 }
       );
     }
@@ -48,23 +41,9 @@ export async function GET(request: NextRequest) {
     const hasCheckIn = result.checkIn !== null;
 
     return NextResponse.json({
-      success: true,
-      booking: {
-        id: result.booking.id,
-        booking_code: result.booking.booking_code,
-        status: result.booking.status,
-        flightId: result.booking.flight_id,
-        totalPrice: result.booking.total_price,
-        createdAt: result.booking.created_at,
-        flight_no: result.booking.flight_no,
-        from_code: result.booking.from_code,
-        to_code: result.booking.to_code,
-        depart_time: result.booking.depart_time,
-        arrive_time: result.booking.arrive_time,
-      },
-      passengers: result.passengers,
+      booking: result.booking,
+      checkIn: result.checkIn,
       hasCheckIn,
-      checkIn: hasCheckIn ? result.checkIn : null,
     });
   } catch (error) {
     console.error('Check-in search error:', error);
@@ -124,6 +103,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Forbidden', message: 'Không có quyền truy cập' },
         { status: 403 }
+      );
+    }
+
+    // Only confirmed bookings can be checked in. Cancelled / refunded /
+    // completed bookings must not issue a boarding pass.
+    if (booking.status !== 'confirmed') {
+      return NextResponse.json(
+        {
+          error: 'Booking not payable',
+          message: `Không thể check-in đặt chỗ có trạng thái '${booking.status}'.`,
+        },
+        { status: 400 }
+      );
+    }
+
+    // The flight must not already have departed or completed.
+    const flight = await getFlightById(booking.flight_id);
+    if (!flight) {
+      return NextResponse.json(
+        { error: 'Not Found', message: 'Không tìm thấy chuyến bay' },
+        { status: 404 }
+      );
+    }
+    if (['departed', 'completed', 'cancelled'].includes(flight.status)) {
+      return NextResponse.json(
+        {
+          error: 'Flight not check-inable',
+          message: `Chuyến bay đã ${flight.status}, không thể check-in.`,
+        },
+        { status: 400 }
       );
     }
 

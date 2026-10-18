@@ -526,6 +526,13 @@ function DiscountModal({
     e.preventDefault();
     setIsSaving(true);
     try {
+      // Mã giảm giá chỉ chấp nhận 6–8 ký tự, bao gồm chữ hoa và số.
+      const trimmedCode = formData.code.trim();
+      if (!/^[A-Z0-9]{6,8}$/.test(trimmedCode)) {
+        onToast?.error('Lỗi', 'Mã giảm giá phải có từ 6 đến 8 ký tự, chỉ chứa chữ hoa và số');
+        return;
+      }
+
       const url = discount
         ? `/api/quan-tri/ma-giam-gia/${discount.id}`
         : '/api/quan-tri/ma-giam-gia';

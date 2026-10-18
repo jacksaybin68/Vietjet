@@ -80,7 +80,7 @@ export default function RootLayout({
 
         {/* Vietjet Air is a local booking simulator and is intentionally not indexed as the official airline site. */}
       </head>
-      <body className="bg-[var(--background)] text-[var(--foreground)]">
+      <body className="bg-[var(--background)] pb-[calc(60px+env(safe-area-inset-bottom))] text-[var(--foreground)] lg:pb-0">
         {/* Rocket Extension message handler - Suppress unknown message type warnings */}
         <script
           dangerouslySetInnerHTML={{
@@ -100,8 +100,11 @@ export default function RootLayout({
         />
         <NextTopLoader color="#EC2029" showSpinner={false} />
         <NavigationOptimizer />
-        {/* Clears the mobile bottom bar so it never covers page content. */}
-        <div className="pb-[calc(60px+env(safe-area-inset-bottom))] lg:pb-0" />
+        {/* Khoảng chừa cho thanh điều hướng dưới ở mobile nằm trên `<body>`
+            (`pb-[calc(60px+…)] lg:pb-0`). Trước đây nó là một `<div />` rỗng
+            ngay tại đây — padding đáy của một hộp rỗng không đẩy được nội dung
+            lên, nên nó chỉ tạo thêm 60px trắng phía trên mọi trang mobile mà
+            không hề che được thanh dưới. */}
         <MobileBottomNav />
         <ThemeProvider>
           <AuthProvider>

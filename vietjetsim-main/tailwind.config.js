@@ -18,6 +18,11 @@ module.exports = {
         vjpurple: '#8075D6',
         vjblue: '#2563D4',
         vjdark: '#333333',
+        vjamber: '#FBB612',
+        vjbgs: '#E9F2FB',
+        vjbrown: '#B8860B',
+        vjegreen: '#7CB342',
+        vjpanelblue: '#B3E5FC',
         surface: '#F7F7F7',
         primary: {
           DEFAULT: '#EC2029',

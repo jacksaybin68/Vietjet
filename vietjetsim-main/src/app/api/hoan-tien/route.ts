@@ -113,6 +113,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Cannot refund more than the booking was actually worth.
+    if (refundAmount > booking.total_price) {
+      return NextResponse.json(
+        {
+          error: 'Refund amount too high',
+          message: `Số tiền hoàn không được vượt quá ${booking.total_price.toLocaleString(
+            'vi-VN'
+          )} VND (tổng tiền đặt chỗ).`,
+        },
+        { status: 400 }
+      );
+    }
+
     const refund = await createRefund({
       booking_id: booking.id,
       user_id: payload.userId,

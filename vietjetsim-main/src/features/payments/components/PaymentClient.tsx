@@ -1170,6 +1170,25 @@ export default function PaymentClient() {
                               </div>
                             </div>
 
+                            {/* VietQR Quick Scan */}
+                            <div className="flex flex-col items-center justify-center p-4 bg-white border-t border-[var(--border)]">
+                              <span className="text-xs font-bold text-primary uppercase tracking-wider mb-2">
+                                Quét mã VietQR thanh toán tự động
+                              </span>
+                              <div className="p-2 bg-white rounded-2xl border-2 border-primary/20 shadow-md">
+                                <img
+                                  src={`https://img.vietqr.io/image/${selectedAdminAccount.bank_bin || 'MB'}-${selectedAdminAccount.admin_bank_account_number}-compact2.png?amount=${total}&addInfo=${encodeURIComponent(transferNote)}&accountName=${encodeURIComponent(selectedAdminAccount.admin_bank_account_holder)}`}
+                                  alt="VietQR Mã thanh toán tự động"
+                                  className="w-44 h-44 sm:w-52 sm:h-52 object-contain"
+                                  loading="lazy"
+                                />
+                              </div>
+                              <p className="text-[11px] text-[var(--foreground-subtle)] text-center mt-2 max-w-xs">
+                                Mở ứng dụng Ngân hàng (VCB, MB, Techcombank, VPBank...) để quét mã
+                                tự động điền STK và nội dung.
+                              </p>
+                            </div>
+
                             <div className="bg-[var(--foreground)] p-3 flex items-center justify-center gap-2">
                               <Icon
                                 name="ShieldCheckIcon"

@@ -21,6 +21,7 @@ import { FLIGHT_NO_PATTERN, normalizeFlightNo } from '@/lib/flight-no';
 import { toVietnamInstant, toVietnamWallClock } from '@/lib/utils';
 import BulkCollectPanel from './BulkCollectPanel';
 import AutoSyncSettingsPanel from './AutoSyncSettingsPanel';
+import BulkPriceAdjustmentModal from './BulkPriceAdjustmentModal';
 
 interface ToastAPI {
   success: (title: string, message?: string, options?: object) => void;
@@ -188,8 +189,8 @@ function toFlightRow(f: AdminFlight): Flight {
     // fallbacks mirror the server-side ladder for rows predating 030.
     economyPrice: Number(f.economy_price ?? f.price) || 0,
     businessPrice: Number(f.business_price ?? f.price) || 0,
-    capacity: Number(f.available ?? f.available_seats ?? 0) || 0,
-    booked: Math.floor(Math.random() * (Number(f.available ?? f.available_seats ?? 1) || 1)),
+    capacity: Number(f.available ?? f.available_seats ?? 180) || 180,
+    booked: Math.max(0, 180 - (Number(f.available ?? f.available_seats ?? 180) || 180)),
     status: (f.status as FlightStatus) || 'active',
   };
 }
@@ -217,6 +218,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
 
   // ─── OpenClaw Web Collection State ──────────────────────────────────────────
   const [showWebCollectPanel, setShowWebCollectPanel] = useState(true);
+  const [showBulkPriceModal, setShowBulkPriceModal] = useState(false);
   const [activeWebTab, setActiveWebTab] = useState<'network' | 'schedule' | 'bulk' | 'auto'>(
     'network'
   );
@@ -706,6 +708,14 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
             >
               <Icon name="GlobeAltIcon" size={14} />
               Thu thập dữ liệu web
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowBulkPriceModal(true)}
+              className={`${ADMIN_ACTION_BTN} bg-amber-600 hover:bg-amber-700 text-white`}
+            >
+              <Icon name="CurrencyDollarIcon" size={14} />
+              Điều chỉnh giá vé
             </button>
             <button
               onClick={() => setShowAddModal(true)}
@@ -2468,6 +2478,14 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
           </div>
         </div>
       )}
+
+      {/* Modal Điều chỉnh giá vé hàng loạt */}
+      <BulkPriceAdjustmentModal
+        isOpen={showBulkPriceModal}
+        onClose={() => setShowBulkPriceModal(false)}
+        onSuccess={fetchFlights}
+        onToast={onToast}
+      />
     </div>
   );
 }

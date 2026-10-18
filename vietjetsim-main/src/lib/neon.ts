@@ -25,6 +25,10 @@ if (hasRealDb) {
   if (process.env.NEON_FETCH_ENDPOINT) {
     neonConfig.fetchEndpoint = process.env.NEON_FETCH_ENDPOINT;
   }
+} else if (process.env.NODE_ENV === 'production') {
+  // Never fall back to the mock database in production: that would silently
+  // serve in-memory data instead of the real store.
+  throw new Error('DATABASE_URL is required in production');
 } else {
   // Mock implementation for development without DB
   console.warn('⚠️  DATABASE_URL not set. Using mock database. Do not use in production.');

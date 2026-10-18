@@ -1,60 +1,11 @@
 'use client';
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { AppImage } from '@/shared/components/ui';
-import { PopularRoutesSkeleton } from '@/shared/components/ui';
-import {
-  FaPlane,
-  FaSuitcaseRolling,
-  FaShieldAlt,
-  FaTicketAlt,
-  FaShoppingCart,
-} from 'react-icons/fa';
-import { MdCheckCircle, MdArrowForward } from 'react-icons/md';
-
-const SERVICES = [
-  { label: 'Đặt vé máy bay', href: '/tim-ve', Icon: FaPlane, iconBg: '#EC2029' },
-  {
-    label: 'Mua hành lý & bữa ăn',
-    href: '/tim-ve',
-    Icon: FaSuitcaseRolling,
-    iconBg: '#10b981',
-  },
-  { label: 'Check-in ưu tiên', href: '/tim-ve', Icon: MdCheckCircle, iconBg: '#0ea5e9' },
-  { label: 'Duty Free', href: '/trang-chu', Icon: FaShoppingCart, iconBg: '#D91A21' },
-  { label: 'Bảo hiểm du lịch', href: '/trang-chu', Icon: FaShieldAlt, iconBg: '#f59e0b' },
-  { label: 'Vietjet e-Voucher', href: '/trang-chu', Icon: FaTicketAlt, iconBg: '#7c3aed' },
-];
-
-const PROMO_BANNERS = [
-  {
-    id: 1,
-    image: '/images/hero/download-6.jpg',
-    alt: 'Jet Cafe - Bua an tuoi ngon tren chuyen bay Vietjet',
-    label: 'Enjoy flying',
-    title: 'Jet Café',
-    subtitle: '9 món ăn tươi ngon',
-    cta: 'Đặt ngay',
-  },
-  {
-    id: 2,
-    image: '/images/hero/download-1.jpg',
-    alt: 'Bao hiem du lich toan dien cho hanh khach Vietjet',
-    label: 'Bảo hiểm',
-    title: 'An tâm bay',
-    subtitle: 'Bảo hiểm toàn diện',
-    cta: 'Mua ngay',
-  },
-  {
-    id: 3,
-    image: '/images/hero/download-7.jpg',
-    alt: 'Dich vu chuyen phat nhanh hang hoa Vietjet Cargo',
-    label: 'Chuyển phát',
-    title: 'Gửi hàng nhanh',
-    subtitle: 'Giao hàng trong ngày',
-    cta: 'Tìm hiểu',
-  },
-];
+import { FaPlane } from 'react-icons/fa';
+import { MdArrowForward } from 'react-icons/md';
+import AppImage from '@/shared/components/ui/AppImage';
+import { SERVICES } from './ServiceIconsSection';
+import { PROMO_BANNERS } from './LargePromoBanners';
 
 const POPULAR_ROUTES = [
   {
@@ -114,7 +65,7 @@ const POPULAR_ROUTES = [
 ];
 
 const TAG_COLORS: Record<string, { bg: string; text: string }> = {
-  'Phổ biến nhất': { bg: 'rgba(227, 6, 19, 0.10)', text: '#EC2029' },
+  'Phổ biến nhất': { bg: 'rgba(227, 6, 19, 0.10)', text: 'var(--primary, #EC2029)' },
   'Giá tốt': { bg: 'rgba(16,185,129,0.12)', text: '#059669' },
   Hot: { bg: 'rgba(249,115,22,0.12)', text: '#ea580c' },
   'Nghỉ dưỡng': { bg: 'rgba(14,165,233,0.12)', text: '#0284c7' },
@@ -125,19 +76,12 @@ const TAG_COLORS: Record<string, { bg: string; text: string }> = {
 export default function PopularRoutesSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const routesHeaderRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
   const promoHeaderRef = useRef<HTMLDivElement>(null);
   const promoBannerImgRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [loading, setLoading] = useState(true);
-  const rafRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1000);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Intersection observer — staggered reveal
   useEffect(() => {
-    if (loading) return;
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -154,7 +98,7 @@ export default function PopularRoutesSection() {
     );
     elements?.forEach((el) => observer?.observe(el));
     return () => observer?.disconnect();
-  }, [loading]);
+  }, []);
 
   // Parallax scroll handler
   const handleScroll = useCallback(() => {
@@ -168,36 +112,17 @@ export default function PopularRoutesSection() {
         const progress = (viewH / 2 - (rect.top + rect.height / 2)) / viewH;
         routesHeaderRef.current.style.transform = `translateY(${progress * 16}px)`;
       }
-
-      // Promo section header parallax
-      if (promoHeaderRef.current) {
-        const rect = promoHeaderRef.current.getBoundingClientRect();
-        const progress = (viewH / 2 - (rect.top + rect.height / 2)) / viewH;
-        promoHeaderRef.current.style.transform = `translateY(${progress * 14}px)`;
-      }
-
-      // Promo banner image parallax
-      promoBannerImgRefs.current.forEach((imgWrapper) => {
-        if (!imgWrapper) return;
-        const rect = imgWrapper.getBoundingClientRect();
-        const cardCenter = rect.top + rect.height / 2;
-        const relativePos = (viewH / 2 - cardCenter) / viewH;
-        imgWrapper.style.transform = `translateY(${relativePos * 32}px) scale(1.14)`;
-      });
     });
   }, []);
 
   useEffect(() => {
-    if (loading) return;
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => {
       window.removeEventListener('scroll', handleScroll);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [loading, handleScroll]);
-
-  if (loading) return <PopularRoutesSkeleton />;
+  }, [handleScroll]);
 
   return (
     <section ref={sectionRef} className="bg-whiteoverflow-hidden">
@@ -218,7 +143,7 @@ export default function PopularRoutesSection() {
               >
                 <div
                   className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center text-white shadow-sm group-hover:shadow-md group-hover:scale-110 transition-all duration-300"
-                  style={{ background: service?.iconBg }}
+                  style={{ background: service?.color }}
                 >
                   <service.Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5" />
                 </div>
@@ -348,7 +273,7 @@ export default function PopularRoutesSection() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 md:gap-4">
             {PROMO_BANNERS?.map((banner, i) => (
               <div
-                key={banner?.id}
+                key={banner?.title || `promo-${i}`}
                 style={{
                   transitionDelay: `${i * 110}ms`,
                   transitionDuration: '0.7s',
@@ -367,7 +292,7 @@ export default function PopularRoutesSection() {
                   >
                     <AppImage
                       src={banner?.image}
-                      alt={banner?.alt}
+                      alt={banner?.title || ''}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 640px) 100vw, 33vw"
@@ -383,13 +308,13 @@ export default function PopularRoutesSection() {
                       fontWeight: 700,
                     }}
                   >
-                    {banner?.label}
+                    {banner?.title}
                   </div>
                   <h3 className="text-sm md:text-base sm:text-lg font-black text-white leading-tight font-body">
                     {banner?.title}
                   </h3>
                   <p className="text-[10px] md:text-xs mt-0.5 mb-1.5 sm:mb-2 font-koho">
-                    {banner?.subtitle}
+                    {banner?.description}
                   </p>
                   <span
                     className="inline-block text-[10px] md:text-xs font-black px-2.5 md:px-3 py-1 md:py-1.5 rounded-lg text-navy"
@@ -399,7 +324,7 @@ export default function PopularRoutesSection() {
                       fontWeight: 800,
                     }}
                   >
-                    {banner?.cta}
+                    {banner?.action}
                   </span>
                 </div>
               </div>
