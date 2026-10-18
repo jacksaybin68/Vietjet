@@ -81,6 +81,12 @@ export default function RootLayout({
         {/* Vietjet Air is a local booking simulator and is intentionally not indexed as the official airline site. */}
       </head>
       <body className="bg-[var(--background)] pb-[calc(60px+env(safe-area-inset-bottom))] text-[var(--foreground)] lg:pb-0">
+        <a
+          href="#main-content"
+          className="vj-skip-link sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-[var(--primary)] focus:px-4 focus:py-2 focus:font-bold focus:text-white"
+        >
+          Bỏ qua tới nội dung chính
+        </a>
         {/* Rocket Extension message handler - Suppress unknown message type warnings */}
         <script
           dangerouslySetInnerHTML={{
@@ -108,7 +114,9 @@ export default function RootLayout({
         <MobileBottomNav />
         <ThemeProvider>
           <AuthProvider>
-            <PageTransition>{children}</PageTransition>
+            <main id="main-content">
+              <PageTransition>{children}</PageTransition>
+            </main>
             <ChatWidgets />
             <SiteOverlays />
           </AuthProvider>

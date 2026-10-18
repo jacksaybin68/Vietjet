@@ -15,6 +15,14 @@ const PROJECT_ROOT = path.resolve(process.cwd());
 
 // Files/dirs the editor must never read or write.
 const IGNORED_NAMES = new Set(['node_modules', '.next', '.git', '.env', '.env.local']);
+
+// Next.js build output beyond the default `.next`: `next.config.mjs` honours
+// `DIST_DIR`, and the UI gate builds into `.next-uicheck` for that reason. A
+// build directory holds thousands of files, several of them named
+// `node_modules_*.js`, so browsing the tree would leak the whole build. Match
+// the family, and only directories — a project file may legitimately be
+// dot-named.
+const isBuildDir = (name: string) => name === '.next' || name.startsWith('.next-');
 const SENSITIVE_PATTERNS = [
   /^\.env($|\.)/,
   /(^|\/)\.git($|\/)/,
@@ -56,6 +64,7 @@ function getFileTree(dir: string, baseDir: string = ''): FileTreeNode[] {
   for (const entry of entries) {
     if (
       IGNORED_NAMES.has(entry.name) ||
+      (entry.isDirectory() && isBuildDir(entry.name)) ||
       entry.name.startsWith('.DS_Store') ||
       isSensitive(path.join(baseDir, entry.name))
     ) {

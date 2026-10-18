@@ -1,6 +1,17 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import HeroSection from '@/app/trang-chu/components/HeroSection';
+
+describe('RootLayout skip link (Phase 1 a11y)', () => {
+  it('layout chứa skip link tới #main-content', () => {
+    const layoutSrc = fs.readFileSync(path.join(__dirname, '..', 'app', 'layout.tsx'), 'utf-8');
+    expect(layoutSrc).toContain('href="#main-content"');
+    expect(layoutSrc).toContain('id="main-content"');
+    expect(layoutSrc).toContain('Bỏ qua tới nội dung chính');
+  });
+});
 
 describe('HeroSection Banner', () => {
   it('renders the flight search form', () => {

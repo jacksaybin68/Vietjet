@@ -55,7 +55,7 @@ function formatVND(n: number) {
 export default function AttractiveDestinationsSection() {
   return (
     <section className="bg-gradient-to-b from-stone-50 to-white py-12 sm:py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-10">
           <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-primary mb-2">
             Điểm đến hấp dẫn

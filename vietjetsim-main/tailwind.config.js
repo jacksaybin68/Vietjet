@@ -3,6 +3,12 @@ module.exports = {
   content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
   theme: {
     extend: {
+      fontSize: {
+        // Thang chuẩn Phase 1: 12, 14, 16, 20, 24, 32, 40px.
+        // text-4xl của Tailwind = 36px nên thêm 2xl2/5xl2 để thay text-[40px].
+        '2xl2': ['2.5rem', { lineHeight: '3rem' }],
+        '5xl2': ['2.5rem', { lineHeight: '2.75rem' }],
+      },
       fontFamily: {
         sans: ['KoHo', 'Be Vietnam Pro', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         display: ['Be Vietnam Pro', 'KoHo', 'ui-sans-serif', 'system-ui', 'sans-serif'],
@@ -99,6 +105,7 @@ module.exports = {
       backgroundImage: {
         // Gradient tokens mirroring vietjetair.com: the menu bar / date-picker
         // toolbar use the red sweep, CTA buttons use the gold sweep.
+        // (gradient-vj-* là alias cũ, giữ tạm để không vỡ class đang dùng.)
         'gradient-vj': 'linear-gradient(180deg, #D91A21 34.8%, #6F0000 182.34%)',
         'gradient-red-vj': 'linear-gradient(180deg, #D91A21 34.8%, #6F0000 182.34%)',
         'gradient-vj-red': 'linear-gradient(180deg, #D91A21 34.8%, #6F0000 182.34%)',
