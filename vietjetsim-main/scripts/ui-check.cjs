@@ -8,6 +8,9 @@
  * box trùng khung, ảnh `src` rỗng), rồi chụp ảnh. Không cần dependency nào —
  * Node có sẵn `fetch` + `WebSocket`.
  *
+ * Mỗi màn hình được chụp ở cả ba viewport canonical (xem `VIEWPORTS`) — desktop
+ * 1440×900, tablet 768×1024, mobile 390×844 — nên tổng số ảnh là 3× số màn hình.
+ *
  * Đây là phần bù cho `test:smoke`: smoke khẳng định HTTP của server, còn script
  * này khẳng định trang *render ra* mà không có lỗi ở phía trình duyệt — đúng chỗ
  * mà một lỗi như `src=""` tải lại cả trang hay một prefetch 404 chỉ hiện ra.
@@ -47,6 +50,18 @@ const RESULTS_URL = `${BASE}/tim-ve?from=HAN&to=SGN&depart=${TOMORROW}`;
 
 const ADMIN = { email: 'admin@vietjetair.vn', password: 'admin123' };
 const USER = { email: 'user@vietjetair.vn', password: 'user123' };
+
+/**
+ * Bộ viewport canonical (khớp mục 2 của kế hoạch đối chiếu). Mọi màn hình được
+ * chụp ở cả ba: `desktop` 1440×900, `tablet` 768×1024, `mobile` 390×844.
+ * `tablet` trước đây chưa từng được kiểm tra, dù đây là breakpoint dễ vỡ nhất
+ * với header nhiều tầng + drawer.
+ */
+const VIEWPORTS = [
+  { label: 'desktop', width: 1440, height: 900, mobile: false },
+  { label: 'tablet', width: 768, height: 1024, mobile: true },
+  { label: 'mobile', width: 390, height: 844, mobile: true },
+];
 
 class Cdp {
   constructor(ws) {
@@ -285,13 +300,15 @@ async function main() {
     state.httpErrors.length = 0;
   };
 
-  const capture = async (name, url, options = {}) => {
+  const capture = async (name, url, { viewport = VIEWPORTS[0], interact } = {}) => {
     reset();
-    const stability = await goto(cdp, url, options);
+    const stability = await goto(cdp, url, viewport);
     const probe = await evaluate(cdp, PROBE);
-    const file = await shot(cdp, name);
+    const screen = `${name}-${viewport.label}`;
+    const file = await shot(cdp, screen);
     results.push({
-      screen: name,
+      screen,
+      viewport: viewport.label,
       requestedUrl: url,
       stable: stability.stable,
       probe,
@@ -300,30 +317,27 @@ async function main() {
       // 401 là chủ ý ở các trang cần session; các mã khác mới đáng báo.
       httpErrors: state.httpErrors.filter((e) => !e.startsWith('401 ')),
       file,
-      ...(options.interact ? await options.interact(cdp) : {}),
+      ...(interact ? await interact(cdp) : {}),
     });
   };
 
-  await capture('01-trang-chu', `${BASE}/trang-chu`);
-  await capture('02-trang-chu-mobile', `${BASE}/trang-chu`, {
-    width: 390,
-    height: 844,
-    mobile: true,
-  });
-  await capture('03-ket-qua-tim-ve', RESULTS_URL);
-  await capture('04-ket-qua-tim-ve-mobile', RESULTS_URL, {
-    width: 390,
-    height: 844,
-    mobile: true,
-  });
-  await capture('05-dang-nhap', `${BASE}/dang-nhap`);
-  await capture('06-tra-cuu', `${BASE}/tra-cuu`);
-  await capture('07-lam-thu-tuc', `${BASE}/lam-thu-tuc`);
-  await capture('08-chuyen-bay-cua-toi', `${BASE}/chuyen-bay-cua-toi`);
-  await capture('09-dich-vu-hanh-ly', `${BASE}/dich-vu?service=baggage`);
-  await capture('10-gioi-thieu', `${BASE}/gioi-thieu`);
-  await capture('11-hoi-dap', `${BASE}/hoi-dap`);
-  await capture('12-lien-he', `${BASE}/lien-he`);
+  // Một màn hình ở cả ba viewport canonical. Thứ tự desktop → tablet → mobile
+  // để ảnh desktop vẫn là cái nhìn đầu tiên khi đọc report.
+  const captureAll = async (name, url) => {
+    for (const viewport of VIEWPORTS) await capture(name, url, { viewport });
+  };
+
+  // 10 route công khai, mỗi route ở cả ba viewport canonical.
+  await captureAll('01-trang-chu', `${BASE}/trang-chu`);
+  await captureAll('02-ket-qua-tim-ve', RESULTS_URL);
+  await captureAll('03-dang-nhap', `${BASE}/dang-nhap`);
+  await captureAll('04-tra-cuu', `${BASE}/tra-cuu`);
+  await captureAll('05-lam-thu-tuc', `${BASE}/lam-thu-tuc`);
+  await captureAll('06-chuyen-bay-cua-toi', `${BASE}/chuyen-bay-cua-toi`);
+  await captureAll('07-dich-vu-hanh-ly', `${BASE}/dich-vu?service=baggage`);
+  await captureAll('08-gioi-thieu', `${BASE}/gioi-thieu`);
+  await captureAll('09-hoi-dap', `${BASE}/hoi-dap`);
+  await captureAll('10-lien-he', `${BASE}/lien-he`);
 
   const login = async (who) => {
     await goto(cdp, `${BASE}/dang-nhap`);
@@ -343,9 +357,14 @@ async function main() {
   };
 
   const userLogin = await login(USER);
-  await capture('13-tai-khoan-vi', `${BASE}/tai-khoan`);
+  await captureAll('11-tai-khoan-vi', `${BASE}/tai-khoan`);
   const adminLogin = await login(ADMIN);
-  await capture('14-quan-tri-tong-quan', `${BASE}/quan-tri`);
+  // `/quan-tri` là console nghiệp vụ desktop-first (AGENTS.md: "không ép giao
+  // diện public lên console nghiệp vụ"), nên kiểm desktop + tablet và bỏ mobile
+  // — bảng dữ liệu dày không có thiết kế mobile để đối chiếu.
+  for (const viewport of VIEWPORTS.filter((v) => v.label !== 'mobile')) {
+    await capture('12-quan-tri-tong-quan', `${BASE}/quan-tri`, { viewport });
+  }
 
   // ── Widget OpenClaw: mở panel, đọc nhãn backend và thử gửi một câu ─────────
   const widgetLauncher = `[...document.querySelectorAll('button')].find((b) => (b.getAttribute('aria-label') || '').includes('OpenClaw'))`;
@@ -367,7 +386,7 @@ async function main() {
         };
       })()`
     );
-    widget.file = await shot(cdp, '15-openclaw-widget');
+    widget.file = await shot(cdp, '13-openclaw-widget');
 
     // Gửi thử một câu để xem luồng chat thật (Ollama ngoại tuyến ⇒ phải trả lời
     // lịch sự, không được hiện khung trống hay lỗi).
@@ -397,7 +416,7 @@ async function main() {
           };
         })()`
       );
-      widget.afterSendFile = await shot(cdp, '16-openclaw-sau-khi-gui');
+      widget.afterSendFile = await shot(cdp, '14-openclaw-sau-khi-gui');
     }
   }
 

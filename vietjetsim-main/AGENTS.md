@@ -13,7 +13,7 @@ npm run lint       # eslint .   (NOT `next lint` ‚Äî that is removed in Next
 npm run lint:fix   # eslint . --fix
 npm run test:migrations # 4 migration passes on throwaway Docker Postgres (needs Docker)
 npm run test:smoke # post-build HTTP assertions against a running server
-npm run test:ui    # headless Chrome render check of 14 screens (needs build + start + Chrome)
+npm run test:ui    # headless Chrome render check of 35 screens (3 viewports × routes; needs build + start + Chrome)
 ```
 
 Lint/format rules live in `eslint.config.mjs` (flat config, prettier printWidth 100,
@@ -1089,7 +1089,7 @@ persistence flows are out of scope. Point it elsewhere with `SMOKE_BASE_URL`.
 Protocol and asserts the *browser* side that smoke cannot see: no `console.error`, no JS
 exception, no non-401 HTTP error, no horizontal overflow, no overlapping boxes, no
 `<img>` with an empty `src`, and no capture taken while a `.skeleton-*` is still on
-screen. It screenshots 14 screens (plus the OpenClaw widget) and exits non-zero if any
+screen. It screenshots 35 screens (plus the OpenClaw widget) and exits non-zero if any
 screen has a flag, so it works as a gate. **Run it against a production build** (`npm run
 build && npm start`) — this is where the difference is load-bearing: `next dev` does not
 prefetch, so `router.prefetch('/dat-ve')` for a non-existent route (only `/dat-ve/[id]`
