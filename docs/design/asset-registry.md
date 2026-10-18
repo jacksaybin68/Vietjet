@@ -68,8 +68,8 @@ Dấu hiệu: tên file dạng `<slug>-<epoch-millis>`, UUID, hoặc tên campai
 | `download-4.jpg` | 137 KB | Ảnh ưu đãi | `/trang-chu` | 🔴 |
 | `download-5.jpg` | 304 KB | Ảnh ưu đãi | `/trang-chu`, `/tai-khoan` | 🔴 |
 | `download-6.jpg` | 375 KB | Ảnh ưu đãi | `/trang-chu`, `/tai-khoan` | 🔴 |
-| `f3aa27c1-7cad-4a31-8086-58654aa494b5.jpg` | 888 KB | Hero artwork | `/trang-chu` | 🔴 |
-| `261ceb09-de92-4981-b4f0-eb6c37ee5720.jpg` | 798 KB | Hero carousel slide | `/trang-chu` | 🔴 |
+| `hero-vietjet-holiday.jpg` (đổi tên từ `f3aa27c1-…-58654aa494b5.jpg`, Phase -1 mục 5) | 888 KB | Hero artwork | `/trang-chu` | 🔴 |
+| `hero-vietjet-skyboss.jpg` (đổi tên từ `261ceb09-…-eb6c37ee5720.jpg`, Phase -1 mục 5) | 798 KB | Hero carousel slide | `/trang-chu` | 🔴 |
 | `9-fare-website-2.webp` | 98 KB | Hero carousel slide | `/trang-chu` | 🔴 |
 | `eng-8-fare-website-1.webp` | 96 KB | Hero carousel slide | `/trang-chu` | 🔴 |
 

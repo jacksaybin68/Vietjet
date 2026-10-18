@@ -143,4 +143,32 @@ describe('giá thẻ hạng vé khớp với giá API thu', () => {
     expect(printed).toContain(format(ECONOMY));
     expect(printed).toContain(format(BUSINESS));
   });
+
+  it('onFlightSelect nhận đúng mã chuyến, hạng và giá đã in', async () => {
+    const onSelect = vi.fn();
+    const onFlightSelect = vi.fn();
+    searchFlightsWithDates.mockResolvedValue({ flights: [flight], availableDates: [] });
+    render(
+      <FlightResultsStep
+        onSelect={onSelect}
+        onFlightSelect={onFlightSelect}
+        search={{ from: 'HAN', to: 'ICN', depart: '2026-10-06' }}
+        pax="1"
+      />
+    );
+    await waitFor(() => expect(screen.getByTestId('flight-result-card')).toBeInTheDocument());
+
+    const card = screen.getByTestId('flight-result-card');
+    const fareGrid = card.lastElementChild as HTMLElement;
+    const buttons = [...fareGrid.querySelectorAll('button')];
+    buttons[0]!.click();
+
+    expect(onFlightSelect).toHaveBeenCalledTimes(1);
+    const [flightNo, fareClass, fare] = onFlightSelect.mock.calls[0]!;
+    expect(flightNo).toBe('VJ115');
+    expect(typeof fareClass).toBe('string');
+    expect(typeof fare).toBe('number');
+    // Song song với onSelect — cùng một giá vé.
+    expect(fare).toBe((onSelect.mock.calls[0]![0] as Flight).price);
+  });
 });

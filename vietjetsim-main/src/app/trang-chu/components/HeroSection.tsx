@@ -64,14 +64,19 @@ const FALLBACK_AIRPORTS: Airport[] = [
 
 /**
  * Danh sách Banner Quảng Cáo của Vietjet làm nền Hero Banner Slider.
+ *
+ * `focusClass` là `object-position` cho dải banner trên mobile: ảnh quảng cáo có
+ * tỉ lệ rất khác nhau (2.0 → 2.95), nên khi bị cắt hai bên thì phải canh vào chỗ
+ * có thông điệp. Từ `lg` trở lên ảnh phủ toàn hero nên luôn canh giữa.
  */
 export const HERO_BANNERS = [
   {
     id: 'banner-vietjet-holiday',
-    image: '/images/hero/f3aa27c1-7cad-4a31-8086-58654aa494b5.jpg',
+    image: '/images/hero/hero-vietjet-holiday.jpg',
     badge: 'Khuyến mại đặc biệt',
     title: 'Bay cùng Vietjet - Bay là thích ngay',
     subtitle: 'Khám phá hàng ngàn điểm đến với mức giá cực kỳ ưu đãi',
+    focusClass: 'object-[50%_50%]',
   },
   {
     id: 'banner-vietjet-0dong',
@@ -79,6 +84,7 @@ export const HERO_BANNERS = [
     badge: 'Săn vé 0 đồng',
     title: 'Vé máy bay siêu tiết kiệm chỉ từ 0đ',
     subtitle: 'Áp dụng cho mọi đường bay nội địa & quốc tế hot nhất',
+    focusClass: 'object-[75%_50%]',
   },
   {
     id: 'banner-vietjet-international',
@@ -86,17 +92,19 @@ export const HERO_BANNERS = [
     badge: 'Đường bay quốc tế',
     title: 'Kết nối năm châu - Chạm đỉnh cao mới',
     subtitle: 'Thoả sức vi vu Nhật Bản, Hàn Quốc, Úc, Ấn Độ cùng Vietjet',
+    focusClass: 'object-[71%_50%]',
   },
   {
     id: 'banner-vietjet-skyboss',
-    image: '/images/hero/261ceb09-de92-4981-b4f0-eb6c37ee5720.jpg',
+    image: '/images/hero/hero-vietjet-skyboss.jpg',
     badge: 'Dịch vụ SkyBoss',
     title: 'Trải nghiệm phong cách Người dẫn đầu',
     subtitle: 'Phòng chờ hạng sang, hành lý ưu tiên và phục vụ chu đáo',
+    focusClass: 'object-[50%_50%]',
   },
 ];
 
-const HERO_ARTWORK = '/images/hero/f3aa27c1-7cad-4a31-8086-58654aa494b5.jpg';
+const HERO_ARTWORK = '/images/hero/hero-vietjet-holiday.jpg';
 
 /**
  * Tab strip of the hero booking card, mirrored from vietjetair.com: the active
@@ -214,13 +222,21 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative w-full overflow-hidden bg-[#b11116] min-h-[640px] xl:min-h-[720px]">
+    <section className="relative w-full overflow-hidden bg-[var(--background)] min-h-[640px] xl:min-h-[720px] lg:bg-[#b11116]">
       {/* Banner Quảng Cáo Slider / Carousel làm nền sống động.
           Chỉ render banner hiện tại: các banner inactive dùng `opacity-0`
           vẫn chiếm bounding box và gây lỗi hình chồng khung (IMG+IMG) trong
           kiểm tra giao diện. Khi chỉ cần 1 ảnh ở một thời điểm, không còn
-          overlap. */}
-      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+          overlap.
+
+          Chiều cao dải ảnh: trên mobile chỉ phủ dải trên (30px padding + 250px
+          vùng điều hướng + 112px fade đáy = ~392px) để thông điệp trong artwork
+          nằm phía trên thẻ đặt vé thay vì bị thẻ che; từ `lg` trở lên ảnh phủ
+          toàn bộ hero như cũ. */}
+      <div
+        className="absolute inset-x-0 top-0 h-[400px] overflow-hidden lg:inset-0 lg:h-auto"
+        aria-hidden="true"
+      >
         {HERO_BANNERS.map((banner, idx) => (
           <div
             key={banner.id}
@@ -231,7 +247,7 @@ export default function HeroSection() {
             <img
               src={banner.image}
               alt={banner.title}
-              className="w-full h-full object-cover object-center scale-[1.01] transition-transform duration-10000"
+              className={`w-full h-full object-cover scale-[1.01] transition-transform duration-10000 ${banner.focusClass} lg:object-center`}
             />
           </div>
         ))}
