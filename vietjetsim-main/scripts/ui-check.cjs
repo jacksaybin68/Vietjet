@@ -263,6 +263,21 @@ const PROBE = `(() => {
     inputs: document.querySelectorAll('input').length,
     images: images.length,
     emptySrcImages: images.filter((i) => !(i.getAttribute('src') || '').trim()).length,
+    /* Landmark: đúng một thẻ main, đúng một đích #main-content, không lồng nhau, và
+       đích phải nằm SAU header trong thứ tự document — nếu không thì skip link trỏ
+       đúng vào thanh điều hướng mà nó sinh ra để bỏ qua. Cả bốn điều này chỉ đúng
+       sau hydration: ba route (/dang-nhap, /dat-lai-mat-khau, /lam-thu-tuc) đọc
+       useSearchParams nên HTML thô chỉ có fallback rỗng. */
+    mainCount: document.querySelectorAll('main').length,
+    mainContentCount: document.querySelectorAll('#main-content').length,
+    nestedMain: [...document.querySelectorAll('main')].filter((m) => m.parentElement.closest('main'))
+      .length,
+    mainAfterHeader: (() => {
+      const main = document.querySelector('#main-content');
+      const header = document.querySelector('header');
+      if (!main || !header) return null;
+      return !!(header.compareDocumentPosition(main) & Node.DOCUMENT_POSITION_FOLLOWING);
+    })(),
     overlappedBoxes: overlapped.slice(0, 5),
     theme: de.classList.contains('dark') ? 'dark' : 'light',
     bg: getComputedStyle(document.body).backgroundColor,
@@ -440,6 +455,12 @@ async function main() {
     if (r.probe.overlappedBoxes.length)
       flags.push(`BOX TRÙNG: ${r.probe.overlappedBoxes.join(', ')}`);
     if (r.probe.emptySrcImages) flags.push(`IMG SRC RỖNG x${r.probe.emptySrcImages}`);
+    if (r.probe.mainCount !== 1) flags.push(`SỐ <main> = ${r.probe.mainCount} (phải đúng 1)`);
+    if (r.probe.nestedMain) flags.push(`<main> LỒNG NHAU x${r.probe.nestedMain}`);
+    if (r.probe.mainContentCount !== 1)
+      flags.push(`#main-content x${r.probe.mainContentCount} (phải đúng 1)`);
+    if (r.probe.mainAfterHeader === false)
+      flags.push('#main-content KHÔNG nằm sau <header> — skip link không bỏ qua được nav');
     if (r.consoleErrors.length) flags.push(`console.error x${r.consoleErrors.length}`);
     if (r.pageErrors.length) flags.push(`JS exception x${r.pageErrors.length}`);
     if (r.httpErrors.length) flags.push(`HTTP lỗi x${r.httpErrors.length}`);
