@@ -8,6 +8,7 @@
     "start": "next start -p 4028",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "lint:css-debt": "node scripts/css-debt.cjs",
     "format": "prettier --write \"src/**/*.{ts,tsx,css,md,json}\"",
     "serve": "next start",
     "type-check": "tsc --noEmit",
