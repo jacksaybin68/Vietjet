@@ -44,11 +44,22 @@ SVG tự tạo (có `aria-label` tiếng Việt), placeholder, favicon dạng h�
 
 | Tên file | Đường dẫn | Mục đích | Route sử dụng | Vấn đề | Kích thước | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- |
-| `logo-vj.svg` | `public/logo-vj.svg` | Wordmark header/footer | Toàn site | Path vẽ chữ "vietjet"; palette ghi chú "lấy từ bundle vietjetair.com" | 5,3 KB | 🔴 |
-| `logo.png` | `public/logo.png` | Logo PNG 230×40 | Toàn site, mail | Nguồn chưa xác minh | 901 B | 🔴 |
-| `app_logo.png` | `public/assets/images/app_logo.png` | Logo 957×1068 trong chat widget | Toàn site (widget) | Nguồn chưa xác minh | 519 KB | 🔴 |
+| `logo-vj.svg` | `public/logo-vj.svg` | Wordmark header/footer | Toàn site | Path vẽ chữ "vietjet"; palette ghi chú "lấy từ bundle vietjetair.com" | 5,3 KB | 🟡 Đã quyết định: Thay (T) |
+| `logo.png` | `public/logo.png` | Logo PNG 230×40 | Toàn site, mail | Nguồn chưa xác minh | 901 B | 🟡 Đã quyết định: Thay (T) |
+| `app_logo.png` | `public/assets/images/app_logo.png` | Logo 957×1068 trong chat widget | Toàn site (widget) | Nguồn chưa xác minh | 519 KB | 🟡 Đã quyết định: Thay (T) |
 
-## C. Nguồn gốc chưa xác minh (23 file)
+## B1. Đã quyết định thay (T) — chờ implement
+
+| Tên file | Đường dẫn | Quyết định | Lý do | Ước tính thời gian | Trạng thái implement |
+| --- | --- | --- | --- | --- | --- |
+| `logo-vj.svg` | `public/logo-vj.svg` | T (Thay) | Rủi ro trademark cao nhất, comment "lấy từ vietjetair.com" | 2-3 ngày | Chờ team design |
+| `logo.png` | `public/logo.png` | T (Thay) | Đồng bộ branding với logo-vj.svg | 1-2 ngày | Chờ team design |
+| `app_logo.png` | `public/assets/images/app_logo.png` | T (Thay) | Chỉ dùng chat widget, dễ thay | 1 ngày | Chờ team design |
+
+
+## C. Nguồn gốc chưa xác minh (22 file)
+
+> **Ghi chú:** 3 asset thương hiệu (`logo-vj.svg`, `logo.png`, `app_logo.png`) đã được quyết định Thay (T) — xem phần B1. Các file còn lại trong phần C là 22 asset hero/promo chưa xác định.
 
 Dấu hiệu: tên file dạng `<slug>-<epoch-millis>`, UUID, hoặc tên campaign CMS. Cần chọn **thay bằng asset có quyền** / **giữ kèm giấy phép** / **xoá** cho từng file.
 

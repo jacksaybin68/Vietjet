@@ -206,6 +206,13 @@ Khiếm khuyết tìm được và đã sửa trong lần chụp đầu: `Activi
 
 ## 8. Checklist hoàn thành
 
+> **Cập nhật 18/10/2026 (sau commit skip link + fontSize + đổi tên hero + test onFlightSelect):**
+> - Đổi tên 2/23 file UUID theo Phase -1 mục 5 (`hero-vietjet-holiday.jpg`, `hero-vietjet-skyboss.jpg`); code hết tham chiếu tên cũ (grep = 0), registry đã đồng bộ.
+> - Skip link + `main#main-content` đã có trong `src/app/layout.tsx` (xóa nợ Phase 1 mục 6.6).
+> - `tailwind.config.js` đã `extend fontSize` cho 40px (`2xl2`/`5xl2`); chưa quét nợ `text-[Npx]` toàn repo (baseline cũ: 648/645 lần).
+> - `onFlightSelect` đã gọi ở 3 vị trí chọn vé trong `FlightResultsStep`; panel tóm tắt + tab hạng ghế + nút "Đi tiếp" đã nối với wizard (test mới pass).
+> - **Còn đỏ:** 23 asset chưa xác minh + 3 asset thương hiệu chờ chủ dự án quyết định (blocker Phase -1, xem `docs/design/asset-decisions.md`); 2 test `hero-banner` cũ; visual regression chưa có tool diff.
+
 - [ ] **Phase -1:** registry đủ 32/32 file; 0 asset nguồn gốc không rõ; 0 orphan; 3 asset thương hiệu đã quyết định.
 - [ ] Baseline đủ tại ba viewport canonical (gồm `768×1024`).
 - [ ] Token/primitives đạt lint/type-check/build, nợ `text-[Npx]`/hex-class giảm so với baseline.

@@ -38,7 +38,7 @@ Trong quá trình kiểm kê asset (task `asset-audit`), phát hiện 3 file th�
 
 **Lựa chọn:**
 
-- [ ] **T (Thay bằng asset nội bộ mới)**
+- [x] **T (Thay bằng asset nội bộ mới)**
   - **Hành động:** Team design tạo logo mới cho dự án, tránh vi phạm trademark Vietjet Air. Cập nhật tất cả 8 tham chiếu trong src/ để trỏ đến logo mới (vd: `/logo-internal.svg`).
   - **Thời gian ước tính:** 2-3 ngày (thiết kế + review + implement).
   - **Trade-off:** Mất đi nhận diện thương hiệu Vietjet Air, nhưng loại bỏ hoàn toàn rủi ro pháp lý.
@@ -69,7 +69,7 @@ Trong quá trình kiểm kê asset (task `asset-audit`), phát hiện 3 file th�
 
 **Lựa chọn:**
 
-- [ ] **T (Thay bằng asset nội bộ mới)**
+- [x] **T (Thay bằng asset nội bộ mới)**
   - **Hành động:** Team design tạo logo PNG mới (230×40 hoặc tương đương). Cập nhật 6 vị trí chính trong src/ (`layout.tsx`, `AppLogo.tsx`, `mail.ts`, `PassengerInfoStep.tsx`) + 3 test files. Kiểm tra OpenGraph preview và email rendering sau khi thay.
   - **Thời gian ước tính:** 1-2 ngày (cùng batch với `logo-vj.svg`).
   - **Trade-off:** Metadata/email cần thời gian để cache mới được index (Google/Facebook).
@@ -101,7 +101,7 @@ Trong quá trình kiểm kê asset (task `asset-audit`), phát hiện 3 file th�
 
 **Lựa chọn:**
 
-- [ ] **T (Thay bằng asset nội bộ mới)**
+- [x] **T (Thay bằng asset nội bộ mới)**
   - **Hành động:** Team design tạo avatar/icon mới cho chat widget (recommend 128×128 hoặc 256×256, tối đa 50 KB). Cập nhật `UserChat.tsx:490` và 2 test files. Chạy lại test suite.
   - **Thời gian ước tính:** 1 ngày (thiết kế icon đơn giản).
   - **Trade-off:** Mất đi nhân vật Vietjet Air, nhưng có thể dùng generic mascot hoặc logo nội bộ.
