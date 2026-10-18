@@ -197,7 +197,6 @@ export default function Header() {
           </div>
         </div>
 
-
         {mobileMenuOpen && (
           <div
             id="mobile-menu"
