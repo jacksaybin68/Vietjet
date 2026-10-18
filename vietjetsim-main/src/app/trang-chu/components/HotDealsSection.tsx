@@ -9,7 +9,7 @@ const HOT_DEALS = [
     to: 'Hà Nội (HAN)',
     date: '28/10/2026',
     type: 'Một chiều / Eco',
-    price: 15.0,
+    price: 1490000,
     seen: '14 phút trước',
     image: '/images/hero/banner-1-hongkong.jpg',
   },
@@ -17,8 +17,8 @@ const HOT_DEALS = [
     from: 'Mumbai (BOM)',
     to: 'Hà Nội (HAN)',
     date: '28/10/2026',
-    type: 'Một chiều / Eco',
-    price: 15.0,
+    type: 'Một chiều / SkyBoss',
+    price: 2990000,
     seen: '19 phút trước',
     image: '/images/hero/banner-2-skyboss.jpg',
   },
@@ -27,7 +27,7 @@ const HOT_DEALS = [
     to: 'Hà Nội (HAN)',
     date: '28/10/2026',
     type: 'Một chiều / Eco',
-    price: 15.0,
+    price: 1590000,
     seen: '53 phút trước',
     image: '/images/hero/banner-3-loc-vang.jpg',
   },
@@ -36,7 +36,7 @@ const HOT_DEALS = [
     to: 'TP. HCM (SGN)',
     date: '18/07/2027',
     type: 'Chuyến đi / Eco',
-    price: 38.0,
+    price: 1790000,
     seen: '11 phút trước',
     image: '/images/hero/banner-4-44-sale.jpg',
   },
@@ -45,7 +45,7 @@ const HOT_DEALS = [
     to: 'Đà Nẵng (DAD)',
     date: '06/10/2026',
     type: 'Một chiều / Eco',
-    price: 102.0,
+    price: 1890000,
     seen: '2 giờ trước',
     image: '/images/hero/download.jpg',
   },
@@ -54,7 +54,7 @@ const HOT_DEALS = [
     to: 'Hà Nội (HAN)',
     date: '06/01/2027',
     type: 'Một chiều / Eco',
-    price: 7.67,
+    price: 790000,
     seen: '1 giờ trước',
     image: '/images/hero/banner-1-hongkong.jpg',
   },
@@ -63,7 +63,7 @@ const HOT_DEALS = [
     to: 'Phú Quốc (PQC)',
     date: '09/01/2027',
     type: 'Một chiều / Eco',
-    price: 0.73,
+    price: 399000,
     seen: '12 phút trước',
     image: '/images/hero/banner-2-skyboss.jpg',
   },
@@ -72,7 +72,7 @@ const HOT_DEALS = [
     to: 'TP. HCM (SGN)',
     date: '15/12/2026',
     type: 'Một chiều / Eco',
-    price: 23.5,
+    price: 690000,
     seen: '25 phút trước',
     image: '/images/hero/banner-3-loc-vang.jpg',
   },
@@ -81,16 +81,20 @@ const HOT_DEALS = [
     to: 'Hà Nội (HAN)',
     date: '20/11/2026',
     type: 'Một chiều / Eco',
-    price: 89.0,
+    price: 1990000,
     seen: '3 giờ trước',
     image: '/images/hero/banner-4-44-sale.jpg',
   },
 ];
 
+function formatVND(n: number) {
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '₫';
+}
+
 export default function HotDealsSection() {
   return (
     <section className="bg-white py-12 sm:py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-10">
           <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-primary mb-2">
             Ưu đãi hấp dẫn
@@ -132,7 +136,7 @@ export default function HotDealsSection() {
                   <div>
                     <p className="text-[9px] text-vj-gray font-semibold uppercase">Giá từ</p>
                     <p className="text-lg sm:text-xl font-black text-primary leading-none">
-                      {deal.price.toFixed(2)} USD
+                      {formatVND(deal.price)}
                     </p>
                   </div>
                   <Link

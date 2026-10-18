@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, Suspense } from 'react';
+import React, { useEffect, useRef, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Icon } from '@/shared/components/ui';
 import { FlightResultsStep, getAirportCity } from '@/features/flights';
@@ -65,8 +65,10 @@ function describePax(counts: Record<PassengerType, number>): string {
 
 function FlightBookingClientInner({
   onFlightSelect,
+  continueSignal = 0,
 }: {
   onFlightSelect?: (flightNo: string, fareClass: string, fare: number) => void;
+  continueSignal?: number;
 }) {
   const searchParams = useSearchParams();
   const params: SearchParams = {
@@ -102,6 +104,16 @@ function FlightBookingClientInner({
     setStep(next);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
+
+  // Signal từ nút "Đi tiếp" ở panel bên ngoài → chuyển sang bước 2.
+
+  const stateRef = useRef({ step, selected: booking.selectedFlight });
+  stateRef.current = { step, selected: booking.selectedFlight };
+  useEffect(() => {
+    if (continueSignal > 0 && stateRef.current.step < 2 && stateRef.current.selected) {
+      goStep(2);
+    }
+  }, [continueSignal]);
 
   const handleFlightSelect = (flight: Flight) => {
     setBooking((b) => ({
@@ -383,12 +395,14 @@ function FlightBookingClientInner({
 
 export default function FlightBookingClient({
   onFlightSelect,
+  continueSignal = 0,
 }: {
   onFlightSelect?: (flightNo: string, fareClass: string, fare: number) => void;
+  continueSignal?: number;
 }) {
   return (
     <Suspense fallback={<FlightSearchSkeleton />}>
-      <FlightBookingClientInner onFlightSelect={onFlightSelect} />
+      <FlightBookingClientInner onFlightSelect={onFlightSelect} continueSignal={continueSignal} />
     </Suspense>
   );
 }

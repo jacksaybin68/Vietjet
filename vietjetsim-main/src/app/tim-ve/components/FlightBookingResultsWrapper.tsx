@@ -33,12 +33,21 @@ interface SelectedBooking {
   total: number;
 }
 
+const FARE_CLASS_MULTIPLIER: Record<string, number> = {
+  ECO: 1,
+  DELUXE: 1.3,
+  SKYBOSS: 1.7,
+  BUSINESS: 2.77,
+  BIZ: 2.77,
+};
+
 export default function FlightBookingResultsWrapper({
   trip,
   date,
 }: FlightBookingResultsWrapperProps) {
   const searchParams = useSearchParams();
   const [selectedBooking, setSelectedBooking] = useState<SelectedBooking | null>(null);
+  const [continueSignal, setContinueSignal] = useState(0);
 
   const handleDateChange = useCallback(
     (value: string) => {
@@ -55,6 +64,23 @@ export default function FlightBookingResultsWrapper({
     setSelectedBooking({ flightNo, fareClass, fare, tax, total });
   }, []);
 
+  const handleFareClassChange = useCallback(
+    (fareClass: string) => {
+      if (!selectedBooking) return;
+      const baseFare = selectedBooking.fare;
+      const multiplier = FARE_CLASS_MULTIPLIER[fareClass] ?? 1;
+      const fare = Math.round(baseFare * multiplier);
+      const tax = Math.round(fare * TAX_AND_FEE_RATE);
+      const total = fare + tax;
+      setSelectedBooking({ ...selectedBooking, fareClass, fare, tax, total });
+    },
+    [selectedBooking]
+  );
+
+  const handleContinue = useCallback(() => {
+    setContinueSignal((n) => n + 1);
+  }, []);
+
   return (
     <div className="flex flex-col lg:flex-row gap-6">
       {/* Cột trái: danh sách chuyến bay (~68%) */}
@@ -64,8 +90,11 @@ export default function FlightBookingResultsWrapper({
           selectedValue={searchParams.get('depart') ?? undefined}
           onSelect={handleDateChange}
         />
-        <FareClassTabs activeClass={selectedBooking?.fareClass ?? 'ECO'} onSelect={() => {}} />
-        <FlightBookingClient onFlightSelect={handleFlightSelect} />
+        <FareClassTabs
+          activeClass={selectedBooking?.fareClass ?? 'ECO'}
+          onSelect={handleFareClassChange}
+        />
+        <FlightBookingClient continueSignal={continueSignal} onFlightSelect={handleFlightSelect} />
       </div>
 
       {/* Cột phải: panel thông tin đặt chỗ (~32%) */}
@@ -78,7 +107,7 @@ export default function FlightBookingResultsWrapper({
           serviceFee: 0,
           total: selectedBooking?.total ?? 0,
         }}
-        onContinue={() => {}}
+        onContinue={handleContinue}
         canContinue={selectedBooking !== null}
       />
     </div>

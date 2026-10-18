@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import type { IconType } from 'react-icons';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -11,17 +10,7 @@ import {
   HiOutlineUserCircle,
   HiOutlineX,
 } from 'react-icons/hi';
-import {
-  RiFlightTakeoffLine,
-  RiGiftLine,
-  RiHotelLine,
-  RiMoneyDollarCircleLine,
-  RiPassportLine,
-  RiPhoneLine,
-  RiShoppingBag3Line,
-  RiShieldCheckLine,
-  RiVipCrownLine,
-} from 'react-icons/ri';
+import { RiPhoneLine } from 'react-icons/ri';
 import { useAuth } from '@/contexts/AuthContext';
 import AnnouncementBar from './AnnouncementBar';
 
@@ -33,24 +22,6 @@ const NAV_LINKS = [
   { label: 'Dịch vụ chuyến bay', href: '/dich-vu' },
   { label: 'Dịch vụ khác', href: '/dich-vu#khac' },
 ] as const;
-
-interface ServiceLink {
-  label: string;
-  href: string;
-  Icon: IconType;
-}
-
-const SERVICE_LINKS: ServiceLink[] = [
-  { label: 'Đặt vé', href: '/trang-chu#hero-booking-form', Icon: RiFlightTakeoffLine },
-  { label: 'Mua sắm', href: '/dich-vu?service=lounge', Icon: RiShoppingBag3Line },
-  { label: 'Khách sạn', href: '/dich-vu?service=lounge', Icon: RiHotelLine },
-  { label: 'E-Voucher', href: '/dich-vu?service=lounge', Icon: RiGiftLine },
-  { label: 'E-Sim', href: '/dich-vu?service=meal', Icon: RiPhoneLine },
-  { label: 'E-Visa', href: '/dich-vu?service=insurance', Icon: RiPassportLine },
-  { label: 'Mua ngoại tệ', href: '/dich-vu?service=insurance', Icon: RiMoneyDollarCircleLine },
-  { label: 'Bảo hiểm', href: '/dich-vu?service=insurance', Icon: RiShieldCheckLine },
-  { label: 'SkyJoy', href: '/tai-khoan', Icon: RiVipCrownLine },
-];
 
 const isActivePath = (pathname: string, href: string) =>
   href === '/trang-chu' ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
@@ -226,28 +197,6 @@ export default function Header() {
           </div>
         </div>
 
-        {pathname === '/trang-chu' && (
-          <nav
-            aria-label="Dịch vụ nhanh"
-            className="hidden border-t border-b-2 border-t-[var(--border)] border-b-[var(--primary)] bg-[var(--surface)] lg:block"
-          >
-            <div className="mx-auto flex h-12 max-w-[1240px] items-center justify-center gap-3 px-4">
-              {SERVICE_LINKS.map(({ label, href, Icon }) => (
-                <Link
-                  key={label}
-                  href={href}
-                  className="group flex items-center gap-1.5 py-2.5 px-2 text-center text-xs font-semibold text-[var(--foreground-muted)] hover:text-[var(--primary)]"
-                >
-                  <Icon
-                    aria-hidden="true"
-                    className="text-lg text-[var(--primary)] transition-transform group-hover:scale-110"
-                  />
-                  <span>{label}</span>
-                </Link>
-              ))}
-            </div>
-          </nav>
-        )}
 
         {mobileMenuOpen && (
           <div
