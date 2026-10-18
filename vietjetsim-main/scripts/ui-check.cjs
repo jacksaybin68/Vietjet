@@ -178,6 +178,33 @@ async function evaluate(cdp, expression) {
 }
 
 /**
+ * Bấm một phím thật qua CDP. `Tab` phải là `rawKeyDown` còn `Enter` phải gửi kèm
+ * `text` thì Chrome mới bắn `click` cho `<a>` đang focus (nó làm điều đó ngay trong
+ * `keyDown`), và chỉ khi đó phép thử mới là "người dùng bấm phím", không phải
+ * `element.click()` chạy bằng script.
+ */
+async function pressKey(cdp, key) {
+  const isTab = key === 'Tab';
+  const code = isTab ? 'Tab' : 'Enter';
+  const vk = isTab ? 9 : 13;
+  await cdp.send('Input.dispatchKeyEvent', {
+    type: isTab ? 'rawKeyDown' : 'keyDown',
+    key,
+    code,
+    windowsVirtualKeyCode: vk,
+    nativeVirtualKeyCode: vk,
+    ...(isTab ? {} : { text: '\r' }),
+  });
+  await cdp.send('Input.dispatchKeyEvent', {
+    type: 'keyUp',
+    key,
+    code,
+    windowsVirtualKeyCode: vk,
+    nativeVirtualKeyCode: vk,
+  });
+}
+
+/**
  * Chờ trang thật sự đứng yên: URL + số ký tự văn bản + số node không đổi trong
  * `quietMs`, VÀ không còn skeleton. Dev server biên dịch route theo yêu cầu, nên
  * một `sleep` cố định hay chụp đúng lúc React còn đang render hoặc đang chuyển
@@ -435,11 +462,53 @@ async function main() {
     }
   }
 
+  // ── Skip link: hành vi thật, không chỉ cấu trúc DOM ────────────────────────
+  // Cấu trúc mà PROBE kiểm (một `#main-content`, nằm sau `<header>`) là điều kiện
+  // cần, không phải điều kiện đủ — nó không cho biết bàn phím có thật sự đi qua
+  // thanh điều hướng. Ở đây: Tab đầu tiên phải rơi vào đúng skip link, Enter phải
+  // đặt đích về `#main-content`, và Tab kế tiếp phải nằm *trong* `#main-content`.
+  await goto(cdp, `${BASE}/trang-chu`, VIEWPORTS[0]);
+  const skip = {
+    inDom: await evaluate(cdp, `!!document.querySelector('a[href="#main-content"]')`),
+  };
+  if (skip.inDom) {
+    // Chuẩn hoá điểm xuất phát của Tab tuần tự về đầu document.
+    await evaluate(cdp, `(document.activeElement && document.activeElement.blur(), true)`);
+    await pressKey(cdp, 'Tab');
+    skip.firstTabIsSkipLink = await evaluate(
+      cdp,
+      `document.activeElement === document.querySelector('a[href="#main-content"]')`
+    );
+    if (skip.firstTabIsSkipLink) {
+      await pressKey(cdp, 'Enter');
+      await sleep(300);
+      skip.hash = await evaluate(cdp, `location.hash`);
+      await pressKey(cdp, 'Tab');
+      skip.nextTabInMain = await evaluate(
+        cdp,
+        `(() => {
+          const main = document.querySelector('#main-content');
+          const el = document.activeElement;
+          return !!main && !!el && el !== document.body && main.contains(el);
+        })()`
+      );
+      skip.nextTabTag = await evaluate(
+        cdp,
+        `(() => {
+          const el = document.activeElement;
+          if (!el || el === document.body) return 'body';
+          return el.tagName + (el.id ? '#' + el.id : '') +
+            (el.className && typeof el.className === 'string' ? '.' + el.className.split(' ')[0] : '');
+        })()`
+      );
+    }
+  }
+
   chrome.kill('SIGTERM');
   writeFileSync(
     path.join(SHOTS_DIR, 'report.json'),
     JSON.stringify(
-      { base: BASE, results, widget, logins: { user: userLogin, admin: adminLogin } },
+      { base: BASE, results, widget, skip, logins: { user: userLogin, admin: adminLogin } },
       null,
       2
     )
@@ -449,6 +518,17 @@ async function main() {
   console.log(`Server: ${BASE}  ·  ảnh: ${SHOTS_DIR}\n`);
 
   let failed = 0;
+
+  // Skip link kiểm một lần cho cả lượt chạy, không theo từng màn hình.
+  const skipFlags = [];
+  if (skip.inDom && skip.firstTabIsSkipLink === false)
+    skipFlags.push('Tab đầu tiên không vào skip link');
+  if (skip.firstTabIsSkipLink && skip.hash !== '#main-content')
+    skipFlags.push(`Enter không đưa đích về #main-content (hash=${skip.hash})`);
+  if (skip.firstTabIsSkipLink && skip.nextTabInMain === false)
+    skipFlags.push(`Tab kế tiếp không nằm trong #main-content (${skip.nextTabTag})`);
+  if (skipFlags.length) failed += 1;
+
   for (const r of results) {
     const flags = [];
     if (r.probe.overflowX > 1) flags.push(`TRÀN NGANG ${r.probe.overflowX}px`);
@@ -478,6 +558,12 @@ async function main() {
     for (const e of r.httpErrors.slice(0, 2)) console.log(`      http: ${e}`);
   }
 
+  console.log(
+    `${skipFlags.length ? '⚠️ ' : '✅ '}skip-link  ` +
+      `Tab đầu tiên = skip link: ${skip.firstTabIsSkipLink} · Enter → hash=${skip.hash} · ` +
+      `Tab kế tiếp trong #main-content: ${skip.nextTabInMain} (${skip.nextTabTag})` +
+      (skipFlags.length ? `\n      → ${skipFlags.join(' · ')}` : '')
+  );
   console.log(`\nWidget OpenClaw: launcher=${widget.launcherFound}`);
   if (widget.panel) console.log(`   nhãn trạng thái: ${widget.panel.statusLabel}`);
   if (widget.send) console.log(`   gửi thử: ${JSON.stringify(widget.send)}`);

@@ -1177,6 +1177,10 @@ new component: a component rendered inside another page's `main` (`FlightResults
 `AdminDashboardClient`) is not a `<main>` itself — only one `<main>` per document — and a
 `Suspense` fallback or `loading.tsx` skeleton is decoration, not the landmark.
 `src/test/hero-banner.test.tsx` pins the source shape; `npm run test:ui` pins the live DOM.
+`test:ui` also presses the keys a visitor would, once per run on `/trang-chu`: the first Tab
+must land on the skip link, Enter must set `#main-content` as the target, and the next Tab
+must land *inside* it. That check cannot pass by doing nothing — if Tab never moved, the
+focused element is still the skip link, which is outside `#main-content`.
 
 The auth screens do **not** use `vj-btn-primary`. Their submit buttons use
 `vj-auth-submit` (48px tall, 344px wide, 4px radius, flat 90¬∞ gold sweep `#F9A51A‚Üí#FFDD00`,
