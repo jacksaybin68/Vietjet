@@ -14,7 +14,17 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   {
-    ignores: ['node_modules/', '.next/', 'out/', 'public/', 'next-env.d.ts'],
+    ignores: [
+      'node_modules/',
+      '.next/',
+      // `DIST_DIR=.next-uicheck` (công thức chạy `test:ui` cạnh một `next dev` đang
+      // sống, xem AGENTS.md) tạo ra một cây build thứ hai có cả file `.ts` sinh tự
+      // động — 184 MB. Không ignore thì `eslint .` quét luôn nó và mất hàng phút.
+      '.next-uicheck/',
+      'out/',
+      'public/',
+      'next-env.d.ts',
+    ],
   },
   ...compat.extends(
     'next/core-web-vitals',
