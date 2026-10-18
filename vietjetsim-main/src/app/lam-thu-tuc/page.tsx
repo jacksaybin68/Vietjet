@@ -251,37 +251,27 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
       <Header />
       <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
 
-      {/* ===== Đầu trang: 2 chip + tiêu đề (bố cục vietjetair.com/vi/checkin) =====
-          Đây là cặp chip y hệt khối đầu trang của `/chuyen-bay-cua-toi`, nên dùng
-          luôn cách đã chốt ở đó: chip đang dùng nền đỏ thương hiệu chữ trắng, chip
-          còn lại nền trắng viền rõ. Nền trang đã là dải trời nhạt, nên chip nền
-          trắng cũ chìm hẳn vào đó; nền đỏ làm chip đang chọn đọc ra ngay. Khối
-          cũng có đệm dưới để không dính vào nội dung bên dưới. */}
-      <section className="relative overflow-hidden border-b border-[var(--border)] bg-transparent">
-        <div className="relative mx-auto max-w-[1000px] px-4 pt-8 pb-10 sm:px-6">
-          <div className="flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full bg-[var(--vj-red)] px-4 py-2 text-xs font-bold text-white shadow-vj-btn ring-1 ring-[var(--vj-red)]">
+      {/* ===== Đầu trang: 2 tab nhỏ + tiêu đề (bố cục vietjetair.com/vi/checkin) =====
+          Dùng đúng ngôn ngữ tab đã chốt ở `/chuyen-bay-cua-toi`: tab đang chọn nền
+          trắng pha trong suốt + chữ/icon đỏ, tab còn lại chữ xám không nền; cả
+          hai nhỏ gọn, đặt sát nhau. Nền section là ảnh trời mây giống trang đó. */}
+      <section className="relative overflow-hidden border-b border-[var(--border)] bg-[url('/sky-clouds.svg')] bg-cover bg-center bg-no-repeat">
+        <div className="relative mx-auto max-w-[1000px] px-4 pt-12 pb-10 sm:px-6">
+          <div className="flex flex-wrap gap-1">
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/80 px-3 py-1.5 text-xs font-bold text-[var(--vj-red)] shadow-sm ring-1 ring-[rgb(var(--vj-red-rgb))]/35">
               <MdConfirmationNumber className="h-3.5 w-3.5" />
               Tìm kiếm mã đặt chỗ
             </span>
             {/* "Chuyến bay sắp tới" của site thật nằm ở trang quản lý đặt chỗ, nên
-                chip thứ hai trỏ thẳng tới đó thay vì giả lập một tab rỗng. */}
+                tab thứ hai trỏ thẳng tới đó thay vì giả lập một tab rỗng. */}
             <Link
               href="/chuyen-bay-cua-toi"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-[var(--foreground)] shadow-sm ring-1 ring-[var(--border)] transition-colors hover:text-[var(--vj-red)] hover:ring-[rgb(var(--vj-red-rgb))]/60"
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-[var(--vj-text-muted)] transition-colors hover:text-[var(--vj-red)]"
             >
               <FlightIcon className="h-3.5 w-3.5" />
               Chuyến bay sắp tới
             </Link>
           </div>
-
-          <h1 className="mt-6 text-lg font-black uppercase tracking-tight text-[var(--vj-text)] sm:text-xl">
-            Check-in
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--vj-text-gray)]">
-            Sẵn sàng cho chuyến bay vui vẻ, thoải mái, bạn có thể làm thủ tục chuyến bay trực tuyến
-            nhanh chóng và đơn giản.
-          </p>
         </div>
       </section>
 
@@ -298,9 +288,18 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
             container, sticky sẽ bám vào đó chứ không bám viewport.) */}
         {step === 'search' && (
           <div className="grid grid-cols-1 overflow-hidden rounded-2xl bg-white/70 ring-1 ring-white/70 shadow-vj-md lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-            {/* Cột trái: Form tìm kiếm (hẹp hơn cột phải) */}
+            {/* Cột trái: tiêu đề + form tìm kiếm (hẹp hơn cột phải) */}
             <div className="p-5 sm:p-6">
-              <form onSubmit={handleSearch} className="flex flex-col gap-4">
+              <div>
+                <h1 className="text-lg font-black uppercase tracking-tight text-[var(--vj-text)]">
+                  Check-in
+                </h1>
+                <p className="mt-2 text-[13px] leading-normal text-[#555555]">
+                  Sẵn sàng cho chuyến bay vui vẻ, thoải mái, bạn có thể làm thủ tục chuyến bay trực
+                  tuyến nhanh chóng và đơn giản.
+                </p>
+              </div>
+              <form onSubmit={handleSearch} className="mt-4 flex flex-col gap-4">
                 {/* Mã đặt chỗ */}
                 <div className="relative w-full">
                   <label className="pointer-events-none absolute left-3 top-2 text-[11px] font-bold text-[var(--vj-text-muted)]">

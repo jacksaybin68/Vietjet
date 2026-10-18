@@ -47,7 +47,7 @@ const flag = (name) => {
 const DRY_RUN = argv.includes('--dry-run');
 /** Cập nhật (xoá hàng cũ của chính mình rồi tạo lại) thay vì chỉ thêm. */
 const REPLACE = argv.includes('--replace');
-const CHUNK = 1000;
+const CHUNK = 500;
 
 const pad = (n) => String(n).padStart(2, '0');
 /** Ngày địa phương dạng `YYYY-MM-DD` (`toISOString` sẽ lùi một ngày ở múi +07). */
@@ -134,27 +134,36 @@ async function main() {
   let inserted = 0;
   for (let i = 0; i < rows.length; i += CHUNK) {
     const chunk = rows.slice(i, i + CHUNK);
-    const result = await sql`
-      WITH ins AS (
-        INSERT INTO flights (
-          flight_no, from_code, to_code, depart_time, arrive_time,
-          price, class, available, economy_price, business_price
-        )
-        SELECT
-          x.flight_no, x.from_code, x.to_code,
-          x.depart_time::timestamptz, x.arrive_time::timestamptz,
-          x.price, x.class, x.available, x.economy_price, x.business_price
-        FROM jsonb_to_recordset(${JSON.stringify(chunk)}::jsonb) AS x(
-          flight_no text, from_code text, to_code text,
-          depart_time text, arrive_time text,
-          price numeric, class text, available int,
-          economy_price numeric, business_price numeric
-        )
-        ON CONFLICT (from_code, to_code, depart_time) DO NOTHING
-        RETURNING 1
-      )
-      SELECT count(*)::int AS n FROM ins
-    `;
+    let result = null;
+    for (let attempt = 1; attempt <= 5; attempt++) {
+      try {
+        result = await sql`
+          WITH ins AS (
+            INSERT INTO flights (
+              flight_no, from_code, to_code, depart_time, arrive_time,
+              price, class, available, economy_price, business_price
+            )
+            SELECT
+              x.flight_no, x.from_code, x.to_code,
+              x.depart_time::timestamptz, x.arrive_time::timestamptz,
+              x.price, x.class, x.available, x.economy_price, x.business_price
+            FROM jsonb_to_recordset(${JSON.stringify(chunk)}::jsonb) AS x(
+              flight_no text, from_code text, to_code text,
+              depart_time text, arrive_time text,
+              price numeric, class text, available int,
+              economy_price numeric, business_price numeric
+            )
+            ON CONFLICT (from_code, to_code, depart_time) DO NOTHING
+            RETURNING 1
+          )
+          SELECT count(*)::int AS n FROM ins
+        `;
+        break;
+      } catch (err) {
+        if (attempt === 5) throw err;
+        await new Promise((res) => setTimeout(res, 1000 * attempt));
+      }
+    }
     inserted += result[0].n;
     process.stdout.write(`\r   đã thêm ${inserted} / ${rows.length}…`);
   }
