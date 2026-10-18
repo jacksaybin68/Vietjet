@@ -1089,7 +1089,12 @@ persistence flows are out of scope. Point it elsewhere with `SMOKE_BASE_URL`.
 Protocol and asserts the *browser* side that smoke cannot see: no `console.error`, no JS
 exception, no non-401 HTTP error, no horizontal overflow, no overlapping boxes, no
 `<img>` with an empty `src`, and no capture taken while a `.skeleton-*` is still on
-screen. It screenshots 35 screens (plus the OpenClaw widget) and exits non-zero if any
+screen. It also asserts the landmark shape of every screen — exactly one `<main>`,
+exactly one `#main-content`, no `<main>` nested in another, and the target *after*
+`<header>` in document order — because that is the only place it can be seen: three routes
+(`/dang-nhap`, `/dat-lai-mat-khau`, `/lam-thu-tuc`) read `useSearchParams` and serve only
+an empty `Suspense` fallback in the raw HTML, so a `curl | grep <main` says zero on pages
+that are correct. It screenshots 35 screens (plus the OpenClaw widget) and exits non-zero if any
 screen has a flag, so it works as a gate. **Run it against a production build** (`npm run
 build && npm start`) — this is where the difference is load-bearing: `next dev` does not
 prefetch, so `router.prefetch('/dat-ve')` for a non-existent route (only `/dat-ve/[id]`
@@ -1113,7 +1118,11 @@ UI_CHECK_BASE_URL=http://127.0.0.1:4029 node scripts/ui-check.cjs
 Two things to remember. The build rewrites `next-env.d.ts` and reformats `tsconfig.json`
 to reference the distDir it just used, so `git checkout -- next-env.d.ts tsconfig.json`
 afterwards — otherwise a `.next-uicheck` path rides along in the next commit. And
-`.next-uicheck/` is gitignored; a different `DIST_DIR` value is not.
+`.next-uicheck/` is gitignored; a different `DIST_DIR` value is not. **`eslint.config.mjs`
+has to ignore it too**, and for a measured reason: the build tree carries generated `.ts`
+files (`types/routes.d.ts`, `cache-life.d.ts`, …), 184 MB of them, and `eslint .` over that
+tree took minutes instead of the ~26 s a clean run needs — long enough that the Phase 1
+lint gate looked like a hang.
 
 **`src/proxy.ts` runs on both `next dev` and `next start`.** Next.js 16 renamed
 the file convention from `middleware.ts` (export `middleware`) to `proxy.ts` (export
@@ -1155,6 +1164,19 @@ brand-red action button (`vj-btn-pill` rounds it); most pages render `<Header />
 `<Footer />` from `@/shared/components/navigation` themselves (only `/dang-nhap`,
 `/quen-mat-khau`, `/dat-lai-mat-khau`, `/editor`, `/quan-tri` are intentionally
 standalone), so a new page should add both.
+
+**The skip link points at `#main-content`, and every surface that renders `<Header />`
+must provide that target itself — after its own header.** The root layout deliberately
+does not: `<Header />` sits inside `children` (each page renders it), so a landmark at
+layout level wrapped the very navigation the link exists to skip, and Tab from the skip
+link landed back on the announcement bar. Which surface owns the landmark follows where
+the chrome is rendered, not where the route is: `/quan-tri`'s header is emitted by
+`AdminDashboardClient`, so its `main#main-content` is the tab panel *inside* that
+component, not the page wrapper in `src/app/quan-tri/page.tsx`. Two consequences for a
+new component: a component rendered inside another page's `main` (`FlightResultsStep`,
+`AdminDashboardClient`) is not a `<main>` itself — only one `<main>` per document — and a
+`Suspense` fallback or `loading.tsx` skeleton is decoration, not the landmark.
+`src/test/hero-banner.test.tsx` pins the source shape; `npm run test:ui` pins the live DOM.
 
 The auth screens do **not** use `vj-btn-primary`. Their submit buttons use
 `vj-auth-submit` (48px tall, 344px wide, 4px radius, flat 90¬∞ gold sweep `#F9A51A‚Üí#FFDD00`,
