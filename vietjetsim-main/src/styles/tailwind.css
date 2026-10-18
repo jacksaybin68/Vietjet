@@ -185,6 +185,17 @@ h6 {
   box-shadow: 0 0 0 5px rgba(236, 32, 41, 0.38);
 }
 
+/* Đích của skip link. Chừa chỗ cho announcement bar + header sticky: không có
+   nó thì tiêu đề trang nằm ngay dưới thanh điều hướng vừa được bỏ qua.
+
+   `.vj-skip-link` (class trong `src/app/layout.tsx`) KHÔNG có định nghĩa ở đây:
+   liên kết đó tự ẩn/hiện bằng tiện ích Tailwind (`sr-only focus:not-sr-only …`).
+   Một bản CSS che nó bằng `transform: translateY(-300%)` sẽ đẩy nó ra ngoài màn
+   hình cả khi đã focus, vì `transform` không bị `not-sr-only` ghi đè. */
+#main-content {
+  scroll-margin-top: 8rem;
+}
+
 .vj-section {
   background: var(--surface);
   padding-block: clamp(2.75rem, 5vw, 4.5rem);
