@@ -44,6 +44,10 @@ export const PUBLIC_API_ROUTES = [
   '/api/checkin',
   // Public bank/transfer config shown on the payment page.
   '/api/cong-khai/cau-hinh-ngan-hang',
+  // Active announcements for the header notice bar. Operator-published
+  // marketing notices read by anonymous visitors, so it must answer before a
+  // session exists; `/api/quan-tri/thong-bao` (admin) stays private.
+  '/api/cong-khai/thong-bao',
   // CSRF bootstrap: anonymous GET minting the double-submit cookie that
   // every mutation route echoes back. Blocking it in the middleware would
   // make the cookie bootstrap unreachable on production builds, and every

@@ -31,6 +31,8 @@ interface SelectedBooking {
   fare: number;
   tax: number;
   total: number;
+  /** Giá Eco làm gốc; đổi tab luôn tính từ gốc này, không nhân dồn. */
+  baseFare: number;
 }
 
 const FARE_CLASS_MULTIPLIER: Record<string, number> = {
@@ -61,15 +63,15 @@ export default function FlightBookingResultsWrapper({
   const handleFlightSelect = useCallback((flightNo: string, fareClass: string, fare: number) => {
     const tax = Math.round(fare * TAX_AND_FEE_RATE);
     const total = fare + tax;
-    setSelectedBooking({ flightNo, fareClass, fare, tax, total });
+    // Vé chọn từ FareClassTabs bên trong kết quả luôn là giá Eco → làm gốc.
+    setSelectedBooking({ flightNo, fareClass, fare, tax, total, baseFare: fare });
   }, []);
 
   const handleFareClassChange = useCallback(
     (fareClass: string) => {
       if (!selectedBooking) return;
-      const baseFare = selectedBooking.fare;
       const multiplier = FARE_CLASS_MULTIPLIER[fareClass] ?? 1;
-      const fare = Math.round(baseFare * multiplier);
+      const fare = Math.round(selectedBooking.baseFare * multiplier);
       const tax = Math.round(fare * TAX_AND_FEE_RATE);
       const total = fare + tax;
       setSelectedBooking({ ...selectedBooking, fareClass, fare, tax, total });
