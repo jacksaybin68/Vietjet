@@ -178,7 +178,7 @@ export default function BookingDetailPage() {
       <Header />
       <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
 
-      <main className="py-6 sm:py-8 px-3 sm:px-4">
+      <main id="main-content" className="py-6 sm:py-8 px-3 sm:px-4">
         <div className="max-w-3xl mx-auto">
           {/* Header - responsive */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">

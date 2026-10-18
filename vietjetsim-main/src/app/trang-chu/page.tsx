@@ -18,23 +18,29 @@ import StatsSection from './components/StatsSection';
 
 export default function Homepage() {
   return (
-    <main className="min-h-screen bg-[var(--background)] overflow-x-hidden">
+    // `<Header />` và `<Footer />` đứng *ngoài* `<main>`: chúng lặp lại trên mọi
+    // trang, còn `<main>` chỉ được chứa nội dung riêng của trang này. Đây cũng là
+    // điều kiện để skip link ở `src/app/layout.tsx` có tác dụng — trỏ vào
+    // `#main-content` phải nhảy *qua* thanh điều hướng, không phải tới nó.
+    <div className="min-h-screen bg-[var(--background)] overflow-x-hidden">
       <Header />
-      <HeroSection />
-      <ServiceIconsSection />
-      <LargePromoBanners />
-      <PromotionalBannersSection />
-      <DealsSection />
-      <HotDealsSection />
-      <PopularRoutesSection />
-      <HowItWorksSection />
-      <FlyEverywhereSection />
-      <AttractiveDestinationsSection />
-      <TravelGuidesSection />
-      <FAQSection />
-      <AwardsSection />
-      <StatsSection />
+      <main id="main-content">
+        <HeroSection />
+        <ServiceIconsSection />
+        <LargePromoBanners />
+        <PromotionalBannersSection />
+        <DealsSection />
+        <HotDealsSection />
+        <PopularRoutesSection />
+        <HowItWorksSection />
+        <FlyEverywhereSection />
+        <AttractiveDestinationsSection />
+        <TravelGuidesSection />
+        <FAQSection />
+        <AwardsSection />
+        <StatsSection />
+      </main>
       <Footer />
-    </main>
+    </div>
   );
 }

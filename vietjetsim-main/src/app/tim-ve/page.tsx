@@ -39,9 +39,11 @@ export default async function FlightBookingPage({
       <Header />
       <ActivityBar />
 
-      <ErrorBoundary variant="booking">
-        <FlightBookingResultsWrapper trip={trip} date={date} />
-      </ErrorBoundary>
+      <main id="main-content">
+        <ErrorBoundary variant="booking">
+          <FlightBookingResultsWrapper trip={trip} date={date} />
+        </ErrorBoundary>
+      </main>
 
       <Footer />
     </div>

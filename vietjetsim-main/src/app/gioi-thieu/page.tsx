@@ -16,7 +16,7 @@ export default function AboutPage() {
       />
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-16 -mt-10 relative z-20">
+      <main id="main-content" className="max-w-6xl mx-auto px-4 py-16 -mt-10 relative z-20">
         {/* About Card */}
         <div className="bg-white rounded-2xl shadow-vj-lg p-8 md:p-12 mb-12">
           <div className="grid md:grid-cols-2 gap-10 items-center">
@@ -125,7 +125,7 @@ export default function AboutPage() {
             </p>
           </div>
         </div>
-      </div>
+      </main>
       <Footer />
     </div>
   );

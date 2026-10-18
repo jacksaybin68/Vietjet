@@ -322,7 +322,8 @@ export default function VSCodeWebEditorPage() {
   };
 
   return (
-    <div
+    <main
+      id="main-content"
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -893,6 +894,6 @@ export default function VSCodeWebEditorPage() {
           <span>⚡ Turbopack (4028)</span>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

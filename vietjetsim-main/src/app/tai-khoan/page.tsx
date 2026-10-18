@@ -10,9 +10,11 @@ export default function UserDashboardPage() {
     <ProtectedRoute requiredRole="user">
       <div className="min-h-screen bg-[var(--surface)]">
         <Header />
-        <ErrorBoundary variant="api">
-          <UserDashboardClient />
-        </ErrorBoundary>
+        <main id="main-content">
+          <ErrorBoundary variant="api">
+            <UserDashboardClient />
+          </ErrorBoundary>
+        </main>
         <Footer />
       </div>
     </ProtectedRoute>

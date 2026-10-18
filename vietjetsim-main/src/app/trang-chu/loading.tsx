@@ -5,7 +5,7 @@ import { PopularRoutesSkeleton, DealsSkeleton } from '@/shared/components/ui';
 
 export default function Loading() {
   return (
-    <main className="min-h-screen bg-white overflow-x-hidden">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       {/* Header skeleton */}
       <div className="bg-white shadow-sm border-b border-stone-100">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -35,6 +35,6 @@ export default function Loading() {
 
       {/* Deals skeleton */}
       <DealsSkeleton />
-    </main>
+    </div>
   );
 }

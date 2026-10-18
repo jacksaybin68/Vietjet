@@ -764,8 +764,11 @@ export default function FlightResultsStep({
         </div>
       </aside>
 
-      {/* Flight List */}
-      <main className="md:col-span-9 w-full min-w-0 space-y-3">
+      {/* Cột kết quả trong grid — không phải `<main>`: nó nằm *trong*
+          `<main id="main-content">` của `/tim-ve` (qua `FlightBookingClient`),
+          nên một landmark ở đây là `<main>` lồng `<main>` — HTML chỉ cho phép
+          một `<main>` mỗi document. */}
+      <div className="md:col-span-9 w-full min-w-0 space-y-3">
         {/* Route board — the real site repeats HAN → SGN above the results. */}
         {search?.from && search?.to && (
           <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] px-3 py-2.5 sm:px-4 sm:py-3">
@@ -1599,7 +1602,7 @@ export default function FlightResultsStep({
             </div>
           </div>
         )}
-      </main>
+      </div>
 
       {/* Booking Summary Sidebar — desktop only. Below `lg` it would stack under
           the flight list as a third full-width block, while the same totals are

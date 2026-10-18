@@ -81,6 +81,9 @@ export default function RootLayout({
         {/* Vietjet Air is a local booking simulator and is intentionally not indexed as the official airline site. */}
       </head>
       <body className="bg-[var(--background)] pb-[calc(60px+env(safe-area-inset-bottom))] text-[var(--foreground)] lg:pb-0">
+        {/* Skip link — phần tử đầu tiên nhận focus. Đích `#main-content` do từng
+            trang tự đặt *sau* `<Header />` của nó; lý do không đặt ở tầng này nằm
+            ở ghi chú trên `<div>` bên dưới. */}
         <a
           href="#main-content"
           className="vj-skip-link sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-[var(--primary)] focus:px-4 focus:py-2 focus:font-bold focus:text-white"
@@ -114,9 +117,14 @@ export default function RootLayout({
         <MobileBottomNav />
         <ThemeProvider>
           <AuthProvider>
-            <main id="main-content">
+            {/* Đây là `<div>`, không phải `<main>`: `children` chứa luôn `<Header />`
+                của từng trang, nên một landmark ở tầng này sẽ bọc cả thanh điều
+                hướng lặp lại — skip link trỏ vào nó thì Tab kế tiếp rơi đúng vào
+                announcement bar, tức là không bỏ qua được gì. Từng trang tự đặt
+                `<main id="main-content">` **sau** `<Header />` của nó. */}
+            <div>
               <PageTransition>{children}</PageTransition>
-            </main>
+            </div>
             <ChatWidgets />
             <SiteOverlays />
           </AuthProvider>

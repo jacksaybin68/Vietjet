@@ -170,7 +170,7 @@ export default function TrackBookingPage() {
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 py-8">
+      <main id="main-content" className="max-w-2xl mx-auto px-4 py-8">
         {/* Not signed in — a booking code is only 6 characters, so the lookup
             is deliberately restricted to the signed-in customer's own bookings
             rather than exposed as a public search. */}

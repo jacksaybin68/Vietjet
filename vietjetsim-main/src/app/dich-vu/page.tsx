@@ -140,7 +140,7 @@ export default function ServicesPage() {
         description="Nâng cao trải nghiệm bay với các dịch vụ bổ trợ đa dạng và tiện ích"
       />
 
-      <main className="max-w-7xl mx-auto px-4 py-10">
+      <main id="main-content" className="max-w-7xl mx-auto px-4 py-10">
         {/* Services Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
           {SERVICES.map((service) => (

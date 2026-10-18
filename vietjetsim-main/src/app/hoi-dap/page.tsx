@@ -36,7 +36,7 @@ export default function FAQPage() {
       />
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 py-16 -mt-10 relative z-20">
+      <main id="main-content" className="max-w-4xl mx-auto px-4 py-16 -mt-10 relative z-20">
         {/* Search Bar */}
         <div className="bg-white rounded-xl shadow-vj-md p-2 mb-8 flex items-center">
           <div className="pl-4 text-[#6D6E71]">
@@ -150,7 +150,7 @@ export default function FAQPage() {
             </a>
           </div>
         </div>
-      </div>
+      </main>
       <Footer />
     </div>
   );
