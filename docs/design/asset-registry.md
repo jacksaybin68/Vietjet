@@ -13,11 +13,11 @@
 | Tổng dung lượng | 14,29 MB | **8,92 MB** (−5,37 MB) |
 | File **không còn tham chiếu** (orphan) | 24 | **0** |
 | File **trùng lặp byte-for-byte** | 1 cặp | 0 |
-| File **nội bộ / đã xác minh** | 7 | **7** |
+| File **nội bộ / đã xác minh** | 7 | **6** |
 | File **rủi ro thương hiệu** | 3 | **3** |
-| File **nguồn gốc chưa xác minh** | 46 | **22** |
+| File **nguồn gốc chưa xác minh** | 46 | **23** |
 
-> **Trạng thái cổng Phase -1:** dọn orphan ✅ · xác minh quyền asset ❌ (còn 22 file chưa xác minh) · 3 asset thương hiệu chờ quyết định ❌.
+> **Trạng thái cổng Phase -1:** dọn orphan ✅ · xác minh quyền asset ❌ (còn 23 file chưa xác minh) · 3 asset thương hiệu chờ quyết định ❌.
 > **Khôi phục file đã xoá:** `git checkout <commit>^ -- <đường-dẫn-file>` (24 file vẫn còn trong lịch sử git).
 
 ## Quy tắc sử dụng asset
@@ -27,7 +27,7 @@
 3. Đổi tên file có dạng `<slug>-<epoch-ms>.<ext>` hoặc UUID sang tên nội bộ khi được duyệt giữ.
 4. Font: repo hiện nạp `KoHo` + `Be Vietnam Pro` qua `<link>` Google Fonts trong `src/app/layout.tsx`, **không** qua `next/font` (xem mục "Font").
 
-## A. Nhóm nội bộ (7 file) — an toàn
+## A. Nhóm nội bộ (6 file) — an toàn
 
 SVG tự tạo (có `aria-label` tiếng Việt), placeholder, favicon dạng hình khối đơn giản.
 
@@ -39,7 +39,6 @@ SVG tự tạo (có `aria-label` tiếng Việt), placeholder, favicon dạng h�
 | `empty-refund-requests.svg` | `public/assets/empty-refund-requests.svg` | Empty state | `/tai-khoan`, `/quan-tri` | Nội bộ | 6,6 KB | ✅ |
 | `empty-upcoming-flights.svg` | `public/assets/empty-upcoming-flights.svg` | Empty state | `/tai-khoan` | Nội bộ | 8,8 KB | ✅ |
 | `no_image.png` | `public/assets/images/no_image.png` | Fallback `AppImage` | Toàn site | Nội bộ | 21 KB | ✅ |
-| `sky_space.png` | `public/assets/images/banners/sky_space.png` | Banner section | `/trang-chu` | Nội bộ (đã xác minh) | 810 KB | ✅ |
 
 ## B. Rủi ro thương hiệu (3 file) — chờ quyết định
 
@@ -49,7 +48,7 @@ SVG tự tạo (có `aria-label` tiếng Việt), placeholder, favicon dạng h�
 | `logo.png` | `public/logo.png` | Logo PNG 230×40 | Toàn site, mail | Nguồn chưa xác minh | 901 B | 🔴 |
 | `app_logo.png` | `public/assets/images/app_logo.png` | Logo 957×1068 trong chat widget | Toàn site (widget) | Nguồn chưa xác minh | 519 KB | 🔴 |
 
-## C. Nguồn gốc chưa xác minh (22 file)
+## C. Nguồn gốc chưa xác minh (23 file)
 
 Dấu hiệu: tên file dạng `<slug>-<epoch-millis>`, UUID, hoặc tên campaign CMS. Cần chọn **thay bằng asset có quyền** / **giữ kèm giấy phép** / **xoá** cho từng file.
 
@@ -85,6 +84,14 @@ Dấu hiệu: tên file dạng `<slug>-<epoch-millis>`, UUID, hoặc tên campai
 | `5.png` | 500 KB | Banner promo | `/trang-chu` | 🔴 |
 | `6.png` | 514 KB | Banner promo | `/trang-chu` | 🔴 |
 
+### C3. `public/assets/images/banners/` — 1 file, 810 KB
+
+| Tên file | Kích thước | Mục đích | Route sử dụng | Trạng thái |
+| --- | --- | --- | --- | --- |
+| `sky_space.png` | 810 KB | Banner section | `/trang-chu` | 🔴 |
+
+> `sky_space.png` cùng họ đặt tên với `loc_vang.png` / `destinations.png` / `services.png` (đã xoá ở nhóm D), nên xếp vào nhóm chưa xác minh thay vì nhóm nội bộ.
+
 ## D. Đã xoá (24 file orphan, ~5,37 MB)
 
 Không có tham chiếu trong `src/`, `scripts/`, `*.json` và không có path động — đã xác minh trước khi xoá. Khôi phục: `git checkout <commit>^ -- <đường-dẫn>`.
@@ -113,6 +120,6 @@ Không có tham chiếu trong `src/`, `scripts/`, `*.json` và không có path �
 | Không file orphan | 0 | 0 | ✅ |
 | Không hotlink `vietjetair.com` trong `src/` | 0 | 0 | ✅ |
 | Không file trùng lặp byte | 0 | 0 | ✅ |
-| Không asset nguồn gốc không rõ | 0 | 22 | ❌ |
+| Không asset nguồn gốc không rõ | 0 | 23 | ❌ |
 | Asset thương hiệu đã quyết định | 3/3 | 0/3 | ❌ |
 | Kích thước ảnh đã đo và ghi nhận | 32/32 | 32/32 | ✅ |

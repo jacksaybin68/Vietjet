@@ -253,7 +253,7 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
 
 export default function FlightResultsStep({
   onSelect,
-  onFlightSelect: _onFlightSelect,
+  onFlightSelect,
   search,
   onDateChange,
   pax,
@@ -1042,14 +1042,15 @@ export default function FlightResultsStep({
                           {fc.price.toLocaleString('vi-VN')}₫
                         </div>
                         <button
-                          onClick={() =>
+                          onClick={() => {
                             onSelect({
                               ...flight,
                               price: fc.price,
                               class: fc.cabin,
                               fareClass: fc.id,
-                            })
-                          }
+                            });
+                            onFlightSelect?.(flight.flightNo, fc.id, fc.price);
+                          }}
                           className={`w-full py-1 rounded text-[8px] sm:text-[9px] 2xl:text-xs font-bold transition-all border ${fc.color}`}
                         >
                           Chọn
@@ -1567,6 +1568,7 @@ export default function FlightResultsStep({
                         onClick={() => {
                           setShowComparison(false);
                           onSelect(flight);
+                          onFlightSelect?.(flight.flightNo, flight.class as string, flight.price);
                         }}
                         className={`w-full vj-btn vj-btn-md rounded-xl font-bold ${
                           flight.class === 'business'
@@ -1721,7 +1723,11 @@ export default function FlightResultsStep({
       <BookingBottomBar
         total={leadTotal}
         ctaLabel="Đi tiếp"
-        onCta={() => leadFlight && onSelect(leadFlight)}
+        onCta={() => {
+          if (!leadFlight) return;
+          onSelect(leadFlight);
+          onFlightSelect?.(leadFlight.flightNo, leadFlight.class as string, leadFlight.price);
+        }}
         disabled={!leadFlight}
         testId="results-bottom-bar"
       />
