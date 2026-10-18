@@ -83,7 +83,6 @@ export const ROUTES = {
   ADMIN: '/quan-tri',
   FAQ: '/hoi-dap',
   CONTACT: '/lien-he',
-  CHECKOUT: '/dat-ve',
   ABOUT: '/gioi-thieu',
   SERVICES: '/dich-vu',
   BAGGAGE: '/hanh-ly',
