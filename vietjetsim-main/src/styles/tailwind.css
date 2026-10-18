@@ -260,6 +260,16 @@ h6 {
   opacity: 0.6;
 }
 
+/* Compact variant of the gold CTA for the small lookup forms
+   (`/chuyen-bay-cua-toi`, `/lam-thu-tuc`): 34px tall, 10px radius. Declared
+   after `.vj-cta` so it overrides the pill's 44px / 0.5rem by source order —
+   scoped to the buttons that opt in, so no `!important` and no effect on the
+   full-size CTA elsewhere. */
+.vj-cta--compact {
+  min-height: 34px;
+  border-radius: 10px;
+}
+
 /* Solid brand-red pill button — the primary submit action on the auth pages.
    The gold `.vj-cta` stays reserved for the flight-search CTA. */
 .vj-btn-pill {

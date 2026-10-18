@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthRequest } from '@/lib/auth';
 import { getBookingsByUserId, createBooking, getFlightById } from '@/lib/db';
+import { sql } from '@/lib/neon';
 import { parsePaginationParams, getPaginationMeta } from '@/lib/pagination';
 import {
   ANCILLARY_OPTIONS,
@@ -203,6 +204,16 @@ export async function POST(request: NextRequest) {
         ancillaryFee
     );
 
+    // Prevent overbooking: refuse the booking when the flight has no seats left
+    // for every seated passenger. This check must happen before createBooking so
+    // we never accept money for a seat that does not exist.
+    if (flight.available < seatedCount) {
+      return NextResponse.json(
+        { error: 'Flight fully booked', message: 'Chuyến bay đã hết ghế trống.' },
+        { status: 409 }
+      );
+    }
+
     const booking = await createBooking(
       { user_id: userId as string, flight_id, total_price: totalPrice },
       normalizedPassengers,
@@ -215,6 +226,13 @@ export async function POST(request: NextRequest) {
         policyAccepted: consents?.policyAccepted ?? false,
       }
     );
+
+    // Reserve the seats by decrementing available capacity on the flight.
+    await sql`
+      UPDATE flights
+      SET available = available - ${seatedCount}
+      WHERE id = ${flight_id}
+    `;
 
     return NextResponse.json({ booking }, { status: 201 });
   } catch (error) {

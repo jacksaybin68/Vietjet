@@ -14,10 +14,22 @@ import {
   FaPassport,
 } from 'react-icons/fa';
 
-const SERVICES = [
+/**
+ * Quick-access service strip — mirrors vietjetair.com's icon row beneath the
+ * hero banner. Ten items in a single centred row (desktop) or horizontally
+ * scrollable strip (mobile). Each icon sits in a lightly tinted circle whose
+ * colour matches the service category.
+ *
+ * Design tokens:
+ * - Background: white with a thin red bottom border (brand accent).
+ * - Icons: 40–44 px circles with 12% opacity tint of the service colour.
+ * - Labels: bold 11 px main + 9 px muted English subtitle.
+ * - Hover: scale icon, underline bar slides in, background blush.
+ */
+export const SERVICES = [
   {
     label: 'Đặt vé',
-    sub: 'Book flight',
+    sub: 'Book Flight',
     href: '/tim-ve',
     Icon: FaPlaneDeparture,
     color: '#EC2029',
@@ -48,79 +60,87 @@ const SERVICES = [
     sub: 'Priority',
     href: '/dich-vu?service=priority',
     Icon: FaStar,
-    color: '#EC2029',
+    color: '#F9A51A',
   },
   {
-    label: 'DutyFree',
-    sub: 'Mua sắm',
+    label: 'Duty Free',
+    sub: 'Shopping',
     href: '/dich-vu?service=lounge',
     Icon: FaShoppingBag,
-    color: '#EC2029',
+    color: '#8075D6',
   },
   {
     label: 'Bảo hiểm',
     sub: 'Insurance',
     href: '/dich-vu?service=insurance',
     Icon: FaShieldAlt,
-    color: '#EC2029',
+    color: '#2563D4',
   },
   {
     label: 'SkyJoy',
-    sub: 'Thưởng',
+    sub: 'Rewards',
     href: '/tai-khoan',
     Icon: FaGift,
     color: '#EC2029',
   },
   {
     label: 'E-Sim',
-    sub: 'Sim data',
+    sub: 'Data SIM',
     href: '/dich-vu?service=meal',
     Icon: FaMobileAlt,
-    color: '#EC2029',
+    color: '#10b981',
   },
   {
     label: 'E-Visa',
     sub: 'Visa',
     href: '/dich-vu?service=insurance',
     Icon: FaPassport,
-    color: '#EC2029',
+    color: '#F4511E',
   },
 ];
 
 export default function ServiceIconsSection() {
   return (
-    <section className="bg-white py-6 sm:py-8 border-b border-gray-100">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-5 sm:grid-cols-5 md:grid-cols-10 gap-3 sm:gap-4">
-          {SERVICES.map((s) => {
+    <section
+      className="relative z-10 bg-white shadow-sm"
+      style={{ borderBottom: '2.5px solid var(--primary)' }}
+    >
+      <div className="mx-auto max-w-[1240px] px-2 sm:px-4">
+        {/* Mobile: horizontal scroll, Desktop: single centred row — matches
+            vietjetair.com's quick-access service strip beneath the hero. */}
+        <div className="vj-service-strip flex items-stretch overflow-x-auto no-scrollbar sm:justify-center sm:overflow-x-visible">
+          {SERVICES.map((s, idx) => {
             const Icon = s.Icon;
             return (
               <Link
                 key={s.label}
                 href={s.href}
-                className="group flex flex-col items-center gap-1.5 sm:gap-2 px-1 sm:px-2 py-3 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:bg-gradient-to-b hover:from-red-50 hover:to-white"
+                className="group flex shrink-0 flex-col items-center gap-1 px-2.5 py-3 sm:px-4 sm:py-3.5 transition-all duration-200 hover:bg-[rgba(236,32,41,0.04)] relative"
+                style={{ animationDelay: `${idx * 40}ms` }}
               >
+                {/* Icon circle — light tinted bg matching service colour */}
                 <div
-                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg relative"
+                  className="flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 group-hover:scale-110 group-hover:shadow-md sm:h-11 sm:w-11"
                   style={{
-                    background: `linear-gradient(135deg, ${s.color}15 0%, ${s.color}25 100%)`,
-                    border: `1.5px solid ${s.color}40`,
+                    background: `${s.color}12`,
+                    border: `1.5px solid ${s.color}30`,
                   }}
                 >
-                  <Icon className="text-lg sm:text-xl" style={{ color: s.color }} />
-                  <span
-                    className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{ background: s.color }}
-                  />
+                  <Icon className="text-base sm:text-lg" style={{ color: s.color }} />
                 </div>
-                <div className="text-center">
-                  <p className="text-[11px] sm:text-xs font-black text-navy leading-tight uppercase group-hover:text-primary transition-colors">
-                    {s.label}
-                  </p>
-                  <p className="text-[9px] sm:text-[10px] text-vj-gray font-medium leading-tight hidden sm:block">
-                    {s.sub}
-                  </p>
-                </div>
+
+                {/* Vietnamese label */}
+                <span className="whitespace-nowrap text-[10.5px] font-bold leading-tight text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors sm:text-[11.5px]">
+                  {s.label}
+                </span>
+
+                {/* English subtitle — adds bilingual feel matching vietjetair.com */}
+                <span className="whitespace-nowrap text-[8.5px] leading-none text-[var(--foreground-muted)] group-hover:text-[var(--primary-light)] transition-colors sm:text-[9px] -mt-0.5">
+                  {s.sub}
+                </span>
+
+                {/* Active indicator on hover — red bar at bottom */}
+                <span className="absolute bottom-0 left-1/2 h-[2px] w-0 -translate-x-1/2 bg-[var(--primary)] transition-all duration-200 group-hover:w-3/4 rounded-full" />
               </Link>
             );
           })}

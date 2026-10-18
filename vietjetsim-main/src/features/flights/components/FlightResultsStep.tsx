@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Flight } from '@/features/bookings/types/booking-flow';
+
 import { getBookingTotals, getFareForClass, type FareClassId } from '@/features/bookings/pricing';
 import BookingBottomBar from '@/features/bookings/components/BookingBottomBar';
 import { Icon, AppImage } from '@/shared/components/ui';
@@ -131,6 +132,8 @@ function SearchErrorModal({ message, onRetry, onDismiss }: SearchErrorModalProps
 export interface FlightResultsStepProps {
   /** Called with the chosen flight; advances the booking wizard to step 2. */
   onSelect: (f: Flight) => void;
+  /** Called when a traveller taps a fare card: (flightNo, fareClass, fare). */
+  onFlightSelect?: (flightNo: string, fareClass: string, fare: number) => void;
   /** Route/departure filters from the search form; drive the real API lookup. */
   search?: { from?: string; to?: string; depart?: string };
   /** Lets the date strip re-search another departure day (vietjetair.com parity). */
@@ -250,6 +253,7 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
 
 export default function FlightResultsStep({
   onSelect,
+  onFlightSelect: _onFlightSelect,
   search,
   onDateChange,
   pax,
@@ -893,55 +897,67 @@ export default function FlightResultsStep({
         {!isLoading &&
           !loadError &&
           filtered.map((flight, idx) => {
-            // Fares come from the flight row (migration 030), not from hard-coded
-            // offsets. The old `basePrice + 1_200_000` ladder showed a price the
-            // server then ignored, so the quoted and charged totals disagreed.
-            // Each card's amount comes from `getFareForClass` — the same ladder
-            // the booking API charges with — so tapping SkyBOSS cannot quote one
-            // figure and bill another.
-            const economyFare = flight.economyPrice || flight.price;
-            const businessFare = flight.businessPrice || flight.price;
-            const fareClasses = [
+            const economyFare = flight.economyPrice ?? flight.price;
+            const businessFare = flight.businessPrice ?? flight.price;
+
+            const fareClasses: Array<{
+              id: FareClassId;
+              name: string;
+              cabin: Flight['class'];
+              price: number;
+              headerClass: string;
+              priceColor: string;
+              color: string;
+            }> = [
               {
-                id: 'business',
-                name: 'Business',
-                color:
-                  'bg-[var(--surface-2)] text-[var(--primary)] border-transparent hover:border-[var(--primary)]',
-                headerClass: 'bg-[var(--primary)] text-white',
-                priceColor: 'text-[var(--primary)]',
-              },
-              {
-                id: 'skyboss',
-                name: 'SkyBOSS',
-                color:
-                  'bg-[var(--surface-2)] text-[var(--foreground)] border-transparent hover:border-[var(--foreground)]',
-                headerClass: 'bg-[var(--vj-navy)] text-white',
-                priceColor: 'text-[var(--foreground)]',
-              },
-              {
-                id: 'deluxe',
-                name: 'Deluxe',
-                color:
-                  'bg-[var(--surface-2)] text-[var(--foreground)] border-transparent hover:border-[var(--border)] ',
-                headerClass: 'bg-[var(--accent)] text-[var(--vj-navy)]',
-                priceColor: 'text-[var(--foreground)]',
-              },
-              {
-                id: 'eco',
+                id: 'eco' as FareClassId,
                 name: 'Eco',
-                color:
-                  'bg-[var(--surface)] text-[var(--foreground-muted)] border-[var(--border)] hover:border-[var(--primary)]:border-[var(--primary)] hover:text-[var(--primary)]:text-[var(--primary)]',
-                headerClass: 'bg-[var(--surface-2)] text-[var(--foreground-muted)]',
-                priceColor: 'text-[var(--foreground-muted)]',
+                cabin: 'economy' as const,
+                price: getFareForClass('eco', {
+                  economyPrice: economyFare,
+                  businessPrice: businessFare,
+                }),
+                headerClass: 'bg-[#2db35e] text-white',
+                priceColor: 'text-[#2db35e]',
+                color: 'border-[#2db35e] text-[#2db35e] hover:bg-[#2db35e] hover:text-white',
               },
-            ].map((fc) => ({
-              ...fc,
-              id: fc.id as FareClassId,
-              price: getFareForClass(fc.id as FareClassId, {
-                economyPrice: economyFare,
-                businessPrice: businessFare,
-              }),
-            }));
+              {
+                id: 'deluxe' as FareClassId,
+                name: 'Deluxe',
+                cabin: 'economy' as const,
+                price: getFareForClass('deluxe', {
+                  economyPrice: economyFare,
+                  businessPrice: businessFare,
+                }),
+                headerClass: 'bg-[#f4511e] text-white',
+                priceColor: 'text-[#f4511e]',
+                color: 'border-[#f4511e] text-[#f4511e] hover:bg-[#f4511e] hover:text-white',
+              },
+              {
+                id: 'skyboss' as FareClassId,
+                name: 'SkyBoss',
+                cabin: 'business' as const,
+                price: getFareForClass('skyboss', {
+                  economyPrice: economyFare,
+                  businessPrice: businessFare,
+                }),
+                headerClass: 'bg-[#6f0000] text-[#ffdd00]',
+                priceColor: 'text-[#6f0000]',
+                color: 'border-[#6f0000] text-[#6f0000] hover:bg-[#6f0000] hover:text-[#ffdd00]',
+              },
+              {
+                id: 'business' as FareClassId,
+                name: 'Business',
+                cabin: 'business' as const,
+                price: getFareForClass('business', {
+                  economyPrice: economyFare,
+                  businessPrice: businessFare,
+                }),
+                headerClass: 'bg-[#fbb612] text-black font-extrabold',
+                priceColor: 'text-[#d97706]',
+                color: 'border-[#fbb612] text-black hover:bg-[#fbb612] hover:text-black',
+              },
+            ];
 
             return (
               <div
@@ -952,57 +968,59 @@ export default function FlightResultsStep({
               >
                 {/* Left: Flight Info - responsive */}
                 <div className="w-full lg:w-[240px] shrink-0 p-3 sm:p-4 border-b lg:border-b-0 border-primary/10 flex flex-col justify-between">
-                  <div className="flex items-center gap-1.5 sm:gap-2 mb-3">
-                    <span className="font-black text-[var(--foreground)] text-sm leading-none font-koho">
-                      {flight.flightNo}
-                    </span>
-                    <span className="text-[10px] sm:text-[11px] text-[var(--foreground-muted)] font-semibold uppercase">
-                      {flight.airline}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between mb-3">
-                    {/* Dep */}
-                    <div className="text-center min-w-[45px] sm:min-w-[50px]">
-                      <div className="text-lg sm:text-xl font-black text-[var(--foreground)] leading-none font-koho">
-                        {flight.departTime}
-                      </div>
-                      <div className="text-[10px] sm:text-xs font-bold text-[var(--foreground-muted)] mt-1">
-                        {flight.from}
-                      </div>
+                  <div>
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-2">
+                      <span className="font-black text-[var(--foreground)] text-sm leading-none font-koho">
+                        {flight.flightNo}
+                      </span>
+                      <span className="text-[10px] text-[var(--foreground-subtle)] font-medium">
+                        {flight.airline ?? 'Vietjet Air'}
+                      </span>
                     </div>
-                    {/* Line */}
-                    <div className="flex-1 flex flex-col items-center px-1.5 sm:px-2">
-                      <div className="text-[9px] sm:text-[10px] text-[var(--foreground-subtle)] font-semibold mb-1">
-                        {flight.duration}
+
+                    <div className="flex items-center justify-between gap-2 my-2">
+                      <div>
+                        <div className="text-xl sm:text-2xl font-black text-[var(--foreground)] font-koho leading-none">
+                          {flight.departTime}
+                        </div>
+                        <div className="text-[11px] text-[var(--foreground-muted)] font-semibold mt-0.5">
+                          {flight.from}
+                        </div>
                       </div>
-                      <div className="w-full flex items-center justify-center">
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full border border-[var(--border)] shrink-0"></div>
-                        <div className="flex-1 border-t border-dashed border-[var(--border)] min-w-[15px] sm:min-w-[20px]"></div>
-                        <Icon
-                          name="PaperAirplaneIcon"
-                          size={8}
-                          className="text-primary rotate-90 mx-0.5 sm:mx-1 shrink-0"
-                        />
-                        <div className="flex-1 border-t border-dashed border-[var(--border)] min-w-[15px] sm:min-w-[20px]"></div>
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full border border-primary bg-primary shrink-0"></div>
+
+                      <div className="flex-1 flex flex-col items-center">
+                        <span className="text-[9px] text-[var(--foreground-subtle)] font-medium">
+                          {flight.duration}
+                        </span>
+                        <div className="w-full flex items-center gap-1 my-0.5">
+                          <span className="h-0.5 flex-1 bg-primary/30" />
+                          <Icon
+                            name="PaperAirplaneIcon"
+                            size={10}
+                            className="text-primary rotate-90"
+                          />
+                          <span className="h-0.5 flex-1 bg-primary/30" />
+                        </div>
+                        <span className="text-[9px] text-primary font-bold">Bay thẳng</span>
                       </div>
-                      <div className="text-[8px] sm:text-[10px] text-primary font-bold mt-1 text-center whitespace-nowrap">
-                        {flight.stops === 0 ? 'Bay thẳng' : `${flight.stops} Điểm dừng`}
-                      </div>
-                    </div>
-                    {/* Arr */}
-                    <div className="text-center min-w-[45px] sm:min-w-[50px]">
-                      <div className="text-lg sm:text-xl font-black text-[var(--foreground)] leading-none font-koho">
-                        {flight.arriveTime}
-                      </div>
-                      <div className="text-[10px] sm:text-xs font-bold text-[var(--foreground-muted)] mt-1">
-                        {flight.to}
+
+                      <div className="text-right">
+                        <div className="text-xl sm:text-2xl font-black text-[var(--foreground)] font-koho leading-none">
+                          {flight.arriveTime}
+                        </div>
+                        <div className="text-[11px] text-[var(--foreground-muted)] font-semibold mt-0.5">
+                          {flight.to}
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <button className="text-[10px] sm:text-[11px] font-bold text-primary hover:underline text-left inline-flex items-center gap-1">
-                    Chi tiết chuyến bay <Icon name="ChevronDownIcon" size={8} />
-                  </button>
+
+                  <div className="text-[10px] text-[var(--foreground-subtle)] mt-2 pt-2 border-t border-[var(--border)] flex items-center justify-between">
+                    <span>Airbus A321</span>
+                    <span className="text-green-600 font-semibold">
+                      Còn {flight.available ?? 9} chỗ
+                    </span>
+                  </div>
                 </div>
 
                 {/* Right: Fare Classes - responsive */}
@@ -1021,17 +1039,22 @@ export default function FlightResultsStep({
                         <div
                           className={`text-[8px] sm:text-[9px] 2xl:text-sm font-black ${fc.priceColor} font-koho mb-1.5 sm:mb-2 2xl:mb-3 leading-none break-words text-center`}
                         >
-                          {Math.round(fc.price).toLocaleString('vi-VN')}₫
+                          {fc.price.toLocaleString('vi-VN')}₫
                         </div>
                         <button
-                          onClick={() => onSelect({ ...flight, price: fc.price, fareClass: fc.id })}
-                          className={`w-full min-h-9 py-1.5 rounded text-[8px] sm:text-[9px] 2xl:text-xs font-bold transition-all border ${fc.color}`}
+                          onClick={() =>
+                            onSelect({
+                              ...flight,
+                              price: fc.price,
+                              class: fc.cabin,
+                              fareClass: fc.id,
+                            })
+                          }
+                          className={`w-full py-1 rounded text-[8px] sm:text-[9px] 2xl:text-xs font-bold transition-all border ${fc.color}`}
                         >
                           Chọn
                         </button>
                       </div>
-                      {/* Overlay effect on hover */}
-                      <div className="absolute inset-0 border-2 border-transparent group-hover:border-primary pointer-events-none rounded-lg transition-colors" />
                     </div>
                   ))}
                 </div>

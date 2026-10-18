@@ -55,7 +55,14 @@ export async function POST(req: NextRequest) {
     if (error) return response;
 
     const body = await req.json();
-    const { routes, dates, wafCookie, importOnSuccess = false, concurrency = 4 } = body || {};
+    const {
+      routes,
+      dates,
+      wafCookie,
+      importOnSuccess = false,
+      concurrency = 4,
+      discountVnd,
+    } = body || {};
 
     // ── Validate ─────────────────────────────────────────────────────────────
     if (!Array.isArray(routes) || routes.length === 0) {
@@ -168,7 +175,12 @@ export async function POST(req: NextRequest) {
           }
 
           if (importOnSuccess) {
-            const importResult = await importWebFlights({ from, to }, date, item.flights);
+            const importResult = await importWebFlights(
+              { from, to },
+              date,
+              item.flights,
+              typeof discountVnd === 'number' ? discountVnd : undefined
+            );
             item.imported = importResult.imported;
             item.skipped = importResult.skipped;
           }

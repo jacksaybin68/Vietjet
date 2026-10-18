@@ -16,6 +16,33 @@ function isUniqueViolation(error: unknown): boolean {
   );
 }
 
+/**
+ * Mã giảm giá chỉ chấp nhận 6–8 ký tự, bao gồm chữ hoa (A–Z) và số (0–9).
+ * Trả về { valid: true } nếu hợp lệ, ngược lại { valid: false, message }.
+ */
+function validateDiscountCode(code: unknown): {
+  valid: boolean;
+  message?: string;
+} {
+  if (typeof code !== 'string' || !code.trim()) {
+    return { valid: false, message: 'Vui lòng nhập mã giảm giá' };
+  }
+  const trimmed = code.trim();
+  if (trimmed.length < 6 || trimmed.length > 8) {
+    return {
+      valid: false,
+      message: 'Mã giảm giá phải có từ 6 đến 8 ký tự',
+    };
+  }
+  if (!/^[A-Z0-9]+$/.test(trimmed)) {
+    return {
+      valid: false,
+      message: 'Mã giảm giá chỉ được chứa chữ hoa và số',
+    };
+  }
+  return { valid: true };
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { error, response } = await verifyAdminRequest(request, 'discount:list');
@@ -82,9 +109,18 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Simple validation
-    if (!code || !type || value === undefined || !start_date || !end_date) {
+    if (!type || value === undefined || !start_date || !end_date) {
       return NextResponse.json(
         { error: 'Bad Request', message: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // Mã giảm giá chỉ chấp nhận 6–8 ký tự, bao gồm chữ hoa và số.
+    const codeValidation = validateDiscountCode(code);
+    if (!codeValidation.valid) {
+      return NextResponse.json(
+        { error: 'Bad Request', message: codeValidation.message },
         { status: 400 }
       );
     }

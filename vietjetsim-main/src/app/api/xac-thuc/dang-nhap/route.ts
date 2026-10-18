@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
+import { rateLimit } from '@/lib/rate-limit';
 import {
   comparePassword,
   generateTokens,
@@ -22,6 +23,12 @@ import { normalizePhone } from '@/lib/utils';
 import { hashBackupCode, normalizeBackupCode, verifyTotpToken } from '@/lib/two-factor';
 
 export async function POST(request: NextRequest) {
+  // IP-based rate limiting: 10 attempts per minute per IP + path.
+  const rateLimitResponse = rateLimit(request, { windowMs: 60_000, maxRequests: 10 });
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const body = await request.json();
     const { email, password, token } = body as {

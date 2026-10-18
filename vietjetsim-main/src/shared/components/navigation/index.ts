@@ -1,3 +1,4 @@
+export { default as AnnouncementBar } from './AnnouncementBar';
 export { default as BreadcrumbNav } from './BreadcrumbNav';
 export type { BreadcrumbItem } from './BreadcrumbNav';
 export { default as Footer } from './Footer';

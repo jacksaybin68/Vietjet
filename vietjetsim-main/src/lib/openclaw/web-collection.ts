@@ -355,6 +355,15 @@ function parseScheduleResponse(from: string, to: string, data: Json): WebFlight[
 
 export const FARE_LADDER_RATIO = 2.77; // đúng hệ số migration 030 dùng khi seed
 
+/**
+ * Mức giảm giá vé mặc định so với giá gốc của Vietjet khi thu thập dữ liệu: 200.000 VND.
+ * Giúp giá hiển thị trên hệ thống luôn cạnh tranh và rẻ hơn giá niêm yết của hãng.
+ */
+export const DEFAULT_VIETJET_DISCOUNT_VND = 200000;
+
+/** Mức giá sàn tối thiểu của một vé sau khi trừ giảm giá (đảm bảo không âm hoặc quá thấp). */
+export const MIN_TICKET_PRICE_FLOOR = 99000;
+
 export interface ImportResult {
   imported: string[];
   skipped: string[];
@@ -364,6 +373,7 @@ export interface ImportResult {
  * Đưa lịch bay thu được từ web vào bảng `flights`:
  * - một LƯỢT bay thành một dòng `economy` (cùng quy ước `createFlight`);
  *   Thương gia = 2.77× — hệ số seed migration 030, giữ thang giá nhất quán;
+ * - áp dụng mức giảm giá (mặc định 200.000 VND rẻ hơn Vietjet) với giá sàn an toàn;
  * - trùng (from,to,depart_time) — index `idx_flights_route_depart_time` —
  *   bỏ qua (`DO NOTHING`), KHÔNG viết đè giá người quản trị đã sửa;
  * - số hiệu không đạt chuẩn `VJ <digits>` (migration 036) thì bỏ và báo lại
@@ -372,7 +382,9 @@ export interface ImportResult {
 export async function importWebFlights(
   route: { from: string; to: string },
   date: string,
-  flights: WebFlight[]
+  flights: WebFlight[],
+  discountVnd: number = Number(process.env.VIETJET_PRICE_DISCOUNT_VND) ||
+    DEFAULT_VIETJET_DISCOUNT_VND
 ): Promise<ImportResult> {
   const imported: string[] = [];
   const skipped: string[] = [];
@@ -383,11 +395,16 @@ export async function importWebFlights(
       skipped.push(`${flight.flightNo} (số hiệu không khớp mẫu VJ <số>)`);
       continue;
     }
-    const price = Math.round(flight.price);
-    if (!(price > 0)) {
+    const rawPrice = Math.round(flight.price);
+    if (!(rawPrice > 0)) {
       skipped.push(`${flightNo} ${flight.departTime} (không đọc được giá)`);
       continue;
     }
+    // Áp dụng chính sách giá rẻ hơn Vietjet (mặc định giảm 200.000 VND)
+    const effectiveDiscount =
+      Number.isFinite(discountVnd) && discountVnd >= 0 ? discountVnd : DEFAULT_VIETJET_DISCOUNT_VND;
+    const price = Math.max(MIN_TICKET_PRICE_FLOOR, rawPrice - effectiveDiscount);
+
     const arriveISO = computeArriveInstant(date, flight.departTime, flight.arriveTime);
     if (!arriveISO) {
       skipped.push(`${flightNo} ${flight.departTime} (giờ đi/đến không đọc được)`);

@@ -279,7 +279,7 @@ describe('Agency discount issuance', () => {
       const req = jsonRequest(
         'http://localhost:4028/api/quan-tri/ma-giam-gia',
         {
-          code: 'dl10',
+          code: 'DL10AB',
           type: 'percentage',
           value: 10,
           start_date: '2026-01-01',
@@ -301,7 +301,7 @@ describe('Agency discount issuance', () => {
       const req = jsonRequest(
         'http://localhost:4028/api/quan-tri/ma-giam-gia',
         {
-          code: 'ALL20',
+          code: 'ALL202',
           type: 'percentage',
           value: 20,
           start_date: '2026-01-01',
@@ -311,6 +311,82 @@ describe('Agency discount issuance', () => {
       );
       await createDiscountRoute(req);
       expect(spy).toHaveBeenCalledWith(expect.objectContaining({ agency_id: null }));
+    });
+  });
+
+  describe('Discount code format validation', () => {
+    const basePayload = {
+      type: 'percentage',
+      value: 10,
+      start_date: '2026-01-01',
+      end_date: '2026-12-31',
+    };
+
+    it.each([
+      ['ABC', 'too short (3 chars)'],
+      ['ABCDE', 'too short (5 chars)'],
+      ['ABCDEFGHI', 'too long (9 chars)'],
+      ['ABCDEFGHIJ', 'too long (10 chars)'],
+    ])('rejects a %s code with 400', async (code, _reason) => {
+      const req = jsonRequest(
+        'http://localhost:4028/api/quan-tri/ma-giam-gia',
+        { ...basePayload, code },
+        withCsrf(adminToken())
+      );
+      const res = await createDiscountRoute(req);
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body.error).toBe('Bad Request');
+      expect(body.message).toContain('6 đến 8 ký tự');
+    });
+
+    it.each([
+      ['abc123', 'lowercase letters'],
+      ['ABC-12', 'hyphen'],
+      ['ABC 12', 'space'],
+      ['ABC@12', 'special character'],
+    ])('rejects a %s code (%s) with 400', async (code, _reason) => {
+      const req = jsonRequest(
+        'http://localhost:4028/api/quan-tri/ma-giam-gia',
+        { ...basePayload, code },
+        withCsrf(adminToken())
+      );
+      const res = await createDiscountRoute(req);
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body.error).toBe('Bad Request');
+      expect(body.message).toContain('chữ hoa và số');
+    });
+
+    it.each([
+      ['ABC123', '6 chars, letters + digits'],
+      ['ABC1234', '7 chars, letters + digits'],
+      ['ABCDEFG', '7 chars, letters only'],
+      ['123456', '6 chars, digits only'],
+      ['A1B2C3D4', '8 chars, letters + digits'],
+    ])('accepts a valid %s code with 201', async (code, _reason) => {
+      const spy = vi.spyOn(db, 'createDiscountCode').mockResolvedValue({} as never);
+      const req = jsonRequest(
+        'http://localhost:4028/api/quan-tri/ma-giam-gia',
+        { ...basePayload, code },
+        withCsrf(adminToken())
+      );
+      const res = await createDiscountRoute(req);
+      expect(res.status).toBe(201);
+      expect(spy).toHaveBeenCalledWith(expect.objectContaining({ code }));
+    });
+
+    it('rejects an empty code with 400', async () => {
+      const req = jsonRequest(
+        'http://localhost:4028/api/quan-tri/ma-giam-gia',
+        { ...basePayload, code: '' },
+        withCsrf(adminToken())
+      );
+      const res = await createDiscountRoute(req);
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body.error).toBe('Bad Request');
+      expect(body.message).toContain('mã giảm giá');
     });
   });
 

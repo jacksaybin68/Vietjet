@@ -68,6 +68,7 @@ export const API_ENDPOINTS = {
     COLLECT_BULK: '/api/quan-tri/thu-thap-hang-loat',
     COLLECT_AUTO: '/api/quan-tri/thu-thap-tu-dong',
     COLLECT_SOLVE_WAF: '/api/quan-tri/thu-thap-giai-waf',
+    ADJUST_FLIGHT_PRICES: '/api/quan-tri/chuyen-bay/dieu-chinh-gia',
   },
 } as const;
 

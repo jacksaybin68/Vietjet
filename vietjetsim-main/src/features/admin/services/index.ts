@@ -446,6 +446,7 @@ export interface BulkCollectInput {
   wafCookie?: string;
   importOnSuccess?: boolean;
   concurrency?: number;
+  discountVnd?: number;
 }
 
 export interface BulkCollectItem {
@@ -532,4 +533,58 @@ export function triggerAdminSolveWaf() {
       method: 'POST',
     }
   );
+}
+
+// ─── Bulk Price Adjustment ──────────────────────────────────────────────────
+
+export interface BulkPriceAdjustPreviewSample {
+  id: string;
+  flight_no: string;
+  route: string;
+  depart_time: string;
+  class: string;
+  old_economy_price: number;
+  new_economy_price: number;
+  old_business_price: number;
+  new_business_price: number;
+  old_price: number;
+  new_price: number;
+  diff: number;
+}
+
+export type PriceAdjustAction =
+  | 'discount_fixed'
+  | 'increase_fixed'
+  | 'discount_percent'
+  | 'increase_percent'
+  | 'set_fixed';
+
+export interface BulkPriceAdjustPayload {
+  filter?: {
+    from_code?: string;
+    to_code?: string;
+    from_date?: string;
+    to_date?: string;
+    flight_no?: string;
+    class?: 'all' | 'economy' | 'business';
+  };
+  action: PriceAdjustAction;
+  amount: number;
+  dryRun?: boolean;
+}
+
+export interface BulkPriceAdjustResponse {
+  success?: boolean;
+  dryRun?: boolean;
+  matchedCount?: number;
+  updatedCount?: number;
+  message?: string;
+  samples?: BulkPriceAdjustPreviewSample[];
+}
+
+export function adjustAdminFlightPrices(input: BulkPriceAdjustPayload) {
+  return apiRequest<BulkPriceAdjustResponse>(EP.ADJUST_FLIGHT_PRICES, {
+    method: 'POST',
+    body: input,
+  });
 }

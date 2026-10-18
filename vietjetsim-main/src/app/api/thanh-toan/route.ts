@@ -53,16 +53,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Charge what the booking is actually worth. `amount` is taken from the
-    // browser for display purposes only: trusting it let a client pay one đồng
-    // and have the booking marked confirmed. A discount legitimately lowers the
-    // charge, so the floor is the discounted total rather than the full fare.
-    const discountedTotal = Math.max(0, booking.total_price - (discount_amount || 0));
-    if (amount < discountedTotal) {
+    // Prevent double-charge: a booking can only be paid once.
+    if (booking.status === 'confirmed') {
       return NextResponse.json(
         {
-          error: 'Payment amount too low',
-          message: `Amount must cover the booking total of ${discountedTotal.toLocaleString('vi-VN')} VND`,
+          error: 'Already paid',
+          message: 'Đặt chỗ này đã được thanh toán rồi.',
+        },
+        { status: 409 }
+      );
+    }
+
+    // Charge exactly what the booking is worth. `amount` from the browser is for
+    // display only — trusting it let a client pay one đồng (or ten times the
+    // fare) and have the booking marked confirmed. A discount legitimately
+    // lowers the charge, so the expected amount is the discounted total.
+    const discountedTotal = Math.max(0, booking.total_price - (discount_amount || 0));
+    if (amount !== discountedTotal) {
+      return NextResponse.json(
+        {
+          error: 'Invalid payment amount',
+          message: `Số tiền phải đúng ${discountedTotal.toLocaleString('vi-VN')} VND`,
         },
         { status: 400 }
       );

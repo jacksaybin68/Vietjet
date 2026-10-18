@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { HiOutlineArrowUpRight, HiOutlinePhone, HiOutlineMapPin } from 'react-icons/hi2';
+import { RiArrowRightUpLine, RiMapPinLine, RiPhoneLine } from 'react-icons/ri';
 
 const FOOTER_GROUPS = [
   {
@@ -49,11 +49,11 @@ export default function Footer() {
                 href="tel:19001166"
                 className="flex items-center gap-2 hover:text-[var(--primary)]"
               >
-                <HiOutlinePhone className="text-[var(--primary)]" />
+                <RiPhoneLine aria-hidden="true" className="text-[var(--primary)]" />
                 1900 1166
               </a>
               <p className="flex items-center gap-2">
-                <HiOutlineMapPin className="text-[var(--primary)]" />
+                <RiMapPinLine aria-hidden="true" className="text-[var(--primary)]" />
                 Hỗ trợ 24/7
               </p>
             </div>
@@ -96,7 +96,7 @@ export default function Footer() {
               className="vj-cta mt-5 flex min-h-11 items-center justify-center gap-2 px-4 text-sm font-black"
             >
               Tìm chuyến bay
-              <HiOutlineArrowUpRight className="text-lg" />
+              <RiArrowRightUpLine aria-hidden="true" className="text-lg" />
             </Link>
           </div>
         </div>
@@ -104,7 +104,7 @@ export default function Footer() {
 
       <div className="bg-[var(--vj-navy)] text-white">
         <div className="mx-auto flex max-w-[1240px] flex-col gap-2 px-4 py-4 text-xs text-white/70 sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 Vietjet Air · Đặt vé máy bay trực tuyến.</p>
+          <p>© {new Date().getFullYear()} Vietjet Air · Đặt vé máy bay trực tuyến.</p>
           <div className="flex flex-wrap gap-x-5 font-semibold [&>a]:py-1.5">
             <Link href="/gioi-thieu" className="hover:text-[var(--accent)]">
               Điều khoản

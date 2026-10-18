@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import {
   MdArrowOutward,
   MdCalendarMonth,
+  MdChevronLeft,
+  MdChevronRight,
   MdConfirmationNumber,
   MdExpandMore,
   MdSwapHoriz,
@@ -61,17 +63,39 @@ const FALLBACK_AIRPORTS: Airport[] = [
 ];
 
 /**
- * Homepage hero artwork.
- *
- * Picked for a right-pinned booking card: this 4000x2000 campaign banner keeps
- * its passengers and plane in the bottom-left and its promo copy between ~33%
- * and ~55% of the width, so the whole right half stays empty cloud for the card
- * to sit on. The `*-fare-website-*.webp` banners (1920x650 / 2560x867) are the
- * right ratio for a hero, but their headline sits at 52-82% of the width and the
- * card half-clipped it. The previous `banner-1-hongkong.jpg` is a 1562x1354
- * (1.15:1) portrait crop built for the deal cards, so stretching it behind a
- * full-bleed hero via `background-size: cover` destroyed it.
+ * Danh sách Banner Quảng Cáo của Vietjet làm nền Hero Banner Slider.
  */
+export const HERO_BANNERS = [
+  {
+    id: 'banner-vietjet-holiday',
+    image: '/images/hero/f3aa27c1-7cad-4a31-8086-58654aa494b5.jpg',
+    badge: 'Khuyến mại đặc biệt',
+    title: 'Bay cùng Vietjet - Bay là thích ngay',
+    subtitle: 'Khám phá hàng ngàn điểm đến với mức giá cực kỳ ưu đãi',
+  },
+  {
+    id: 'banner-vietjet-0dong',
+    image: '/images/hero/9-fare-website-2.webp',
+    badge: 'Săn vé 0 đồng',
+    title: 'Vé máy bay siêu tiết kiệm chỉ từ 0đ',
+    subtitle: 'Áp dụng cho mọi đường bay nội địa & quốc tế hot nhất',
+  },
+  {
+    id: 'banner-vietjet-international',
+    image: '/images/hero/eng-8-fare-website-1.webp',
+    badge: 'Đường bay quốc tế',
+    title: 'Kết nối năm châu - Chạm đỉnh cao mới',
+    subtitle: 'Thoả sức vi vu Nhật Bản, Hàn Quốc, Úc, Ấn Độ cùng Vietjet',
+  },
+  {
+    id: 'banner-vietjet-skyboss',
+    image: '/images/hero/261ceb09-de92-4981-b4f0-eb6c37ee5720.jpg',
+    badge: 'Dịch vụ SkyBoss',
+    title: 'Trải nghiệm phong cách Người dẫn đầu',
+    subtitle: 'Phòng chờ hạng sang, hành lý ưu tiên và phục vụ chu đáo',
+  },
+];
+
 const HERO_ARTWORK = '/images/hero/f3aa27c1-7cad-4a31-8086-58654aa494b5.jpg';
 
 /**
@@ -81,7 +105,7 @@ const HERO_ARTWORK = '/images/hero/f3aa27c1-7cad-4a31-8086-58654aa494b5.jpg';
 const BOOKING_TABS = [
   {
     id: 'services',
-    label: 'Mua hành lý, suất ăn chọn chỗ ngồi và hơn thế nữa...',
+    label: 'Mua hành lý, suất ăn, chọn chỗ ngồi và hơn thế nữa...',
     href: '/dich-vu',
   },
   { id: 'booking', label: 'Đặt chuyến đi & Mua SkyJoy', href: '#hero-booking-form' },
@@ -93,24 +117,22 @@ const CURRENCIES = ['VND', 'USD'] as const;
 // 16px on mobile: anything smaller makes iOS Safari zoom the page the moment a
 // field takes focus, and the user never sees the form again.
 const inputClass =
-  'w-full min-w-0 border-0 bg-transparent px-0 text-base font-extrabold text-[#333333] outline-none disabled:cursor-not-allowed disabled:text-[#8b9099] sm:text-sm';
+  'w-full min-w-0 border-0 bg-transparent px-0 text-base font-extrabold text-[#222222] outline-none disabled:cursor-not-allowed disabled:text-[#8b9099] sm:text-sm';
 const labelClass =
-  'block text-[10px] font-bold uppercase leading-none tracking-[0.06em] text-[#8c8c8c]';
+  'block text-[10px] font-bold uppercase leading-none tracking-[0.06em] text-[#767676]';
 /**
  * Airport + date share a single bordered box split 2:1 by a `|` hairline, the
  * way vietjetair.com pairs a route field with its date. The group owns the
- * border, the rounding and the focus colour; each half is only a segment, so it
- * contributes padding, its own focus tint and — on mobile, where the halves
- * stack — the hairline that turns into a top border.
+ * border, the rounding and the focus colour.
  */
 const pairedFieldClass =
-  'flex items-center gap-2 bg-white px-3 py-2.5 focus-within:bg-[#fffdf3] sm:py-1.5';
+  'flex items-center gap-2.5 bg-white px-3.5 py-2.5 transition-colors focus-within:bg-[#fffdf3] sm:py-2';
 const pairedFieldWideClass = 'sm:col-span-2';
 const fieldGroupClass =
-  'grid grid-cols-1 divide-y divide-[#e4e4e4] overflow-hidden rounded border border-[#e4e4e4] bg-white focus-within:border-[var(--accent)] sm:grid-cols-[2fr_1fr] sm:divide-x sm:divide-y-0';
+  'grid grid-cols-1 divide-y divide-[#e4e4e4] overflow-hidden rounded-xl border border-[#e4e4e4] bg-white shadow-sm transition-all focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)] sm:grid-cols-[2fr_1fr] sm:divide-x sm:divide-y-0';
 const fieldClass =
-  'flex items-center gap-2 rounded border border-[#e4e4e4] bg-white px-3 py-2.5 focus-within:border-[var(--accent)] sm:py-1.5';
-const iconClass = 'shrink-0 text-lg text-[#4a4a4a]';
+  'flex items-center gap-2.5 rounded-xl border border-[#e4e4e4] bg-white px-3.5 py-2.5 shadow-sm transition-all focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)] focus-within:bg-[#fffdf3] sm:py-2';
+const iconClass = 'shrink-0 text-lg text-[#555555]';
 const toInputDate = (date: Date) => date.toISOString().slice(0, 10);
 
 export default function HeroSection() {
@@ -156,6 +178,22 @@ export default function HeroSection() {
   const [promoCode, setPromoCode] = useState('');
   const [currency, setCurrency] = useState<string>('VND');
   const [cheapestOnly, setCheapestOnly] = useState(false);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentBannerIndex((prev) => (prev + 1) % HERO_BANNERS.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handlePrevBanner = () => {
+    setCurrentBannerIndex((prev) => (prev - 1 + HERO_BANNERS.length) % HERO_BANNERS.length);
+  };
+
+  const handleNextBanner = () => {
+    setCurrentBannerIndex((prev) => (prev + 1) % HERO_BANNERS.length);
+  };
 
   const search = (event: FormEvent) => {
     event.preventDefault();
@@ -176,30 +214,91 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative w-full overflow-hidden bg-[#e9f2fb]">
-      {/* Full-bleed campaign artwork with no scrim in front of it, exactly like
-          the vietjetair.com hero. */}
-      <div className="absolute inset-0" aria-hidden="true">
-        <img
-          src={HERO_ARTWORK}
-          alt=""
-          className="h-full w-full object-cover object-left lg:object-center"
-        />
+    <section className="relative w-full overflow-hidden bg-[#b11116] min-h-[640px] xl:min-h-[720px]">
+      {/* Banner Quảng Cáo Slider / Carousel làm nền sống động.
+          Chỉ render banner hiện tại: các banner inactive dùng `opacity-0`
+          vẫn chiếm bounding box và gây lỗi hình chồng khung (IMG+IMG) trong
+          kiểm tra giao diện. Khi chỉ cần 1 ảnh ở một thời điểm, không còn
+          overlap. */}
+      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+        {HERO_BANNERS.map((banner, idx) => (
+          <div
+            key={banner.id}
+            className={`absolute inset-0 ${
+              idx === currentBannerIndex ? 'opacity-100 z-0' : 'hidden pointer-events-none'
+            }`}
+          >
+            <img
+              src={banner.image}
+              alt={banner.title}
+              className="w-full h-full object-cover object-center scale-[1.01] transition-transform duration-10000"
+            />
+          </div>
+        ))}
+
+        {/* Lớp overlay gradient đa tầng giúp làm nổi bật form đặt vé và chữ */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/40 lg:to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[var(--background)] to-transparent pointer-events-none" />
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-[1920px] flex-col px-4 pb-7 pt-[150px] sm:px-6 sm:pt-[230px] lg:min-h-[560px] lg:items-end lg:justify-center lg:px-10 lg:pb-10 lg:pt-10 xl:min-h-[640px] xl:px-[104px]">
-        {/* The campaign headline is baked into the artwork, so the page outline
-            keeps a screen-reader title instead of duplicating it visually. */}
-        <p className="sr-only">Bay là thích ngay</p>
-        <h1 className="sr-only">Chuyến bay tốt giá bắt đầu từ đây</h1>
+      <div className="relative mx-auto flex w-full max-w-[1920px] flex-col px-4 pb-7 pt-[30px] sm:px-6 md:px-8 lg:min-h-[640px] lg:flex-row lg:items-center lg:justify-between lg:px-10 lg:pb-10 lg:pt-10 xl:min-h-[720px] xl:px-[104px] z-10 gap-8">
+        {/* Artwork đã chứa thông điệp chiến dịch. Chỉ đặt một tiêu đề ngữ nghĩa
+            cho trình đọc màn hình, còn controls neo ở đáy để không che banner. */}
+        <div className="flex min-h-[250px] flex-1 flex-col justify-end py-4 text-white lg:min-h-[520px] lg:py-10">
+          <h1 className="sr-only">{HERO_BANNERS[currentBannerIndex].title}</h1>
+          <div className="flex items-center gap-3 self-start rounded-full bg-black/20 px-3 py-2 backdrop-blur-sm">
+            <div className="flex items-center gap-1.5">
+              {HERO_BANNERS.map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  aria-label={`Banner quảng cáo ${idx + 1}`}
+                  onClick={() => setCurrentBannerIndex(idx)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    idx === currentBannerIndex
+                      ? 'w-8 bg-[var(--accent)] shadow'
+                      : 'w-2 bg-white/60 hover:bg-white'
+                  }`}
+                />
+              ))}
+            </div>
+
+            <div className="flex items-center gap-1 ml-3">
+              <button
+                type="button"
+                onClick={handlePrevBanner}
+                aria-label="Banner quảng cáo trước"
+                className="w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white flex items-center justify-center transition-all"
+              >
+                <MdChevronLeft className="text-xl" />
+              </button>
+              <button
+                type="button"
+                onClick={handleNextBanner}
+                aria-label="Banner quảng cáo tiếp theo"
+                className="w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white flex items-center justify-center transition-all"
+              >
+                <MdChevronRight className="text-xl" />
+              </button>
+            </div>
+          </div>
+        </div>
 
         <form
           id="hero-booking-form"
           onSubmit={search}
-          className="w-full rounded bg-[var(--primary)] p-3.5 shadow-[0_12px_36px_rgba(71,0,0,0.3)] lg:w-[392px] lg:shrink-0"
+          className="w-full rounded-[12px] bg-[linear-gradient(135deg,var(--primary),var(--primary-dark))] p-4 sm:p-5 shadow-[0_12px_36px_rgba(71,0,0,0.3)] relative overflow-hidden lg:w-[460px] lg:shrink-0"
         >
+          {/* Hình nền mờ: sân bay/máy bay phía sau thẻ đặt vé (dùng lại artworkhero đã có). */}
+          <img
+            src={HERO_ARTWORK}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover opacity-20 grayscale -z-10"
+            aria-hidden="true"
+          />
+          {/* Hàng dịch vụ phía trên: 3 mục. Cuộn ngang trên màn hình nhỏ. */}
           <nav
-            className="mb-3 flex items-stretch gap-px rounded bg-white/30"
+            className="mb-3.5 flex items-stretch gap-px overflow-x-auto rounded-[5px] bg-black/10 p-0.5"
             aria-label="Dịch vụ chuyến bay"
           >
             {BOOKING_TABS.map((tab) => {
@@ -210,11 +309,11 @@ export default function HeroSection() {
                   key={tab.id}
                   href={tab.href}
                   aria-current={active ? 'true' : undefined}
-                  className={`flex items-center justify-center rounded-[2px] text-center text-[10px] font-bold leading-[1.2] transition-colors sm:text-[11px] ${
-                    isCargo ? 'w-[72px] shrink-0 px-1 py-1.5' : 'flex-1 px-1.5 py-2'
+                  className={`flex items-center justify-center rounded-[4px] px-2 py-2 text-center text-[10px] sm:text-[11px] font-bold leading-tight transition-colors ${
+                    isCargo ? 'w-[72px] shrink-0' : 'flex-1'
                   } ${
                     active
-                      ? 'bg-[var(--accent)] text-[var(--primary-deep)]'
+                      ? 'bg-[var(--accent)] text-[var(--primary-deep)] shadow-sm font-extrabold'
                       : 'bg-[var(--primary)] text-white hover:bg-[var(--primary-dark)]'
                   }`}
                 >
@@ -223,44 +322,45 @@ export default function HeroSection() {
               );
             })}
           </nav>
-          {/* The multi-city link and the currency picker travel as one unbreakable
-              group: as three flex children they wrapped apart, leaving a line
-              that held only the currency box. */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pb-3">
-            {[
-              { value: true, label: 'Khứ hồi' },
-              { value: false, label: 'Một chiều' },
-            ].map(({ value, label }) => (
-              <label
-                key={label}
-                className="flex min-h-9 cursor-pointer items-center gap-2 text-xs font-bold text-white"
-              >
-                <input
-                  type="radio"
-                  name="trip-type"
-                  checked={roundTrip === value}
-                  onChange={() => setRoundTrip(value)}
-                  className="h-4 w-4 shrink-0 accent-[var(--accent)]"
-                />
-                <span>{label}</span>
-              </label>
-            ))}
 
-            <span className="ml-auto flex items-center gap-3">
+          {/* Lựa chọn loại hành trình & tiền tệ trên cùng một hàng */}
+          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 pb-3 text-white">
+            <div className="flex items-center gap-3">
+              {[
+                { value: true, label: 'Khứ hồi' },
+                { value: false, label: 'Một chiều' },
+              ].map(({ value, label }) => (
+                <label
+                  key={label}
+                  className="flex min-h-8 cursor-pointer items-center gap-1.5 text-xs font-bold text-white transition-opacity hover:opacity-90"
+                >
+                  <input
+                    type="radio"
+                    name="trip-type"
+                    checked={roundTrip === value}
+                    onChange={() => setRoundTrip(value)}
+                    className="h-4 w-4 shrink-0 accent-[var(--accent)] cursor-pointer"
+                  />
+                  <span>{label}</span>
+                </label>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2.5">
               <a
                 href="/trang-chu#hero-booking-form"
-                className="flex min-h-9 items-center text-xs font-bold text-white hover:underline"
+                className="flex min-h-8 items-center gap-0.5 text-xs font-bold text-white hover:underline transition-opacity"
               >
-                Nhiều chặng
+                <span>Nhiều chặng</span>
                 <MdArrowOutward className="text-sm" />
               </a>
 
-              <label className="flex min-h-9 items-center rounded border border-white/70 px-2.5">
+              <label className="flex h-7 items-center rounded border border-white/70 bg-white/10 px-2 transition-colors hover:border-white">
                 <select
                   value={currency}
                   onChange={(event) => setCurrency(event.target.value)}
                   aria-label="Loại tiền tệ"
-                  className="cursor-pointer appearance-none border-0 bg-transparent text-xs font-bold text-white outline-none"
+                  className="cursor-pointer appearance-none border-0 bg-transparent pr-1 text-xs font-bold text-white outline-none"
                 >
                   {CURRENCIES.map((code) => (
                     <option key={code} value={code} className="text-[#333333]">
@@ -268,103 +368,116 @@ export default function HeroSection() {
                     </option>
                   ))}
                 </select>
-                <MdExpandMore className="text-sm text-white" />
+                <MdExpandMore className="text-sm text-white shrink-0 pointer-events-none" />
               </label>
-            </span>
+            </div>
           </div>
 
-          {/* Departure / destination paired with their dates, with the swap
-              control hugging the left gutter between the two rows. */}
-          <div className="relative">
-            <div className={fieldGroupClass}>
-              <AirportPicker
-                label="Điểm khởi hành"
-                icon="takeoff"
-                value={from}
-                airports={airports}
-                onChange={setFrom}
-                variant="flush"
-              />
-              <label className={pairedFieldClass}>
-                <MdCalendarMonth className={iconClass} />
-                <span className="min-w-0 flex-1">
-                  <span className={labelClass}>Ngày đi</span>
-                  <input
-                    type="date"
-                    value={departDate}
-                    min={toInputDate(new Date())}
-                    onChange={(event) => setDepartDate(event.target.value)}
-                    aria-label="Ngày đi"
-                    className={`${inputClass} vj-no-native-icon cursor-pointer`}
+          {/* Các trường nhập liệu cách nhau 10-12px */}
+          <div className="space-y-2.5">
+            <div className="relative">
+              <div className="space-y-2.5">
+                {/* Hàng 1: Điểm khởi hành & Ngày đi */}
+                <div className={fieldGroupClass}>
+                  <AirportPicker
+                    label="Điểm khởi hành"
+                    icon="takeoff"
+                    value={from}
+                    airports={airports}
+                    onChange={setFrom}
+                    variant="flush"
                   />
-                </span>
-              </label>
+                  <label className={pairedFieldClass}>
+                    <MdCalendarMonth className={iconClass} />
+                    <span className="min-w-0 flex-1">
+                      <span className={labelClass}>Ngày đi</span>
+                      <input
+                        type="date"
+                        value={departDate}
+                        min={toInputDate(new Date())}
+                        onChange={(event) => setDepartDate(event.target.value)}
+                        aria-label="Ngày đi"
+                        className={`${inputClass} vj-no-native-icon cursor-pointer`}
+                      />
+                    </span>
+                  </label>
+                </div>
+
+                {/* Hàng 2: Điểm đến & Ngày về */}
+                <div className={fieldGroupClass}>
+                  <AirportPicker
+                    label="Điểm đến"
+                    icon="land"
+                    value={to}
+                    airports={airports}
+                    onChange={setTo}
+                    variant="flush"
+                    className={roundTrip ? '' : pairedFieldWideClass}
+                  />
+                  {roundTrip && (
+                    <label className={pairedFieldClass}>
+                      <MdCalendarMonth className={iconClass} />
+                      <span className="min-w-0 flex-1">
+                        <span className={labelClass}>Ngày về</span>
+                        <input
+                          type="date"
+                          value={returnDate}
+                          min={departDate}
+                          onChange={(event) => setReturnDate(event.target.value)}
+                          aria-label="Ngày về"
+                          className={`${inputClass} vj-no-native-icon cursor-pointer`}
+                        />
+                      </span>
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              {/* Nút hoán đổi điểm đi và điểm đến nằm giữa hai hàng */}
+              <button
+                type="button"
+                aria-label="Đổi điểm khởi hành và điểm đến"
+                onClick={() => {
+                  setFrom(to);
+                  setTo(from);
+                }}
+                className="absolute -left-3.5 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-gray-200 bg-white text-lg text-[var(--primary)] shadow-[0_2px_8px_rgba(0,0,0,0.2)] transition-transform hover:scale-105 hover:bg-[#fff3f3] active:scale-95"
+              >
+                <MdSwapHoriz />
+              </button>
             </div>
 
-            <div className={`mt-2 ${fieldGroupClass}`}>
-              <AirportPicker
-                label="Điểm đến"
-                icon="land"
-                value={to}
-                airports={airports}
-                onChange={setTo}
-                variant="flush"
-                className={roundTrip ? '' : pairedFieldWideClass}
+            {/* Hàng 3: Hành khách */}
+            <PassengerPicker value={paxCounts} onChange={setPaxCounts} className="mt-0" />
+
+            {/* Hàng 4: Mã khuyến mại */}
+            <label className={fieldClass}>
+              <MdConfirmationNumber className={iconClass} />
+              <input
+                value={promoCode}
+                onChange={(event) => setPromoCode(event.target.value)}
+                placeholder="Mã khuyến mại"
+                className="min-w-0 flex-1 border-0 bg-transparent px-0 text-base font-extrabold text-[#222222] outline-none placeholder:font-bold placeholder:text-[#8c8c8c] sm:text-sm"
               />
-              {roundTrip && (
-                <label className={pairedFieldClass}>
-                  <MdCalendarMonth className={iconClass} />
-                  <span className="min-w-0 flex-1">
-                    <span className={labelClass}>Ngày về</span>
-                    <input
-                      type="date"
-                      value={returnDate}
-                      min={departDate}
-                      onChange={(event) => setReturnDate(event.target.value)}
-                      aria-label="Ngày về"
-                      className={`${inputClass} vj-no-native-icon cursor-pointer`}
-                    />
-                  </span>
-                </label>
-              )}
-            </div>
-
-            <button
-              type="button"
-              aria-label="Đổi điểm khởi hành và điểm đến"
-              onClick={() => {
-                setFrom(to);
-                setTo(from);
-              }}
-              className="absolute -left-3 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white text-xl text-[var(--primary)] shadow-[0_2px_8px_rgba(0,0,0,0.2)] hover:bg-[#fff3f3]"
-            >
-              <MdSwapHoriz />
-            </button>
+            </label>
           </div>
 
-          <PassengerPicker value={paxCounts} onChange={setPaxCounts} />
-
-          <label className={`mt-2 ${fieldClass}`}>
-            <MdConfirmationNumber className={iconClass} />
-            <input
-              value={promoCode}
-              onChange={(event) => setPromoCode(event.target.value)}
-              placeholder="Mã khuyến mại"
-              className="min-w-0 flex-1 border-0 bg-transparent px-0 text-base font-extrabold text-[#333333] outline-none placeholder:font-bold placeholder:text-[#8c8c8c] sm:text-sm"
-            />
-          </label>
-
-          <label className="mt-1.5 flex min-h-9 cursor-pointer items-center gap-2 text-sm font-bold text-white">
+          {/* Tìm vé rẻ nhất */}
+          <label className="mt-2.5 flex min-h-8 cursor-pointer items-center gap-2 text-xs font-bold text-white transition-opacity hover:opacity-90">
             <input
               type="checkbox"
               checked={cheapestOnly}
               onChange={(event) => setCheapestOnly(event.target.checked)}
-              className="h-4 w-4 shrink-0 accent-[var(--accent)]"
+              className="h-4 w-4 shrink-0 rounded accent-[var(--accent)] cursor-pointer"
             />
             <span>Tìm vé rẻ nhất</span>
           </label>
 
-          <button type="submit" className="vj-cta mt-3 w-full px-4 text-sm font-extrabold">
+          {/* Nút Tìm chuyến bay: chiều cao 52px, bo góc 10px, nền vàng */}
+          <button
+            type="submit"
+            className="vj-cta mt-3.5 h-[52px] min-h-[52px] w-full rounded-[10px] px-4 text-base font-black text-black shadow-md transition-all hover:brightness-105 active:scale-[0.99]"
+          >
             Tìm chuyến bay
           </button>
         </form>

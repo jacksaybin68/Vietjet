@@ -46,16 +46,15 @@ const inputClass =
   'w-full min-w-0 border-0 bg-transparent px-0 text-base font-extrabold text-[#333333] outline-none sm:text-sm';
 const labelClass =
   'block text-[10px] font-bold uppercase leading-none tracking-[0.06em] text-[#8c8c8c]';
-const fieldClass =
-  'flex items-center gap-2 rounded border border-[#e4e4e4] bg-white px-3 py-2.5 focus-within:border-[var(--accent)] sm:py-1.5';
 const iconClass = 'shrink-0 text-lg text-[#4a4a4a]';
 
 interface Props {
   value: PaxCounts;
   onChange: (next: PaxCounts) => void;
+  className?: string;
 }
 
-export default function PassengerPicker({ value, onChange }: Props) {
+export default function PassengerPicker({ value, onChange, className }: Props) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -83,8 +82,8 @@ export default function PassengerPicker({ value, onChange }: Props) {
   };
 
   return (
-    <div ref={containerRef} className="mt-2 relative">
-      <label className={fieldClass}>
+    <div ref={containerRef} className={`relative ${className ?? 'mt-2.5'}`}>
+      <label className="flex items-center gap-2.5 rounded-xl border border-[#e4e4e4] bg-white px-3.5 py-2.5 shadow-sm transition-all focus-within:border-[var(--accent)] focus-within:bg-[#fffdf3] sm:py-2">
         <MdPeople className={iconClass} />
         <span className="min-w-0 flex-1">
           <span className={labelClass}>Hành khách</span>
