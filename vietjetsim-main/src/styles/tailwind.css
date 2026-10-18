@@ -1,4 +1,6 @@
-/* @import Google Fonts moved to next/font for zero render-blocking */
+/* Google Fonts được nạp bằng <link> trong src/app/layout.tsx, KHÔNG qua next/font:
+ * chuyển sang next/font sẽ đổi cách biến CSS của KoHo / Be Vietnam Pro nối vào
+ * tailwind.config.js. Sửa comment này phải đi kèm sửa thật ở layout.tsx. */
 @tailwind base;
 
 /*
