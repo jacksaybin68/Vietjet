@@ -3,12 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Icon } from '@/shared/components/ui';
-import {
-  RiFlightTakeoffLine,
-  RiUserLine,
-  RiShoppingBag3Line,
-  RiMoneyDollarCircleLine,
-} from 'react-icons/ri';
+import { RiFlightTakeoffLine, RiUserLine, RiMoneyDollarCircleLine } from 'react-icons/ri';
 
 interface ActivityIcon {
   label: string;
@@ -16,10 +11,13 @@ interface ActivityIcon {
   icon: React.ElementType;
 }
 
+// Không có "Giỏ hàng" ở đây: `/dat-ve` chỉ tồn tại dưới dạng `/dat-ve/[id]`, nên
+// một mục trỏ tới nó vừa là link chết vừa làm `next/link` prefetch 404 RSC trên
+// mọi lần tải `/tim-ve` — lỗi mà `npm run test:ui` bắt được trong bản production.
+// Luồng đặt vé thật đi thẳng `/tim-ve` → `/thanh-toan` (FlightBookingClient).
 const ACTIVITY_ICONS: readonly ActivityIcon[] = [
   { label: 'Tìm chuyến bay', href: '/tim-ve', icon: RiFlightTakeoffLine },
   { label: 'Tài khoản', href: '/tai-khoan', icon: RiUserLine },
-  { label: 'Giỏ hàng', href: '/dat-ve', icon: RiShoppingBag3Line },
   { label: 'Thanh toán', href: '/thanh-toan', icon: RiMoneyDollarCircleLine },
 ];
 
