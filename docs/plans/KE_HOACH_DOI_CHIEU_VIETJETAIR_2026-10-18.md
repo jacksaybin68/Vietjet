@@ -50,7 +50,7 @@ console quản trị nội bộ.
 3. Component card, section spacing và typography còn dùng nhiều utility/hex cục bộ (đo được: **648 lần `text-[Npx]`, 390 class hex tuỳ ý** trong `src/`).
 4. Cookie consent và promo phải là một chuỗi trải nghiệm, không che lẫn nhau hoặc cản form trên mobile (đã có nền tảng, cần kiểm thử).
 5. Các trang phụ cần cùng khung công khai và chuẩn page hero; admin/auth vẫn tách biệt.
-6. **Chỉ 7/56 file trong `public/` được xác minh nguồn gốc; 46 file còn lại có dấu hiệu lấy từ CMS/CDN vietjetair (xem Phase -1); 24 file không còn tham chiếu (~5,4 MB).**
+6. **Chỉ 6/32 file còn lại trong `public/` được xác minh nguồn gốc; 23 file còn lại có dấu hiệu lấy từ CMS/CDN vietjetair (xem Phase -1). 24 file orphan (~5,4 MB) đã được xoá.**
 
 ## 4. Hệ thiết kế đích
 
@@ -83,14 +83,16 @@ console quản trị nội bộ.
 
 Trạng thái chi tiết từng file: `docs/design/asset-registry.md`.
 
-1. Xử lý **46 file nguồn gốc chưa xác minh** (`public/images/hero/` 36 file, `public/images/promos/` 6 file, `public/assets/images/banners/` 4 file): chọn **thay bằng asset có quyền** / **giữ kèm giấy phép** / **xoá** cho từng file.
+1. Xử lý **23 file nguồn gốc chưa xác minh** (`public/images/hero/` 16 file, `public/images/promos/` 6 file, `public/assets/images/banners/` 1 file): chọn **thay bằng asset có quyền** / **giữ kèm giấy phép** / **xoá** cho từng file. *(Con số 46 ban đầu còn tính 23 file hoá ra là orphan, đã xoá ở mục 3.)*
 2. Quyết định 3 asset rủi ro thương hiệu: `logo-vj.svg`, `logo.png`, `app_logo.png`.
 3. Xoá **24 file orphan** (~5,4 MB) hoặc đăng ký lý do giữ.
 4. Xoá file trùng lặp: `public/images/hero/download.png` == `public/assets/images/app_logo.png`.
 5. Đổi tên các file được giữ sang quy ước nội bộ (bỏ hậu tố epoch-millis và UUID).
 6. Chốt hướng nạp font và sửa mâu thuẫn `src/styles/tailwind.css` (dòng 1) ↔ `src/app/layout.tsx` (dòng 66–75).
 
-**Cổng duyệt:** registry đủ 56/56 file, 0 file nguồn gốc không rõ, 0 orphan, 0 hotlink `vietjetair.com`. Không mở Phase 0 khi cổng này chưa xanh.
+**Cổng duyệt:** registry đủ **32/32** file (sau khi xoá 24 orphan), 0 orphan, 0 hotlink `vietjetair.com`, 0 file nguồn gốc không rõ. Không mở Phase 0 khi cổng này chưa xanh.
+
+**Trạng thái 18/10/2026:** mục 3 ✅ (xoá 24 orphan, `public/` 56 → 32 file, 14,29 → 8,92 MB) · mục 4 ✅ (xoá bản trùng byte `hero/download.png`) · mục 6 ✅ (sửa comment `src/styles/tailwind.css` dòng 1 cho khớp `layout.tsx`) · mục 1, 2, 5 ❌ **chờ chủ dự án quyết định**. Bằng chứng và phương án nằm ở `docs/qa/asset-audit-22.md`, `docs/qa/asset-replacement-plan.md` và `docs/design/asset-decisions.md`.
 
 ### Phase 0 — Chốt baseline và asset registry
 
@@ -99,10 +101,19 @@ Trạng thái chi tiết từng file: `docs/design/asset-registry.md`.
 1. Mở rộng `scripts/ui-check.cjs` cho đủ ba viewport canonical (`390×844`, `768×1024`, `1440×900`) — hiện chỉ có mobile `390×844` và desktop mặc định, `768×1024` chưa từng được test.
 2. Chụp từng route tham chiếu ở ba viewport canonical; ghi viewport, thời điểm, URL, trạng thái cookie/promo.
 3. Chạy `npm run test:ui`, lưu snapshot app hiện tại trong `docs/qa/screenshots/<ngày>/`.
-4. Hoàn tất `docs/design/asset-registry.md` (đã kiểm kê 56/56 file — xem Phase -1 để xử lý quyền/nguồn).
+4. Hoàn tất `docs/design/asset-registry.md` (đã kiểm kê 32/32 file sau dọn — xem Phase -1 để xử lý quyền/nguồn).
 5. Lập inventory component và route: `trang-chu`, `tim-ve`, `dat-ve`, `thanh-toan`, `tra-cuu`, `lam-thu-tuc`, `lam-thu-tuc-truc-tuyen`, `chuyen-bay-cua-toi`, `hanh-ly`, `dich-vu`, `gioi-thieu`, `hoi-dap`, `lien-he`, `tai-khoan`, `quan-tri`, auth (`dang-nhap`, `quen-mat-khau`, `dat-lai-mat-khau`). **Loại trừ tường minh `/editor` (CMS) khỏi phạm vi công khai.**
 
 **Cổng duyệt:** baseline đủ cả ba viewport canonical; Phase -1 đã xanh; không tải asset từ website tham chiếu vào repo.
+
+**Trạng thái 18/10/2026:** mục 1 ✅ · mục 2 ✅ · mục 4 ✅ (registry 32/32) · mục 5 ✅ (inventory đã có trong kế hoạch) · mục 3 ✅ đã chạy — **35/35 màn hình sạch**, xem `docs/qa/BASELINE_3VIEWPORT_2026-10-18.md`.
+
+Hai điểm còn lại của Phase 0:
+
+- **Ảnh chụp không được commit.** Bộ 37 PNG nặng 21,8 MB, tái tạo được bằng một lệnh, và công cụ so sánh ảnh còn chưa chọn (Phase 6) — commit bây giờ là trả giá trước khi biết dùng để làm gì.
+- **Baseline chưa gắn với một commit.** Lần chụp chạy trên working tree còn thay đổi chưa commit của workstream asset. Cần chụp lại khi tree tĩnh để khoá baseline cứng.
+
+Khiếm khuyết tìm được và đã sửa trong lần chụp đầu: `ActivityBar` trỏ "Giỏ hàng" vào `/dat-ve` — route không tồn tại (chỉ có `/dat-ve/[id]`), nên `next/link` prefetch RSC nhận 404 ở cả ba viewport của `/tim-ve`. `next dev` không prefetch nên lỗi chỉ hiện trong bản production, đúng như cảnh báo trong `AGENTS.md`. Đã bỏ link chết và hằng số `ROUTES.CHECKOUT` cùng trỏ vào đó; sau khi sửa còn 0/35 flag.
 
 ### Phase 1 — Foundation: tokens, layout, accessibility
 
@@ -176,7 +187,7 @@ Trạng thái chi tiết từng file: `docs/design/asset-registry.md`.
 
 `Phase -1 → Phase 0 → Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6`
 
-- **Phase -1 là blocker cứng:** 46 asset chưa xác minh quyền phải được xử lý trước; không mở Phase 0 nếu registry chưa xanh.
+- **Phase -1 là blocker cứng:** 23 asset chưa xác minh quyền phải được xử lý trước; không mở Phase 0 nếu registry chưa xanh.
 - Phase 1 phải hoàn thành trước khi thay nhiều component để tránh token drift.
 - Phase 2 phải hoàn thành trước Phase 3 vì header/overlay quyết định hero viewport và safe area.
 - Phase 3/4 có thể triển khai song song sau khi primitives đã ổn định, nhưng phải dùng cùng visual regression baseline.
@@ -195,7 +206,7 @@ Trạng thái chi tiết từng file: `docs/design/asset-registry.md`.
 
 ## 8. Checklist hoàn thành
 
-- [ ] **Phase -1:** registry đủ 56/56 file; 0 asset nguồn gốc không rõ; 0 orphan; 3 asset thương hiệu đã quyết định.
+- [ ] **Phase -1:** registry đủ 32/32 file; 0 asset nguồn gốc không rõ; 0 orphan; 3 asset thương hiệu đã quyết định.
 - [ ] Baseline đủ tại ba viewport canonical (gồm `768×1024`).
 - [ ] Token/primitives đạt lint/type-check/build, nợ `text-[Npx]`/hex-class giảm so với baseline.
 - [ ] Header/footer/overlay được duyệt bằng ảnh ở ba viewport canonical.
