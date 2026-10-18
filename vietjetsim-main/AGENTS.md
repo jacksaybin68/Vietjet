@@ -1100,6 +1100,21 @@ README); login status is printed but does not gate, since a fresh DB has no such
 Override with `UI_CHECK_BASE_URL`, `CHROME_PATH` and `UI_CHECK_SHOTS_DIR` (screenshots
 default to a temp dir so a repo run does not leave artifacts behind).
 
+**`next start` needs `.next`, and a running `next dev` is using it — so build a second
+copy instead of stopping the dev server.** `next.config.mjs` reads `DIST_DIR`, so the
+whole gate can run beside a live dev server on another port:
+
+```bash
+DIST_DIR=.next-uicheck npm run build
+DIST_DIR=.next-uicheck npx next start -p 4029
+UI_CHECK_BASE_URL=http://127.0.0.1:4029 node scripts/ui-check.cjs
+```
+
+Two things to remember. The build rewrites `next-env.d.ts` and reformats `tsconfig.json`
+to reference the distDir it just used, so `git checkout -- next-env.d.ts tsconfig.json`
+afterwards — otherwise a `.next-uicheck` path rides along in the next commit. And
+`.next-uicheck/` is gitignored; a different `DIST_DIR` value is not.
+
 **`src/proxy.ts` runs on both `next dev` and `next start`.** Next.js 16 renamed
 the file convention from `middleware.ts` (export `middleware`) to `proxy.ts` (export
 `proxy`), and the file must sit at the same level as `app` — here that is `src/`,
