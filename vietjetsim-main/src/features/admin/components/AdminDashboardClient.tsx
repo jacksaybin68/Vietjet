@@ -544,8 +544,11 @@ export default function AdminDashboardClient() {
           </div>
         </header>
 
-        {/* Tab Content */}
+        {/* Tab Content — landmark của `/quan-tri`. Nó phải nằm *sau* `<header>`
+            của console, mà header đó do chính component này render, nên landmark
+            không thể đặt ở tầng trang (`src/app/quan-tri/page.tsx`). */}
         <main
+          id="main-content"
           className="flex-1 overflow-y-auto p-4 lg:p-6"
           style={{ background: 'linear-gradient(180deg, #1a2948 0%, #0f172a 100%)' }}
         >

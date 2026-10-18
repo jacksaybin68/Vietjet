@@ -275,7 +275,7 @@ export default function MyFlightsPage() {
       <div className="flex min-h-screen flex-col bg-[url('/sky-clouds.svg')] bg-cover bg-top bg-no-repeat bg-[#fdeff5]">
         <Header />
 
-        <main className="flex flex-1 flex-col">
+        <main id="main-content" className="flex flex-1 flex-col">
           {/* ===== Đầu trang: 2 tab nhỏ + tiêu đề (bố cục vietjetair.com/vi/my/search-booking) ===== */}
           <section className="relative overflow-hidden border-b border-[var(--border)]">
             <div className="relative mx-auto w-full md:w-[min(1000px,64vw)] px-4 pt-12 pb-6 sm:px-6 lg:px-8">

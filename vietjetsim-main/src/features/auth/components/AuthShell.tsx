@@ -25,7 +25,7 @@ export default function AuthShell({ eyebrow, title, subtitle, children }: AuthSh
       <Header />
       {/* `pb-36` keeps the floating chat mascot (fixed bottom-right) clear of the
           form card on phones, where the card otherwise reaches the viewport edge. */}
-      <div className="pb-36">
+      <main id="main-content" className="pb-36">
         {/* Cột form hẹp lại (560 → 470) để nhường bề ngang cho banner bên phải:
             banner là ảnh 750×650 có chữ bám sát mép phải ("Hỗ trợ toàn quốc"), nên
             cột càng hẹp thì ảnh càng bị cắt và chữ trên ảnh càng khó đọc. */}
@@ -65,7 +65,7 @@ export default function AuthShell({ eyebrow, title, subtitle, children }: AuthSh
             />
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

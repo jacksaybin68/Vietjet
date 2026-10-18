@@ -8,11 +8,13 @@ export default function PaymentPage() {
   return (
     <div className="min-h-screen bg-[var(--surface)]">
       <Header />
-      <ErrorBoundary variant="booking" retryLabel="Thử thanh toán lại">
-        <Suspense fallback={<div>Đang tải thanh toán...</div>}>
-          <PaymentClient />
-        </Suspense>
-      </ErrorBoundary>
+      <main id="main-content">
+        <ErrorBoundary variant="booking" retryLabel="Thử thanh toán lại">
+          <Suspense fallback={<div>Đang tải thanh toán...</div>}>
+            <PaymentClient />
+          </Suspense>
+        </ErrorBoundary>
+      </main>
       <Footer />
     </div>
   );

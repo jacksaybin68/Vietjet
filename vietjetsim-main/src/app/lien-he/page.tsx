@@ -37,7 +37,7 @@ export default function ContactPage() {
       />
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-16 -mt-10 relative z-20">
+      <main id="main-content" className="max-w-6xl mx-auto px-4 py-16 -mt-10 relative z-20">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Contact Form */}
           <div className="lg:col-span-2 bg-white rounded-2xl shadow-vj-lg p-8">
@@ -223,7 +223,7 @@ export default function ContactPage() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
       <Footer />
     </div>
   );

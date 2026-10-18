@@ -483,7 +483,10 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
 
         {/* Stepper3 bước đã bỏ — site thật không có dải bước ở trang check-in. */}
 
-        <main className={step === 'search' ? 'flex-1' : 'mx-auto max-w-[1200px] flex-1 px-4 py-6'}>
+        <main
+          id="main-content"
+          className={step === 'search' ? 'flex-1' : 'mx-auto max-w-[1200px] flex-1 px-4 py-6'}
+        >
           {/* ============ BƯỚC 2: XÁC NHẬN ============ */}
           {step === 'confirm' && checkInData && (
             <div className="mx-auto max-w-[700px]">
