@@ -260,6 +260,8 @@ const OPERATING_TABLES_SQL = `
   UNION ALL SELECT 'chat_messages=' || count(*) FROM chat_messages
   UNION ALL SELECT 'loyalty_programs=' || count(*) FROM loyalty_programs
   UNION ALL SELECT 'loyalty_tiers=' || count(*) FROM loyalty_tiers
+  UNION ALL SELECT 'phone_otp=' || count(*) FROM phone_otp
+  UNION ALL SELECT 'referral_events=' || count(*) FROM referral_events
   ORDER BY 1
 `;
 
@@ -322,6 +324,16 @@ function seedOperatingRows() {
     FROM user_profiles u CROSS JOIN loyalty_programs p
     WHERE u.email = 'migration-canary@vietjetsim.invalid' AND p.is_active
       AND NOT EXISTS (SELECT 1 FROM user_loyalty l WHERE l.user_id = u.id);
+
+    INSERT INTO phone_otp (phone, purpose, code_hash, expires_at)
+    SELECT '0900000777', 'login', 'canary', NOW() + INTERVAL '5 minutes'
+    WHERE NOT EXISTS (SELECT 1 FROM phone_otp WHERE phone = '0900000777');
+
+    INSERT INTO referral_events (referee_user_id, referral_code, points_awarded)
+    SELECT u.id, 'SJ20000001', 0
+    FROM user_profiles u
+    WHERE u.email = 'migration-canary@vietjetsim.invalid'
+      AND NOT EXISTS (SELECT 1 FROM referral_events r WHERE r.referee_user_id = u.id);
   `);
 }
 /** The canary must survive every re-apply: an empty table means a file dropped it. */

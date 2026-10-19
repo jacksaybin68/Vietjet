@@ -81,8 +81,17 @@ input[type='date'].vj-no-native-icon::-moz-calendar-picker-indicator {
   --vj-purple: #8075d6;
   --vj-purple-light: #ede9fe;
   --vj-blue: #2563d4;
-  --vj-green: #2db35e;
-  --vj-green-light: #dcfce7;
+  --vj-wine: #780000;
+  --vj-wine-dark: #5e0000;
+  --vj-wine-deep: #560000;
+  --vj-wine-hover: #680000;
+  --brand-wine: #780000;
+  --brand-wine-dark: #5e0000;
+  --brand-cta: #ffdd00;
+  --brand-cta-hover: #fbb612;
+  --vj-green-leaf: #7cb342;
+  --vj-blue-soft: #f0f6fc;
+  --vj-blue-tint: #f0f7fe;
   /* RGB channels: Tailwind's `/N` modifier only compiles against
      `[rgb(var(--x-rgb))]/N`; `[var(--x)]/N` is silently dropped. */
   --vj-red-rgb: 236 32 41;
@@ -107,30 +116,11 @@ input[type='date'].vj-no-native-icon::-moz-calendar-picker-indicator {
   --vj-grad-gold-to: #ffdd00;
 }
 
-/* Dark mode tokens */
-.dark {
-  --background: #172033;
-  --background-secondary: #1e293b;
-  --surface: #1e293b;
-  --surface-2: #243044;
-  --surface-3: #2f3b52;
-  --accent-light: #ffdd00;
-  --foreground: #f0f0f0;
-  --foreground-muted: #a0a0a0;
-  --foreground-subtle: #707070;
-  --border: #2f3b52;
-  --vj-text: #f0f0f0;
-  --vj-text-gray: #b0b0b0;
-  --vj-text-muted: #808080;
-  /* Light-tint chip backgrounds need dark counterparts or the chips glow. */
-  --vj-green-light: #0b2e1c;
-  --vj-purple-light: #241b4d;
-  --foreground-muted-rgb: 160 160 160;
-  --background-secondary-rgb: 30 41 59;
-  --foreground-rgb: 240 240 240;
-  --surface-2-rgb: 36 48 68;
-  --dark-surface-2-rgb: 36 48 68;
-}
+/* Dark mode tokens removed — Phase 1 mục 2 (2026-10-19).
+ * Vietjet Air only ships a light presentation (`color-scheme: light` in :root).
+ * The .dark class toggle was unused. Removed to avoid dead CSS.
+ * Tokens --dark-bg / --dark-surface / --dark-surface-2 / --dark-border in :root
+ * are kept: they serve as navy/admin surface colours, not OS-theme overrides. */
 
 html {
   scroll-behavior: smooth;
@@ -152,11 +142,7 @@ body {
   letter-spacing: 0.01em;
 }
 
-/* Dark mode body styles */
-.dark body {
-  background: var(--background);
-  color: var(--foreground);
-}
+/* .dark body rule removed — Phase 1 mục 2 (2026-10-19). Brand is light-only. */
 
 h1,
 h2,
@@ -296,10 +282,6 @@ h6 {
 
 .vj-table-row:hover {
   background: var(--surface-2);
-}
-
-.dark .vj-table-row:hover {
-  background: var(--dark-surface-2);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -994,6 +976,69 @@ h6 {
   white-space: nowrap;
 }
 
+/* Booking-lookup field — the 47px, 7px-radius input on
+   `/chuyen-bay-cua-toi`. The label rests at 17px inside the field and lifts to
+   a 12px caption on focus or once the field has a value. Kept as CSS (like
+   `.form-field-float`) because the sibling selector `:not(:placeholder-shown)`
+   is what keeps a filled field's label lifted without JS state. */
+.vj-lookup-field {
+  position: relative;
+}
+
+.vj-lookup-field .vj-lookup-input {
+  width: 100%;
+  height: 47px;
+  border: 1px solid #d9dee5;
+  border-radius: 7px;
+  background: #ffffff;
+  padding: 18px 22px 4px;
+  font-family: 'KoHo', 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.2;
+  color: #333333;
+  box-shadow: 0 1px 3px rgba(15, 35, 70, 0.08);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.vj-lookup-field .vj-lookup-input:focus {
+  border-color: var(--vj-blue);
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 212, 0.16),
+    0 1px 3px rgba(15, 35, 70, 0.08);
+}
+
+.vj-lookup-field .vj-lookup-input:focus-visible {
+  outline: 3px solid var(--vj-blue);
+  outline-offset: 2px;
+}
+
+.vj-lookup-field .vj-lookup-label {
+  position: absolute;
+  left: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 17px;
+  line-height: 1.2;
+  font-weight: 500;
+  color: #333333;
+  pointer-events: none;
+  transition:
+    top 160ms ease,
+    font-size 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.vj-lookup-field .vj-lookup-input:focus ~ .vj-lookup-label,
+.vj-lookup-field .vj-lookup-input:not(:placeholder-shown) ~ .vj-lookup-label {
+  top: 7px;
+  transform: none;
+  font-size: 12px;
+  color: #7a808a;
+}
+
 /* Form focus styles */
 .form-input {
   transition:
@@ -1080,11 +1125,6 @@ select option {
   background: var(--background);
   padding: 0 4px;
   font-weight: 700;
-}
-.dark .form-field-float .form-input:focus ~ .form-label-float,
-.dark .form-field-float .form-input:not(:placeholder-shown) ~ .form-label-float,
-.dark .form-field-float.has-value .form-label-float {
-  background: var(--dark-surface);
 }
 /* Lift label when input has left icon padding */
 .form-field-float .form-label-float.has-icon {
@@ -1463,31 +1503,7 @@ select option {
   vertical-align: middle;
 }
 
-/* Badge styles - Dark mode */
-.dark .badge-success {
-  background: #166534;
-  color: #6ee7b7;
-}
 
-.dark .badge-error {
-  background: #7f1d1d;
-  color: #fca5a5;
-}
-
-.dark .badge-info {
-  background: #1e3a8a;
-  color: #60a5fa;
-}
-
-.dark .badge-warning {
-  background: #78350f;
-  color: #fbbf24;
-}
-
-.dark .badge-neutral {
-  background: #334155;
-  color: #cbd5e1;
-}
 
 /* Primary 50 background */
 .bg-primary-50 {
@@ -2056,3 +2072,17 @@ select option {
   font-size: 12px;
   font-weight: 700;
 }
+
+/* Chat launcher mascot — the gentle idle bob vietjetair.com's widget mascot does. */
+.chat-mascot {
+  animation: chatMascotBob 3.2s ease-in-out infinite;
+}
+@keyframes chatMascotBob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
