@@ -30,42 +30,47 @@ vi.mock('@/features/flights', () => ({
   ),
 }));
 
-vi.mock('../features/bookings/components/SeatSelectionStep', () => ({
-  default: ({
-    onConfirm,
-  }: {
-    onConfirm: (seats: string[], prices: number[], ancillaries: never[]) => boolean;
-  }) => (
+vi.mock('../features/bookings/components/PassengerInfoStep', () => ({
+  default: ({ onSubmit }: { onSubmit: (passengers: object[], consents: object) => void }) => (
     <div>
-      <h2>Màn hình chọn chỗ ngồi</h2>
-      <button onClick={() => onConfirm(['1A'], [150000], [])}>Xác nhận chỗ ngồi</button>
+      <h2>Nhập thông tin hành khách</h2>
+      <button
+        onClick={() =>
+          onSubmit(
+            [{ name: 'LONG CHIN', gender: 'male', phone: '0901234567', email: 'user@example.com' }],
+            { marketing: false, survey: false, retainForFutureBooking: false, policyAccepted: true }
+          )
+        }
+      >
+        Lưu thông tin hành khách
+      </button>
     </div>
   ),
 }));
 
-vi.mock('../features/bookings/components/PassengerInfoStep', () => ({
-  default: () => <h2>Nhập thông tin hành khách</h2>,
+vi.mock('../features/bookings/components/AncillaryServicesStep', () => ({
+  default: () => <h2>Dịch vụ bổ sung</h2>,
 }));
 
 describe('FlightBookingClient step order', () => {
-  it('centers the progress steps and moves through seat selection before passenger details', () => {
+  it('moves through flight selection -> passenger details -> ancillary services', () => {
     render(<FlightBookingClient />);
 
     const progress = screen.getByRole('navigation', { name: 'Tiến trình đặt vé' });
     expect(progress).toHaveClass('mx-auto', 'max-w-2xl', 'justify-center');
     expect(
-      within(progress).getAllByText(/Chọn chuyến bay|Chọn chỗ ngồi|Thông tin hành khách/)
+      within(progress).getAllByText(/Chọn chuyến bay|Thông tin hành khách|Dịch vụ bổ sung/)
     ).toHaveLength(3);
     expect(
       within(progress)
-        .getAllByText(/Chọn chuyến bay|Chọn chỗ ngồi|Thông tin hành khách/)
+        .getAllByText(/Chọn chuyến bay|Thông tin hành khách|Dịch vụ bổ sung/)
         .map((node) => node.textContent)
-    ).toEqual(['Chọn chuyến bay', 'Chọn chỗ ngồi', 'Thông tin hành khách']);
+    ).toEqual(['Chọn chuyến bay', 'Thông tin hành khách', 'Dịch vụ bổ sung']);
 
     fireEvent.click(screen.getByRole('button', { name: 'Chọn chuyến bay VJ301' }));
-    expect(screen.getByRole('heading', { name: 'Màn hình chọn chỗ ngồi' })).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Xác nhận chỗ ngồi' }));
     expect(screen.getByRole('heading', { name: 'Nhập thông tin hành khách' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Lưu thông tin hành khách' }));
+    expect(screen.getByRole('heading', { name: 'Dịch vụ bổ sung' })).toBeInTheDocument();
   });
 });

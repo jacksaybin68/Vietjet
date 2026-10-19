@@ -28,7 +28,7 @@ export default function IconButton({
   return (
     <button
       aria-label={label}
-      className={`inline-flex items-center justify-center rounded-lg border border-transparent text-white bg-[var(--primary)] hover:bg-[var(--primary-dark)] hover:shadow-[0_0_20px_rgba(236,32,41,0.35)] transition-all duration-160 focus-visible:outline-[3px] focus-visible:outline-[var(--accent)] focus-visible:outline-offset-[3px] ${sizeClasses[size]} ${active ? 'bg-[var(--accent)] text-[#333333]' : ''} ${className}`}
+      className={`inline-flex items-center justify-center rounded-lg border border-transparent text-white bg-[var(--primary)] hover:bg-[var(--primary-dark)] hover:shadow-[0_0_20px_rgba(236,32,41,0.35)] transition-all duration-160 focus-visible:outline-[3px] focus-visible:outline-[var(--accent)] focus-visible:outline-offset-[3px] ${sizeClasses[size]} ${active ? 'bg-[var(--accent)] text-[var(--foreground)]' : ''} ${className}`}
       {...props}
     >
       {children}

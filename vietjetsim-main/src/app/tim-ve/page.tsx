@@ -1,7 +1,6 @@
 import React from 'react';
 import { redirect } from 'next/navigation';
 import { Header } from '@/shared/components/navigation';
-import ActivityBar from '@/shared/components/navigation/ActivityBar';
 import { Footer } from '@/shared/components/navigation';
 import { ErrorBoundary } from '@/shared/components/feedback';
 import FlightBookingResultsWrapper from './components/FlightBookingResultsWrapper';
@@ -35,9 +34,10 @@ export default async function FlightBookingPage({
     : '--/--/----';
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <Header />
-      <ActivityBar />
+    <div className="min-h-screen bg-[var(--vj-blue-soft)] bg-[url('/images/hero/hero-window-clouds.jpg')] bg-cover bg-center bg-fixed">
+      {/* Compact red band, not the full four-tier chrome: the booking flow keeps
+          one nav row above the single yellow trip strip. */}
+      <Header variant="compact" />
 
       <main id="main-content">
         <ErrorBoundary variant="booking">

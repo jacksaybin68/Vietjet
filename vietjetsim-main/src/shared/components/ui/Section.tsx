@@ -14,7 +14,7 @@ interface SectionProps extends React.HTMLAttributes<HTMLElement> {
 export default function Section({ children, className = '', muted = false }: SectionProps) {
   return (
     <section
-      className={`relative overflow-hidden bg-[var(--surface)] px-4 pb-[clamp(2.75rem,5vw,4.5rem)] pt-[clamp(2.75rem,5vw,4.5rem)] ${muted ? 'bg-[#f7f7f7]' : ''} ${className}`}
+      className={`relative overflow-hidden bg-[var(--surface)] px-4 pb-[clamp(2.75rem,5vw,4.5rem)] pt-[clamp(2.75rem,5vw,4.5rem)] ${muted ? 'bg-[var(--surface)]' : ''} ${className}`}
     >
       {children}
     </section>

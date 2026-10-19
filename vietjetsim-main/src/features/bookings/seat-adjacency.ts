@@ -9,40 +9,49 @@
 // never seated and never needs an adjacent seat. `isSeated()` already drops it
 // from the picker before these rules run.
 
-const COLS = ['A', 'B', 'C', 'D', 'E', 'F'] as const;
+const COLS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'] as const;
 type SeatCol = (typeof COLS)[number];
 
-/** Column that separates the cabin halves, so C and D are NOT neighbours. */
-const AISLE_AFTER = 2;
+/**
+ * Seats per cabin block: both the A321 (A–C | D–F) and the A330
+ * (A–C | D–F | G–I economy, A–B | D–E | G–H business) seat three abreast
+ * between aisles, so one constant covers the whole fleet.
+ */
+const BLOCK_SIZE = 3;
 
 /** Split `"12A"` into its numeric row and letter column. */
 function parseSeat(seatId: string): { row: number; col: number } | null {
-  const match = /^(\d+)([A-F])$/.exec(seatId);
+  const match = /^(\d+)([A-I])$/.exec(seatId);
   if (!match) return null;
   return { row: Number(match[1]), col: COLS.indexOf(match[2] as SeatCol) };
+}
+
+/** Which three-across block a column index sits in; each block is one side of an aisle. */
+function blockOf(col: number): number {
+  return Math.floor(col / BLOCK_SIZE);
 }
 
 /**
  * Seats sharing a side wall with `seatId`, so a child is seated together.
  *
- * The aisle test compares which half of the cabin the two seats are in, rather
+ * The aisle test compares which three-across block the two seats are in, rather
  * than special-casing a column index. The previous form tested the *origin*
  * column on the way left — `col === AISLE_AFTER` — which dropped C's left-hand
  * neighbour along with its right, so `adjacentSeats('12C')` returned only
  * `['12D']` and a child sitting beside an adult in 12B was refused outright.
- * C–D is the aisle; C–B is a shared armrest.
+ * C–D is the aisle; C–B is a shared armrest. On the A330 the same rule keeps
+ * F–G an aisle as well.
  */
 export function adjacentSeats(seatId: string): string[] {
   const parsed = parseSeat(seatId);
   if (!parsed) return [];
   const { row, col } = parsed;
-  // Left half is A–C, right half is D–F. `AISLE_AFTER` is the last left column.
-  const half = (index: number) => (index <= AISLE_AFTER ? 0 : 1);
+  const block = blockOf(col);
   const neighbours: string[] = [];
   for (const delta of [-1, 1]) {
     const next = col + delta;
     if (next < 0 || next >= COLS.length) continue;
-    if (half(next) !== half(col)) continue;
+    if (blockOf(next) !== block) continue;
     neighbours.push(`${row}${COLS[next]}`);
   }
   return neighbours;

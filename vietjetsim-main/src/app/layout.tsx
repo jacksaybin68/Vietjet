@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     siteName: 'Vietjet Air',
     images: [
       {
-        url: '/logo.png',
+        url: '/logo-internal.png',
         width: 1200,
         height: 630,
         alt: 'Vietjet Air giao diện đặt vé',
@@ -47,11 +47,11 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Vietjet - Đặt Vé Máy Bay',
     description: 'Tìm kiếm, đặt chỗ, chọn ghế và thanh toán chuyến bay Vietjet Air.',
-    images: ['/logo.png'],
+    images: ['/logo-internal.png'],
   },
   icons: {
     icon: [{ url: '/favicon.ico', type: 'image/x-icon' }],
-    apple: [{ url: '/logo.png' }],
+    apple: [{ url: '/logo-internal.png' }],
   },
 };
 

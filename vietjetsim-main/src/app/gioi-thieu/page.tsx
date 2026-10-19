@@ -21,10 +21,10 @@ export default function AboutPage() {
         <div className="bg-white rounded-2xl shadow-vj-lg p-8 md:p-12 mb-12">
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div>
-              <h2 className="text-2xl font-bold text-[#1A2948] mb-4 font-heading-800">
+              <h2 className="text-2xl font-bold text-[var(--vj-navy)] mb-4 font-heading-800">
                 Sứ mệnh của chúng tôi
               </h2>
-              <p className="text-[#333333] leading-relaxed mb-4">
+              <p className="text-[var(--foreground)] leading-relaxed mb-4">
                 Vietjet Air được phát triển như một nền tảng toàn diện cho quy trình đặt vé máy bay
                 nội địa và quốc tế. Chúng tôi giúp người dùng thực hiện các bước đặt vé, chọn ghế,
                 thanh toán và quản lý hành trình một cách trực quan nhất.
@@ -44,10 +44,12 @@ export default function AboutPage() {
                   { label: 'Hài lòng', value: '99%', icon: 'StarIcon' },
                 ].map((stat, i) => (
                   <div key={i} className="bg-white rounded-lg p-4 text-center shadow-sm">
-                    <div className="text-[#EC2029] mb-2 flex justify-center">
+                    <div className="text-[var(--primary)] mb-2 flex justify-center">
                       <Icon name={stat.icon} size={24} />
                     </div>
-                    <div className="text-2xl font-extrabold text-[#1A2948]">{stat.value}</div>
+                    <div className="text-2xl font-extrabold text-[var(--vj-navy)]">
+                      {stat.value}
+                    </div>
                     <div className="text-xs text-[#6D6E71] font-medium">{stat.label}</div>
                   </div>
                 ))}
@@ -58,7 +60,7 @@ export default function AboutPage() {
 
         {/* Tech Stack */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold text-[#1A2948] mb-8 text-center font-heading-800">
+          <h2 className="text-2xl font-bold text-[var(--vj-navy)] mb-8 text-center font-heading-800">
             Công nghệ sử dụng
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -79,7 +81,9 @@ export default function AboutPage() {
                 >
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: tech.color }} />
                 </div>
-                <h3 className="text-sm font-bold text-[#1A2948] text-center mb-1">{tech.name}</h3>
+                <h3 className="text-sm font-bold text-[var(--vj-navy)] text-center mb-1">
+                  {tech.name}
+                </h3>
                 <p className="text-xs text-[#6D6E71] text-center">{tech.desc}</p>
               </div>
             ))}
@@ -87,7 +91,7 @@ export default function AboutPage() {
         </div>
 
         {/* Team & Acknowledgments */}
-        <div className="bg-[#1A2948] rounded-2xl p-8 md:p-12 text-white">
+        <div className="bg-[var(--vj-navy)] rounded-2xl p-8 md:p-12 text-white">
           <div className="text-center mb-10">
             <h2 className="text-2xl font-bold mb-3 font-heading-800">Đội ngũ phát triển</h2>
             <p className="text-white/70 max-w-xl mx-auto">
@@ -105,11 +109,11 @@ export default function AboutPage() {
                 key={i}
                 className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/15 transition-colors"
               >
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#EC2029] to-[#FFDD00] mx-auto mb-4 flex items-center justify-center text-xl font-bold">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] mx-auto mb-4 flex items-center justify-center text-xl font-bold">
                   {member.name.charAt(0)}
                 </div>
                 <h3 className="text-lg font-bold text-center mb-1">{member.name}</h3>
-                <p className="text-[#FFDD00] text-sm font-semibold text-center mb-2">
+                <p className="text-[var(--accent)] text-sm font-semibold text-center mb-2">
                   {member.role}
                 </p>
                 <p className="text-white/60 text-xs text-center">{member.desc}</p>
@@ -118,10 +122,10 @@ export default function AboutPage() {
           </div>
           <div className="mt-10 pt-6 border-t border-white/10 text-center">
             <p className="text-sm text-white/70">
-              Cảm ơn <span className="text-[#FFDD00] font-semibold">Vietjet Air</span> vì cảm hứng
-              thiết kế và{' '}
-              <span className="text-[#FFDD00] font-semibold">cộng đồng mã nguồn mở</span> vì các
-              công cụ tuyệt vời.
+              Cảm ơn <span className="text-[var(--accent)] font-semibold">Vietjet Air</span> vì cảm
+              hứng thiết kế và{' '}
+              <span className="text-[var(--accent)] font-semibold">cộng đồng mã nguồn mở</span> vì
+              các công cụ tuyệt vời.
             </p>
           </div>
         </div>

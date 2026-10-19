@@ -36,7 +36,7 @@ export default function InputField({
         <label
           htmlFor={fieldId}
           className={`block text-[10px] font-bold uppercase leading-none tracking-[0.06em] transition-colors ${
-            hasError ? 'text-[var(--primary-dark)]' : 'text-[#6c6c6c]'
+            hasError ? 'text-[var(--primary-dark)]' : 'text-[var(--vj-text-gray)]'
           } ${required ? 'font-extrabold' : ''}`}
         >
           {label}
@@ -67,7 +67,7 @@ export default function InputField({
       )}
 
       {helperText && !hasError && (
-        <p className="text-[11px] font-medium text-[#6c6c6c]">{helperText}</p>
+        <p className="text-[11px] font-medium text-[var(--vj-text-gray)]">{helperText}</p>
       )}
     </div>
   );

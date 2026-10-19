@@ -19,7 +19,7 @@ export interface ConfirmationModalProps {
 const variantConfig: Record<ConfirmationModalVariant, { icon: string; iconBg: string }> = {
   danger: {
     icon: '⚠',
-    iconBg: 'bg-red-100 text-[#EC2029]',
+    iconBg: 'bg-red-100 text-[var(--primary)]',
   },
   warning: {
     icon: '!',
@@ -27,7 +27,7 @@ const variantConfig: Record<ConfirmationModalVariant, { icon: string; iconBg: st
   },
   info: {
     icon: 'i',
-    iconBg: 'bg-blue-100 text-[#1A2948]',
+    iconBg: 'bg-blue-100 text-[var(--vj-navy)]',
   },
 };
 

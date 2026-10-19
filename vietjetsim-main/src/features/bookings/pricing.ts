@@ -34,7 +34,10 @@ export const SEAT_TIER_PRICES = {
  * seat they had not agreed to.
  */
 export function getSeatPrice(seatNumber: string): number {
-  const match = /^(\d+)[A-F]$/.exec(seatNumber.trim().toUpperCase());
+  // A–F is the narrow-body A321 cabin; G–I only exist on the A330's 3-3-3
+  // wide-body layout, so the pattern widens with the fleet. Anything outside
+  // the range (a typo like "12Z") still prices to 0 rather than to a band.
+  const match = /^(\d+)[A-I]$/.exec(seatNumber.trim().toUpperCase());
   if (!match) return 0;
   const row = Number(match[1]);
   if (row <= 3) return SEAT_TIER_PRICES.business;
@@ -85,6 +88,29 @@ export const ANCILLARY_OPTIONS: readonly AncillaryOption[] = [
     price: 60000,
   },
 ] as const;
+
+export interface BaggagePackage {
+  id: string;
+  weight: number;
+  label: string;
+  price: number;
+}
+
+export const BAGGAGE_PACKAGES: readonly BaggagePackage[] = [
+  { id: 'bg-20', weight: 20, label: 'Gói 20kg', price: 200000 },
+  { id: 'bg-30', weight: 30, label: 'Gói 30kg', price: 300000 },
+  { id: 'bg-40', weight: 40, label: 'Gói 40kg', price: 400000 },
+  { id: 'bg-50', weight: 50, label: 'Gói 50kg', price: 550000 },
+  { id: 'bg-60', weight: 60, label: 'Gói 60kg', price: 650000 },
+  { id: 'bg-70', weight: 70, label: 'Gói 70kg', price: 750000 },
+];
+
+export const OVERSIZED_BAGGAGE: readonly BaggagePackage[] = [
+  { id: 'hlqk-20', weight: 20, label: 'Kiện HLQK 20kg', price: 450000 },
+  { id: 'hlqk-30', weight: 30, label: 'Kiện HLQK 30kg', price: 550000 },
+];
+
+export const TRAVEL_SAFE_INSURANCE_PRICE = 72000;
 
 export interface PriceBreakdownInput {
   /** Air fare for ONE adult. */

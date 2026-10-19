@@ -7,4 +7,5 @@ export { default as Section } from './Section';
 export { default as Card } from './Card';
 export { default as IconButton } from './IconButton';
 export { default as Pagination } from './Pagination';
+export { default as Mascot } from './Mascot';
 export * from './SkeletonLoader';

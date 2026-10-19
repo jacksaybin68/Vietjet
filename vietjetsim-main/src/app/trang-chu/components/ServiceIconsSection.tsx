@@ -1,146 +1,104 @@
 'use client';
-import React from 'react';
+
 import Link from 'next/link';
 import {
   FaPlaneDeparture,
   FaSuitcaseRolling,
-  FaUtensils,
   FaChair,
-  FaStar,
-  FaShoppingBag,
+  FaUserShield,
   FaShieldAlt,
-  FaGift,
-  FaMobileAlt,
-  FaPassport,
+  FaTag,
 } from 'react-icons/fa';
 
-/**
- * Quick-access service strip — mirrors vietjetair.com's icon row beneath the
- * hero banner. Ten items in a single centred row (desktop) or horizontally
- * scrollable strip (mobile). Each icon sits in a lightly tinted circle whose
- * colour matches the service category.
- *
- * Design tokens:
- * - Background: white with a thin red bottom border (brand accent).
- * - Icons: 40–44 px circles with 12% opacity tint of the service colour.
- * - Labels: bold 11 px main + 9 px muted English subtitle.
- * - Hover: scale icon, underline bar slides in, background blush.
- */
-export const SERVICES = [
+/* 6 khối dịch vụ nhanh dạng "squircle" 3D, màu sắc theo spec. */
+const SERVICES = [
   {
-    label: 'Đặt vé',
+    label: 'Đặt chuyến bay',
     sub: 'Book Flight',
     href: '/tim-ve',
     Icon: FaPlaneDeparture,
-    color: '#EC2029',
+    color: '#EC2029', // Đỏ
   },
   {
-    label: 'Mua hành lý',
-    sub: 'Baggage',
+    label: 'Mua hành lý/chỗ',
+    sub: 'Baggage & Seat',
     href: '/dich-vu?service=baggage',
     Icon: FaSuitcaseRolling,
-    color: '#EC2029',
+    color: '#22C55E', // Xanh lá
   },
   {
-    label: 'Suất ăn',
-    sub: 'Meals',
-    href: '/dich-vu?service=meal',
-    Icon: FaUtensils,
-    color: '#EC2029',
-  },
-  {
-    label: 'Chọn chỗ',
-    sub: 'Seat',
-    href: '/dich-vu?service=seat',
-    Icon: FaChair,
-    color: '#EC2029',
-  },
-  {
-    label: 'SkyBoss',
-    sub: 'Priority',
+    label: 'Ưu tiên làm thủ tục',
+    sub: 'Priority Check-in',
     href: '/dich-vu?service=priority',
-    Icon: FaStar,
-    color: '#F9A51A',
+    Icon: FaChair,
+    color: '#2563D4', // Xanh dương
   },
   {
-    label: 'Duty Free',
-    sub: 'Shopping',
-    href: '/dich-vu?service=lounge',
-    Icon: FaShoppingBag,
-    color: '#8075D6',
+    label: 'Hàng miễn thuế',
+    sub: 'Duty Free',
+    href: '/dich-vu?service=dutyfree',
+    Icon: FaUserShield,
+    color: '#9D174D', // Đỏ mận
   },
   {
     label: 'Bảo hiểm',
     sub: 'Insurance',
     href: '/dich-vu?service=insurance',
     Icon: FaShieldAlt,
-    color: '#2563D4',
+    color: '#06B6D4', // Cyan
   },
   {
-    label: 'SkyJoy',
-    sub: 'Rewards',
-    href: '/tai-khoan',
-    Icon: FaGift,
-    color: '#EC2029',
+    label: 'Vietjet e-Voucher',
+    sub: 'e-Voucher',
+    href: '/dich-vu?service=voucher',
+    Icon: FaTag,
+    color: '#8B5CF6', // Tím
   },
-  {
-    label: 'E-Sim',
-    sub: 'Data SIM',
-    href: '/dich-vu?service=meal',
-    Icon: FaMobileAlt,
-    color: '#10b981',
-  },
-  {
-    label: 'E-Visa',
-    sub: 'Visa',
-    href: '/dich-vu?service=insurance',
-    Icon: FaPassport,
-    color: '#F4511E',
-  },
-];
+] as const;
 
 export default function ServiceIconsSection() {
   return (
-    <section
-      className="relative z-10 bg-white shadow-sm"
-      style={{ borderBottom: '2.5px solid var(--primary)' }}
-    >
-      <div className="mx-auto max-w-[1240px] px-2 sm:px-4">
-        {/* Mobile: horizontal scroll, Desktop: single centred row — matches
-            vietjetair.com's quick-access service strip beneath the hero. */}
-        <div className="vj-service-strip flex items-stretch overflow-x-auto no-scrollbar sm:justify-center sm:overflow-x-visible">
-          {SERVICES.map((s, idx) => {
-            const Icon = s.Icon;
+    <section className="bg-[var(--surface)] py-10 sm:py-14 border-y border-[#ececec]">
+      <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-10 sm:mb-12">
+          <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[var(--primary)] mb-2">
+            Dịch vụ nhanh
+          </p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[var(--foreground)] tracking-tight">
+            Tất cả trong một lần chạm
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-5">
+          {SERVICES.map((service) => {
+            const Icon = service.Icon;
             return (
               <Link
-                key={s.label}
-                href={s.href}
-                className="group flex shrink-0 flex-col items-center gap-1 px-2.5 py-3 sm:px-4 sm:py-3.5 transition-all duration-200 hover:bg-[rgba(236,32,41,0.04)] relative"
-                style={{ animationDelay: `${idx * 40}ms` }}
+                key={service.label}
+                href={service.href}
+                className="group relative block rounded-[20px] p-5 sm:p-6 shadow-[0_8px_24px_rgba(0,0,0,0.08)] border border-white transition-all duration-300 hover:shadow-[0_16px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 hover:border-[rgb(var(--primary-rgb))]/30"
+                style={{ backgroundColor: `${service.color}12` }}
               >
-                {/* Icon circle — light tinted bg matching service colour */}
                 <div
-                  className="flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 group-hover:scale-110 group-hover:shadow-md sm:h-11 sm:w-11"
+                  className="flex h-14 w-14 items-center justify-center rounded-[12px] shadow-lg mb-3.5 sm:mb-4 transition-all duration-300 group-hover:scale-110"
                   style={{
-                    background: `${s.color}12`,
-                    border: `1.5px solid ${s.color}30`,
+                    backgroundColor: service.color,
+                    boxShadow: `0 4px 12px ${service.color}4d`,
                   }}
                 >
-                  <Icon className="text-base sm:text-lg" style={{ color: s.color }} />
+                  <Icon className="text-xl sm:text-2xl text-white" />
                 </div>
-
-                {/* Vietnamese label */}
-                <span className="whitespace-nowrap text-[10.5px] font-bold leading-tight text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors sm:text-[11.5px]">
-                  {s.label}
+                <span className="block font-black text-[var(--foreground)] text-sm sm:text-base leading-tight">
+                  {service.label}
                 </span>
-
-                {/* English subtitle — adds bilingual feel matching vietjetair.com */}
-                <span className="whitespace-nowrap text-[8.5px] leading-none text-[var(--foreground-muted)] group-hover:text-[var(--primary-light)] transition-colors sm:text-[9px] -mt-0.5">
-                  {s.sub}
+                <span className="block mt-1 text-[10px] sm:text-xs text-[var(--foreground-muted)] font-semibold">
+                  {service.sub}
                 </span>
-
-                {/* Active indicator on hover — red bar at bottom */}
-                <span className="absolute bottom-0 left-1/2 h-[2px] w-0 -translate-x-1/2 bg-[var(--primary)] transition-all duration-200 group-hover:w-3/4 rounded-full" />
+                {/* Nếp nổi 3D phía dưới */}
+                <span
+                  className="absolute bottom-0 left-1/2 w-1 h-1 -translate-y-1/2 -translate-x-1/2 rounded-full"
+                  style={{ backgroundColor: service.color, opacity: 0.35 }}
+                />
               </Link>
             );
           })}

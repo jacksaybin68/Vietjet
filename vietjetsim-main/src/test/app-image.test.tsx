@@ -23,8 +23,8 @@ describe('AppImage', () => {
   });
 
   it('giữ nguyên src hợp lệ', () => {
-    expect(resolveImageSrc('/assets/images/app_logo.png', FALLBACK)).toBe(
-      '/assets/images/app_logo.png'
+    expect(resolveImageSrc('/assets/images/chat-avatar.jpg', FALLBACK)).toBe(
+      '/assets/images/chat-avatar.jpg'
     );
     expect(resolveImageSrc('https://cdn.example.com/a.png', FALLBACK)).toBe(
       'https://cdn.example.com/a.png'

@@ -485,17 +485,17 @@ export default function UserChat() {
             <Icon name="XMarkIcon" size={22} />
           </span>
         ) : (
-          <span className="relative flex h-12 w-12 items-center justify-center sm:h-14 sm:w-14">
-            <img
-              src="/assets/images/app_logo.png"
-              alt="Logo hỗ trợ Vietjet Air"
-              width={56}
-              height={56}
-              className="h-full w-full object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.28)]"
-            />
-            <span className="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-2xl bg-white px-3 py-1.5 text-[13px] font-bold text-[var(--vj-navy)] shadow-[0_6px_18px_rgba(0,0,0,0.16)] ring-1 ring-black/5">
+          <span className="flex items-end gap-2">
+            <span className="mb-7 whitespace-nowrap rounded-[8px] bg-white px-3.5 py-2 text-base2 font-bold text-[var(--foreground)] shadow-[0_6px_18px_rgba(0,0,0,0.16)] ring-1 ring-black/5">
               Xin chào!
             </span>
+            <img
+              src="/images/hero/amy-mascot.png"
+              alt="Logo hỗ trợ Vietjet Air"
+              width={86}
+              height={96}
+              className="h-[74px] w-auto object-contain drop-shadow-[0_6px_14px_rgba(0,0,0,0.22)] sm:h-[92px]"
+            />
           </span>
         )}
         {!isOpen && unreadCount > 0 && (
@@ -516,7 +516,7 @@ export default function UserChat() {
             <div className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white/15 shadow-inner ring-1 ring-white/25">
               <Icon name="ChatBubbleLeftRightIcon" size={22} className="text-accent" />
               <span
-                className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-[#EC2029] ${
+                className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-primary ${
                   operatorOnline ? 'bg-green-400' : 'bg-gray-400'
                 }`}
               />

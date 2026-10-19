@@ -1,40 +1,15 @@
 'use client';
 import React from 'react';
+import Skeleton from './Skeleton';
 
-// ─── Base Skeleton Atom ───────────────────────────────────────────────────────
-interface SkeletonProps {
-  className?: string;
-  rounded?: 'sm' | 'md' | 'lg' | 'full' | 'xl' | '2xl';
-  accent?: boolean; // red shimmer variant
-  style?: React.CSSProperties;
-}
-
-export function Skeleton({
-  className = '',
-  rounded = 'full',
-  accent = false,
-  style,
-}: SkeletonProps) {
-  const roundedMap = {
-    sm: 'rounded-sm',
-    md: 'rounded-md',
-    lg: 'rounded-lg',
-    xl: 'rounded-xl',
-    '2xl': 'rounded-2xl',
-    full: 'rounded-full',
-  };
-  return (
-    <div
-      className={`skeleton-pulse ${roundedMap[rounded]} ${accent ? 'skeleton-accent' : 'skeleton-base'} ${className}`}
-      style={style}
-    />
-  );
-}
+// Hạt `Skeleton` đã được tách ra `./Skeleton` (Phase 1 — Mục 3). Mọi component
+// ghép bên dưới vẫn dùng đúng API cũ: className / rounded / accent.
+export { default as Skeleton } from './Skeleton';
 
 // ─── Flight Card Skeleton ─────────────────────────────────────────────────────
 export function FlightCardSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden skeleton-card">
+    <div className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden skeleton-card">
       {/* Red accent top bar */}
       <div className="h-1 w-full skeleton-accent-bar" />
       <div className="p-5">
@@ -100,7 +75,7 @@ export function FlightResultsSkeleton({ count = 4 }: FlightResultsSkeletonProps)
 // ─── Bookings Table Row Skeleton ──────────────────────────────────────────────
 export function BookingTableRowSkeleton() {
   return (
-    <tr className="border-b border-stone-50 skeleton-row">
+    <tr className="border-b border-[var(--surface)] skeleton-row">
       <td className="px-5 py-4">
         <Skeleton className="h-4 w-20" />
       </td>
@@ -146,7 +121,7 @@ export function BookingsTableSkeleton({ rows = 3 }: BookingsTableSkeletonProps) 
 export function StatCardSkeleton() {
   return (
     <div
-      className="bg-white rounded-2xl border border-stone-200 p-5 skeleton-card"
+      className="bg-white rounded-2xl border border-[var(--border)] p-5 skeleton-card"
       style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
     >
       {/* Red accent top bar */}
@@ -181,7 +156,7 @@ export function DashboardStatsSkeleton({ count = 4 }: DashboardStatsSkeletonProp
 // ─── Admin Bookings Table Row Skeleton ────────────────────────────────────────
 export function AdminBookingRowSkeleton() {
   return (
-    <tr className="border-b border-stone-50 skeleton-row">
+    <tr className="border-b border-[var(--surface)] skeleton-row">
       <td className="px-5 py-3.5">
         <Skeleton className="h-4 w-20" rounded="md" />
       </td>
@@ -217,7 +192,7 @@ export function AdminBookingsTableSkeleton({ rows = 5 }: { rows?: number }) {
 // ─── Revenue Tab Skeleton ─────────────────────────────────────────────────────
 export function RevenueKPISkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 p-5">
+    <div className="bg-white rounded-2xl border border-[var(--border)] p-5">
       <div className="flex items-center justify-between mb-3">
         <Skeleton className="w-10 h-10" rounded="xl" />
         <Skeleton className="h-5 w-12" />
@@ -230,7 +205,7 @@ export function RevenueKPISkeleton() {
 
 export function RevenueChartSkeleton({ height = 280 }: { height?: number }) {
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 p-5">
+    <div className="bg-white rounded-2xl border border-[var(--border)] p-5">
       <Skeleton className="h-5 w-40 mb-5" rounded="lg" />
       <div className="flex items-end gap-3 px-2" style={{ height }}>
         {[65, 78, 92, 55, 88, 72].map((h, i) => (
@@ -273,8 +248,8 @@ export function RevenueTabSkeleton() {
         <RevenueChartSkeleton height={220} />
       </div>
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden">
-        <div className="p-5 border-b border-stone-100">
+      <div className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden">
+        <div className="p-5 border-b border-[var(--surface-2)]">
           <Skeleton className="h-5 w-48" rounded="lg" />
         </div>
         <div className="p-5 space-y-3">
@@ -302,14 +277,14 @@ export function PaymentSkeleton() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Payment form skeleton */}
           <div className="lg:col-span-2 space-y-5">
-            <div className="bg-white rounded-2xl border border-stone-200 p-5">
+            <div className="bg-white rounded-2xl border border-[var(--border)] p-5">
               <Skeleton className="h-5 w-48 mb-4" rounded="lg" />
               {/* Method tabs */}
               <div className="grid grid-cols-3 gap-3 mb-5">
                 {[0, 1, 2].map((i) => (
                   <div
                     key={i}
-                    className="flex flex-col items-center gap-2 py-4 rounded-xl border border-stone-200"
+                    className="flex flex-col items-center gap-2 py-4 rounded-xl border border-[var(--border)]"
                   >
                     <Skeleton className="w-6 h-6" rounded="lg" />
                     <Skeleton className="h-3 w-16" />
@@ -339,11 +314,14 @@ export function PaymentSkeleton() {
           </div>
           {/* Order summary skeleton */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-stone-200 p-5">
+            <div className="bg-white rounded-2xl border border-[var(--border)] p-5">
               <Skeleton className="h-5 w-36 mb-4" rounded="lg" />
               <Skeleton className="h-24 w-full mb-4" rounded="xl" />
               {[0, 1, 2].map((i) => (
-                <div key={i} className="flex justify-between py-2 border-b border-stone-100">
+                <div
+                  key={i}
+                  className="flex justify-between py-2 border-b border-[var(--surface-2)]"
+                >
                   <Skeleton className="h-4 w-28" />
                   <Skeleton className="h-4 w-20" />
                 </div>
@@ -355,7 +333,7 @@ export function PaymentSkeleton() {
                     <Skeleton className="h-4 w-20" />
                   </div>
                 ))}
-                <div className="border-t border-stone-200 pt-2 flex justify-between">
+                <div className="border-t border-[var(--border)] pt-2 flex justify-between">
                   <Skeleton className="h-5 w-32" rounded="lg" />
                   <Skeleton className="h-5 w-24" rounded="lg" accent />
                 </div>
@@ -374,7 +352,7 @@ export function ProfileSkeleton() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Left: form card */}
       <div
-        className="lg:col-span-2 bg-white rounded-2xl border border-stone-200 overflow-hidden"
+        className="lg:col-span-2 bg-white rounded-2xl border border-[var(--border)] overflow-hidden"
         style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
       >
         <div className="h-1.5 w-full skeleton-accent-bar" />
@@ -398,7 +376,7 @@ export function ProfileSkeleton() {
       {/* Right: stats + security */}
       <div className="space-y-4">
         <div
-          className="bg-white rounded-2xl border border-stone-200 overflow-hidden"
+          className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden"
           style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
         >
           <div className="h-1.5 w-full skeleton-accent-bar" />
@@ -410,7 +388,7 @@ export function ProfileSkeleton() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="flex items-center justify-between py-2 border-b border-stone-50"
+                className="flex items-center justify-between py-2 border-b border-[var(--surface)]"
               >
                 <div className="flex items-center gap-2">
                   <Skeleton className="w-8 h-8" rounded="lg" />
@@ -442,7 +420,7 @@ export function ProfileSkeleton() {
 export function UpcomingBookingCardSkeleton() {
   return (
     <div
-      className="bg-white rounded-2xl border border-stone-200 overflow-hidden skeleton-card"
+      className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden skeleton-card"
       style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
     >
       <div className="h-1.5 w-full skeleton-accent-bar" />
@@ -472,7 +450,7 @@ export function UpcomingBookingCardSkeleton() {
               <Skeleton className="h-3 w-20 ml-auto" />
             </div>
           </div>
-          <div className="flex items-center justify-between pt-3 border-t border-stone-100">
+          <div className="flex items-center justify-between pt-3 border-t border-[var(--surface-2)]">
             <div className="flex items-center gap-3">
               <Skeleton className="h-3 w-28" />
               <Skeleton className="h-3 w-16" />
@@ -605,7 +583,7 @@ export function PopularRoutesSkeleton() {
         </div>
       </div>
       {/* Promo bento grid skeleton */}
-      <div className="py-7 bg-[#F7F7F7]">
+      <div className="py-7 bg-[var(--surface)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-5">
             <Skeleton className="h-5 w-28" rounded="full" />
@@ -646,7 +624,7 @@ export function DealsSkeleton() {
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="min-w-[210px] sm:min-w-[230px] flex-shrink-0 rounded-xl overflow-hidden border border-stone-200"
+              className="min-w-[210px] sm:min-w-[230px] flex-shrink-0 rounded-xl overflow-hidden border border-[var(--border)]"
               style={{ animationDelay: `${i * 80}ms` }}
             >
               <Skeleton className="h-32 w-full" rounded="lg" />
@@ -688,7 +666,7 @@ export function PassengerInfoSkeleton({ count = 1 }: { count?: number }) {
           {Array.from({ length: count }).map((_, i) => (
             <div
               key={i}
-              className="bg-white rounded-2xl border border-stone-200 overflow-hidden skeleton-card"
+              className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden skeleton-card"
               style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
             >
               <div className="h-1 w-full skeleton-accent-bar" />
@@ -738,7 +716,7 @@ export function PassengerInfoSkeleton({ count = 1 }: { count?: number }) {
       {/* Booking summary skeleton */}
       <div className="lg:col-span-1">
         <div
-          className="bg-white rounded-2xl border border-stone-200 overflow-hidden sticky top-36"
+          className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden sticky top-36"
           style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
         >
           <div className="h-1 w-full bg-gradient-to-r from-accent/40 via-accent/60 to-accent/40" />
@@ -747,7 +725,7 @@ export function PassengerInfoSkeleton({ count = 1 }: { count?: number }) {
               <Skeleton className="w-4 h-4" rounded="sm" />
               <Skeleton className="h-5 w-36" rounded="lg" />
             </div>
-            <div className="rounded-xl border border-stone-100 bg-stone-50 p-4 space-y-3">
+            <div className="rounded-xl border border-[var(--surface-2)] bg-[var(--surface)] p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <Skeleton className="w-7 h-7" rounded="lg" accent />
                 <Skeleton className="h-3.5 w-16" rounded="md" accent />
@@ -772,7 +750,7 @@ export function PassengerInfoSkeleton({ count = 1 }: { count?: number }) {
                   <Skeleton className="h-3.5 w-20" />
                 </div>
               ))}
-              <div className="border-t border-stone-100 pt-2 flex justify-between">
+              <div className="border-t border-[var(--surface-2)] pt-2 flex justify-between">
                 <Skeleton className="h-4 w-24" rounded="lg" />
                 <Skeleton className="h-4 w-28" rounded="lg" accent />
               </div>
@@ -794,7 +772,7 @@ export function SeatMapSkeleton() {
       {/* Left: Seat Map Panel */}
       <div className="lg:col-span-2 space-y-4">
         <div
-          className="bg-white rounded-2xl border border-stone-200 overflow-hidden"
+          className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden"
           style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
         >
           <div className="h-1 w-full skeleton-accent-bar" />
@@ -810,7 +788,7 @@ export function SeatMapSkeleton() {
             <Skeleton className="h-3.5 w-52 mb-5" />
 
             {/* Legend skeleton */}
-            <div className="rounded-xl border border-stone-100 bg-stone-50 p-3 mb-5">
+            <div className="rounded-xl border border-[var(--surface-2)] bg-[var(--surface)] p-3 mb-5">
               <Skeleton className="h-3 w-28 mb-2" rounded="md" />
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -874,7 +852,7 @@ export function SeatMapSkeleton() {
       {/* Right: Summary Panel */}
       <div className="lg:col-span-1">
         <div
-          className="bg-white rounded-2xl border border-stone-200 overflow-hidden sticky top-36"
+          className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden sticky top-36"
           style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
         >
           <div className="h-1 w-full bg-gradient-to-r from-accent/40 via-accent/60 to-accent/40" />
@@ -889,7 +867,7 @@ export function SeatMapSkeleton() {
               <Skeleton className="h-3.5 w-32 mx-auto" />
             </div>
             {/* Price rows */}
-            <div className="border-t border-stone-100 pt-4 space-y-2">
+            <div className="border-t border-[var(--surface-2)] pt-4 space-y-2">
               {[0, 1, 2].map((i) => (
                 <div key={i} className="flex justify-between">
                   <Skeleton className="h-3.5 w-24" />

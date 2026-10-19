@@ -301,12 +301,20 @@ export default function SeatSelectionStep({
     };
   }, [holdTimer]);
 
+  const [exitRowCandidate, setExitRowCandidate] = useState<string | null>(null);
+
   // A child must sit beside an adult; an infant is absent here because it
   // rides on a lap and is filtered out of `seatedPassengers`.
   const paxCounts = React.useMemo(() => {
     const counts = countPassengerTypes(passengers);
     return { adult: counts.adult, child: counts.child };
   }, [passengers]);
+
+  const isExitRow = useCallback((seat: string) => {
+    const rowMatch = seat.match(/^(\d+)/);
+    if (!rowMatch) return false;
+    return EXIT_ROWS.has(Number(rowMatch[1]));
+  }, []);
 
   const toggleSeat = useCallback(
     (seatId: string) => {
@@ -320,12 +328,25 @@ export default function SeatSelectionStep({
         );
         return;
       }
+      if (isExitRow(seatId)) {
+        setExitRowCandidate(seatId);
+        return;
+      }
       if (canSelectSeat({ seatId, selected, paxCounts })) {
         setSelected((prev) => [...prev, seatId]);
       }
     },
-    [selected, paxCounts]
+    [selected, paxCounts, isExitRow]
   );
+
+  const confirmExitRowSeat = useCallback(() => {
+    if (exitRowCandidate) {
+      if (canSelectSeat({ seatId: exitRowCandidate, selected, paxCounts })) {
+        setSelected((prev) => [...prev, exitRowCandidate]);
+      }
+      setExitRowCandidate(null);
+    }
+  }, [exitRowCandidate, selected, paxCounts]);
 
   const handleSeatEnter = useCallback((target: HTMLElement, seatId: string) => {
     const rect = target.getBoundingClientRect();
@@ -998,6 +1019,63 @@ export default function SeatSelectionStep({
             testId="seat-bottom-bar"
           />
         </>
+      )}
+
+      {/* Exit Row Safety Confirmation Modal */}
+      {exitRowCandidate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl animate-fadeIn">
+            <div className="bg-vjred p-4 text-white flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Icon name="ShieldCheckIcon" size={20} className="text-vjyellow" />
+                <h3 className="text-base font-black uppercase">
+                  Quy định ghế lối thoát hiểm ({exitRowCandidate})
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setExitRowCandidate(null)}
+                className="text-white hover:bg-white/20 p-1 rounded-full transition-colors"
+                aria-label="Đóng"
+              >
+                <Icon name="XMarkIcon" size={18} />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-3 text-xs text-vjdark">
+              <p className="font-semibold text-vjdark">
+                Theo quy định an toàn của Cục Hàng không và Vietjet, hành khách ngồi tại hàng ghế
+                thoát hiểm cần đáp ứng các điều kiện sau:
+              </p>
+              <ul className="space-y-2 list-disc pl-4 text-vjdark/80">
+                <li>Độ tuổi từ 15 đến 65 tuổi, có đầy đủ thể lực.</li>
+                <li>Không đi cùng trẻ sơ sinh, trẻ em hoặc người cần trợ giúp đặc biệt.</li>
+                <li>Không có thai hoặc mang thương tật hạn chế khả năng vận động.</li>
+                <li>
+                  Hiểu và có khả năng làm theo khẩu lệnh sơ tán bằng tiếng Việt hoặc tiếng Anh.
+                </li>
+                <li>Sẵn sàng hỗ trợ phi hành đoàn trong trường hợp khẩn cấp.</li>
+              </ul>
+            </div>
+
+            <div className="bg-vjbgs p-4 flex gap-2 justify-end border-t border-black/10">
+              <button
+                type="button"
+                onClick={() => setExitRowCandidate(null)}
+                className="vj-btn vj-btn-sm vj-btn-outline rounded-xl px-4 py-2 text-xs font-bold"
+              >
+                Chọn ghế khác
+              </button>
+              <button
+                type="button"
+                onClick={confirmExitRowSeat}
+                className="vj-btn vj-btn-sm vj-btn-primary rounded-xl px-4 py-2 text-xs font-bold"
+              >
+                Tôi đồng ý & Chọn ghế
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
