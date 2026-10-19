@@ -257,13 +257,26 @@ async function shot(cdp, name) {
 
 /**
  * `overlappedBoxes` bỏ qua cặp cha–con (một <button> và <img> bên trong nó luôn
- * trùng khung), nên chỉ còn những chồng lấn thật.
+ * trùng khung) và bỏ qua phần tử nằm trong cây đang mờ dần (opacity < 1 hay
+ * visibility ẩn dọc tổ tiên — slide carousel ẩn, overlay đang tắt), nên chỉ còn
+ * những chồng lấn thật: hai khối đục hoàn toàn cùng một chỗ.
  */
 const PROBE = `(() => {
   const de = document.documentElement;
+  /* Chồng lấn "thật" là hai khối ĐỌNG THẶT cùng chỗ — một khối phải che khuất
+     khối kia. Phần tử nằm trong cây đang mờ dần (carousel cross-fade, overlay
+     đang mở/đóng) không che gì cả, nên tính hệ số mờ dọc tổ tiên: opacity
+     chưa đạt 1, hoặc visibility/display ẩn, thì loại khỏi phép so khớp. */
+  const solidInLayout = (el) => {
+    for (let n = el; n && n.nodeType === 1; n = n.parentElement) {
+      const s = getComputedStyle(n);
+      if (s.display === 'none' || s.visibility === 'hidden' || Number(s.opacity) < 1) return false;
+    }
+    return true;
+  };
   const nodes = [...document.querySelectorAll('h1, h2, header, footer, button, input, img')].filter((el) => {
     const r = el.getBoundingClientRect();
-    return r.width >= 2 && r.height >= 2;
+    return r.width >= 2 && r.height >= 2 && solidInLayout(el);
   });
   const seen = new Map();
   const overlapped = [];

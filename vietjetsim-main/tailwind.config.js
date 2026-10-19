@@ -8,6 +8,39 @@ module.exports = {
         // text-4xl của Tailwind = 36px nên thêm 2xl2/5xl2 để thay text-[40px].
         '2xl2': ['2.5rem', { lineHeight: '3rem' }],
         '5xl2': ['2.5rem', { lineHeight: '2.75rem' }],
+        // Cỡ nhỏ cho chip/badge/drawer, không có bậc tương ứng trong thang
+        // mặc định; giữ đúng pixel để rời khỏi text-[Npx] mà không xê dịch layout.
+        '3xs': ['0.5625rem', { lineHeight: '1rem' }], // 9px
+        '2xs': ['0.625rem', { lineHeight: '1rem' }], // 10px
+        xs2: ['0.6875rem', { lineHeight: '1rem' }], // 11px
+        sm2: ['0.8125rem', { lineHeight: '1.25rem' }], // 13px
+        base2: ['0.9375rem', { lineHeight: '1.375rem' }], // 15px
+        '3xl2': ['1.75rem', { lineHeight: '2.125rem' }], // 28px
+        '4xs': ['0.5rem', { lineHeight: '0.875rem' }], // 8px
+        lg2: ['1.0625rem', { lineHeight: '1.5rem' }], // 17px
+        lg3: ['1.1875rem', { lineHeight: '1.625rem' }], // 19px
+        xl2: ['1.3125rem', { lineHeight: '1.75rem' }], // 21px
+        xl3: ['1.4375rem', { lineHeight: '1.875rem' }], // 23px
+      },
+      // Phase 1 mục 4 (2026-10-19): Spacing scale chuẩn 4px grid.
+      // Dùng để dần migrate khỏi spacing tùy ý (p-[Npx], m-[Npx]).
+      // Không override Tailwind defaults — chỉ thêm alias có ý nghĩa.
+      spacing: {
+        1: '0.25rem', // 4px
+        2: '0.5rem', // 8px
+        3: '0.75rem', // 12px
+        4: '1rem', // 16px
+        6: '1.5rem', // 24px
+        8: '2rem', // 32px
+        12: '3rem', // 48px
+        16: '4rem', // 64px
+        24: '6rem', // 96px
+        // Semantic aliases for common VJ layout patterns
+        'section-y': '4rem', // 64px — section vertical padding
+        'section-y-sm': '2rem', // 32px — section vertical padding (mobile)
+        'header-h': '4rem', // 64px — header height
+        'card-p': '1.5rem', // 24px — card padding
+        'card-gap': '1rem', // 16px — card gap
       },
       fontFamily: {
         sans: ['KoHo', 'Be Vietnam Pro', 'ui-sans-serif', 'system-ui', 'sans-serif'],
@@ -16,10 +49,21 @@ module.exports = {
         koho: ['KoHo', 'Be Vietnam Pro', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
+        brand: {
+          wine: '#780000',
+          wineDark: '#5e0000',
+          cta: '#FFDD00',
+          ctaHover: '#FBB612',
+        },
         // Brand palette lifted from vietjetair.com production bundle
         // (main.f5b4a549.chunk.css + main.6df371cf.chunk.js).
-        vjred: '#EC2029',
+        vjred: '#ED1C24',
+        'vjred-dark': '#DA251D',
         vjyellow: '#FFDD00',
+        vjgold: '#FFD000',
+        vjwine: '#5E0B0B',
+        vjnavy: '#141d2f',
+        'vjnavy-dark': '#0b111e',
         vjorange: '#F4511E',
         vjpurple: '#8075D6',
         vjblue: '#2563D4',
@@ -68,6 +112,27 @@ module.exports = {
           'gold-from': '#F9A51A',
           'gold-mid': '#FBB612',
           'gold-to': '#FFDD00',
+          // HeroBookingWidget (trang-chu) — sắc thái riêng của hộp tìm kiếm
+          // theo ảnh tham chiếu: thân form đỏ hồng, tab vàng/đỏ đô.
+          'red-panel': '#E74B55',
+          'gold-hover': '#FFE04D',
+          'tab-active': '#BA2D36',
+          'tab-idle': '#961F27',
+          'tab-idle-hover': '#A8252E',
+          // Header hạng vé Business trên FlightCard (ECO dùng `success`).
+          'gold-bronze': '#977B39',
+        },
+        // Màu xanh "Bay thẳng / thành công" dùng chung cho hạng vé ECO và
+        // trạng thái hoàn tất trong luồng đặt vé/thanh toán.
+        success: '#009E49',
+        // Màu thương hiệu của mạng xã hội (icon chia sẻ Footer) — cố định
+        // theo từng nền tảng, không phải token brand của Vietjet.
+        social: {
+          facebook: '#1877F2',
+          'facebook-hover': '#166fe5',
+          zalo: '#0068FF',
+          line: '#06C755',
+          youtube: '#FF0000',
         },
         stone: {
           50: '#FAFAF9',
