@@ -67,6 +67,8 @@ export type BookingState = {
   passengers: Passenger[];
   selectedSeats: string[];
   ancillaries: AncillaryId[];
+  selectedBaggage?: string | null;
+  hasInsurance?: boolean;
 };
 
 export type SearchParams = {

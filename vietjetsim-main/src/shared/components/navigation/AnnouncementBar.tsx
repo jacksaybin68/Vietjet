@@ -22,10 +22,10 @@ import { apiRequest } from '@/shared/services';
  * mới không phải lý do để thanh trống.
  */
 const FALLBACK_ANNOUNCEMENTS: readonly string[] = [
-  'Ưu đãi 50% cho vé khứ hồi nội địa — đặt ngay hôm nay!',
+  'TIN MỚI Ưu đãi 50% cho vé khứ hồi nội địa — đặt ngay hôm nay!',
+  '[THÔNG BÁO] Từ ngày 17/8/2026 (GMT+7), các chuyến bay Vietjet đến và đi từ Jakarta sẽ được chuyển về nhà ga T3 Ultimate của Sân bay Quốc tế Soekarno-Hatta (CGK).',
   'Thành viên SkyJoy tích điểm gấp đôi khi đặt vé trên website và ứng dụng Vietjet.',
   'Vietjet mở bán đường bay mới TP. Hồ Chí Minh – Western Sydney (WSI), giá chỉ từ 299.000đ.',
-  'Từ 15/10/2026, Vietjet bổ sung 12 chuyến bay mỗi tuần trên đường bay TP. Hồ Chí Minh – Hà Nội và điều chỉnh giờ khởi hành một số chuyến buổi tối; vui lòng kiểm tra lại thông tin chuyến bay trước khi ra sân bay.',
 ];
 
 /** Thông báo như `/api/cong-khai/thong-bao` trả về. */
@@ -85,29 +85,35 @@ export default function AnnouncementBar() {
   const move = (step: number) => setIndex((current) => (current + step + total) % total);
 
   const controlClass =
-    'grid h-8 w-8 place-items-center rounded-full text-[var(--foreground-muted)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--primary)]';
+    'grid h-8 w-8 place-items-center rounded-full text-[var(--foreground-muted)] transition-colors hover:bg-gray-100 hover:text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-gray-300';
 
   return (
     <div
       role="region"
       aria-label="Thông báo"
-      className="border-b border-black/5 bg-[var(--background)]"
+      className="w-full min-h-[49px] bg-white text-[var(--foreground)] border-b border-gray-200 flex items-center"
     >
-      <div className="mx-auto flex h-[58px] max-w-[1240px] items-center gap-3 px-4 sm:h-[60px]">
-        <RiNotification3Line
-          aria-hidden="true"
-          className="shrink-0 text-[22px] text-[var(--primary)] sm:text-2xl"
-        />
+      <div className="mx-auto flex w-full max-w-[1240px] items-center gap-3.5 px-4 sm:px-6 py-2 text-sm sm:text-base2">
+        <RiNotification3Line aria-hidden="true" className="shrink-0 text-lg text-vjred" />
 
-        <p
+        <div
           aria-live="polite"
           title={message}
-          className="min-w-0 flex-1 truncate text-[15px] font-semibold leading-6 text-[var(--foreground)] sm:text-[17px] lg:text-[19px]"
+          className="min-w-0 flex-1 truncate text-sm sm:text-base2 font-normal leading-[22px] text-[var(--foreground)] flex items-center gap-2"
         >
-          {message}
-        </p>
+          {message.startsWith('TIN MỚI') ? (
+            <>
+              <span className="shrink-0 bg-vjgold text-vjwine text-xs2 font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                TIN MỚI
+              </span>
+              <span className="truncate">{message.replace(/^TIN MỚI\s*[:-]?\s*/, '')}</span>
+            </>
+          ) : (
+            <span className="truncate">{message}</span>
+          )}
+        </div>
 
-        <div className="flex shrink-0 items-center gap-0.5">
+        <div className="flex shrink-0 items-center gap-1">
           <button
             type="button"
             onClick={() => move(-1)}
@@ -116,7 +122,7 @@ export default function AnnouncementBar() {
           >
             <RiArrowLeftSLine aria-hidden="true" className="text-xl" />
           </button>
-          <span className="min-w-[38px] text-center text-xs font-bold tabular-nums text-[var(--foreground-muted)]">
+          <span className="min-w-[28px] text-center text-xs font-semibold tabular-nums text-gray-500">
             {index + 1}/{total}
           </span>
           <button

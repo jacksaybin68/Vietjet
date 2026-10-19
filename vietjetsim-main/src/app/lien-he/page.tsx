@@ -41,7 +41,7 @@ export default function ContactPage() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Contact Form */}
           <div className="lg:col-span-2 bg-white rounded-2xl shadow-vj-lg p-8">
-            <h2 className="text-2xl font-bold text-[#1A2948] mb-6 font-heading-800">
+            <h2 className="text-2xl font-bold text-[var(--vj-navy)] mb-6 font-heading-800">
               Gửi tin nhắn cho chúng tôi
             </h2>
             {submitted ? (
@@ -56,7 +56,7 @@ export default function ContactPage() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid md:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-sm font-semibold text-[#333333] mb-2">
+                    <label className="block text-sm font-semibold text-[var(--foreground)] mb-2">
                       Họ và tên *
                     </label>
                     <input
@@ -65,12 +65,12 @@ export default function ContactPage() {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#EC2029] focus:ring-2 focus:ring-[#EC2029]/20 outline-none transition-all"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[var(--primary)] focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/20 outline-none transition-all"
                       placeholder="Nhập họ và tên"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-[#333333] mb-2">
+                    <label className="block text-sm font-semibold text-[var(--foreground)] mb-2">
                       Email *
                     </label>
                     <input
@@ -79,13 +79,13 @@ export default function ContactPage() {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#EC2029] focus:ring-2 focus:ring-[#EC2029]/20 outline-none transition-all"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[var(--primary)] focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/20 outline-none transition-all"
                       placeholder="example@email.com"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#333333] mb-2">
+                  <label className="block text-sm font-semibold text-[var(--foreground)] mb-2">
                     Tiêu đề *
                   </label>
                   <input
@@ -94,12 +94,12 @@ export default function ContactPage() {
                     value={formData.subject}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#EC2029] focus:ring-2 focus:ring-[#EC2029]/20 outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[var(--primary)] focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/20 outline-none transition-all"
                     placeholder="Vấn đề bạn cần hỗ trợ"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#333333] mb-2">
+                  <label className="block text-sm font-semibold text-[var(--foreground)] mb-2">
                     Nội dung *
                   </label>
                   <textarea
@@ -108,13 +108,13 @@ export default function ContactPage() {
                     onChange={handleChange}
                     required
                     rows={5}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#EC2029] focus:ring-2 focus:ring-[#EC2029]/20 outline-none transition-all resize-none"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[var(--primary)] focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/20 outline-none transition-all resize-none"
                     placeholder="Mô tả chi tiết yêu cầu của bạn..."
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full md:w-auto px-8 py-3 rounded-lg bg-[#EC2029] text-white font-bold hover:bg-primary-dark transition-all duration-300 shadow-vj-btn hover:shadow-vj-btn-hover flex items-center justify-center gap-2"
+                  className="w-full md:w-auto px-8 py-3 rounded-lg bg-[var(--primary)] text-white font-bold hover:bg-primary-dark transition-all duration-300 shadow-vj-btn hover:shadow-vj-btn-hover flex items-center justify-center gap-2"
                 >
                   <Icon name="PaperAirplaneIcon" size={18} />
                   Gửi tin nhắn
@@ -127,13 +127,13 @@ export default function ContactPage() {
           <div className="space-y-8">
             {/* Contact Details */}
             <div className="bg-white rounded-2xl shadow-vj-sm p-6">
-              <h3 className="text-lg font-bold text-[#1A2948] mb-4 flex items-center gap-2">
+              <h3 className="text-lg font-bold text-[var(--vj-navy)] mb-4 flex items-center gap-2">
                 <Icon name="PhoneIcon" size={20} />
                 Thông tin liên hệ
               </h3>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0 text-[#EC2029]">
+                  <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0 text-[var(--primary)]">
                     <Icon name="EnvelopeIcon" size={20} />
                   </div>
                   <div>
@@ -142,14 +142,14 @@ export default function ContactPage() {
                     </p>
                     <a
                       href="mailto:support@vietjetair.com"
-                      className="text-[#1A2948] font-semibold hover:text-[#EC2029] transition-colors"
+                      className="text-[var(--vj-navy)] font-semibold hover:text-[var(--primary)] transition-colors"
                     >
                       support@vietjetair.com
                     </a>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0 text-[#EC2029]">
+                  <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0 text-[var(--primary)]">
                     <Icon name="PhoneIcon" size={20} />
                   </div>
                   <div>
@@ -158,21 +158,21 @@ export default function ContactPage() {
                     </p>
                     <a
                       href="tel:19006886"
-                      className="text-[#1A2948] font-semibold hover:text-[#EC2029] transition-colors"
+                      className="text-[var(--vj-navy)] font-semibold hover:text-[var(--primary)] transition-colors"
                     >
                       1900-6886
                     </a>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0 text-[#EC2029]">
+                  <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0 text-[var(--primary)]">
                     <Icon name="MapPinIcon" size={20} />
                   </div>
                   <div>
                     <p className="text-xs text-[#6D6E71] font-medium uppercase tracking-wide">
                       Địa chỉ
                     </p>
-                    <p className="text-[#1A2948] font-medium">
+                    <p className="text-[var(--vj-navy)] font-medium">
                       Tòa nhà Vietjet, Số 1 Nguyễn Văn Trỗi, Phường 2, Quận Tân Bình, TP. Hồ Chí
                       Minh
                     </p>
@@ -183,7 +183,7 @@ export default function ContactPage() {
 
             {/* Working Hours */}
             <div className="bg-white rounded-2xl shadow-vj-sm p-6">
-              <h3 className="text-lg font-bold text-[#1A2948] mb-4 flex items-center gap-2">
+              <h3 className="text-lg font-bold text-[var(--vj-navy)] mb-4 flex items-center gap-2">
                 <Icon name="ClockIcon" size={20} />
                 Giờ làm việc
               </h3>
@@ -197,8 +197,8 @@ export default function ContactPage() {
                     key={i}
                     className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0"
                   >
-                    <span className="text-sm text-[#333333] font-medium">{item.day}</span>
-                    <span className="text-sm font-bold text-[#EC2029]">{item.hours}</span>
+                    <span className="text-sm text-[var(--foreground)] font-medium">{item.day}</span>
+                    <span className="text-sm font-bold text-[var(--primary)]">{item.hours}</span>
                   </div>
                 ))}
               </div>
@@ -216,7 +216,7 @@ export default function ContactPage() {
                 ></div>
                 <div className="text-center z-10">
                   <Icon name="MapPinIcon" size={32} />
-                  <p className="text-sm font-bold text-[#1A2948] mt-2">Bản đồ Vietjet Air</p>
+                  <p className="text-sm font-bold text-[var(--vj-navy)] mt-2">Bản đồ Vietjet Air</p>
                   <p className="text-xs text-[#6D6E71]">Tân Bình, TP. Hồ Chí Minh</p>
                 </div>
               </div>

@@ -26,6 +26,11 @@ export default function DateStrip({ items, selectedValue, onSelect }: DateStripP
     container.scrollBy({ left: dir === 'left' ? -step : step, behavior: 'smooth' });
   };
 
+  const validPrices = items
+    .map((i) => i.price)
+    .filter((p): p is number => typeof p === 'number' && p > 0);
+  const _minPrice = validPrices.length > 0 ? Math.min(...validPrices) : null;
+
   return (
     <section className="w-full border-b border-black/10 bg-[var(--background)]">
       <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
@@ -36,22 +41,30 @@ export default function DateStrip({ items, selectedValue, onSelect }: DateStripP
         >
           {items.map((item) => {
             const active = item.value === selectedValue;
-            const parts = item.label.split(' ');
+            // Parse label into day of week, day & month
+            const labelParts = item.label.split(' ');
+            const dayOfWeek = labelParts[0] || 'Thứ';
+            const dayMonth = labelParts.slice(1).join(' ').replace('/', ' tháng ');
             return (
               <button
                 key={item.value}
                 onClick={() => onSelect(item.value)}
-                className={`flex flex-col items-center gap-1 shrink-0 px-3 py-2 rounded-xl transition-all ${
+                className={`relative flex flex-col items-center justify-center shrink-0 min-w-[130px] px-3 py-2 rounded-2xl transition-all shadow-sm ${
                   active
-                    ? 'border-2 border-vjred bg-vjred/10 text-vjred font-black'
-                    : 'border-transparent text-vjdark font-semibold hover:bg-vjbgs/50'
+                    ? 'bg-gradient-to-b from-vjyellow to-accent-light text-[var(--foreground)] font-black border-2 border-yellow-500 ring-2 ring-vjyellow/40 scale-105 z-10'
+                    : 'border border-gray-200/90 bg-white text-gray-700 font-semibold hover:border-amber-300 hover:bg-amber-50/30'
                 }`}
               >
-                <span className="text-xs uppercase tracking-wider">{parts[0]}</span>
-                <span className="text-sm font-black">{parts.slice(1).join(' ')}</span>
+                <span className="text-xs2 font-bold opacity-90">{dayOfWeek}</span>
+                <span className="text-xs font-black">{dayMonth}</span>
                 {item.price && (
-                  <span className="text-[10px] text-vjred font-bold mt-0.5">
-                    {item.price.toLocaleString('vi-VN')}đ
+                  <span
+                    className={`text-xs2 font-bold mt-0.5 ${
+                      active ? 'text-red-700 font-black' : 'text-gray-500'
+                    }`}
+                  >
+                    {active ? 'Từ ' : ''}
+                    {item.price.toLocaleString('vi-VN')} VND
                   </span>
                 )}
               </button>

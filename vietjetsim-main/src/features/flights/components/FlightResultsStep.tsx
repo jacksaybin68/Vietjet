@@ -8,6 +8,23 @@ import { Icon, AppImage } from '@/shared/components/ui';
 import { FlightResultsSkeleton } from '@/shared/components/ui';
 import { getErrorMessage } from '@/lib/utils';
 import { searchFlightsWithDates, getAirportCity } from '@/features/flights/services';
+import FareBenefitsModal from './FareBenefitsModal';
+
+/**
+ * The fare the summary panel holds for the flight being looked at.
+ *
+ * Declared here rather than in the booking feature because the results step is
+ * the only writer: it produces the ladder and the panel only echoes it back.
+ */
+export interface FlightSelection {
+  flightNo: string;
+  /** Bucket id as the cards know it (`eco` … `business`). */
+  fareClass: string;
+  /** The chosen bucket's price for one adult. */
+  fare: number;
+  /** Full ladder for the same flight, so nothing re-derives a second price. */
+  fares?: Partial<Record<FareClassId, number>>;
+}
 
 // Fare class config
 const FARE_CLASS_CONFIG: Record<
@@ -17,14 +34,14 @@ const FARE_CLASS_CONFIG: Record<
   economy: {
     code: 'ECO',
     label: 'Phổ thông',
-    color: 'text-[var(--vj-green)]',
-    bg: 'bg-[rgb(var(--vj-green-rgb))]/10 border-[rgb(var(--vj-green-rgb))]/30',
+    color: 'text-[var(--foreground-muted)]',
+    bg: 'bg-[var(--surface-2)] border-[var(--border)]',
   },
   business: {
     code: 'BIZ',
     label: 'Thương gia',
-    color: 'text-[var(--accent-dark)]',
-    bg: 'bg-[rgb(var(--accent-rgb))]/15 border-[rgb(var(--accent-rgb))]/40',
+    color: 'text-[var(--primary)]',
+    bg: 'bg-[rgb(var(--vj-red-rgb))]/10 border-[rgb(var(--vj-red-rgb))]/30',
   },
 };
 
@@ -132,8 +149,29 @@ function SearchErrorModal({ message, onRetry, onDismiss }: SearchErrorModalProps
 export interface FlightResultsStepProps {
   /** Called with the chosen flight; advances the booking wizard to step 2. */
   onSelect: (f: Flight) => void;
-  /** Called when a traveller taps a fare card: (flightNo, fareClass, fare). */
-  onFlightSelect?: (flightNo: string, fareClass: string, fare: number) => void;
+  /**
+   * Called when a traveller taps a fare card: (flightNo, fareClass, fare, fares).
+   * `fares` is the whole ladder for that flight so the summary panel and the fare
+   * tabs can re-pick another bucket without re-deriving prices of their own.
+   */
+  onFlightSelect?: (
+    flightNo: string,
+    fareClass: string,
+    fare: number,
+    fares?: Partial<Record<FareClassId, number>>
+  ) => void;
+  /**
+   * Fare the parent panel currently holds. It paints that card as "Đã chọn" and
+   * fills the summary, which is how a selection survives switching between the
+   * card, the fare tabs and the right-hand panel.
+   */
+  selection?: FlightSelection | null;
+  /**
+   * Fired by the sticky "Đi tiếp" bar once a fare has been handed to the parent.
+   * The /tim-ve flow defers the wizard to the panel's own "Đi tiếp", so this is
+   * what lets the bottom bar keep advancing instead of only re-syncing.
+   */
+  onContinue?: () => void;
   /** Route/departure filters from the search form; drive the real API lookup. */
   search?: { from?: string; to?: string; depart?: string };
   /** Lets the date strip re-search another departure day (vietjetair.com parity). */
@@ -212,12 +250,12 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
               aria-current={isSelected ? 'date' : undefined}
               className={`flex-1 min-w-0 px-0.5 sm:px-1 py-1 sm:py-1.5 rounded-xl text-center transition-all ${
                 isSelected
-                  ? 'bg-[var(--accent)] text-[var(--foreground)] shadow-sm'
+                  ? 'bg-[rgb(var(--vj-red-rgb))]/10 text-[var(--primary)] border border-primary/40 shadow-sm'
                   : 'text-[var(--foreground-muted)] hover:bg-[var(--surface-2)]'
               }`}
             >
               <span
-                className={`block text-[9px] sm:text-[10px] truncate ${isSelected ? 'font-bold text-[var(--vj-navy)]' : ''}`}
+                className={`block text-3xs sm:text-2xs truncate ${isSelected ? 'font-bold text-[var(--primary)]' : ''}`}
               >
                 {WEEKDAY_LABELS[day.getDay()]}
               </span>
@@ -254,6 +292,8 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
 export default function FlightResultsStep({
   onSelect,
   onFlightSelect,
+  selection,
+  onContinue: _onContinue,
   search,
   onDateChange,
   pax,
@@ -280,6 +320,8 @@ export default function FlightResultsStep({
   const [showComparison, setShowComparison] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [compareFare, setCompareFare] = useState<FareClassId | null>(null);
+  const [expandedFlightNo, setExpandedFlightNo] = useState<string | null>(null);
   // Dates this route actually flies, sent by the API with an empty result. The
   // date strip runs from today forward, so a search past the end of the seeded
   // schedule otherwise leaves the customer on a strip of equally empty days
@@ -525,7 +567,7 @@ export default function FlightResultsStep({
               <Icon name="AdjustmentsHorizontalIcon" size={16} className="text-primary" />
               Bộ lọc
               {activeFilterCount > 0 && (
-                <span className="grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-white">
+                <span className="grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-2xs font-bold text-white">
                   {activeFilterCount}
                 </span>
               )}
@@ -541,7 +583,7 @@ export default function FlightResultsStep({
               <Icon name="AdjustmentsHorizontalIcon" size={14} className="text-primary" />
               Bộ lọc
               {activeFilterCount > 0 && (
-                <span className="text-[10px] font-bold bg-primary text-white rounded-full w-4 h-4 flex items-center justify-center">
+                <span className="text-2xs font-bold bg-primary text-white rounded-full w-4 h-4 flex items-center justify-center">
                   {activeFilterCount}
                 </span>
               )}
@@ -550,7 +592,7 @@ export default function FlightResultsStep({
               <button
                 type="button"
                 onClick={resetFilters}
-                className="min-h-11 shrink-0 px-3 text-[11px] font-semibold text-primary hover:underline"
+                className="min-h-11 shrink-0 px-3 text-xs2 font-semibold text-primary hover:underline"
               >
                 Xóa tất cả
               </button>
@@ -561,7 +603,7 @@ export default function FlightResultsStep({
             <div className="p-2 sm:p-3 space-y-3 sm:space-y-4">
               {/* Sort */}
               <div>
-                <label className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1 font-koho">
+                <label className="text-2xs font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1 font-koho">
                   Sắp xếp theo
                 </label>
                 <select
@@ -579,7 +621,7 @@ export default function FlightResultsStep({
 
               {/* Airline Filter */}
               <div>
-                <label className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
+                <label className="text-2xs font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
                   Hãng hàng không
                 </label>
                 <div className="space-y-1">
@@ -596,10 +638,10 @@ export default function FlightResultsStep({
                         onChange={() => toggleAirline(airline)}
                         className="accent-primary w-4 h-4 shrink-0 rounded"
                       />
-                      <span className="text-[11px] sm:text-xs text-[var(--foreground-muted)] group-hover:text-primary flex-1">
+                      <span className="text-xs2 sm:text-xs text-[var(--foreground-muted)] group-hover:text-primary flex-1">
                         {airline}
                       </span>
-                      <span className="text-[9px] sm:text-[10px] text-[var(--foreground-subtle)]">
+                      <span className="text-3xs sm:text-2xs text-[var(--foreground-subtle)]">
                         {flights.filter((f) => f.airline === airline).length}
                       </span>
                     </label>
@@ -609,11 +651,11 @@ export default function FlightResultsStep({
 
               {/* Price Range */}
               <div>
-                <label className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
+                <label className="text-2xs font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
                   Khoảng giá
                 </label>
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-[10px] text-[var(--foreground-subtle)]">
+                  <div className="flex items-center justify-between text-2xs text-[var(--foreground-subtle)]">
                     <span className="font-semibold text-primary">
                       {minPrice.toLocaleString('vi-VN')}₫
                     </span>
@@ -623,7 +665,7 @@ export default function FlightResultsStep({
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center gap-1">
-                      <span className="text-[9px] sm:text-[10px] text-[var(--foreground-subtle)] w-5 sm:w-7">
+                      <span className="text-3xs sm:text-2xs text-[var(--foreground-subtle)] w-5 sm:w-7">
                         Thấp
                       </span>
                       <input
@@ -643,7 +685,7 @@ export default function FlightResultsStep({
                       />
                     </div>
                     <div className="flex items-center gap-1">
-                      <span className="text-[9px] sm:text-[10px] text-[var(--foreground-subtle)] w-5 sm:w-7">
+                      <span className="text-3xs sm:text-2xs text-[var(--foreground-subtle)] w-5 sm:w-7">
                         Cao
                       </span>
                       <input
@@ -668,7 +710,7 @@ export default function FlightResultsStep({
 
               {/* Departure Time */}
               <div>
-                <label className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
+                <label className="text-2xs font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
                   Giờ khởi hành
                 </label>
                 <div className="grid grid-cols-2 gap-1">
@@ -676,14 +718,14 @@ export default function FlightResultsStep({
                     <button
                       key={idx}
                       onClick={() => toggleSlot(idx)}
-                      className={`text-left px-1.5 sm:px-2 py-2 sm:py-1.5 rounded-lg border text-[9px] sm:text-[10px] transition-all ${
+                      className={`text-left px-1.5 sm:px-2 py-2 sm:py-1.5 rounded-lg border text-3xs sm:text-2xs transition-all ${
                         filters.departureSlots.includes(idx)
                           ? 'border-primary bg-primary/5 text-primary font-semibold'
                           : 'border-[var(--border)] text-[var(--foreground-muted)] hover:border-primary/40 hover:text-primary'
                       }`}
                     >
                       <div className="font-semibold">{slot.label}</div>
-                      <div className="text-[var(--foreground-subtle)] text-[8px] sm:text-[9px] mt-0.5">
+                      <div className="text-[var(--foreground-subtle)] text-4xs sm:text-3xs mt-0.5">
                         {slot.sublabel}
                       </div>
                     </button>
@@ -693,7 +735,7 @@ export default function FlightResultsStep({
 
               {/* Stop Count */}
               <div>
-                <label className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
+                <label className="text-2xs font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
                   Số điểm dừng
                 </label>
                 <div className="space-y-1">
@@ -714,10 +756,10 @@ export default function FlightResultsStep({
                         onChange={() => toggleStop(opt.value)}
                         className="accent-primary w-4 h-4 shrink-0 rounded"
                       />
-                      <span className="text-[11px] sm:text-xs text-[var(--foreground-muted)] group-hover:text-primary">
+                      <span className="text-xs2 sm:text-xs text-[var(--foreground-muted)] group-hover:text-primary">
                         {opt.label}
                       </span>
-                      <span className="text-[9px] sm:text-[10px] text-[var(--foreground-subtle)] ml-auto">
+                      <span className="text-3xs sm:text-2xs text-[var(--foreground-subtle)] ml-auto">
                         {
                           flights.filter((f) =>
                             opt.value === 2 ? f.stops >= 2 : f.stops === opt.value
@@ -731,7 +773,7 @@ export default function FlightResultsStep({
 
               {/* Duration */}
               <div>
-                <label className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
+                <label className="text-2xs font-bold text-[var(--foreground)] uppercase tracking-wider block mb-1.5 font-koho">
                   Thời gian bay tối đa:{' '}
                   <span className="text-primary">
                     {Math.floor(shownMaxDuration / 60)}h{' '}
@@ -751,7 +793,7 @@ export default function FlightResultsStep({
                   }
                   className="w-full accent-primary"
                 />
-                <div className="flex justify-between text-[9px] sm:text-[10px] text-[var(--foreground-subtle)] mt-1">
+                <div className="flex justify-between text-3xs sm:text-2xs text-[var(--foreground-subtle)] mt-1">
                   <span>1h</span>
                   <span>
                     {Math.floor(maxDuration / 60)}h{' '}
@@ -777,7 +819,7 @@ export default function FlightResultsStep({
                 <div className="text-lg sm:text-xl font-black text-[var(--foreground)] font-koho">
                   {search.from.toUpperCase()}
                 </div>
-                <div className="text-[11px] sm:text-xs text-[var(--foreground-muted)] truncate">
+                <div className="text-xs2 sm:text-xs text-[var(--foreground-muted)] truncate">
                   {getAirportCity(search.from)}
                 </div>
               </div>
@@ -790,7 +832,7 @@ export default function FlightResultsStep({
                 <div className="text-lg sm:text-xl font-black text-[var(--foreground)] font-koho">
                   {search.to.toUpperCase()}
                 </div>
-                <div className="text-[11px] sm:text-xs text-[var(--foreground-muted)] truncate">
+                <div className="text-xs2 sm:text-xs text-[var(--foreground-muted)] truncate">
                   {getAirportCity(search.to)}
                 </div>
               </div>
@@ -845,14 +887,14 @@ export default function FlightResultsStep({
           {/* Scrolls sideways instead of wrapping: five chips plus the label wrap
               onto two rows on a 390px screen and push the flight list down. */}
           <div className="-mx-1 flex items-center gap-1 overflow-x-auto px-1 pb-1">
-            <span className="shrink-0 text-[10px] sm:text-[11px] text-[var(--foreground-subtle)] font-semibold">
+            <span className="shrink-0 text-2xs sm:text-xs2 text-[var(--foreground-subtle)] font-semibold">
               Sắp xếp:
             </span>
             {SORT_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
                 onClick={() => setSortBy(opt.value)}
-                className={`shrink-0 text-[10px] sm:text-[11px] px-2 sm:px-2.5 py-1.5 sm:py-1 rounded-full border font-semibold transition-all ${
+                className={`shrink-0 text-2xs sm:text-xs2 px-2 sm:px-2.5 py-1.5 sm:py-1 rounded-full border font-semibold transition-all ${
                   sortBy === opt.value
                     ? 'bg-primary text-white border-primary shadow-sm'
                     : 'border-[var(--border)] text-[var(--foreground-muted)] hover:border-primary/40 hover:text-primary'
@@ -920,9 +962,9 @@ export default function FlightResultsStep({
                   economyPrice: economyFare,
                   businessPrice: businessFare,
                 }),
-                headerClass: 'bg-[#2db35e] text-white',
-                priceColor: 'text-[#2db35e]',
-                color: 'border-[#2db35e] text-[#2db35e] hover:bg-[#2db35e] hover:text-white',
+                headerClass: 'bg-[var(--surface-2)] text-[var(--foreground)]',
+                priceColor: 'text-[var(--foreground)]',
+                color: 'border-primary/40 text-primary hover:bg-primary hover:text-white',
               },
               {
                 id: 'deluxe' as FareClassId,
@@ -932,9 +974,9 @@ export default function FlightResultsStep({
                   economyPrice: economyFare,
                   businessPrice: businessFare,
                 }),
-                headerClass: 'bg-[#f4511e] text-white',
-                priceColor: 'text-[#f4511e]',
-                color: 'border-[#f4511e] text-[#f4511e] hover:bg-[#f4511e] hover:text-white',
+                headerClass: 'bg-[var(--surface-2)] text-[var(--foreground)]',
+                priceColor: 'text-[var(--foreground)]',
+                color: 'border-primary/40 text-primary hover:bg-primary hover:text-white',
               },
               {
                 id: 'skyboss' as FareClassId,
@@ -944,9 +986,9 @@ export default function FlightResultsStep({
                   economyPrice: economyFare,
                   businessPrice: businessFare,
                 }),
-                headerClass: 'bg-[#6f0000] text-[#ffdd00]',
-                priceColor: 'text-[#6f0000]',
-                color: 'border-[#6f0000] text-[#6f0000] hover:bg-[#6f0000] hover:text-[#ffdd00]',
+                headerClass: 'bg-[var(--surface-2)] text-[var(--foreground)]',
+                priceColor: 'text-[var(--foreground)]',
+                color: 'border-primary/40 text-primary hover:bg-primary hover:text-white',
               },
               {
                 id: 'business' as FareClassId,
@@ -956,9 +998,9 @@ export default function FlightResultsStep({
                   economyPrice: economyFare,
                   businessPrice: businessFare,
                 }),
-                headerClass: 'bg-[#fbb612] text-black font-extrabold',
-                priceColor: 'text-[#d97706]',
-                color: 'border-[#fbb612] text-black hover:bg-[#fbb612] hover:text-black',
+                headerClass: 'bg-[var(--surface-2)] text-[var(--foreground)]',
+                priceColor: 'text-[var(--foreground)]',
+                color: 'border-primary/40 text-primary hover:bg-primary hover:text-white',
               },
             ];
 
@@ -967,7 +1009,7 @@ export default function FlightResultsStep({
                 key={flight.id}
                 data-testid="flight-result-card"
                 style={{ transitionDelay: `${Math.min(idx * 50, 300)}ms` }}
-                className={`@container bg-[var(--surface)] rounded-xl border border-primary/30 transition-all hover:shadow-lg relative overflow-hidden flex flex-col lg:flex-row shadow-[0_2px_8px_rgba(209,22,27,0.15)]`}
+                className={`@container bg-[var(--surface)] rounded-xl border border-[var(--border)] transition-shadow duration-200 hover:shadow-md relative overflow-hidden flex flex-col lg:flex-row shadow-sm`}
               >
                 {/* Left: Flight Info - responsive */}
                 <div className="w-full lg:w-[240px] shrink-0 p-3 sm:p-4 border-b lg:border-b-0 border-primary/10 flex flex-col justify-between">
@@ -976,7 +1018,7 @@ export default function FlightResultsStep({
                       <span className="font-black text-[var(--foreground)] text-sm leading-none font-koho">
                         {flight.flightNo}
                       </span>
-                      <span className="text-[10px] text-[var(--foreground-subtle)] font-medium">
+                      <span className="text-2xs text-[var(--foreground-subtle)] font-medium">
                         {flight.airline ?? 'Vietjet Air'}
                       </span>
                     </div>
@@ -986,13 +1028,13 @@ export default function FlightResultsStep({
                         <div className="text-xl sm:text-2xl font-black text-[var(--foreground)] font-koho leading-none">
                           {flight.departTime}
                         </div>
-                        <div className="text-[11px] text-[var(--foreground-muted)] font-semibold mt-0.5">
+                        <div className="text-xs2 text-[var(--foreground-muted)] font-semibold mt-0.5">
                           {flight.from}
                         </div>
                       </div>
 
                       <div className="flex-1 flex flex-col items-center">
-                        <span className="text-[9px] text-[var(--foreground-subtle)] font-medium">
+                        <span className="text-3xs text-[var(--foreground-subtle)] font-medium">
                           {flight.duration}
                         </span>
                         <div className="w-full flex items-center gap-1 my-0.5">
@@ -1004,23 +1046,23 @@ export default function FlightResultsStep({
                           />
                           <span className="h-0.5 flex-1 bg-primary/30" />
                         </div>
-                        <span className="text-[9px] text-primary font-bold">Bay thẳng</span>
+                        <span className="text-3xs text-primary font-bold">Bay thẳng</span>
                       </div>
 
                       <div className="text-right">
                         <div className="text-xl sm:text-2xl font-black text-[var(--foreground)] font-koho leading-none">
                           {flight.arriveTime}
                         </div>
-                        <div className="text-[11px] text-[var(--foreground-muted)] font-semibold mt-0.5">
+                        <div className="text-xs2 text-[var(--foreground-muted)] font-semibold mt-0.5">
                           {flight.to}
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="text-[10px] text-[var(--foreground-subtle)] mt-2 pt-2 border-t border-[var(--border)] flex items-center justify-between">
+                  <div className="text-2xs text-[var(--foreground-subtle)] mt-2 pt-2 border-t border-[var(--border)] flex items-center justify-between">
                     <span>Airbus A321</span>
-                    <span className="text-green-600 font-semibold">
+                    <span className="text-[var(--foreground-muted)] font-semibold">
                       Còn {flight.available ?? 9} chỗ
                     </span>
                   </div>
@@ -1028,40 +1070,183 @@ export default function FlightResultsStep({
 
                 {/* Right: Fare Classes - responsive */}
                 <div className="flex-1 min-w-0 grid grid-cols-4 gap-0.5 bg-[var(--surface-2)] p-1">
-                  {fareClasses.map((fc) => (
-                    <div
-                      key={fc.id}
-                      className="relative flex min-w-0 flex-col overflow-hidden rounded-lg group"
-                    >
-                      <div className={`text-center py-1 ${fc.headerClass}`}>
-                        <div className="truncate text-[8px] font-black uppercase font-koho tracking-tight sm:text-[9px] 2xl:text-[10px]">
-                          {fc.name}
+                  {fareClasses.map((fc) => {
+                    // Whole ladder of this flight, handed to the parent with the
+                    // pick so the panel/tabs can switch bucket without guessing.
+                    const fares = Object.fromEntries(
+                      fareClasses.map((item) => [item.id, item.price])
+                    ) as Partial<Record<FareClassId, number>>;
+                    const isSelected =
+                      selection?.flightNo === flight.flightNo && selection?.fareClass === fc.id;
+                    return (
+                      <div
+                        key={fc.id}
+                        className="relative flex min-w-0 flex-col overflow-hidden rounded-lg group"
+                      >
+                        {/* The fare NAME opens the rights comparison — the card's
+                            "Chọn" below is what books it, so the two never share
+                            a target. */}
+                        <div
+                          role="button"
+                          tabIndex={0}
+                          data-testid="fare-benefits-trigger"
+                          aria-label={`So sánh quyền lợi hạng ${fc.name}`}
+                          onClick={() => setCompareFare(fc.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              setCompareFare(fc.id);
+                            }
+                          }}
+                          className={`text-center py-1 w-full cursor-pointer transition-opacity hover:opacity-85 select-none border-b border-[var(--border)] ${fc.headerClass}`}
+                        >
+                          <span className="block truncate text-2xs font-black uppercase font-koho tracking-tight sm:text-xs2 2xl:text-xs">
+                            {fc.name}
+                          </span>
+                        </div>
+                        <div className="bg-[var(--surface)] flex flex-col justify-center items-center flex-1 p-1 sm:p-1.5 2xl:p-3 border-x border-b border-[var(--border)] rounded-b-lg">
+                          <div
+                            className={`text-xs2 sm:text-xs 2xl:text-sm font-black ${fc.priceColor} font-koho mb-1.5 sm:mb-2 2xl:mb-3 leading-none break-words text-center`}
+                          >
+                            {fc.price.toLocaleString('vi-VN')}₫
+                          </div>
+                          <button
+                            data-testid="select-fare"
+                            aria-pressed={isSelected}
+                            onClick={() => {
+                              setExpandedFlightNo(flight.flightNo);
+                              onSelect({
+                                ...flight,
+                                price: fc.price,
+                                class: fc.cabin,
+                                fareClass: fc.id,
+                              });
+                              onFlightSelect?.(flight.flightNo, fc.id, fc.price, fares);
+                            }}
+                            className={`w-full py-1 rounded text-2xs sm:text-xs2 2xl:text-xs font-bold transition-colors duration-200 border ${
+                              isSelected
+                                ? 'bg-primary text-white border-primary shadow-sm'
+                                : fc.color
+                            }`}
+                          >
+                            {isSelected ? 'Đã chọn' : 'Chọn'}
+                          </button>
                         </div>
                       </div>
-                      <div className="bg-[var(--surface)] flex flex-col justify-center items-center flex-1 p-1 sm:p-1.5 2xl:p-3 border-x border-b border-[var(--border)] rounded-b-lg">
-                        <div
-                          className={`text-[8px] sm:text-[9px] 2xl:text-sm font-black ${fc.priceColor} font-koho mb-1.5 sm:mb-2 2xl:mb-3 leading-none break-words text-center`}
-                        >
-                          {fc.price.toLocaleString('vi-VN')}₫
-                        </div>
-                        <button
-                          onClick={() => {
-                            onSelect({
-                              ...flight,
-                              price: fc.price,
-                              class: fc.cabin,
-                              fareClass: fc.id,
-                            });
-                            onFlightSelect?.(flight.flightNo, fc.id, fc.price);
-                          }}
-                          className={`w-full py-1 rounded text-[8px] sm:text-[9px] 2xl:text-xs font-bold transition-all border ${fc.color}`}
-                        >
-                          Chọn
-                        </button>
+                    );
+                  })}
+                </div>
+
+                {/* Expanded flight details accordion matching Screenshot 3 */}
+                {(selection?.flightNo === flight.flightNo ||
+                  expandedFlightNo === flight.flightNo) && (
+                  <div className="w-full bg-[var(--surface-2)] border-t border-[var(--border)] p-4 sm:p-5 animate-fadeIn">
+                    {/* Header route line */}
+                    <div className="flex flex-wrap items-center justify-between border-b border-[var(--border)] pb-3 mb-3 gap-2">
+                      <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+                        <span className="font-black text-[var(--foreground)]">{flight.from}</span>
+                        <span className="text-[var(--foreground-muted)] font-medium">
+                          {getAirportCity(flight.from)}
+                        </span>
+                        <span className="text-[var(--foreground-subtle)] font-bold">
+                          {flight.departTime},{' '}
+                          {flight.departDate
+                            ? new Date(flight.departDate).toLocaleDateString('vi-VN')
+                            : '24/10/2026'}
+                        </span>
+                        <span className="text-[var(--foreground-subtle)] font-bold mx-1">→</span>
+                        <span className="text-xs font-bold text-[var(--foreground)] bg-[var(--surface)] px-2.5 py-0.5 rounded-full border border-[var(--border)]">
+                          {flight.duration} Bay thẳng
+                        </span>
+                        <span className="text-[var(--foreground-subtle)] font-bold mx-1">→</span>
+                        <span className="font-black text-[var(--foreground)]">{flight.to}</span>
+                        <span className="text-[var(--foreground-muted)] font-medium">
+                          {getAirportCity(flight.to)}
+                        </span>
+                        <span className="text-[var(--foreground-subtle)] font-bold">
+                          {flight.arriveTime},{' '}
+                          {flight.departDate
+                            ? new Date(flight.departDate).toLocaleDateString('vi-VN')
+                            : '24/10/2026'}
+                        </span>
+                      </div>
+                      <div className="text-xs2 font-semibold text-[var(--foreground-muted)]">
+                        Airbus A321 • Bay thẳng
                       </div>
                     </div>
-                  ))}
-                </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <h4 className="font-black text-[var(--foreground)] uppercase tracking-wide text-xs2 mb-2 flex items-center gap-1">
+                          Bao gồm:
+                        </h4>
+                        <ul className="space-y-1.5 text-[var(--foreground)] font-medium text-xs2">
+                          <li className="flex items-center gap-2 text-[var(--primary)]">
+                            <span className="font-bold">✔</span> Hành lý xách tay: 07kg
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div>
+                        <h4 className="font-black text-[var(--foreground-muted)] uppercase tracking-wide text-xs2 mb-2">
+                          Chưa bao gồm (Có thể mua thêm với phí):
+                        </h4>
+                        <ul className="space-y-1.5 text-[var(--foreground-muted)] text-xs2">
+                          <li className="flex items-center gap-2 text-[var(--foreground-muted)]">
+                            <span className="font-bold">⊗</span>{' '}
+                            <span className="text-[var(--foreground)]">
+                              Hành lý ký gửi (tùy chọn)
+                            </span>
+                          </li>
+                          <li className="flex items-center gap-2 text-[var(--foreground-muted)]">
+                            <span className="font-bold">⊗</span>{' '}
+                            <span className="text-[var(--foreground)]">Suất ăn</span>
+                          </li>
+                          <li className="flex items-center gap-2 text-[var(--foreground-muted)]">
+                            <span className="font-bold">⊗</span>{' '}
+                            <span className="text-[var(--foreground)]">Bộ tiện ích 3 trong 1</span>
+                          </li>
+                          <li className="flex items-center gap-2 text-[var(--foreground-muted)]">
+                            <span className="font-bold">⊗</span>{' '}
+                            <span className="text-[var(--foreground)]">Chọn trước chỗ ngồi</span>
+                          </li>
+                          <li className="flex items-center gap-2 text-[var(--foreground-muted)]">
+                            <span className="font-bold">⊗</span>{' '}
+                            <span className="text-[var(--foreground)]">
+                              Thay đổi chuyến bay, ngày bay, hành trình
+                            </span>
+                          </li>
+                          <li className="flex items-center gap-2 text-[var(--foreground-muted)]">
+                            <span className="font-bold">⊗</span>{' '}
+                            <span className="text-[var(--foreground)]">
+                              Chênh lệch tiền vé khi thay đổi (nếu có)
+                            </span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between border-t border-[var(--border)] pt-3 mt-3">
+                      <button
+                        type="button"
+                        onClick={() => setCompareFare('eco')}
+                        className="flex items-center gap-1.5 text-xs font-bold text-[var(--primary)] hover:text-[var(--primary-dark)] transition-colors"
+                      >
+                        <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[rgb(var(--primary-rgb))]/10 text-[var(--primary)] text-2xs font-bold">
+                          ℹ
+                        </span>
+                        <span className="underline">Xem quy định giá vé</span>
+                      </button>
+
+                      <div className="flex items-center gap-1.5 text-[var(--primary)] text-xs font-black">
+                        <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[rgb(var(--primary-rgb))]/10 text-[var(--primary)] text-2xs">
+                          ✔
+                        </span>
+                        <span>Đã chọn</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -1103,7 +1288,7 @@ export default function FlightResultsStep({
 
                 {/* Suggestions */}
                 <div className="bg-[var(--surface-2)] rounded-xl p-3 sm:p-4 mb-4 sm:mb-5 text-left max-w-sm">
-                  <p className="text-[10px] sm:text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-2.5 sm:mb-3 font-koho">
+                  <p className="text-2xs sm:text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-2.5 sm:mb-3 font-koho">
                     Gợi ý cho bạn
                   </p>
                   <ul className="space-y-1.5 sm:space-y-2">
@@ -1173,7 +1358,7 @@ export default function FlightResultsStep({
                       route actually flies. */}
                   {!searchQuery && availableDates.length > 0 && (
                     <div className="w-full">
-                      <p className="text-[10px] sm:text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-2 font-koho">
+                      <p className="text-2xs sm:text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-2 font-koho">
                         Ngày có chuyến bay
                       </p>
                       <div className="flex flex-wrap gap-1.5 sm:gap-2">
@@ -1185,7 +1370,7 @@ export default function FlightResultsStep({
                               onClick={() => onDateChange?.(iso)}
                               data-testid="available-date"
                               aria-label={`Xem chuyến bay ngày ${iso}`}
-                              className="inline-flex items-center gap-1.5 rounded-xl border border-primary/30 bg-[var(--surface)] px-3 py-2 text-[11px] sm:text-xs font-bold text-primary transition-all hover:bg-primary hover:text-white"
+                              className="inline-flex items-center gap-1.5 rounded-xl border border-primary/30 bg-[var(--surface)] px-3 py-2 text-xs2 sm:text-xs font-bold text-primary transition-all hover:bg-primary hover:text-white"
                             >
                               <Icon name="CalendarDaysIcon" size={12} />
                               {date.toLocaleDateString('vi-VN', {
@@ -1202,7 +1387,7 @@ export default function FlightResultsStep({
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="inline-flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-sm font-bold text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all hover:opacity-90 hover:shadow-md active:scale-95"
+                      className="inline-flex items-center gap-1.5 sm:gap-2 text-2xs sm:text-sm font-bold text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all hover:opacity-90 hover:shadow-md active:scale-95"
                       style={{ background: 'var(--primary)' }}
                     >
                       <Icon name="XMarkIcon" size={12} />
@@ -1212,7 +1397,7 @@ export default function FlightResultsStep({
                   {activeFilterCount > 0 && (
                     <button
                       onClick={resetFilters}
-                      className="inline-flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-sm font-bold text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all hover:opacity-90 hover:shadow-md active:scale-95"
+                      className="inline-flex items-center gap-1.5 sm:gap-2 text-2xs sm:text-sm font-bold text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all hover:opacity-90 hover:shadow-md active:scale-95"
                       style={{ background: 'var(--primary)' }}
                     >
                       <Icon name="ArrowPathIcon" size={12} />
@@ -1221,7 +1406,7 @@ export default function FlightResultsStep({
                   )}
                   <button
                     onClick={resetFilters}
-                    className="inline-flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-sm font-bold text-[var(--foreground-muted)] border border-[var(--border)] hover:border-primary/40 hover:bg-[var(--surface-2)] px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all"
+                    className="inline-flex items-center gap-1.5 sm:gap-2 text-2xs sm:text-sm font-bold text-[var(--foreground-muted)] border border-[var(--border)] hover:border-primary/40 hover:bg-[var(--surface-2)] px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all"
                   >
                     <Icon name="AdjustmentsHorizontalIcon" size={12} />
                     Xem tất cả chuyến bay
@@ -1237,7 +1422,7 @@ export default function FlightResultsStep({
           <div className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--surface)] border-t-2 border-primary shadow-2xl">
             <div className="max-w-6xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                <span className="text-[10px] sm:text-sm font-black text-[var(--foreground)] flex items-center gap-1 sm:gap-1.5 font-koho">
+                <span className="text-2xs sm:text-sm font-black text-[var(--foreground)] flex items-center gap-1 sm:gap-1.5 font-koho">
                   <Icon name="ArrowsRightLeftIcon" size={14} className="text-primary" />
                   So sánh ({compareIds.length}/3):
                 </span>
@@ -1293,7 +1478,7 @@ export default function FlightResultsStep({
               style={{ maxWidth: compareFlights.length === 3 ? '1100px' : '820px' }}
             >
               {/* Modal Header */}
-              <div className="bg-gradient-to-r from-[var(--vj-navy)] to-[var(--vj-navy-2)] px-6 py-4 flex items-center justify-between shrink-0">
+              <div className="bg-primary px-6 py-4 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2.5">
                   <Icon name="ArrowsRightLeftIcon" size={18} className="text-accent" />
                   <h2 className="text-white font-black text-lg font-koho">So sánh chuyến bay</h2>
@@ -1330,12 +1515,12 @@ export default function FlightResultsStep({
                         {(isCheapest || isFastest) && (
                           <div className="flex gap-1 mb-2 flex-wrap">
                             {isCheapest && (
-                              <span className="text-[10px] font-black bg-[var(--vj-green)] text-white px-2 py-0.5 rounded-full">
+                              <span className="text-2xs font-black bg-primary text-white px-2 py-0.5 rounded-full">
                                 Rẻ nhất
                               </span>
                             )}
                             {isFastest && (
-                              <span className="text-[10px] font-black bg-[var(--blue)] text-white px-2 py-0.5 rounded-full">
+                              <span className="text-2xs font-black bg-[var(--foreground-muted)] text-white px-2 py-0.5 rounded-full">
                                 Nhanh nhất
                               </span>
                             )}
@@ -1346,7 +1531,7 @@ export default function FlightResultsStep({
                             className={`h-7 px-2 rounded-lg flex items-center justify-center shrink-0 ${flight.class === 'business' ? 'bg-accent' : 'bg-gradient-red'}`}
                           >
                             <img
-                              src="/logo-vj.svg"
+                              src="/logo-internal.svg"
                               alt="Vietjet Air"
                               className={`h-3 w-auto ${flight.class === 'business' ? '' : 'brightness-0 invert'}`}
                             />
@@ -1361,7 +1546,7 @@ export default function FlightResultsStep({
                           </div>
                         </div>
                         <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${fareClass.bg} ${fareClass.color}`}
+                          className={`text-2xs font-bold px-2 py-0.5 rounded-full border ${fareClass.bg} ${fareClass.color}`}
                         >
                           {fareClass.code} · {fareClass.label}
                         </span>
@@ -1378,7 +1563,7 @@ export default function FlightResultsStep({
                     return (
                       <CompareCell key={flight.id} tone={isBest ? 'best' : 'plain'}>
                         <div
-                          className={`text-xl font-black ${isBest ? 'text-[var(--vj-green)]' : 'text-primary'} font-koho`}
+                          className={`text-xl font-black ${isBest ? 'text-primary' : 'text-[var(--foreground)]'} font-koho`}
                         >
                           {Math.round(flight.price).toLocaleString('vi-VN')}₫
                         </div>
@@ -1426,7 +1611,7 @@ export default function FlightResultsStep({
                     return (
                       <CompareCell key={flight.id} tone={isBest ? 'fastest' : 'plain'}>
                         <div
-                          className={`text-lg font-black ${isBest ? 'text-[var(--blue)]' : 'text-[var(--foreground)]'} font-koho`}
+                          className={`text-lg font-black ${isBest ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'} font-koho`}
                         >
                           {flight.duration}
                         </div>
@@ -1441,7 +1626,7 @@ export default function FlightResultsStep({
                   {compareFlights.map((flight) => (
                     <CompareCell key={flight.id}>
                       <div
-                        className={`text-sm font-bold ${flight.stops === 0 ? 'text-[var(--vj-green)]' : 'text-[var(--accent-dark)]'}`}
+                        className={`text-sm font-bold ${flight.stops === 0 ? 'text-[var(--foreground)]' : 'text-[var(--accent-dark)]'}`}
                       >
                         {flight.stops === 0 ? 'Bay thẳng' : `${flight.stops} điểm dừng`}
                       </div>
@@ -1531,7 +1716,7 @@ export default function FlightResultsStep({
                     const isBest = flight.price === cheapestPrice;
                     return (
                       <CompareCell key={flight.id} size="sm" tone={isBest ? 'best' : 'plain'}>
-                        <div className="text-sm font-semibold text-[var(--vj-green)]">
+                        <div className="text-sm font-semibold text-primary">
                           -{Math.round(flight.price).toLocaleString('vi-VN')}₫
                         </div>
                       </CompareCell>
@@ -1626,10 +1811,10 @@ export default function FlightResultsStep({
           <div className="p-4 space-y-4">
             <div className="border border-[rgb(var(--primary-rgb))]/10 rounded-lg p-3 bg-[rgb(var(--primary-rgb))]/5 border-l-4 border-l-primary">
               <div className="flex justify-between items-start mb-2">
-                <span className="font-bold text-[var(--vj-navy)] font-koho text-sm uppercase">
+                <span className="font-bold text-[var(--foreground)] font-koho text-sm uppercase">
                   Chuyến đi
                 </span>
-                <button className="text-[10px] font-bold text-primary hover:underline">
+                <button className="text-2xs font-bold text-primary hover:underline">
                   Chi tiết
                 </button>
               </div>
@@ -1648,7 +1833,7 @@ export default function FlightResultsStep({
               </div>
               {/* Fare placeholders — the real site keeps the three cells empty until a
                   flight is picked, which is exactly the state of this step. */}
-              <div className="text-[11px] tracking-[0.2em] text-[var(--foreground-subtle)] pt-1">
+              <div className="text-xs2 tracking-[0.2em] text-[var(--foreground-subtle)] pt-1">
                 --- | --- | --- | ---
               </div>
             </div>
@@ -1664,7 +1849,7 @@ export default function FlightResultsStep({
                 <span>0₫</span>
               </div>
               <div className="flex justify-between items-center mt-2">
-                <span className="text-[10px] text-[var(--foreground-muted)] font-bold uppercase tracking-wider">
+                <span className="text-2xs text-[var(--foreground-muted)] font-bold uppercase tracking-wider">
                   Hành lý & Dịch vụ
                 </span>
                 <span className="text-xs font-semibold text-[var(--foreground-subtle)]">
@@ -1677,7 +1862,7 @@ export default function FlightResultsStep({
               <div className="absolute -left-5 top-1.5 w-3 h-3 bg-[var(--surface)] rounded-full border-r border-[rgb(var(--primary-rgb))]/20" />
               <div className="absolute -right-5 top-1.5 w-3 h-3 bg-[var(--surface)] rounded-full border-l border-[rgb(var(--primary-rgb))]/20" />
               <div className="flex justify-between items-center mb-1">
-                <span className="font-black text-[var(--foreground-muted)] font-koho text-[11px] tracking-widest uppercase">
+                <span className="font-black text-[var(--foreground-muted)] font-koho text-xs2 tracking-widest uppercase">
                   Tóm tắt
                 </span>
               </div>
@@ -1703,7 +1888,7 @@ export default function FlightResultsStep({
                   </span>
                 </div>
               </div>
-              <div className="text-right text-[10px] text-[var(--foreground-subtle)] italic mt-2">
+              <div className="text-right text-2xs text-[var(--foreground-subtle)] italic mt-2">
                 Đã bao gồm thuế, phí, phụ thu
               </div>
             </div>
@@ -1734,6 +1919,12 @@ export default function FlightResultsStep({
         disabled={!leadFlight}
         testId="results-bottom-bar"
       />
+
+      <FareBenefitsModal
+        open={Boolean(compareFare)}
+        onClose={() => setCompareFare(null)}
+        highlight={compareFare ?? undefined}
+      />
     </div>
   );
 }
@@ -1756,7 +1947,7 @@ function CompareCell({
 }) {
   const isHighlighted = tone !== 'plain';
   const highlightBg =
-    tone === 'fastest' ? 'bg-[rgb(var(--blue-rgb))]/10' : 'bg-[rgb(var(--vj-green-rgb))]/10';
+    tone === 'fastest' ? 'bg-[rgb(var(--primary-rgb))]/10' : 'bg-[rgb(var(--accent-rgb))]/15';
 
   return (
     <div
@@ -1790,7 +1981,7 @@ function CompareRowLabel({
         <span className="text-xs font-semibold text-[var(--foreground-muted)]">{label}</span>
       </div>
       {sublabel && (
-        <span className="text-[10px] text-[var(--foreground-subtle)] pl-5">{sublabel}</span>
+        <span className="text-2xs text-[var(--foreground-subtle)] pl-5">{sublabel}</span>
       )}
     </div>
   );

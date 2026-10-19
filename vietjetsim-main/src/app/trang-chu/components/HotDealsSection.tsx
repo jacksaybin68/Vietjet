@@ -11,7 +11,7 @@ const HOT_DEALS = [
     type: 'Một chiều / Eco',
     price: 1490000,
     seen: '14 phút trước',
-    image: '/images/hero/banner-1-hongkong.jpg',
+    image: '/images/hero/hero-hongkong-skyline.jpg',
   },
   {
     from: 'Mumbai (BOM)',
@@ -20,7 +20,7 @@ const HOT_DEALS = [
     type: 'Một chiều / SkyBoss',
     price: 2990000,
     seen: '19 phút trước',
-    image: '/images/hero/banner-2-skyboss.jpg',
+    image: '/images/hero/hero-skyboss-cabin.jpg',
   },
   {
     from: 'Mumbai (BOM)',
@@ -29,7 +29,7 @@ const HOT_DEALS = [
     type: 'Một chiều / Eco',
     price: 1590000,
     seen: '53 phút trước',
-    image: '/images/hero/banner-3-loc-vang.jpg',
+    image: '/images/hero/hero-tet-celebration.jpg',
   },
   {
     from: 'New Delhi (DEL)',
@@ -38,7 +38,7 @@ const HOT_DEALS = [
     type: 'Chuyến đi / Eco',
     price: 1790000,
     seen: '11 phút trước',
-    image: '/images/hero/banner-4-44-sale.jpg',
+    image: '/images/hero/hero-sale-aerial.jpg',
   },
   {
     from: 'Hyderabad (HYD)',
@@ -47,7 +47,7 @@ const HOT_DEALS = [
     type: 'Một chiều / Eco',
     price: 1890000,
     seen: '2 giờ trước',
-    image: '/images/hero/download.jpg',
+    image: '/images/hero/hero-artwork-beach-sunset.jpg',
   },
   {
     from: 'Kuala Lumpur (KUL)',
@@ -56,7 +56,7 @@ const HOT_DEALS = [
     type: 'Một chiều / Eco',
     price: 790000,
     seen: '1 giờ trước',
-    image: '/images/hero/banner-1-hongkong.jpg',
+    image: '/images/hero/hero-hongkong-skyline.jpg',
   },
   {
     from: 'Singapore (SIN)',
@@ -65,7 +65,7 @@ const HOT_DEALS = [
     type: 'Một chiều / Eco',
     price: 399000,
     seen: '12 phút trước',
-    image: '/images/hero/banner-2-skyboss.jpg',
+    image: '/images/hero/hero-skyboss-cabin.jpg',
   },
   {
     from: 'Bangkok (BKK)',
@@ -74,7 +74,7 @@ const HOT_DEALS = [
     type: 'Một chiều / Eco',
     price: 690000,
     seen: '25 phút trước',
-    image: '/images/hero/banner-3-loc-vang.jpg',
+    image: '/images/hero/hero-tet-celebration.jpg',
   },
   {
     from: 'Tokyo (NRT)',
@@ -83,7 +83,7 @@ const HOT_DEALS = [
     type: 'Một chiều / Eco',
     price: 1990000,
     seen: '3 giờ trước',
-    image: '/images/hero/banner-4-44-sale.jpg',
+    image: '/images/hero/hero-sale-aerial.jpg',
   },
 ];
 
@@ -111,7 +111,7 @@ export default function HotDealsSection() {
           {HOT_DEALS.map((deal, i) => (
             <div
               key={i}
-              className="group flex items-center gap-4 bg-white rounded-2xl p-4 border border-gray-100 hover:border-primary/30 hover:shadow-lg transition-all duration-300"
+              className="group flex items-center gap-4 bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.1)] transition-all duration-250"
             >
               <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-xl overflow-hidden">
                 <img
@@ -123,19 +123,19 @@ export default function HotDealsSection() {
               </div>
 
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-semibold text-vj-gray uppercase tracking-wider">
+                <p className="text-xs2 font-semibold text-vj-gray uppercase tracking-wider">
                   {deal.type}
                 </p>
                 <h3 className="text-sm sm:text-base font-black text-navy truncate mt-0.5">
-                  {deal.from} <span className="text-primary">→</span> {deal.to}
+                  {deal.from} <span className="text-vjred">→</span> {deal.to}
                 </h3>
-                <p className="text-[11px] text-vj-gray mt-0.5">
+                <p className="text-xs2 text-vj-gray mt-0.5">
                   Ngày đi: <span className="font-semibold text-navy">{deal.date}</span>
                 </p>
                 <div className="flex items-center justify-between mt-2">
                   <div>
-                    <p className="text-[9px] text-vj-gray font-semibold uppercase">Giá từ</p>
-                    <p className="text-lg sm:text-xl font-black text-primary leading-none">
+                    <p className="text-3xs text-vj-gray font-semibold uppercase">Giá từ</p>
+                    <p className="text-xl sm:text-2xl font-black text-vjred leading-none">
                       {formatVND(deal.price)}
                     </p>
                   </div>
@@ -146,7 +146,7 @@ export default function HotDealsSection() {
                     <FaArrowRight size={12} />
                   </Link>
                 </div>
-                <div className="flex items-center gap-1 mt-2 text-[10px] text-vj-muted">
+                <div className="flex items-center gap-1 mt-2 text-2xs text-vj-muted">
                   <FaEye size={9} />
                   <span>Xem {deal.seen}</span>
                 </div>

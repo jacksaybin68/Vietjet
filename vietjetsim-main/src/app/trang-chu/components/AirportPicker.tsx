@@ -11,7 +11,7 @@ export interface Airport {
 
 // 16px below `sm` so iOS Safari does not zoom the page when the field is tapped.
 const inputClass =
-  'w-full min-w-0 border-0 bg-transparent px-0 text-base font-extrabold text-[#333333] outline-none sm:text-sm';
+  'w-full min-w-0 border-0 bg-transparent px-0 text-base font-extrabold text-[var(--foreground)] outline-none sm:text-sm';
 const labelClass =
   'block text-[10px] font-bold uppercase leading-none tracking-[0.06em] text-[#8c8c8c]';
 const iconClass = 'shrink-0 text-lg text-[#4a4a4a]';
@@ -260,7 +260,7 @@ export default function AirportPicker({
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Tìm sân bay..."
                 aria-label={`Tìm ${label.toLowerCase()}`}
-                className="min-w-0 flex-1 bg-transparent text-sm text-[#333333] outline-none placeholder:text-[#b0b0b0]"
+                className="min-w-0 flex-1 bg-transparent text-sm text-[var(--foreground)] outline-none placeholder:text-[#b0b0b0]"
               />
               {/* How many are left, so the list does not have to be scrolled to the
                 end to find out it is not the whole list. Sits in the search row
@@ -287,7 +287,7 @@ export default function AirportPicker({
                     role="option"
                     aria-selected={airport.code === value}
                     onClick={() => choose(airport.code)}
-                    className={`flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-[#f5f5f5] ${
+                    className={`flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-[var(--vj-sky)] ${
                       airport.code === value ? 'bg-[#fff3f3]' : ''
                     }`}
                   >
@@ -295,7 +295,7 @@ export default function AirportPicker({
                       {airport.code === value && <MdCheck className="text-sm" />}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-bold text-[#333333]">
+                      <span className="block truncate text-sm font-bold text-[var(--foreground)]">
                         {airport.city} ( {airport.code} )
                       </span>
                       <span className="block truncate text-[11px] leading-tight text-[#8c8c8c]">

@@ -272,7 +272,7 @@ export function ErrorFallback({
       >
         <div className="flex-shrink-0">{cfg.icon}</div>
         <div>
-          <h3 className="text-base font-bold text-[#1A2948] font-['KoHo',sans-serif]">
+          <h3 className="text-base font-bold text-[var(--vj-navy)] font-['KoHo',sans-serif]">
             {displayTitle}
           </h3>
           <p className="text-sm text-[#666] mt-1 max-w-xs mx-auto">{displaySubtitle}</p>
@@ -302,7 +302,7 @@ export function ErrorFallback({
           {onGoHome && (
             <button
               onClick={onGoHome}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-[#1A2948] bg-white border border-[#E8E8E8] transition-all duration-200 hover:bg-[#F5F5F5] active:scale-95 shadow-sm"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-[var(--vj-navy)] bg-white border border-[#E8E8E8] transition-all duration-200 hover:bg-[var(--vj-sky)] active:scale-95 shadow-sm"
             >
               <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4" aria-hidden="true">
                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
@@ -324,7 +324,7 @@ export function ErrorFallback({
       aria-live="assertive"
     >
       {/* Vietjet Air brand strip */}
-      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#EC2029] via-[#FF4D53] to-[#FFDD00]" />
+      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[var(--primary)] via-[#FF4D53] to-[var(--accent)]" />
 
       <div className="max-w-md w-full text-center">
         {/* Illustration */}
@@ -332,7 +332,7 @@ export function ErrorFallback({
 
         {/* Heading */}
         <h1
-          className="text-2xl font-bold text-[#1A2948] mb-3 font-['KoHo',sans-serif]"
+          className="text-2xl font-bold text-[var(--vj-navy)] mb-3 font-['KoHo',sans-serif]"
           style={{ color: cfg.accentColor }}
         >
           {displayTitle}
@@ -370,7 +370,7 @@ export function ErrorFallback({
           {onGoHome && (
             <button
               onClick={onGoHome}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-[#1A2948] bg-white border border-[#E8E8E8] transition-all duration-200 hover:bg-[#F5F5F5] active:scale-95 shadow-sm"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-[var(--vj-navy)] bg-white border border-[#E8E8E8] transition-all duration-200 hover:bg-[var(--vj-sky)] active:scale-95 shadow-sm"
             >
               <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4" aria-hidden="true">
                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />

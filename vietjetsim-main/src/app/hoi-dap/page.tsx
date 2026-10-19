@@ -47,12 +47,12 @@ export default function FAQPage() {
             placeholder="Tìm kiếm câu hỏi..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-3 outline-none text-[#333333] placeholder:text-[#939598] bg-transparent"
+            className="w-full px-4 py-3 outline-none text-[var(--foreground)] placeholder:text-[#939598] bg-transparent"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="p-2 text-[#6D6E71] hover:text-[#EC2029] transition-colors"
+              className="p-2 text-[#6D6E71] hover:text-[var(--primary)] transition-colors"
             >
               <Icon name="XMarkIcon" size={18} />
             </button>
@@ -67,8 +67,8 @@ export default function FAQPage() {
               onClick={() => setActiveCategory(cat)}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
                 activeCategory === cat
-                  ? 'bg-[#EC2029] text-white shadow-vj-btn'
-                  : 'bg-white text-[#333333] hover:bg-red-50 hover:text-[#EC2029] border border-gray-200'
+                  ? 'bg-[var(--primary)] text-white shadow-vj-btn'
+                  : 'bg-white text-[var(--foreground)] hover:bg-red-50 hover:text-[var(--primary)] border border-gray-200'
               }`}
             >
               {cat}
@@ -91,15 +91,19 @@ export default function FAQPage() {
                   <div className="flex items-center gap-3">
                     <span
                       className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                        openId === faq.id ? 'bg-[#EC2029] text-white' : 'bg-red-50 text-[#EC2029]'
+                        openId === faq.id
+                          ? 'bg-[var(--primary)] text-white'
+                          : 'bg-red-50 text-[var(--primary)]'
                       }`}
                     >
                       {faq.category.charAt(0)}
                     </span>
-                    <span className="text-[#1A2948] font-semibold text-base">{faq.question}</span>
+                    <span className="text-[var(--vj-navy)] font-semibold text-base">
+                      {faq.question}
+                    </span>
                   </div>
                   <div
-                    className={`transform transition-transform duration-300 text-[#EC2029] ${openId === faq.id ? 'rotate-180' : ''}`}
+                    className={`transform transition-transform duration-300 text-[var(--primary)] ${openId === faq.id ? 'rotate-180' : ''}`}
                   >
                     <Icon name="ChevronDownIcon" size={20} />
                   </div>
@@ -110,7 +114,9 @@ export default function FAQPage() {
                   }`}
                 >
                   <div className="px-5 pb-5 pt-0 border-t border-gray-100">
-                    <p className="text-[#333333] leading-relaxed pt-4 pl-11">{faq.answer}</p>
+                    <p className="text-[var(--foreground)] leading-relaxed pt-4 pl-11">
+                      {faq.answer}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -127,7 +133,7 @@ export default function FAQPage() {
         </div>
 
         {/* Contact CTA */}
-        <div className="mt-12 bg-[#1A2948] rounded-2xl p-8 text-center text-white">
+        <div className="mt-12 bg-[var(--vj-navy)] rounded-2xl p-8 text-center text-white">
           <h3 className="text-xl font-bold mb-2 font-heading-800">
             Vẫn chưa tìm thấy câu trả lời?
           </h3>
@@ -137,7 +143,7 @@ export default function FAQPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/lien-he"
-              className="px-6 py-3 rounded-lg bg-[#EC2029] text-white font-bold hover:bg-primary-dark transition-all shadow-vj-btn"
+              className="px-6 py-3 rounded-lg bg-[var(--primary)] text-white font-bold hover:bg-primary-dark transition-all shadow-vj-btn"
             >
               Gửi tin nhắn
             </Link>

@@ -2,9 +2,16 @@
 import React, { useEffect, useRef, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Icon } from '@/shared/components/ui';
-import { FlightResultsStep, getAirportCity } from '@/features/flights';
+import { FlightResultsStep } from '@/features/flights';
 import PassengerInfoStep from './PassengerInfoStep';
-import SeatSelectionStep from './SeatSelectionStep';
+import AncillaryServicesStep from './AncillaryServicesStep';
+import SeatSelectionDrawer from './SeatSelectionDrawer';
+import BaggageSelectionDrawer from './BaggageSelectionDrawer';
+import InsuranceDrawer from './InsuranceDrawer';
+import MealSelectionDrawer from './MealSelectionDrawer';
+import PetServiceDrawer from './PetServiceDrawer';
+import PassengerServicesDrawer from './PassengerServicesDrawer';
+import TaxiServiceDrawer from './TaxiServiceDrawer';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 import { ErrorBoundary } from '@/shared/components/feedback';
@@ -12,8 +19,7 @@ import { createBooking } from '@/features/bookings/services';
 import { ApiRequestError } from '@/shared/services';
 import {
   getBookingTotals,
-  PASSENGER_TYPE_LABELS,
-  type AncillaryId,
+  TRAVEL_SAFE_INSURANCE_PRICE,
   type BookingConsents,
   type Flight,
   type Passenger,
@@ -24,8 +30,8 @@ import {
 
 const STEPS = [
   { id: 1, label: 'Chọn chuyến bay' },
-  { id: 2, label: 'Chọn chỗ ngồi' },
-  { id: 3, label: 'Thông tin hành khách' },
+  { id: 2, label: 'Thông tin hành khách' },
+  { id: 3, label: 'Dịch vụ bổ sung' },
 ];
 
 /** Build the passenger roster: adults first, then children, then lap infants. */
@@ -55,20 +61,14 @@ function countByType(passengers: Passenger[]): Record<PassengerType, number> {
   return counts;
 }
 
-/** "2 Người lớn, 1 Trẻ em" — only the categories actually on the booking. */
-function describePax(counts: Record<PassengerType, number>): string {
-  return (['adult', 'child', 'infant'] as const)
-    .filter((type) => counts[type] > 0)
-    .map((type) => `${counts[type]} ${PASSENGER_TYPE_LABELS[type]}`)
-    .join(', ');
-}
-
 function FlightBookingClientInner({
   onFlightSelect,
   continueSignal = 0,
+  onStepChange,
 }: {
   onFlightSelect?: (flightNo: string, fareClass: string, fare: number) => void;
   continueSignal?: number;
+  onStepChange?: (step: number) => void;
 }) {
   const searchParams = useSearchParams();
   const params: SearchParams = {
@@ -92,28 +92,58 @@ function FlightBookingClientInner({
     passengers: buildPassengerRoster(paxCounts),
     selectedSeats: [],
     ancillaries: [],
+    selectedBaggage: null,
+    hasInsurance: false,
   }));
   const [selectedSeatPrices, setSelectedSeatPrices] = useState<number[]>([]);
+  const [baggageFee, setBaggageFee] = useState<number>(0);
+  const [baggageLabel, setBaggageLabel] = useState<string>('');
+  const [isSeatDrawerOpen, setIsSeatDrawerOpen] = useState(false);
+  const [isBaggageDrawerOpen, setIsBaggageDrawerOpen] = useState(false);
+  const [isMealDrawerOpen, setIsMealDrawerOpen] = useState(false);
+  const [isInsuranceDrawerOpen, setIsInsuranceDrawerOpen] = useState(false);
+  const [isPassengerServicesDrawerOpen, setIsPassengerServicesDrawerOpen] = useState(false);
+  const [isPetDrawerOpen, setIsPetDrawerOpen] = useState(false);
+  const [isTaxiDrawerOpen, setIsTaxiDrawerOpen] = useState(false);
+  const [selectedMeals, setSelectedMeals] = useState<Record<string, number>>({});
+  const [mealFee, setMealFee] = useState<number>(0);
+  const [consents, setConsents] = useState<BookingConsents>({
+    marketing: false,
+    survey: false,
+    retainForFutureBooking: false,
+    policyAccepted: true,
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const router = useRouter();
   const toast = useToast();
 
-  // The wizard swaps steps in place (no route change), so PageTransition's
-  // scroll-to-top never fires — bring the new step into view ourselves, the
-  // way vietjetair.com loads each step's page at the top.
   const goStep = (next: number) => {
     setStep(next);
+    onStepChange?.(next);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   // Signal từ nút "Đi tiếp" ở panel bên ngoài → chuyển sang bước 2.
-
   const stateRef = useRef({ step, selected: booking.selectedFlight });
   stateRef.current = { step, selected: booking.selectedFlight };
+  // goStep là hàm tạo mới mỗi render — giữ qua ref để effect không phụ thuộc nó
+  // (thêm vào deps sẽ khiến effect chạy lại mỗi render và tự chuyển bước liên tục).
+  const goStepRef = useRef(goStep);
+  goStepRef.current = goStep;
   useEffect(() => {
-    if (continueSignal > 0 && stateRef.current.step < 2 && stateRef.current.selected) {
-      goStep(2);
+    if (continueSignal > 0) {
+      if (!stateRef.current.selected) {
+        toast.error('Chưa chọn chuyến bay', 'Vui lòng chọn chuyến bay trước khi bấm Đi tiếp.');
+        return;
+      }
+      if (stateRef.current.step === 1) {
+        goStepRef.current(2);
+      } else if (stateRef.current.step === 2) {
+        goStepRef.current(3);
+      }
     }
-  }, [continueSignal]);
+  }, [continueSignal, toast]);
 
   const handleFlightSelect = (flight: Flight) => {
     setBooking((b) => ({
@@ -130,23 +160,71 @@ function FlightBookingClientInner({
     );
   };
 
-  const handleSeatContinue = (
-    seats: string[],
-    seatPrices: number[],
-    ancillaries: AncillaryId[]
-  ): boolean => {
-    setBooking((b) => ({ ...b, selectedSeats: seats, ancillaries }));
-    setSelectedSeatPrices(seatPrices);
+  const handlePassengerSubmit = (passengers: Passenger[], newConsents: BookingConsents) => {
+    setBooking((b) => ({ ...b, passengers }));
+    setConsents(newConsents);
     goStep(3);
     toast.success(
-      'Chỗ ngồi đã được chọn!',
-      `Ghế ${seats.join(', ')} đã được giữ. Vui lòng nhập thông tin hành khách.`
+      'Đã lưu thông tin hành khách!',
+      'Vui lòng chọn dịch vụ bổ sung trước khi hoàn tất đặt vé.'
     );
-    return true;
   };
 
-  const handlePassengerSubmit = async (passengers: Passenger[], consents: BookingConsents) => {
+  const handleConfirmSeats = (seats: string[], seatFee: number) => {
+    setBooking((b) => ({ ...b, selectedSeats: seats }));
+    setSelectedSeatPrices(seats.length > 0 ? [seatFee] : []);
+    if (seats.length > 0) {
+      toast.success('Đã chọn chỗ ngồi!', `Ghế: ${seats.join(', ')}`);
+    }
+  };
+
+  const handleConfirmBaggage = (packageId: string | null, fee: number, label: string) => {
+    setBooking((b) => ({ ...b, selectedBaggage: packageId }));
+    setBaggageFee(fee);
+    setBaggageLabel(label);
+    if (fee > 0) {
+      toast.success('Đã chọn gói hành lý!', label);
+    }
+  };
+
+  const handleConfirmInsurance = (enabled: boolean) => {
+    setBooking((b) => ({ ...b, hasInsurance: enabled }));
+    if (enabled) {
+      toast.success(
+        'Đã chọn Bảo hiểm Travel Safe!',
+        `${TRAVEL_SAFE_INSURANCE_PRICE.toLocaleString('vi-VN')} VND`
+      );
+    }
+  };
+
+  const handleConfirmMeals = (meals: Record<string, number>, totalFee: number) => {
+    setSelectedMeals(meals);
+    setMealFee(totalFee);
+    if (totalFee > 0) {
+      const count = Object.values(meals).reduce((a, b) => a + b, 0);
+      toast.success('Đã chọn suất ăn!', `${count} suất (${totalFee.toLocaleString('vi-VN')} VND)`);
+    }
+  };
+
+  const seatFeeTotal = selectedSeatPrices.reduce((sum, price) => sum + price, 0);
+  const insuranceFeeTotal = booking.hasInsurance ? TRAVEL_SAFE_INSURANCE_PRICE : 0;
+  const currentFlight = booking.selectedFlight;
+
+  const baseTotals = currentFlight
+    ? getBookingTotals({
+        farePerPassenger: currentFlight.price,
+        passengerCount: booking.passengers.length,
+        paxCounts: countByType(booking.passengers),
+        seatFee: seatFeeTotal,
+        ancillaries: booking.ancillaries,
+      })
+    : null;
+
+  const finalTotal = (baseTotals?.total ?? 0) + baggageFee + insuranceFeeTotal + mealFee;
+
+  const handleFinalBookingSubmit = async () => {
     try {
+      setIsSubmitting(true);
       const selectedFlight = booking.selectedFlight;
       const flightId = selectedFlight?.id;
       if (!selectedFlight || !flightId) {
@@ -155,36 +233,20 @@ function FlightBookingClientInner({
       }
 
       const seats = booking.selectedSeats;
-      const ancillaries = booking.ancillaries;
-      const basePrice = selectedFlight.price;
-      const seatsFee = selectedSeatPrices.reduce((sum, price) => sum + price, 0);
-      const totals = getBookingTotals({
-        farePerPassenger: basePrice,
-        passengerCount: passengers.length,
-        paxCounts: countByType(passengers),
-        seatFee: seatsFee,
-        ancillaries,
-      });
+      const ancillaries = [...booking.ancillaries];
+      if (baggageFee > 0) ancillaries.push('baggage');
+      if (booking.hasInsurance) ancillaries.push('insurance');
 
       const data = await createBooking({
         flight_id: flightId,
-        total_price: totals.total,
-        passengers,
+        total_price: finalTotal,
+        passengers: booking.passengers,
         seats,
-        // The server re-prices everything from `pricing.ts`; sending the card id
-        // only tells it which fare was tapped, never what it costs.
         fareClass: selectedFlight.fareClass ?? 'eco',
         ancillaries,
         consents,
       });
       const bookingId = data.booking.id;
-
-      setBooking((b) => ({
-        ...b,
-        passengers,
-        selectedSeats: seats,
-        ancillaries,
-      }));
 
       sessionStorage.setItem(
         'vjsim_booking',
@@ -197,32 +259,27 @@ function FlightBookingClientInner({
           toCity: selectedFlight.toCity,
           departTime: selectedFlight.departTime,
           arriveTime: selectedFlight.arriveTime,
-          // The flight's own day, not today's. `new Date()` here stamped every
-          // booking with the day it was made, which is only ever right by
-          // accident.
           date: selectedFlight.departDate,
-          passengers: passengers.map((passenger, index) => ({
+          passengers: booking.passengers.map((passenger, index) => ({
             name: passenger.name,
             seat: seats[index],
           })),
-          fareSubtotal: totals.fareSubtotal,
-          tax: totals.taxAndFee,
-          seatFee: totals.seatFee,
-          ancillaryFee: totals.ancillaryFee,
-          ancillaries,
-          total: totals.total,
+          fareSubtotal: baseTotals?.fareSubtotal ?? 0,
+          tax: baseTotals?.taxAndFee ?? 0,
+          seatFee: seatFeeTotal,
+          baggageFee,
+          insuranceFee: insuranceFeeTotal,
+          total: finalTotal,
         })
       );
 
       toast.success(
-        'Thông tin hành khách đã được xác nhận!',
+        'Đặt chỗ thành công!',
         `Mã đặt chỗ: ${bookingId}. Đang chuyển đến thanh toán...`,
         { duration: 3000 }
       );
       setTimeout(() => router.push(`/thanh-toan?bookingId=${bookingId}`), 800);
     } catch (err) {
-      // Booking creation requires a session (the API answers 401); send guests
-      // to login with the current search kept as the post-login destination.
       if (err instanceof ApiRequestError && err.status === 401) {
         toast.error('Yêu cầu đăng nhập', 'Vui lòng đăng nhập để hoàn tất đặt vé.');
         const target = encodeURIComponent(window.location.pathname + window.location.search);
@@ -230,10 +287,11 @@ function FlightBookingClientInner({
         return;
       }
       toast.error('Lỗi đặt chỗ', err instanceof Error ? err.message : 'Không thể tạo booking');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  /** The results step's date strip rewrites `depart` so the route re-searches. */
   const handleDateChange = (isoDate: string) => {
     if (!isoDate || isoDate === params.depart) return;
     const next = new URLSearchParams(searchParams.toString());
@@ -241,41 +299,12 @@ function FlightBookingClientInner({
     router.replace(`/tim-ve?${next.toString()}`, { scroll: false });
   };
 
-  const tripLabel = params.return ? 'Chuyến bay khứ hồi' : 'Chuyến bay một chiều';
+  const leadPassengerName = booking.passengers[0]?.name?.trim() || 'LONG CHIN';
 
   return (
-    <div className="min-h-screen bg-[var(--background)] font-body">
-      {/* Trip board — vietjetair.com repeats the trip summary in a brand-yellow strip. */}
-      <div className="bg-[var(--vj-yellow)] text-[var(--vj-navy)]" data-testid="trip-board">
-        <div className="mx-auto max-w-5xl px-3 py-2 sm:px-4 md:px-6">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs sm:text-sm font-koho">
-            <span className="font-black uppercase tracking-wide">{tripLabel}</span>
-            <span className="hidden sm:inline opacity-50">|</span>
-            <span className="font-semibold">{describePax(paxCounts)}</span>
-          </div>
-          <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] sm:text-xs">
-            <span className="inline-flex items-center gap-1.5">
-              <Icon name="PaperAirplaneIcon" size={12} className="text-[var(--primary-dark)]" />
-              <span className="font-semibold">Điểm khởi hành</span>
-              <span className="font-bold text-[var(--primary-dark)]">
-                {params.from
-                  ? `${getAirportCity(params.from)} ( ${params.from.toUpperCase()} )`
-                  : '---'}
-              </span>
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Icon name="MapPinIcon" size={12} className="text-[var(--primary-dark)]" />
-              <span className="font-semibold">Điểm đến</span>
-              <span className="font-bold text-[var(--primary-dark)]">
-                {params.to ? `${getAirportCity(params.to)} ( ${params.to.toUpperCase()} )` : '---'}
-              </span>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Booking progress — compact, sticky below the global header. */}
-      <div className="border-b border-[var(--border)] bg-[var(--background)] shadow-sm">
+    <div className="font-body">
+      {/* Booking progress steps */}
+      <div className="border-b border-[var(--border)] bg-white shadow-sm mb-4">
         <div className="mx-auto max-w-5xl px-3 py-3 sm:px-4 md:px-6">
           <nav
             aria-label="Tiến trình đặt vé"
@@ -285,17 +314,17 @@ function FlightBookingClientInner({
               <React.Fragment key={s.id}>
                 <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-shrink-0">
                   <div
-                    className={`w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center text-[10px] sm:text-xs md:text-sm font-black transition-all flex-shrink-0`}
+                    className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center text-2xs sm:text-xs md:text-sm font-black transition-all flex-shrink-0"
                     style={{
                       background:
                         step > s.id
-                          ? 'linear-gradient(135deg, var(--accent), var(--accent-dark))'
+                          ? 'rgb(var(--primary-rgb) / 0.12)'
                           : step === s.id
                             ? 'var(--primary)'
                             : 'var(--surface-2)',
                       color:
                         step > s.id
-                          ? 'var(--vj-navy)'
+                          ? 'var(--primary)'
                           : step === s.id
                             ? 'white'
                             : 'var(--foreground-muted)',
@@ -313,7 +342,7 @@ function FlightBookingClientInner({
                     )}
                   </div>
                   <span
-                    className={`text-[10px] sm:text-xs md:text-sm font-semibold hidden sm:block transition-colors`}
+                    className="text-2xs sm:text-xs md:text-sm font-semibold hidden sm:block transition-colors"
                     style={{
                       color:
                         step === s.id
@@ -329,11 +358,11 @@ function FlightBookingClientInner({
                 </div>
                 {i < STEPS.length - 1 && (
                   <div
-                    className={`flex-1 h-0.5 min-w-6 sm:min-w-8 md:min-w-12 max-w-10 sm:max-w-12 md:max-w-16 transition-colors flex-shrink-0`}
+                    className="flex-1 h-0.5 min-w-6 sm:min-w-8 md:min-w-12 max-w-10 sm:max-w-12 md:max-w-16 transition-colors flex-shrink-0"
                     style={{
                       background:
                         step > s.id + 1
-                          ? 'var(--accent)'
+                          ? 'var(--primary)'
                           : step > s.id
                             ? 'var(--primary)'
                             : 'var(--border)',
@@ -346,8 +375,8 @@ function FlightBookingClientInner({
         </div>
       </div>
 
-      {/* Step Content - responsive padding */}
-      <div className="mx-auto max-w-5xl px-3 py-5 sm:px-4 sm:py-7 md:px-6">
+      {/* Step Content */}
+      <div className="mx-auto max-w-5xl">
         {step === 1 && (
           <ErrorBoundary inline variant="api" retryLabel="Tìm lại chuyến bay">
             <FlightResultsStep
@@ -361,32 +390,130 @@ function FlightBookingClientInner({
             />
           </ErrorBoundary>
         )}
-        {step === 2 && (
-          <ErrorBoundary inline variant="booking" retryLabel="Chọn lại chỗ ngồi">
-            <SeatSelectionStep
-              flight={booking.selectedFlight!}
-              passengers={booking.passengers}
-              initialSeats={booking.selectedSeats}
-              initialAncillaries={booking.ancillaries}
-              onConfirm={handleSeatContinue}
+
+        {step === 2 && booking.selectedFlight && (
+          <ErrorBoundary inline variant="booking" retryLabel="Nhập lại thông tin">
+            <PassengerInfoStep
+              flight={booking.selectedFlight}
+              passengerCount={booking.passengers.length}
+              initialPassengers={booking.passengers}
+              seatFee={seatFeeTotal}
+              ancillaries={booking.ancillaries}
+              onSubmit={handlePassengerSubmit}
               onBack={() => goStep(1)}
             />
           </ErrorBoundary>
         )}
-        {step === 3 && (
-          <ErrorBoundary inline variant="booking" retryLabel="Nhập lại thông tin">
-            <PassengerInfoStep
-              flight={booking.selectedFlight!}
-              passengerCount={booking.passengers.length}
-              initialPassengers={booking.passengers}
-              seatFee={selectedSeatPrices.reduce((sum, price) => sum + price, 0)}
-              ancillaries={booking.ancillaries}
-              onSubmit={handlePassengerSubmit}
+
+        {step === 3 && booking.selectedFlight && (
+          <ErrorBoundary inline variant="booking" retryLabel="Thử lại dịch vụ bổ sung">
+            <AncillaryServicesStep
+              flight={booking.selectedFlight}
+              passengerName={leadPassengerName}
+              selectedSeats={booking.selectedSeats}
+              seatFee={seatFeeTotal}
+              baggageLabel={baggageLabel}
+              baggageFee={baggageFee}
+              hasInsurance={booking.hasInsurance}
+              insuranceFee={TRAVEL_SAFE_INSURANCE_PRICE}
+              mealFee={mealFee}
+              mealCount={Object.values(selectedMeals).reduce((a, b) => a + b, 0)}
+              totalAmount={finalTotal}
+              onOpenSeatDrawer={() => setIsSeatDrawerOpen(true)}
+              onOpenBaggageDrawer={() => setIsBaggageDrawerOpen(true)}
+              onOpenMealDrawer={() => setIsMealDrawerOpen(true)}
+              onOpenTaxiDrawer={() => setIsTaxiDrawerOpen(true)}
+              onOpenInsuranceDrawer={() => setIsInsuranceDrawerOpen(true)}
+              onOpenPassengerServicesDrawer={() => setIsPassengerServicesDrawerOpen(true)}
+              onOpenPetDrawer={() => setIsPetDrawerOpen(true)}
               onBack={() => goStep(2)}
+              onContinue={handleFinalBookingSubmit}
+              isSubmitting={isSubmitting}
             />
           </ErrorBoundary>
         )}
       </div>
+
+      {/* Drawer 1: Chọn chỗ ngồi */}
+      {booking.selectedFlight && (
+        <SeatSelectionDrawer
+          isOpen={isSeatDrawerOpen}
+          onClose={() => setIsSeatDrawerOpen(false)}
+          flight={booking.selectedFlight}
+          passengerName={leadPassengerName}
+          initialSeats={booking.selectedSeats}
+          onConfirmSeats={handleConfirmSeats}
+          isRoundTrip={Boolean(params.return)}
+        />
+      )}
+
+      {/* Drawer 2: Chọn hành lý */}
+      {booking.selectedFlight && (
+        <BaggageSelectionDrawer
+          isOpen={isBaggageDrawerOpen}
+          onClose={() => setIsBaggageDrawerOpen(false)}
+          flight={booking.selectedFlight}
+          passengerName={leadPassengerName}
+          initialPackageId={booking.selectedBaggage}
+          onConfirmBaggage={handleConfirmBaggage}
+          isRoundTrip={Boolean(params.return)}
+        />
+      )}
+
+      {/* Drawer 3: Chọn suất ăn */}
+      {booking.selectedFlight && (
+        <MealSelectionDrawer
+          isOpen={isMealDrawerOpen}
+          onClose={() => setIsMealDrawerOpen(false)}
+          flight={booking.selectedFlight}
+          passengerName={leadPassengerName}
+          initialMeals={selectedMeals}
+          onConfirmMeals={handleConfirmMeals}
+          isRoundTrip={Boolean(params.return)}
+        />
+      )}
+
+      {/* Drawer 4: Bảo hiểm du lịch Vietjet Travel Safe */}
+      {booking.selectedFlight && (
+        <InsuranceDrawer
+          isOpen={isInsuranceDrawerOpen}
+          onClose={() => setIsInsuranceDrawerOpen(false)}
+          flight={booking.selectedFlight}
+          hasInsurance={Boolean(booking.hasInsurance)}
+          onConfirmInsurance={handleConfirmInsurance}
+        />
+      )}
+
+      {/* Drawer 5: Dịch vụ theo hành khách */}
+      {booking.selectedFlight && (
+        <PassengerServicesDrawer
+          isOpen={isPassengerServicesDrawerOpen}
+          onClose={() => setIsPassengerServicesDrawerOpen(false)}
+          flight={booking.selectedFlight}
+          passengerName={leadPassengerName}
+          isRoundTrip={Boolean(params.return)}
+        />
+      )}
+
+      {/* Drawer 6: Mang theo thú cưng */}
+      {booking.selectedFlight && (
+        <PetServiceDrawer
+          isOpen={isPetDrawerOpen}
+          onClose={() => setIsPetDrawerOpen(false)}
+          flight={booking.selectedFlight}
+          passengerName={leadPassengerName}
+          isRoundTrip={Boolean(params.return)}
+        />
+      )}
+
+      {/* Drawer 7: Dịch vụ Taxi */}
+      {booking.selectedFlight && (
+        <TaxiServiceDrawer
+          isOpen={isTaxiDrawerOpen}
+          onClose={() => setIsTaxiDrawerOpen(false)}
+          flight={booking.selectedFlight}
+        />
+      )}
 
       <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
     </div>
@@ -396,13 +523,19 @@ function FlightBookingClientInner({
 export default function FlightBookingClient({
   onFlightSelect,
   continueSignal = 0,
+  onStepChange,
 }: {
   onFlightSelect?: (flightNo: string, fareClass: string, fare: number) => void;
   continueSignal?: number;
+  onStepChange?: (step: number) => void;
 }) {
   return (
     <Suspense fallback={<FlightSearchSkeleton />}>
-      <FlightBookingClientInner onFlightSelect={onFlightSelect} continueSignal={continueSignal} />
+      <FlightBookingClientInner
+        onFlightSelect={onFlightSelect}
+        continueSignal={continueSignal}
+        onStepChange={onStepChange}
+      />
     </Suspense>
   );
 }

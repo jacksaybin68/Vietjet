@@ -11,6 +11,12 @@ export const API_ENDPOINTS = {
     ME: '/api/xac-thuc/toi',
     FORGOT_PASSWORD: '/api/xac-thuc/quen-mat-khau',
     RESET_PASSWORD: '/api/xac-thuc/dat-lai-mat-khau',
+    // OTP SMS: gửi mã cho đăng ký/đăng nhập, và đăng nhập không cần mật khẩu.
+    SEND_OTP: '/api/xac-thuc/otp/gui',
+    LOGIN_OTP: '/api/xac-thuc/dang-nhap-otp',
+    // CAPTCHA mô phỏng (phát câu hỏi + chữ ký) và cấu hình Social Login.
+    CAPTCHA: '/api/xac-thuc/captcha',
+    SOCIAL: '/api/xac-thuc/social',
   },
   FLIGHTS: {
     SEARCH: '/api/chuyen-bay',
@@ -23,6 +29,9 @@ export const API_ENDPOINTS = {
   PAYMENTS: {
     CREATE: '/api/thanh-toan',
     HISTORY: '/api/thanh-toan/lich-su',
+    // Sinh mã VietQR (EMVCo) cho một booking và polling trạng thái giao dịch.
+    VIETQR: '/api/thanh-toan/vietqr',
+    STATUS: '/api/thanh-toan/trang-thai',
   },
   LOYALTY: {
     MEMBERSHIP: '/api/thanh-vien',
@@ -181,3 +190,41 @@ export const AIRPORT_CITIES: Record<string, string> = {
   NRT: 'Tokyo',
   HKG: 'Hong Kong',
 };
+
+/**
+ * Airports served outside Vietnam.
+ *
+ * The seat picker needs to know which aircraft flies a route: the narrow-body
+ * A321 (3-3, one aisle) works the domestic network, while the wide-body A330
+ * (3-3-3 with a 2-2-2 business cabin) is what Vietjet puts on the international
+ * trunk routes. A route is international when either end sits outside the list
+ * below — derived from `AIRPORT_CITIES`'s own entries rather than a second map
+ * that could drift from it, so every foreign airport added there must be added
+ * here too.
+ */
+export const INTERNATIONAL_AIRPORT_CODES: readonly string[] = [
+  'SIN',
+  'BKK',
+  'DMK',
+  'KUL',
+  'CGK',
+  'MNL',
+  'PNH',
+  'RGN',
+  'VTE',
+  'ICN',
+  'KIX',
+  'NRT',
+  'HKG',
+];
+
+/** Whether `code` is an airport outside Vietnam (case-insensitive). */
+export function isInternationalAirport(code: string | undefined): boolean {
+  if (!code) return false;
+  return INTERNATIONAL_AIRPORT_CODES.includes(code.trim().toUpperCase());
+}
+
+/** Whether a search route leaves Vietnam, i.e. needs the wide-body cabin. */
+export function isInternationalRoute(from: string | undefined, to: string | undefined): boolean {
+  return isInternationalAirport(from) || isInternationalAirport(to);
+}

@@ -1524,7 +1524,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                       <div className="flex items-center gap-2">
                         <div className="h-6 px-1.5 bg-gradient-red rounded-lg flex items-center justify-center shrink-0">
                           <img
-                            src="/logo-vj.svg"
+                            src="/logo-internal.svg"
                             alt="Vietjet Air"
                             className="h-3 w-auto brightness-0 invert"
                           />

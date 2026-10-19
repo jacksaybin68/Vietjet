@@ -36,10 +36,10 @@ const TYPE_CONFIG: Record<
   }
 > = {
   success: {
-    bar: 'bg-gradient-to-r from-[#1A2948] to-[#2A3F6F]',
-    bg: 'bg-white border border-[#E8E8E8]',
-    iconBg: 'bg-[#1A2948]',
-    iconColor: 'text-[#FFDD00]',
+    bar: 'bg-gradient-to-r from-[var(--vj-navy)] to-[#2A3F6F]',
+    bg: 'bg-white border border-[var(--border)]',
+    iconBg: 'bg-[var(--vj-navy)]',
+    iconColor: 'text-[var(--accent)]',
     defaultIcon: (
       <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
         <path
@@ -51,9 +51,9 @@ const TYPE_CONFIG: Record<
     ),
   },
   error: {
-    bar: 'bg-gradient-to-r from-[#EC2029] to-[#FF4D53]',
-    bg: 'bg-white border border-[#E8E8E8]',
-    iconBg: 'bg-[#EC2029]',
+    bar: 'bg-gradient-to-r from-[var(--primary)] to-[#FF4D53]',
+    bg: 'bg-white border border-[var(--border)]',
+    iconBg: 'bg-[var(--primary)]',
     iconColor: 'text-white',
     defaultIcon: (
       <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
@@ -67,9 +67,9 @@ const TYPE_CONFIG: Record<
   },
   warning: {
     bar: 'bg-gradient-to-r from-[var(--vj-yellow)] to-[#f7c61a]',
-    bg: 'bg-white border border-[#E8E8E8]',
-    iconBg: 'bg-[#FFDD00]',
-    iconColor: 'text-[#1A2948]',
+    bg: 'bg-white border border-[var(--border)]',
+    iconBg: 'bg-[var(--accent)]',
+    iconColor: 'text-[var(--vj-navy)]',
     defaultIcon: (
       <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
         <path
@@ -81,9 +81,9 @@ const TYPE_CONFIG: Record<
     ),
   },
   info: {
-    bar: 'bg-gradient-to-r from-[#1A2948] to-[#2A3F6F]',
-    bg: 'bg-white border border-[#E8E8E8]',
-    iconBg: 'bg-[#1A2948]',
+    bar: 'bg-gradient-to-r from-[var(--vj-navy)] to-[#2A3F6F]',
+    bg: 'bg-white border border-[var(--border)]',
+    iconBg: 'bg-[var(--vj-navy)]',
     iconColor: 'text-white',
     defaultIcon: (
       <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
@@ -96,9 +96,9 @@ const TYPE_CONFIG: Record<
     ),
   },
   promo: {
-    bar: 'bg-gradient-to-r from-[#EC2029] via-[#FF4D53] to-[#FFDD00]',
-    bg: 'bg-white border border-[#E8E8E8]',
-    iconBg: 'bg-gradient-to-br from-[#EC2029] to-[#FFDD00]',
+    bar: 'bg-gradient-to-r from-[var(--primary)] via-[#FF4D53] to-[var(--accent)]',
+    bg: 'bg-white border border-[var(--border)]',
+    iconBg: 'bg-gradient-to-br from-[var(--primary)] to-[var(--accent)]',
     iconColor: 'text-white',
     defaultIcon: (
       <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
@@ -116,7 +116,7 @@ function ToastProgressBar({ duration, paused }: { duration: number; paused: bool
   return (
     <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#F0F0F0] overflow-hidden rounded-b-xl">
       <div
-        className="h-full bg-gradient-to-r from-[#EC2029] to-[#FFDD00] origin-left"
+        className="h-full bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] origin-left"
         style={{
           animation: `toast-progress ${duration}ms linear forwards`,
           animationPlayState: paused ? 'paused' : 'running',
@@ -181,11 +181,13 @@ function ToastNotification({ toast, onDismiss }: ToastProps) {
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-[#1A2948] text-sm leading-tight font-['KoHo',sans-serif]">
+          <p className="font-semibold text-[var(--vj-navy)] text-sm leading-tight font-['KoHo',sans-serif]">
             {toast.title}
           </p>
           {toast.message && (
-            <p className="text-xs text-[#666666] mt-0.5 leading-relaxed">{toast.message}</p>
+            <p className="text-xs text-[var(--foreground-muted)] mt-0.5 leading-relaxed">
+              {toast.message}
+            </p>
           )}
 
           {/* Action buttons */}
@@ -202,10 +204,10 @@ function ToastNotification({ toast, onDismiss }: ToastProps) {
                   className={`text-xs font-semibold px-3 py-1.5 rounded-md transition-all duration-150 active:scale-95 font-['KoHo',sans-serif]
                     ${
                       action.variant === 'accent'
-                        ? 'bg-[#FFDD00] text-[#1A2948] hover:bg-[#E6BF00] shadow-sm'
+                        ? 'bg-[var(--accent)] text-[var(--vj-navy)] hover:bg-[#E6BF00] shadow-sm'
                         : action.variant === 'ghost'
-                          ? 'text-[#666666] hover:text-[#1A2948] hover:bg-[#F5F5F5]'
-                          : 'bg-[#EC2029] text-white hover:bg-primary-dark shadow-sm'
+                          ? 'text-[var(--foreground-muted)] hover:text-[var(--vj-navy)] hover:bg-[var(--vj-sky)]'
+                          : 'bg-[var(--primary)] text-white hover:bg-primary-dark shadow-sm'
                     }
                   `}
                 >
@@ -222,7 +224,7 @@ function ToastNotification({ toast, onDismiss }: ToastProps) {
             e.stopPropagation();
             dismiss();
           }}
-          className="flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center text-[#999999] hover:text-[#333333] hover:bg-[#F5F5F5] transition-colors duration-150 mt-0.5"
+          className="flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center text-[#999999] hover:text-[var(--foreground)] hover:bg-[var(--vj-sky)] transition-colors duration-150 mt-0.5"
           aria-label="Đóng thông báo"
         >
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">

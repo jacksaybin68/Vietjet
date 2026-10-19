@@ -35,6 +35,7 @@ interface User {
   role: UserRole;
   phone?: string;
   avatarUrl?: string;
+  skyjoyMemberId?: string;
   createdAt?: string;
   updatedAt?: string;
   // Snake_case aliases some API responses still use.
@@ -42,6 +43,57 @@ interface User {
   avatar_url?: string;
   created_at?: string;
   updated_at?: string;
+}
+
+/** Metadata gửi kèm khi đăng ký (đã bao gồm các trường SkyJoy mở rộng). */
+export interface SignUpMetadata {
+  fullName?: string;
+  phone?: string;
+  avatarUrl?: string;
+  dob?: string;
+  /** Danh xưng: ong | ba | co | anh. */
+  salutation?: string;
+  /** Họ, viết hoa không dấu (NGUYEN). */
+  lastName?: string;
+  /** Tên đệm & tên, viết hoa không dấu (VAN A). */
+  firstName?: string;
+  /** Mã giới thiệu SkyJoy (mã hội viên của người giới thiệu). */
+  referralCode?: string;
+  /** Mã OTP SMS đã nhận, bắt buộc khi đăng ký bằng số điện thoại. */
+  otpCode?: string;
+  captchaToken?: string;
+  captchaAnswer?: string;
+}
+
+export interface CaptchaChallenge {
+  token: string;
+  question: string;
+  expiresIn: number;
+}
+
+export interface SocialProviderConfig {
+  id: string;
+  label: string;
+  enabled: boolean;
+}
+
+export interface SendOtpInput {
+  /** Số điện thoại cho `purpose: 'register'`. */
+  phone?: string;
+  /** Email / số điện thoại / mã hội viên cho `purpose: 'login'`. */
+  identifier?: string;
+  purpose: 'register' | 'login';
+  captchaToken?: string;
+  captchaAnswer?: string;
+}
+
+export interface SendOtpResult {
+  success: boolean;
+  message?: string;
+  phone?: string;
+  expiresInMinutes?: number;
+  /** Chỉ có ở môi trường không phải production (chưa cấu hình SMS gateway). */
+  devCode?: string;
 }
 
 /** Shape returned by the `/api/xac-thuc/*` handlers the provider wraps. */
@@ -71,12 +123,20 @@ export interface AuthContextType {
   profile: Profile | null;
   isAdmin: boolean;
   isUser: boolean;
-  signUp: (
+  signUp: (email: string, password: string, metadata?: SignUpMetadata) => Promise<AuthResponse>;
+  signIn: (
     email: string,
     password: string,
-    metadata?: { fullName?: string; phone?: string; avatarUrl?: string; dob?: string }
+    token?: string,
+    captcha?: { token?: string; answer?: string }
   ) => Promise<AuthResponse>;
-  signIn: (email: string, password: string, token?: string) => Promise<AuthResponse>;
+  signInWithOtp: (identifier: string, code: string) => Promise<AuthResponse>;
+  /** Gửi OTP SMS cho đăng ký hoặc đăng nhập. */
+  requestOtp: (input: SendOtpInput) => Promise<SendOtpResult>;
+  /** Lấy CAPTCHA mới (câu hỏi + chữ ký) từ server. */
+  getCaptcha: () => Promise<CaptchaChallenge>;
+  /** Danh sách Social Login kèm trạng thái cấu hình. */
+  getSocialProviders: () => Promise<SocialProviderConfig[]>;
   signOut: () => Promise<void>;
   getCurrentUser: () => Promise<User | null>;
   isEmailVerified: () => boolean;
@@ -98,7 +158,14 @@ export const useAuth = (): AuthContextType => {
 
 // ─── API Helpers ────────────────────────────────────────────────────────────
 
-async function fetchAuth(endpoint: string, options?: RequestInit): Promise<AuthResponse> {
+/**
+ * Gọi một endpoint `/api/xac-thuc/*`.
+ *
+ * `T` cho phép route trả shape riêng (CaptchaChallenge, SendOtpResult…) mà không
+ * phải ép kiểu ở chỗ gọi. Lỗi vẫn luôn là `Error` mang theo payload đã parse, nên
+ * `requires2FA` / `captchaRequired` đọc được từ `error`.
+ */
+async function fetchAuth<T = AuthResponse>(endpoint: string, options?: RequestInit): Promise<T> {
   const { headers, ...rest } = options ?? {};
   const res = await fetch(`/api/xac-thuc${endpoint}`, {
     ...rest,
@@ -118,7 +185,7 @@ async function fetchAuth(endpoint: string, options?: RequestInit): Promise<AuthR
     throw Object.assign(new Error(data.error || data.message || 'Auth request failed'), data);
   }
 
-  return data;
+  return data as T;
 }
 
 // ─── Auth Provider ──────────────────────────────────────────────────────────
@@ -185,11 +252,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (
-    email: string,
-    password: string,
-    metadata?: { fullName?: string; phone?: string; avatarUrl?: string; dob?: string }
-  ) => {
+  const signUp = async (email: string, password: string, metadata?: SignUpMetadata) => {
     const data = await fetchAuth('/dang-ky', {
       method: 'POST',
       body: JSON.stringify({
@@ -199,6 +262,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         phone: normalizePhone(metadata?.phone),
         avatar_url: metadata?.avatarUrl,
         dob: metadata?.dob,
+        salutation: metadata?.salutation,
+        last_name: metadata?.lastName,
+        first_name: metadata?.firstName,
+        referral_code: metadata?.referralCode,
+        otp_code: metadata?.otpCode,
+        captchaToken: metadata?.captchaToken,
+        captchaAnswer: metadata?.captchaAnswer,
       }),
     });
 
@@ -210,10 +280,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return data;
   };
 
-  const signIn = async (email: string, password: string, token?: string) => {
+  const signIn = async (
+    email: string,
+    password: string,
+    token?: string,
+    captcha?: { token?: string; answer?: string }
+  ) => {
     const data = await fetchAuth('/dang-nhap', {
       method: 'POST',
-      body: JSON.stringify({ email, password, token }),
+      body: JSON.stringify({
+        email,
+        password,
+        token,
+        captchaToken: captcha?.token,
+        captchaAnswer: captcha?.answer,
+      }),
     });
 
     if (data.user) {
@@ -222,6 +303,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     return data;
+  };
+
+  /** Đăng nhập không cần mật khẩu bằng OTP SMS đã nhận. */
+  const signInWithOtp = async (identifier: string, code: string) => {
+    const data = await fetchAuth('/dang-nhap-otp', {
+      method: 'POST',
+      body: JSON.stringify({ identifier, code }),
+    });
+
+    if (data.user) {
+      setUser(data.user);
+      setRole(data.user.role || 'user');
+    }
+
+    return data;
+  };
+
+  const requestOtp = async (input: SendOtpInput) => {
+    return fetchAuth<SendOtpResult>('/otp/gui', { method: 'POST', body: JSON.stringify(input) });
+  };
+
+  const getCaptcha = async () => {
+    return fetchAuth<CaptchaChallenge>('/captcha');
+  };
+
+  const getSocialProviders = async () => {
+    const data = await fetchAuth<{ providers?: SocialProviderConfig[] }>('/social');
+    return data.providers ?? [];
   };
 
   const signOut = async () => {
@@ -311,6 +420,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isUser,
     signUp,
     signIn,
+    signInWithOtp,
+    requestOtp,
+    getCaptcha,
+    getSocialProviders,
     signOut,
     getCurrentUser,
     isEmailVerified,

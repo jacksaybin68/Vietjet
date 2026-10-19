@@ -309,7 +309,7 @@ export default function TrackBookingPage() {
             {/* Booking Card */}
             <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
               {/* Header */}
-              <div className="px-6 py-4 bg-gradient-to-r from-[#1A2948] to-[#0F1E3A] flex items-center justify-between">
+              <div className="px-6 py-4 bg-gradient-to-r from-[var(--vj-navy)] to-[#0F1E3A] flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Icon name="PaperAirplaneIcon" size={18} className="text-white" />
                   <span className="text-white font-bold">{result.flightNo}</span>
@@ -321,7 +321,9 @@ export default function TrackBookingPage() {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="text-center">
-                    <div className="text-2xl font-black text-[#1A2948]">{result.departTime}</div>
+                    <div className="text-2xl font-black text-[var(--vj-navy)]">
+                      {result.departTime}
+                    </div>
                     <div className="text-sm font-bold text-stone-600 mt-1">{result.from}</div>
                     <div className="text-xs text-stone-400">{result.fromCity}</div>
                   </div>
@@ -341,7 +343,9 @@ export default function TrackBookingPage() {
                   </div>
 
                   <div className="text-center">
-                    <div className="text-2xl font-black text-[#1A2948]">{result.arriveTime}</div>
+                    <div className="text-2xl font-black text-[var(--vj-navy)]">
+                      {result.arriveTime}
+                    </div>
                     <div className="text-sm font-bold text-stone-600 mt-1">{result.to}</div>
                     <div className="text-xs text-stone-400">{result.toCity}</div>
                   </div>

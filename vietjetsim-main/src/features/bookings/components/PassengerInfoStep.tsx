@@ -33,7 +33,7 @@ interface Props {
  * a new field picks up the same typography instead of re-inventing it.
  */
 const fieldLabelClass =
-  'block text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--foreground)] mb-1 font-koho';
+  'block text-2xs sm:text-xs font-bold uppercase tracking-wider text-[var(--foreground)] mb-1 font-koho';
 
 export default function PassengerInfoStep({
   flight,
@@ -102,7 +102,7 @@ export default function PassengerInfoStep({
               <div className="flex items-center gap-3 sm:gap-4 relative z-10">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full flex items-center justify-center p-1.5 sm:p-2 shrink-0 shadow-sm">
                   <AppImage
-                    src="/logo.png"
+                    src="/logo-internal.png"
                     alt="SkyJoy"
                     width={48}
                     height={48}
@@ -144,7 +144,7 @@ export default function PassengerInfoStep({
                   Thông tin hành khách
                 </h2>
               </div>
-              <span className="text-[10px] sm:text-xs font-bold text-white bg-[var(--vj-navy)] px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-md self-start sm:self-auto">
+              <span className="text-2xs sm:text-xs font-bold text-white bg-[var(--primary)] px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-md self-start sm:self-auto">
                 {passengerCount} Hành khách
               </span>
             </div>
@@ -166,11 +166,11 @@ export default function PassengerInfoStep({
                   <div className="h-1 w-full bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
                   <div className="p-4 sm:p-6">
                     <h3 className="font-black text-[var(--foreground)] mb-4 sm:mb-5 flex items-center gap-1.5 sm:gap-2 font-koho">
-                      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-red text-white text-[10px] sm:text-xs font-black flex items-center justify-center shadow-sm">
+                      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-red text-white text-2xs sm:text-xs font-black flex items-center justify-center shadow-sm">
                         {i + 1}
                       </div>
                       Hành khách {i + 1}
-                      <span className="ml-1 inline-block rounded-md bg-[var(--vj-navy)] px-1.5 py-0.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-white">
+                      <span className="ml-1 inline-block rounded-md bg-[var(--primary)] px-1.5 py-0.5 text-3xs sm:text-2xs font-black uppercase tracking-wider text-white">
                         {PASSENGER_TYPE_LABELS[p.type ?? 'adult']}
                       </span>
                     </h3>
@@ -201,7 +201,7 @@ export default function PassengerInfoStep({
                                 onChange={() => updatePassenger(i, 'gender', val)}
                                 className="hidden"
                               />
-                              <span className="text-[11px] sm:text-sm font-bold">{label}</span>
+                              <span className="text-xs2 sm:text-sm font-bold">{label}</span>
                             </label>
                           ))}
                         </div>
@@ -310,7 +310,7 @@ export default function PassengerInfoStep({
                           {phoneTouched[i] && !/^0\d{8,9}$/.test(p.phone.replace(/\s/g, '')) && (
                             <p
                               id={`passenger-${i}-phone-error`}
-                              className="mt-1 text-[11px] font-medium text-primary"
+                              className="mt-1 text-xs2 font-medium text-primary"
                             >
                               Vui lòng nhập số điện thoại.
                             </p>
@@ -345,7 +345,7 @@ export default function PassengerInfoStep({
                           {emailTouched[i] && !/^\S+@\S+\.\S+$/.test(p.email) && (
                             <p
                               id={`passenger-${i}-email-error`}
-                              className="mt-1 text-[11px] font-medium text-primary"
+                              className="mt-1 text-xs2 font-medium text-primary"
                             >
                               Vui lòng nhập địa chỉ email của bạn.
                             </p>
@@ -545,12 +545,12 @@ export default function PassengerInfoStep({
                 <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
                   <div className="h-6 sm:h-7 px-1.5 sm:px-2 bg-gradient-red rounded-lg flex items-center justify-center shadow-sm">
                     <img
-                      src="/logo-vj.svg"
+                      src="/logo-internal.svg"
                       alt="Vietjet Air"
                       className="h-2.5 sm:h-3 w-auto brightness-0 invert"
                     />
                   </div>
-                  <span className="text-[10px] sm:text-xs font-black text-primary font-koho">
+                  <span className="text-2xs sm:text-xs font-black text-primary font-koho">
                     {flight.flightNo}
                   </span>
                 </div>
@@ -559,7 +559,7 @@ export default function PassengerInfoStep({
                     <div className="text-lg sm:text-xl font-black text-[var(--foreground)] font-koho">
                       {flight.departTime}
                     </div>
-                    <div className="text-[10px] sm:text-xs text-[var(--foreground-muted)]">
+                    <div className="text-2xs sm:text-xs text-[var(--foreground-muted)]">
                       {flight.from} · {flight.fromCity}
                     </div>
                   </div>
@@ -568,16 +568,16 @@ export default function PassengerInfoStep({
                     <div className="text-lg sm:text-xl font-black text-[var(--foreground)] font-koho">
                       {flight.arriveTime}
                     </div>
-                    <div className="text-[10px] sm:text-xs text-[var(--foreground-muted)]">
+                    <div className="text-2xs sm:text-xs text-[var(--foreground-muted)]">
                       {flight.to} · {flight.toCity}
                     </div>
                   </div>
                 </div>
-                <div className="text-[10px] sm:text-xs text-[var(--foreground-subtle)]">
+                <div className="text-2xs sm:text-xs text-[var(--foreground-subtle)]">
                   {flight.duration} · Bay thẳng
                 </div>
               </div>
-              <div className="space-y-1.5 sm:space-y-2 text-[11px] sm:text-sm">
+              <div className="space-y-1.5 sm:space-y-2 text-xs2 sm:text-sm">
                 <div className="flex justify-between">
                   <span className="text-[var(--foreground-muted)]">
                     Giá vé ({passengerCount} người)

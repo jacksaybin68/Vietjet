@@ -6,37 +6,37 @@ import { AppImage } from '@/shared/components/ui';
 const DESTINATIONS = [
   {
     name: 'Hà Nội',
-    image: '/images/hero/download.jpg',
+    image: '/images/hero/hero-artwork-beach-sunset.jpg',
     alt: 'Ha Noi - Thu do ngan nam van hien voi Ho Hoan Kiem',
     code: 'HAN',
   },
   {
     name: 'TP. Hồ Chí Minh',
-    image: '/images/hero/download-6.jpg',
+    image: '/images/hero/hero-bali-terraces.jpg',
     alt: 'TP. Ho Chi Minh - Thanh pho nang dong nhat Viet Nam',
     code: 'SGN',
   },
   {
     name: 'Phú Quốc',
-    image: '/images/hero/download-5.jpg',
+    image: '/images/hero/hero-sale-aerial.jpg',
     alt: 'Phu Quoc - Dao ngoc nhiet doi voi bai bien xanh trong',
     code: 'PQC',
   },
   {
     name: 'Đà Nẵng',
-    image: '/images/hero/banner-4-44-sale.jpg',
+    image: '/images/hero/hero-sale-aerial.jpg',
     alt: 'Da Nang - Thanh pho bien dang song voi Cau Rong',
     code: 'DAD',
   },
   {
     name: 'Nha Trang',
-    image: '/images/hero/download-2.jpg',
+    image: '/images/hero/hero-bangkok-temple.jpg',
     alt: 'Nha Trang - Vinh bien xanh trong noi tieng mien Trung',
     code: 'CXR',
   },
   {
     name: 'Huế',
-    image: '/images/hero/download-4.jpg',
+    image: '/images/hero/hero-window-clouds.jpg',
     alt: 'Hue - Co do lich su voi Dai Noi va lang tam trieu Nguyen',
     code: 'HUI',
   },

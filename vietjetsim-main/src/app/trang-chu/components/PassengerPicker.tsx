@@ -43,7 +43,7 @@ export function describePax(counts: PaxCounts): string {
 
 // 16px below `sm` so iOS Safari does not zoom the page when the field is tapped.
 const inputClass =
-  'w-full min-w-0 border-0 bg-transparent px-0 text-base font-extrabold text-[#333333] outline-none sm:text-sm';
+  'w-full min-w-0 border-0 bg-transparent px-0 text-base font-extrabold text-[var(--foreground)] outline-none sm:text-sm';
 const labelClass =
   'block text-[10px] font-bold uppercase leading-none tracking-[0.06em] text-[#8c8c8c]';
 const iconClass = 'shrink-0 text-lg text-[#4a4a4a]';
@@ -113,7 +113,7 @@ export default function PassengerPicker({ value, onChange, className }: Props) {
               className="flex items-center justify-between gap-3 border-b border-[#f0f0f0] py-2 last:border-b-0"
             >
               <span className="min-w-0">
-                <span className="block text-sm font-bold text-[#333333]">
+                <span className="block text-sm font-bold text-[var(--foreground)]">
                   {PASSENGER_TYPE_LABELS[row.type]}
                 </span>
                 <span className="block text-[11px] leading-tight text-[#8c8c8c]">{row.hint}</span>
@@ -124,11 +124,11 @@ export default function PassengerPicker({ value, onChange, className }: Props) {
                   onClick={() => step(row.type, -1)}
                   disabled={value[row.type] <= row.min}
                   aria-label={`Giảm số ${PASSENGER_TYPE_LABELS[row.type]}`}
-                  className="grid h-9 w-9 place-items-center rounded-full border border-[#dcdcdc] text-[#333333] disabled:opacity-35"
+                  className="grid h-9 w-9 place-items-center rounded-full border border-[#dcdcdc] text-[var(--foreground)] disabled:opacity-35"
                 >
                   <MdRemove className="text-sm" />
                 </button>
-                <span className="w-5 text-center text-sm font-extrabold text-[#333333]">
+                <span className="w-5 text-center text-sm font-extrabold text-[var(--foreground)]">
                   {value[row.type]}
                 </span>
                 <button
