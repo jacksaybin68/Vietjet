@@ -3061,6 +3061,43 @@ export async function spendLoyaltyPoints(
   return (result as LoyaltyTransactionRecord[])[0];
 }
 
+/**
+ * Cộng điểm SkyPoint cho một người dùng (ví dụ thưởng mã giới thiệu).
+ *
+ * Ba bộ đếm trên `user_loyalty` được cập nhật cùng nhịp: `available_points` là
+ * điểm tiêu được, `total_points`/`lifetime_points` là số tích luỹ dùng để xét
+ * hạng. Bỏ sót `lifetime_points` khiến khách có điểm mà không lên hạng.
+ */
+export async function awardLoyaltyPoints(
+  userId: string,
+  points: number,
+  description: string,
+  type: 'bonus' | 'earn' | 'adjust' = 'bonus'
+): Promise<LoyaltyTransactionRecord> {
+  if (!Number.isFinite(points) || points <= 0) {
+    throw new Error('Points to award must be greater than 0');
+  }
+
+  const loyalty = await getOrEnrollLoyalty(userId);
+
+  const result = await sql`
+    INSERT INTO loyalty_transactions (user_loyalty_id, points, type, description)
+    VALUES (${loyalty.id}, ${points}, ${type}, ${description})
+    RETURNING id, user_loyalty_id, points, type, description, created_at
+  `;
+
+  await sql`
+    UPDATE user_loyalty
+    SET available_points = available_points + ${points},
+        total_points = total_points + ${points},
+        lifetime_points = lifetime_points + ${points},
+        updated_at = NOW()
+    WHERE id = ${loyalty.id}
+  `;
+
+  return (result as LoyaltyTransactionRecord[])[0];
+}
+
 // ─── Check-in Queries ──────────────────────────────────────────────────────────
 
 /** Row shape returned by `getCheckInStatusByBookingId`. */

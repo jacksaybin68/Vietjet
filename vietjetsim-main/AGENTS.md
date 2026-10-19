@@ -1014,6 +1014,24 @@ return response;` narrows correctly and avoids returning `undefined` from a hand
   comparing each row against the `session_id` cookie. `user_sessions` and
   `login_history` live in `src/lib/security-db.ts`; deletes are always scoped
   by `user_id` so a foreign session id is a silent no-op.
+- **The SkyJoy auth flow (member id / OTP / CAPTCHA / social) has one shared
+  account lookup and one shared session issuer — do not inline either.** A login
+  identifier is an email, a phone number in any spelling, or a SkyJoy member id
+  (`SJ` + 8–10 digits); `findAccountByIdentifier` (`src/lib/account-lookup.ts`)
+  owns all three so `/dang-nhap` and `/dang-nhap-otp` cannot drift. Session
+  issuance (tokens, refresh row, `session_id`, CSRF cookie) is
+  `establishSession` (`src/lib/auth-session.ts`) for both the password and OTP
+  paths. `/dang-nhap` requires CAPTCHA **adaptively** — only once
+  `failed_login_attempts >= 3` — so a clean login (and `test:ui`'s direct POST)
+  stays challenge-free, while registration and `/otp/gui` require it always.
+  Five consecutive failures lock the account for 15 minutes via a **single**
+  `UPDATE` (`registerFailedLoginAttempt`) whose `COALESCE(failed_login_attempts,
+  0) + 1` prevents the lost-update that a read-then-write allows. The OTP table
+  (`phone_otp`), referral ledger (`referral_events`) and member-id backfill come
+  from `038_skyjoy_auth_enhancements.sql`; referral bonus is best-effort and
+  idempotent on `referee_user_id` UNIQUE. SMS, OAuth credentials and reCAPTCHA
+  are the documented plug points (see `.env.local.example`); `sendOtpSms` echoes
+  a `devCode` outside production, mirroring `/quen-mat-khau`'s `resetUrl`.
 - **The README demo passwords only apply to a fresh database.** `014_seed_demo_data.sql`
   still seeds the old `@vietjetsim.vn` domain, and `022_rename_demo_email_domain.sql`
   then renames those two rows to `@vietjetair.vn`. Both statements are

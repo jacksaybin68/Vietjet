@@ -120,14 +120,14 @@ describe('visual hiện đại, không giống AI tạo', () => {
 describe('logo thật trong header', () => {
   it('dùng ảnh PNG tuyệt đối, có kích thước cố định và alt', () => {
     process.env.MAIL_SITE_URL = 'https://vietjet.shop';
-    expect(mailLogoUrl()).toBe('https://vietjet.shop/logo.png');
+    expect(mailLogoUrl()).toBe('https://vietjet.shop/logo-internal.png');
     const { html } = buildBookingConfirmationHtml({
       fullName: 'A',
       bookingCode: 'X',
       amount: 1,
       method: 'card',
     });
-    expect(html).toContain('src="https://vietjet.shop/logo.png"');
+    expect(html).toContain('src="https://vietjet.shop/logo-internal.png"');
     expect(html).toContain('width="230"');
     expect(html).toContain('height="40"');
     expect(html).toContain('alt="Vietjet Air"');

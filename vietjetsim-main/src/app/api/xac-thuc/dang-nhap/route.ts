@@ -1,26 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@/lib/neon';
 import { rateLimit } from '@/lib/rate-limit';
+import { comparePassword, type User } from '@/lib/auth';
 import {
-  comparePassword,
-  generateTokens,
-  setAuthCookiesOnResponse,
-  hashToken,
-  generateTokenFamily,
-} from '@/lib/auth';
-import { storeRefreshToken } from '@/lib/db';
-import type { User } from '@/lib/auth';
-import { isAccountLocked } from '@/lib/account-lock';
-import { setCsrfCookieOnResponse } from '@/lib/csrf';
+  CAPTCHA_AFTER_FAILED_ATTEMPTS,
+  isAccountLocked,
+  temporaryLockMessage,
+} from '@/lib/account-lock';
+import { verifyCaptcha } from '@/lib/captcha';
+import { findAccountByIdentifier } from '@/lib/account-lookup';
 import {
+  clearFailedLoginAttempts,
   consumeBackupCodeHash,
-  createUserSession,
   get2FAConfig,
   recordLoginAttempt,
+  registerFailedLoginAttempt,
 } from '@/lib/security-db';
 import { describeDevice } from '@/lib/user-agent';
-import { normalizePhone } from '@/lib/utils';
 import { hashBackupCode, normalizeBackupCode, verifyTotpToken } from '@/lib/two-factor';
+import { establishSession } from '@/lib/auth-session';
 
 export async function POST(request: NextRequest) {
   // IP-based rate limiting: 10 attempts per minute per IP + path.
@@ -31,10 +28,12 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { email, password, token } = body as {
+    const { email, password, token, captchaToken, captchaAnswer } = body as {
       email?: string;
       password?: string;
       token?: string;
+      captchaToken?: string;
+      captchaAnswer?: string;
     };
 
     if (!email || !password) {
@@ -47,38 +46,21 @@ export async function POST(request: NextRequest) {
     // correct credential look wrong.
     const identifier = email.trim();
 
-    // Find user in Neon PostgreSQL.
-    // Identifier can be either an email or a phone number. Phone rows are
-    // matched on the canonical form too, so someone who registered as
-    // `0986349061` can still sign in with `+84 986 349 061`.
-    // Email comparison is case-insensitive: addresses are not case-sensitive
-    // per RFC 5321 and users habitually type `User@VietjetAir.vn`.
-    // The cast is required: a bare parameter in `IS NOT NULL` leaves Postgres
-    // unable to infer a type and the query fails with "could not determine
-    // data type of parameter $3".
-    const phoneIdentifier = normalizePhone(identifier);
-    const results = await sql`
-      SELECT id, email, password_hash, full_name, role, phone, avatar_url, created_at, updated_at,
-             locked_until
-      FROM user_profiles
-      WHERE LOWER(email) = LOWER(${identifier})
-         OR phone = ${identifier}
-         OR (${phoneIdentifier}::text IS NOT NULL AND phone = ${phoneIdentifier}::text)
-    `;
+    // The identifier can be an email, a phone number (any spelling) or a SkyJoy
+    // member id; `findAccountByIdentifier` owns that lookup so the password and
+    // OTP login paths cannot drift apart.
+    const userRecord = await findAccountByIdentifier(identifier);
 
     const device = describeDevice(request.headers.get('user-agent'));
 
     console.info(`[AUTH] Login attempt for identifier: ${identifier}`);
-    if (results.length === 0) {
+    if (!userRecord) {
       console.warn(`[AUTH] Login failed: User not found in database for identifier: ${identifier}`);
       return NextResponse.json(
         { error: 'Email/Số điện thoại hoặc mật khẩu không đúng' },
         { status: 401 }
       );
     }
-
-    console.info(`[AUTH] User found, comparing password for: ${identifier}`);
-    const userRecord = results[0];
 
     // Locked accounts cannot authenticate, even with the correct password.
     if (isAccountLocked(userRecord.locked_until)) {
@@ -89,14 +71,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Adaptive CAPTCHA: a first-time or clean login never sees the challenge,
+    // but once an account has failed a few times every further attempt must
+    // prove it is human. Enforcing it from attempt one would make the very
+    // first typo cost an extra round trip.
+    const failedBefore = userRecord.failed_login_attempts ?? 0;
+    const captchaRequired = failedBefore >= CAPTCHA_AFTER_FAILED_ATTEMPTS;
+    if (captchaRequired && !verifyCaptcha(captchaToken, captchaAnswer ?? '')) {
+      return NextResponse.json(
+        { error: 'Vui lòng xác nhận bạn không phải robot.', captchaRequired: true },
+        { status: 400 }
+      );
+    }
+
+    console.info(`[AUTH] User found, comparing password for: ${identifier}`);
+
     // A password pasted from a manager/chat window often carries a trailing
     // space or newline. Try the value as typed first, then the trimmed value, so
     // the user is not told their (correct) password is wrong.
     const trimmedPassword = password.trim();
     const isValidPassword =
-      (await comparePassword(password, userRecord.password_hash)) ||
+      (await comparePassword(password, userRecord.password_hash ?? '')) ||
       (trimmedPassword !== password &&
-        (await comparePassword(trimmedPassword, userRecord.password_hash)));
+        (await comparePassword(trimmedPassword, userRecord.password_hash ?? '')));
 
     if (!isValidPassword) {
       console.warn(`[AUTH] Login failed: Invalid password for email: ${identifier}`);
@@ -105,7 +102,26 @@ export async function POST(request: NextRequest) {
         success: false,
         failureReason: 'invalid_password',
       });
-      return NextResponse.json({ error: 'Email hoặc mật khẩu không đúng' }, { status: 401 });
+
+      // Count the failure and, on the fifth, apply a temporary lock. The count
+      // and the lock land in one UPDATE; see `registerFailedLoginAttempt`.
+      const state = await registerFailedLoginAttempt(userRecord.id);
+      if (state && isAccountLocked(state.locked_until)) {
+        return NextResponse.json(
+          { error: temporaryLockMessage(), locked: true, captchaRequired: false },
+          { status: 403 }
+        );
+      }
+
+      const failedNow = state?.failed_login_attempts ?? failedBefore + 1;
+      return NextResponse.json(
+        {
+          error: 'Email hoặc mật khẩu không đúng',
+          failedAttempts: failedNow,
+          captchaRequired: failedNow >= CAPTCHA_AFTER_FAILED_ATTEMPTS,
+        },
+        { status: 401 }
+      );
     }
 
     // Second factor gate. Nothing is issued until the token checks out, so a
@@ -140,69 +156,23 @@ export async function POST(request: NextRequest) {
     // Build user object
     const user: User = {
       id: userRecord.id,
-      email: userRecord.email,
-      full_name: userRecord.full_name,
-      role: userRecord.role || 'user',
-      phone: userRecord.phone,
-      avatar_url: userRecord.avatar_url,
+      email: userRecord.email ?? '',
+      full_name: userRecord.full_name ?? '',
+      role: (userRecord.role as User['role']) || 'user',
+      phone: userRecord.phone ?? undefined,
+      avatar_url: userRecord.avatar_url ?? undefined,
       created_at: userRecord.created_at,
       updated_at: userRecord.updated_at,
     };
 
-    // Generate tokens
-    const tokens = generateTokens(user);
-
-    // Store refresh token hash in DB for rotation / revocation tracking
-    const tokenHash = hashToken(tokens.refreshToken);
-    const familyId = generateTokenFamily();
+    // A successful login clears the counter so the next typo starts from zero.
     try {
-      await storeRefreshToken(user.id, tokenHash, familyId);
-    } catch (storeErr) {
-      // Log but don't block login — rotation is a security hardening, not a hard dependency
-      console.error('Failed to store refresh token (rotation disabled):', storeErr);
+      await clearFailedLoginAttempts(user.id);
+    } catch (clearErr) {
+      console.error('Failed to reset failed-login counter:', clearErr);
     }
 
-    // Register the device so the security tab can list and revoke logins.
-    // Failures here must not block a valid login.
-    let sessionId: string | null = null;
-    try {
-      const session = await createUserSession(user.id, device);
-      sessionId = session.id;
-    } catch (sessionErr) {
-      console.error('Failed to record session (session list unavailable):', sessionErr);
-    }
-
-    void recordLoginAttempt(user.id, { ...device, success: true });
-
-    // Create response with user data
-    const response = NextResponse.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        fullName: user.full_name,
-        role: user.role,
-        phone: user.phone,
-        avatarUrl: user.avatar_url,
-      },
-    });
-
-    // Set cookies on response
-    setAuthCookiesOnResponse(response, tokens);
-    // Establish the double-submit CSRF cookie alongside the session cookies, otherwise
-    // CSRF-guarded mutations fail after a fresh login.
-    setCsrfCookieOnResponse(response);
-
-    if (sessionId) {
-      response.cookies.set('session_id', sessionId, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 7 * 24 * 60 * 60,
-      });
-    }
-
-    return response;
+    return establishSession(user, device);
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json({ error: 'Đã xảy ra lỗi khi đăng nhập' }, { status: 500 });

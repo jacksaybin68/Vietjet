@@ -24,6 +24,7 @@ const METHOD_LABELS: Record<string, string> = {
   e_wallet: 'Ví điện tử',
   vietqr: 'VietQR',
   wallet: 'Ví Vietjet Air',
+  skypoint: 'SkyPoint / Ví SkyJoy',
 };
 
 function formatCurrency(amount: number): string {
