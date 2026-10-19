@@ -33,6 +33,10 @@ vi.mock('@/lib/security-db', () => ({
   consumeBackupCodeHash: vi.fn().mockResolvedValue(false),
   createUserSession: vi.fn().mockResolvedValue({ id: 'session-1' }),
   recordLoginAttempt: (...a: unknown[]) => recordLoginMock(...a),
+  // Adaptive CAPTCHA + lockout read the failed-attempt counter; a null result
+  // means "no lock and no counter yet", which is the clean-login case here.
+  registerFailedLoginAttempt: vi.fn().mockResolvedValue(null),
+  clearFailedLoginAttempts: vi.fn().mockResolvedValue(undefined),
 }));
 
 // Only the documented demo password authenticates, so a passing test proves the

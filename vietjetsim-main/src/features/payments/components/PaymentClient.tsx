@@ -6,12 +6,18 @@ import { PaymentSkeleton } from '@/shared/components/ui';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 import { createPayment, getWalletOverview } from '@/features/payments/services';
+import { getMembership } from '@/features/loyalty/services';
 import { TAX_AND_FEE_RATE, ANCILLARY_OPTIONS, type AncillaryId } from '@/features/bookings/pricing';
 
 import type { PaymentMethod } from '@/features/payments/types';
 import { apiRequest, ApiRequestError } from '@/shared/services';
 import { renderTransferNote } from '@/lib/transfer-note';
 import { validateBankTransferInput } from '@/lib/bank-transfer';
+import { skypointPointsForAmount, skypointValueOfPoints } from '@/lib/skypoint';
+import { buildBoardingQrContent, buildETicketHtml, type ETicketData } from '../e-ticket';
+import VietQrBox from './VietQrBox';
+import EBoardingPass from './EBoardingPass';
+import PaymentModal from './PaymentModal';
 
 interface BankAccount {
   id: string;
@@ -213,7 +219,7 @@ function PaymentProcessingOverlay() {
           </div>
         </div>
         <div className="text-center">
-          <div className="font-black text-[#1A2948] text-lg mb-1 font-koho">
+          <div className="font-black text-[var(--vj-navy)] text-lg mb-1 font-koho">
             Đang xử lý thanh toán
           </div>
           <div className="text-sm text-[var(--foreground-muted)]">
@@ -261,7 +267,7 @@ function ErrorModal({ title, message, onRetry, onDismiss }: ErrorModalProps) {
           <div className="w-16 h-16 bg-[rgb(var(--primary-rgb))]/10 rounded-full flex items-center justify-center mb-5 border-4 border-primary/20">
             <Icon name="ExclamationTriangleIcon" size={32} className="text-primary" />
           </div>
-          <h3 className="font-black text-[#1A2948] text-xl mb-2 font-koho">{title}</h3>
+          <h3 className="font-black text-[var(--vj-navy)] text-xl mb-2 font-koho">{title}</h3>
           <p className="text-sm text-[var(--foreground-muted)] leading-relaxed mb-7">{message}</p>
           <div className="flex flex-col gap-3 w-full">
             <button
@@ -353,10 +359,15 @@ export default function PaymentClient() {
   const [pageLoading, setPageLoading] = useState(true);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [showVietQrModal, setShowVietQrModal] = useState(false);
   const toast = useToast();
   const [adminAccounts, setAdminAccounts] = useState<BankAccount[]>([]);
   const [selectedAdminAccount, setSelectedAdminAccount] = useState<BankAccount | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  // SkyPoint (SkyJoy): số dư điểm + tỷ lệ quy đổi points/1.000đ của chương
+  // trình loyalty — cả client hiển thị lẫn server trừ điểm dùng chung công
+  // thức trong `@/lib/skypoint` để số hiển thị và số trừ không lệch nhau.
+  const [skypointInfo, setSkypointInfo] = useState<{ points: number; rate: number } | null>(null);
 
   useEffect(() => {
     apiRequest<{
@@ -378,6 +389,16 @@ export default function PaymentClient() {
         }
       })
       .catch((err) => console.error('Failed to load wallet balance:', err));
+
+    // SkyPoint balance for the SkyJoy payment tab (fail-soft như ví).
+    getMembership()
+      .then((data) => {
+        setSkypointInfo({
+          points: data.membership.currentPoints,
+          rate: data.program.pointsPerThousandVnd,
+        });
+      })
+      .catch((err) => console.error('Failed to load SkyPoint balance:', err));
   }, []);
 
   useEffect(() => {
@@ -481,11 +502,12 @@ export default function PaymentClient() {
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // A bank transfer is confirmed here: the customer re-types the memo and
-    // amount this page displayed. Checked against the values we rendered, so
-    // the same helper the API uses decides — the client copy exists only to
-    // fail fast, never to be the authority.
-    if (paymentMethod === 'bank') {
+    // A bank transfer (or a VietQR scan into the same account) is confirmed
+    // here: the customer re-types the memo and amount this page displayed.
+    // Checked against the values we rendered, so the same helper the API uses
+    // decides — the client copy exists only to fail fast, never to be the
+    // authority.
+    if (paymentMethod === 'bank' || paymentMethod === 'vietqr') {
       if (!selectedAdminAccount) {
         setPaymentError('Chưa có thông tin tài khoản nhận. Vui lòng thử lại sau.');
         setShowErrorModal(true);
@@ -506,6 +528,17 @@ export default function PaymentClient() {
       if (walletBalance === null || walletBalance < total) {
         setPaymentError(
           'Số dư ví không đủ để thanh toán. Vui lòng nạp thêm tiền hoặc chọn phương thức khác.'
+        );
+        setShowErrorModal(true);
+        return;
+      }
+    }
+
+    if (paymentMethod === 'skypoint') {
+      const pointsNeeded = skypointInfo ? skypointPointsForAmount(total, skypointInfo.rate) : null;
+      if (pointsNeeded === null || skypointInfo!.points < pointsNeeded) {
+        setPaymentError(
+          `Số dư SkyPoint không đủ (cần ${pointsNeeded?.toLocaleString('vi-VN') ?? '—'} điểm). Hãy đổi thêm điểm hoặc chọn phương thức khác.`
         );
         setShowErrorModal(true);
         return;
@@ -606,6 +639,108 @@ export default function PaymentClient() {
       'width=600,height=400'
     );
   }, [shareText]);
+
+  // Dữ liệu vé điện tử cho success screen (thẻ lên máy bay + bản in PDF).
+  const ticketData = useMemo<ETicketData | null>(() => {
+    if (!booking) return null;
+    return {
+      pnr: bookingCodeLabel,
+      flightNo: booking.flightNo,
+      from: booking.from,
+      to: booking.to,
+      fromCity: booking.fromCity,
+      toCity: booking.toCity,
+      date: booking.date,
+      departTime: booking.departTime,
+      arriveTime: booking.arriveTime,
+      passengers: booking.passengers,
+      amount: booking.total,
+    };
+  }, [booking, bookingCodeLabel]);
+
+  /**
+   * Mở cửa sổ in với HTML e-ticket (QR + mã vạch, khổ A4) — khách chọn
+   * "Lưu thành PDF" trong hộp thoại in của trình duyệt. Cùng pattern với
+   * hóa đơn admin (`features/admin/invoice.ts`), không cần thư viện PDF.
+   */
+  const handleDownloadETicket = useCallback(async () => {
+    if (!booking || booking.passengers.length === 0) return;
+    const base: ETicketData = {
+      pnr: bookingCodeLabel,
+      flightNo: booking.flightNo,
+      from: booking.from,
+      to: booking.to,
+      fromCity: booking.fromCity,
+      toCity: booking.toCity,
+      date: booking.date,
+      departTime: booking.departTime,
+      arriveTime: booking.arriveTime,
+      passengers: booking.passengers,
+      amount: booking.total,
+    };
+    let qrDataUrl: string | undefined;
+    try {
+      const QRCode = await import('qrcode');
+      qrDataUrl = await QRCode.toDataURL(buildBoardingQrContent(base, booking.passengers[0]), {
+        margin: 2,
+        width: 320,
+      });
+    } catch {
+      // QR vắng mặt vẫn in được — bản in còn mã vạch Code 39 và thông tin vé.
+    }
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast.error(
+        'Không mở được cửa sổ in',
+        'Trình duyệt đã chặn popup — hãy cho phép popup và thử lại.'
+      );
+      return;
+    }
+    printWindow.document.write(buildETicketHtml({ ...base, qrDataUrl }));
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => printWindow.print(), 350);
+  }, [booking, bookingCodeLabel, toast]);
+
+  // Form xác nhận đã chuyển khoản — dùng chung cho tab Ngân hàng và tab VietQR
+  // (khách quét mã VietQR xong quay lại đây gõ nội dung + số tiền trong trường
+  // hợp hệ thống chưa tự nhận giao dịch qua polling).
+  const transferConfirmBlock = (
+    <div className="bg-white border border-[var(--border)] rounded-xl p-4 space-y-3">
+      <h4 className="text-sm font-bold text-[var(--foreground)] flex items-center gap-2">
+        <Icon name="CheckCircleIcon" size={18} className="text-primary" />
+        Xác nhận đã chuyển khoản
+      </h4>
+      <p className="text-xs text-[var(--foreground-muted)]">
+        Nhập đúng nội dung và số tiền đã chuyển để hoàn tất thanh toán.
+      </p>
+      <div>
+        <label className="block text-xs font-medium text-[var(--foreground-muted)] mb-1">
+          Nội dung chuyển khoản <span className="text-primary">*</span>
+        </label>
+        <input
+          type="text"
+          value={transferNoteInput}
+          onChange={(e) => setTransferNoteInput(e.target.value)}
+          placeholder={transferNote}
+          className="w-full px-3 py-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+        />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-[var(--foreground-muted)] mb-1">
+          Số tiền đã chuyển <span className="text-primary">*</span>
+        </label>
+        <input
+          type="text"
+          inputMode="numeric"
+          value={transferAmountInput}
+          onChange={(e) => setTransferAmountInput(e.target.value)}
+          placeholder={String(total)}
+          className="w-full px-3 py-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+        />
+      </div>
+    </div>
+  );
 
   if (pageLoading) {
     return <PaymentSkeleton />;
@@ -809,20 +944,14 @@ export default function PaymentClient() {
                   </span>
                 </div>
 
-                {/* QR Mock */}
-                <div className="mt-5 flex flex-col items-center">
-                  <div className="w-28 h-28 bg-[var(--surface-2)] rounded-xl flex items-center justify-center border-2 border-dashed border-[var(--border)] ">
-                    <div className="text-center">
-                      <Icon
-                        name="QrCodeIcon"
-                        size={40}
-                        className="text-[var(--foreground-subtle)] mx-auto"
-                      />
-                      <div className="text-xs text-[var(--foreground-subtle)] mt-1">
-                        QR Check-in
-                      </div>
-                    </div>
+                {/* E-boarding passes — mỗi hành khách một thẻ, QR + mã vạch thật. */}
+                <div className="mt-5 space-y-4">
+                  <div className="text-xs font-bold text-[var(--foreground-subtle)] uppercase tracking-widest text-center">
+                    Thẻ lên máy bay điện tử
                   </div>
+                  {ticketData?.passengers.map((p, i) => (
+                    <EBoardingPass key={i} data={ticketData} passenger={p} />
+                  ))}
                 </div>
 
                 {/* Share section */}
@@ -835,7 +964,7 @@ export default function PaymentClient() {
                     <button
                       onClick={handleShareFacebook}
                       title="Chia sẻ lên Facebook"
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1877F2] text-white text-xs font-semibold hover:bg-[#166fe5] transition-all hover:-translate-y-0.5 hover:shadow-md"
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-social-facebook text-white text-xs font-semibold hover:bg-social-facebook-hover transition-all hover:-translate-y-0.5 hover:shadow-md"
                     >
                       <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
                         <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
@@ -869,6 +998,14 @@ export default function PaymentClient() {
 
                 {/* Actions */}
                 <div className="mt-6 flex flex-col gap-3">
+                  <button
+                    type="button"
+                    onClick={handleDownloadETicket}
+                    className="w-full flex items-center justify-center gap-2 bg-vjyellow hover:bg-accent-dark text-[var(--foreground)] font-black py-3.5 rounded-xl transition-all shadow-vj-btn hover:shadow-vj-btn-hover hover:-translate-y-0.5 text-sm"
+                  >
+                    <Icon name="ArrowDownTrayIcon" size={16} />
+                    Tải vé điện tử (PDF)
+                  </button>
                   <Link
                     href="/tai-khoan"
                     className="vj-btn vj-btn-primary w-full py-3 rounded-xl text-sm"
@@ -906,7 +1043,7 @@ export default function PaymentClient() {
                 style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
               >
                 <h2 className="font-bold text-[var(--foreground)] mb-4">Phương thức thanh toán</h2>
-                <div className="grid grid-cols-2 gap-3 mb-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
                   {(
                     [
                       {
@@ -914,6 +1051,13 @@ export default function PaymentClient() {
                         label: 'Thẻ tín dụng',
                         desc: 'Visa · MasterCard · JCB · AMEX',
                         icon: 'CreditCardIcon',
+                        color: 'text-primary',
+                      },
+                      {
+                        val: 'vietqr',
+                        label: 'VietQR',
+                        desc: 'Quét mã QR ngân hàng',
+                        icon: 'QrCodeIcon',
                         color: 'text-primary',
                       },
                       {
@@ -937,6 +1081,13 @@ export default function PaymentClient() {
                         icon: 'DevicePhoneMobileIcon',
                         color: 'text-[var(--vj-green)]',
                       },
+                      {
+                        val: 'skypoint',
+                        label: 'SkyPoint',
+                        desc: 'Dùng điểm SkyJoy',
+                        icon: 'StarIcon',
+                        color: 'text-vjbrown',
+                      },
                     ] as const
                   ).map((method) => (
                     <button
@@ -959,7 +1110,7 @@ export default function PaymentClient() {
                         <Icon name={method.icon} size={20} />
                       </div>
                       <span className="text-xs font-bold leading-none">{method.label}</span>
-                      <span className="text-[10px] text-[var(--foreground-subtle)] leading-none">
+                      <span className="text-2xs text-[var(--foreground-subtle)] leading-none">
                         {method.desc}
                       </span>
                     </button>
@@ -1078,7 +1229,7 @@ export default function PaymentClient() {
                                   key={acc.id}
                                   type="button"
                                   onClick={() => setSelectedAdminAccount(acc)}
-                                  className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
+                                  className={`px-3 py-1.5 rounded-full text-xs2 font-bold whitespace-nowrap transition-all ${
                                     selectedAdminAccount.id === acc.id
                                       ? 'bg-primary text-white shadow-md shadow-primary/20'
                                       : 'bg-[var(--surface-2)] text-[var(--foreground-muted)] hover:bg-[var(--surface-3)] '
@@ -1102,7 +1253,7 @@ export default function PaymentClient() {
                                   </h4>
                                 </div>
                                 <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-[var(--border)] flex items-center justify-center p-1">
-                                  <div className="text-[10px] font-black text-primary">
+                                  <div className="text-2xs font-black text-primary">
                                     {selectedAdminAccount.admin_bank_name.substring(0, 3)}
                                   </div>
                                 </div>
@@ -1111,7 +1262,7 @@ export default function PaymentClient() {
                               <div className="space-y-3">
                                 <div className="flex justify-between items-end">
                                   <div>
-                                    <label className="text-[10px] font-bold text-[var(--foreground-subtle)] uppercase tracking-widest block mb-0.5">
+                                    <label className="text-2xs font-bold text-[var(--foreground-subtle)] uppercase tracking-widest block mb-0.5">
                                       Số tài khoản
                                     </label>
                                     <p className="text-lg font-mono font-black text-[var(--foreground)] leading-none tracking-wider">
@@ -1137,7 +1288,7 @@ export default function PaymentClient() {
 
                                 <div className="flex justify-between items-center py-3 px-4 bg-primary/5 rounded-2xl border border-primary/10">
                                   <div>
-                                    <label className="text-[10px] font-bold text-primary/60 uppercase tracking-widest block mb-0.5">
+                                    <label className="text-2xs font-bold text-primary/60 uppercase tracking-widest block mb-0.5">
                                       Nội dung chuyển khoản
                                     </label>
                                     <p className="text-base font-black text-primary leading-none tracking-widest">
@@ -1160,7 +1311,7 @@ export default function PaymentClient() {
                                 </div>
 
                                 <div className="pt-2">
-                                  <label className="text-[10px] font-bold text-[var(--foreground-subtle)] uppercase tracking-widest block mb-1">
+                                  <label className="text-2xs font-bold text-[var(--foreground-subtle)] uppercase tracking-widest block mb-1">
                                     Chủ tài khoản
                                   </label>
                                   <p className="text-sm font-bold text-[var(--foreground)]">
@@ -1170,23 +1321,18 @@ export default function PaymentClient() {
                               </div>
                             </div>
 
-                            {/* VietQR Quick Scan */}
+                            {/* VietQR Quick Scan — payload EMVCo sinh ở server,
+                                QR render cục bộ (không gọi img.vietqr.io) +
+                                polling tự dò giao dịch. */}
                             <div className="flex flex-col items-center justify-center p-4 bg-white border-t border-[var(--border)]">
                               <span className="text-xs font-bold text-primary uppercase tracking-wider mb-2">
                                 Quét mã VietQR thanh toán tự động
                               </span>
-                              <div className="p-2 bg-white rounded-2xl border-2 border-primary/20 shadow-md">
-                                <img
-                                  src={`https://img.vietqr.io/image/${selectedAdminAccount.bank_bin || 'MB'}-${selectedAdminAccount.admin_bank_account_number}-compact2.png?amount=${total}&addInfo=${encodeURIComponent(transferNote)}&accountName=${encodeURIComponent(selectedAdminAccount.admin_bank_account_holder)}`}
-                                  alt="VietQR Mã thanh toán tự động"
-                                  className="w-44 h-44 sm:w-52 sm:h-52 object-contain"
-                                  loading="lazy"
-                                />
-                              </div>
-                              <p className="text-[11px] text-[var(--foreground-subtle)] text-center mt-2 max-w-xs">
-                                Mở ứng dụng Ngân hàng (VCB, MB, Techcombank, VPBank...) để quét mã
-                                tự động điền STK và nội dung.
-                              </p>
+                              <VietQrBox
+                                bookingId={booking?.bookingId ?? bookingId}
+                                onPaid={() => setConfirmed(true)}
+                                showBankHeader={false}
+                              />
                             </div>
 
                             <div className="bg-[var(--foreground)] p-3 flex items-center justify-center gap-2">
@@ -1195,7 +1341,7 @@ export default function PaymentClient() {
                                 size={14}
                                 className="text-[var(--vj-green)]"
                               />
-                              <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">
+                              <span className="text-2xs font-bold text-white/70 uppercase tracking-widest">
                                 Giao dịch bảo mật
                               </span>
                             </div>
@@ -1206,42 +1352,21 @@ export default function PaymentClient() {
                               memo and amount we just showed, which is the only
                               proof of payment we can check without a banking
                               integration. */}
-                          <div className="bg-white border border-[var(--border)] rounded-xl p-4 space-y-3">
-                            <h4 className="text-sm font-bold text-[var(--foreground)] flex items-center gap-2">
-                              <Icon name="CheckCircleIcon" size={18} className="text-primary" />
-                              Xác nhận đã chuyển khoản
-                            </h4>
-                            <p className="text-xs text-[var(--foreground-muted)]">
-                              Nhập đúng nội dung và số tiền đã chuyển để hoàn tất thanh toán.
-                            </p>
-                            <div>
-                              <label className="block text-xs font-medium text-[var(--foreground-muted)] mb-1">
-                                Nội dung chuyển khoản <span className="text-primary">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                value={transferNoteInput}
-                                onChange={(e) => setTransferNoteInput(e.target.value)}
-                                placeholder={transferNote}
-                                className="w-full px-3 py-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-xs font-medium text-[var(--foreground-muted)] mb-1">
-                                Số tiền đã chuyển <span className="text-primary">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                inputMode="numeric"
-                                value={transferAmountInput}
-                                onChange={(e) => setTransferAmountInput(e.target.value)}
-                                placeholder={String(total)}
-                                className="w-full px-3 py-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                              />
-                            </div>
-                          </div>
+                          {transferConfirmBlock}
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {/* VietQR — mã EMVCo sinh ở server, QR render cục bộ,
+                      polling tự dò giao dịch; form xác nhận thủ công là fallback. */}
+                  {paymentMethod === 'vietqr' && (
+                    <div className="space-y-4">
+                      <VietQrBox
+                        bookingId={booking?.bookingId ?? bookingId}
+                        onPaid={() => setConfirmed(true)}
+                      />
+                      {transferConfirmBlock}
                     </div>
                   )}
 
@@ -1312,6 +1437,69 @@ export default function PaymentClient() {
                           {wallet}
                         </button>
                       ))}
+                    </div>
+                  )}
+
+                  {/* SkyPoint / Ví SkyJoy — thanh toán bằng điểm tích lũy. */}
+                  {paymentMethod === 'skypoint' && (
+                    <div
+                      className={`bg-[var(--background)] border rounded-2xl p-6 flex flex-col items-center gap-4 transition-all ${
+                        skypointInfo &&
+                        skypointInfo.points >= skypointPointsForAmount(total, skypointInfo.rate)
+                          ? 'border-vjbrown/40 bg-vjyellow/10'
+                          : 'border-[var(--border)] '
+                      }`}
+                    >
+                      <div className="w-16 h-16 bg-vjyellow rounded-full flex items-center justify-center shadow-md">
+                        <Icon
+                          name="StarIcon"
+                          size={30}
+                          className="text-yellow-800"
+                          variant="solid"
+                        />
+                      </div>
+                      <div className="text-center">
+                        <h4 className="font-bold text-[var(--foreground)] mb-1">
+                          Thanh toán bằng SkyPoint
+                        </h4>
+                        <p className="text-sm text-[var(--foreground-muted)]">
+                          Dùng điểm SkyJoy tích lũy để trả cho đặt chỗ này
+                        </p>
+                      </div>
+
+                      <div className="w-full border-t border-[var(--border)] pt-4 mt-2 space-y-2 text-sm">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[var(--foreground-muted)]">Số dư SkyPoint:</span>
+                          <span
+                            className={`font-black ${skypointInfo === null ? 'animate-pulse text-[var(--foreground-subtle)]' : 'text-vjbrown'}`}
+                          >
+                            {skypointInfo !== null
+                              ? `${skypointInfo.points.toLocaleString('vi-VN')} điểm (≈ ${skypointValueOfPoints(skypointInfo.points, skypointInfo.rate).toLocaleString('vi-VN')}₫)`
+                              : '•••••• điểm'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-[var(--foreground-muted)]">
+                            Cần cho giao dịch này:
+                          </span>
+                          <span className="font-black text-[var(--foreground)]">
+                            {skypointInfo
+                              ? `${skypointPointsForAmount(total, skypointInfo.rate).toLocaleString('vi-VN')} điểm`
+                              : '—'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {skypointInfo &&
+                        skypointInfo.points < skypointPointsForAmount(total, skypointInfo.rate) && (
+                          <Link
+                            href="/tai-khoan"
+                            className="text-xs text-primary font-bold hover:underline flex items-center gap-1 mt-1"
+                          >
+                            <Icon name="ArrowTopRightOnSquareIcon" size={14} />
+                            Xem cách tích lũy thêm SkyPoint
+                          </Link>
+                        )}
                     </div>
                   )}
 
@@ -1389,7 +1577,7 @@ export default function PaymentClient() {
                   <div className="flex items-center gap-2 mb-3">
                     <div className="h-7 px-2 bg-gradient-red rounded-lg flex items-center justify-center shrink-0">
                       <img
-                        src="/logo-vj.svg"
+                        src="/logo-internal.svg"
                         alt="Vietjet Air"
                         className="h-3 w-auto brightness-0 invert"
                       />
@@ -1562,6 +1750,24 @@ export default function PaymentClient() {
           }}
         />
       )}
+
+      {/* VietQR Payment Modal matching Screenshot 2 & Screenshot 1 */}
+      <PaymentModal
+        isOpen={showVietQrModal}
+        onClose={() => setShowVietQrModal(false)}
+        methodLabel="VietQR"
+        subtotal={booking?.fareSubtotal ?? total}
+        discount={discountAmount}
+        convenienceFee={108000}
+        grandTotal={total}
+        onProceed={() => {
+          setShowVietQrModal(false);
+          toast.success(
+            'Chuyển sang trang mã QR VietQR',
+            'Vui lòng quét mã QR để hoàn tất thanh toán.'
+          );
+        }}
+      />
     </>
   );
 }

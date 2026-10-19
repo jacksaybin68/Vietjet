@@ -118,7 +118,7 @@ const FALLBACK_UPCOMING: UiBooking[] = [
     seat: '14A',
     price: 1038900,
     status: 'confirmed',
-    image: '/images/hero/download-6.jpg',
+    image: '/images/hero/hero-bali-terraces.jpg',
     alt: 'Ho Chi Minh City skyline',
   },
   {
@@ -134,7 +134,7 @@ const FALLBACK_UPCOMING: UiBooking[] = [
     seat: '8C',
     price: 598900,
     status: 'confirmed',
-    image: '/images/hero/download-5.jpg',
+    image: '/images/hero/hero-sale-aerial.jpg',
     alt: 'Phu Quoc island beach',
   },
 ];
@@ -1304,7 +1304,7 @@ export default function UserDashboardClient() {
                               <div className="flex items-center gap-2">
                                 <div className="h-6 px-1.5 bg-gradient-red rounded-lg flex items-center justify-center shrink-0">
                                   <img
-                                    src="/logo-vj.svg"
+                                    src="/logo-internal.svg"
                                     alt="Vietjet Air"
                                     className="h-3 w-auto brightness-0 invert"
                                   />

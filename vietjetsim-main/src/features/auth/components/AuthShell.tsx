@@ -21,51 +21,124 @@ interface AuthShellProps {
  */
 export default function AuthShell({ eyebrow, title, subtitle, children }: AuthShellProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#d9e9f8] via-[#eef4fa] to-[#f5f5f5] font-body text-[#333]">
+    <div className="min-h-screen bg-[var(--vj-purple-light)] bg-[url('/images/hero/hero-window-clouds.jpg')] bg-cover bg-center bg-fixed font-body text-[var(--foreground)] relative flex flex-col justify-between">
       <Header />
-      {/* `pb-36` keeps the floating chat mascot (fixed bottom-right) clear of the
-          form card on phones, where the card otherwise reaches the viewport edge. */}
-      <main id="main-content" className="pb-36">
-        {/* Cột form hẹp lại (560 → 470) để nhường bề ngang cho banner bên phải:
-            banner là ảnh 750×650 có chữ bám sát mép phải ("Hỗ trợ toàn quốc"), nên
-            cột càng hẹp thì ảnh càng bị cắt và chữ trên ảnh càng khó đọc. */}
-        <div className="mx-auto grid max-w-[1180px] gap-6 px-4 pt-6 sm:px-6 lg:grid-cols-[minmax(0,470px)_minmax(0,1fr)] lg:px-8">
-          {/* Site thật để form đặt thẳng trên nền mây, không bọc card trắng. */}
-          <section className="px-1 py-2 sm:px-2">
-            <Link href="/trang-chu" className="mb-6 inline-flex lg:hidden">
-              <img src="/logo-vj.svg" alt="Vietjet Air" className="h-7 w-auto" />
-            </Link>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[var(--primary)]">
-              {eyebrow}
-            </p>
-            <h2 className="mt-2 font-[Be_Vietnam_Pro,sans-serif] text-[28px] font-extrabold leading-[1.2] tracking-[-0.03em] text-[#1a2948]">
-              {title}
-            </h2>
-            <p className="mt-2 text-sm font-bold leading-6 text-[#6c6f76]">{subtitle}</p>
-            <div className="mt-7">{children}</div>
-            <p className="mt-7 border-t border-[#eee] pt-5 text-xs font-bold leading-5 text-[#6c6f76]">
-              * Bạn đã biết về{' '}
-              <Link href="/gioi-thieu" className="font-bold text-[var(--primary)]">
+      <main
+        id="main-content"
+        className="flex-1 flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8 pb-32"
+      >
+        <div className="w-full max-w-[1020px] rounded-3xl bg-white shadow-[0_24px_64px_rgba(30,41,59,0.18)] border border-white/80 overflow-hidden grid lg:grid-cols-2 my-auto">
+          {/* Cột trái: Form đăng nhập/đăng ký */}
+          <section className="p-6 sm:p-8 lg:p-10 flex flex-col justify-between bg-white">
+            <div>
+              <Link href="/trang-chu" className="mb-4 inline-flex lg:hidden">
+                <img src="/logo-internal.svg" alt="Vietjet Air" className="h-7 w-auto" />
+              </Link>
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1 text-xs font-black uppercase tracking-wider text-[var(--primary)]">
+                <span className="w-2 h-2 rounded-full bg-[var(--primary)] animate-pulse" />
+                {eyebrow}
+              </div>
+              <h2 className="font-[Be_Vietnam_Pro,sans-serif] text-2xl sm:text-3xl2 font-extrabold leading-[1.2] tracking-tight text-[var(--vj-navy)]">
+                {title}
+              </h2>
+              <p className="mt-1.5 text-xs sm:text-sm font-medium leading-relaxed text-[var(--foreground-muted)]">
+                {subtitle}
+              </p>
+              <div className="mt-6">{children}</div>
+            </div>
+            <p className="mt-8 border-t border-gray-200 pt-4 text-xs font-medium text-[var(--foreground-muted)]">
+              * Tìm hiểu thêm về quyền lợi{' '}
+              <Link href="/gioi-thieu" className="font-bold text-[var(--primary)] hover:underline">
                 Vietjet SkyJoy
               </Link>
               ?
             </p>
           </section>
 
-          {/* Ảnh để cao theo đúng tỉ lệ gốc (`w-full h-auto`) thay vì kéo đầy
-              chiều cao form rồi `object-cover`: cover cắt cạnh khi cột hẹp hơn
-              chiều cao × tỉ lệ ảnh, và cạnh bị cắt đúng là chỗ có chữ. `self-start`
-              giữ ảnh ở đầu cột khi form (tab Đăng ký) cao hơn ảnh, để nó không bị
-              kéo giãn. */}
-          <div className="relative hidden self-start overflow-hidden rounded-xl shadow-[0_16px_48px_rgba(26,41,72,0.16)] lg:block">
-            <img
-              src="/images/hero/banner-quang-cao-ngoai-te.jpg"
-              alt="Mua ngoại tệ dễ dàng khi đặt vé"
-              className="block h-auto w-full"
-            />
+          {/* Cột phải: Poster Ngoại tệ sẵn sàng - Hành trình an tâm khớp 100% ảnh tham chiếu */}
+          <div className="relative hidden lg:flex flex-col justify-between bg-gradient-to-b from-sky-100 via-sky-50 to-rose-50 p-6 sm:p-8 border-l border-gray-100 overflow-hidden">
+            <a
+              href="https://vikkibank.vn/mua-ngoai-te-tren-app-vikki/?utm_source=vietjet&utm_medium=referral&utm_campaign=always_on"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block relative h-full flex flex-col justify-between"
+            >
+              {/* Top tag & Plane */}
+              <div>
+                <div className="flex items-center justify-between">
+                  <div className="bg-primary-dark text-white px-2.5 py-1 rounded-sm text-xs2 font-black italic tracking-tight shadow-sm inline-block">
+                    vietjetAir.com
+                  </div>
+                  {/* Small plane flying */}
+                  <span className="text-2xl transform -rotate-12">✈️</span>
+                </div>
+
+                <div className="mt-5 text-center">
+                  <h3 className="text-xl sm:text-2xl font-black text-primary-dark uppercase tracking-tight leading-tight">
+                    NGOẠI TỆ SẴN SÀNG
+                  </h3>
+                  <h3 className="text-xl sm:text-2xl font-black text-primary-dark uppercase tracking-tight leading-tight mt-0.5">
+                    HÀNH TRÌNH AN TÂM
+                  </h3>
+                  <p className="text-sm font-bold text-gray-800 mt-2">
+                    Mua ngoại tệ dễ dàng khi đặt vé
+                  </p>
+
+                  <div className="mt-4 inline-flex flex-col items-start gap-1.5 text-xs font-bold text-gray-800">
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary-dark font-black text-sm">✓</span>
+                      <span>Nhận trong ngày</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary-dark font-black text-sm">✓</span>
+                      <span>Tỷ giá ưu đãi</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary-dark font-black text-sm">✓</span>
+                      <span>Hỗ trợ toàn quốc</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Graphic illustration with landmark, travelers, currency symbols */}
+              <div className="relative mt-4 rounded-xl overflow-hidden bg-white/60 shadow-sm border border-sky-100">
+                <img
+                  src="/images/hero/hero-airport-exchange.jpg"
+                  alt="Ngoại tệ sẵn sàng - Hành trình an tâm"
+                  className="w-full h-auto object-cover max-h-[260px] group-hover:scale-105 transition-transform duration-300"
+                />
+                {/* Floating currency badges */}
+                <div className="absolute top-2 left-2 bg-amber-400 text-yellow-950 text-2xs font-black px-2 py-0.5 rounded-full shadow-sm">
+                  $ USD
+                </div>
+                <div className="absolute top-2 right-2 bg-amber-400 text-yellow-950 text-2xs font-black px-2 py-0.5 rounded-full shadow-sm">
+                  € EUR
+                </div>
+                <div className="absolute bottom-2 left-2 bg-amber-400 text-yellow-950 text-2xs font-black px-2 py-0.5 rounded-full shadow-sm">
+                  ¥ JPY
+                </div>
+              </div>
+            </a>
           </div>
         </div>
       </main>
+
+      {/* Amy Mascot with "Xin chào!" tooltip matching reference screenshot */}
+      <div className="fixed right-6 bottom-6 z-40 flex items-end pointer-events-none select-none">
+        <div className="relative mb-12 -mr-1 animate-bounce duration-1000">
+          <div className="bg-white text-gray-800 text-2xs font-bold px-2.5 py-1 rounded-full shadow-lg border border-gray-200">
+            Xin chào!
+          </div>
+          <div className="w-2 h-2 bg-white border-r border-b border-gray-200 rotate-45 mx-auto -mt-1" />
+        </div>
+        <img
+          src="/images/hero/amy-mascot.png"
+          alt="Mascot Amy"
+          className="w-14 h-auto drop-shadow-lg"
+          loading="lazy"
+        />
+      </div>
     </div>
   );
 }

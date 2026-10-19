@@ -51,7 +51,7 @@ export interface CreatePaymentResponse {
 export type PaymentStatus = PaymentRecord['status'];
 
 /** Methods accepted by `POST /api/thanh-toan`, matching UI usage. */
-export type PaymentMethod = 'wallet' | 'card' | 'bank' | 'vietqr' | 'e_wallet';
+export type PaymentMethod = 'wallet' | 'card' | 'bank' | 'vietqr' | 'e_wallet' | 'skypoint';
 
 export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
   pending: 'Đang xử lý',
@@ -68,4 +68,5 @@ export const PAYMENT_METHOD_LABELS: Record<string, string> = {
   wallet: 'Ví Vietjet Air',
   card: 'Thẻ',
   bank: 'Tài khoản ngân hàng',
+  skypoint: 'SkyPoint / Ví SkyJoy',
 };

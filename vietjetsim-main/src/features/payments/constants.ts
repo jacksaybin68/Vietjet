@@ -19,6 +19,7 @@ export const PAYMENT_METHODS = {
   BANK: 'bank',
   VIETQR: 'vietqr',
   E_WALLET: 'e_wallet',
+  SKYPOINT: 'skypoint',
 } as const satisfies Record<string, PaymentMethod>;
 
 export const CURRENCIES = {

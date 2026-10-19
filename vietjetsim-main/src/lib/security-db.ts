@@ -1,4 +1,5 @@
 import { sql } from '@/lib/neon';
+import { LOGIN_LOCK_MINUTES, MAX_FAILED_LOGIN_ATTEMPTS } from '@/lib/account-lock';
 
 // ─── Security: 2FA, sessions, login history ─────────────────────────────────
 
@@ -207,4 +208,53 @@ export async function getLoginHistory(userId: string, limit = 20): Promise<Login
     LIMIT ${limit}
   `;
   return rows as LoginHistoryRecord[];
+}
+
+// ─── Failed-login counter ───────────────────────────────────────────────────
+
+export interface FailedLoginState {
+  failed_login_attempts: number;
+  locked_until: string | null;
+}
+
+/**
+ * Tăng bộ đếm đăng nhập sai và, khi chạm ngưỡng, khoá tài khoản tạm thời.
+ *
+ * Việc tăng và việc khoá nằm trong **một** câu UPDATE: đọc bộ đếm rồi ghi lại
+ * là lost-update, và hai lần gửi sai song song cùng đọc 4 sẽ cùng ghi 5, bỏ qua
+ * đúng lần chạm ngưỡng. `COALESCE` cần thiết vì cột này nullable trên dữ liệu cũ.
+ *
+ * @returns trạng thái sau khi tăng, hoặc `null` khi bộ đếm không ghi được
+ *          (tài khoản không tồn tại, hoặc `sql` đang được mock trong test).
+ */
+export async function registerFailedLoginAttempt(
+  userId: string,
+  options: { maxAttempts?: number; lockMinutes?: number } = {}
+): Promise<FailedLoginState | null> {
+  const maxAttempts = options.maxAttempts ?? MAX_FAILED_LOGIN_ATTEMPTS;
+  const lockMinutes = options.lockMinutes ?? LOGIN_LOCK_MINUTES;
+
+  const rows = await sql`
+    UPDATE user_profiles
+    SET failed_login_attempts = COALESCE(failed_login_attempts, 0) + 1,
+        locked_until = CASE
+          WHEN COALESCE(failed_login_attempts, 0) + 1 >= ${maxAttempts}
+          THEN NOW() + make_interval(mins => ${lockMinutes}::int)
+          ELSE locked_until
+        END
+    WHERE id = ${userId}
+    RETURNING failed_login_attempts, locked_until
+  `;
+
+  if (!Array.isArray(rows) || rows.length === 0) return null;
+  return rows[0] as FailedLoginState;
+}
+
+/** Đặt lại bộ đếm sau một lần đăng nhập thành công. */
+export async function clearFailedLoginAttempts(userId: string): Promise<void> {
+  await sql`
+    UPDATE user_profiles
+    SET failed_login_attempts = 0
+    WHERE id = ${userId} AND COALESCE(failed_login_attempts, 0) <> 0
+  `;
 }

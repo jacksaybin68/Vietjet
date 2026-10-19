@@ -26,6 +26,8 @@ vi.mock('@/lib/security-db', () => ({
   consumeBackupCodeHash: (...a: unknown[]) => consumeMock(...a),
   createUserSession: (...a: unknown[]) => createSessionMock(...a),
   recordLoginAttempt: (...a: unknown[]) => recordLoginMock(...a),
+  registerFailedLoginAttempt: vi.fn().mockResolvedValue(null),
+  clearFailedLoginAttempts: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('bcryptjs', () => ({

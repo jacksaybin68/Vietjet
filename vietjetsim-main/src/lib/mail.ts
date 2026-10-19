@@ -40,7 +40,7 @@ export function isGmailHost(host: string | undefined): boolean {
  */
 export function mailLogoUrl(env: NodeJS.ProcessEnv = process.env): string {
   if (env.MAIL_LOGO_URL) return env.MAIL_LOGO_URL.replace(/\/$/, '');
-  return `${siteUrl(env)}/logo.png`;
+  return `${siteUrl(env)}/logo-internal.png`;
 }
 
 /** `.env` hay shell thường bọc giá trị trong dấu nháy — bóc ra trước khi gửi. */

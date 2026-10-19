@@ -95,7 +95,7 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-[var(--surface)]rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
         <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
-          <h3 className="text-lg font-bold font-[KoHo,sans-serif] text-[#1A2948]">
+          <h3 className="text-lg font-bold font-[KoHo,sans-serif] text-[var(--vj-navy)]">
             Thiết lập xác thực hai yếu tố (2FA)
           </h3>
           <button
@@ -109,10 +109,10 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
         <div className="p-6">
           {step === 'setup' && (
             <div className="space-y-4 text-center">
-              <div className="w-20 h-20 bg-[#EC2029]/10 rounded-full flex items-center justify-center mx-auto">
-                <Icon name="LockClosedIcon" size={36} className="text-[#EC2029]" />
+              <div className="w-20 h-20 bg-[var(--primary)]/10 rounded-full flex items-center justify-center mx-auto">
+                <Icon name="LockClosedIcon" size={36} className="text-[var(--primary)]" />
               </div>
-              <h4 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948]">
+              <h4 className="text-base font-bold font-[KoHo,sans-serif] text-[var(--vj-navy)]">
                 Quét mã QR với ứng dụng xác thực
               </h4>
               <p className="text-sm text-[var(--foreground-muted)]font-[Be Vietnam Pro,sans-serif]">
@@ -139,7 +139,7 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
                 <p className="text-xs text-[var(--foreground-muted)]font-semibold mb-1 font-[Be Vietnam Pro,sans-serif]">
                   Hoặc nhập mã thủ công:
                 </p>
-                <p className="text-sm font-mono text-[#1A2948] break-all font-[Be Vietnam Pro,sans-serif]">
+                <p className="text-sm font-mono text-[var(--vj-navy)] break-all font-[Be Vietnam Pro,sans-serif]">
                   {secret || 'Đang tải...'}
                 </p>
               </div>
@@ -148,7 +148,7 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
                 <button
                   onClick={initSetup}
                   disabled={loading}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#EC2029] text-white rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-primary-dark transition-all active:scale-95 disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[var(--primary)] text-white rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-primary-dark transition-all active:scale-95 disabled:opacity-50"
                 >
                   {loading ? (
                     <Icon name="ArrowPathIcon" size={18} className="animate-spin" />
@@ -171,7 +171,7 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
               <div className="w-20 h-20 bg-[#10B981]/10 rounded-full flex items-center justify-center mx-auto">
                 <Icon name="ShieldCheckIcon" size={36} className="text-[#10B981]" />
               </div>
-              <h4 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948]">
+              <h4 className="text-base font-bold font-[KoHo,sans-serif] text-[var(--vj-navy)]">
                 Nhập mã xác thực
               </h4>
               <p className="text-sm text-[var(--foreground-muted)]font-[Be Vietnam Pro,sans-serif]">
@@ -182,7 +182,7 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
                 type="text"
                 value={token}
                 onChange={(e) => setToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                className="w-full text-center text-3xl tracking-[0.5em] px-4 py-4 bg-[var(--surface-2)] border border-[var(--border)]rounded-xl focus:outline-none focus:ring-2 focus:ring-[#EC2029]/20 focus:border-[#EC2029] font-[KoHo,sans-serif]"
+                className="w-full text-center text-3xl tracking-[0.5em] px-4 py-4 bg-[var(--surface-2)] border border-[var(--border)]rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] font-[KoHo,sans-serif]"
                 placeholder="000000"
                 maxLength={6}
               />
@@ -191,7 +191,7 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
                 <button
                   onClick={handleVerify}
                   disabled={loading || token.length !== 6}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#EC2029] text-white rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-primary-dark transition-all active:scale-95 disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[var(--primary)] text-white rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-primary-dark transition-all active:scale-95 disabled:opacity-50"
                 >
                   {loading ? (
                     <Icon name="ArrowPathIcon" size={18} className="animate-spin" />
@@ -214,7 +214,7 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
               <div className="w-20 h-20 bg-[#10B981]/10 rounded-full flex items-center justify-center mx-auto">
                 <Icon name="CheckCircleIcon" size={36} className="text-[#10B981]" />
               </div>
-              <h4 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948]">
+              <h4 className="text-base font-bold font-[KoHo,sans-serif] text-[var(--vj-navy)]">
                 Mã dự phòng
               </h4>
               <p className="text-sm text-[var(--foreground-muted)]font-[Be Vietnam Pro,sans-serif]">
@@ -226,7 +226,7 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
                 {backupCodes.map((code, i) => (
                   <div
                     key={i}
-                    className="bg-[var(--surface-2)]rounded-lg px-3 py-2 text-center font-mono text-sm font-bold text-[#1A2948] font-[Be Vietnam Pro,sans-serif]"
+                    className="bg-[var(--surface-2)]rounded-lg px-3 py-2 text-center font-mono text-sm font-bold text-[var(--vj-navy)] font-[Be Vietnam Pro,sans-serif]"
                   >
                     {code}
                   </div>
@@ -353,7 +353,7 @@ export default function SecurityTab() {
     <div className="space-y-6 p-4">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[#1A2948]">
+        <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[var(--vj-navy)]">
           Bảo mật tài khoản
         </h2>
         <p className="text-sm text-[var(--foreground-muted)]mt-1 font-[Be Vietnam Pro,sans-serif]">
@@ -364,15 +364,15 @@ export default function SecurityTab() {
       {/* 2FA Section */}
       <div className="bg-[var(--surface)]rounded-2xl border border-[var(--border)]overflow-hidden shadow-vj-card">
         <div className="p-5 border-b border-[var(--border)]">
-          <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948] flex items-center gap-2">
-            <Icon name="ShieldCheckIcon" size={20} className="text-[#EC2029]" />
+          <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[var(--vj-navy)] flex items-center gap-2">
+            <Icon name="ShieldCheckIcon" size={20} className="text-[var(--primary)]" />
             Xác thực hai yếu tố (2FA)
           </h3>
         </div>
         <div className="p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-[#1A2948] font-[KoHo,sans-serif]">
+              <p className="text-sm font-semibold text-[var(--vj-navy)] font-[KoHo,sans-serif]">
                 {twoFA?.isEnabled ? 'Đã kích hoạt' : 'Chưa kích hoạt'}
               </p>
               <p className="text-xs text-[var(--foreground-muted)]mt-0.5 font-[Be Vietnam Pro,sans-serif]">
@@ -401,7 +401,7 @@ export default function SecurityTab() {
               ) : (
                 <button
                   onClick={() => setShow2FASetup(true)}
-                  className="px-5 py-2 bg-[#EC2029] text-white rounded-lg text-sm font-semibold font-[KoHo,sans-serif] hover:bg-primary-dark transition-all active:scale-95 shadow-sm"
+                  className="px-5 py-2 bg-[var(--primary)] text-white rounded-lg text-sm font-semibold font-[KoHo,sans-serif] hover:bg-primary-dark transition-all active:scale-95 shadow-sm"
                 >
                   Kích hoạt
                 </button>
@@ -414,8 +414,8 @@ export default function SecurityTab() {
       {/* Active Sessions */}
       <div className="bg-[var(--surface)]rounded-2xl border border-[var(--border)]overflow-hidden shadow-vj-card">
         <div className="p-5 border-b border-[var(--border)] flex items-center justify-between">
-          <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948] flex items-center gap-2">
-            <Icon name="DevicePhoneMobileIcon" size={20} className="text-[#1A2948]" />
+          <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[var(--vj-navy)] flex items-center gap-2">
+            <Icon name="DevicePhoneMobileIcon" size={20} className="text-[var(--vj-navy)]" />
             Thiết bị đã đăng nhập
           </h3>
           {sessions.length > 1 && (
@@ -451,7 +451,7 @@ export default function SecurityTab() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm text-[#1A2948] font-[KoHo,sans-serif]">
+                    <span className="font-semibold text-sm text-[var(--vj-navy)] font-[KoHo,sans-serif]">
                       {session.device_name ||
                         `${session.browser || 'Trình duyệt'} trên ${session.os || 'thiết bị'}`}
                     </span>
@@ -484,7 +484,7 @@ export default function SecurityTab() {
       {/* Login History */}
       <div className="bg-[var(--surface)]rounded-2xl border border-[var(--border)]overflow-hidden shadow-vj-card">
         <div className="p-5 border-b border-[var(--border)]">
-          <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948] flex items-center gap-2">
+          <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[var(--vj-navy)] flex items-center gap-2">
             <Icon name="ClockIcon" size={20} className="text-[var(--foreground-subtle)]" />
             Lịch sử đăng nhập
           </h3>
@@ -509,7 +509,7 @@ export default function SecurityTab() {
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-[#1A2948] font-[KoHo,sans-serif]">
+                  <div className="text-sm font-semibold text-[var(--vj-navy)] font-[KoHo,sans-serif]">
                     {item.success ? 'Đăng nhập thành công' : 'Đăng nhập thất bại'}
                     {item.device_type ? ` từ ${item.device_type}` : ''}
                   </div>
