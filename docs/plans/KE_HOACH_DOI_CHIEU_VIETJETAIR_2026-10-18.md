@@ -21,7 +21,7 @@
 | **5** Nội dung / tài khoản / admin | ⚪ chưa có hồ sơ đo lường | §5 Phase 5 |
 | **6** QA, regression, tối ưu | 🟡 ba viewport ✅, landmark + skip link ✅; còn chọn công cụ diff ảnh, interaction cookie/promo/menu, Lighthouse | §5 Phase 6 |
 
-**Cổng kỹ thuật (đo 19/10 buổi chiều):** `npm run type-check` ✅ · `npm test` ✅ (**84 file / 829 test**) · `npm run lint` ✅ 0 error (5 warning chưa xử lý ở component booking mới) · `npm run lint:css-debt` 🔴 **tạm đỏ** (+16 `text-[Npx]`, +88 hex — do workstream song song đang viết tiếp Header/FlightCard/DatePicker trong working tree, chưa phải trạng thái cuối) · `npm run test:ui` chưa chạy lại sau đợt thay asset.
+**Cổng kỹ thuật — XANH ĐỦ 6/6 (đo 19/10 chiều, sau khi chốt batch):** `npm run lint` ✅ 0 error / 0 warning · `npm run type-check` ✅ · `npm test` ✅ (**84 file / 829 test**) · `npm run lint:css-debt` ✅ **486/162, giảm 256 so với baseline cũ 648/256** (baseline đã hạ để khoá) · `npm run build` ✅ · `npm run test:ui` ✅ **35/35 màn hình** (gồm phép thử skip-link; probe chồng lấn đã bỏ qua cây mờ dần).
 
 > **Ba tài liệu thực thi đi kèm kế hoạch này** (đọc khi cần chi tiết công việc, thời lượng, người làm): `docs/plans/phase-0-execution.md` (đã commit), `docs/plans/phase-1-execution.md` và `vietjetsim-main/docs/qa/phase-1-current-state.md` — **hai file sau còn untracked tại 19/10/2026**.
 
@@ -286,7 +286,7 @@ Khiếm khuyết tìm được và đã sửa trong lần chụp đầu: `Activi
 > - Đã re-point 17 tham chiếu sang asset nội bộ đã đăng ký, xoá 62 orphan, gỡ 5 hotlink → `public/` còn **41 file, 0 orphan, 0 hotlink**; chi tiết và bảng re-point: `docs/design/asset-registry.md`.
 > - Nợ CSS mới phát sinh trong batch: 5 file mới/dư mới (HeroBookingWidget, SeatSelectionDrawer, BaggageSelectionDrawer, AncillaryServicesStep, AuthShell) có **+127 hex-class, +22 `text-[Npx]`** — đã migrate hết về token/scale: thêm 5 token `vj` (red-panel, gold-hover, tab-active, tab-idle, tab-idle-hover) + 6 bậc fontSize (3xs/2xs/xs2/sm2/base2/3xl2), hex → token Tailwind stock khi trùng giá trị gốc (yellow-500, orange-600, sky-600…). Sau migrate: color **256 → 237 (−19)**.
 > - `npm test` đo lại: **84 file / 829 test xanh** (tăng từ 73/761 nhờ workstream SkyJoy); type-check sạch; lint 0 error / 5 warning.
-> - **Ratchet tạm đỏ (+16 fontSize, +88 hex lúc 11:51):** một workstream song song đang sửa tiếp cùng working tree (Header, FlightCard, DatePicker, AnnouncementBar — mtime < 5 phút). Cổng chỉ có ý nghĩa khi chạy lại sau khi cả hai workstream dừng ghi.
+> - **Ratchet tạm đỏ (+16 fontSize, +88 hex lúc 11:51):** một workstream song song đang sửa tiếp cùng working tree (Header, FlightCard, DatePicker, AnnouncementBar — mtime < 5 phút). **Kết cục:** workstream kia dừng 12:19; migrate nốt toàn bộ batch (map hex → token/scale, thêm token `success`/`social`/`vj.gold-bronze`) → **486/162 (−256)**, baseline hạ để khoá; `test:ui` chạy lại trên bản production build: **35/35** (3 cờ BOX TRÙNG đầu tiên là false positive từ cross-fade hero — probe đã sửa để bỏ qua phần tử không đục). Batch đã commit thành 4 cụm: `865cd46` assets, `9b99d55` tokens/gate, `1549f9d` auth, `0461005` ui.
 > - Bằng chứng: `docs/design/asset-registry.md` (bản đối soát).
 
 Trạng thái đo ngày 19/10/2026:
