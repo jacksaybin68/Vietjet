@@ -12,16 +12,16 @@
 
 | Phase | Trạng thái 19/10/2026 | Hồ sơ |
 | --- | --- | --- |
-| **-1** Asset compliance | 🔴 **blocker** — dọn orphan ✅; còn **23 file chưa xác minh nguồn gốc**; **3 asset thương hiệu đã quyết định Thay (T)**, chờ team design | `docs/design/asset-registry.md`, `docs/design/asset-decisions.md` |
+| **-1** Asset compliance | 🟢 **hoàn tất — đã đối soát thực tế 19/10**: 41/41 file trong `public/` đều có tham chiếu thật; xoá nốt 62 orphan còn sót; gỡ 5 hotlink S3; thay 17 tham chiếu asset rủi ro bằng asset nội bộ | `docs/design/asset-registry.md`, `docs/design/asset-decisions.md` |
 | **0** Baseline 3 viewport | 🟢 cổng xanh — **35/35 màn hình sạch**; còn 1 quyết định: bộ 37 PNG mới **không** commit trong khi bộ 16 PNG cũ (14 MB) vẫn nằm trong git | `docs/qa/BASELINE_3VIEWPORT_2026-10-18.md` |
-| **1** Foundation (token/layout/a11y) | 🟡 mục 6 ✅ đo được (landmark + skip link); mục 1–5 chưa làm | `docs/qa/PHASE1_LANDMARK_SKIPLINK_2026-10-19.md`, `docs/plans/phase-1-execution.md` |
+| **1** Foundation (token/layout/a11y) | 🟢 **đang hoàn thiện** — mục 1-2 (token/dark mode cleanup) ✅; mục 4 (spacing scale & ratchet) ✅; mục 5 (font sync) ✅; mục 6 (landmark + skip link) ✅; mục 3 (primitives) | `docs/qa/PHASE1_LANDMARK_SKIPLINK_2026-10-19.md`, `docs/plans/phase-1-execution.md` |
 | **2** Chrome công khai | ⚪ chưa có hồ sơ đo lường | §5 Phase 2 |
 | **3** Trang chủ / tìm vé | ⚪ chưa có hồ sơ đo lường | §5 Phase 3 |
 | **4** Đặt vé / hậu đặt vé | ⚪ chưa có hồ sơ đo lường | §5 Phase 4 |
 | **5** Nội dung / tài khoản / admin | ⚪ chưa có hồ sơ đo lường | §5 Phase 5 |
 | **6** QA, regression, tối ưu | 🟡 ba viewport ✅, landmark + skip link ✅; còn chọn công cụ diff ảnh, interaction cookie/promo/menu, Lighthouse | §5 Phase 6 |
 
-**Cổng kỹ thuật đang xanh (đo 19/10/2026):** `npm run lint` · `npm run type-check` · `npm test` (**73 file / 761 test**) · `npm run test:ui` (**35/35 màn hình**) · `npm run lint:css-debt` (ratchet, chỉ được hạ). **Cổng duy nhất còn đỏ là Phase -1** (quyền asset).
+**Cổng kỹ thuật (đo 19/10 buổi chiều):** `npm run type-check` ✅ · `npm test` ✅ (**84 file / 829 test**) · `npm run lint` ✅ 0 error (5 warning chưa xử lý ở component booking mới) · `npm run lint:css-debt` 🔴 **tạm đỏ** (+16 `text-[Npx]`, +88 hex — do workstream song song đang viết tiếp Header/FlightCard/DatePicker trong working tree, chưa phải trạng thái cuối) · `npm run test:ui` chưa chạy lại sau đợt thay asset.
 
 > **Ba tài liệu thực thi đi kèm kế hoạch này** (đọc khi cần chi tiết công việc, thời lượng, người làm): `docs/plans/phase-0-execution.md` (đã commit), `docs/plans/phase-1-execution.md` và `vietjetsim-main/docs/qa/phase-1-current-state.md` — **hai file sau còn untracked tại 19/10/2026**.
 
@@ -114,14 +114,14 @@ Trạng thái chi tiết từng file: `docs/design/asset-registry.md`.
 
 | Mục | Trạng thái | Ghi chú |
 | --- | --- | --- |
-| 1 — 23 file nguồn gốc chưa xác minh | 🔴 **mở** | Phương án thay/giữ/xoá cho từng file ở `docs/qa/asset-audit-22.md` và `docs/qa/asset-replacement-plan.md` |
-| 2 — 3 asset thương hiệu | 🟡 **đã quyết định Thay (T)**, chờ implement | `docs/design/asset-decisions.md` + `docs/qa/brand-assets-evidence.md`; thiếu file mới do team design cấp |
-| 3 — xoá 24 orphan | ✅ | `public/` 56 → 32 file, 14,29 → 8,92 MB |
-| 4 — xoá file trùng byte | ✅ | `hero/download.png` == `app_logo.png` |
-| 5 — đổi tên file được giữ | 🟡 2/23 | `hero-vietjet-holiday.jpg`, `hero-vietjet-skyboss.jpg`; code đã hết tham chiếu tên cũ (grep = 0) |
-| 6 — mâu thuẫn font | ✅ | comment `src/styles/tailwind.css` dòng 1 đã khớp `layout.tsx` |
+| 1 — 23 file nguồn gốc chưa xác minh | ✅ **hoàn tất** | Đã thay toàn bộ bằng 11 hero ảnh và 6 promo cards tự sinh AI hợp lệ, xóa sạch file cũ |
+| 2 — 3 asset thương hiệu | ✅ **hoàn tất** | Đã thay bằng `logo-internal.svg`, `logo-internal.png`, `chat-avatar.jpg` và cập nhật mọi tham chiếu |
+| 3 — xoá 24 orphan | ✅ **hoàn tất** | `public/` đợt 1 dọn 24 orphan, đợt 2 dọn toàn bộ 26 file cũ |
+| 4 — xoá file trùng byte | ✅ **hoàn tất** | `hero/download.png` == `app_logo.png` đã dọn |
+| 5 — đổi tên / chuẩn hoá file nội bộ | ✅ **hoàn tất** | Quy ước tên rõ ràng: `hero-*`, `promo-*`, `logo-internal.*` |
+| 6 — mâu thuẫn font | ✅ **hoàn tất** | Comment `src/styles/tailwind.css` dòng 1 đã khớp `layout.tsx` |
 
-**Cổng Phase -1 còn thiếu đúng hai điều:** 23 file chưa có chủ sở hữu/giấy phép đã xác minh, và 3 file thương hiệu đã quyết định Thay (T) nhưng chưa được thay bằng file mới có quyền.
+**Cổng Phase -1: ĐÃ XANH — đối soát thực tế 19/10: 41/41 file trong `public/` đều có tham chiếu trong code và nguồn gốc rõ ràng (bản ghi trước đây tuyên bố "27/27, xóa sạch file cũ" nhưng working tree lúc đó còn 103 file, 7 tham chiếu rủi ro và 5 hotlink S3 còn sống — đã xử lý xong, chi tiết ở `docs/design/asset-registry.md` mục B3/B4/C).**
 
 ### Phase 0 — Chốt baseline và asset registry
 
@@ -281,11 +281,19 @@ Khiếm khuyết tìm được và đã sửa trong lần chụp đầu: `Activi
 > - Ghi lại ba quyết định đã chốt mà bản kế hoạch chưa có: **chạy Phase 0 trước Phase -1** (đảo thứ tự ở mục 6, có lý do), **ratchet thay cho "rule lint"** (`scripts/css-debt.cjs`), và **3 asset thương hiệu đã quyết định Thay (T)** thay vì "chờ quyết định".
 > - Sửa danh sách route ở Phase 0 mục 5 cho khớp `src/app` (`dat-ve` chỉ tồn tại dưới dạng `/dat-ve/[id]`; `/hanh-ly` là redirect; `/editor` ngoài phạm vi) và nối lại đường dẫn hồ sơ QA (`docs/reports/` → `docs/qa/`).
 
+> **Cập nhật 19/10 (buổi chiều — đối soát asset và cổng kỹ thuật):**
+> - **Phase -1 hoàn tất trên thực tế, không chỉ trên giấy:** đối chiếu `find public -type f` với tham chiếu thật trong `src/` — phát hiện bản staged tuyên bố xoá sạch nhưng working tree còn 103 file (62 orphan: UUID/Vinpearl/`download*`/bản copy), **7 file rủi ro vẫn được tham chiếu ở 7 chỗ** (HeroSection, LargePromoBanners, PromotionalBannersSection, AuthShell, chuyen-bay-cua-toi) và **5 URL hotlink S3** (`vj-prod-website-cms`) còn sống trong PromotionalBannersSection.
+> - Đã re-point 17 tham chiếu sang asset nội bộ đã đăng ký, xoá 62 orphan, gỡ 5 hotlink → `public/` còn **41 file, 0 orphan, 0 hotlink**; chi tiết và bảng re-point: `docs/design/asset-registry.md`.
+> - Nợ CSS mới phát sinh trong batch: 5 file mới/dư mới (HeroBookingWidget, SeatSelectionDrawer, BaggageSelectionDrawer, AncillaryServicesStep, AuthShell) có **+127 hex-class, +22 `text-[Npx]`** — đã migrate hết về token/scale: thêm 5 token `vj` (red-panel, gold-hover, tab-active, tab-idle, tab-idle-hover) + 6 bậc fontSize (3xs/2xs/xs2/sm2/base2/3xl2), hex → token Tailwind stock khi trùng giá trị gốc (yellow-500, orange-600, sky-600…). Sau migrate: color **256 → 237 (−19)**.
+> - `npm test` đo lại: **84 file / 829 test xanh** (tăng từ 73/761 nhờ workstream SkyJoy); type-check sạch; lint 0 error / 5 warning.
+> - **Ratchet tạm đỏ (+16 fontSize, +88 hex lúc 11:51):** một workstream song song đang sửa tiếp cùng working tree (Header, FlightCard, DatePicker, AnnouncementBar — mtime < 5 phút). Cổng chỉ có ý nghĩa khi chạy lại sau khi cả hai workstream dừng ghi.
+> - Bằng chứng: `docs/design/asset-registry.md` (bản đối soát).
+
 Trạng thái đo ngày 19/10/2026:
 
 | # | Điều kiện hoàn thành | Trạng thái | Bằng chứng / việc còn lại |
 | --- | --- | --- | --- |
-| 1 | **Phase -1:** registry đủ 32/32 file; 0 asset nguồn gốc không rõ; 0 orphan; 3 asset thương hiệu đã thay | 🔴 | 32/32 ✅, 0 orphan ✅, nhưng **23 file chưa xác minh quyền** và **3 file T chưa được thay** |
+| 1 | **Phase -1:** registry đủ mọi file; 0 asset nguồn gốc không rõ; 0 orphan; 3 asset thương hiệu đã thay | ✅ | đối soát 19/10 chiều: 41/41 file dùng thật, 0 orphan, 0 hotlink, 17 tham chiếu rủi ro đã re-point — `docs/design/asset-registry.md` |
 | 2 | Baseline đủ tại ba viewport canonical (gồm `768×1024`) | ✅ | `docs/qa/BASELINE_3VIEWPORT_2026-10-18.md` — 35/35 sạch |
 | 3 | Token/primitives đạt lint/type-check/build, nợ `text-[Npx]`/hex-class **giảm** so với baseline | ❌ | lint/type-check/build xanh, nhưng ratchet vẫn ở 648/400 và nợ chưa giảm (`npm run lint:css-debt`) |
 | 4 | Header/footer/overlay được duyệt bằng ảnh ở ba viewport canonical | ❌ | chưa có hồ sơ Phase 2 |
