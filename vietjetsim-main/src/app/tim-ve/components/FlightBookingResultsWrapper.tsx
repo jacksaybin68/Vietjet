@@ -153,25 +153,40 @@ export default function FlightBookingResultsWrapper({
     ) => {
       const normalized = normalizeFareClass(fareClass);
       const tax = 581581 * (paxCounts.adult || 1);
-      // The base is the ECO price of this same flight: a Deluxe pick must not
-      // become the "Eco" figure the tabs then multiply from.
       const baseFare = fares?.eco ?? Math.round(fare / (FARE_CLASS_MULTIPLIER[normalized] ?? 1));
+      const outboundFlight = {
+        flightNo,
+        fareClass: normalized,
+        fare,
+        tax,
+        total: fare + tax,
+        baseFare,
+        fares,
+        departTime: flight?.departTime || '06:00',
+        arriveTime: flight?.arriveTime || '08:15',
+      };
+      const returnFlightNo = flightNo.replace(/\d+/, (m) => String(Number(m) + 1));
+      const inboundFlight = isRoundTrip
+        ? {
+            flightNo: returnFlightNo,
+            fareClass: normalized,
+            fare,
+            tax,
+            total: fare + tax,
+            baseFare,
+            fares,
+            departTime: '18:30',
+            arriveTime: '20:45',
+          }
+        : null;
+
       setBookings((prev) => ({
         ...prev,
-        [bookingKey]: {
-          flightNo,
-          fareClass: normalized,
-          fare,
-          tax,
-          total: fare + tax,
-          baseFare,
-          fares,
-          departTime: flight?.departTime,
-          arriveTime: flight?.arriveTime,
-        },
+        outbound: outboundFlight,
+        inbound: inboundFlight,
       }));
     },
-    [bookingKey, paxCounts.adult]
+    [isRoundTrip, paxCounts.adult]
   );
 
   const handleContinue = useCallback(() => {
@@ -467,7 +482,7 @@ export default function FlightBookingResultsWrapper({
                 : undefined,
             }}
             onContinue={handleContinue}
-            canContinue={bookings.outbound !== null && (!isRoundTrip || bookings.inbound !== null)}
+            canContinue={bookings.outbound !== null}
           />
         </div>
       </div>
@@ -486,8 +501,8 @@ export default function FlightBookingResultsWrapper({
           <button
             type="button"
             onClick={handleContinue}
-            disabled={!bookings.outbound || (isRoundTrip && !bookings.inbound)}
-            className="bg-[#FFCC00] hover:bg-[#FFD200] disabled:opacity-50 disabled:cursor-not-allowed text-gray-950 font-black text-sm px-10 py-2.5 rounded-full shadow transition-all active:scale-95"
+            disabled={!bookings.outbound}
+            className="bg-[#FFCC00] hover:bg-[#FFD200] disabled:opacity-50 disabled:cursor-not-allowed text-gray-950 font-black text-sm px-10 py-2.5 rounded-full shadow transition-all active:scale-95 cursor-pointer"
           >
             Đi tiếp
           </button>
