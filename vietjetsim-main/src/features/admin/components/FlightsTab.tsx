@@ -235,6 +235,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
   const [scheduleDate, setScheduleDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [wafCookie, setWafCookie] = useState('');
   const [importOnSuccess, setImportOnSuccess] = useState(false);
+  const [updateExistingPrices, setUpdateExistingPrices] = useState(true);
   const [isCollectingSchedule, setIsCollectingSchedule] = useState(false);
   const [isImportingFlights, setIsImportingFlights] = useState(false);
   const [scheduleResult, setScheduleResult] = useState<CollectScheduleResponse | null>(null);
@@ -299,16 +300,19 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
         date: scheduleDate,
         wafCookie: wafCookie.trim() || undefined,
         importOnSuccess,
+        updateExisting: updateExistingPrices,
       });
       setScheduleResult(data);
       if (!data.reachable) {
         onToast?.warning('Không thể lấy lịch bay', data.reason || 'Bị chặn bởi WAF');
       } else {
         const count = data.flights?.length ?? 0;
-        if (data.imported && data.imported.length > 0) {
+        const importedCount = data.imported?.length ?? 0;
+        const updatedCount = data.updated?.length ?? 0;
+        if (importedCount > 0 || updatedCount > 0) {
           onToast?.success(
-            'Thu thập và nhập thành công',
-            `Đã nhập ${data.imported.length} chuyến bay vào hệ thống.`
+            'Thu thập và cập nhật giá vé thành công',
+            `Đã thêm mới ${importedCount} chuyến, cập nhật giá vé thực tế ${updatedCount} chuyến.`
           );
           fetchFlights();
         } else {
@@ -336,24 +340,28 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
         to: scheduleTo,
         date: scheduleDate,
         flights: scheduleResult.flights,
+        updateExisting: updateExistingPrices,
       });
+      const importedCount = res.imported?.length ?? 0;
+      const updatedCount = res.updated?.length ?? 0;
       onToast?.success(
-        'Nhập chuyến bay thành công',
-        `Đã nhập ${res.imported.length} chuyến, bỏ qua ${res.skipped.length} chuyến.`
+        'Cập nhật giá vé thành công',
+        `Đã thêm mới ${importedCount} chuyến, cập nhật giá vé thực tế ${updatedCount} chuyến.`
       );
       setScheduleResult((prev) =>
         prev
           ? {
               ...prev,
               imported: res.imported,
+              updated: res.updated,
               skipped: res.skipped,
             }
           : prev
       );
       fetchFlights();
     } catch (err) {
-      const msg = getApiErrorMessage(err, 'Không thể nhập chuyến bay vào cơ sở dữ liệu');
-      onToast?.error('Lỗi nhập chuyến bay', msg);
+      const msg = getApiErrorMessage(err, 'Không thể cập nhật chuyến bay vào cơ sở dữ liệu');
+      onToast?.error('Lỗi cập nhật chuyến bay', msg);
     } finally {
       setIsImportingFlights(false);
     }
@@ -1062,20 +1070,38 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                     placeholder="aws-waf-token=... (Lấy từ DevTools của trình duyệt khi duyệt vietjetair.com)"
                     className="w-full bg-slate-900/60 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-600 px-3 py-2 font-mono focus:outline-none focus:border-indigo-500/50"
                   />
-                  <div className="flex items-center gap-2 pt-1">
-                    <input
-                      type="checkbox"
-                      id="importOnSuccessCheck"
-                      checked={importOnSuccess}
-                      onChange={(e) => setImportOnSuccess(e.target.checked)}
-                      className="w-4 h-4 rounded border-white/20 bg-slate-900 text-indigo-600 focus:ring-0 cursor-pointer"
-                    />
-                    <label
-                      htmlFor="importOnSuccessCheck"
-                      className="text-xs text-slate-300 cursor-pointer select-none"
-                    >
-                      Nhập ngay vào cơ sở dữ liệu sau khi thu thập thành công
-                    </label>
+                  <div className="flex flex-wrap items-center gap-4 pt-1">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="updateExistingPricesCheck"
+                        checked={updateExistingPrices}
+                        onChange={(e) => setUpdateExistingPrices(e.target.checked)}
+                        className="w-4 h-4 rounded border-white/20 bg-slate-900 text-emerald-500 focus:ring-0 cursor-pointer"
+                      />
+                      <label
+                        htmlFor="updateExistingPricesCheck"
+                        className="text-xs font-semibold text-emerald-400 cursor-pointer select-none"
+                      >
+                        Cập nhật giá vé thực tế cho các chuyến đã có
+                      </label>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="importOnSuccessCheck"
+                        checked={importOnSuccess}
+                        onChange={(e) => setImportOnSuccess(e.target.checked)}
+                        className="w-4 h-4 rounded border-white/20 bg-slate-900 text-indigo-600 focus:ring-0 cursor-pointer"
+                      />
+                      <label
+                        htmlFor="importOnSuccessCheck"
+                        className="text-xs text-slate-300 cursor-pointer select-none"
+                      >
+                        Tự động nhập/cập nhật sau khi thu thập
+                      </label>
+                    </div>
                   </div>
                 </div>
 
@@ -1153,7 +1179,8 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                           {/* Import Button if not yet imported */}
                           {scheduleResult.flights &&
                             scheduleResult.flights.length > 0 &&
-                            (!scheduleResult.imported || scheduleResult.imported.length === 0) && (
+                            (!scheduleResult.imported || scheduleResult.imported.length === 0) &&
+                            (!scheduleResult.updated || scheduleResult.updated.length === 0) && (
                               <button
                                 type="button"
                                 onClick={handleImportFlights}
@@ -1166,26 +1193,41 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                                   className={isImportingFlights ? 'animate-spin' : ''}
                                 />
                                 {isImportingFlights
-                                  ? 'Đang nhập...'
-                                  : `Nhập ${scheduleResult.flights.length} chuyến vào bảng chuyến bay`}
+                                  ? 'Đang đồng bộ...'
+                                  : `Cập nhật giá vé thực tế (${scheduleResult.flights.length} chuyến)`}
                               </button>
                             )}
                         </div>
 
                         {/* Import summary status */}
-                        {scheduleResult.imported && scheduleResult.imported.length > 0 && (
-                          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs space-y-1">
-                            <p className="font-bold">
-                              ✓ Đã nhập thành công {scheduleResult.imported.length} chuyến vào cơ sở
-                              dữ liệu:
-                            </p>
-                            <p className="text-slate-300 font-mono">
-                              {scheduleResult.imported.join(', ')}
-                            </p>
+                        {((scheduleResult.imported && scheduleResult.imported.length > 0) ||
+                          (scheduleResult.updated && scheduleResult.updated.length > 0)) && (
+                          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs space-y-1.5">
+                            {scheduleResult.imported && scheduleResult.imported.length > 0 && (
+                              <div>
+                                <p className="font-bold">
+                                  ✓ Đã thêm mới {scheduleResult.imported.length} chuyến vào hệ
+                                  thống:
+                                </p>
+                                <p className="text-slate-300 font-mono text-xs mt-0.5">
+                                  {scheduleResult.imported.join(', ')}
+                                </p>
+                              </div>
+                            )}
+                            {scheduleResult.updated && scheduleResult.updated.length > 0 && (
+                              <div>
+                                <p className="font-bold text-cyan-300">
+                                  ✓ Đã cập nhật giá vé thực tế cho {scheduleResult.updated.length}{' '}
+                                  chuyến đã có:
+                                </p>
+                                <p className="text-slate-300 font-mono text-xs mt-0.5">
+                                  {scheduleResult.updated.join(', ')}
+                                </p>
+                              </div>
+                            )}
                             {scheduleResult.skipped && scheduleResult.skipped.length > 0 && (
-                              <p className="text-slate-400 mt-1">
-                                (Bỏ qua {scheduleResult.skipped.length} chuyến đã có sẵn hoặc không
-                                đạt chuẩn)
+                              <p className="text-slate-400 text-xs pt-0.5 border-t border-white/5">
+                                (Bỏ qua {scheduleResult.skipped.length} chuyến không đạt chuẩn)
                               </p>
                             )}
                           </div>

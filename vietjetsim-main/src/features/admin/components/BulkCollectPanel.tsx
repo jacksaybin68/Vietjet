@@ -92,6 +92,7 @@ export default function BulkCollectPanel({
   const [dateTo, setDateTo] = useState(tomorrow);
   const [wafCookie, setWafCookie] = useState('');
   const [importOnSuccess, setImportOnSuccess] = useState(false);
+  const [updateExistingPrices, setUpdateExistingPrices] = useState(true);
   const [concurrency, setConcurrency] = useState(4);
 
   const [isRunning, setIsRunning] = useState(false);
@@ -139,15 +140,20 @@ export default function BulkCollectPanel({
         dates,
         wafCookie: wafCookie.trim() || undefined,
         importOnSuccess,
+        updateExisting: updateExistingPrices,
         concurrency,
       });
       setResult(res);
       if (res.succeeded > 0) {
+        const extra =
+          res.imported > 0 || res.updated > 0
+            ? `, thêm mới ${res.imported} chuyến, cập nhật ${res.updated || 0} chuyến`
+            : '';
         onToast?.success(
           'Thu thập hoàn tất',
-          `${res.succeeded}/${res.total} chặng thành công${res.imported > 0 ? `, đã nhập ${res.imported} chuyến` : ''}.`
+          `${res.succeeded}/${res.total} chặng thành công${extra}.`
         );
-        if (res.imported > 0) onFlightsImported?.();
+        if (res.imported > 0 || (res.updated && res.updated > 0)) onFlightsImported?.();
       } else {
         onToast?.warning('Không lấy được chuyến nào', `${res.blocked} chặng bị WAF chặn.`);
       }
@@ -164,6 +170,7 @@ export default function BulkCollectPanel({
     dateTo,
     wafCookie,
     importOnSuccess,
+    updateExistingPrices,
     concurrency,
     onToast,
     onFlightsImported,
@@ -180,26 +187,35 @@ export default function BulkCollectPanel({
         to: item.to,
         date: item.date,
         flights: item.flights,
+        updateExisting: updateExistingPrices,
       });
+      const importedCount = res.imported?.length ?? 0;
+      const updatedCount = res.updated?.length ?? 0;
       onToast?.success(
-        'Nhập thành công',
-        `Đã nhập ${res.imported.length} chuyến, bỏ qua ${res.skipped.length}.`
+        'Đồng bộ thành công',
+        `Chặng ${item.route}: thêm mới ${importedCount} chuyến, cập nhật giá vé ${updatedCount} chuyến.`
       );
       // Cập nhật kết quả local
       setResult((prev) =>
         prev
           ? {
               ...prev,
-              imported: prev.imported + res.imported.length,
+              imported: prev.imported + importedCount,
+              updated: (prev.updated || 0) + updatedCount,
               results: prev.results.map((r) =>
                 r.route === item.route && r.date === item.date
-                  ? { ...r, imported: res.imported, skipped: res.skipped }
+                  ? {
+                      ...r,
+                      imported: res.imported,
+                      updated: res.updated,
+                      skipped: res.skipped,
+                    }
                   : r
               ),
             }
           : prev
       );
-      if (res.imported.length > 0) onFlightsImported?.();
+      if (importedCount > 0 || updatedCount > 0) onFlightsImported?.();
     } catch (err) {
       onToast?.error('Lỗi nhập chuyến bay', getApiErrorMessage(err, 'Không thể nhập chuyến bay'));
     } finally {
@@ -348,17 +364,30 @@ export default function BulkCollectPanel({
             />
           </div>
         </div>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={importOnSuccess}
-            onChange={(e) => setImportOnSuccess(e.target.checked)}
-            className="w-4 h-4 accent-indigo-500"
-          />
-          <span className="text-xs text-slate-300">
-            Tự động nhập vào DB khi thu thập thành công
-          </span>
-        </label>
+        <div className="flex flex-wrap items-center gap-4 pt-1">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={updateExistingPrices}
+              onChange={(e) => setUpdateExistingPrices(e.target.checked)}
+              className="w-4 h-4 accent-emerald-500"
+            />
+            <span className="text-xs font-semibold text-emerald-400">
+              Cập nhật giá vé thực tế cho các chuyến đã có
+            </span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={importOnSuccess}
+              onChange={(e) => setImportOnSuccess(e.target.checked)}
+              className="w-4 h-4 accent-indigo-500"
+            />
+            <span className="text-xs text-slate-300">
+              Tự động nhập/cập nhật vào DB khi thu thập thành công
+            </span>
+          </label>
+        </div>
       </div>
 
       {/* ── Tổng hợp và nút chạy ───────────────────────────────────────────── */}
@@ -406,8 +435,8 @@ export default function BulkCollectPanel({
             {[
               { label: 'Thành công', value: result.succeeded, cls: 'text-emerald-400' },
               { label: 'WAF chặn', value: result.blocked, cls: 'text-amber-400' },
-              { label: 'Lỗi', value: result.failed, cls: 'text-red-400' },
-              { label: 'Đã nhập', value: result.imported, cls: 'text-indigo-400' },
+              { label: 'Đã thêm mới', value: result.imported, cls: 'text-indigo-400' },
+              { label: 'Đã cập nhật giá', value: result.updated || 0, cls: 'text-cyan-400' },
             ].map((card) => (
               <div
                 key={card.label}

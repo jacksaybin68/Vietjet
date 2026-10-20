@@ -29,6 +29,7 @@ export interface BulkCollectItem {
   status: 'success' | 'waf_blocked' | 'error' | 'empty';
   flights: WebFlight[];
   imported?: string[];
+  updated?: string[];
   skipped?: string[];
   reason?: string;
 }
@@ -39,6 +40,7 @@ export interface BulkCollectResponse {
   blocked: number;
   failed: number;
   imported: number;
+  updated: number;
   results: BulkCollectItem[];
 }
 
@@ -60,6 +62,7 @@ export async function POST(req: NextRequest) {
       dates,
       wafCookie,
       importOnSuccess = false,
+      updateExisting = false,
       concurrency = 4,
       discountVnd,
     } = body || {};
@@ -179,9 +182,11 @@ export async function POST(req: NextRequest) {
               { from, to },
               date,
               item.flights,
-              typeof discountVnd === 'number' ? discountVnd : undefined
+              typeof discountVnd === 'number' ? discountVnd : undefined,
+              Boolean(updateExisting)
             );
             item.imported = importResult.imported;
+            item.updated = importResult.updated;
             item.skipped = importResult.skipped;
           }
 
@@ -214,6 +219,7 @@ export async function POST(req: NextRequest) {
       blocked: results.filter((r) => r.status === 'waf_blocked').length,
       failed: results.filter((r) => r.status === 'error').length,
       imported: results.reduce((s, r) => s + (r.imported?.length ?? 0), 0),
+      updated: results.reduce((s, r) => s + (r.updated?.length ?? 0), 0),
       results,
     };
 

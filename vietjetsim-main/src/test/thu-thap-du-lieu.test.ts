@@ -276,6 +276,7 @@ describe('OpenClaw Web Collection API Routes', () => {
 
       vi.spyOn(webCollection, 'importWebFlights').mockResolvedValueOnce({
         imported: ['VJ 123 06:00'],
+        updated: [],
         skipped: [],
       });
 
@@ -295,6 +296,7 @@ describe('OpenClaw Web Collection API Routes', () => {
     it('action=import: nhập trực tiếp danh sách chuyến bay đã xem trước', async () => {
       vi.spyOn(webCollection, 'importWebFlights').mockResolvedValueOnce({
         imported: ['VJ 456 09:30'],
+        updated: [],
         skipped: [],
       });
 

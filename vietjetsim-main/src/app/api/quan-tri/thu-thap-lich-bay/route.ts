@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
       date,
       wafCookie,
       importOnSuccess = false,
+      updateExisting = false,
       action,
       flights,
       discountVnd,
@@ -55,7 +56,8 @@ export async function POST(req: NextRequest) {
         { from: fromCode, to: toCode },
         dateStr,
         flights as WebFlight[],
-        typeof discountVnd === 'number' ? discountVnd : undefined
+        typeof discountVnd === 'number' ? discountVnd : undefined,
+        Boolean(updateExisting)
       );
       return NextResponse.json({
         success: true,
@@ -131,11 +133,13 @@ export async function POST(req: NextRequest) {
         { from: fromCode, to: toCode },
         dateStr,
         scheduleResult.flights,
-        typeof discountVnd === 'number' ? discountVnd : undefined
+        typeof discountVnd === 'number' ? discountVnd : undefined,
+        Boolean(updateExisting)
       );
       return NextResponse.json({
         ...scheduleResult,
         imported: importResult.imported,
+        updated: importResult.updated,
         skipped: importResult.skipped,
       });
     }

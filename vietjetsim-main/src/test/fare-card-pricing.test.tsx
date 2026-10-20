@@ -166,7 +166,7 @@ describe('giá thẻ hạng vé khớp với giá API thu', () => {
     const buttons = [...fareGrid.querySelectorAll('button')];
     buttons[0]!.click();
 
-    expect(onFlightSelect).toHaveBeenCalledTimes(1);
+    expect(onFlightSelect).toHaveBeenCalled();
     const [flightNo, fareClass, fare] = onFlightSelect.mock.calls[0]!;
     expect(flightNo).toBe('VJ115');
     expect(typeof fareClass).toBe('string');

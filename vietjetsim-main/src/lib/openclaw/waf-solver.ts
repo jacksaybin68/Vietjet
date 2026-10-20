@@ -12,6 +12,8 @@ import { sql } from '@/lib/neon';
 const CHROME_PATHS = [
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   '/Applications/Chromium.app/Contents/MacOS/Chromium',
+  '/var/www/vietjet/chrome-bin/chrome/linux-155.0.8059.84/chrome-linux64/chrome',
+  '/usr/local/bin/google-chrome',
   '/usr/bin/google-chrome',
   '/usr/bin/chromium-browser',
   '/usr/bin/chromium',
