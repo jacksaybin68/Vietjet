@@ -142,11 +142,15 @@ export function verifyRefreshToken(token: string): JWTPayload | null {
 }
 
 export function generateTokens(user: User): AuthTokens {
+  const cleanFullName = user.full_name
+    ? user.full_name.replace(/\s*\(CCCD:.*?\)/gi, '').trim()
+    : user.full_name;
+
   const payload: JWTPayload = {
     userId: user.id,
     email: user.email,
     role: user.role,
-    fullName: user.full_name,
+    fullName: cleanFullName,
     phone: user.phone,
   };
 

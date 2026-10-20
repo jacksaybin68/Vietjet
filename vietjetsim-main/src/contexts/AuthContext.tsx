@@ -45,6 +45,16 @@ interface User {
   updated_at?: string;
 }
 
+function sanitizeUser(u: User): User {
+  const cleanName = (val?: string) => (val ? val.replace(/\s*\(CCCD:.*?\)/gi, '').trim() : '');
+  const cleanFullName = cleanName(u.fullName || u.full_name);
+  return {
+    ...u,
+    fullName: cleanFullName,
+    full_name: cleanFullName,
+  };
+}
+
 /** Metadata gửi kèm khi đăng ký (đã bao gồm các trường SkyJoy mở rộng). */
 export interface SignUpMetadata {
   fullName?: string;
@@ -226,17 +236,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const data = await fetchAuth('/toi');
       if (data?.user) {
-        setUser(data.user);
-        setRole(data.user.role || 'user');
+        const sanitized = sanitizeUser(data.user);
+        setUser(sanitized);
+        setRole(sanitized.role || 'user');
         setProfile({
-          id: data.user.id,
-          email: data.user.email,
-          fullName: data.user.fullName || data.user.full_name || '',
-          role: data.user.role || 'user',
-          phone: data.user.phone,
-          avatarUrl: data.user.avatarUrl || data.user.avatar_url,
-          createdAt: data.user.createdAt || data.user.created_at || '',
-          updatedAt: data.user.updatedAt || data.user.updated_at || '',
+          id: sanitized.id,
+          email: sanitized.email,
+          fullName: sanitized.fullName || '',
+          role: sanitized.role || 'user',
+          phone: sanitized.phone,
+          avatarUrl: sanitized.avatarUrl || sanitized.avatar_url,
+          createdAt: sanitized.createdAt || sanitized.created_at || '',
+          updatedAt: sanitized.updatedAt || sanitized.updated_at || '',
         });
       } else {
         setUser(null);
@@ -273,8 +284,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     if (data.user) {
-      setUser(data.user);
-      setRole(data.user.role || 'user');
+      const sanitized = sanitizeUser(data.user);
+      setUser(sanitized);
+      setRole(sanitized.role || 'user');
     }
 
     return data;
@@ -298,8 +310,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     if (data.user) {
-      setUser(data.user);
-      setRole(data.user.role || 'user');
+      const sanitized = sanitizeUser(data.user);
+      setUser(sanitized);
+      setRole(sanitized.role || 'user');
     }
 
     return data;
@@ -313,8 +326,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     if (data.user) {
-      setUser(data.user);
-      setRole(data.user.role || 'user');
+      const sanitized = sanitizeUser(data.user);
+      setUser(sanitized);
+      setRole(sanitized.role || 'user');
     }
 
     return data;
