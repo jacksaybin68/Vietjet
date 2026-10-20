@@ -302,7 +302,7 @@ export default function HeroBookingWidget() {
           </div>
 
           {/* Hàng 3: Hành khách */}
-          <div className="mt-2.5 rounded-[6px] overflow-hidden border border-[var(--border)] bg-white shadow-xs">
+          <div className="mt-2.5 rounded-[6px] border border-[var(--border)] bg-white shadow-xs relative z-30">
             <PassengerPicker
               value={paxCounts}
               onChange={setPaxCounts}

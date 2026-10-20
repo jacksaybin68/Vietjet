@@ -134,11 +134,14 @@ export default function PassengerPicker({
       {/* Trigger Button inside Hero Widget */}
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-label="Số hành khách"
-        className="w-full flex items-center gap-2.5 bg-white px-3 py-2 text-left transition-colors cursor-pointer hover:bg-amber-50"
+        className="w-full flex items-center gap-2.5 bg-white px-3 py-2 text-left transition-colors cursor-pointer hover:bg-amber-50 rounded-[6px]"
       >
         <MdOutlinePerson className="shrink-0 text-xl text-gray-700" />
         <span className="min-w-0 flex-1">
@@ -149,7 +152,11 @@ export default function PassengerPicker({
             {describePax(value)}
           </span>
         </span>
-        <MdExpandMore className="shrink-0 text-xl text-gray-700" />
+        <MdExpandMore
+          className={`shrink-0 text-xl text-gray-700 transition-transform duration-200 ${
+            open ? 'rotate-180' : ''
+          }`}
+        />
       </button>
 
       {/* Dropdown Popup matching Vietjet Live Screenshot 2 */}
@@ -157,7 +164,7 @@ export default function PassengerPicker({
         <div
           role="dialog"
           aria-label="Chọn số hành khách"
-          className="absolute left-0 top-full z-40 mt-1 w-full min-w-[300px] sm:min-w-[340px] rounded-xl border border-gray-100 bg-white p-4 shadow-[0_16px_50px_rgba(0,0,0,0.22)] animate-fadeIn text-gray-800"
+          className="absolute left-0 top-full z-50 mt-1 w-full min-w-[300px] sm:min-w-[340px] rounded-xl border border-gray-200 bg-white p-4 shadow-[0_16px_50px_rgba(0,0,0,0.22)] animate-fadeIn text-gray-800"
         >
           {/* Top Row: Yêu cầu trợ giúp đặc biệt */}
           <div className="flex justify-end mb-3">
