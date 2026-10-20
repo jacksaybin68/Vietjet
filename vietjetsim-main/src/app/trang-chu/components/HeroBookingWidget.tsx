@@ -23,7 +23,7 @@ const TRIP_TYPES = [
 ] as const;
 
 const fieldGroupClass =
-  'grid grid-cols-1 divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-white shadow-xs transition-all focus-within:border-[var(--accent)] sm:grid-cols-[1.65fr_1.35fr] sm:divide-x sm:divide-y-0 min-h-[48px]';
+  'grid grid-cols-[1.6fr_1.4fr] divide-x divide-[var(--border)] rounded-xl border border-[var(--border)] bg-white shadow-xs transition-all focus-within:border-[var(--accent)] min-h-[48px]';
 
 export default function HeroBookingWidget() {
   const router = useRouter();
@@ -137,15 +137,15 @@ export default function HeroBookingWidget() {
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
                 aria-pressed={active}
-                className={`flex min-h-[48px] items-center justify-center p-1.5 text-center text-xs2 leading-[14px] font-bold transition-all cursor-pointer ${
+                className={`flex min-h-[48px] items-center justify-center p-1 sm:p-1.5 text-center text-3xs sm:text-xs2 leading-tight sm:leading-[14px] font-bold transition-all cursor-pointer ${
                   isGoldTab
                     ? 'bg-vjgold text-vjwine font-extrabold hover:bg-vj-gold-hover'
                     : active
                       ? 'bg-vj-tab-active text-white'
                       : 'bg-vj-tab-idle text-white/90 hover:bg-vj-tab-idle-hover hover:text-white'
-                } ${narrow ? 'w-[72px] shrink-0' : 'flex-1'}`}
+                } ${narrow ? 'w-[68px] sm:w-[72px] shrink-0' : 'flex-1'}`}
               >
-                {tab.label}
+                <span className="line-clamp-2">{tab.label}</span>
               </button>
             );
           })}
@@ -154,8 +154,8 @@ export default function HeroBookingWidget() {
         {/* Thân form nền đỏ hồng #E74B55 theo quy chuẩn Ảnh 2 */}
         <div className="p-3.5 sm:p-4 text-white bg-vj-red-panel">
           {/* Hàng chọn loại hành trình + Tiền tệ VND */}
-          <div className="flex items-center justify-between gap-2 mb-3">
-            <fieldset className="flex items-center gap-2.5 sm:gap-3 border-none p-0">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <fieldset className="flex flex-wrap items-center gap-2 sm:gap-3 border-none p-0">
               <legend className="sr-only">Loại hành trình</legend>
               {TRIP_TYPES.map(({ value, label }) => {
                 const isSelected = roundTrip === (value === 'round');
@@ -255,7 +255,7 @@ export default function HeroBookingWidget() {
                 setTo(from);
                 setSearchError(null);
               }}
-              className="absolute -left-3 top-[52px] -translate-y-1/2 z-10 grid h-7 w-7 place-items-center rounded-full bg-white text-vjred shadow-[0_2px_8px_rgba(0,0,0,0.22)] border border-gray-100 hover:scale-110 active:scale-95 transition-transform cursor-pointer"
+              className="absolute -left-3 top-[53px] -translate-y-1/2 z-10 grid h-7 w-7 place-items-center rounded-full bg-white text-vjred shadow-[0_2px_8px_rgba(0,0,0,0.22)] border border-gray-100 hover:scale-110 active:scale-95 transition-transform cursor-pointer"
             >
               <MdSwapHoriz className="text-lg" />
             </button>
@@ -269,7 +269,7 @@ export default function HeroBookingWidget() {
                 airports={airports}
                 onChange={handleToChange}
                 variant="flush"
-                className={roundTrip ? '' : 'sm:col-span-2'}
+                className={roundTrip ? '' : 'col-span-2'}
               />
               {roundTrip && (
                 <label
