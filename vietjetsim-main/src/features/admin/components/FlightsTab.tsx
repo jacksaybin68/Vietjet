@@ -750,7 +750,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold text-white">Thu Thập Dữ Liệu Web</h3>
-                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                <span className="text-2xs font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                   OpenClaw
                 </span>
               </div>
@@ -947,7 +947,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                                 <span className="font-semibold text-white">{ap.name}</span>
                                 <span className="text-slate-400">({ap.city})</span>
                               </div>
-                              <span className="text-slate-400 text-[11px] font-medium">
+                              <span className="text-slate-400 text-xs2 font-medium">
                                 {ap.country ?? 'Quốc tế'}
                               </span>
                             </div>
@@ -974,7 +974,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                   {/* From */}
                   <div className="md:col-span-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5 block">
+                    <label className="text-2xs font-black text-slate-400 uppercase tracking-wider mb-1.5 block">
                       Điểm đi
                     </label>
                     <select
@@ -1008,7 +1008,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
 
                   {/* To */}
                   <div className="md:col-span-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5 block">
+                    <label className="text-2xs font-black text-slate-400 uppercase tracking-wider mb-1.5 block">
                       Điểm đến
                     </label>
                     <select
@@ -1026,7 +1026,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
 
                   {/* Date */}
                   <div className="md:col-span-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5 block">
+                    <label className="text-2xs font-black text-slate-400 uppercase tracking-wider mb-1.5 block">
                       Ngày bay
                     </label>
                     <input
@@ -1057,7 +1057,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
 
                 {/* WAF Cookie + Option Row */}
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                  <label className="text-2xs font-black text-slate-400 uppercase tracking-wider flex items-center justify-between">
                     <span>WAF Cookie (Tùy chọn - Dùng khi bị chặn CloudFront / AWS WAF 403)</span>
                     <span className="text-slate-500 lowercase font-normal">
                       Ví dụ: aws-waf-token=...
@@ -1238,7 +1238,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                           <div className="overflow-x-auto rounded-xl border border-white/5 bg-black/20">
                             <table className="w-full text-xs">
                               <thead>
-                                <tr className="border-b border-white/5 text-slate-500 text-[10px] font-black uppercase tracking-wider text-left">
+                                <tr className="border-b border-white/5 text-slate-500 text-2xs font-black uppercase tracking-wider text-left">
                                   <th className="px-4 py-2.5">Số hiệu</th>
                                   <th className="px-4 py-2.5">Chặng</th>
                                   <th className="px-4 py-2.5">Giờ đi</th>
@@ -1415,47 +1415,47 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
             <thead>
               <tr className="border-b border-white/5">
                 <th
-                  className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 cursor-pointer hover:text-slate-400 select-none whitespace-nowrap"
+                  className="text-left text-2xs font-black text-slate-500 uppercase tracking-widest px-5 py-4 cursor-pointer hover:text-slate-400 select-none whitespace-nowrap"
                   onClick={() => handleSort('flightNo')}
                 >
                   Số hiệu
                   <SortIcon col="flightNo" />
                 </th>
-                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4">
+                <th className="text-left text-2xs font-black text-slate-500 uppercase tracking-widest px-5 py-4">
                   Hành trình
                 </th>
-                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 hidden sm:table-cell">
+                <th className="text-left text-2xs font-black text-slate-500 uppercase tracking-widest px-5 py-4 hidden sm:table-cell">
                   Giờ bay
                 </th>
                 <th
-                  className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 hidden md:table-cell cursor-pointer hover:text-slate-400 select-none whitespace-nowrap"
+                  className="text-left text-2xs font-black text-slate-500 uppercase tracking-widest px-5 py-4 hidden md:table-cell cursor-pointer hover:text-slate-400 select-none whitespace-nowrap"
                   onClick={() => handleSort('date')}
                 >
                   Ngày
                   <SortIcon col="date" />
                 </th>
                 <th
-                  className="text-right text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 cursor-pointer hover:text-slate-400 select-none whitespace-nowrap"
+                  className="text-right text-2xs font-black text-slate-500 uppercase tracking-widest px-5 py-4 cursor-pointer hover:text-slate-400 select-none whitespace-nowrap"
                   onClick={() => handleSort('price')}
                 >
                   Giá vé
                   <SortIcon col="price" />
                 </th>
                 <th
-                  className="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 hidden lg:table-cell cursor-pointer hover:text-slate-400 select-none whitespace-nowrap"
+                  className="text-center text-2xs font-black text-slate-500 uppercase tracking-widest px-5 py-4 hidden lg:table-cell cursor-pointer hover:text-slate-400 select-none whitespace-nowrap"
                   onClick={() => handleSort('booked')}
                 >
                   Tải lượng
                   <SortIcon col="booked" />
                 </th>
                 <th
-                  className="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4 cursor-pointer hover:text-slate-400 select-none whitespace-nowrap"
+                  className="text-center text-2xs font-black text-slate-500 uppercase tracking-widest px-5 py-4 cursor-pointer hover:text-slate-400 select-none whitespace-nowrap"
                   onClick={() => handleSort('status')}
                 >
                   Trạng thái
                   <SortIcon col="status" />
                 </th>
-                <th className="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest px-5 py-4">
+                <th className="text-center text-2xs font-black text-slate-500 uppercase tracking-widest px-5 py-4">
                   Thao tác
                 </th>
               </tr>
@@ -1760,7 +1760,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                  <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-1">
                     Điểm đến
                   </label>
                   <select
@@ -1776,7 +1776,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                  <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-1">
                     Giờ đi
                   </label>
                   <input
@@ -1788,7 +1788,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                  <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-1">
                     Giờ đến
                   </label>
                   <input
@@ -1802,7 +1802,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                  <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-1">
                     Giá vé Phổ thông (₫)
                   </label>
                   <div className={`form-field-float ${newFlight.economyPrice ? 'has-value' : ''}`}>
@@ -1823,7 +1823,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                     the hint says so rather than leaving the operator to guess why
                     the thẻ Business trên trang kết quả lấy một con số từ đâu. */}
                 <div>
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                  <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-1">
                     Giá vé Thương gia (₫)
                   </label>
                   <div className={`form-field-float ${newFlight.businessPrice ? 'has-value' : ''}`}>
@@ -1842,7 +1842,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                  <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-1">
                     Sức chứa
                   </label>
                   <div className={`form-field-float ${newFlight.capacity ? 'has-value' : ''}`}>
@@ -1931,8 +1931,8 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
             <form onSubmit={handleSaveEdit} className="p-5 space-y-4">
               {/* ── Field 1: Số hiệu chuyến bay (flight_no) ── */}
               <div>
-                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                  <span className="w-5 h-5 rounded bg-red-500/10 text-red-400 flex items-center justify-center text-[10px] font-bold">
+                <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                  <span className="w-5 h-5 rounded bg-red-500/10 text-red-400 flex items-center justify-center text-2xs font-bold">
                     1
                   </span>
                   Số hiệu chuyến bay
@@ -1951,16 +1951,14 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   className={`w-full px-3 py-2.5 bg-slate-900/60 border ${editingFlight.flightNo.length >= 3 ? 'border-emerald-500/40' : 'border-white/10'} rounded-lg text-sm text-white font-mono font-bold focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-500/20 transition-all`}
                   required
                 />
-                <p className="text-[11px] text-slate-500 mt-1">
-                  Định dạng: VJ 101, VN001, BL 202...
-                </p>
+                <p className="text-xs2 text-slate-500 mt-1">Định dạng: VJ 101, VN001, BL 202...</p>
               </div>
 
               {/* ── Field 2 & 3: Điểm đi / Điểm đến ── */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded bg-blue-500/10 text-blue-400 flex items-center justify-center text-[10px] font-bold">
+                  <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded bg-blue-500/10 text-blue-400 flex items-center justify-center text-2xs font-bold">
                       2
                     </span>
                     Điểm đi
@@ -1982,8 +1980,8 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded bg-blue-500/10 text-blue-400 flex items-center justify-center text-[10px] font-bold">
+                  <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded bg-blue-500/10 text-blue-400 flex items-center justify-center text-2xs font-bold">
                       3
                     </span>
                     Điểm đến
@@ -2027,8 +2025,8 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               {/* ── Field 4 & 5: Thời gian khởi hành / Thời gian đến ── */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded bg-amber-500/10 text-amber-400 flex items-center justify-center text-[10px] font-bold">
+                  <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded bg-amber-500/10 text-amber-400 flex items-center justify-center text-2xs font-bold">
                       4
                     </span>
                     Giờ khởi hành
@@ -2045,8 +2043,8 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded bg-amber-500/10 text-amber-400 flex items-center justify-center text-[10px] font-bold">
+                  <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded bg-amber-500/10 text-amber-400 flex items-center justify-center text-2xs font-bold">
                       5
                     </span>
                     Giờ đến
@@ -2067,8 +2065,8 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
               {/* ── Fare pair: what the results cards price from (migration 030) ── */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[10px] font-bold">
+                  <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-2xs font-bold">
                       ₫
                     </span>
                     Giá Phổ thông (₫)
@@ -2089,8 +2087,8 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-[10px] font-bold">
+                  <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-2xs font-bold">
                       ₫
                     </span>
                     Giá Thương gia (₫)
@@ -2133,7 +2131,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   </div>
                 )}
               <div>
-                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
                   <Icon name="CalendarDaysIcon" size={12} className="text-slate-500" />
                   Ngày bay
                 </label>
@@ -2171,8 +2169,8 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
 
               {/* ── Field 6: Trạng thái chuyến bay ── */}
               <div>
-                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                  <span className="w-5 h-5 rounded bg-purple-500/10 text-purple-400 flex items-center justify-center text-[10px] font-bold">
+                <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                  <span className="w-5 h-5 rounded bg-purple-500/10 text-purple-400 flex items-center justify-center text-2xs font-bold">
                     6
                   </span>
                   Trạng thái chuyến bay
@@ -2216,14 +2214,14 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                     </button>
                   ))}
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1.5">
+                <p className="text-xs2 text-slate-500 mt-1.5">
                   Chọn trạng thái hiện tại của chuyến bay trong hệ thống.
                 </p>
               </div>
 
               {/* Change summary preview */}
               <div className="rounded-xl p-3 space-y-1.5 bg-slate-900/40 border border-white/10">
-                <p className="text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 text-slate-400">
+                <p className="text-xs2 font-bold uppercase tracking-widest flex items-center gap-1.5 text-slate-400">
                   <Icon name="EyeIcon" size={12} /> Xem trước thay đổi
                 </p>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
@@ -2356,7 +2354,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                       {selectedFlight.flightNo}
                     </h3>
                     <span
-                      className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest ${selectedFlight.status === 'active' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}
+                      className={`text-2xs font-black px-2.5 py-1 rounded-lg uppercase tracking-widest ${selectedFlight.status === 'active' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}
                     >
                       {STATUS_MAP[selectedFlight.status]?.label || selectedFlight.status}
                     </span>
@@ -2386,7 +2384,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 {/* Schedule info */}
                 <div className="space-y-8">
                   <section>
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">
+                    <label className="text-2xs font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">
                       Lịch trình bay
                     </label>
                     <div className="relative pl-6 space-y-8">
@@ -2425,7 +2423,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   </section>
 
                   <section>
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">
+                    <label className="text-2xs font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">
                       Thời gian bay dự kiến
                     </label>
                     <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-4 flex items-center gap-4">
@@ -2440,7 +2438,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 {/* Capacity & Commercial */}
                 <div className="space-y-8">
                   <section>
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">
+                    <label className="text-2xs font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">
                       Tải lượng & Đặt chỗ
                     </label>
                     <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-6">
@@ -2452,7 +2450,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                             )}
                             %
                           </p>
-                          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">
+                          <p className="text-2xs font-bold text-slate-500 uppercase tracking-widest mt-1">
                             Hệ số sử dụng ghế
                           </p>
                         </div>
@@ -2460,7 +2458,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                           <p className="text-sm font-black text-slate-300">
                             {selectedFlight.booked} / {selectedFlight.capacity}
                           </p>
-                          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">
+                          <p className="text-2xs font-bold text-slate-500 uppercase tracking-widest mt-1">
                             Ghế đã đặt
                           </p>
                         </div>
@@ -2477,13 +2475,13 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   </section>
 
                   <section>
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">
+                    <label className="text-2xs font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">
                       Thanh khoản dự kiến
                     </label>
                     <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-3xl p-6 relative group overflow-hidden">
                       <div className="absolute top-[-20%] right-[-10%] w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
                       <div className="relative z-10">
-                        <p className="text-[10px] font-black text-emerald-500/70 uppercase tracking-widest mb-1">
+                        <p className="text-2xs font-black text-emerald-500/70 uppercase tracking-widest mb-1">
                           Doanh thu hiện tại
                         </p>
                         <p className="text-2xl font-black text-emerald-400 tabular-nums tracking-tighter">

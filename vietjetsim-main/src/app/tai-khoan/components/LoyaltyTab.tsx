@@ -112,7 +112,7 @@ function RedeemModal({
   };
 
   const inputClass =
-    'w-full px-4 py-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#EC2029]/20 focus:border-[#EC2029] font-[Be Vietnam Pro,sans-serif]';
+    'w-full px-4 py-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-[Be Vietnam Pro,sans-serif]';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -175,7 +175,7 @@ function RedeemModal({
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#FFDD00] text-[#1A2948] rounded-xl font-bold text-sm font-[KoHo,sans-serif] hover:bg-[#F9A51A] transition-all shadow-md active:scale-95 disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-accent text-[#1A2948] rounded-xl font-bold text-sm font-[KoHo,sans-serif] hover:bg-accent-dark transition-all shadow-md active:scale-95 disabled:opacity-50"
             >
               {loading ? (
                 <Icon name="ArrowPathIcon" size={18} className="animate-spin" />
@@ -396,7 +396,7 @@ export default function LoyaltyTab() {
                   {formatPoints(tier.minLifetimePoints)} điểm
                 </div>
                 {isCurrentTier && (
-                  <div className="mt-2 text-xs font-bold text-[#EC2029] font-[Be Vietnam Pro,sans-serif]">
+                  <div className="mt-2 text-xs font-bold text-primary font-[Be Vietnam Pro,sans-serif]">
                     ★ Hạng hiện tại
                   </div>
                 )}
@@ -447,7 +447,7 @@ export default function LoyaltyTab() {
                   </div>
                   <div
                     className={`font-bold text-sm font-[KoHo,sans-serif] ${
-                      isPositive ? 'text-[#10B981]' : 'text-[#EF4444]'
+                      isPositive ? 'text-emerald-500' : 'text-red-500'
                     }`}
                   >
                     {isPositive ? '+' : '-'}

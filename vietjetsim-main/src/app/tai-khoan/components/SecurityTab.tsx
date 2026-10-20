@@ -168,8 +168,8 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
 
           {step === 'verify' && (
             <div className="space-y-4 text-center">
-              <div className="w-20 h-20 bg-[#10B981]/10 rounded-full flex items-center justify-center mx-auto">
-                <Icon name="ShieldCheckIcon" size={36} className="text-[#10B981]" />
+              <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto">
+                <Icon name="ShieldCheckIcon" size={36} className="text-emerald-500" />
               </div>
               <h4 className="text-base font-bold font-[KoHo,sans-serif] text-[var(--vj-navy)]">
                 Nhập mã xác thực
@@ -211,8 +211,8 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
 
           {step === 'done' && (
             <div className="space-y-4 text-center">
-              <div className="w-20 h-20 bg-[#10B981]/10 rounded-full flex items-center justify-center mx-auto">
-                <Icon name="CheckCircleIcon" size={36} className="text-[#10B981]" />
+              <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto">
+                <Icon name="CheckCircleIcon" size={36} className="text-emerald-500" />
               </div>
               <h4 className="text-base font-bold font-[KoHo,sans-serif] text-[var(--vj-navy)]">
                 Mã dự phòng
@@ -236,7 +236,7 @@ function TwoFASetupModal({ onClose, onSuccess }: { onClose: () => void; onSucces
               <div className="flex gap-3 pt-2">
                 <button
                   onClick={handleFinish}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#10B981] text-white rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-[#059669] transition-all active:scale-95"
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-emerald-500 text-white rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-emerald-600 transition-all active:scale-95"
                 >
                   <Icon name="CheckIcon" size={18} />
                   Hoàn tất
@@ -456,7 +456,7 @@ export default function SecurityTab() {
                         `${session.browser || 'Trình duyệt'} trên ${session.os || 'thiết bị'}`}
                     </span>
                     {session.is_current && (
-                      <span className="px-2 py-0.5 bg-[#10B981]/10 text-[#10B981] rounded-full text-xs font-semibold font-[Be Vietnam Pro,sans-serif]">
+                      <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 rounded-full text-xs font-semibold font-[Be Vietnam Pro,sans-serif]">
                         Hiện tại
                       </span>
                     )}
@@ -499,13 +499,13 @@ export default function SecurityTab() {
               <div key={item.id} className="p-4 flex items-center gap-4">
                 <div
                   className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                    item.success ? 'bg-[#10B981]/10' : 'bg-[#EF4444]/10'
+                    item.success ? 'bg-emerald-500/10' : 'bg-red-500/10'
                   }`}
                 >
                   <Icon
                     name={item.success ? 'CheckCircleIcon' : 'XCircleIcon'}
                     size={16}
-                    className={item.success ? 'text-[#10B981]' : 'text-[#EF4444]'}
+                    className={item.success ? 'text-emerald-500' : 'text-red-500'}
                   />
                 </div>
                 <div className="flex-1 min-w-0">
