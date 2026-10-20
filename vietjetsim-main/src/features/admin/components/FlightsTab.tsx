@@ -1947,7 +1947,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                     )
                   }
                   placeholder="Ví dụ: VJ 101"
-                  maxLength={10}
+                  maxLength={15}
                   className={`w-full px-3 py-2.5 bg-slate-900/60 border ${editingFlight.flightNo.length >= 3 ? 'border-emerald-500/40' : 'border-white/10'} rounded-lg text-sm text-white font-mono font-bold focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-500/20 transition-all`}
                   required
                 />
