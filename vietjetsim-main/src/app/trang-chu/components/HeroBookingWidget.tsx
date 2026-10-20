@@ -44,19 +44,27 @@ export default function HeroBookingWidget() {
 
   useEffect(() => {
     let active = true;
-    fetch('/api/san-bay')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (
-          !active ||
-          !data?.airports ||
-          !Array.isArray(data.airports) ||
-          data.airports.length === 0
-        )
-          return;
-        setAirports(data.airports);
-      })
-      .catch(() => {});
+    if (typeof fetch === 'function') {
+      try {
+        const p = fetch('/api/san-bay');
+        if (p && typeof p.then === 'function') {
+          p.then((res) => (res && res.ok ? res.json() : null))
+            .then((data) => {
+              if (
+                !active ||
+                !data?.airports ||
+                !Array.isArray(data.airports) ||
+                data.airports.length === 0
+              )
+                return;
+              setAirports(data.airports);
+            })
+            .catch(() => {});
+        }
+      } catch {
+        // Ignore fetch errors during mount
+      }
+    }
     return () => {
       active = false;
     };
