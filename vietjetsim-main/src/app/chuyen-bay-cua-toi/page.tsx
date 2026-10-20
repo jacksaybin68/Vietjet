@@ -295,10 +295,10 @@ export default function MyFlightsPage() {
                     [
                       {
                         id: 'search',
-                        label: 'TRA CỨU MÃ ĐẶT CHỖ',
+                        label: 'Tìm kiếm mã đặt chỗ',
                         TabIcon: MdConfirmationNumber,
                       },
-                      { id: 'list', label: 'CHUYẾN BAY SẮP TỚI', TabIcon: FlightIcon },
+                      { id: 'list', label: 'Chuyến bay sắp tới', TabIcon: FlightIcon },
                     ] as const
                   ).map((chip) => {
                     const active = view === chip.id;
@@ -313,13 +313,13 @@ export default function MyFlightsPage() {
                           viewPinned.current = true;
                           setView(chip.id);
                         }}
-                        className={`relative flex h-12 items-center gap-2 rounded-t-[10px] px-5 text-sm font-black uppercase tracking-wider transition-all sm:h-[52px] sm:px-6 sm:text-base2 ${
+                        className={`relative flex h-11 items-center gap-2 rounded-t-[10px] px-5 text-xs font-black uppercase tracking-wider transition-all sm:text-sm ${
                           active
-                            ? 'bg-white text-[var(--vj-red)] shadow-[0_-4px_16px_rgba(36,73,120,0.08)] border-t-2 border-[var(--vj-red)]'
-                            : 'bg-white/60 text-gray-500 hover:bg-white/80 hover:text-[var(--vj-red)] backdrop-blur-sm'
+                            ? 'bg-white text-[#D71920] shadow-[0_-4px_16px_rgba(36,73,120,0.08)] border-t-2 border-[#D71920]'
+                            : 'bg-white/60 text-gray-500 hover:bg-white/80 hover:text-[#D71920] backdrop-blur-sm'
                         }`}
                       >
-                        <TabIcon aria-hidden="true" className="text-xl" />
+                        <TabIcon aria-hidden="true" className="text-base" />
                         {chip.label}
                       </button>
                     );
@@ -335,12 +335,12 @@ export default function MyFlightsPage() {
                     <div className="grid grid-cols-1 gap-8 xl:grid-cols-[458px_minmax(0,1fr)] xl:gap-[60px]">
                       {/* Cột trái: tiêu đề + mô tả + ba trường nhập. */}
                       <div className="flex flex-col">
-                        <h1 className="text-xl2 font-extrabold uppercase leading-[1.15] tracking-[-0.01em] text-[var(--foreground)] sm:text-xl3">
-                          Tra cứu mã đặt chỗ
+                        <h1 className="text-lg font-black uppercase tracking-tight text-gray-900">
+                          CHUYẾN BAY CỦA TÔI
                         </h1>
-                        <p className="mt-[14px] max-w-[450px] text-base2 leading-[22px] text-[var(--foreground-muted)]">
-                          Vui lòng nhập thông tin theo vé đã đặt để xem hoặc thay đổi thông tin vé
-                          của quý khách.
+                        <p className="mt-2 text-xs leading-relaxed text-gray-600">
+                          Bạn muốn xem chuyến bay đã đặt, đổi lịch trình bay hay mua thêm dịch vụ
+                          hành lý, chỗ ngồi, suất ăn..., vui lòng điền thông tin bên dưới:
                         </p>
 
                         <div className="mt-[22px] space-y-[18px]">
@@ -394,11 +394,11 @@ export default function MyFlightsPage() {
                           </div>
                         </div>
 
-                        <div className="mt-[26px] flex justify-center">
+                        <div className="mt-6 flex justify-center">
                           <button
                             type="submit"
                             disabled={loading}
-                            className="inline-flex h-[45px] w-[146px] items-center justify-center rounded-[12px] bg-[linear-gradient(90deg,#FFB000_0%,#FFD500_100%)] text-lg font-black italic text-black shadow-[0_2px_10px_rgba(255,176,0,0.35)] transition-[filter,box-shadow] duration-150 hover:brightness-[1.03] hover:shadow-[0_4px_16px_rgba(255,176,0,0.45)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-vjblue/50 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex h-10 px-8 items-center justify-center rounded-xl bg-[#FFDD00] hover:bg-[#FBB612] text-sm font-black text-gray-900 shadow-md transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
                           >
                             {loading ? 'Đang tìm…' : 'Tìm kiếm'}
                           </button>
@@ -408,11 +408,11 @@ export default function MyFlightsPage() {
                       {/* Cột phải: banner ngoại tệ thực tế theo Ảnh 1 & Ảnh 2 */}
                       <div className="relative aspect-[750/650] w-full overflow-hidden rounded-[6px] min-[1368px]:aspect-auto min-[1368px]:h-[682px]">
                         <AppImage
-                          src="/images/hero/hero-airport-exchange.jpg"
+                          src="/images/hero/banner-chuyenbay-ngoai-te.jpg"
                           alt="Mua ngoại tệ dễ dàng khi đặt vé"
                           fill
                           priority
-                          quality={90}
+                          quality={95}
                           sizes="(min-width: 1280px) 800px, 100vw"
                         />
                       </div>
@@ -426,50 +426,64 @@ export default function MyFlightsPage() {
                     <div className="grid grid-cols-1 gap-8 xl:grid-cols-[458px_minmax(0,1fr)] xl:gap-[60px]">
                       {/* Cột trái: Đăng nhập bằng số điện thoại / SkyJoy ID */}
                       <div className="flex flex-col justify-center py-6">
-                        <h2 className="text-center text-xl2 font-extrabold uppercase leading-[1.15] tracking-[-0.01em] text-[var(--foreground)] sm:text-xl3">
+                        <h2 className="text-center text-base sm:text-lg font-black uppercase tracking-wide text-gray-900">
                           Đăng nhập
                         </h2>
 
-                        <div className="mt-8 mx-auto w-full max-w-[360px]">
-                          <div className="flex rounded-md border border-[var(--border)] bg-white overflow-hidden focus-within:border-[var(--vj-red)] focus-within:ring-2 focus-within:ring-red-100 transition-all">
-                            <span className="inline-flex items-center px-3.5 bg-gray-50 border-r border-[var(--border)] text-sm font-bold text-gray-700">
-                              (+84)
+                        <div className="mt-6 mx-auto w-full max-w-[340px] space-y-4">
+                          <div className="flex rounded-md border border-gray-300 bg-white overflow-hidden focus-within:border-[#D71920]">
+                            <span className="inline-flex items-center px-3 py-2 bg-gray-50 border-r border-gray-200 text-xs font-bold text-gray-700 select-none">
+                              (+84) <span className="text-[9px] text-gray-400 ml-1">▼</span>
                             </span>
                             <input
                               type="tel"
                               placeholder="Số điện thoại"
-                              className="flex-1 px-3.5 py-3 text-sm font-medium outline-none text-gray-900"
+                              className="flex-1 px-3 py-2 text-xs font-bold outline-none text-gray-900 bg-transparent"
                             />
                           </div>
 
-                          <div className="mt-6 flex justify-center">
+                          <div className="flex justify-center">
                             <Link
                               href="/dang-nhap?redirect=/chuyen-bay-cua-toi"
-                              className="text-base2 font-bold text-vjblue hover:underline"
+                              className="w-full py-2.5 rounded-xl bg-gray-100 hover:bg-[#FFDD00] text-gray-400 hover:text-gray-900 text-center font-black text-xs border border-gray-200 transition-colors shadow-sm"
                             >
                               Đăng nhập
                             </Link>
                           </div>
 
-                          <p className="mt-6 text-center text-xs text-gray-600">
+                          <p className="text-center text-xs text-gray-600">
                             Bạn chưa có tài khoản?{' '}
                             <Link
-                              href="/dang-nhap?tab=register&redirect=/chuyen-bay-cua-toi"
-                              className="font-bold text-vjblue hover:underline"
+                              href="/dang-ky?redirect=/chuyen-bay-cua-toi"
+                              className="font-bold text-[#2563d4] underline hover:text-blue-700"
                             >
                               Đăng ký ngay
                             </Link>
                           </p>
 
-                          <div className="mt-10 pt-6 border-t border-gray-200/80 text-center">
-                            <p className="text-xs2 text-gray-500">
+                          <div className="pt-6 border-t border-gray-100 text-center space-y-2">
+                            <p className="text-[11px] text-gray-500">
                               Được cung cấp và xác thực bởi SkyJoy ID
                             </p>
-                            <div className="mt-2 flex items-center justify-center gap-2">
-                              <span className="text-xs font-black italic text-[var(--vj-red)]">
-                                vietjet
+                            <div className="flex items-center justify-center gap-4 text-xs font-black select-none">
+                              <span>
+                                <span className="text-[#D71920]">Sky</span>
+                                <span className="text-[#FBB612]">Joy</span>
                               </span>
-                              <span className="text-xs font-black text-amber-500">SkyJoy</span>
+                              <span className="text-[#D71920] italic">vietjetAir.com</span>
+                              <span>
+                                <span className="text-[#D71920]">Sky</span>
+                                <span className="text-[#855B2C]">Pay</span>
+                              </span>
+                            </div>
+                            <div>
+                              <Link
+                                href="/gioi-thieu"
+                                className="inline-flex items-center gap-1 text-[11px] font-bold text-[#2563d4] hover:underline"
+                              >
+                                <span className="text-xs">ℹ</span>
+                                <span>Bạn đã biết về Vietjet SkyJoy?</span>
+                              </Link>
                             </div>
                           </div>
                         </div>
@@ -478,11 +492,11 @@ export default function MyFlightsPage() {
                       {/* Cột phải: cùng banner quảng cáo ngoại tệ như Ảnh 2 & Ảnh 4 */}
                       <div className="relative aspect-[750/650] w-full overflow-hidden rounded-[6px] min-[1368px]:aspect-auto min-[1368px]:h-[682px]">
                         <AppImage
-                          src="/images/hero/hero-airport-exchange.jpg"
+                          src="/images/hero/banner-chuyenbay-ngoai-te.jpg"
                           alt="Mua ngoại tệ dễ dàng khi đặt vé"
                           fill
                           priority
-                          quality={90}
+                          quality={95}
                           sizes="(min-width: 1280px) 800px, 100vw"
                         />
                       </div>

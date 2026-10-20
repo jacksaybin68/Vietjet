@@ -1085,6 +1085,29 @@ with services in `src/features/chat/services` and APIs under `src/app/api/tro-ch
   there or it silently no-ops in mock mode. Restart `next dev` after editing
   `neon.ts` ‚Äî a stale server serves the old mock and looks like a 404 on new queries.
 
+## Coding Pi (NVIDIA NIM)
+
+Coding Pi là trợ lý lập trình của `/editor`, chạy trên NVIDIA NIM qua API
+tương thích OpenAI. Khoá `NVIDIA_API_KEY` là server-only; đừng thêm tiền tố
+`NEXT_PUBLIC_`. Cấu hình nằm trong `src/lib/coding-pi/config.ts` (mặc định
+`nvidia/nemotron-3.5-super-vl-120b-a12b`, `max_tokens` 16384,
+`enable_thinking` bật).
+
+- `POST /api/coding-pi/chat` admin-only (`system:config`, cùng cổng với
+  `/api/editor/files`), mặc định trả SSE. Event: `ready`, `reasoning`,
+  `content`, `tool_call`, `done`, `error`. `stream: false` trả JSON cùng shape
+  như `done`. Lỗi sau khi stream đã mở đi qua `event: error`, không đổi được
+  HTTP status nữa.
+- `GET` cùng route trả trạng thái cấu hình/model cho editor.
+- `protocol.ts` là phần thuần (kiểm tra body, dựng payload, đọc SSE) và không
+  đọc `process.env`; nhờ vậy client import được mà không kéo theo khoá.
+  `createCodingPiSseParser` giữ khối bị chia cắt giữa hai chunk;
+  `createCodingPiAccumulator` nối `tool_calls[].function.arguments` theo
+  `index` thay vì ghi đè.
+- Editor dùng `streamCodingPi` từ `src/features/coding-pi` và hiển thị
+  `reasoning_content` trong khối “Suy nghĩ của Coding Pi”.
+- Test: `src/test/coding-pi.test.ts` (không gọi NVIDIA thật).
+
 ## Testing
 
 Vitest, tests in `src/test/` (`src/test/setup.ts` is the setup file). Route handlers are

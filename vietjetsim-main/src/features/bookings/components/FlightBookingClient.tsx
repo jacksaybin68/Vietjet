@@ -63,10 +63,16 @@ function countByType(passengers: Passenger[]): Record<PassengerType, number> {
 
 function FlightBookingClientInner({
   onFlightSelect,
-  continueSignal = 0,
+  continueSignal,
   onStepChange,
 }: {
-  onFlightSelect?: (flightNo: string, fareClass: string, fare: number) => void;
+  onFlightSelect?: (
+    flightNo: string,
+    fareClass: string,
+    fare: number,
+    fares?: any,
+    flight?: any
+  ) => void;
   continueSignal?: number;
   onStepChange?: (step: number) => void;
 }) {
@@ -79,6 +85,7 @@ function FlightBookingClientInner({
     pax: searchParams.get('pax') || undefined,
     child: searchParams.get('child') || undefined,
     infant: searchParams.get('infant') || undefined,
+    cheapest: searchParams.get('cheapest') || undefined,
   };
 
   const [step, setStep] = useState(1);
@@ -132,7 +139,7 @@ function FlightBookingClientInner({
   const goStepRef = useRef(goStep);
   goStepRef.current = goStep;
   useEffect(() => {
-    if (continueSignal > 0) {
+    if (continueSignal && continueSignal > 0) {
       if (!stateRef.current.selected) {
         toast.error('Chưa chọn chuyến bay', 'Vui lòng chọn chuyến bay trước khi bấm Đi tiếp.');
         return;
@@ -153,7 +160,9 @@ function FlightBookingClientInner({
       ancillaries: [],
     }));
     setSelectedSeatPrices([]);
-    goStep(2);
+    if (continueSignal === undefined) {
+      goStep(2);
+    }
     toast.success(
       'Chuyến bay đã được chọn!',
       `${flight.flightNo}: ${flight.fromCity} → ${flight.toCity} lúc ${flight.departTime}`
@@ -303,8 +312,8 @@ function FlightBookingClientInner({
 
   return (
     <div className="font-body">
-      {/* Booking progress steps */}
-      <div className="border-b border-[var(--border)] bg-white shadow-sm mb-4">
+      {/* Booking progress steps (visually hidden, 4 circular steps are in top strip) */}
+      <div className="sr-only">
         <div className="mx-auto max-w-5xl px-3 py-3 sm:px-4 md:px-6">
           <nav
             aria-label="Tiến trình đặt vé"
@@ -522,10 +531,16 @@ function FlightBookingClientInner({
 
 export default function FlightBookingClient({
   onFlightSelect,
-  continueSignal = 0,
+  continueSignal,
   onStepChange,
 }: {
-  onFlightSelect?: (flightNo: string, fareClass: string, fare: number) => void;
+  onFlightSelect?: (
+    flightNo: string,
+    fareClass: string,
+    fare: number,
+    fares?: any,
+    flight?: any
+  ) => void;
   continueSignal?: number;
   onStepChange?: (step: number) => void;
 }) {

@@ -3,7 +3,7 @@
 import React, { useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Header } from '@/shared/components/navigation';
+import { CheckInHeader } from '@/shared/components/navigation';
 import { Footer } from '@/shared/components/navigation';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
@@ -243,15 +243,12 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
     }
   }, [agreed, checkInData, toast, router]);
 
-  const fieldClass =
-    'w-full rounded-lg border border-[rgb(var(--vj-navy-rgb))]/20 bg-[var(--surface)] px-4 py-3 text-sm text-[var(--vj-text)] placeholder:text-[var(--vj-text-muted)] focus:border-[var(--vj-red)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--vj-red-rgb))]/20 font-koho';
-
   return (
     <div className="flex flex-col bg-[var(--background)]">
       {/* Nền mây phủ vùng header + nội dung chính và chiếm đúng một viewport,
           nên footer nằm ngoài vùng nền mây, theo đúng luồng tài liệu. */}
       <div className="flex min-h-screen flex-col bg-[url('/sky-clouds.svg')] bg-cover bg-top bg-no-repeat bg-[#fdeff5]">
-        <Header />
+        <CheckInHeader />
         <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
 
         {/* ===== Đầu trang: 2 tab nhỏ + tiêu đề (bố cục vietjetair.com/vi/checkin) =====
@@ -259,220 +256,343 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
           trắng pha trong suốt + chữ/icon đỏ, tab còn lại chữ xám không nền; cả
           hai nhỏ gọn, đặt sát nhau. Nền trời mây đặt ở GỐC trang (phủ toàn bộ
           nội dung dưới header), giống trang /chuyen-bay-cua-toi. */}
-        <section className="relative overflow-hidden border-b border-[var(--border)]">
-          <div className="relative mx-auto w-full md:w-[min(1000px,64vw)] px-4 pt-12 pb-6 sm:px-6 lg:px-8">
-            <div className="flex flex-wrap gap-1">
-              <span className="inline-flex items-center gap-1 rounded-md bg-white px-2.5 py-1 text-xs font-bold text-[var(--vj-red)]">
-                <MdConfirmationNumber className="h-3.5 w-3.5" />
-                Tìm kiếm mã đặt chỗ
-              </span>
-              {/* "Chuyến bay sắp tới" của site thật nằm ở trang quản lý đặt chỗ, nên
-                tab thứ hai trỏ thẳng tới đó thay vì giả lập một tab rỗng. */}
+        <section className="relative overflow-hidden py-8 sm:py-10">
+          <div
+            className="relative mx-auto max-w-full px-4 sm:px-0"
+            style={{ width: 'min(1200px, calc(100vw - 80px))' }}
+          >
+            {/* Tab active + tab inactive */}
+            <div className="flex items-end">
+              <div
+                className="flex items-center justify-center gap-2 select-none"
+                style={{
+                  width: '199px',
+                  height: '48px',
+                  background: 'rgba(255, 255, 255, 0.6)',
+                  borderRadius: '8px 8px 0 0',
+                  color: '#EC2029',
+                  fontSize: '16px',
+                  fontWeight: 700,
+                }}
+              >
+                <MdConfirmationNumber className="h-5 w-5 text-[#EC2029]" />
+                <span>Tìm kiếm mã đặt chỗ</span>
+              </div>
               <Link
                 href="/chuyen-bay-cua-toi"
-                className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-bold text-[var(--vj-text-muted)] transition-colors hover:text-[var(--vj-red)]"
+                className="flex items-center justify-center gap-2 px-5 text-[#666666] transition-colors hover:text-[#EC2029]"
+                style={{
+                  height: '48px',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                }}
               >
-                <FlightIcon className="h-3.5 w-3.5" />
-                Chuyến bay sắp tới
+                <FlightIcon className="h-5 w-5" />
+                <span>Chuyến bay sắp tới</span>
               </Link>
             </div>
 
             {/* ============ BƯỚC 1: TRA CỨU ============ */}
-            {/* Hai nền trắng (form + hướng dẫn) được gắn liền nhau trong một khung
-              duy nhất: cột trái (form) chiếm 2 phần, cột phải (hướng dẫn) chiếm 3
-              phần — trái hẹp hơn phải — và hai phần ngăn cách bằng đường kẻ mảnh
-              thay vì khoảng hở giữa hai thẻ rời. Trên mobile hai phần vẫn xếp
-              dọc. (`position: sticky` cho khung form không dùng được:
-              `.page-transition-wrapper` có `overflow-x: hidden` nên nó là scroll
-              container, sticky sẽ bám vào đó chứ không bám viewport.) */}
             {step === 'search' && (
-              <div className="mt-4 grid grid-cols-1 overflow-hidden rounded-[10px] bg-white/75 ring-1 ring-white/70 shadow-vj-md lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-                {/* Cột trái: tiêu đề + form tìm kiếm (hẹp hơn cột phải) */}
-                <div className="p-5 sm:p-6">
+              <div
+                className="grid w-full grid-cols-1 overflow-hidden lg:grid-cols-[474px_minmax(0,1fr)]"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.6)',
+                  borderRadius: '0 10px 10px 10px',
+                  boxShadow: '0 3px 12px rgba(0, 31, 62, 0.08)',
+                }}
+              >
+                {/* Cột trái: CHECK-IN form */}
+                <div className="flex flex-col justify-start border-b border-[#E5E7EB] p-6 sm:p-8 lg:border-b-0 lg:border-r lg:border-[#E5E7EB]">
                   <div>
-                    <h1 className="text-lg font-black uppercase tracking-tight text-[var(--vj-text)]">
-                      Check-in
+                    <h1 className="text-xl font-black uppercase tracking-tight text-gray-900 font-sans">
+                      CHECK-IN
                     </h1>
-                    <p className="mt-2 text-[13px] leading-normal text-[#555555]">
+                    <p className="mt-2 text-sm leading-relaxed text-gray-700 font-medium">
                       Sẵn sàng cho chuyến bay vui vẻ, thoải mái, bạn có thể làm thủ tục chuyến bay
                       trực tuyến nhanh chóng và đơn giản.
                     </p>
                   </div>
-                  <form onSubmit={handleSearch} className="mt-4 flex flex-col gap-4">
-                    {/* Mã đặt chỗ */}
-                    <div className="relative w-full">
-                      <label className="pointer-events-none absolute left-3 top-2 text-[11px] font-bold text-[var(--vj-text-muted)]">
-                        Mã đặt chỗ <span className="text-[var(--vj-red)]">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={bookingCode}
-                        onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
-                        placeholder=" "
-                        className={`${fieldClass} pb-2 pt-6 text-black font-bold uppercase`}
-                      />
-                    </div>
 
-                    {/* Họ */}
-                    <div className="relative w-full mt-4">
-                      <label className="pointer-events-none absolute left-3 top-2 text-[11px] font-bold text-[var(--vj-text-muted)]">
-                        Họ <span className="text-[var(--vj-red)]">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value.toUpperCase())}
-                        placeholder=" "
-                        className={`${fieldClass} pb-2 pt-6 text-black font-bold uppercase`}
-                      />
-                    </div>
-
-                    {/* Nút Tìm kiếm */}
-                    <div className="mt-6">
-                      <button
-                        type="submit"
-                        disabled={loading}
-                        className="vj-cta w-full h-[54px] items-center justify-center rounded-lg px-7 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50"
+                  <form onSubmit={handleSearch} className="mt-6 flex flex-col items-center">
+                    <div className="flex w-full flex-col items-center gap-[10px]">
+                      {/* Ô nhập 1: Mã đặt chỗ (410x40) */}
+                      <div
+                        className="relative flex h-[40px] items-center rounded-[5px] bg-white px-[20px]"
+                        style={{
+                          width: '410px',
+                          maxWidth: '100%',
+                          boxShadow: '0 4px 9px rgba(0, 0, 0, 0.09)',
+                        }}
                       >
-                        {loading ? 'Đang tra cứu…' : 'Tìm kiếm'}
-                      </button>
+                        <input
+                          id="booking-code"
+                          type="text"
+                          required
+                          value={bookingCode}
+                          onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
+                          autoComplete="off"
+                          className="peer z-10 h-full w-full border-0 bg-transparent p-0 text-[16px] font-semibold uppercase text-[#222222] outline-none"
+                        />
+                        {!bookingCode && (
+                          <label
+                            htmlFor="booking-code"
+                            className="pointer-events-none absolute left-[20px] flex select-none items-center text-[16px] font-semibold text-[#888888] transition-opacity peer-focus:opacity-30"
+                          >
+                            Mã đặt chỗ<span className="ml-0.5 text-[#EC2029]">*</span>
+                          </label>
+                        )}
+                      </div>
+
+                      {/* Ô nhập 2: Họ (410x40) */}
+                      <div
+                        className="relative flex h-[40px] items-center rounded-[5px] bg-white px-[20px]"
+                        style={{
+                          width: '410px',
+                          maxWidth: '100%',
+                          boxShadow: '0 4px 9px rgba(0, 0, 0, 0.09)',
+                        }}
+                      >
+                        <input
+                          id="last-name"
+                          type="text"
+                          required
+                          value={lastName}
+                          onChange={(e) => setLastName(e.target.value.toUpperCase())}
+                          autoComplete="off"
+                          className="peer z-10 h-full w-full border-0 bg-transparent p-0 text-[16px] font-semibold uppercase text-[#222222] outline-none"
+                        />
+                        {!lastName && (
+                          <label
+                            htmlFor="last-name"
+                            className="pointer-events-none absolute left-[20px] flex select-none items-center text-[16px] font-semibold text-[#888888] transition-opacity peer-focus:opacity-30"
+                          >
+                            Họ<span className="ml-0.5 text-[#EC2029]">*</span>
+                          </label>
+                        )}
+                      </div>
                     </div>
+
+                    {/* Nút Tìm kiếm 127x39 bo 10 gradient 3 điểm dừng */}
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="mt-5 flex items-center justify-center border-0 transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
+                      style={{
+                        width: '127px',
+                        height: '39px',
+                        borderRadius: '10px',
+                        background:
+                          'linear-gradient(26.73deg, #F9A51A 0%, #FBB612 50%, #FFDD00 100%)',
+                        color: '#000000',
+                        fontFamily: 'JambonoMedium, sans-serif',
+                        fontSize: '16px',
+                        fontWeight: 700,
+                        fontStyle: 'italic',
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                      }}
+                    >
+                      {loading ? 'Đang tìm…' : 'Tìm kiếm'}
+                    </button>
                   </form>
                 </div>
 
-                {/* Cột phải: Văn bản giới thiệu (rộng hơn cột trái) */}
-                <div className="border-t border-[var(--vj-sky)] p-5 text-[15px] leading-relaxed text-[var(--vj-text)] lg:border-l lg:border-t-0 lg:p-6">
-                  <div className="lg:columns-2 lg:gap-8">
-                    <div className="mb-5 break-inside-avoid">
+                {/* Cột phải: Toàn bộ 16px/500 KoHo, line-height 24px, nhấn mạnh 16px/700 */}
+                <div className="space-y-4 p-6 sm:p-8 font-koho text-[16px] font-medium leading-[24px] text-[#222222]">
+                  <p>
+                    Quý khách có thể chủ động làm thủ tục chuyến bay trực tuyến (Online Check-in)
+                    trên website hoặc ứng dụng Vietjet Air từ{' '}
+                    <strong className="font-bold text-gray-900">
+                      24 giờ đến 60 phút trước giờ khởi hành
+                    </strong>{' '}
+                    (thời gian kết thúc có thể thay đổi tùy sân bay).
+                  </p>
+
+                  <div>
+                    <h2 className="font-bold text-[16px] leading-[24px] text-gray-900">
+                      Tiện lợi — nhanh chóng — tiết kiệm thời gian
+                    </h2>
+                    <p className="mt-1">
+                      Hoàn tất thủ tục mọi lúc, mọi nơi và hạn chế thời gian chờ đợi tại Quầy thủ
+                      tục sân bay.
+                    </p>
+                  </div>
+
+                  {/* Khung vàng: <table> viền 1px #EDCE00, bo 8, nền trắng */}
+                  <div className="overflow-hidden rounded-[8px] border border-[#EDCE00] bg-white">
+                    <table
+                      className="w-full border-collapse bg-white font-koho text-[16px] font-medium leading-[24px] text-[#222222]"
+                      style={{ borderSpacing: 0 }}
+                    >
+                      <tbody>
+                        <tr>
+                          <td
+                            className="block w-full border-b border-[#EDCE00] p-5 align-top md:table-cell md:w-1/2 md:border-b-0 md:border-r"
+                            style={{ borderColor: '#EDCE00' }}
+                          >
+                            <h3 className="mb-3 font-bold text-[16px] leading-[24px] text-gray-900">
+                              Lưu ý sau khi Online Check-in:
+                            </h3>
+                            <div className="space-y-4">
+                              <div>
+                                <p className="font-bold text-[16px] leading-[24px] text-gray-900">
+                                  • Không có hành lý ký gửi:
+                                </p>
+                                <p className="mt-1">
+                                  Đối với chuyến bay nội địa tại Việt Nam, Quý khách chuẩn bị hành
+                                  lý xách tay đúng quy định và di chuyển trực tiếp đến khu vực kiểm
+                                  tra an ninh.
+                                </p>
+                              </div>
+                              <div>
+                                <p className="font-bold text-[16px] leading-[24px] text-gray-900">
+                                  • Có hành lý ký gửi:
+                                </p>
+                                <p className="mt-1">
+                                  Vui lòng đến{' '}
+                                  <strong className="font-bold text-gray-900">
+                                    Quầy Online Check-in/Bag Drop
+                                  </strong>{' '}
+                                  để gửi hành lý. Quầy làm thủ tục chuyến bay nội địa{' '}
+                                  <strong className="font-bold text-gray-900">
+                                    đóng trước 40 phút
+                                  </strong>{' '}
+                                  so với giờ khởi hành (giờ đóng quầy quốc tế tùy sân bay).
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="block w-full p-5 align-top md:table-cell md:w-1/2">
+                            <h3 className="mb-3 font-bold text-[16px] leading-[24px] text-gray-900">
+                              Lưu ý quan trọng:
+                            </h3>
+                            <div className="space-y-3">
+                              <p>
+                                Nếu có thay đổi chuyến bay sau khi đã Online Check-in, Quý khách cần
+                                thực hiện{' '}
+                                <strong className="font-bold text-gray-900">
+                                  Online Check-in lại để nhận Thẻ lên tàu bay mới
+                                </strong>{' '}
+                                và{' '}
+                                <strong className="font-bold text-gray-900">
+                                  sử dụng đúng thẻ lên tàu bay của chuyến bay đang khởi hành
+                                </strong>
+                                .
+                              </p>
+                              <p>
+                                Trong giờ cao điểm hoặc mùa lễ Tết, khu vực an ninh/xuất nhập cảnh
+                                có thể đông; Quý khách nên đến sân bay sớm để đảm bảo hành trình
+                                thuận lợi.
+                              </p>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mục I, II, III & khôi phục toàn bộ nội dung hướng dẫn */}
+                  <div className="space-y-4 pt-2">
+                    <h3 className="font-bold text-[16px] leading-[24px] text-[#EC2029]">
+                      I. Các chuyến bay khai thác bởi Vietjet:
+                    </h3>
+
+                    <div>
                       <p>
-                        Quý khách có thể chủ động làm thủ tục chuyến bay trực tuyến (Online
-                        Check-in) trên website hoặc ứng dụng Vietjet Air từ{' '}
-                        <strong className="text-[var(--vj-text)]">24 giờ đến 60 phút</strong> trước
-                        giờ khởi hành (thời gian kết thúc có thể thay đổi tùy sân bay).
-                      </p>
-                      <h3 className="mt-4 text-lg font-black text-[var(--vj-text)]">
-                        Tiện lợi – nhanh chóng – tiết kiệm thời gian
-                      </h3>
-                      <p className="mt-1">
-                        Hoàn tất thủ tục mọi lúc, mọi nơi và hạn chế thời gian chờ tại Quầy thủ tục
-                        sân bay.
+                        <strong className="font-bold text-gray-900">1. Quy định chung:</strong> Quý
+                        khách cần chuẩn bị đầy đủ giấy tờ du lịch còn hạn, đáp ứng quy định
+                        Xuất/Nhập cảnh và lưu trú.
                       </p>
                     </div>
 
-                    <div className="mb-5 space-y-6 break-inside-avoid">
-                      <div>
-                        <h3 className="text-lg font-black text-[var(--vj-text)]">
-                          Lưu ý sau khi Online Check-in:
-                        </h3>
-                        <p className="mt-3 font-bold text-[var(--vj-text)]">
-                          Không có hành lý ký gửi:
-                        </p>
-                        <p className="mt-1">
-                          Đối với chuyến bay nội địa tại Việt Nam, Quý khách chuẩn bị hành lý xách
-                          tay đúng quy định và di chuyển trực tiếp đến khu vực kiểm tra an ninh.
-                        </p>
-                        <p className="mt-3 font-bold text-[var(--vj-text)]">Có hành lý ký gửi:</p>
-                        <p className="mt-1">
-                          Vui lòng đến Quầy Online Check-in/Bag Drop để gửi hành lý. Quầy làm thủ
-                          tục chuyến bay nội địa đóng trước 40 phút so với giờ khởi hành (giờ đóng
-                          quầy quốc tế tùy sân bay).
-                        </p>
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-black text-[var(--vj-text)]">
-                          Lưu ý quan trọng:
-                        </h3>
-                        <p className="mt-3">
-                          Nếu có thay đổi chuyến bay sau khi đã Online Check-in, Quý khách cần thực
-                          hiện Online Check-in lại để nhận Thẻ lên tàu bay mới và sử dụng đúng thẻ
-                          lên tàu bay của chuyến bay đang khởi hành.
-                        </p>
-                        <p className="mt-3">
-                          Trong giờ cao điểm hoặc mùa lễ Tết, khu vực an ninh/xuất nhập cảnh có thể
-                          đông; Quý khách nên đến sân bay sớm để đảm bảo hành trình thuận lợi.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="break-inside-avoid border-t border-[var(--vj-sky)] pt-5">
-                      <h3 className="text-lg font-black text-[var(--vj-text)]">
-                        3. Chuyến bay quốc tế:
-                      </h3>
-                      <p className="mt-2 font-bold text-[var(--vj-text)]">
-                        Áp dụng các chuyến bay xuất phát từ:
-                      </p>
-                      <ul className="mt-1 list-disc pl-5">
-                        <li>Việt Nam</li>
-                        <li>Úc</li>
-                        <li>Ấn Độ</li>
-                        <li>Nhật Bản</li>
-                        <li>Hàn Quốc</li>
-                        <li>Đông Nam A (Ngoài trừ DPS)</li>
-                      </ul>
-                    </div>
                     <div>
-                      <p className="font-bold text-[var(--vj-text)]">Thời gian áp dụng:</p>
-                      <ul className="mt-1 list-disc space-y-1 pl-5">
-                        <li>
-                          Các chuyến bay khai thác bởi Vietjet: từ 24 tiếng đến 90 phút trước giờ
+                      <p className="font-bold text-[16px] leading-[24px] text-gray-900">
+                        2. Chuyến bay nội địa:
+                      </p>
+                      <p className="mt-1">
+                        Áp dụng cho các chuyến bay nội địa do Vietjet khai thác.
+                      </p>
+                      <p className="mt-1">
+                        Thời gian áp dụng: từ 24 tiếng đến 60 phút trước giờ bay.
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="font-bold text-[16px] leading-[24px] text-gray-900">
+                        3. Chuyến bay quốc tế:
+                      </p>
+                      <p className="mt-1">Áp dụng các chuyến bay xuất phát từ:</p>
+                      <ul className="mt-1 space-y-0.5 pl-6">
+                        <li className="list-disc">Việt Nam</li>
+                        <li className="list-disc">Úc</li>
+                        <li className="list-disc">Ấn Độ</li>
+                        <li className="list-disc">Nhật Bản</li>
+                        <li className="list-disc">Hàn Quốc</li>
+                        <li className="list-disc">Đông Nam Á (Ngoại trừ DPS)</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <p className="font-bold text-[16px] leading-[24px] text-gray-900">
+                        Thời gian áp dụng:
+                      </p>
+                      <ul className="mt-1 space-y-0.5 pl-6">
+                        <li className="list-disc">Từ 24 tiếng đến 90 phút trước giờ bay.</li>
+                        <li className="list-disc">
+                          Chuyến bay quốc tế xuất phát từ Úc: Từ 24 tiếng đến 04 tiếng trước giờ
                           bay.
-                        </li>
-                        <li>
-                          Chuyến bay quốc tế xuất phát từ Úc: từ 24 tiếng đến 04 tiếng trước giờ
-                          bay.
-                        </li>
-                        <li>
-                          Chuyến bay khai thác bởi Thai Vietjet: làm thủ tục trực tuyến trên website
-                          của Thai Vietjet.
                         </li>
                       </ul>
                     </div>
-                    <p className="font-bold text-[var(--vj-text)]">
-                      *Lưu ý quan trọng dành cho hành khách quốc tế đã hoàn thành làm thủ tục trực
-                      tuyến: Quy định này chỉ áp dụng đối với các chuyến bay không có hành lý ký
-                      gửi.
+
+                    <p>
+                      <strong className="font-bold text-gray-900">
+                        *Lưu ý quan trọng dành cho hành khách quốc tế đã làm thủ tục trực tuyến:
+                      </strong>{' '}
+                      Quy định này áp dụng bao gồm cả Quý khách không có hành lý ký gửi.
                     </p>
+
                     <p>
                       Để đảm bảo hành trình suôn sẻ, Quý khách vui lòng có mặt tại Quầy phục vụ
                       khách làm thủ tục trực tuyến trước giờ khởi hành 60 phút để nhân viên xác thực
-                      thông tin chuyến bay và giấy tờ du lịch, giấy tờ xuất nhập cảnh theo quy định
-                      của điểm đến.
+                      các thông tin bao gồm:
                     </p>
-                    <div>
-                      <p className="font-bold text-[var(--vj-text)]">
-                        Xác nhận lại thông tin chuyến bay với nhân viên phụ trách.
-                      </p>
+
+                    <div className="space-y-1 pl-4">
+                      <p>Xác nhận lại thông tin chuyến bay với nhân viên hãng.</p>
                       <p>
-                        Kiểm tra giấy tờ du lịch, giấy tờ xuất nhập cảnh theo yêu cầu của cảnh sát
-                        an ninh:{' '}
-                        <a href="/gioi-thieu" className="font-bold text-[var(--vj-red)] underline">
-                          TẠI ĐÂY
-                        </a>
+                        Kiểm tra giấy tờ du lịch, giấy tờ xuất nhập cảnh theo quy định của điểm đến.
                       </p>
                     </div>
-                    <div className="space-y-2 rounded-lg bg-[var(--vj-sky)] p-4">
+
+                    <div className="space-y-2 pt-1">
                       <p>
-                        <span className="font-bold text-[var(--vj-text)]">
+                        <strong className="font-bold text-[#EC2029]">
                           II. Các chuyến bay khai thác bởi Thai Vietjet
-                        </span>
+                        </strong>
                         , vui lòng làm thủ tục trực tuyến:{' '}
-                        <a href="/lam-thu-tuc" className="font-bold text-[var(--vj-red)] underline">
+                        <a
+                          href="https://checkin.vietjetair.com"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-bold text-[#0066CC] hover:underline"
+                        >
                           TẠI ĐÂY
                         </a>
                       </p>
                       <p>
-                        <span className="font-bold text-[var(--vj-text)]">
-                          III. Làm thủ tục trực tuyến bằng công nghệ nhận diện khuôn mặt
-                        </span>
+                        <strong className="font-bold text-[#EC2029]">
+                          III. Làm thủ tục trực tuyến bằng công nghệ định danh sinh trắc học
+                        </strong>
                         , hướng dẫn chi tiết:{' '}
-                        <a href="/hoi-dap" className="font-bold text-[var(--vj-red)] underline">
+                        <a href="/hoi-dap" className="font-bold text-[#0066CC] hover:underline">
                           TẠI ĐÂY
                         </a>
                       </p>
                     </div>
-                    <p className="font-bold text-[var(--vj-text)]">
-                      Xin cảm ơn &amp; chúc Quý khách có chuyến bay vui vẻ!
+
+                    <p className="pt-2 font-medium text-gray-900">
+                      Xin cảm ơn và chúc Quý khách có chuyến đi vui vẻ!
                     </p>
                   </div>
                 </div>

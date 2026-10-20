@@ -27,6 +27,7 @@ export type Flight = {
   class: 'economy' | 'business';
   airline: string;
   flightNo: string;
+  aircraft?: string;
   available: number;
   stops: number;
 };

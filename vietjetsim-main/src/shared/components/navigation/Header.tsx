@@ -223,7 +223,7 @@ export default function Header({ variant = 'default' }: { variant?: 'default' | 
       <header
         className={`sticky top-0 z-40 transition-all duration-200 ${
           compactMode
-            ? 'bg-red-700 text-white shadow-[0_2px_10px_rgba(0,0,0,0.18)]'
+            ? 'bg-[#D71920] text-white shadow-[0_2px_10px_rgba(0,0,0,0.18)]'
             : transparentMode
               ? 'bg-gradient-to-b from-slate-400/40 via-slate-400/15 to-transparent text-white shadow-none'
               : 'bg-white/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.08)]'
@@ -236,7 +236,7 @@ export default function Header({ variant = 'default' }: { variant?: 'default' | 
           <div
             className={`mx-auto flex items-center justify-between px-4 sm:px-6 ${
               compactMode
-                ? 'h-16 max-w-[1368px] min-[1368px]:px-0 lg:h-[56px]'
+                ? 'h-14 max-w-[1368px] min-[1368px]:px-0 lg:h-[48px]'
                 : 'h-14 max-w-[1240px] sm:h-16 lg:px-0'
             }`}
           >
@@ -251,7 +251,7 @@ export default function Header({ variant = 'default' }: { variant?: 'default' | 
                 alt="Vietjet Air"
                 className={
                   compactMode
-                    ? 'h-[24px] w-auto brightness-0 invert lg:h-[26px]'
+                    ? 'h-[28px] w-auto brightness-0 invert lg:h-[30px]'
                     : 'h-8 sm:h-9 w-auto'
                 }
               />
@@ -260,7 +260,7 @@ export default function Header({ variant = 'default' }: { variant?: 'default' | 
             {/* Cụm tiện ích bên phải trên desktop */}
             <div
               className={`hidden lg:flex items-center font-semibold ${
-                compactMode ? 'gap-7 text-lg2' : 'gap-6 text-sm2'
+                compactMode ? 'gap-5 text-xs' : 'gap-6 text-sm2'
               } ${lightChrome ? 'text-white' : 'text-gray-700'}`}
             >
               {/* 🎧 Hỗ trợ */}
@@ -274,7 +274,7 @@ export default function Header({ variant = 'default' }: { variant?: 'default' | 
                   aria-hidden="true"
                   className={
                     compactMode
-                      ? 'text-lg3'
+                      ? 'text-sm'
                       : `text-base ${lightChrome ? 'text-white' : 'text-vjred'}`
                   }
                 />
@@ -282,7 +282,7 @@ export default function Header({ variant = 'default' }: { variant?: 'default' | 
               </a>
 
               <span
-                className={`w-px ${compactMode ? 'h-5' : 'h-4'} ${
+                className={`w-px ${compactMode ? 'h-3.5' : 'h-4'} ${
                   lightChrome ? 'bg-white/30' : 'bg-gray-200'
                 }`}
                 aria-hidden="true"
@@ -340,14 +340,14 @@ export default function Header({ variant = 'default' }: { variant?: 'default' | 
                 </div>
               ) : (
                 <div
-                  className={`flex items-center gap-1.5 font-bold ${lightChrome ? 'text-white' : 'text-gray-700'}`}
+                  className={`flex items-center gap-1.5 font-bold ${compactMode ? 'text-xs' : 'text-sm'} ${lightChrome ? 'text-white' : 'text-gray-700'}`}
                 >
                   <HiOutlineUserCircle
                     aria-hidden="true"
-                    className={`text-base ${lightChrome ? 'text-white' : 'text-gray-400'}`}
+                    className={`${compactMode ? 'text-sm' : 'text-base'} ${lightChrome ? 'text-white' : 'text-gray-400'}`}
                   />
                   <Link
-                    href="/dang-nhap?tab=register"
+                    href="/dang-ky"
                     className={`transition ${lightChrome ? 'hover:text-vjgold' : 'hover:text-vjred'}`}
                   >
                     Đăng ký
@@ -363,7 +363,7 @@ export default function Header({ variant = 'default' }: { variant?: 'default' | 
               )}
 
               <span
-                className={`h-4 w-px ${lightChrome ? 'bg-white/30' : 'bg-gray-200'}`}
+                className={`h-3.5 w-px ${lightChrome ? 'bg-white/30' : 'bg-gray-200'}`}
                 aria-hidden="true"
               />
 
@@ -373,20 +373,15 @@ export default function Header({ variant = 'default' }: { variant?: 'default' | 
                   type="button"
                   onClick={() => setLangMenuOpen((open) => !open)}
                   aria-expanded={langMenuOpen}
-                  className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 font-bold transition ${
-                    compactMode ? 'text-base2' : 'text-xs'
-                  } ${
+                  className={`flex items-center gap-1 rounded-full px-2 py-0.5 font-bold transition text-xs ${
                     lightChrome
-                      ? 'border border-white/40 bg-black/10 backdrop-blur-xs text-white hover:border-white'
+                      ? 'border border-white/50 bg-black/10 backdrop-blur-xs text-white hover:border-white'
                       : 'border border-gray-200 bg-gray-50 text-gray-700 hover:text-vjred'
                   }`}
                 >
-                  <HiOutlineGlobeAlt
-                    aria-hidden="true"
-                    className={compactMode ? 'text-lg3' : 'text-sm'}
-                  />
+                  <HiOutlineGlobeAlt aria-hidden="true" className="text-sm" />
                   <span>{currentLang}</span>
-                  <HiOutlineChevronDown className="text-xs" />
+                  <HiOutlineChevronDown className="text-[10px]" />
                 </button>
 
                 {langMenuOpen && (
@@ -467,7 +462,7 @@ export default function Header({ variant = 'default' }: { variant?: 'default' | 
             <div ref={megaMenuRef} className="relative" onMouseLeave={() => setMegaMenu(null)}>
               <nav
                 aria-label="Điều hướng chính"
-                className={`flex items-center ${compactMode ? 'gap-9' : 'gap-6'}`}
+                className={`flex items-center ${compactMode ? 'gap-7' : 'gap-6'}`}
               >
                 {NAV_LINKS.map((link) => {
                   const active = isActivePath(pathname, link.href);
@@ -494,7 +489,7 @@ export default function Header({ variant = 'default' }: { variant?: 'default' | 
                             );
                         }}
                         className={`relative whitespace-nowrap py-1.5 font-bold uppercase tracking-wider transition-colors duration-200 flex items-center gap-1 ${
-                          compactMode ? 'text-base' : 'text-sm'
+                          compactMode ? 'text-xs' : 'text-sm'
                         } ${
                           compactMode
                             ? active || isCurrentMega
@@ -733,7 +728,7 @@ export default function Header({ variant = 'default' }: { variant?: 'default' | 
                     Đăng nhập
                   </Link>
                   <Link
-                    href="/dang-nhap?tab=register"
+                    href="/dang-ky"
                     className="rounded-lg bg-vjred py-2.5 text-center text-xs font-bold text-white shadow-xs"
                   >
                     Đăng ký

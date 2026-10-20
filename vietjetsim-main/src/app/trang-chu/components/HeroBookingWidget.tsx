@@ -5,10 +5,11 @@ import { useState } from 'react';
 import { MdArrowOutward, MdConfirmationNumber, MdExpandMore, MdSwapHoriz } from 'react-icons/md';
 import AirportPicker, { type Airport } from './AirportPicker';
 import PassengerPicker, { type PaxCounts } from './PassengerPicker';
-import DatePicker from './DatePicker';
+import { FlightDatePickerPopover, formatDisplayDate, toInputDate } from './DatePicker';
+import { MdCalendarMonth as Calendar } from 'react-icons/md';
 
 const TABS = [
-  { id: 'services', label: 'Mua hành lý, suất ăn...' },
+  { id: 'services', label: 'Mua hành lý, suất ăn chọn chỗ ngồi và hơn thế nữa...' },
   { id: 'rewards', label: 'Đổi thưởng & Mua SkyPoint' },
   { id: 'cargo', label: 'Gửi hàng nhanh' },
 ] as const;
@@ -43,11 +44,7 @@ const FALLBACK_AIRPORTS: Airport[] = [
 ];
 
 const fieldGroupClass =
-  'grid grid-cols-1 divide-y divide-[var(--border)] overflow-hidden rounded-xl border border-[var(--border)] bg-white shadow-xs transition-all focus-within:border-[var(--accent)] sm:grid-cols-[2fr_1fr] sm:divide-x sm:divide-y-0';
-
-function toInputDate(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
+  'grid grid-cols-1 divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-white shadow-xs transition-all focus-within:border-[var(--accent)] sm:grid-cols-[2fr_1fr] sm:divide-x sm:divide-y-0';
 
 export default function HeroBookingWidget() {
   const router = useRouter();
@@ -60,6 +57,7 @@ export default function HeroBookingWidget() {
   const [returnDate, setReturnDate] = useState(() =>
     toInputDate(new Date(Date.now() + 7 * 86400000))
   );
+  const [activeDatePicker, setActiveDatePicker] = useState<'depart' | 'return' | null>(null);
   const [paxCounts, setPaxCounts] = useState<PaxCounts>({ adult: 1, child: 0, infant: 0 });
   const [airports] = useState<Airport[]>(FALLBACK_AIRPORTS);
   const [promoCode, setPromoCode] = useState('');
@@ -67,8 +65,8 @@ export default function HeroBookingWidget() {
 
   const minDate = toInputDate(new Date());
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
+  const handleSubmit = (event?: React.FormEvent) => {
+    if (event) event.preventDefault();
     const params = new URLSearchParams();
     params.set('from', from);
     params.set('to', to);
@@ -88,7 +86,7 @@ export default function HeroBookingWidget() {
       <form
         id="hero-booking-form"
         onSubmit={handleSubmit}
-        className="w-full overflow-hidden rounded-[4px] bg-vj-red-panel shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-vj-red-panel/30"
+        className="w-full rounded-[4px] bg-vj-red-panel shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-vj-red-panel/30"
       >
         {/* Ba tab dịch vụ trên cùng */}
         <nav
@@ -186,13 +184,32 @@ export default function HeroBookingWidget() {
                 onChange={setFrom}
                 variant="flush"
               />
-              <DatePicker
-                label="Ngày đi"
-                value={departDate}
-                min={minDate}
-                onChange={setDepartDate}
-                variant="flush"
-              />
+              <label
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setActiveDatePicker((prev) => (prev === 'depart' ? null : 'depart'));
+                  }
+                }}
+                onClick={() => setActiveDatePicker((prev) => (prev === 'depart' ? null : 'depart'))}
+                aria-label="Ngày đi"
+                aria-expanded={activeDatePicker === 'depart'}
+                className={`w-full flex items-center gap-2 bg-white px-2.5 py-1.5 cursor-pointer hover:bg-amber-50 focus-within:bg-amber-50 min-w-0 text-left transition-colors ${
+                  activeDatePicker === 'depart' ? 'bg-amber-50/90 ring-1 ring-vjred ring-inset' : ''
+                }`}
+              >
+                <Calendar className="shrink-0 text-base text-[var(--foreground-subtle)]" />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-2xs font-bold uppercase leading-tight tracking-[0.06em] text-[var(--foreground-subtle)]">
+                    Ngày đi
+                  </span>
+                  <span className="block text-sm2 font-bold text-[var(--foreground)] truncate">
+                    {formatDisplayDate(departDate) || 'Ngày đi'}
+                  </span>
+                </span>
+              </label>
             </div>
 
             {/* Nút đảo chiều sân bay */}
@@ -220,23 +237,85 @@ export default function HeroBookingWidget() {
                 className={roundTrip ? '' : 'sm:col-span-2'}
               />
               {roundTrip && (
-                <DatePicker
-                  label="Ngày về"
-                  value={returnDate}
-                  min={departDate}
-                  onChange={setReturnDate}
-                  variant="flush"
-                />
+                <label
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setActiveDatePicker((prev) => (prev === 'return' ? null : 'return'));
+                    }
+                  }}
+                  onClick={() =>
+                    setActiveDatePicker((prev) => (prev === 'return' ? null : 'return'))
+                  }
+                  aria-label="Ngày về"
+                  aria-expanded={activeDatePicker === 'return'}
+                  className={`w-full flex items-center gap-2 bg-white px-2.5 py-1.5 cursor-pointer hover:bg-amber-50 focus-within:bg-amber-50 min-w-0 text-left transition-colors ${
+                    activeDatePicker === 'return'
+                      ? 'bg-amber-50/90 ring-1 ring-vjred ring-inset'
+                      : ''
+                  }`}
+                >
+                  <Calendar className="shrink-0 text-base text-[var(--foreground-subtle)]" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-2xs font-bold uppercase leading-tight tracking-[0.06em] text-[var(--foreground-subtle)]">
+                      Ngày về
+                    </span>
+                    <span className="block text-sm2 font-bold text-[var(--foreground)] truncate">
+                      {formatDisplayDate(returnDate) || 'Ngày về'}
+                    </span>
+                  </span>
+                </label>
               )}
             </div>
+
+            {/* Lịch chọn ngày bay 2 tháng chuẩn Vietjet Air */}
+            {activeDatePicker && (
+              <FlightDatePickerPopover
+                departDate={departDate}
+                returnDate={returnDate}
+                roundTrip={roundTrip}
+                activeStep={activeDatePicker}
+                onStepChange={setActiveDatePicker}
+                onSelectDepart={(date) => {
+                  setDepartDate(date);
+                  if (roundTrip && returnDate && returnDate < date) {
+                    const d = new Date(date);
+                    d.setDate(d.getDate() + 3);
+                    setReturnDate(toInputDate(d));
+                  }
+                }}
+                onSelectReturn={setReturnDate}
+                onTripTypeChange={(isRound) => {
+                  setRoundTrip(isRound);
+                  if (isRound && (!returnDate || returnDate < departDate)) {
+                    const d = new Date(departDate);
+                    d.setDate(d.getDate() + 7);
+                    setReturnDate(toInputDate(d));
+                  }
+                }}
+                onClose={() => setActiveDatePicker(null)}
+                minDate={minDate}
+              />
+            )}
           </div>
 
           {/* Hàng 3: Hành khách */}
           <div className="mt-2.5 rounded-[6px] overflow-hidden border border-[var(--border)] bg-white shadow-xs">
-            <PassengerPicker value={paxCounts} onChange={setPaxCounts} className="mt-0" />
+            <PassengerPicker
+              value={paxCounts}
+              onChange={setPaxCounts}
+              promoCode={promoCode}
+              onPromoCodeChange={setPromoCode}
+              cheapestOnly={cheapestOnly}
+              onCheapestChange={setCheapestOnly}
+              onSubmit={() => handleSubmit()}
+              className="mt-0"
+            />
           </div>
 
-          {/* Hàng 4: Mã khuyến mại */}
+          {/* Hàng 4: Mã khuyến mại (hiển thị khi picker đóng) */}
           <label className="mt-2.5 flex items-center gap-2 rounded-[6px] border border-[var(--border)] bg-white px-3 py-2 shadow-xs transition-all focus-within:border-vjred focus-within:ring-1 focus-within:ring-vjred">
             <MdConfirmationNumber className="shrink-0 text-lg text-vjred/80" />
             <input

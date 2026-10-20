@@ -43,6 +43,7 @@ export interface Passenger {
   /** Absent only on objects built before passenger types existed; read as 'adult'. */
   type?: PassengerType;
   name: string;
+  firstName?: string;
   dob: string;
   idNumber: string;
   gender: string;
@@ -82,4 +83,6 @@ export type SearchParams = {
   child?: string;
   /** Infants under 2, travelling on a lap. */
   infant?: string;
+  /** Auto-select cheapest fare when set to '1'. */
+  cheapest?: string;
 };

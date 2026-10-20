@@ -5,140 +5,225 @@ import Link from 'next/link';
 import { Header } from '@/shared/components/navigation';
 
 interface AuthShellProps {
-  eyebrow: string;
-  title: string;
-  subtitle: string;
+  eyebrow?: string;
+  title?: string;
+  subtitle?: string;
+  mode?: 'login' | 'register';
   children: React.ReactNode;
 }
 
-/**
- * Page frame for the auth screens, laid out like vietjetair.com/vi/signin:
- * site header on top, then a two-column grid — white form card on the left,
- * promo banner on the right, everything on a soft sky background.
- *
- * The submit buttons inside use `.vj-auth-submit`, which mirrors the real
- * SkyID (skyjoy-authen) gold theme rather than the red `.vj-btn-primary`.
- */
-export default function AuthShell({ eyebrow, title, subtitle, children }: AuthShellProps) {
+export default function AuthShell({
+  eyebrow,
+  title,
+  subtitle,
+  mode = 'login',
+  children,
+}: AuthShellProps) {
   return (
-    <div className="min-h-screen bg-[var(--vj-purple-light)] bg-[url('/images/hero/hero-window-clouds.jpg')] bg-cover bg-center bg-fixed font-body text-[var(--foreground)] relative flex flex-col justify-between">
-      <Header />
+    <div className="min-h-screen bg-[#edf2fb] bg-[url('/images/hero/hero-window-clouds.jpg')] bg-cover bg-center bg-fixed font-body text-[var(--foreground)] relative flex flex-col justify-between overflow-x-hidden">
+      <Header variant="compact" />
       <main
         id="main-content"
-        className="flex-1 flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8 pb-32"
+        className="flex-1 flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8 pb-28"
       >
-        <div className="w-full max-w-[1020px] rounded-3xl bg-white shadow-[0_24px_64px_rgba(30,41,59,0.18)] border border-white/80 overflow-hidden grid lg:grid-cols-2 my-auto">
-          {/* Cột trái: Form đăng nhập/đăng ký */}
-          <section className="p-6 sm:p-8 lg:p-10 flex flex-col justify-between bg-white">
+        <div className="w-full max-w-[1040px] rounded-3xl bg-white/95 backdrop-blur-sm shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-white/80 overflow-hidden grid lg:grid-cols-[1.12fr_0.88fr] my-auto">
+          {/* Cột trái: Form đăng nhập / đăng ký */}
+          <section className="p-6 sm:p-8 lg:p-10 flex flex-col justify-start bg-white">
             <div>
-              <Link href="/trang-chu" className="mb-4 inline-flex lg:hidden">
-                <img src="/logo-internal.svg" alt="Vietjet Air" className="h-7 w-auto" />
-              </Link>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1 text-xs font-black uppercase tracking-wider text-[var(--primary)]">
-                <span className="w-2 h-2 rounded-full bg-[var(--primary)] animate-pulse" />
-                {eyebrow}
-              </div>
-              <h2 className="font-[Be_Vietnam_Pro,sans-serif] text-2xl sm:text-3xl2 font-extrabold leading-[1.2] tracking-tight text-[var(--vj-navy)]">
-                {title}
-              </h2>
-              <p className="mt-1.5 text-xs sm:text-sm font-medium leading-relaxed text-[var(--foreground-muted)]">
-                {subtitle}
-              </p>
-              <div className="mt-6">{children}</div>
+              {title && (
+                <div className="mb-5 text-center">
+                  {eyebrow && (
+                    <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1 text-xs font-black uppercase tracking-wider text-[var(--primary)]">
+                      <span className="w-2 h-2 rounded-full bg-[var(--primary)] animate-pulse" />
+                      {eyebrow}
+                    </div>
+                  )}
+                  <h2 className="font-extrabold text-lg sm:text-xl uppercase tracking-tight text-gray-900">
+                    {title}
+                  </h2>
+                  {subtitle && <p className="mt-1 text-xs text-gray-500 font-medium">{subtitle}</p>}
+                </div>
+              )}
+              {children}
             </div>
-            <p className="mt-8 border-t border-gray-200 pt-4 text-xs font-medium text-[var(--foreground-muted)]">
-              * Tìm hiểu thêm về quyền lợi{' '}
-              <Link href="/gioi-thieu" className="font-bold text-[var(--primary)] hover:underline">
-                Vietjet SkyJoy
-              </Link>
-              ?
-            </p>
           </section>
 
-          {/* Cột phải: Poster Ngoại tệ sẵn sàng - Hành trình an tâm khớp 100% ảnh tham chiếu */}
-          <div className="relative hidden lg:flex flex-col justify-between bg-gradient-to-b from-sky-100 via-sky-50 to-rose-50 p-6 sm:p-8 border-l border-gray-100 overflow-hidden">
-            <a
-              href="https://vikkibank.vn/mua-ngoai-te-tren-app-vikki/?utm_source=vietjet&utm_medium=referral&utm_campaign=always_on"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group block relative h-full flex flex-col justify-between"
-            >
-              {/* Top tag & Plane */}
-              <div>
-                <div className="flex items-center justify-between">
-                  <div className="bg-primary-dark text-white px-2.5 py-1 rounded-sm text-xs2 font-black italic tracking-tight shadow-sm inline-block">
-                    vietjetAir.com
-                  </div>
-                  {/* Small plane flying */}
-                  <span className="text-2xl transform -rotate-12">✈️</span>
-                </div>
-
-                <div className="mt-5 text-center">
-                  <h3 className="text-xl sm:text-2xl font-black text-primary-dark uppercase tracking-tight leading-tight">
-                    NGOẠI TỆ SẴN SÀNG
-                  </h3>
-                  <h3 className="text-xl sm:text-2xl font-black text-primary-dark uppercase tracking-tight leading-tight mt-0.5">
-                    HÀNH TRÌNH AN TÂM
-                  </h3>
-                  <p className="text-sm font-bold text-gray-800 mt-2">
-                    Mua ngoại tệ dễ dàng khi đặt vé
-                  </p>
-
-                  <div className="mt-4 inline-flex flex-col items-start gap-1.5 text-xs font-bold text-gray-800">
-                    <div className="flex items-center gap-2">
-                      <span className="text-primary-dark font-black text-sm">✓</span>
-                      <span>Nhận trong ngày</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-primary-dark font-black text-sm">✓</span>
-                      <span>Tỷ giá ưu đãi</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-primary-dark font-black text-sm">✓</span>
-                      <span>Hỗ trợ toàn quốc</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Graphic illustration with landmark, travelers, currency symbols */}
-              <div className="relative mt-4 rounded-xl overflow-hidden bg-white/60 shadow-sm border border-sky-100">
+          {/* Cột phải: Banner tương ứng theo Mode */}
+          {mode === 'login' ? (
+            /* Banner 1: Poster Ngoại tệ sẵn sàng - Hành trình an tâm khớp 100% Ảnh gốc từ CMS Vietjet */
+            <div className="relative hidden lg:flex items-center justify-center p-3 sm:p-4 bg-gradient-to-b from-[#e0f2fe]/40 via-[#f0f9ff]/30 to-[#fff1f2]/40 border-l border-gray-100 overflow-hidden">
+              <a
+                href="https://vikkibank.vn/mua-ngoai-te-tren-app-vikki/?utm_source=vietjet&utm_medium=referral&utm_campaign=always_on"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group block relative w-full h-full max-h-[590px] rounded-2xl overflow-hidden shadow-sm border border-sky-100/80 transition-transform duration-300 hover:scale-[1.01]"
+              >
                 <img
-                  src="/images/hero/hero-airport-exchange.jpg"
-                  alt="Ngoại tệ sẵn sàng - Hành trình an tâm"
-                  className="w-full h-auto object-cover max-h-[260px] group-hover:scale-105 transition-transform duration-300"
+                  src="/images/hero/banner-chuyenbay-ngoai-te.jpg"
+                  alt="Ngoại tệ sẵn sàng - Hành trình an tâm - Vietjet Air"
+                  className="w-full h-full object-cover rounded-2xl"
+                  loading="lazy"
                 />
-                {/* Floating currency badges */}
-                <div className="absolute top-2 left-2 bg-amber-400 text-yellow-950 text-2xs font-black px-2 py-0.5 rounded-full shadow-sm">
-                  $ USD
+              </a>
+            </div>
+          ) : (
+            /* Banner 2: Đăng Ký Hội Viên VIETJET SkyJoy (3 Bước) khớp Ảnh chuẩn */
+            <div className="relative hidden lg:flex flex-col justify-between bg-gradient-to-b from-[#fffbeb] via-[#fef3c7]/30 to-[#fff7ed] p-6 sm:p-8 border-l border-amber-100 overflow-hidden">
+              <div>
+                <div className="text-center pt-1">
+                  <h3 className="text-xl sm:text-2xl font-bold text-[#5a4538] tracking-tight">
+                    Đăng Ký Hội Viên
+                  </h3>
+                  <div className="text-2xl sm:text-3xl font-black mt-0.5 flex items-center justify-center gap-1.5">
+                    <span className="text-[#D71920]">VIETJET</span>
+                    <span className="text-[#D71920]">Sky</span>
+                    <span className="relative inline-block text-[#D71920]">
+                      Joy
+                      <svg
+                        className="absolute -bottom-1 left-0 w-full h-2 text-[#FBB612]"
+                        viewBox="0 0 40 8"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                      >
+                        <path d="M 2 2 Q 20 8 38 2" />
+                      </svg>
+                    </span>
+                  </div>
                 </div>
-                <div className="absolute top-2 right-2 bg-amber-400 text-yellow-950 text-2xs font-black px-2 py-0.5 rounded-full shadow-sm">
-                  € EUR
-                </div>
-                <div className="absolute bottom-2 left-2 bg-amber-400 text-yellow-950 text-2xs font-black px-2 py-0.5 rounded-full shadow-sm">
-                  ¥ JPY
+
+                {/* Khung viền vàng 3 bước */}
+                <div className="mt-5 rounded-3xl border-2 border-[#FFC709] bg-white p-5 sm:p-6 shadow-sm space-y-4">
+                  {/* BƯỚC 1 */}
+                  <div className="flex items-center gap-4">
+                    <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full border-2 border-[#FBB612] bg-white text-[#FBB612] flex items-center justify-center shrink-0 shadow-sm">
+                      <svg
+                        className="w-7 h-7 text-[#FBB612]"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="text-sm font-black text-[#D71920] uppercase tracking-wide">
+                        BƯỚC 1:
+                      </div>
+                      <div className="text-base font-bold text-gray-800">Đăng ký tại đây</div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-gray-200" />
+
+                  {/* BƯỚC 2 */}
+                  <div className="flex items-center gap-4">
+                    <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full border-2 border-[#FBB612] bg-white flex flex-col items-center justify-center shrink-0 shadow-sm p-1">
+                      <div className="bg-[#D71920] text-white rounded px-1.5 py-0.5 text-center leading-none shadow-xs">
+                        <span className="text-[8px] font-black block">Sky</span>
+                        <span className="text-[8px] font-black block">Joy</span>
+                      </div>
+                      <span className="text-[10px] font-black text-[#FBB612] leading-none mt-0.5">
+                        ▼
+                      </span>
+                    </div>
+                    <div>
+                      <div className="text-sm font-black text-[#D71920] uppercase tracking-wide">
+                        BƯỚC 2:
+                      </div>
+                      <div className="text-base font-bold text-gray-800 leading-snug">
+                        Tải ứng dụng SkyJoy tại
+                      </div>
+                      <div className="text-base font-bold text-gray-800 leading-snug">
+                        App Store/ Google Play Store
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-gray-200" />
+
+                  {/* BƯỚC 3 */}
+                  <div className="flex items-start gap-4">
+                    <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full border-2 border-[#FBB612] bg-white text-[#FBB612] flex items-center justify-center shrink-0 shadow-sm">
+                      <svg
+                        className="w-8 h-8 text-[#FBB612]"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 8v13m0-13V3.5a2.5 2.5 0 10-5 0V8m5 0V3.5a2.5 2.5 0 115 0V8m-10 0h10a2 2 0 012 2v2H3v-2a2 2 0 012-2zm-2 4h18v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="text-sm font-black text-[#D71920] uppercase tracking-wide">
+                        BƯỚC 3:
+                      </div>
+                      <div className="text-base font-bold text-gray-800">Hưởng Ưu đãi</div>
+                      <ul className="mt-1 space-y-0.5 text-xs sm:text-sm text-gray-700 italic">
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-[#D71920] font-black not-italic text-sm">•</span>
+                          <span>
+                            Tặng ngay{' '}
+                            <strong className="not-italic font-black text-gray-900">
+                              200 SkyPoint
+                            </strong>
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <span className="text-[#D71920] font-black not-italic text-sm">•</span>
+                          <span>Tích SkyPoint cho các chuyến đã bay (*)</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </a>
-          </div>
+
+              <div className="text-center text-xs text-gray-500 italic mt-4">
+                (*) Khi đã hoàn thành đăng ký và xác thực tài khoản
+              </div>
+            </div>
+          )}
         </div>
       </main>
 
-      {/* Amy Mascot with "Xin chào!" tooltip matching reference screenshot */}
-      <div className="fixed right-6 bottom-6 z-40 flex items-end pointer-events-none select-none">
-        <div className="relative mb-12 -mr-1 animate-bounce duration-1000">
-          <div className="bg-white text-gray-800 text-2xs font-bold px-2.5 py-1 rounded-full shadow-lg border border-gray-200">
+      {/* Amy Mascot với tooltip "Xin chào!" khớp ảnh tham chiếu */}
+      <div className="fixed right-6 bottom-4 z-40 flex items-end pointer-events-none select-none">
+        <div className="relative mb-8 mr-1">
+          <div className="bg-white text-gray-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-md border border-gray-200">
             Xin chào!
           </div>
-          <div className="w-2 h-2 bg-white border-r border-b border-gray-200 rotate-45 mx-auto -mt-1" />
+          <div className="w-2.5 h-2.5 bg-white border-r border-b border-gray-200 rotate-45 ml-auto mr-3 -mt-1.5" />
         </div>
         <img
           src="/images/hero/amy-mascot.png"
           alt="Mascot Amy"
-          className="w-14 h-auto drop-shadow-lg"
+          className="w-16 h-auto drop-shadow-md"
           loading="lazy"
         />
       </div>
+
+      {/* Dải sóng cong 3 màu đặc trưng Vietjet: Xanh lá - Vàng - Đỏ ở góc dưới cùng bên phải */}
+      <svg
+        className="fixed -bottom-1 -right-1 w-44 h-44 sm:w-52 sm:h-52 pointer-events-none z-30"
+        viewBox="0 0 200 200"
+        fill="none"
+      >
+        <path
+          d="M 10 200 C 60 195 150 165 200 45 L 200 85 C 145 170 55 196 25 200 Z"
+          fill="#84CC16"
+        />
+        <path
+          d="M 25 200 C 70 196 155 170 200 85 L 200 135 C 140 180 65 198 45 200 Z"
+          fill="#FFDD00"
+        />
+        <path d="M 45 200 C 85 198 160 180 200 135 L 200 200 Z" fill="#D71920" />
+      </svg>
     </div>
   );
 }

@@ -5,21 +5,15 @@ import HeroBookingWidget from './HeroBookingWidget';
 
 export const HERO_BANNERS = [
   {
-    id: 'banner-tet-celebration',
-    image: '/images/hero/hero-tet-celebration.jpg',
-    title: 'Vé Tết tới, mời bạn bay! - Vietjet Air',
-    focusClass: 'object-cover object-top',
-  },
-  {
-    id: 'banner-vietjet-starlink',
-    image: '/images/hero/hero-vietjet-holiday.jpg',
-    title: 'VietjetAir Starlink - Kết nối không giới hạn trên mỗi chuyến bay',
-    focusClass: 'object-cover object-center',
-  },
-  {
     id: 'banner-bay-khap-the-gioi',
     image: '/images/hero/banner-bay-khap-the-gioi.jpg',
     title: 'Bay khắp thế giới, chạm đỉnh cao mới',
+    focusClass: 'object-cover object-top',
+  },
+  {
+    id: 'banner-tet-celebration',
+    image: '/images/hero/hero-tet-celebration.jpg',
+    title: 'Vé Tết tới, mời bạn bay! - Vietjet Air',
     focusClass: 'object-cover object-top',
   },
   {

@@ -140,14 +140,6 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Registration shares the auth page with login. Preserve the public
-  // /dang-ky entry point while opening the correct tab directly.
-  if (pathname === '/dang-ky') {
-    const registerUrl = new URL('/dang-nhap', request.url);
-    registerUrl.searchParams.set('tab', 'register');
-    return NextResponse.redirect(registerUrl);
-  }
-
   // ─── Rate Limiting for Auth Endpoints ──────────────────────────────
   if (
     pathname.startsWith('/api/xac-thuc/dang-nhap') ||
