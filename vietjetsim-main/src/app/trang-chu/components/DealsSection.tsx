@@ -118,7 +118,7 @@ export default function DealsSection() {
                   Ngày bay: {deal.date}
                 </p>
                 <div className="mt-5">
-                  <span className="inline-flex items-center justify-center w-full rounded-xl border border-[var(--vj-wine)] bg-[var(--vj-wine)] px-3 py-2.5 text-xs2 sm:text-sm font-bold text-white transition-colors group-hover:bg-[var(--accent)] group-hover:text-[var(--foreground)] group-hover:border-[var(--accent)]">
+                  <span className="inline-flex items-center justify-center w-full rounded-xl border border-[var(--accent)] bg-[var(--accent)] px-3 py-2.5 text-xs2 sm:text-sm font-bold text-gray-950 transition-colors group-hover:bg-[var(--primary)] group-hover:text-white group-hover:border-[var(--primary)]">
                     Chọn chuyến <span className="ml-1">→</span>
                   </span>
                 </div>

@@ -1,5 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import LoginPage from '@/app/dang-nhap/page';
 
 const mockToast = vi.hoisted(() => ({
@@ -26,21 +26,16 @@ vi.mock('@/hooks/useToast', () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.useFakeTimers();
 });
 
-afterEach(() => {
-  vi.useRealTimers();
-});
-
-describe('LoginPage — giao diện đơn giản hóa theo H1', () => {
-  it('render header đỏ, form 1 input, tab Đăng nhập/Đăng ký, banner, chatbot, ribbon', () => {
+describe('LoginPage — giao diện đơn giản hóa và đăng nhập mật khẩu', () => {
+  it('render header đỏ, form đăng nhập, tab Đăng nhập/Đăng ký, banner, chatbot, ribbon', () => {
     render(<LoginPage />);
 
     expect(screen.getByTestId('checkin-header')).toBeInTheDocument();
 
-    expect(screen.getByRole('button', { name: /Đăng ký/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Đăng nhập/i })).toBeInTheDocument();
+    expect(screen.getByTestId('tab-register')).toBeInTheDocument();
+    expect(screen.getByTestId('tab-login')).toBeInTheDocument();
 
     expect(screen.getByRole('heading', { name: /Đăng nhập/i })).toBeInTheDocument();
 
@@ -48,15 +43,13 @@ describe('LoginPage — giao diện đơn giản hóa theo H1', () => {
     const phone = screen.getByPlaceholderText('Số điện thoại');
     expect(phone).toBeInTheDocument();
 
-    expect(screen.getByRole('button', { name: /Gửi mã OTP/i })).toBeInTheDocument();
+    expect(screen.getByTestId('login-submit-btn')).toBeInTheDocument();
+    expect(screen.getByTestId('login-submit-btn')).toHaveTextContent('Đăng nhập');
 
     expect(screen.getByText('Đăng ký ngay')).toBeInTheDocument();
 
     expect(screen.getByText('Được cung cấp và xác thực bởi SkyJoy ID')).toBeInTheDocument();
 
-    // The right column used to mock the promo with a gradient block plus the
-    // copy as text; it now shows the real Vietjet banner graphic, so the copy
-    // lives in the image's alt text and the asset itself is the assertion.
     const banner = screen.getByAltText(/Ngoại tệ sẵn sàng/i);
     expect(banner).toBeInTheDocument();
     expect((banner as HTMLImageElement).getAttribute('src')).toContain(
@@ -64,42 +57,86 @@ describe('LoginPage — giao diện đơn giản hóa theo H1', () => {
     );
     expect(banner.getAttribute('alt')).toMatch(/Hành trình an tâm/i);
 
-    expect(screen.getByAltText('Mascot Amy')).toBeInTheDocument();
+    expect(screen.queryByAltText('Mascot Amy')).not.toBeInTheDocument();
 
     const ribbon = document.querySelector('svg[height="110"]');
     expect(ribbon).toBeInTheDocument();
   });
 
-  it('gõ số điện thoại vào input và hiển thị toast thành công', () => {
+  it('gõ số điện thoại vào input, bấm Đăng nhập -> hiển thị ô mật khẩu, nhập mật khẩu và thực hiện đăng nhập', async () => {
+    const originalFetch = global.fetch;
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        user: { id: 'u1', full_name: 'Nguyễn Văn A', email: '0912345678@vietjet.vn' },
+        token: 'fake-token',
+      }),
+    } as unknown as Response);
+
     render(<LoginPage />);
 
     const phone = screen.getByPlaceholderText('Số điện thoại');
-    fireEvent.change(phone, { target: { value: '912345678' } });
-    expect((phone as HTMLInputElement).value).toBe('912345678');
+    fireEvent.change(phone, { target: { value: '0912345678' } });
+    expect((phone as HTMLInputElement).value).toBe('0912345678');
 
-    fireEvent.click(screen.getByRole('button', { name: /Gửi mã OTP/i }));
+    const submitBtn = screen.getByTestId('login-submit-btn');
+    fireEvent.click(submitBtn);
 
-    vi.advanceTimersByTime(600);
+    // Ô mật khẩu phải xuất hiện
+    const passwordInput = screen.getByPlaceholderText('Mật khẩu');
+    expect(passwordInput).toBeInTheDocument();
 
-    expect(mockToast.success).toHaveBeenCalledWith(
-      'Đã gửi mã OTP',
-      expect.stringContaining('mã xác thực')
-    );
+    // Nhập mật khẩu và bấm Đăng nhập lần 2
+    fireEvent.change(passwordInput, { target: { value: 'Secret123!' } });
+    fireEvent.click(submitBtn);
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/xac-thuc/dang-nhap',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ email: '0912345678', password: 'Secret123!' }),
+        })
+      );
+      expect(mockToast.success).toHaveBeenCalledWith(
+        'Đăng nhập thành công',
+        expect.stringContaining('Nguyễn Văn A')
+      );
+    });
+
+    global.fetch = originalFetch;
   });
 
   it('hiển thị toast lỗi khi bấm nút để trống số điện thoại', () => {
     render(<LoginPage />);
 
-    fireEvent.click(screen.getByRole('button', { name: /Gửi mã OTP/i }));
+    const submitBtn = screen.getByTestId('login-submit-btn');
+    fireEvent.click(submitBtn);
 
     expect(mockToast.error).toHaveBeenCalledWith('Lỗi', 'Vui lòng nhập số điện thoại');
+  });
+
+  it('hiển thị toast lỗi khi đã hiện ô mật khẩu nhưng để trống mật khẩu', () => {
+    render(<LoginPage />);
+
+    const phone = screen.getByPlaceholderText('Số điện thoại');
+    fireEvent.change(phone, { target: { value: '0912345678' } });
+
+    const submitBtn = screen.getByTestId('login-submit-btn');
+    fireEvent.click(submitBtn);
+
+    expect(screen.getByPlaceholderText('Mật khẩu')).toBeInTheDocument();
+
+    // Bấm khi chưa nhập mật khẩu
+    fireEvent.click(submitBtn);
+    expect(mockToast.error).toHaveBeenCalledWith('Lỗi', 'Vui lòng nhập mật khẩu');
   });
 
   it('chuyển qua giao diện đăng ký khi bấm tab Đăng ký và quay lại Đăng nhập khi bấm tab Đăng nhập', () => {
     render(<LoginPage />);
 
-    const registerTab = screen.getByRole('button', { name: /Đăng ký/i });
-    const loginTab = screen.getByRole('button', { name: /Đăng nhập/i });
+    const registerTab = screen.getByTestId('tab-register');
+    const loginTab = screen.getByTestId('tab-login');
 
     // Ban đầu ở tab Đăng nhập
     expect(loginTab).toHaveAttribute('aria-pressed', 'true');

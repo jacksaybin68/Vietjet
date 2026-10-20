@@ -19,7 +19,11 @@ const PROMO_LINK =
 function LoginPageInner() {
   const [activeKey, setActiveKey] = React.useState<'register' | 'login'>('login');
   const [phone, setPhone] = React.useState('');
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [password, setPassword] = React.useState('');
+  const [showPasswordText, setShowPasswordText] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const passwordInputRef = React.useRef<HTMLInputElement>(null);
   const searchParams = useSearchParams();
   const toast = useToast();
 
@@ -41,6 +45,10 @@ function LoginPageInner() {
 
   const handleTabChange = (key: 'register' | 'login') => {
     setActiveKey(key);
+    if (key === 'register') {
+      setShowPassword(false);
+      setPassword('');
+    }
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href);
       if (key === 'register') {
@@ -52,21 +60,65 @@ function LoginPageInner() {
     }
   };
 
-  // NOTE: /api/xac-thuc/dang-nhap-otp yêu cầu {identifier, code} (xác thực OTP
-  // đầy đủ), không phải chỉ gửi mã; và không có route /dang-nhap-otp để nhận
-  // mã gửi lại. Spec H1 chỉ yêu cầu giao diện đơn giản hóa, nên form submit
-  // chỉ mô phỏng gửi mã (toast) mà không gọi API thật để tránh gọi sai endpoint.
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phone.trim()) {
+    const identifier = phone.trim();
+    if (!identifier) {
       toast.error('Lỗi', 'Vui lòng nhập số điện thoại');
       return;
     }
+
+    // Bước 1: Nếu chưa hiện trường mật khẩu, hiển thị trường mật khẩu và focus
+    if (!showPassword) {
+      setShowPassword(true);
+      setTimeout(() => {
+        passwordInputRef.current?.focus();
+      }, 50);
+      return;
+    }
+
+    // Bước 2: Đã hiện trường mật khẩu, kiểm tra mật khẩu
+    if (!password) {
+      toast.error('Lỗi', 'Vui lòng nhập mật khẩu');
+      passwordInputRef.current?.focus();
+      return;
+    }
+
+    // Thực hiện đăng nhập qua API xác thực
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/xac-thuc/dang-nhap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: identifier, password }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setLoading(false);
+        toast.error(
+          'Đăng nhập thất bại',
+          data.error || 'Số điện thoại hoặc mật khẩu không chính xác'
+        );
+        return;
+      }
+
+      toast.success(
+        'Đăng nhập thành công',
+        `Chào mừng ${data.user?.full_name || 'bạn'} đã đăng nhập thành công!`
+      );
+
+      const redirectParam = searchParams?.get('redirect');
+      const targetUrl = redirectParam || (data.user?.role === 'admin' ? '/quan-tri' : '/trang-chu');
+
+      setTimeout(() => {
+        window.location.href = targetUrl;
+      }, 500);
+    } catch {
       setLoading(false);
-      toast.success('Đã gửi mã OTP', 'Vui lòng nhập mã xác thực gửi đến số điện thoại của bạn.');
-    }, 600);
+      toast.error('Lỗi kết nối', 'Không thể kết nối đến máy chủ. Vui lòng thử lại sau.');
+    }
   };
 
   const handleRegisterSubmit = (e: React.FormEvent) => {
@@ -130,6 +182,7 @@ function LoginPageInner() {
                   <button
                     key={tab.key}
                     type="button"
+                    data-testid={`tab-${tab.key}`}
                     onClick={() => handleTabChange(tab.key)}
                     aria-pressed={active}
                     className={`-mb-px border-b-2 pb-2 text-[15px] font-bold transition-colors ${
@@ -164,12 +217,79 @@ function LoginPageInner() {
                     />
                   </div>
 
+                  {showPassword && (
+                    <div className="flex flex-col gap-1.5">
+                      <div className="relative flex items-center">
+                        <input
+                          ref={passwordInputRef}
+                          type={showPasswordText ? 'text' : 'password'}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Mật khẩu"
+                          autoComplete="current-password"
+                          className="vj-auth-input h-12 w-full rounded-[4px] border border-gray-300 bg-white px-4 pr-11 text-sm text-gray-800 outline-none transition-colors focus:border-[var(--primary)]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPasswordText(!showPasswordText)}
+                          className="absolute right-3 p-1 text-gray-400 hover:text-gray-600 focus:outline-none"
+                          aria-label={showPasswordText ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                        >
+                          {showPasswordText ? (
+                            <svg
+                              className="h-5 w-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"
+                              />
+                            </svg>
+                          ) : (
+                            <svg
+                              className="h-5 w-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
+                      <div className="flex justify-end">
+                        <Link
+                          href="/quen-mat-khau"
+                          className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+                        >
+                          Quên mật khẩu?
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+
                   <button
                     type="submit"
+                    data-testid="login-submit-btn"
                     disabled={loading}
                     className="vj-auth-submit w-full disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {loading ? 'Đang gửi…' : 'Gửi mã OTP'}
+                    {loading ? 'Đang đăng nhập…' : 'Đăng nhập'}
                   </button>
                 </form>
 
@@ -228,14 +348,14 @@ function LoginPageInner() {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between gap-2 rounded border border-gray-300 bg-white px-3 py-2 text-xs text-gray-800">
-                    <span className="font-bold whitespace-nowrap text-gray-700">Ngày sinh:</span>
-                    <div className="flex items-center gap-1 font-bold">
+                  <div className="flex h-11 w-full items-center justify-between gap-2 rounded border border-gray-300 bg-white px-3 text-sm text-gray-800 transition-colors focus-within:border-primary">
+                    <span className="font-medium whitespace-nowrap text-gray-700">Ngày sinh:</span>
+                    <div className="flex items-center gap-1 font-semibold text-sm">
                       <select
                         aria-label="Ngày"
                         value={regBirthDay}
                         onChange={(e) => setRegBirthDay(e.target.value)}
-                        className="bg-transparent text-xs font-bold outline-none cursor-pointer"
+                        className="cursor-pointer bg-transparent text-sm font-semibold text-gray-800 outline-none"
                       >
                         <option value="">Ngày</option>
                         {Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0')).map(
@@ -251,7 +371,7 @@ function LoginPageInner() {
                         aria-label="Tháng"
                         value={regBirthMonth}
                         onChange={(e) => setRegBirthMonth(e.target.value)}
-                        className="bg-transparent text-xs font-bold outline-none cursor-pointer"
+                        className="cursor-pointer bg-transparent text-sm font-semibold text-gray-800 outline-none"
                       >
                         <option value="">Tháng</option>
                         {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0')).map(
@@ -267,7 +387,7 @@ function LoginPageInner() {
                         aria-label="Năm"
                         value={regBirthYear}
                         onChange={(e) => setRegBirthYear(e.target.value)}
-                        className="bg-transparent text-xs font-bold outline-none cursor-pointer"
+                        className="cursor-pointer bg-transparent text-sm font-semibold text-gray-800 outline-none"
                       >
                         <option value="">Năm</option>
                         {Array.from({ length: 80 }, (_, i) => String(2024 - i)).map((y) => (
@@ -391,21 +511,6 @@ function LoginPageInner() {
           </div>
         </div>
       </main>
-
-      {/* 5. Floating chatbot mascot */}
-      <div className="fixed right-[25px] bottom-[165px] z-40 flex flex-col items-end pointer-events-auto">
-        <div className="relative mb-2">
-          <div className="inline-block rounded-[10px] bg-gradient-to-b from-white to-gray-200 px-[12px] py-[5px] text-[11px] font-bold whitespace-nowrap text-gray-900 shadow-[0_3px_6px_rgba(0,0,0,0.2)]">
-            Xin chào!
-          </div>
-        </div>
-        <img
-          src="/images/hero/amy-mascot.png"
-          alt="Mascot Amy"
-          className="h-auto w-[44px] drop-shadow-md"
-          loading="lazy"
-        />
-      </div>
 
       {/* 6. Dải sóng cong 3 màu đặc trưng Vietjet ở góc dưới cùng bên phải */}
       <svg
