@@ -332,84 +332,85 @@ function LoginPageInner() {
                     Nhập họ tên in hoa không dấu khớp giấy tờ tùy thân (ví dụ: NGUYEN VAN A).
                   </p>
 
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-11 w-20 shrink-0 items-center justify-between rounded border border-gray-300 bg-white px-2.5 text-xs font-bold text-gray-800">
-                      <span>(+84)</span>
-                      <span className="text-xs text-gray-400">▾</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex h-11 w-16 shrink-0 items-center justify-between rounded border border-gray-300 bg-white px-2 text-xs font-bold text-gray-800">
+                        <span>(+84)</span>
+                        <span className="text-xs text-gray-400">▾</span>
+                      </div>
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        value={regPhone}
+                        onChange={(e) => setRegPhone(e.target.value.replace(/\D/g, ''))}
+                        placeholder="Số điện thoại *"
+                        className="vj-auth-input h-11 min-w-0 flex-1 rounded border border-gray-300 bg-white px-3 text-sm text-gray-800 outline-none transition-colors focus:border-primary"
+                        required
+                      />
                     </div>
-                    <input
-                      type="tel"
-                      inputMode="numeric"
-                      value={regPhone}
-                      onChange={(e) => setRegPhone(e.target.value.replace(/\D/g, ''))}
-                      placeholder="Số điện thoại *"
-                      className="vj-auth-input h-11 w-full rounded border border-gray-300 bg-white px-3 text-sm text-gray-800 outline-none transition-colors focus:border-primary"
-                      required
-                    />
+
+                    <div className="flex h-11 w-full items-center justify-between gap-1.5 rounded border border-gray-300 bg-white px-3 text-sm text-gray-800 transition-colors focus-within:border-primary">
+                      <span className="font-medium whitespace-nowrap text-gray-700 text-xs sm:text-sm">
+                        Ngày sinh:
+                      </span>
+                      <div className="flex items-center gap-0.5 font-semibold text-xs sm:text-sm">
+                        <select
+                          aria-label="Ngày"
+                          value={regBirthDay}
+                          onChange={(e) => setRegBirthDay(e.target.value)}
+                          className="cursor-pointer bg-transparent text-xs sm:text-sm font-semibold text-gray-800 outline-none"
+                        >
+                          <option value="">Ngày</option>
+                          {Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0')).map(
+                            (d) => (
+                              <option key={d} value={d}>
+                                {d}
+                              </option>
+                            )
+                          )}
+                        </select>
+                        <span className="text-gray-400">/</span>
+                        <select
+                          aria-label="Tháng"
+                          value={regBirthMonth}
+                          onChange={(e) => setRegBirthMonth(e.target.value)}
+                          className="cursor-pointer bg-transparent text-xs sm:text-sm font-semibold text-gray-800 outline-none"
+                        >
+                          <option value="">Tháng</option>
+                          {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0')).map(
+                            (m) => (
+                              <option key={m} value={m}>
+                                {m}
+                              </option>
+                            )
+                          )}
+                        </select>
+                        <span className="text-gray-400">/</span>
+                        <select
+                          aria-label="Năm"
+                          value={regBirthYear}
+                          onChange={(e) => setRegBirthYear(e.target.value)}
+                          className="cursor-pointer bg-transparent text-xs sm:text-sm font-semibold text-gray-800 outline-none"
+                        >
+                          <option value="">Năm</option>
+                          {Array.from({ length: 80 }, (_, i) => String(2024 - i)).map((y) => (
+                            <option key={y} value={y}>
+                              {y}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex h-11 w-full items-center justify-between gap-2 rounded border border-gray-300 bg-white px-3 text-sm text-gray-800 transition-colors focus-within:border-primary">
-                    <span className="font-medium whitespace-nowrap text-gray-700">Ngày sinh:</span>
-                    <div className="flex items-center gap-1 font-semibold text-sm">
-                      <select
-                        aria-label="Ngày"
-                        value={regBirthDay}
-                        onChange={(e) => setRegBirthDay(e.target.value)}
-                        className="cursor-pointer bg-transparent text-sm font-semibold text-gray-800 outline-none"
-                      >
-                        <option value="">Ngày</option>
-                        {Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0')).map(
-                          (d) => (
-                            <option key={d} value={d}>
-                              {d}
-                            </option>
-                          )
-                        )}
-                      </select>
-                      <span className="text-gray-400">/</span>
-                      <select
-                        aria-label="Tháng"
-                        value={regBirthMonth}
-                        onChange={(e) => setRegBirthMonth(e.target.value)}
-                        className="cursor-pointer bg-transparent text-sm font-semibold text-gray-800 outline-none"
-                      >
-                        <option value="">Tháng</option>
-                        {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0')).map(
-                          (m) => (
-                            <option key={m} value={m}>
-                              {m}
-                            </option>
-                          )
-                        )}
-                      </select>
-                      <span className="text-gray-400">/</span>
-                      <select
-                        aria-label="Năm"
-                        value={regBirthYear}
-                        onChange={(e) => setRegBirthYear(e.target.value)}
-                        className="cursor-pointer bg-transparent text-sm font-semibold text-gray-800 outline-none"
-                      >
-                        <option value="">Năm</option>
-                        {Array.from({ length: 80 }, (_, i) => String(2024 - i)).map((y) => (
-                          <option key={y} value={y}>
-                            {y}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input
                       type="email"
                       value={regEmail}
                       onChange={(e) => setRegEmail(e.target.value)}
-                      placeholder="Email (xác nhận đặt vé & đổi thưởng)"
+                      placeholder="Email (xác nhận đặt vé)"
                       className="vj-auth-input h-11 w-full rounded border border-gray-300 bg-white px-3 text-sm text-gray-800 outline-none transition-colors focus:border-primary"
                     />
-                  </div>
-
-                  <div>
                     <input
                       type="text"
                       value={regReferral}

@@ -1,9 +1,10 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MdArrowOutward, MdConfirmationNumber, MdExpandMore, MdSwapHoriz } from 'react-icons/md';
 import AirportPicker, { type Airport } from './AirportPicker';
+import { ALL_AIRPORTS } from './airports';
 import PassengerPicker, { type PaxCounts } from './PassengerPicker';
 import { FlightDatePickerPopover, formatDisplayDate, toInputDate } from './DatePicker';
 import { MdCalendarMonth as Calendar } from 'react-icons/md';
@@ -21,28 +22,6 @@ const TRIP_TYPES = [
   { value: 'one', label: 'Một chiều' },
 ] as const;
 
-const FALLBACK_AIRPORTS: Airport[] = [
-  { code: 'HAN', city: 'Hà Nội', airport: 'Nội Bài' },
-  { code: 'SGN', city: 'TP. Hồ Chí Minh', airport: 'Tân Sơn Nhất' },
-  { code: 'DAD', city: 'Đà Nẵng', airport: 'Đà Nẵng' },
-  { code: 'PQC', city: 'Phú Quốc', airport: 'Phú Quốc' },
-  { code: 'CXR', city: 'Nha Trang', airport: 'Cam Ranh' },
-  { code: 'VDH', city: 'Quảng Bình', airport: 'Đồng Hới' },
-  { code: 'HPH', city: 'Hải Phòng', airport: 'Cát Bi' },
-  { code: 'HUI', city: 'Huế', airport: 'Phú Bài' },
-  { code: 'PXU', city: 'Pleiku', airport: 'Pleiku' },
-  { code: 'BMV', city: 'Buôn Ma Thuột', airport: 'Buôn Ma Thuột' },
-  { code: 'DLI', city: 'Đà Lạt', airport: 'Liên Khương' },
-  { code: 'VCS', city: 'Côn Đảo', airport: 'Côn Đảo' },
-  { code: 'THD', city: 'Thanh Hóa', airport: 'Thọ Xuân' },
-  { code: 'VII', city: 'Vinh', airport: 'Vinh' },
-  { code: 'VCA', city: 'Cần Thơ', airport: 'Cần Thơ' },
-  { code: 'SIN', city: 'Singapore', airport: 'Changi' },
-  { code: 'BKK', city: 'Bangkok', airport: 'Suvarnabhumi' },
-  { code: 'KUL', city: 'Kuala Lumpur', airport: 'Kuala Lumpur' },
-  { code: 'CGK', city: 'Jakarta', airport: 'Soekarno-Hatta' },
-];
-
 const fieldGroupClass =
   'grid grid-cols-1 divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-white shadow-xs transition-all focus-within:border-[var(--accent)] sm:grid-cols-[2fr_1fr] sm:divide-x sm:divide-y-0';
 
@@ -59,9 +38,29 @@ export default function HeroBookingWidget() {
   );
   const [activeDatePicker, setActiveDatePicker] = useState<'depart' | 'return' | null>(null);
   const [paxCounts, setPaxCounts] = useState<PaxCounts>({ adult: 1, child: 0, infant: 0 });
-  const [airports] = useState<Airport[]>(FALLBACK_AIRPORTS);
+  const [airports, setAirports] = useState<Airport[]>(ALL_AIRPORTS);
   const [promoCode, setPromoCode] = useState('');
   const [cheapestOnly, setCheapestOnly] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    fetch('/api/san-bay')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (
+          !active ||
+          !data?.airports ||
+          !Array.isArray(data.airports) ||
+          data.airports.length === 0
+        )
+          return;
+        setAirports(data.airports);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const minDate = toInputDate(new Date());
 
