@@ -591,7 +591,7 @@ export default function UserChat() {
               <div>
                 <div className="flex items-center gap-1.5">
                   <h3 className="font-bold text-red-600 font-koho text-sm sm:text-base leading-tight">
-                    Trợ lý ảo Amy
+                    Vietjet Air 24/7
                   </h3>
                   <span
                     className={`h-2 w-2 rounded-full ${operatorOnline ? 'bg-green-500' : 'bg-gray-400'}`}
@@ -641,7 +641,6 @@ export default function UserChat() {
                     <span className="text-xs font-bold text-red-600 font-koho uppercase tracking-wider">
                       Thông tin khách hàng
                     </span>
-                    <span className="text-3xs text-gray-400">Không cần đăng nhập</span>
                   </div>
 
                   <div className="space-y-2.5 text-xs">
@@ -910,7 +909,7 @@ export default function UserChat() {
 
               {/* Footer text & Vietjet swoosh */}
               <div className="mt-1 flex items-center justify-center text-3xs text-gray-400 gap-1 select-none">
-                <span>Phát triển bởi</span>
+                <span>Vietjet Air</span>
                 <span className="font-bold text-red-600">VinBigdata</span>
               </div>
             </div>
