@@ -94,4 +94,34 @@ describe('LoginPage — giao diện đơn giản hóa theo H1', () => {
 
     expect(mockToast.error).toHaveBeenCalledWith('Lỗi', 'Vui lòng nhập số điện thoại');
   });
+
+  it('chuyển qua giao diện đăng ký khi bấm tab Đăng ký và quay lại Đăng nhập khi bấm tab Đăng nhập', () => {
+    render(<LoginPage />);
+
+    const registerTab = screen.getByRole('button', { name: /Đăng ký/i });
+    const loginTab = screen.getByRole('button', { name: /Đăng nhập/i });
+
+    // Ban đầu ở tab Đăng nhập
+    expect(loginTab).toHaveAttribute('aria-pressed', 'true');
+    expect(registerTab).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('heading', { name: /Đăng nhập/i })).toBeInTheDocument();
+
+    // Bấm tab Đăng ký
+    fireEvent.click(registerTab);
+
+    expect(registerTab).toHaveAttribute('aria-pressed', 'true');
+    expect(loginTab).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('heading', { name: /Đăng ký tài khoản/i })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Họ *')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Tên đệm & Tên *')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Đăng ký tài khoản SkyJoy/i })).toBeInTheDocument();
+
+    // Bấm tab Đăng nhập để quay lại
+    fireEvent.click(loginTab);
+
+    expect(loginTab).toHaveAttribute('aria-pressed', 'true');
+    expect(registerTab).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('heading', { name: /Đăng nhập tài khoản/i })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Số điện thoại')).toBeInTheDocument();
+  });
 });

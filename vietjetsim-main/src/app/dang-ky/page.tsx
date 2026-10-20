@@ -322,6 +322,24 @@ function RegisterPageInner() {
 
   return (
     <AuthShell mode="register" title="ĐĂNG KÝ TÀI KHOẢN SKYJOY">
+      {/* Tab Đăng ký / Đăng nhập */}
+      <div className="mb-6 flex items-center justify-center gap-10 border-b border-gray-200">
+        <button
+          type="button"
+          aria-pressed="true"
+          className="-mb-px border-b-2 border-primary pb-2 text-sm font-bold text-primary transition-colors"
+        >
+          Đăng ký
+        </button>
+        <Link
+          href="/dang-nhap"
+          aria-pressed="false"
+          className="-mb-px border-b-2 border-transparent pb-2 text-sm font-bold text-gray-400 transition-colors hover:text-gray-600"
+        >
+          Đăng nhập
+        </Link>
+      </div>
+
       <AlertBanner message={error} variant="error" />
       <AlertBanner message={success} variant="success" />
 
