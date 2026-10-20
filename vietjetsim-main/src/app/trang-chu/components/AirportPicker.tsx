@@ -194,12 +194,12 @@ export default function AirportPicker({
   };
 
   return (
-    <div ref={containerRef} className={`relative min-w-0 ${className}`}>
+    <div ref={containerRef} className={`relative min-w-0 h-full ${className}`}>
       <label
         className={
           variant === 'flush'
-            ? 'flex items-center gap-2 bg-white px-3 py-2.5 focus-within:bg-[#fffdf3] sm:py-1.5'
-            : 'flex items-center gap-2 rounded border border-[#e4e4e4] bg-white px-3 py-2.5 focus-within:border-[var(--accent)] sm:py-1.5'
+            ? 'flex h-full min-h-[48px] items-center gap-2 bg-white px-3 py-1.5 focus-within:bg-[#fffdf3]'
+            : 'flex min-h-[48px] items-center gap-2 rounded-xl border border-[#e4e4e4] bg-white px-3 py-1.5 focus-within:border-[var(--accent)]'
         }
       >
         <Icon className={iconClass} />

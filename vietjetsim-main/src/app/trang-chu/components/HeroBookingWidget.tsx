@@ -23,7 +23,7 @@ const TRIP_TYPES = [
 ] as const;
 
 const fieldGroupClass =
-  'grid grid-cols-1 divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-white shadow-xs transition-all focus-within:border-[var(--accent)] sm:grid-cols-[1.65fr_1.35fr] sm:divide-x sm:divide-y-0';
+  'grid grid-cols-1 divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-white shadow-xs transition-all focus-within:border-[var(--accent)] sm:grid-cols-[1.65fr_1.35fr] sm:divide-x sm:divide-y-0 min-h-[48px]';
 
 export default function HeroBookingWidget() {
   const router = useRouter();
@@ -230,7 +230,7 @@ export default function HeroBookingWidget() {
                 onClick={() => setActiveDatePicker((prev) => (prev === 'depart' ? null : 'depart'))}
                 aria-label="Ngày đi"
                 aria-expanded={activeDatePicker === 'depart'}
-                className={`w-full flex items-center gap-2 bg-white px-2.5 py-1.5 cursor-pointer hover:bg-amber-50 focus-within:bg-amber-50 min-w-0 text-left transition-colors ${
+                className={`w-full h-full min-h-[48px] flex items-center gap-2 bg-white px-3 py-1.5 cursor-pointer hover:bg-amber-50 focus-within:bg-amber-50 min-w-0 text-left transition-colors ${
                   activeDatePicker === 'depart' ? 'bg-amber-50/90 ring-1 ring-vjred ring-inset' : ''
                 }`}
               >
@@ -286,7 +286,7 @@ export default function HeroBookingWidget() {
                   }
                   aria-label="Ngày về"
                   aria-expanded={activeDatePicker === 'return'}
-                  className={`w-full flex items-center gap-2 bg-white px-2.5 py-1.5 cursor-pointer hover:bg-amber-50 focus-within:bg-amber-50 min-w-0 text-left transition-colors ${
+                  className={`w-full h-full min-h-[48px] flex items-center gap-2 bg-white px-3 py-1.5 cursor-pointer hover:bg-amber-50 focus-within:bg-amber-50 min-w-0 text-left transition-colors ${
                     activeDatePicker === 'return'
                       ? 'bg-amber-50/90 ring-1 ring-vjred ring-inset'
                       : ''
@@ -337,7 +337,7 @@ export default function HeroBookingWidget() {
           </div>
 
           {/* Hàng 3: Hành khách */}
-          <div className="mt-2.5 rounded-[6px] border border-[var(--border)] bg-white shadow-xs relative z-30">
+          <div className="mt-2.5 rounded-xl border border-[var(--border)] bg-white shadow-xs relative z-30 min-h-[48px] flex items-center">
             <PassengerPicker
               value={paxCounts}
               onChange={setPaxCounts}
@@ -346,19 +346,24 @@ export default function HeroBookingWidget() {
               cheapestOnly={cheapestOnly}
               onCheapestChange={setCheapestOnly}
               onSubmit={() => handleSubmit()}
-              className="mt-0"
+              className="mt-0 w-full h-full"
             />
           </div>
 
           {/* Hàng 4: Mã khuyến mại (hiển thị khi picker đóng) */}
-          <label className="mt-2.5 flex items-center gap-2 rounded-[6px] border border-[var(--border)] bg-white px-3 py-2 shadow-xs transition-all focus-within:border-vjred focus-within:ring-1 focus-within:ring-vjred">
+          <label className="mt-2.5 flex min-h-[48px] items-center gap-2.5 rounded-xl border border-[var(--border)] bg-white px-3 py-1.5 shadow-xs transition-all focus-within:border-[var(--accent)] cursor-text">
             <MdConfirmationNumber className="shrink-0 text-lg text-vjred/80" />
-            <input
-              value={promoCode}
-              onChange={(event) => setPromoCode(event.target.value)}
-              placeholder="Mã khuyến mại"
-              className="w-full min-w-0 border-0 bg-transparent px-0 text-sm2 font-bold text-[var(--foreground)] outline-none placeholder:text-[var(--foreground-subtle)] placeholder:font-normal"
-            />
+            <span className="min-w-0 flex-1">
+              <span className="block text-2xs font-bold uppercase leading-tight tracking-[0.06em] text-[var(--foreground-subtle)]">
+                Mã khuyến mại
+              </span>
+              <input
+                value={promoCode}
+                onChange={(event) => setPromoCode(event.target.value)}
+                placeholder="Mã khuyến mại"
+                className="w-full min-w-0 border-0 bg-transparent px-0 text-sm2 font-bold text-[var(--foreground)] outline-none placeholder:text-[var(--foreground-subtle)] placeholder:font-normal"
+              />
+            </span>
           </label>
 
           {/* Hàng 5: Checkbox Tìm vé rẻ nhất */}
