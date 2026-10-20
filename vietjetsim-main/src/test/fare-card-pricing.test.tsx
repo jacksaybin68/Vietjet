@@ -116,7 +116,8 @@ describe('giá thẻ hạng vé khớp với giá API thu', () => {
     await renderResults(onSelect);
 
     const card = screen.getByTestId('flight-result-card');
-    const fareGrid = card.lastElementChild as HTMLElement;
+    const fareGrid = (card.querySelector('.grid.grid-cols-4') ??
+      card.lastElementChild) as HTMLElement;
     const printed = printedFares(fareGrid);
     expect(printed).toHaveLength(4);
 
@@ -137,7 +138,9 @@ describe('giá thẻ hạng vé khớp với giá API thu', () => {
   it('thẻ rẻ nhất và đắt nhất đúng bằng hai giá lưu trong DB', async () => {
     await renderResults(vi.fn());
     const card = screen.getByTestId('flight-result-card');
-    const printed = printedFares(card.lastElementChild as HTMLElement);
+    const fareGrid = (card.querySelector('.grid.grid-cols-4') ??
+      card.lastElementChild) as HTMLElement;
+    const printed = printedFares(fareGrid);
 
     expect(printed).toHaveLength(4);
     expect(printed).toContain(format(ECONOMY));
