@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { apiRequest, getApiErrorMessage } from '@/shared/services';
+import { streamCodingPi } from '@/features/coding-pi';
 
 // Dynamically import Monaco Editor to avoid SSR window issues
 const Editor = dynamic(() => import('@monaco-editor/react'), { ssr: false });
@@ -23,9 +24,10 @@ interface OpenTab {
   isDirty: boolean;
 }
 
-interface ClaudeMessage {
+interface CodingPiMessage {
   role: 'user' | 'assistant';
   content: string;
+  reasoning?: string;
 }
 
 export default function VSCodeWebEditorPage() {
@@ -43,10 +45,10 @@ export default function VSCodeWebEditorPage() {
   const [previewKey, setPreviewKey] = useState<number>(1);
   const [cursorPos, setCursorPos] = useState({ line: 1, col: 1 });
   const [searchTerm, setSearchTerm] = useState('');
-  const [showClaude, setShowClaude] = useState<boolean>(false);
-  const [claudeInput, setClaudeInput] = useState('');
-  const [claudeMessages, setClaudeMessages] = useState<ClaudeMessage[]>([]);
-  const [isClaudeSending, setIsClaudeSending] = useState(false);
+  const [showPi, setShowPi] = useState<boolean>(false);
+  const [piInput, setPiInput] = useState('');
+  const [piMessages, setPiMessages] = useState<CodingPiMessage[]>([]);
+  const [isPiSending, setIsPiSending] = useState(false);
   // GrapesJS editor instance (external library with no local type surface).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const editorRef = useRef<any>(null);
@@ -125,38 +127,64 @@ export default function VSCodeWebEditorPage() {
 
   const activeTab = openTabs.find((t) => t.path === activeTabPath);
 
-  const askClaude = async () => {
-    const prompt = claudeInput.trim();
-    if (!prompt || isClaudeSending) return;
+  const askCodingPi = async () => {
+    const prompt = piInput.trim();
+    if (!prompt || isPiSending) return;
 
-    const userMessage: ClaudeMessage = { role: 'user', content: prompt };
-    setClaudeInput('');
-    setClaudeMessages((prev) => [...prev, userMessage]);
-    setIsClaudeSending(true);
+    // Chỉ gửi các lượt đã có nội dung; lượt trợ lý đang stream dở không được
+    // đưa vào history của chính request kế tiếp.
+    const history = piMessages
+      .filter((message) => message.content.trim().length > 0)
+      .map((message) => ({ role: message.role, content: message.content }));
+
+    setPiInput('');
+    setPiMessages((prev) => [
+      ...prev,
+      { role: 'user', content: prompt },
+      { role: 'assistant', content: '', reasoning: '' },
+    ]);
+    setIsPiSending(true);
+
+    const updateLastAssistant = (updater: (message: CodingPiMessage) => CodingPiMessage) => {
+      setPiMessages((prev) => {
+        if (prev.length === 0 || prev[prev.length - 1].role !== 'assistant') return prev;
+        const next = [...prev];
+        next[next.length - 1] = updater(next[next.length - 1]);
+        return next;
+      });
+    };
 
     try {
-      const data = await apiRequest<{ content: string }>('/api/claude/chat', {
-        method: 'POST',
-        body: {
+      await streamCodingPi(
+        {
           prompt,
           context: activeTab ? `Tệp: ${activeTab.path}\n\n${activeTab.content}` : '',
-          history: claudeMessages,
+          history,
         },
-      });
-      setClaudeMessages((prev) => [...prev, { role: 'assistant', content: data.content }]);
-    } catch (error) {
-      setClaudeMessages((prev) => [
-        ...prev,
         {
-          role: 'assistant',
-          content:
-            error instanceof Error
-              ? `Lỗi Claude: ${error.message}`
-              : 'Không thể kết nối tới Claude.',
-        },
-      ]);
+          onReasoning: (text) =>
+            updateLastAssistant((message) => ({
+              ...message,
+              reasoning: `${message.reasoning ?? ''}${text}`,
+            })),
+          onContent: (text) =>
+            updateLastAssistant((message) => ({
+              ...message,
+              content: `${message.content}${text}`,
+            })),
+        }
+      );
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Không thể kết nối tới Coding Pi.';
+      updateLastAssistant((assistant) => ({
+        ...assistant,
+        content: assistant.content
+          ? `${assistant.content}\n\n[Lỗi: ${errorMessage}]`
+          : `Lỗi Coding Pi: ${errorMessage}`,
+      }));
     } finally {
-      setIsClaudeSending(false);
+      setIsPiSending(false);
     }
   };
 
@@ -377,9 +405,9 @@ export default function VSCodeWebEditorPage() {
           </button>
 
           <button
-            onClick={() => setShowClaude((isOpen) => !isOpen)}
+            onClick={() => setShowPi((isOpen) => !isOpen)}
             style={{
-              background: showClaude ? '#D97706' : '#3C3C3C',
+              background: showPi ? '#76B900' : '#3C3C3C',
               color: '#FFF',
               border: '1px solid #5A5A5A',
               padding: '4px 10px',
@@ -389,7 +417,7 @@ export default function VSCodeWebEditorPage() {
               cursor: 'pointer',
             }}
           >
-            ✦ Claude
+            ✦ Coding Pi
           </button>
 
           <button
@@ -661,7 +689,7 @@ export default function VSCodeWebEditorPage() {
           </div>
         </div>
 
-        {showClaude && (
+        {showPi && (
           <div
             style={{
               width: '340px',
@@ -685,9 +713,9 @@ export default function VSCodeWebEditorPage() {
                 fontWeight: 700,
               }}
             >
-              <span>✦ CLAUDE CODE ASSISTANT</span>
+              <span>✦ CODING PI — NVIDIA NEMOTRON</span>
               <button
-                onClick={() => setClaudeMessages([])}
+                onClick={() => setPiMessages([])}
                 style={{
                   background: 'transparent',
                   border: 'none',
@@ -711,12 +739,12 @@ export default function VSCodeWebEditorPage() {
                 gap: '10px',
               }}
             >
-              {claudeMessages.length === 0 && (
+              {piMessages.length === 0 && (
                 <div style={{ color: '#9CA3AF', fontSize: '12px', lineHeight: 1.5 }}>
-                  Hỏi Claude về tệp đang mở, lỗi TypeScript hoặc cách cải thiện code.
+                  Hỏi Coding Pi về tệp đang mở, lỗi TypeScript hoặc cách cải thiện code.
                 </div>
               )}
-              {claudeMessages.map((message, index) => (
+              {piMessages.map((message, index) => (
                 <div
                   key={`${message.role}-${index}`}
                   style={{
@@ -731,41 +759,72 @@ export default function VSCodeWebEditorPage() {
                       marginBottom: '3px',
                     }}
                   >
-                    {message.role === 'user' ? 'Bạn' : 'Claude'}
+                    {message.role === 'user' ? 'Bạn' : 'Coding Pi'}
                   </div>
-                  <div
-                    style={{
-                      backgroundColor: message.role === 'user' ? '#5B4210' : '#1E1E1E',
-                      color: '#E5E7EB',
-                      borderRadius: '4px',
-                      padding: '8px',
-                      fontSize: '12px',
-                      lineHeight: 1.5,
-                      whiteSpace: 'pre-wrap',
-                      overflowWrap: 'anywhere',
-                    }}
-                  >
-                    {message.content}
-                  </div>
+                  {message.role === 'assistant' && message.reasoning && (
+                    <details style={{ marginBottom: '6px' }}>
+                      <summary
+                        style={{
+                          color: '#9CA3AF',
+                          fontSize: '10px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Suy nghĩ của Coding Pi
+                      </summary>
+                      <div
+                        style={{
+                          color: '#9CA3AF',
+                          fontSize: '11px',
+                          lineHeight: 1.5,
+                          whiteSpace: 'pre-wrap',
+                          overflowWrap: 'anywhere',
+                          marginTop: '4px',
+                        }}
+                      >
+                        {message.reasoning}
+                      </div>
+                    </details>
+                  )}
+                  {(message.content || message.role === 'user') && (
+                    <div
+                      style={{
+                        backgroundColor: message.role === 'user' ? '#5B4210' : '#1E1E1E',
+                        color: '#E5E7EB',
+                        borderRadius: '4px',
+                        padding: '8px',
+                        fontSize: '12px',
+                        lineHeight: 1.5,
+                        whiteSpace: 'pre-wrap',
+                        overflowWrap: 'anywhere',
+                      }}
+                    >
+                      {message.content}
+                    </div>
+                  )}
                 </div>
               ))}
-              {isClaudeSending && (
-                <div style={{ color: '#D97706', fontSize: '12px' }}>Claude đang suy nghĩ...</div>
+              {isPiSending && (
+                <div style={{ color: '#76B900', fontSize: '12px' }}>
+                  {piMessages[piMessages.length - 1]?.content
+                    ? 'Coding Pi đang trả lời...'
+                    : 'Coding Pi đang suy nghĩ...'}
+                </div>
               )}
             </div>
 
             <div style={{ padding: '10px', borderTop: '1px solid #3C3C3C' }}>
               <textarea
-                value={claudeInput}
-                onChange={(event) => setClaudeInput(event.target.value)}
+                value={piInput}
+                onChange={(event) => setPiInput(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' && !event.shiftKey) {
                     event.preventDefault();
-                    askClaude();
+                    askCodingPi();
                   }
                 }}
-                placeholder={activeTab ? `Hỏi về ${activeTab.name}...` : 'Hỏi Claude...'}
-                disabled={isClaudeSending}
+                placeholder={activeTab ? `Hỏi về ${activeTab.name}...` : 'Hỏi Coding Pi...'}
+                disabled={isPiSending}
                 rows={3}
                 style={{
                   width: '100%',
@@ -781,12 +840,12 @@ export default function VSCodeWebEditorPage() {
                 }}
               />
               <button
-                onClick={askClaude}
-                disabled={!claudeInput.trim() || isClaudeSending}
+                onClick={askCodingPi}
+                disabled={!piInput.trim() || isPiSending}
                 style={{
                   marginTop: '8px',
                   width: '100%',
-                  backgroundColor: '#D97706',
+                  backgroundColor: '#76B900',
                   color: '#FFF',
                   border: 'none',
                   borderRadius: '4px',
@@ -794,10 +853,10 @@ export default function VSCodeWebEditorPage() {
                   fontSize: '12px',
                   fontWeight: 700,
                   cursor: 'pointer',
-                  opacity: !claudeInput.trim() || isClaudeSending ? 0.5 : 1,
+                  opacity: !piInput.trim() || isPiSending ? 0.5 : 1,
                 }}
               >
-                {isClaudeSending ? 'Đang gửi...' : 'Gửi cho Claude'}
+                {isPiSending ? 'Đang gửi...' : 'Gửi cho Coding Pi'}
               </button>
             </div>
           </div>

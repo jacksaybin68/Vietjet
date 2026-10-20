@@ -10,6 +10,7 @@
 export const PUBLIC_ROUTES = [
   '/',
   '/dang-nhap',
+  '/dang-ky',
   // Password recovery must be reachable without a session.
   '/quen-mat-khau',
   '/dat-lai-mat-khau',

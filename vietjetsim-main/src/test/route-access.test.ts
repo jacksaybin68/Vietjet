@@ -21,6 +21,7 @@ describe('route access classification', () => {
 
     it('allows the password recovery pages without a session', () => {
       expect(isPublicRoute('/dang-nhap')).toBe(true);
+      expect(isPublicRoute('/dang-ky')).toBe(true);
       expect(isPublicRoute('/quen-mat-khau')).toBe(true);
       expect(isPublicRoute('/dat-lai-mat-khau')).toBe(true);
     });
