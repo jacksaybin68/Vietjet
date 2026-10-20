@@ -164,7 +164,7 @@ export default function PassengerPicker({
         <div
           role="dialog"
           aria-label="Chọn số hành khách"
-          className="absolute left-0 top-full z-50 mt-1 w-full min-w-[300px] sm:min-w-[340px] rounded-xl border border-gray-200 bg-white p-4 shadow-[0_16px_50px_rgba(0,0,0,0.22)] animate-fadeIn text-gray-800"
+          className="absolute left-0 top-full z-50 mt-1 w-full max-w-[calc(100vw-28px)] min-w-[280px] sm:min-w-[340px] rounded-xl border border-gray-200 bg-white p-3.5 sm:p-4 shadow-[0_16px_50px_rgba(0,0,0,0.22)] animate-fadeIn text-gray-800"
         >
           {/* Top Row: Yêu cầu trợ giúp đặc biệt */}
           <div className="flex justify-end mb-3">

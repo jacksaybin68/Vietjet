@@ -440,7 +440,7 @@ export default function FlightBookingResultsWrapper({
         </div>
       </div>
 
-      <div className="mx-auto max-w-[1368px] px-4 sm:px-6 lg:px-8 py-5">
+      <div className="mx-auto max-w-[1368px] px-4 sm:px-6 lg:px-8 pt-5 pb-24 sm:pb-28">
         <div className="flex flex-col lg:flex-row gap-6 items-start">
           {/* Cột trái: danh sách chuyến bay (~68%) */}
           <div className="flex-1 lg:w-[68%] min-w-0">

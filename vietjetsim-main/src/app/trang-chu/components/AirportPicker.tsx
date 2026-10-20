@@ -154,13 +154,13 @@ export default function AirportPicker({
       // field the moment the page moves. `width` is floored at the same 260px
       // the panel used to get from `min-w-[260px]`, so the list does not become
       // unreadably narrow in a wide-but-short hero column.
+      const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 360;
+      const panelWidth = Math.min(viewportWidth - 16, Math.max(rect.width || 0, 260));
+      const panelLeft = Math.max(8, Math.min(rect.left || 0, viewportWidth - panelWidth - 8));
       setAnchor({
-        left: rect.left || 0,
+        left: panelLeft,
         top: (rect.bottom || 0) + 4,
-        // `rect.width` is guarded because a partial rect (a test double, or a
-        // detached node) would otherwise put `NaN` in the style and silently
-        // collapse the panel's width.
-        width: Math.max(rect.width || 0, 260),
+        width: panelWidth,
       });
       // The 96px floor is two airports, and it is deliberately low. A higher
       // floor reads better until the screen is short enough for it to win over

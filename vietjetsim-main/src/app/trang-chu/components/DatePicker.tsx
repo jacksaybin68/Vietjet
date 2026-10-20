@@ -204,7 +204,7 @@ export function FlightDatePickerPopover({
     const cells = getMonthCells(y, m);
 
     return (
-      <div className="flex-1 min-w-[260px]">
+      <div className="flex-1 min-w-0 sm:min-w-[260px]">
         {/* Month Header */}
         <div className="flex items-center justify-between mb-3 px-1">
           {isFirstMonth ? (
@@ -319,7 +319,7 @@ export function FlightDatePickerPopover({
   return (
     <div
       ref={popoverRef}
-      className={`absolute right-0 top-[112px] z-50 w-[630px] max-w-[calc(100vw-32px)] bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-gray-100 p-4 sm:p-5 select-none text-gray-800 animate-fadeIn ${className}`}
+      className={`absolute right-0 top-[112px] z-50 w-[630px] max-w-[calc(100vw-28px)] bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-gray-100 p-3 sm:p-5 select-none text-gray-800 animate-fadeIn ${className}`}
     >
       {/* Top Header: Radio Buttons Khứ hồi / Một chiều */}
       <div className="flex items-center justify-end gap-6 mb-4 px-2">
