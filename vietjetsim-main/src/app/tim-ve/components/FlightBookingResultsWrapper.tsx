@@ -149,12 +149,13 @@ export default function FlightBookingResultsWrapper({
       fareClass: string,
       fare: number,
       fares?: Partial<Record<FareClassId, number>>,
-      flight?: { departTime?: string; arriveTime?: string }
+      flight?: { departTime?: string; arriveTime?: string },
+      leg: 'outbound' | 'inbound' = 'outbound'
     ) => {
       const normalized = normalizeFareClass(fareClass);
       const tax = 581581 * (paxCounts.adult || 1);
       const baseFare = fares?.eco ?? Math.round(fare / (FARE_CLASS_MULTIPLIER[normalized] ?? 1));
-      const outboundFlight = {
+      const legFlight = {
         flightNo,
         fareClass: normalized,
         fare,
@@ -162,31 +163,16 @@ export default function FlightBookingResultsWrapper({
         total: fare + tax,
         baseFare,
         fares,
-        departTime: flight?.departTime || '06:00',
-        arriveTime: flight?.arriveTime || '08:15',
+        departTime: flight?.departTime || (leg === 'outbound' ? '06:00' : '18:30'),
+        arriveTime: flight?.arriveTime || (leg === 'outbound' ? '08:15' : '20:45'),
       };
-      const returnFlightNo = flightNo.replace(/\d+/, (m) => String(Number(m) + 1));
-      const inboundFlight = isRoundTrip
-        ? {
-            flightNo: returnFlightNo,
-            fareClass: normalized,
-            fare,
-            tax,
-            total: fare + tax,
-            baseFare,
-            fares,
-            departTime: '18:30',
-            arriveTime: '20:45',
-          }
-        : null;
 
       setBookings((prev) => ({
         ...prev,
-        outbound: outboundFlight,
-        inbound: inboundFlight,
+        [leg]: legFlight,
       }));
     },
-    [isRoundTrip, paxCounts.adult]
+    [paxCounts.adult]
   );
 
   const handleContinue = useCallback(() => {

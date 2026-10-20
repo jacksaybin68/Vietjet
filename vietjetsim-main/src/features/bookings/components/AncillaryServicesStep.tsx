@@ -16,10 +16,14 @@ import BookingBottomBar from './BookingBottomBar';
 
 interface AncillaryServicesStepProps {
   flight: Flight;
+  returnFlight?: Flight | null;
+  isRoundTrip?: boolean;
   passengerName?: string;
   selectedSeats?: string[];
+  returnSeats?: string[];
   seatFee?: number;
   baggageLabel?: string;
+  returnBaggageLabel?: string;
   baggageFee?: number;
   hasInsurance?: boolean;
   insuranceFee?: number;
@@ -40,10 +44,14 @@ interface AncillaryServicesStepProps {
 
 export default function AncillaryServicesStep({
   flight,
+  returnFlight: _returnFlight,
+  isRoundTrip = false,
   passengerName: _passengerName = 'LONG CHIN',
   selectedSeats = [],
+  returnSeats = [],
   seatFee = 0,
   baggageLabel,
+  returnBaggageLabel,
   baggageFee = 0,
   hasInsurance = false,
   insuranceFee = 72000,
@@ -93,9 +101,25 @@ export default function AncillaryServicesStep({
                 )}
               </div>
               <p className="text-xs text-gray-500 mt-0.5">
-                {selectedSeats.length > 0
-                  ? `Đã chọn: ${selectedSeats.join(', ')}`
-                  : 'Hãy chọn chỗ ngồi yêu thích của bạn'}
+                {isRoundTrip ? (
+                  selectedSeats.length > 0 || returnSeats.length > 0 ? (
+                    <>
+                      <span>
+                        Đi: {selectedSeats.length > 0 ? selectedSeats.join(', ') : 'Chưa chọn'}
+                      </span>
+                      <span className="mx-1.5">•</span>
+                      <span>
+                        Về: {returnSeats.length > 0 ? returnSeats.join(', ') : 'Chưa chọn'}
+                      </span>
+                    </>
+                  ) : (
+                    'Hãy chọn chỗ ngồi chuyến đi & về'
+                  )
+                ) : selectedSeats.length > 0 ? (
+                  `Đã chọn: ${selectedSeats.join(', ')}`
+                ) : (
+                  'Hãy chọn chỗ ngồi yêu thích của bạn'
+                )}
               </p>
             </div>
           </div>
@@ -126,7 +150,15 @@ export default function AncillaryServicesStep({
                 )}
               </div>
               <p className="text-xs text-gray-500 mt-0.5">
-                {baggageLabel ? (
+                {isRoundTrip ? (
+                  baggageLabel || returnBaggageLabel ? (
+                    <span className="font-semibold text-gray-700">
+                      Đi: {baggageLabel || '7kg'} | Về: {returnBaggageLabel || '7kg'}
+                    </span>
+                  ) : (
+                    'Hãy lựa chọn gói hành lý chiều đi & về'
+                  )
+                ) : baggageLabel ? (
                   <span className="font-semibold text-gray-700">
                     {flight.from} ✈ {flight.to} ({baggageLabel})
                   </span>

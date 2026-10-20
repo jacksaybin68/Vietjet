@@ -10,9 +10,11 @@ interface SeatSelectionDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   flight: Flight;
+  returnFlight?: Flight | null;
   passengerName?: string;
   initialSeats?: string[];
-  onConfirmSeats: (seats: string[], seatFee: number) => void;
+  initialReturnSeats?: string[];
+  onConfirmSeats: (seats: string[], seatFee: number, returnSeats?: string[]) => void;
   isRoundTrip?: boolean;
 }
 
@@ -44,38 +46,49 @@ export default function SeatSelectionDrawer({
   isOpen,
   onClose,
   flight,
+  returnFlight,
   passengerName = 'LONG CHIN',
   initialSeats = [],
+  initialReturnSeats = [],
   onConfirmSeats,
   isRoundTrip = false,
 }: SeatSelectionDrawerProps) {
   const [activeLeg, setActiveLeg] = useState<'outbound' | 'inbound'>('outbound');
-  const [selectedSeats, setSelectedSeats] = useState<string[]>(initialSeats);
+  const [outboundSeats, setOutboundSeats] = useState<string[]>(initialSeats);
+  const [inboundSeats, setInboundSeats] = useState<string[]>(initialReturnSeats);
 
   useEffect(() => {
-    setSelectedSeats(initialSeats);
-  }, [initialSeats, isOpen]);
+    setOutboundSeats(initialSeats);
+    setInboundSeats(initialReturnSeats);
+  }, [initialSeats, initialReturnSeats, isOpen]);
 
   if (!isOpen) return null;
 
+  const currentSeats = activeLeg === 'outbound' ? outboundSeats : inboundSeats;
+  const setCurrentSeats = activeLeg === 'outbound' ? setOutboundSeats : setInboundSeats;
+
   const handleToggleSeat = (seatId: string) => {
     if (OCCUPIED_SEATS.has(seatId)) return;
-    if (selectedSeats.includes(seatId)) {
-      setSelectedSeats(selectedSeats.filter((s) => s !== seatId));
+    if (currentSeats.includes(seatId)) {
+      setCurrentSeats(currentSeats.filter((s) => s !== seatId));
     } else {
-      setSelectedSeats([seatId]); // 1 passenger selects 1 seat
+      setCurrentSeats([seatId]); // 1 passenger selects 1 seat
     }
   };
 
-  const totalSeatFee = selectedSeats.reduce((sum, seat) => sum + getSeatCharge(seat), 0);
+  const outboundSeatFee = outboundSeats.reduce((sum, seat) => sum + getSeatCharge(seat), 0);
+  const inboundSeatFee = isRoundTrip
+    ? inboundSeats.reduce((sum, seat) => sum + getSeatCharge(seat), 0)
+    : 0;
+  const totalSeatFee = outboundSeatFee + inboundSeatFee;
 
   const handleConfirm = () => {
-    onConfirmSeats(selectedSeats, totalSeatFee);
+    onConfirmSeats(outboundSeats, totalSeatFee, inboundSeats);
     onClose();
   };
 
   const handleSkip = () => {
-    onConfirmSeats([], 0);
+    onConfirmSeats([], 0, []);
     onClose();
   };
 
@@ -138,7 +151,9 @@ export default function SeatSelectionDrawer({
             <span className="uppercase">{passengerName}</span>
           </div>
           <div className="text-yellow-300">
-            {flight.from} - {flight.to}
+            {activeLeg === 'outbound'
+              ? `${flight.from} - ${flight.to}`
+              : `${returnFlight?.from || flight.to} - ${returnFlight?.to || flight.from}`}
           </div>
         </div>
 
@@ -239,7 +254,7 @@ export default function SeatSelectionDrawer({
                         {COLS_LEFT.map((col) => {
                           const seatId = `${row}${col}`;
                           const isOccupied = OCCUPIED_SEATS.has(seatId);
-                          const isSelected = selectedSeats.includes(seatId);
+                          const isSelected = currentSeats.includes(seatId);
 
                           let bgColor = 'bg-green-500 text-white hover:opacity-90'; // standard
                           if (row <= 2)
@@ -275,7 +290,7 @@ export default function SeatSelectionDrawer({
                         {COLS_RIGHT.map((col) => {
                           const seatId = `${row}${col}`;
                           const isOccupied = OCCUPIED_SEATS.has(seatId);
-                          const isSelected = selectedSeats.includes(seatId);
+                          const isSelected = currentSeats.includes(seatId);
 
                           let bgColor = 'bg-green-500 text-white hover:opacity-90';
                           if (row <= 2) bgColor = 'bg-yellow-500 text-white hover:opacity-90';
@@ -309,14 +324,23 @@ export default function SeatSelectionDrawer({
         {/* Sticky Drawer Footer */}
         <div className="bg-primary-dark text-white p-3 flex items-center justify-between shadow-lg">
           <div>
-            <span className="text-xs2 text-gray-200 block">Chỗ ngồi:</span>
+            <span className="text-xs2 text-gray-200 block">
+              Chỗ ngồi (
+              {[
+                outboundSeats.length > 0 ? `Đi: ${outboundSeats.join(', ')}` : null,
+                inboundSeats.length > 0 ? `Về: ${inboundSeats.join(', ')}` : null,
+              ]
+                .filter(Boolean)
+                .join(' | ') || 'Chưa chọn'}
+              ):
+            </span>
             <span className="text-base font-black">
               {totalSeatFee > 0 ? `${totalSeatFee.toLocaleString('vi-VN')} VND` : '0 VND'}
             </span>
           </div>
 
           <div className="flex items-center gap-2">
-            {selectedSeats.length === 0 ? (
+            {outboundSeats.length === 0 && inboundSeats.length === 0 ? (
               <button
                 type="button"
                 onClick={handleSkip}
