@@ -259,7 +259,7 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
                 {/* Scalloped / puffy cloud SVG badge background matching sample image */}
                 <svg
                   viewBox="0 0 140 70"
-                  className="absolute inset-0 w-full h-full text-[#FFD200] filter drop-shadow z-0"
+                  className="absolute inset-0 w-full h-full text-vjyellow filter drop-shadow z-0"
                   fill="currentColor"
                   preserveAspectRatio="none"
                 >
@@ -280,7 +280,7 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
                   <span className="block text-xs sm:text-sm font-black text-gray-900 leading-tight my-0.5">
                     {day.getDate()} tháng {day.getMonth() + 1}
                   </span>
-                  <span className="block text-2xs sm:text-xs font-black text-[#D71920] leading-tight">
+                  <span className="block text-2xs sm:text-xs font-black text-primary leading-tight">
                     Từ <span className="font-extrabold">{price}</span> VND
                   </span>
                 </div>
@@ -341,7 +341,7 @@ const FARE_BENEFITS: Record<
   }
 > = {
   eco: {
-    bgClass: 'bg-[#DCF5E2]', // Soft pastel green matching sample 1
+    bgClass: 'bg-emerald-50', // Soft pastel green matching sample 1
     included: ['Hành lý xách tay: 07Kg.'],
     notIncluded: [
       'Hành lý ký gửi (tùy chọn)',
@@ -353,7 +353,7 @@ const FARE_BENEFITS: Record<
     ],
   },
   deluxe: {
-    bgClass: 'bg-[#FFF3DF]', // Soft warm tan/orange matching sample 2
+    bgClass: 'bg-amber-50', // Soft warm tan/orange matching sample 2
     included: [
       'Hành lý xách tay: 10kg cho đường bay Châu Âu, Úc, Kazakhstan; 07kg cho các đường bay còn lại.',
       'Hành lý ký gửi: 40kg cho đường bay Châu Âu, Úc, Kazakhstan; 20kg cho các đường bay còn lại.',
@@ -364,7 +364,7 @@ const FARE_BENEFITS: Record<
     notIncluded: ['Bộ tiện ích 3 trong 1'],
   },
   skyboss: {
-    bgClass: 'bg-[#FDEBEB]', // Soft pastel red/pink matching sample 3
+    bgClass: 'bg-rose-50', // Soft pastel red/pink matching sample 3
     included: [
       'Hành lý xách tay: 10kg',
       'Hành lý ký gửi: 50kg cho đường bay Châu Âu, Úc, Kazakhstan; 30kg cho các đường bay còn lại và 01 bộ dụng cụ chơi golf (nếu có).',
@@ -377,7 +377,7 @@ const FARE_BENEFITS: Record<
     notIncluded: [],
   },
   business: {
-    bgClass: 'bg-[#FDF6E3]', // Soft pastel cream/gold matching sample 4
+    bgClass: 'bg-yellow-50', // Soft pastel cream/gold matching sample 4
     included: [
       'Hành lý xách tay: 18kg',
       'Hành lý ký gửi: 60kg cho đường bay Châu Âu, Úc, Kazakhstan; 40kg cho các đường bay còn lại và 01 bộ dụng cụ chơi golf (nếu có).',
@@ -956,8 +956,8 @@ export default function FlightResultsStep({
 
               {/* Opposing arrows: top red right, bottom gray left */}
               <div className="flex flex-col items-center justify-center gap-1 px-4 sm:px-8">
-                <div className="w-12 sm:w-16 h-0.5 bg-[#D71920] relative">
-                  <span className="absolute right-0 -top-1 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-l-[6px] border-l-[#D71920]" />
+                <div className="w-12 sm:w-16 h-0.5 bg-primary relative">
+                  <span className="absolute right-0 -top-1 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-l-[6px] border-l-primary" />
                 </div>
                 <div className="w-12 sm:w-16 h-0.5 bg-gray-400 relative">
                   <span className="absolute left-0 -top-1 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-r-[6px] border-r-gray-400" />
@@ -1006,7 +1006,7 @@ export default function FlightResultsStep({
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('business')}
-                className="bg-[#A67C1E] text-white py-2 px-2 text-center rounded-t-md flex items-center justify-center cursor-pointer hover:opacity-90 shadow-sm"
+                className="bg-yellow-700 text-white py-2 px-2 text-center rounded-t-md flex items-center justify-center cursor-pointer hover:opacity-90 shadow-sm"
               >
                 <span className="font-black italic uppercase text-xs sm:text-sm tracking-wider font-koho">
                   BUSINESS
@@ -1016,7 +1016,7 @@ export default function FlightResultsStep({
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('skyboss')}
-                className="bg-[#D71920] text-white py-2 px-2 text-center rounded-t-md flex items-center justify-center cursor-pointer hover:opacity-90 shadow-sm"
+                className="bg-primary text-white py-2 px-2 text-center rounded-t-md flex items-center justify-center cursor-pointer hover:opacity-90 shadow-sm"
               >
                 <span className="font-black italic text-xs sm:text-sm tracking-wider font-koho">
                   skyBOSS
@@ -1026,7 +1026,7 @@ export default function FlightResultsStep({
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('deluxe')}
-                className="bg-[#F37021] text-white py-2 px-2 text-center rounded-t-md flex items-center justify-center cursor-pointer hover:opacity-90 shadow-sm"
+                className="bg-orange-500 text-white py-2 px-2 text-center rounded-t-md flex items-center justify-center cursor-pointer hover:opacity-90 shadow-sm"
               >
                 <span className="font-black italic text-xs sm:text-sm tracking-wider font-koho">
                   Deluxe
@@ -1036,7 +1036,7 @@ export default function FlightResultsStep({
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('eco')}
-                className="bg-[#54B848] text-white py-2 px-2 text-center rounded-t-md flex items-center justify-center cursor-pointer hover:opacity-90 shadow-sm"
+                className="bg-emerald-600 text-white py-2 px-2 text-center rounded-t-md flex items-center justify-center cursor-pointer hover:opacity-90 shadow-sm"
               >
                 <span className="font-black italic lowercase text-xs sm:text-sm tracking-wider font-koho">
                   eco
@@ -1145,7 +1145,7 @@ export default function FlightResultsStep({
                 className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 relative flex flex-col lg:flex-row flex-wrap mb-3"
               >
                 {/* Left: Flight Info - bright yellow box matching real Vietjet */}
-                <div className="w-full lg:w-[240px] shrink-0 bg-[#FFD200] p-3 sm:p-4 border-b lg:border-b-0 border-yellow-400 flex flex-col items-center justify-center text-center relative select-none">
+                <div className="w-full lg:w-[240px] shrink-0 bg-vjyellow p-3 sm:p-4 border-b lg:border-b-0 border-yellow-400 flex flex-col items-center justify-center text-center relative select-none">
                   <span className="text-2xs font-bold text-gray-900 tracking-wider uppercase">
                     {flight.flightNo}
                   </span>
@@ -1188,9 +1188,9 @@ export default function FlightResultsStep({
                         key={fc.id}
                         className={`relative flex min-w-0 flex-col overflow-hidden transition-colors ${
                           isSoldOut
-                            ? 'bg-[#F2F4F7]'
+                            ? 'bg-gray-100'
                             : isSelected
-                              ? 'bg-yellow-50/80 ring-2 ring-inset ring-[#FFD200]'
+                              ? 'bg-yellow-50/80 ring-2 ring-inset ring-vjyellow'
                               : 'bg-white hover:bg-yellow-50/40'
                         }`}
                       >
@@ -1288,7 +1288,7 @@ export default function FlightResultsStep({
                         </span>
                         <div className="w-full flex items-center gap-1.5 my-0.5">
                           <span className="h-px flex-1 border-t border-dashed border-gray-400" />
-                          <span className="text-[#D71920] rotate-45 inline-block text-xs">✈</span>
+                          <span className="text-primary rotate-45 inline-block text-xs">✈</span>
                           <span className="h-px flex-1 border-t border-dashed border-gray-400" />
                         </div>
                         <span className="text-2xs text-gray-700 font-medium">Bay thẳng</span>
@@ -1320,7 +1320,7 @@ export default function FlightResultsStep({
                                 key={i}
                                 className="flex items-start gap-2.5 text-xs text-gray-800 leading-relaxed"
                               >
-                                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#54B848] text-white text-3xs shrink-0 mt-0.5 font-black shadow-xs">
+                                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-600 text-white text-3xs shrink-0 mt-0.5 font-black shadow-xs">
                                   ✓
                                 </span>
                                 <span>{item}</span>
@@ -1341,7 +1341,7 @@ export default function FlightResultsStep({
                                 key={i}
                                 className="flex items-start gap-2.5 text-xs text-gray-800 leading-relaxed"
                               >
-                                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#D71920] text-white text-3xs shrink-0 mt-0.5 font-black shadow-xs">
+                                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary text-white text-3xs shrink-0 mt-0.5 font-black shadow-xs">
                                   ✕
                                 </span>
                                 <span>{item}</span>
@@ -1356,16 +1356,16 @@ export default function FlightResultsStep({
                         <button
                           type="button"
                           onClick={() => setCompareFare(activeFareClass)}
-                          className="flex items-center gap-1.5 text-xs text-[#0072BC] hover:underline font-bold"
+                          className="flex items-center gap-1.5 text-xs text-blue-600 hover:underline font-bold"
                         >
-                          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#0072BC] text-white text-3xs font-bold">
+                          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-600 text-white text-3xs font-bold">
                             i
                           </span>
                           <span>Xem quy định giá vé</span>
                         </button>
 
-                        <div className="flex items-center gap-1.5 text-[#54B848] text-xs font-bold">
-                          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full border-2 border-[#54B848] text-[#54B848] text-2xs font-black">
+                        <div className="flex items-center gap-1.5 text-emerald-600 text-xs font-bold">
+                          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full border-2 border-emerald-600 text-emerald-600 text-2xs font-black">
                             ✓
                           </span>
                           <span>Đã chọn</span>

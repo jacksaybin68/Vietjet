@@ -61,21 +61,23 @@ function countByType(passengers: Passenger[]): Record<PassengerType, number> {
   return counts;
 }
 
-function FlightBookingClientInner({
-  onFlightSelect,
-  continueSignal,
-  onStepChange,
-}: {
+export interface FlightBookingClientProps {
   onFlightSelect?: (
     flightNo: string,
     fareClass: string,
     fare: number,
-    fares?: any,
-    flight?: any
+    fares?: Partial<Record<string, number>>,
+    flight?: { departTime?: string; arriveTime?: string }
   ) => void;
   continueSignal?: number;
   onStepChange?: (step: number) => void;
-}) {
+}
+
+function FlightBookingClientInner({
+  onFlightSelect,
+  continueSignal,
+  onStepChange,
+}: FlightBookingClientProps) {
   const searchParams = useSearchParams();
   const params: SearchParams = {
     from: searchParams.get('from') || undefined,
@@ -533,17 +535,7 @@ export default function FlightBookingClient({
   onFlightSelect,
   continueSignal,
   onStepChange,
-}: {
-  onFlightSelect?: (
-    flightNo: string,
-    fareClass: string,
-    fare: number,
-    fares?: any,
-    flight?: any
-  ) => void;
-  continueSignal?: number;
-  onStepChange?: (step: number) => void;
-}) {
+}: FlightBookingClientProps) {
   return (
     <Suspense fallback={<FlightSearchSkeleton />}>
       <FlightBookingClientInner

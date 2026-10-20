@@ -107,7 +107,6 @@ function RegisterPageInner() {
   // CAPTCHA
   const [captcha, setCaptcha] = useState<CaptchaChallenge | null>(null);
   const [captchaAnswer, setCaptchaAnswer] = useState('');
-  const [captchaInvalid, setCaptchaInvalid] = useState(false);
 
   const autoSolveCaptcha = (challenge: CaptchaChallenge | null): string => {
     if (!challenge?.token) return '';
@@ -134,7 +133,6 @@ function RegisterPageInner() {
       const challenge = await getCaptcha();
       setCaptcha(challenge);
       setCaptchaAnswer(autoSolveCaptcha(challenge));
-      setCaptchaInvalid(false);
     } catch {
       setCaptcha(null);
     }
@@ -254,7 +252,6 @@ function RegisterPageInner() {
 
       const effectiveCaptcha = captchaAnswer || autoSolveCaptcha(captcha);
       if (!captcha?.token || !effectiveCaptcha.trim()) {
-        setCaptchaInvalid(true);
         setError('Vui lòng hoàn thành xác nhận để tiếp tục.');
         return;
       }
@@ -342,12 +339,12 @@ function RegisterPageInner() {
                   value={surname}
                   onChange={(e) => setSurname(e.target.value)}
                   onBlur={() => setSurname((value) => normalizePassportName(value))}
-                  className="w-full rounded-md border border-gray-300 bg-white px-3.5 py-2.5 text-sm font-medium text-gray-900 focus:border-[#D71920] focus:ring-1 focus:ring-[#D71920] outline-none transition-all"
+                  className="w-full rounded-md border border-gray-300 bg-white px-3.5 py-2.5 text-sm font-medium text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                   required
                 />
                 {!surname && (
                   <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-500 select-none">
-                    Họ <span className="text-[#D71920] font-bold">*</span>
+                    Họ <span className="text-primary font-bold">*</span>
                   </span>
                 )}
               </div>
@@ -360,19 +357,19 @@ function RegisterPageInner() {
                   value={givenName}
                   onChange={(e) => setGivenName(e.target.value)}
                   onBlur={() => setGivenName((value) => normalizePassportName(value))}
-                  className="w-full rounded-md border border-gray-300 bg-white px-3.5 py-2.5 text-sm font-medium text-gray-900 focus:border-[#D71920] focus:ring-1 focus:ring-[#D71920] outline-none transition-all"
+                  className="w-full rounded-md border border-gray-300 bg-white px-3.5 py-2.5 text-sm font-medium text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                   required
                 />
                 {!givenName && (
                   <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-500 select-none">
-                    Tên đệm và Tên <span className="text-[#D71920] font-bold">*</span>
+                    Tên đệm và Tên <span className="text-primary font-bold">*</span>
                   </span>
                 )}
               </div>
             </div>
 
             {/* Chú thích màu xanh */}
-            <p className="text-[11px] leading-relaxed text-[#2563d4] font-medium">
+            <p className="text-xs2 leading-relaxed text-blue-600 font-medium">
               Vui lòng nhập họ, tên đệm và tên khớp với giấy tờ tùy thân của bạn. Ví dụ: với tên
               Nguyễn Văn A, bạn cần nhập NGUYỄN vào ô &ldquo;Họ&rdquo; và VĂN A vào ô &ldquo;Tên đệm
               và Tên&rdquo;.
@@ -382,7 +379,7 @@ function RegisterPageInner() {
             <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr_auto] gap-2.5 items-center">
               <div className="flex items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2.5 text-xs font-bold text-gray-700 w-[78px] cursor-pointer select-none">
                 <span>(+84)</span>
-                <span className="text-[10px] text-gray-400">▼</span>
+                <span className="text-2xs text-gray-400">▼</span>
               </div>
 
               <div className="relative">
@@ -394,12 +391,12 @@ function RegisterPageInner() {
                   autoComplete="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                  className="w-full rounded-md border border-gray-300 bg-white px-3.5 py-2.5 text-sm font-medium text-gray-900 focus:border-[#D71920] focus:ring-1 focus:ring-[#D71920] outline-none transition-all"
+                  className="w-full rounded-md border border-gray-300 bg-white px-3.5 py-2.5 text-sm font-medium text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                   required
                 />
                 {!phone && (
                   <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-500 select-none">
-                    Số điện thoại <span className="text-[#D71920] font-bold">*</span>
+                    Số điện thoại <span className="text-primary font-bold">*</span>
                   </span>
                 )}
               </div>
@@ -407,9 +404,9 @@ function RegisterPageInner() {
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-bold text-gray-800 whitespace-nowrap select-none">
                   <span>Ngày sinh</span>
-                  <span className="text-[#D71920] ml-0.5">*</span>
+                  <span className="text-primary ml-0.5">*</span>
                 </span>
-                <div className="flex items-center rounded-md border border-gray-300 bg-white px-2.5 py-2 text-xs font-medium text-gray-800 focus-within:border-[#D71920] focus-within:ring-1 focus-within:ring-[#D71920]">
+                <div className="flex items-center rounded-md border border-gray-300 bg-white px-2.5 py-2 text-xs font-medium text-gray-800 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
                   <span className="mr-1.5 text-gray-500 select-none text-xs">📅</span>
                   <select
                     aria-label="Ngày sinh: ngày"
@@ -458,7 +455,7 @@ function RegisterPageInner() {
                 </div>
               </div>
             </div>
-            {birthError && <p className="text-xs font-bold text-[#D71920]">{birthError}</p>}
+            {birthError && <p className="text-xs font-bold text-primary">{birthError}</p>}
 
             {/* Hàng 3: Email * */}
             <div>
@@ -470,15 +467,15 @@ function RegisterPageInner() {
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-t-md border border-gray-300 bg-white px-3.5 py-2.5 text-sm font-medium text-gray-900 focus:border-[#D71920] focus:ring-1 focus:ring-[#D71920] outline-none transition-all"
+                  className="w-full rounded-t-md border border-gray-300 bg-white px-3.5 py-2.5 text-sm font-medium text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                 />
                 {!email && (
                   <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-500 select-none">
-                    Email <span className="text-[#D71920] font-bold">*</span>
+                    Email <span className="text-primary font-bold">*</span>
                   </span>
                 )}
               </div>
-              <div className="bg-[#FBE5B5] border border-t-0 border-[#f6d89b] rounded-b-md px-3.5 py-1.5 text-[11px] sm:text-xs text-[#8A4A00] font-medium leading-snug">
+              <div className="bg-amber-100 border border-t-0 border-amber-200 rounded-b-md px-3.5 py-1.5 text-xs2 sm:text-xs text-amber-900 font-medium leading-snug">
                 Nhập email để xác minh và khôi phục tài khoản khi cần thiết
               </div>
             </div>
@@ -495,10 +492,10 @@ function RegisterPageInner() {
                 aria-invalid={referralError ? true : undefined}
                 aria-describedby={referralError ? 'referral-code-error' : undefined}
                 placeholder="Mã giới thiệu"
-                className="w-full rounded-md border border-gray-300 bg-white px-3.5 py-2.5 text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:border-[#D71920] focus:ring-1 focus:ring-[#D71920] outline-none transition-all"
+                className="w-full rounded-md border border-gray-300 bg-white px-3.5 py-2.5 text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
               />
               {referralError && (
-                <p id="referral-code-error" className="mt-1 text-xs font-bold text-[#D71920]">
+                <p id="referral-code-error" className="mt-1 text-xs font-bold text-primary">
                   {referralError}
                 </p>
               )}
@@ -510,7 +507,7 @@ function RegisterPageInner() {
                 type="checkbox"
                 checked={agreeTerms}
                 onChange={(e) => setAgreeTerms(e.target.checked)}
-                className="mt-0.5 rounded border-gray-300 text-[#D71920] focus:ring-[#D71920]"
+                className="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary"
                 style={{ accentColor: '#D71920' }}
               />
               <span>
@@ -519,7 +516,7 @@ function RegisterPageInner() {
                   href="/gioi-thieu"
                   target="_blank"
                   rel="noreferrer"
-                  className="font-bold text-[#2563d4] underline hover:text-blue-700"
+                  className="font-bold text-blue-600 underline hover:text-blue-700"
                 >
                   điều khoản của chương trình
                 </a>
@@ -546,8 +543,8 @@ function RegisterPageInner() {
                 aria-label="Tiếp tục"
                 className={`w-40 py-2.5 rounded-lg text-center font-bold text-sm transition-all ${
                   !agreeTerms || !surname.trim() || !givenName.trim() || (!phone && !email)
-                    ? 'bg-[#EEF0F3] text-gray-400 cursor-not-allowed shadow-none italic'
-                    : 'bg-[#D71920] hover:bg-red-700 text-white cursor-pointer shadow-md active:scale-95'
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none italic'
+                    : 'bg-primary hover:bg-red-700 text-white cursor-pointer shadow-md active:scale-95'
                 }`}
               >
                 {loading ? <Spinner /> : 'Đăng ký'}
@@ -558,9 +555,9 @@ function RegisterPageInner() {
             <div className="text-center pt-4">
               <Link
                 href="/gioi-thieu"
-                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#2563d4] hover:underline"
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-blue-600 hover:underline"
               >
-                <span className="w-4 h-4 rounded-full bg-[#2563d4] text-white text-[10px] flex items-center justify-center font-bold">
+                <span className="w-4 h-4 rounded-full bg-blue-600 text-white text-2xs flex items-center justify-center font-bold">
                   ℹ
                 </span>
                 <span>Bạn đã biết về Vietjet SkyJoy?</span>
@@ -573,7 +570,7 @@ function RegisterPageInner() {
               <div>
                 <Link
                   href="/dang-nhap"
-                  className="inline-flex items-center justify-center rounded-xl bg-[#FFCD00] hover:bg-[#FBB612] px-7 py-2.5 text-xs sm:text-sm font-black text-gray-900 shadow-sm transition-all active:scale-95 cursor-pointer"
+                  className="inline-flex items-center justify-center rounded-xl bg-vjyellow hover:bg-vjamber px-7 py-2.5 text-xs sm:text-sm font-black text-gray-900 shadow-sm transition-all active:scale-95 cursor-pointer"
                 >
                   Đăng nhập bằng SkyJoy
                 </Link>
@@ -585,7 +582,7 @@ function RegisterPageInner() {
 
       {registerStep === 2 && (
         <form onSubmit={handleVerifyRegisterOtp} className="space-y-4">
-          <div className="rounded-md border border-[var(--border)] bg-[#f8fafc] px-4 py-3 text-xs font-bold leading-5 text-[var(--foreground-muted)]">
+          <div className="rounded-md border border-[var(--border)] bg-slate-50 px-4 py-3 text-xs font-bold leading-5 text-[var(--foreground-muted)]">
             Mã xác thực gồm {OTP_LENGTH} chữ số đã được gửi tới số điện thoại{' '}
             <span className="text-[var(--foreground)] font-bold">{phone}</span>. Nhập mã để hoàn tất
             tạo tài khoản.
@@ -607,7 +604,7 @@ function RegisterPageInner() {
               value={otpCode}
               onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
               placeholder="Nhập mã OTP"
-              className="w-full rounded-md border border-gray-300 bg-white py-3 pl-11 pr-4 text-base tracking-[0.4em] font-bold text-gray-900 outline-none focus:border-[#D71920] focus:ring-1 focus:ring-[#D71920]"
+              className="w-full rounded-md border border-gray-300 bg-white py-3 pl-11 pr-4 text-base tracking-[0.4em] font-bold text-gray-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               required
             />
           </div>
@@ -627,7 +624,7 @@ function RegisterPageInner() {
                 setError('');
                 setSuccess('');
               }}
-              className="text-sm font-bold text-gray-500 hover:text-[#D71920]"
+              className="text-sm font-bold text-gray-500 hover:text-primary"
             >
               ← Sửa thông tin
             </button>
@@ -635,7 +632,7 @@ function RegisterPageInner() {
               type="button"
               onClick={handleResendRegisterOtp}
               disabled={otpSending || resend.seconds > 0}
-              className="text-sm font-bold text-[#D71920] hover:underline disabled:opacity-50"
+              className="text-sm font-bold text-primary hover:underline disabled:opacity-50"
             >
               {resend.seconds > 0 ? `Gửi lại sau ${resend.seconds}s` : 'Gửi lại mã'}
             </button>
@@ -644,7 +641,7 @@ function RegisterPageInner() {
           <button
             type="submit"
             disabled={loading}
-            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#D71920] hover:bg-red-700 text-white font-bold shadow-md transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary hover:bg-red-700 text-white font-bold shadow-md transition-all active:scale-95 cursor-pointer disabled:opacity-50"
           >
             {loading ? <Spinner /> : 'Xác nhận & Hoàn tất tạo tài khoản'}
           </button>

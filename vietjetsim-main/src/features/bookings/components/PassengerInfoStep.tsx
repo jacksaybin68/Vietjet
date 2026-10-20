@@ -4,13 +4,9 @@ import {
   BookingConsents,
   Flight,
   Passenger,
-  PASSENGER_TYPE_LABELS,
-  countPassengerTypes,
   requiresIdNumber,
 } from '@/features/bookings/types/booking-flow';
-import { Icon, AppImage } from '@/shared/components/ui';
-import { TAX_AND_FEE_RATE, getBookingTotals, type AncillaryId } from '@/features/bookings/pricing';
-import BookingBottomBar from './BookingBottomBar';
+import type { AncillaryId } from '@/features/bookings/pricing';
 
 interface Props {
   flight: Flight;
@@ -36,13 +32,13 @@ const fieldLabelClass =
   'block text-2xs sm:text-xs font-bold uppercase tracking-wider text-[var(--foreground)] mb-1 font-koho';
 
 export default function PassengerInfoStep({
-  flight,
+  flight: _flight,
   passengerCount,
   initialPassengers,
-  seatFee = 0,
-  ancillaries = [],
+  seatFee: _seatFee = 0,
+  ancillaries: _ancillaries = [],
   onSubmit,
-  onBack,
+  onBack: _onBack,
 }: Props) {
   const [passengers, setPassengers] = useState<Passenger[]>(
     initialPassengers ??
@@ -66,14 +62,6 @@ export default function PassengerInfoStep({
     survey: false,
     retainForFutureBooking: false,
     policyAccepted: false,
-  });
-
-  const totals = getBookingTotals({
-    farePerPassenger: flight.price,
-    passengerCount: passengers.length,
-    paxCounts: countPassengerTypes(passengers),
-    seatFee,
-    ancillaries,
   });
 
   const updatePassenger = (i: number, field: keyof Passenger, value: string) => {
@@ -101,7 +89,7 @@ export default function PassengerInfoStep({
         {/* SkyJoy Banner Card matching screenshot */}
         <div className="bg-white rounded-lg border border-gray-200/90 p-3.5 sm:p-4 flex items-center justify-between mb-4 shadow-sm">
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-full bg-[#FFF0E6] flex items-center justify-center shrink-0 border border-[#FED7AA]">
+            <div className="w-11 h-11 rounded-full bg-orange-50 flex items-center justify-center shrink-0 border border-orange-200">
               <span className="text-xl">🎁</span>
             </div>
             <div>
@@ -114,7 +102,7 @@ export default function PassengerInfoStep({
               </p>
               <a
                 href="/dang-nhap"
-                className="text-2xs sm:text-xs font-bold text-[#D71920] hover:underline inline-flex items-center gap-0.5 mt-0.5"
+                className="text-2xs sm:text-xs font-bold text-primary hover:underline inline-flex items-center gap-0.5 mt-0.5"
               >
                 Đăng nhập hoặc đăng ký &gt;
               </a>
@@ -131,7 +119,7 @@ export default function PassengerInfoStep({
                 className="bg-white rounded-lg border border-gray-200/90 overflow-hidden shadow-sm"
               >
                 {/* Passenger Accordion Header */}
-                <div className="bg-[#F0F2F5] px-4 py-2.5 border-b border-gray-200/80 flex items-center justify-between cursor-pointer">
+                <div className="bg-gray-100 px-4 py-2.5 border-b border-gray-200/80 flex items-center justify-between cursor-pointer">
                   <div className="flex items-center gap-2 text-xs font-bold text-gray-800">
                     <span className="text-sm">👤</span>
                     <span>
@@ -162,7 +150,7 @@ export default function PassengerInfoStep({
                             value={val}
                             checked={p.gender === val}
                             onChange={() => updatePassenger(i, 'gender', val)}
-                            className="accent-[#D71920] w-4 h-4 cursor-pointer"
+                            className="accent-primary w-4 h-4 cursor-pointer"
                           />
                           <span>{label}</span>
                         </label>
@@ -187,7 +175,7 @@ export default function PassengerInfoStep({
                           placeholder="Theo giấy tờ tuỳ thân"
                           value={p.name}
                           onChange={(e) => updatePassenger(i, 'name', e.target.value)}
-                          className="w-full border-0 border-b-2 border-[#D71920] bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-[#D71920] placeholder:text-gray-400 placeholder:italic placeholder:font-normal placeholder:text-2xs"
+                          className="w-full border-0 border-b-2 border-primary bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-primary placeholder:text-gray-400 placeholder:italic placeholder:font-normal placeholder:text-2xs"
                           required
                         />
                       </div>
@@ -200,11 +188,11 @@ export default function PassengerInfoStep({
                           type="text"
                           value={p.firstName || ''}
                           onChange={(e) => updatePassenger(i, 'firstName', e.target.value)}
-                          className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-[#D71920]"
+                          className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-primary"
                         />
                       </div>
                     </div>
-                    <div className="mt-1.5 text-2xs text-[#0072BC] flex items-center gap-1 cursor-pointer hover:underline">
+                    <div className="mt-1.5 text-2xs text-blue-600 flex items-center gap-1 cursor-pointer hover:underline">
                       <span className="font-bold">ℹ</span>
                       <span>Hướng dẫn nhập họ, tên đệm và tên.</span>
                     </div>
@@ -222,7 +210,7 @@ export default function PassengerInfoStep({
                         type="date"
                         value={p.dob}
                         onChange={(e) => updatePassenger(i, 'dob', e.target.value)}
-                        className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-[#D71920]"
+                        className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-primary"
                         required
                       />
                     </div>
@@ -236,7 +224,7 @@ export default function PassengerInfoStep({
                           name={`passenger-${i}-countryCode`}
                           value={p.countryCode}
                           onChange={(e) => updatePassenger(i, 'countryCode', e.target.value)}
-                          className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-[#D71920]"
+                          className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-primary"
                           required
                         >
                           <option value="VN">Việt Nam (+84)</option>
@@ -252,7 +240,7 @@ export default function PassengerInfoStep({
                         <label htmlFor={`passenger-${i}-phone`} className={fieldLabelClass}>
                           Số điện thoại <span className="text-red-600">*</span>
                         </label>
-                        <div className="flex items-center border-b border-gray-300 focus-within:border-[#D71920]">
+                        <div className="flex items-center border-b border-gray-300 focus-within:border-primary">
                           <span className="flex items-center gap-1 pr-2 py-1 text-xs font-semibold text-gray-700 select-none shrink-0">
                             +84 <span className="text-3xs text-gray-400">▾</span>
                           </span>
@@ -311,7 +299,7 @@ export default function PassengerInfoStep({
                           }
                           aria-describedby={`passenger-${i}-email-error`}
                           aria-invalid={emailTouched[i] && !/^\S+@\S+\.\S+$/.test(p.email)}
-                          className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-[#D71920]"
+                          className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-primary"
                           required
                         />
                         {emailTouched[i] && !/^\S+@\S+\.\S+$/.test(p.email) && (
@@ -344,7 +332,7 @@ export default function PassengerInfoStep({
                       type="text"
                       value={p.idNumber}
                       onChange={(e) => updatePassenger(i, 'idNumber', e.target.value)}
-                      className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-[#D71920]"
+                      className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-primary"
                       required={requiresIdNumber(p.type)}
                     />
                   </div>
@@ -360,7 +348,7 @@ export default function PassengerInfoStep({
                       type="text"
                       value={p.residence}
                       onChange={(event) => updatePassenger(i, 'residence', event.target.value)}
-                      className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-[#D71920]"
+                      className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-primary"
                     />
                   </div>
 
@@ -385,14 +373,14 @@ export default function PassengerInfoStep({
                         placeholder="SJxxxxxxxxxx"
                         pattern="SJ[0-9]{8,10}"
                         title="Mã SkyJoy gồm SJ và 8–10 chữ số"
-                        className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs uppercase text-gray-900 focus:outline-none focus:border-[#D71920]"
+                        className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs uppercase text-gray-900 focus:outline-none focus:border-primary"
                       />
                     </div>
                   )}
 
                   {/* Privacy note & Checkboxes inside passenger card */}
                   <div className="mt-4 pt-3 border-t border-gray-100 text-xs">
-                    <div className="flex items-start gap-1.5 text-2xs text-[#0072BC] leading-relaxed mb-2.5">
+                    <div className="flex items-start gap-1.5 text-2xs text-blue-600 leading-relaxed mb-2.5">
                       <span className="font-bold text-xs leading-none">ℹ</span>
                       <span>
                         Dữ liệu cá nhân của Quý khách sẽ được Vietjet xử lý theo{' '}
@@ -411,7 +399,7 @@ export default function PassengerInfoStep({
                           onChange={(e) =>
                             setConsents((c) => ({ ...c, marketing: e.target.checked }))
                           }
-                          className="w-3.5 h-3.5 rounded border-gray-300 accent-[#D71920]"
+                          className="w-3.5 h-3.5 rounded border-gray-300 accent-primary"
                         />
                         <span>Gửi thông tin khuyến mãi, ưu đãi</span>
                       </label>
@@ -420,7 +408,7 @@ export default function PassengerInfoStep({
                           type="checkbox"
                           checked={consents.survey}
                           onChange={(e) => setConsents((c) => ({ ...c, survey: e.target.checked }))}
-                          className="w-3.5 h-3.5 rounded border-gray-300 accent-[#D71920]"
+                          className="w-3.5 h-3.5 rounded border-gray-300 accent-primary"
                         />
                         <span>Thực hiện khảo sát và chăm sóc khách hàng</span>
                       </label>
@@ -440,7 +428,7 @@ export default function PassengerInfoStep({
                 onChange={(e) =>
                   setConsents((c) => ({ ...c, retainForFutureBooking: e.target.checked }))
                 }
-                className="w-4 h-4 rounded border-gray-300 accent-[#D71920]"
+                className="w-4 h-4 rounded border-gray-300 accent-primary"
               />
               <span>Lưu thông tin hành khách cho các lần đặt vé sau</span>
             </label>
@@ -454,27 +442,26 @@ export default function PassengerInfoStep({
                 checked={consents.policyAccepted}
                 onChange={(e) => setConsents((c) => ({ ...c, policyAccepted: e.target.checked }))}
                 required
-                className="w-4 h-4 rounded border-gray-300 accent-[#D71920] mt-0.5 shrink-0"
+                className="w-4 h-4 rounded border-gray-300 accent-primary mt-0.5 shrink-0"
               />
               <span>
                 Tôi đã đọc, hiểu và đồng ý với{' '}
-                <span className="text-[#0072BC] underline cursor-pointer">
+                <span className="text-blue-600 underline cursor-pointer">
                   Chính sách về quyền riêng tư
                 </span>
-                ,{' '}
-                <span className="text-[#0072BC] underline cursor-pointer">Điều lệ vận chuyển</span>,{' '}
-                <span className="text-[#0072BC] underline cursor-pointer">Điều kiện vé</span> và{' '}
-                <span className="text-[#0072BC] underline cursor-pointer">
+                , <span className="text-blue-600 underline cursor-pointer">Điều lệ vận chuyển</span>
+                , <span className="text-blue-600 underline cursor-pointer">Điều kiện vé</span> và{' '}
+                <span className="text-blue-600 underline cursor-pointer">
                   Quy định vật dụng bị cấm
                 </span>{' '}
                 mang lên máy bay và các điều kiện giao dịch chung tại website{' '}
-                <span className="text-[#0072BC] underline cursor-pointer">Vietjetair.com</span>
+                <span className="text-blue-600 underline cursor-pointer">Vietjetair.com</span>
               </span>
             </label>
           </div>
 
           {/* Form submit button for test suite expectations */}
-          <button type="submit" className="sr-only">
+          <button type="submit" disabled={isSubmitting} className="sr-only">
             Hoàn tất & thanh toán
           </button>
         </form>

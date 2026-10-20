@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { HiOutlineUserCircle } from 'react-icons/hi';
 import { RiHeadphoneLine } from 'react-icons/ri';
@@ -30,7 +30,6 @@ const NAV_LINKS = [
 export default function CheckInHeader() {
   const { user, signOut } = useAuth();
   const pathname = usePathname();
-  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const isActive = (href: string) =>
