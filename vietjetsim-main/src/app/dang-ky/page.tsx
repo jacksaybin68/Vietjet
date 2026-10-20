@@ -425,7 +425,6 @@ function RegisterPageInner() {
                   <span className="text-primary ml-0.5">*</span>
                 </span>
                 <div className="flex items-center rounded-md border border-gray-300 bg-white px-2.5 py-2 text-xs font-medium text-gray-800 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
-                  <span className="mr-1.5 text-gray-500 select-none text-xs">📅</span>
                   <select
                     aria-label="Ngày sinh: ngày"
                     value={birthDay}
