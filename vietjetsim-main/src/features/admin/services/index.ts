@@ -387,6 +387,8 @@ export interface CollectScheduleInput {
   date: string;
   wafCookie?: string;
   importOnSuccess?: boolean;
+  updateExisting?: boolean;
+  discountVnd?: number;
 }
 
 export interface CollectedFlightItem {
@@ -407,6 +409,7 @@ export interface CollectScheduleResponse {
   reason?: string;
   hint?: string;
   imported?: string[];
+  updated?: string[];
   skipped?: string[];
 }
 
@@ -422,10 +425,13 @@ export function importCollectedFlights(input: {
   to: string;
   date: string;
   flights: CollectedFlightItem[];
+  updateExisting?: boolean;
+  discountVnd?: number;
 }) {
   return apiRequest<{
     success: boolean;
     imported: string[];
+    updated: string[];
     skipped: string[];
   }>(EP.COLLECT_SCHEDULE, {
     method: 'POST',
@@ -445,6 +451,7 @@ export interface BulkCollectInput {
   dates: string[];
   wafCookie?: string;
   importOnSuccess?: boolean;
+  updateExisting?: boolean;
   concurrency?: number;
   discountVnd?: number;
 }
@@ -457,6 +464,7 @@ export interface BulkCollectItem {
   status: 'success' | 'waf_blocked' | 'error' | 'empty';
   flights: CollectedFlightItem[];
   imported?: string[];
+  updated?: string[];
   skipped?: string[];
   reason?: string;
 }
@@ -467,6 +475,7 @@ export interface BulkCollectResponse {
   blocked: number;
   failed: number;
   imported: number;
+  updated: number;
   results: BulkCollectItem[];
 }
 

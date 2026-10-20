@@ -359,6 +359,39 @@ describe('nhập lượt thu được (sau "xác nhận")', () => {
     expect(result.skipped[0]).toContain('số hiệu');
     expect(result.skipped[1]).toContain('không đọc được giá');
   });
+
+  it('updateExisting = true: ON CONFLICT DO UPDATE SET giá và trả về updated', async () => {
+    const { sql } = await import('@/lib/neon');
+    const tagged = sql as unknown as {
+      mockImplementationOnce: (fn: () => Promise<unknown>) => void;
+    };
+    tagged.mockImplementationOnce(async () => [{ id: 'updated-1', is_insert: false }]);
+
+    const result = await importWebFlights(
+      { from: 'SGN', to: 'HAN' },
+      TOMORROW,
+      [
+        {
+          flightNo: 'VJ 310',
+          from: 'SGN',
+          to: 'HAN',
+          departTime: '06:00',
+          arriveTime: '08:10',
+          price: 1350000,
+          fares: [],
+        },
+      ],
+      0,
+      true
+    );
+    expect(result.updated).toEqual(['VJ 310 06:00 (1.350.000 ₫)']);
+    expect(result.imported).toEqual([]);
+    const sqlMock = sql as unknown as { mock: { calls: Array<Array<unknown>> } };
+    const [lastStrings] = sqlMock.mock.calls[sqlMock.mock.calls.length - 1];
+    expect(String(lastStrings)).toContain(
+      'ON CONFLICT (from_code, to_code, depart_time) DO UPDATE'
+    );
+  });
 });
 
 describe('bộ chờ nhập web-flight', () => {

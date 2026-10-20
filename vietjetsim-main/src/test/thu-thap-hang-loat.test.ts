@@ -39,6 +39,7 @@ vi.mock('@/lib/openclaw/web-collection', () => ({
   }),
   importWebFlights: vi.fn().mockResolvedValue({
     imported: ['VJ 123 08:00'],
+    updated: [],
     skipped: [],
   }),
 }));

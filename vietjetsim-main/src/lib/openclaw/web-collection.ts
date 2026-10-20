@@ -366,6 +366,7 @@ export const MIN_TICKET_PRICE_FLOOR = 99000;
 
 export interface ImportResult {
   imported: string[];
+  updated: string[];
   skipped: string[];
 }
 
@@ -374,8 +375,9 @@ export interface ImportResult {
  * - một LƯỢT bay thành một dòng `economy` (cùng quy ước `createFlight`);
  *   Thương gia = 2.77× — hệ số seed migration 030, giữ thang giá nhất quán;
  * - áp dụng mức giảm giá (mặc định 200.000 VND rẻ hơn Vietjet) với giá sàn an toàn;
- * - trùng (from,to,depart_time) — index `idx_flights_route_depart_time` —
- *   bỏ qua (`DO NOTHING`), KHÔNG viết đè giá người quản trị đã sửa;
+ * - trùng (from,to,depart_time) — index `idx_flights_route_depart_time`:
+ *   + nếu updateExisting = true: cập nhật giá vé thực tế, hạng vé và giờ bay;
+ *   + nếu updateExisting = false: bỏ qua (`DO NOTHING`), giữ nguyên chuyến đã có;
  * - số hiệu không đạt chuẩn `VJ <digits>` (migration 036) thì bỏ và báo lại
  *   trong `skipped`, không để CHECK ném 500.
  */
@@ -384,9 +386,11 @@ export async function importWebFlights(
   date: string,
   flights: WebFlight[],
   discountVnd: number = Number(process.env.VIETJET_PRICE_DISCOUNT_VND) ||
-    DEFAULT_VIETJET_DISCOUNT_VND
+    DEFAULT_VIETJET_DISCOUNT_VND,
+  updateExisting: boolean = false
 ): Promise<ImportResult> {
   const imported: string[] = [];
+  const updated: string[] = [];
   const skipped: string[] = [];
 
   for (const flight of flights) {
@@ -411,24 +415,55 @@ export async function importWebFlights(
       continue;
     }
 
-    const rows = await sql`
-      INSERT INTO flights (
-        flight_no, from_code, to_code, depart_time, arrive_time,
-        price, economy_price, business_price, class, available
-      )
-      VALUES (
-        ${flightNo}, ${route.from.toUpperCase()}, ${route.to.toUpperCase()},
-        ${toVietnamInstant(date, flight.departTime)}, ${arriveISO},
-        ${price}, ${price}, ${Math.round(price * FARE_LADDER_RATIO)}, 'economy', 180
-      )
-      ON CONFLICT (from_code, to_code, depart_time) DO NOTHING
-      RETURNING id
-    `;
-    if (Array.isArray(rows) && rows.length > 0) imported.push(`${flightNo} ${flight.departTime}`);
-    else skipped.push(`${flightNo} ${flight.departTime} (lượt này đã có trong bảng)`);
+    if (updateExisting) {
+      const rows = await sql`
+        INSERT INTO flights (
+          flight_no, from_code, to_code, depart_time, arrive_time,
+          price, economy_price, business_price, class, available
+        )
+        VALUES (
+          ${flightNo}, ${route.from.toUpperCase()}, ${route.to.toUpperCase()},
+          ${toVietnamInstant(date, flight.departTime)}, ${arriveISO},
+          ${price}, ${price}, ${Math.round(price * FARE_LADDER_RATIO)}, 'economy', 180
+        )
+        ON CONFLICT (from_code, to_code, depart_time) DO UPDATE SET
+          price = EXCLUDED.price,
+          economy_price = EXCLUDED.economy_price,
+          business_price = EXCLUDED.business_price,
+          flight_no = EXCLUDED.flight_no,
+          arrive_time = EXCLUDED.arrive_time,
+          updated_at = NOW()
+        RETURNING id, (xmax = 0) AS is_insert
+      `;
+      if (Array.isArray(rows) && rows.length > 0) {
+        if (rows[0].is_insert === false) {
+          updated.push(`${flightNo} ${flight.departTime} (${vnd(price)} ₫)`);
+        } else {
+          imported.push(`${flightNo} ${flight.departTime}`);
+        }
+      } else {
+        skipped.push(`${flightNo} ${flight.departTime} (lỗi ghi nhận)`);
+      }
+    } else {
+      const rows = await sql`
+        INSERT INTO flights (
+          flight_no, from_code, to_code, depart_time, arrive_time,
+          price, economy_price, business_price, class, available
+        )
+        VALUES (
+          ${flightNo}, ${route.from.toUpperCase()}, ${route.to.toUpperCase()},
+          ${toVietnamInstant(date, flight.departTime)}, ${arriveISO},
+          ${price}, ${price}, ${Math.round(price * FARE_LADDER_RATIO)}, 'economy', 180
+        )
+        ON CONFLICT (from_code, to_code, depart_time) DO NOTHING
+        RETURNING id
+      `;
+      if (Array.isArray(rows) && rows.length > 0) imported.push(`${flightNo} ${flight.departTime}`);
+      else skipped.push(`${flightNo} ${flight.departTime} (lượt này đã có trong bảng)`);
+    }
   }
 
-  return { imported, skipped };
+  return { imported, updated, skipped };
 }
 
 // ─── Bộ chờ xác nhận "nhập chuyến thu được" ─────────────────────────────────
