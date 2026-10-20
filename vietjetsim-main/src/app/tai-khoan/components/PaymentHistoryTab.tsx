@@ -207,7 +207,7 @@ export default function PaymentHistoryTab() {
       {/* Summary */}
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-white rounded-2xl border border-[var(--border)] p-4 text-center shadow-vj-card">
-          <div className="text-2xl font-bold font-[KoHo,sans-serif] text-[#10B981]">
+          <div className="text-2xl font-bold font-[KoHo,sans-serif] text-emerald-500">
             {payments.filter((p) => p.status === 'completed').length}
           </div>
           <div className="text-xs text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
@@ -215,7 +215,7 @@ export default function PaymentHistoryTab() {
           </div>
         </div>
         <div className="bg-white rounded-2xl border border-[var(--border)] p-4 text-center shadow-vj-card">
-          <div className="text-2xl font-bold font-[KoHo,sans-serif] text-[#F59E0B]">
+          <div className="text-2xl font-bold font-[KoHo,sans-serif] text-amber-500">
             {payments.filter((p) => p.status === 'pending').length}
           </div>
           <div className="text-xs text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
@@ -223,7 +223,7 @@ export default function PaymentHistoryTab() {
           </div>
         </div>
         <div className="bg-white rounded-2xl border border-[var(--border)] p-4 text-center shadow-vj-card">
-          <div className="text-2xl font-bold font-[KoHo,sans-serif] text-[#8B5CF6]">
+          <div className="text-2xl font-bold font-[KoHo,sans-serif] text-violet-500">
             {payments.filter((p) => p.status === 'refunded').length}
           </div>
           <div className="text-xs text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">

@@ -125,7 +125,7 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-[11px] font-black uppercase tracking-[0.2em] px-6 py-3.5 rounded-2xl transition-all shadow-lg active:scale-95"
+          className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-xs2 font-black uppercase tracking-[0.2em] px-6 py-3.5 rounded-2xl transition-all shadow-lg active:scale-95"
         >
           <Icon name="PlusIcon" size={16} />
           Tạo mã mới
@@ -165,28 +165,28 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-white/5 border-b border-white/5">
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest">
                   Mã / Loại
                 </th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest">
                   Giá trị
                 </th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest">
                   Đại lý
                 </th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest">
                   Điều kiện
                 </th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest">
                   Hiệu lực
                 </th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">
+                <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest text-center">
                   Sử dụng
                 </th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">
+                <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest text-center">
                   Trạng thái
                 </th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">
+                <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest text-center">
                   Thao tác
                 </th>
               </tr>
@@ -205,7 +205,7 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
                   <td colSpan={8} className="px-6 py-24 text-center">
                     <div className="flex flex-col items-center gap-4">
                       <Icon name="InboxIcon" size={32} className="text-slate-600" />
-                      <p className="font-black text-slate-400 uppercase text-[10px] tracking-widest">
+                      <p className="font-black text-slate-400 uppercase text-2xs tracking-widest">
                         Không có mã giảm giá
                       </p>
                     </div>
@@ -224,7 +224,7 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
                         <div className="font-black text-slate-200 group-hover:text-primary transition-colors tracking-tight">
                           {discount.code}
                         </div>
-                        <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mt-1">
+                        <div className="text-2xs text-slate-500 uppercase font-bold tracking-widest mt-1">
                           {discount.type === 'percentage' ? 'Phần trăm' : 'Cố định'}
                         </div>
                       </td>
@@ -235,7 +235,7 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
                             : `${Number(discount.value).toLocaleString('vi-VN')}₫`}
                         </div>
                         {discount.type === 'percentage' && discount.max_discount_amount && (
-                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">
+                          <div className="text-2xs font-bold text-slate-500 uppercase tracking-wider mt-1">
                             Tối đa: {Number(discount.max_discount_amount).toLocaleString('vi-VN')}₫
                           </div>
                         )}
@@ -243,37 +243,37 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
                       <td className="px-6 py-5">
                         {discount.agency_name ? (
                           <>
-                            <div className="text-[11px] font-black text-slate-200 tracking-tight">
+                            <div className="text-xs2 font-black text-slate-200 tracking-tight">
                               {discount.agency_name}
                             </div>
                             {discount.agency_code && (
-                              <div className="text-[9px] font-black text-primary/70 uppercase tracking-[0.2em] mt-1">
+                              <div className="text-3xs font-black text-primary/70 uppercase tracking-[0.2em] mt-1">
                                 {discount.agency_code}
                               </div>
                             )}
                           </>
                         ) : (
-                          <span className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em] px-2 py-1 bg-white/5 rounded-md inline-block">
+                          <span className="text-3xs font-black text-slate-600 uppercase tracking-[0.2em] px-2 py-1 bg-white/5 rounded-md inline-block">
                             Dùng chung
                           </span>
                         )}
                       </td>
                       <td className="px-6 py-5">
-                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        <div className="text-2xs font-bold text-slate-400 uppercase tracking-widest">
                           Đơn từ: {Number(discount.min_booking_amount).toLocaleString('vi-VN')}₫
                         </div>
                         {discount.usage_per_user_limit && (
-                          <div className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em] mt-1.5 px-2 py-0.5 bg-white/5 rounded-md inline-block">
+                          <div className="text-3xs font-black text-slate-600 uppercase tracking-[0.2em] mt-1.5 px-2 py-0.5 bg-white/5 rounded-md inline-block">
                             Max {discount.usage_per_user_limit} lượt/người
                           </div>
                         )}
                       </td>
                       <td className="px-6 py-5">
-                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                        <div className="text-2xs font-bold text-slate-500 uppercase tracking-widest">
                           Đến {new Date(discount.end_date).toLocaleDateString('vi-VN')}
                         </div>
                         <div
-                          className={`text-[9px] font-black uppercase tracking-tighter mt-1 ${isExpired ? 'text-rose-500' : 'text-emerald-500'}`}
+                          className={`text-3xs font-black uppercase tracking-tighter mt-1 ${isExpired ? 'text-rose-500' : 'text-emerald-500'}`}
                         >
                           {isExpired ? 'Đã hết hạn' : 'Đang hiệu lực'}
                         </div>
@@ -283,7 +283,7 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
                           {discount.used_count}
                         </div>
                         {discount.usage_limit && (
-                          <div className="text-[10px] font-bold text-slate-500 tracking-widest mt-0.5">
+                          <div className="text-2xs font-bold text-slate-500 tracking-widest mt-0.5">
                             / {discount.usage_limit}
                           </div>
                         )}
@@ -292,7 +292,7 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
                         <button
                           onClick={() => handleToggleStatus(discount)}
                           disabled={isExpired}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all ${
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-3xs font-black uppercase tracking-widest border transition-all ${
                             isExpired
                               ? 'bg-slate-800 text-slate-600 border-slate-700 cursor-not-allowed opacity-50'
                               : discount.is_active
@@ -363,7 +363,7 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
                   <h3 className="text-xl font-black text-white uppercase tracking-tight">
                     {viewingDiscount.code}
                   </h3>
-                  <p className="text-[10px] font-black text-primary uppercase tracking-widest">
+                  <p className="text-2xs font-black text-primary uppercase tracking-widest">
                     {viewingDiscount.type === 'percentage'
                       ? 'Chiết khấu Phần trăm'
                       : 'Giảm giá Cố định'}
@@ -384,7 +384,7 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
               <div className="flex items-center justify-between bg-slate-950/40 border border-white/5 rounded-3xl p-6 overflow-hidden relative group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
                 <div>
-                  <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1">
+                  <p className="text-2xs font-black text-slate-600 uppercase tracking-widest mb-1">
                     Giá trị ưu đãi
                   </p>
                   <p className="text-4xl font-black text-white tracking-tighter tabular-nums">
@@ -394,7 +394,7 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1">
+                  <p className="text-2xs font-black text-slate-600 uppercase tracking-widest mb-1">
                     Lượt đã dùng
                   </p>
                   <p className="text-3xl font-black text-slate-200 tabular-nums">
@@ -409,7 +409,7 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
 
               <div className="grid grid-cols-2 gap-8">
                 <div>
-                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">
+                  <label className="text-2xs font-black text-slate-600 uppercase tracking-widest block mb-1">
                     Đơn hàng tối thiểu
                   </label>
                   <p className="text-sm font-bold text-slate-300 tabular-nums">
@@ -417,7 +417,7 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
                   </p>
                 </div>
                 <div>
-                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">
+                  <label className="text-2xs font-black text-slate-600 uppercase tracking-widest block mb-1">
                     Giảm tối đa
                   </label>
                   <p className="text-sm font-bold text-slate-300 tabular-nums">
@@ -427,7 +427,7 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
                   </p>
                 </div>
                 <div>
-                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">
+                  <label className="text-2xs font-black text-slate-600 uppercase tracking-widest block mb-1">
                     Bắt đầu
                   </label>
                   <p className="text-xs font-bold text-slate-400">
@@ -435,7 +435,7 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
                   </p>
                 </div>
                 <div>
-                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">
+                  <label className="text-2xs font-black text-slate-600 uppercase tracking-widest block mb-1">
                     Kết thúc
                   </label>
                   <p className="text-xs font-bold text-slate-400">
@@ -451,13 +451,13 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
                   setViewingDiscount(null);
                   setEditingDiscount(viewingDiscount);
                 }}
-                className="flex-1 px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest border border-white/5 transition-all active:scale-95"
+                className="flex-1 px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl text-2xs font-black uppercase tracking-widest border border-white/5 transition-all active:scale-95"
               >
                 Chỉnh sửa
               </button>
               <button
                 onClick={() => setViewingDiscount(null)}
-                className="flex-1 px-8 py-4 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-primary/20"
+                className="flex-1 px-8 py-4 bg-primary text-white rounded-2xl text-2xs font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-primary/20"
               >
                 Đóng
               </button>
@@ -573,7 +573,7 @@ function DiscountModal({
         <form onSubmit={handleSubmit} className="min-h-0 flex-1 overflow-y-auto p-8 space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
             <div className="sm:col-span-2">
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
                 Mã giảm giá
               </label>
               <input
@@ -586,7 +586,7 @@ function DiscountModal({
               />
             </div>
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
                 Loại ưu đãi
               </label>
               <select
@@ -601,7 +601,7 @@ function DiscountModal({
               </select>
             </div>
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
                 Giá trị
               </label>
               <input
@@ -618,7 +618,7 @@ function DiscountModal({
                       key={pct}
                       type="button"
                       onClick={() => setFormData({ ...formData, value: String(pct) })}
-                      className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all active:scale-95 ${
+                      className={`px-3 py-1.5 rounded-xl text-2xs font-black uppercase tracking-widest border transition-all active:scale-95 ${
                         String(formData.value) === String(pct)
                           ? 'bg-primary text-white border-primary'
                           : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10'
@@ -631,7 +631,7 @@ function DiscountModal({
               )}
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
                 Phát hành cho đại lý
               </label>
               <select
@@ -646,12 +646,12 @@ function DiscountModal({
                   </option>
                 ))}
               </select>
-              <p className="text-[10px] font-bold text-slate-600 mt-2 ml-1">
+              <p className="text-2xs font-bold text-slate-600 mt-2 ml-1">
                 Mã gắn đại lý vẫn nhập được ở ô mã giảm giá khi khách đặt vé.
               </p>
             </div>
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
                 Đơn hàng từ (vnđ)
               </label>
               <input
@@ -662,7 +662,7 @@ function DiscountModal({
               />
             </div>
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
                 Giảm tối đa (vnđ)
               </label>
               <input
@@ -674,7 +674,7 @@ function DiscountModal({
               />
             </div>
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
                 Ngày bắt đầu
               </label>
               <input
@@ -686,7 +686,7 @@ function DiscountModal({
               />
             </div>
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
                 Ngày hết hạn
               </label>
               <input
@@ -698,7 +698,7 @@ function DiscountModal({
               />
             </div>
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
                 Tổng lượt dùng
               </label>
               <input
@@ -731,14 +731,14 @@ function DiscountModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-5 bg-white/5 hover:bg-white/10 text-white font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all border border-white/5"
+              className="flex-1 py-5 bg-white/5 hover:bg-white/10 text-white font-black text-2xs uppercase tracking-widest rounded-2xl transition-all border border-white/5"
             >
               Hủy bỏ
             </button>
             <button
               disabled={isSaving}
               type="submit"
-              className="flex-[2] bg-primary hover:bg-primary-dark text-white font-black text-[10px] uppercase tracking-widest py-5 rounded-2xl transition-all shadow-lg active:scale-95 shadow-primary/20 disabled:opacity-50"
+              className="flex-[2] bg-primary hover:bg-primary-dark text-white font-black text-2xs uppercase tracking-widest py-5 rounded-2xl transition-all shadow-lg active:scale-95 shadow-primary/20 disabled:opacity-50"
             >
               {isSaving ? 'Đang khởi tạo...' : discount ? 'Lưu thay đổi' : 'Khởi tạo mã'}
             </button>

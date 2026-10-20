@@ -422,14 +422,14 @@ export default function BookingsTab() {
             <>
               <button
                 onClick={exportCSV}
-                className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-xl transition-all hover:translate-y-[-1px] active:scale-95"
+                className="flex items-center gap-2 text-2xs font-black uppercase tracking-wider text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-xl transition-all hover:translate-y-[-1px] active:scale-95"
               >
                 <Icon name="TableCellsIcon" size={14} />
                 Xuất CSV
               </button>
               <button
                 onClick={exportPDF}
-                className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-rose-400 hover:text-rose-300 bg-rose-500/10 border border-rose-500/20 px-4 py-2 rounded-xl transition-all hover:translate-y-[-1px] active:scale-95"
+                className="flex items-center gap-2 text-2xs font-black uppercase tracking-wider text-rose-400 hover:text-rose-300 bg-rose-500/10 border border-rose-500/20 px-4 py-2 rounded-xl transition-all hover:translate-y-[-1px] active:scale-95"
               >
                 <Icon name="DocumentArrowDownIcon" size={14} />
                 Xuất PDF
@@ -472,7 +472,7 @@ export default function BookingsTab() {
           >
             <div className="absolute top-[-20%] right-[-10%] w-24 h-24 bg-white/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
             <div className="text-3xl font-black tracking-tighter relative z-10">{stat.value}</div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.2em] mt-1.5 opacity-60 relative z-10">
+            <div className="text-2xs font-bold uppercase tracking-[0.2em] mt-1.5 opacity-60 relative z-10">
               {stat.label}
             </div>
           </div>
@@ -556,7 +556,7 @@ export default function BookingsTab() {
                 setDateFrom('');
                 setDateTo('');
               }}
-              className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-rose-400 bg-rose-500/10 border border-rose-500/20 px-4 py-3 rounded-2xl transition-all hover:bg-rose-500/20"
+              className="flex items-center gap-2 text-2xs font-black uppercase tracking-wider text-rose-400 bg-rose-500/10 border border-rose-500/20 px-4 py-3 rounded-2xl transition-all hover:bg-rose-500/20"
             >
               <Icon name="XMarkIcon" size={14} />
               Xoá bộ lọc
@@ -580,41 +580,41 @@ export default function BookingsTab() {
             <thead>
               <tr className="bg-white/5 border-b border-white/5">
                 <th
-                  className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-6 py-5 cursor-pointer hover:text-white transition-colors select-none whitespace-nowrap"
+                  className="text-left text-2xs font-black text-slate-500 uppercase tracking-widest px-6 py-5 cursor-pointer hover:text-white transition-colors select-none whitespace-nowrap"
                   onClick={() => handleSort('id')}
                 >
                   Mã đặt chỗ
                   <SortIcon col="id" />
                 </th>
                 <th
-                  className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-6 py-5 cursor-pointer hover:text-white transition-colors select-none whitespace-nowrap"
+                  className="text-left text-2xs font-black text-slate-500 uppercase tracking-widest px-6 py-5 cursor-pointer hover:text-white transition-colors select-none whitespace-nowrap"
                   onClick={() => handleSort('userName')}
                 >
                   Khách hàng
                   <SortIcon col="userName" />
                 </th>
-                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-6 py-5 hidden sm:table-cell">
+                <th className="text-left text-2xs font-black text-slate-500 uppercase tracking-widest px-6 py-5 hidden sm:table-cell">
                   Chuyến bay
                 </th>
-                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-6 py-5 hidden md:table-cell">
+                <th className="text-left text-2xs font-black text-slate-500 uppercase tracking-widest px-6 py-5 hidden md:table-cell">
                   Thanh toán
                 </th>
                 <th
-                  className="text-right text-[10px] font-black text-slate-500 uppercase tracking-widest px-6 py-5 cursor-pointer hover:text-white transition-colors select-none whitespace-nowrap"
+                  className="text-right text-2xs font-black text-slate-500 uppercase tracking-widest px-6 py-5 cursor-pointer hover:text-white transition-colors select-none whitespace-nowrap"
                   onClick={() => handleSort('amount')}
                 >
                   Giá trị
                   <SortIcon col="amount" />
                 </th>
                 <th
-                  className="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest px-6 py-5 cursor-pointer hover:text-white transition-colors select-none whitespace-nowrap"
+                  className="text-center text-2xs font-black text-slate-500 uppercase tracking-widest px-6 py-5 cursor-pointer hover:text-white transition-colors select-none whitespace-nowrap"
                   onClick={() => handleSort('status')}
                 >
                   Trạng thái
                   <SortIcon col="status" />
                 </th>
                 <th
-                  className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-6 py-5 hidden lg:table-cell cursor-pointer hover:text-white transition-colors select-none whitespace-nowrap"
+                  className="text-left text-2xs font-black text-slate-500 uppercase tracking-widest px-6 py-5 hidden lg:table-cell cursor-pointer hover:text-white transition-colors select-none whitespace-nowrap"
                   onClick={() => handleSort('createdAt')}
                 >
                   Ngày tạo
@@ -847,18 +847,18 @@ export default function BookingsTab() {
                       <div className="font-bold text-slate-200 text-sm group-hover:text-white transition-colors">
                         {booking.userName}
                       </div>
-                      <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-0.5">
+                      <div className="text-2xs font-black text-slate-500 uppercase tracking-widest mt-0.5">
                         Ghế {booking.seat}
                       </div>
                     </td>
                     <td className="px-6 py-5 hidden sm:table-cell">
                       <div className="font-bold text-slate-300 text-sm">{booking.flightNo}</div>
-                      <div className="text-[10px] font-bold text-slate-500 tracking-wider">
+                      <div className="text-2xs font-bold text-slate-500 tracking-wider">
                         {booking.route} · {booking.date}
                       </div>
                     </td>
                     <td className="px-6 py-5 hidden md:table-cell">
-                      <span className="text-[10px] font-black text-indigo-300 bg-indigo-500/10 border border-indigo-500/10 px-2.5 py-1 rounded-lg uppercase tracking-wider">
+                      <span className="text-2xs font-black text-indigo-300 bg-indigo-500/10 border border-indigo-500/10 px-2.5 py-1 rounded-lg uppercase tracking-wider">
                         {booking.payMethod}
                       </span>
                     </td>
@@ -875,7 +875,7 @@ export default function BookingsTab() {
                         onChange={(e) =>
                           handleStatusChange(booking.id, e.target.value as BookingStatus)
                         }
-                        className={`text-[10px] font-black px-3 py-1 rounded-lg border-0 cursor-pointer appearance-none text-center uppercase tracking-wider transition-all focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                        className={`text-2xs font-black px-3 py-1 rounded-lg border-0 cursor-pointer appearance-none text-center uppercase tracking-wider transition-all focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 ${
                           booking.status === 'confirmed'
                             ? 'bg-emerald-500/10 text-emerald-400 focus:ring-emerald-500/50'
                             : booking.status === 'pending'
@@ -984,7 +984,7 @@ export default function BookingsTab() {
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-white tracking-tight">Chi tiết đặt vé</h3>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">
+                  <p className="text-2xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">
                     Mã: <span className="text-indigo-400">{selectedBooking.id}</span>
                   </p>
                 </div>
@@ -1038,7 +1038,7 @@ export default function BookingsTab() {
                 {/* Left Column: Guest & Flight */}
                 <div className="space-y-6">
                   <section>
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">
+                    <label className="text-2xs font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">
                       Thông tin khách hàng
                     </label>
                     <div className="bg-white/5 border border-white/5 rounded-2xl p-4">
@@ -1105,7 +1105,7 @@ export default function BookingsTab() {
                   </section>
 
                   <section>
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">
+                    <label className="text-2xs font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">
                       Hành trình
                     </label>
                     <div className="bg-white/5 border border-white/5 rounded-2xl p-4">
@@ -1143,7 +1143,7 @@ export default function BookingsTab() {
                               <div className="text-lg font-black text-white">
                                 {selectedBooking.route.split(' → ')[0]}
                               </div>
-                              <div className="text-[10px] font-bold text-slate-500 uppercase">
+                              <div className="text-2xs font-bold text-slate-500 uppercase">
                                 Khởi hành
                               </div>
                             </div>
@@ -1159,7 +1159,7 @@ export default function BookingsTab() {
                               <div className="text-lg font-black text-white">
                                 {selectedBooking.route.split(' → ')[1] || ''}
                               </div>
-                              <div className="text-[10px] font-bold text-slate-500 uppercase">
+                              <div className="text-2xs font-bold text-slate-500 uppercase">
                                 Điểm đến
                               </div>
                             </div>
@@ -1185,7 +1185,7 @@ export default function BookingsTab() {
                 {/* Right Column: Payment & History */}
                 <div className="space-y-6">
                   <section>
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">
+                    <label className="text-2xs font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">
                       Thanh toán
                     </label>
                     <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-2xl p-4 overflow-hidden relative group">
@@ -1235,7 +1235,7 @@ export default function BookingsTab() {
                                 {selectedBooking.amount.toLocaleString('vi-VN')}₫
                               </p>
                             </div>
-                            <div className="px-2.5 py-1 bg-white/[0.03] border border-white/5 rounded-lg text-[10px] font-black text-indigo-300 uppercase tracking-widest">
+                            <div className="px-2.5 py-1 bg-white/[0.03] border border-white/5 rounded-lg text-2xs font-black text-indigo-300 uppercase tracking-widest">
                               {selectedBooking.payMethod}
                             </div>
                           </div>
@@ -1244,7 +1244,7 @@ export default function BookingsTab() {
                               className={`w-2 h-2 rounded-full ${selectedBooking.status === 'confirmed' ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : selectedBooking.status === 'pending' ? 'bg-amber-500 shadow-[0_0_8px_#f59e0b]' : 'bg-rose-500 shadow-[0_0_8px_#f43f5e]'}`}
                             />
                             <span
-                              className={`text-[10px] font-black uppercase tracking-widest ${selectedBooking.status === 'confirmed' ? 'text-emerald-400' : selectedBooking.status === 'pending' ? 'text-amber-400' : 'text-rose-400'}`}
+                              className={`text-2xs font-black uppercase tracking-widest ${selectedBooking.status === 'confirmed' ? 'text-emerald-400' : selectedBooking.status === 'pending' ? 'text-amber-400' : 'text-rose-400'}`}
                             >
                               {bookingBadge(selectedBooking.status).label}
                             </span>
@@ -1255,7 +1255,7 @@ export default function BookingsTab() {
                   </section>
 
                   <section>
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">
+                    <label className="text-2xs font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">
                       Lịch sử đơn hàng
                     </label>
                     <div className="space-y-4">
@@ -1280,8 +1280,8 @@ export default function BookingsTab() {
                             className={`w-4 h-4 rounded-full mt-0.5 relative z-10 border-2 ${item.status === 'done' ? 'bg-indigo-500 border-indigo-400 shadow-[0_0_8px_#6366f1]' : item.status === 'pending' ? 'bg-slate-800 border-indigo-500/50' : 'bg-slate-800 border-slate-700'}`}
                           />
                           <div>
-                            <p className="text-[11px] font-bold text-slate-200">{item.event}</p>
-                            <p className="text-[9px] font-black text-slate-500 uppercase mt-0.5 tracking-wider">
+                            <p className="text-xs2 font-bold text-slate-200">{item.event}</p>
+                            <p className="text-3xs font-black text-slate-500 uppercase mt-0.5 tracking-wider">
                               {item.time}
                             </p>
                           </div>
@@ -1298,7 +1298,7 @@ export default function BookingsTab() {
               <div className="flex-1 flex gap-3">
                 <button
                   onClick={() => printSingleInvoice(selectedBooking)}
-                  className="flex-1 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2 border border-white/10"
+                  className="flex-1 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-2xs font-black uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2 border border-white/10"
                 >
                   <Icon name="PrinterIcon" size={16} />
                   In hoá đơn
@@ -1309,7 +1309,7 @@ export default function BookingsTab() {
                       setInvoiceForm({ ...invoiceForm, amount: selectedBooking.amount });
                       setShowInvoiceModal(true);
                     }}
-                    className="flex-1 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-500/20 active:scale-95 flex items-center justify-center gap-2"
+                    className="flex-1 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-2xs font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-500/20 active:scale-95 flex items-center justify-center gap-2"
                   >
                     <Icon name="CurrencyDollarIcon" size={16} />
                     Tạo hoá đơn thanh toán
@@ -1320,7 +1320,7 @@ export default function BookingsTab() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setIsEditing(!isEditing)}
-                  className="px-6 py-3 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-90"
+                  className="px-6 py-3 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/5 rounded-2xl text-2xs font-black uppercase tracking-widest transition-all active:scale-90"
                 >
                   {isEditing ? 'Huỷ chỉnh sửa' : 'Chỉnh sửa nhanh'}
                 </button>
@@ -1357,7 +1357,7 @@ export default function BookingsTab() {
                 <h3 className="font-black uppercase tracking-widest text-xs text-white">
                   Xử lý thanh toán
                 </h3>
-                <p className="text-[10px] font-bold text-indigo-400 mt-0.5">
+                <p className="text-2xs font-bold text-indigo-400 mt-0.5">
                   Booking ID: {selectedBooking.id}
                 </p>
               </div>
@@ -1370,7 +1370,7 @@ export default function BookingsTab() {
             </div>
             <div className="p-8 space-y-6">
               <div>
-                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">
+                <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 px-1">
                   Số tiền thanh toán
                 </label>
                 <div className="relative group">
@@ -1382,13 +1382,13 @@ export default function BookingsTab() {
                     }
                     className="w-full pl-5 pr-14 py-4 bg-slate-800/50 border border-white/10 rounded-2xl text-base font-black text-white focus:outline-none focus:border-indigo-500/50 transition-all"
                   />
-                  <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-500 uppercase">
+                  <span className="absolute right-5 top-1/2 -translate-y-1/2 text-2xs font-black text-slate-500 uppercase">
                     VNĐ
                   </span>
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">
+                <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 px-1">
                   Phương thức ghi nhận
                 </label>
                 <div className="relative group">
@@ -1413,7 +1413,7 @@ export default function BookingsTab() {
                 <button
                   onClick={handleCreateInvoice}
                   disabled={isProcessingInvoice}
-                  className="w-full py-5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-xl shadow-indigo-500/20 disabled:opacity-50 active:scale-95 flex items-center justify-center gap-3"
+                  className="w-full py-5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-2xl text-xs2 font-black uppercase tracking-widest transition-all shadow-xl shadow-indigo-500/20 disabled:opacity-50 active:scale-95 flex items-center justify-center gap-3"
                 >
                   {isProcessingInvoice ? (
                     <Icon name="ArrowPathIcon" size={18} className="animate-spin" />
@@ -1422,7 +1422,7 @@ export default function BookingsTab() {
                   )}
                   {isProcessingInvoice ? 'Đang xác thực...' : 'Xác nhận đặt vé ngay'}
                 </button>
-                <p className="text-[10px] text-center text-slate-500 mt-6 leading-relaxed px-4 font-medium italic">
+                <p className="text-2xs text-center text-slate-500 mt-6 leading-relaxed px-4 font-medium italic">
                   Thao tác này đồng nghĩa với việc bạn xác nhận đã nhận đủ số tiền và tự động thay
                   đổi trạng thái Booking sang <strong>Confirmed</strong>.
                 </p>

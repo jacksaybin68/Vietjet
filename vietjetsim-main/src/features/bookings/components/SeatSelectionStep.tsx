@@ -221,7 +221,7 @@ function CabinDivider({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-2 py-1.5" role="presentation">
       <span className="h-px flex-1 bg-[var(--border)]" />
-      <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-[var(--foreground-subtle)] font-koho whitespace-nowrap">
+      <span className="text-3xs font-bold uppercase tracking-[0.14em] text-[var(--foreground-subtle)] font-koho whitespace-nowrap">
         {label}
       </span>
       <span className="h-px flex-1 bg-[var(--border)]" />
@@ -430,7 +430,7 @@ export default function SeatSelectionStep({
                             : 'text-primary'
                       }
                     />
-                    <span className="text-[10px] sm:text-sm font-semibold font-koho">
+                    <span className="text-2xs sm:text-sm font-semibold font-koho">
                       {timerUrgent ? '⚠️ Ghế sắp hết hạn giữ!' : 'Thời gian giữ chỗ còn lại'}
                     </span>
                   </div>
@@ -487,12 +487,12 @@ export default function SeatSelectionStep({
                             )}
                           </div>
                           <div className="mt-auto">
-                            <div className="text-[8px] sm:text-[10px] text-[var(--foreground-subtle)]">
+                            <div className="text-4xs sm:text-2xs text-[var(--foreground-subtle)]">
                               {svc.description}
                             </div>
-                            <div className="text-[11px] sm:text-sm font-black text-primary font-koho">
+                            <div className="text-xs2 sm:text-sm font-black text-primary font-koho">
                               {svc.price.toLocaleString('vi-VN')}₫
-                              <span className="font-body text-[9px] sm:text-[10px] font-normal text-[var(--foreground-muted)]">
+                              <span className="font-body text-3xs sm:text-2xs font-normal text-[var(--foreground-muted)]">
                                 {' '}
                                 / khách
                               </span>
@@ -517,7 +517,7 @@ export default function SeatSelectionStep({
                     {/* Heatmap toggle */}
                     <button
                       onClick={() => setShowHeatmap((v) => !v)}
-                      className={`flex items-center gap-1 text-[10px] sm:gap-1.5 sm:text-xs font-semibold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border transition-all ${
+                      className={`flex items-center gap-1 text-2xs sm:gap-1.5 sm:text-xs font-semibold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border transition-all ${
                         showHeatmap
                           ? 'bg-[var(--orange)] text-white border-[var(--orange)]'
                           : 'bg-[var(--surface)] text-[var(--foreground-muted)] border-[var(--border)] hover:border-[var(--orange)] hover:text-[var(--orange)]'
@@ -531,7 +531,7 @@ export default function SeatSelectionStep({
                       and shows the fill as a bar, not as a "(1/1)" parenthetical. */}
                   <div className="flex items-center gap-2.5 sm:gap-3 mb-3 sm:mb-4">
                     <div className="flex-1">
-                      <p className="text-[11px] sm:text-sm text-[var(--foreground-muted)]">
+                      <p className="text-xs2 sm:text-sm text-[var(--foreground-muted)]">
                         {allSeatsPicked ? (
                           <span className="font-semibold text-primary">
                             Đã chọn xong chỗ ngồi cho {passengerCount} hành khách
@@ -565,7 +565,7 @@ export default function SeatSelectionStep({
                       </div>
                     </div>
                     <span
-                      className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] sm:text-xs font-bold font-koho tabular-nums border ${
+                      className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs2 sm:text-xs font-bold font-koho tabular-nums border ${
                         allSeatsPicked
                           ? 'bg-[rgb(var(--primary-rgb))]/10 text-primary border-[rgb(var(--primary-rgb))]/30'
                           : 'bg-[var(--surface-2)] text-[var(--foreground-muted)] border-[var(--border)]'
@@ -593,7 +593,7 @@ export default function SeatSelectionStep({
                           strokeLinejoin="round"
                         />
                       </svg>
-                      <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--foreground-subtle)] font-koho">
+                      <span className="text-3xs sm:text-2xs font-bold uppercase tracking-[0.16em] text-[var(--foreground-subtle)] font-koho">
                         Mũi máy bay
                       </span>
                     </div>
@@ -609,7 +609,7 @@ export default function SeatSelectionStep({
                           {COLS.map((col, i) => (
                             <React.Fragment key={col}>
                               {i === AISLE_AFTER && <span className="w-8 sm:w-8" />}
-                              <span className="w-8 sm:w-8 text-center text-[10px] sm:text-[11px] font-bold tracking-wide text-[var(--foreground-muted)]">
+                              <span className="w-8 sm:w-8 text-center text-2xs sm:text-xs2 font-bold tracking-wide text-[var(--foreground-muted)]">
                                 {col}
                               </span>
                             </React.Fragment>
@@ -628,7 +628,7 @@ export default function SeatSelectionStep({
                               {row === BUSINESS_ROWS + 1 && <CabinDivider label="Hạng Phổ thông" />}
                               {row === EXIT_ROWS_MIN && <CabinDivider label="Lối cứu thư" />}
                               <div className="flex items-center">
-                                <span className="w-8 sm:w-7 text-[10px] sm:text-[11px] text-[var(--foreground-subtle)] font-medium tabular-nums text-center">
+                                <span className="w-8 sm:w-7 text-2xs sm:text-xs2 text-[var(--foreground-subtle)] font-medium tabular-nums text-center">
                                   {row}
                                 </span>
                                 {COLS.map((col, i) => {
@@ -654,7 +654,7 @@ export default function SeatSelectionStep({
                                         disabled={info.status === 'occupied'}
                                         aria-pressed={isSelected}
                                         aria-label={`Ghế ${seatId}, ${SEAT_STATUS_LABELS[info.status]}${isSelected ? ', đã chọn' : ''}, ${info.price.toLocaleString('vi-VN')}₫`}
-                                        className={`w-8 h-8 sm:w-8 sm:h-8 rounded-[3px] text-[10px] sm:text-[11px] font-bold seat flex-shrink-0 ${getHeatmapClass(
+                                        className={`w-8 h-8 sm:w-8 sm:h-8 rounded-[3px] text-2xs sm:text-xs2 font-bold seat flex-shrink-0 ${getHeatmapClass(
                                           seatId,
                                           info.status,
                                           info.occupancyLevel,
@@ -667,7 +667,7 @@ export default function SeatSelectionStep({
                                     </React.Fragment>
                                   );
                                 })}
-                                <span className="w-8 sm:w-7 text-[10px] sm:text-[11px] text-[var(--foreground-subtle)] font-medium tabular-nums text-center">
+                                <span className="w-8 sm:w-7 text-2xs sm:text-xs2 text-[var(--foreground-subtle)] font-medium tabular-nums text-center">
                                   {row}
                                 </span>
                               </div>
@@ -697,13 +697,13 @@ export default function SeatSelectionStep({
                                   top: flipBelow ? tooltip.y + 22 : tooltip.y - TIP_H,
                                 }}
                               >
-                                <div className="bg-[var(--vj-navy)] text-white rounded-xl shadow-xl p-2.5 sm:p-3 w-44 text-[10px] sm:text-xs">
+                                <div className="bg-[var(--vj-navy)] text-white rounded-xl shadow-xl p-2.5 sm:p-3 w-44 text-2xs sm:text-xs">
                                   <div className="flex items-center justify-between mb-1.5 sm:mb-2">
                                     <span className="font-black text-sm sm:text-base font-koho">
                                       Ghế {tooltip.seatId}
                                     </span>
                                     <span
-                                      className={`px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-bold ${
+                                      className={`px-1.5 py-0.5 rounded text-2xs sm:text-xs font-bold ${
                                         tooltipSeat.status === 'business'
                                           ? 'bg-accent text-[var(--vj-navy)]'
                                           : tooltipSeat.status === 'hot'
@@ -806,10 +806,10 @@ export default function SeatSelectionStep({
                             aria-hidden="true"
                           />
                           <span className="leading-tight">
-                            <span className="block text-[10px] sm:text-xs font-semibold text-[var(--foreground)]">
+                            <span className="block text-2xs sm:text-xs font-semibold text-[var(--foreground)]">
                               {item.label}
                             </span>
-                            <span className="block text-[9px] sm:text-[10px] text-[var(--foreground-subtle)] tabular-nums">
+                            <span className="block text-3xs sm:text-2xs text-[var(--foreground-subtle)] tabular-nums">
                               {item.note}
                             </span>
                           </span>
@@ -821,7 +821,7 @@ export default function SeatSelectionStep({
                         reuse the seat classes so the ramp cannot drift. */}
                     {showHeatmap && (
                       <div className="mt-3 pt-3 border-t border-dashed border-[var(--border)]">
-                        <div className="flex items-center gap-2 text-[10px] sm:text-xs text-[var(--foreground-muted)]">
+                        <div className="flex items-center gap-2 text-2xs sm:text-xs text-[var(--foreground-muted)]">
                           <span>Mức độ lấp đầy</span>
                           <div className="flex flex-1 items-center gap-1.5" aria-hidden="true">
                             {HEATMAP_RAMP.map((level, i) => (
@@ -868,7 +868,7 @@ export default function SeatSelectionStep({
                         size={32}
                         className="mx-auto mb-1.5 sm:mb-2 text-[var(--foreground-muted)]"
                       />
-                      <div className="text-[11px] sm:text-sm">Chưa chọn chỗ ngồi</div>
+                      <div className="text-xs2 sm:text-sm">Chưa chọn chỗ ngồi</div>
                     </div>
                   ) : (
                     <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
@@ -880,17 +880,17 @@ export default function SeatSelectionStep({
                             className="flex items-center justify-between rounded-xl border border-[rgb(var(--primary-rgb))]/10 bg-[rgb(var(--primary-rgb))]/5 px-2.5 py-2 sm:px-3 sm:py-2.5"
                           >
                             <div className="flex items-center gap-1.5 sm:gap-2">
-                              <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-red rounded text-white text-[10px] sm:text-xs font-black flex items-center justify-center shadow-sm">
+                              <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-red rounded text-white text-2xs sm:text-xs font-black flex items-center justify-center shadow-sm">
                                 {i + 1}
                               </div>
                               <div>
-                                <div className="font-black text-[var(--foreground)] text-[11px] sm:text-sm font-koho">
+                                <div className="font-black text-[var(--foreground)] text-xs2 sm:text-sm font-koho">
                                   Ghế {seat}
                                 </div>
-                                <div className="text-[9px] sm:text-xs text-[var(--foreground-muted)]">
+                                <div className="text-3xs sm:text-xs text-[var(--foreground-muted)]">
                                   {seatedPassengers[i]?.name || `Hành khách ${i + 1}`}
                                 </div>
-                                <div className="text-[9px] sm:text-xs text-primary font-bold">
+                                <div className="text-3xs sm:text-xs text-primary font-bold">
                                   {info.price.toLocaleString('vi-VN')}₫
                                 </div>
                               </div>
@@ -908,7 +908,7 @@ export default function SeatSelectionStep({
                   )}
 
                   {/* Price - responsive */}
-                  <div className="border-t border-[var(--border)] pt-3 sm:pt-4 mb-3 sm:mb-4 space-y-1.5 sm:space-y-2 text-[11px] sm:text-sm">
+                  <div className="border-t border-[var(--border)] pt-3 sm:pt-4 mb-3 sm:mb-4 space-y-1.5 sm:space-y-2 text-xs2 sm:text-sm">
                     <div className="flex justify-between">
                       <span className="text-[var(--foreground-muted)]">Vé máy bay</span>
                       <span className="font-semibold text-[var(--foreground)]">
@@ -946,7 +946,7 @@ export default function SeatSelectionStep({
                   {/* Compact hold timer in sidebar - responsive */}
                   {holdTimer !== null && (
                     <div
-                      className={`rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 mb-2.5 sm:mb-3 flex items-center justify-between text-[10px] sm:text-xs ${
+                      className={`rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 mb-2.5 sm:mb-3 flex items-center justify-between text-2xs sm:text-xs ${
                         timerUrgent
                           ? 'bg-[rgb(var(--primary-rgb))]/10 text-primary border border-[rgb(var(--primary-rgb))]/30'
                           : timerWarning
