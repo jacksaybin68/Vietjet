@@ -102,6 +102,19 @@ export default function PassengerInfoStep({
     onPassengersChange?.(next);
   };
 
+  const removeLastOfType = (type: PassengerType) => {
+    if (type === 'adult' && adultsCount <= 1) return;
+    if (type === 'child' && childrenCount <= 0) return;
+    if (type === 'infant' && infantsCount <= 0) return;
+
+    for (let i = passengers.length - 1; i >= 0; i--) {
+      if ((passengers[i].type ?? 'adult') === type) {
+        removePassenger(i);
+        break;
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -148,46 +161,122 @@ export default function PassengerInfoStep({
           </div>
         </div>
 
-        {/* Passenger Summary & Add Toolbar */}
-        <div className="bg-white rounded-lg border border-gray-200/90 p-3.5 sm:p-4 mb-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <div className="text-xs sm:text-sm font-bold text-gray-900 font-koho">
-              Tổng cộng: {passengers.length} hành khách
+        {/* Passenger Summary & Steppers: Chọn số lượng hành khách */}
+        <div className="bg-white rounded-lg border border-gray-200/90 p-4 mb-4 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-gray-100 gap-2">
+            <div>
+              <div className="text-sm font-bold text-gray-900 font-koho flex items-center gap-2">
+                <span>Chọn số lượng hành khách</span>
+                <span className="text-2xs bg-red-50 text-primary font-bold px-2 py-0.5 rounded border border-red-200">
+                  Tổng cộng: {passengers.length} hành khách
+                </span>
+              </div>
+              <div className="text-2xs text-gray-500 mt-0.5 font-medium">
+                {adultsCount} Người lớn
+                {childrenCount > 0 ? `, ${childrenCount} Trẻ em` : ''}
+                {infantsCount > 0 ? `, ${infantsCount} Em bé` : ''}
+              </div>
             </div>
-            <div className="text-2xs text-gray-500 mt-0.5 font-medium">
-              {adultsCount} Người lớn
-              {childrenCount > 0 ? `, ${childrenCount} Trẻ em` : ''}
-              {infantsCount > 0 ? `, ${infantsCount} Em bé` : ''}
+            <div className="text-2xs text-gray-400 font-medium">
+              Tối đa 9 hành khách mỗi lần đặt chỗ
             </div>
           </div>
-          {passengers.length < 9 && (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-2xs font-semibold text-gray-600">Thêm:</span>
-              <button
-                type="button"
-                onClick={() => addPassenger('adult')}
-                className="px-2.5 py-1 text-2xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-800 rounded border border-gray-300 transition-colors"
-              >
-                + Người lớn
-              </button>
-              <button
-                type="button"
-                onClick={() => addPassenger('child')}
-                disabled={childrenCount >= adultsCount * 2}
-                className="px-2.5 py-1 text-2xs font-bold bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 rounded border border-gray-300 transition-colors"
-              >
-                + Trẻ em
-              </button>
-              <button
-                type="button"
-                onClick={() => addPassenger('infant')}
-                disabled={infantsCount >= adultsCount}
-                className="px-2.5 py-1 text-2xs font-bold bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 rounded border border-gray-300 transition-colors"
-              >
-                + Em bé
-              </button>
+
+          {/* Steppers: Người lớn, Trẻ em, Em bé */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3">
+            {/* Người lớn */}
+            <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-gray-50/50 hover:bg-gray-50 transition-colors">
+              <div>
+                <div className="text-xs font-bold text-gray-900">Người lớn :</div>
+                <div className="text-2xs text-gray-500">12 tuổi trở lên</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => removeLastOfType('adult')}
+                  disabled={adultsCount <= 1}
+                  aria-label="Giảm Người lớn"
+                  className="w-7 h-7 flex items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold text-sm cursor-pointer"
+                >
+                  -
+                </button>
+                <span className="w-5 text-center text-xs font-bold text-gray-900">
+                  {adultsCount}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => addPassenger('adult')}
+                  disabled={passengers.length >= 9}
+                  aria-label="+ Người lớn"
+                  className="w-7 h-7 flex items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold text-sm cursor-pointer"
+                >
+                  +
+                </button>
+              </div>
             </div>
-          )}
+
+            {/* Trẻ em */}
+            <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-gray-50/50 hover:bg-gray-50 transition-colors">
+              <div>
+                <div className="text-xs font-bold text-gray-900">Trẻ em :</div>
+                <div className="text-2xs text-gray-500">2 - 11 tuổi (75% giá vé)</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => removeLastOfType('child')}
+                  disabled={childrenCount <= 0}
+                  aria-label="Giảm Trẻ em"
+                  className="w-7 h-7 flex items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold text-sm cursor-pointer"
+                >
+                  -
+                </button>
+                <span className="w-5 text-center text-xs font-bold text-gray-900">
+                  {childrenCount}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => addPassenger('child')}
+                  disabled={passengers.length >= 9 || childrenCount >= adultsCount * 2}
+                  aria-label="+ Trẻ em"
+                  className="w-7 h-7 flex items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold text-sm cursor-pointer"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            {/* Em bé */}
+            <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-gray-50/50 hover:bg-gray-50 transition-colors">
+              <div>
+                <div className="text-xs font-bold text-gray-900">Em bé :</div>
+                <div className="text-2xs text-gray-500">Dưới 2 tuổi (Miễn phí vé)</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => removeLastOfType('infant')}
+                  disabled={infantsCount <= 0}
+                  aria-label="Giảm Em bé"
+                  className="w-7 h-7 flex items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold text-sm cursor-pointer"
+                >
+                  -
+                </button>
+                <span className="w-5 text-center text-xs font-bold text-gray-900">
+                  {infantsCount}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => addPassenger('infant')}
+                  disabled={passengers.length >= 9 || infantsCount >= adultsCount}
+                  aria-label="+ Em bé"
+                  className="w-7 h-7 flex items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold text-sm cursor-pointer"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <form id="passenger-info-form" onSubmit={handleSubmit} className="space-y-4">

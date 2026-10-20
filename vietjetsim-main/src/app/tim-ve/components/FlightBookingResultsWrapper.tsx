@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { FlightBookingClient } from '@/features/bookings';
 import { PASSENGER_TYPE_LABELS, type PassengerType } from '@/features/bookings';
@@ -100,6 +100,19 @@ export default function FlightBookingResultsWrapper({
   });
   const [continueSignal, setContinueSignal] = useState(0);
   const [showBenefitsModal, setShowBenefitsModal] = useState(false);
+  const [isPaxDropdownOpen, setIsPaxDropdownOpen] = useState(false);
+  const paxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isPaxDropdownOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (!paxRef.current?.contains(e.target as Node)) {
+        setIsPaxDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isPaxDropdownOpen]);
 
   const selectedBooking = bookings[bookingKey];
 
@@ -189,7 +202,162 @@ export default function FlightBookingResultsWrapper({
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-bold">
             <span className="font-black uppercase tracking-wide">{tripLabel}</span>
             <span className="opacity-50">|</span>
-            <span>{describePax(paxCounts)}</span>
+            <div className="relative inline-block" ref={paxRef}>
+              <button
+                type="button"
+                onClick={() => setIsPaxDropdownOpen((v) => !v)}
+                className="inline-flex items-center gap-1 hover:underline cursor-pointer bg-black/10 hover:bg-black/15 px-2 py-0.5 rounded transition-colors"
+                title="Thay đổi số lượng hành khách"
+              >
+                <span>{describePax(paxCounts)}</span>
+                <span className="text-2xs opacity-70">▼</span>
+              </button>
+
+              {isPaxDropdownOpen && (
+                <div className="absolute left-0 top-full mt-2 z-50 w-72 rounded-xl bg-white p-4 shadow-xl border border-gray-200 text-gray-800 text-xs">
+                  <div className="font-bold text-xs text-gray-900 mb-3 pb-2 border-b border-gray-100 flex justify-between items-center">
+                    <span>Chọn số lượng hành khách</span>
+                    <button
+                      type="button"
+                      onClick={() => setIsPaxDropdownOpen(false)}
+                      className="text-gray-400 hover:text-gray-600 text-sm font-bold cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="space-y-3 font-normal">
+                    {/* Người lớn */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-bold text-gray-900">Người lớn :</div>
+                        <div className="text-2xs text-gray-400">12 tuổi trở lên</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (paxCounts.adult > 1) {
+                              handlePaxCountsChange({ ...paxCounts, adult: paxCounts.adult - 1 });
+                            }
+                          }}
+                          disabled={paxCounts.adult <= 1}
+                          className="w-6 h-6 flex items-center justify-center rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed font-bold cursor-pointer"
+                        >
+                          -
+                        </button>
+                        <span className="w-4 text-center font-bold text-gray-900">
+                          {paxCounts.adult}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const total = paxCounts.adult + paxCounts.child + paxCounts.infant;
+                            if (total < 9) {
+                              handlePaxCountsChange({ ...paxCounts, adult: paxCounts.adult + 1 });
+                            }
+                          }}
+                          disabled={paxCounts.adult + paxCounts.child + paxCounts.infant >= 9}
+                          className="w-6 h-6 flex items-center justify-center rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed font-bold cursor-pointer"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Trẻ em */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-bold text-gray-900">Trẻ em :</div>
+                        <div className="text-2xs text-gray-400">2 - 11 tuổi (75%)</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (paxCounts.child > 0) {
+                              handlePaxCountsChange({ ...paxCounts, child: paxCounts.child - 1 });
+                            }
+                          }}
+                          disabled={paxCounts.child <= 0}
+                          className="w-6 h-6 flex items-center justify-center rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed font-bold cursor-pointer"
+                        >
+                          -
+                        </button>
+                        <span className="w-4 text-center font-bold text-gray-900">
+                          {paxCounts.child}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const total = paxCounts.adult + paxCounts.child + paxCounts.infant;
+                            if (total < 9 && paxCounts.child < paxCounts.adult * 2) {
+                              handlePaxCountsChange({ ...paxCounts, child: paxCounts.child + 1 });
+                            }
+                          }}
+                          disabled={
+                            paxCounts.adult + paxCounts.child + paxCounts.infant >= 9 ||
+                            paxCounts.child >= paxCounts.adult * 2
+                          }
+                          className="w-6 h-6 flex items-center justify-center rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed font-bold cursor-pointer"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Em bé */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-bold text-gray-900">Em bé :</div>
+                        <div className="text-2xs text-gray-400">Dưới 2 tuổi (Miễn phí)</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (paxCounts.infant > 0) {
+                              handlePaxCountsChange({ ...paxCounts, infant: paxCounts.infant - 1 });
+                            }
+                          }}
+                          disabled={paxCounts.infant <= 0}
+                          className="w-6 h-6 flex items-center justify-center rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed font-bold cursor-pointer"
+                        >
+                          -
+                        </button>
+                        <span className="w-4 text-center font-bold text-gray-900">
+                          {paxCounts.infant}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const total = paxCounts.adult + paxCounts.child + paxCounts.infant;
+                            if (total < 9 && paxCounts.infant < paxCounts.adult) {
+                              handlePaxCountsChange({ ...paxCounts, infant: paxCounts.infant + 1 });
+                            }
+                          }}
+                          disabled={
+                            paxCounts.adult + paxCounts.child + paxCounts.infant >= 9 ||
+                            paxCounts.infant >= paxCounts.adult
+                          }
+                          className="w-6 h-6 flex items-center justify-center rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed font-bold cursor-pointer"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsPaxDropdownOpen(false)}
+                    className="w-full mt-3 py-1.5 bg-primary text-white font-bold rounded-lg hover:bg-red-700 transition-colors cursor-pointer text-center"
+                  >
+                    Xác nhận
+                  </button>
+                </div>
+              )}
+            </div>
             <span className="mx-1 h-3.5 w-px bg-black/20" aria-hidden="true" />
             <span className="inline-flex items-center gap-1.5 text-xs">
               <span className="inline-block w-2.5 h-2.5 rounded-full border-2 border-red-600 bg-red-600" />
