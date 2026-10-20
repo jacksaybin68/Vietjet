@@ -87,11 +87,11 @@ export default function FlightBookingResultsWrapper({
   const bookingKey = isRoundTrip && searchParams.get('leg') === 'return' ? 'inbound' : 'outbound';
 
   /** Passenger mix from the search, for the yellow trip strip under the header. */
-  const paxCounts: Record<PassengerType, number> = {
+  const [paxCounts, setPaxCounts] = useState<Record<PassengerType, number>>(() => ({
     adult: Number(searchParams.get('pax') ?? 1) || 1,
     child: Number(searchParams.get('child') ?? 0) || 0,
     infant: Number(searchParams.get('infant') ?? 0) || 0,
-  };
+  }));
   const tripLabel = isRoundTrip ? 'Chuyến bay khứ hồi' : 'Chuyến bay một chiều';
 
   const [bookings, setBookings] = useState<Record<'outbound' | 'inbound', SelectedBooking | null>>({
@@ -102,6 +102,33 @@ export default function FlightBookingResultsWrapper({
   const [showBenefitsModal, setShowBenefitsModal] = useState(false);
 
   const selectedBooking = bookings[bookingKey];
+
+  const handlePaxCountsChange = useCallback(
+    (newPax: Record<PassengerType, number>) => {
+      setPaxCounts(newPax);
+      setBookings((prev) => {
+        const next = { ...prev };
+        (['outbound', 'inbound'] as const).forEach((key) => {
+          const item = next[key];
+          if (item) {
+            const currentWeight = paxCounts.adult + paxCounts.child * 0.75 || 1;
+            const unitFare = item.fare / currentWeight;
+            const nextWeight = newPax.adult + newPax.child * 0.75;
+            const nextFare = Math.round(unitFare * nextWeight);
+            const nextTax = 581581 * (newPax.adult || 1);
+            next[key] = {
+              ...item,
+              fare: nextFare,
+              tax: nextTax,
+              total: nextFare + nextTax,
+            };
+          }
+        });
+        return next;
+      });
+    },
+    [paxCounts.adult, paxCounts.child]
+  );
 
   const handleFlightSelect = useCallback(
     (
@@ -238,6 +265,7 @@ export default function FlightBookingResultsWrapper({
               continueSignal={continueSignal}
               onFlightSelect={handleFlightSelect}
               onStepChange={setBookingStep}
+              onPaxCountsChange={handlePaxCountsChange}
             />
           </div>
 
@@ -255,6 +283,7 @@ export default function FlightBookingResultsWrapper({
               arriveTime: bookings.outbound?.arriveTime,
               total: bookings.outbound?.total ?? 0,
               isRoundTrip,
+              paxCounts,
               returnLeg: isRoundTrip
                 ? {
                     trip: returnTrip,

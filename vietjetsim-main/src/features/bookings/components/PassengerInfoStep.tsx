@@ -4,6 +4,7 @@ import {
   BookingConsents,
   Flight,
   Passenger,
+  PassengerType,
   requiresIdNumber,
 } from '@/features/bookings/types/booking-flow';
 import type { AncillaryId } from '@/features/bookings/pricing';
@@ -16,6 +17,23 @@ interface Props {
   ancillaries?: AncillaryId[];
   onSubmit: (passengers: Passenger[], consents: BookingConsents) => void | Promise<void>;
   onBack: () => void;
+  onPassengersChange?: (passengers: Passenger[]) => void;
+}
+
+function createBlankPassenger(type: PassengerType = 'adult'): Passenger {
+  return {
+    name: '',
+    firstName: '',
+    dob: '',
+    idNumber: '',
+    gender: 'male',
+    countryCode: 'VN',
+    phone: '',
+    email: '',
+    residence: '',
+    skyJoyMemberId: '',
+    type,
+  };
 }
 
 /**
@@ -39,20 +57,12 @@ export default function PassengerInfoStep({
   ancillaries: _ancillaries = [],
   onSubmit,
   onBack: _onBack,
+  onPassengersChange,
 }: Props) {
   const [passengers, setPassengers] = useState<Passenger[]>(
-    initialPassengers ??
-      Array.from({ length: passengerCount }, () => ({
-        name: '',
-        dob: '',
-        idNumber: '',
-        gender: 'male',
-        countryCode: 'VN',
-        phone: '',
-        email: '',
-        residence: '',
-        skyJoyMemberId: '',
-      }))
+    initialPassengers && initialPassengers.length > 0
+      ? initialPassengers
+      : Array.from({ length: passengerCount }, () => createBlankPassenger('adult'))
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [phoneTouched, setPhoneTouched] = useState<boolean[]>([]);
@@ -65,7 +75,31 @@ export default function PassengerInfoStep({
   });
 
   const updatePassenger = (i: number, field: keyof Passenger, value: string) => {
-    setPassengers((prev) => prev.map((p, idx) => (idx === i ? { ...p, [field]: value } : p)));
+    setPassengers((prev) => {
+      const next = prev.map((p, idx) => (idx === i ? { ...p, [field]: value } : p));
+      onPassengersChange?.(next);
+      return next;
+    });
+  };
+
+  const addPassenger = (type: PassengerType) => {
+    if (passengers.length >= 9) return;
+    const next = [...passengers, createBlankPassenger(type)];
+    setPassengers(next);
+    onPassengersChange?.(next);
+  };
+
+  const removePassenger = (index: number) => {
+    if (passengers.length <= 1) return;
+    const target = passengers[index];
+    const targetType = target.type ?? 'adult';
+    const adultCount = passengers.filter((p) => (p.type ?? 'adult') === 'adult').length;
+    if (targetType === 'adult' && adultCount <= 1 && passengers.length > 1) {
+      return;
+    }
+    const next = passengers.filter((_, idx) => idx !== index);
+    setPassengers(next);
+    onPassengersChange?.(next);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -77,6 +111,10 @@ export default function PassengerInfoStep({
       setIsSubmitting(false);
     }
   };
+
+  const adultsCount = passengers.filter((p) => (p.type ?? 'adult') === 'adult').length;
+  const childrenCount = passengers.filter((p) => p.type === 'child').length;
+  const infantsCount = passengers.filter((p) => p.type === 'infant').length;
 
   return (
     <>
@@ -110,9 +148,57 @@ export default function PassengerInfoStep({
           </div>
         </div>
 
+        {/* Passenger Summary & Add Toolbar */}
+        <div className="bg-white rounded-lg border border-gray-200/90 p-3.5 sm:p-4 mb-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <div className="text-xs sm:text-sm font-bold text-gray-900 font-koho">
+              Tổng cộng: {passengers.length} hành khách
+            </div>
+            <div className="text-2xs text-gray-500 mt-0.5 font-medium">
+              {adultsCount} Người lớn
+              {childrenCount > 0 ? `, ${childrenCount} Trẻ em` : ''}
+              {infantsCount > 0 ? `, ${infantsCount} Em bé` : ''}
+            </div>
+          </div>
+          {passengers.length < 9 && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-2xs font-semibold text-gray-600">Thêm:</span>
+              <button
+                type="button"
+                onClick={() => addPassenger('adult')}
+                className="px-2.5 py-1 text-2xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-800 rounded border border-gray-300 transition-colors"
+              >
+                + Người lớn
+              </button>
+              <button
+                type="button"
+                onClick={() => addPassenger('child')}
+                disabled={childrenCount >= adultsCount * 2}
+                className="px-2.5 py-1 text-2xs font-bold bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 rounded border border-gray-300 transition-colors"
+              >
+                + Trẻ em
+              </button>
+              <button
+                type="button"
+                onClick={() => addPassenger('infant')}
+                disabled={infantsCount >= adultsCount}
+                className="px-2.5 py-1 text-2xs font-bold bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 rounded border border-gray-300 transition-colors"
+              >
+                + Em bé
+              </button>
+            </div>
+          )}
+        </div>
+
         <form id="passenger-info-form" onSubmit={handleSubmit} className="space-y-4">
           {passengers.map((p, i) => {
             const isAdult = (p.type ?? 'adult') === 'adult';
+            const pType = p.type ?? 'adult';
+            const ordinal = passengers
+              .slice(0, i + 1)
+              .filter((x) => (x.type ?? 'adult') === pType).length;
+            const typeLabel =
+              pType === 'child' ? 'Trẻ em' : pType === 'infant' ? 'Em bé' : 'Người lớn';
             return (
               <div
                 key={i}
@@ -123,10 +209,26 @@ export default function PassengerInfoStep({
                   <div className="flex items-center gap-2 text-xs font-bold text-gray-800">
                     <span className="text-sm">👤</span>
                     <span>
-                      {p.type === 'child' ? 'Trẻ em' : p.type === 'infant' ? 'Em bé' : 'Người lớn'}
+                      {typeLabel} {ordinal}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-500 font-bold">▲</span>
+                  <div className="flex items-center gap-3">
+                    {passengers.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removePassenger(i);
+                        }}
+                        className="text-2xs font-bold text-red-600 hover:text-red-700 hover:underline px-2 py-0.5 rounded transition-colors"
+                        title={`Xóa ${typeLabel} ${ordinal}`}
+                        aria-label={`Xóa ${typeLabel} ${ordinal}`}
+                      >
+                        Xóa
+                      </button>
+                    )}
+                    <span className="text-xs text-gray-500 font-bold">▲</span>
+                  </div>
                 </div>
 
                 <div className="p-4 sm:p-5 space-y-4">

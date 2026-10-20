@@ -95,6 +95,7 @@ function createMockSql() {
   const chatConversations: MockResult[] = [];
   const chatMessages: MockResult[] = [];
   const chatPresence: MockResult[] = [];
+  const userProfiles: MockResult[] = [];
 
   const nowIso = () => new Date().toISOString();
   let chatSeq = 0;
@@ -135,6 +136,43 @@ function createMockSql() {
   );
 
   const normalizeSql = (text: string) => text.replace(/\s+/g, ' ').trim().toLowerCase();
+
+  /** Handles user_profiles query for dev/test */
+  function runUserProfileQuery(text: string, values: unknown[]): MockResult[] | null {
+    const q = normalizeSql(text);
+    if (q.includes('insert into user_profiles')) {
+      const [email, password_hash, full_name, role, phone] = values as [
+        string,
+        string,
+        string,
+        string,
+        string | null,
+      ];
+      const row: MockResult = {
+        id: nextChatId('usr'),
+        email,
+        password_hash,
+        full_name,
+        role: role || 'user',
+        phone: phone || null,
+        avatar_url: null,
+        created_at: nowIso(),
+        updated_at: nowIso(),
+      };
+      userProfiles.push(row);
+      return [row];
+    }
+    if (q.includes('from user_profiles where email = ?')) {
+      return userProfiles.filter((u) => u.email === values[0]);
+    }
+    if (q.includes('from user_profiles where id = ?')) {
+      return userProfiles.filter((u) => u.id === values[0]);
+    }
+    if (q.includes('from user_profiles where phone = ?')) {
+      return userProfiles.filter((u) => u.phone === values[0]);
+    }
+    return null;
+  }
 
   /** Handles a chat query, or returns null when the text is not chat-related. */
   function runChatQuery(text: string, values: unknown[]): MockResult[] | null {
@@ -309,6 +347,9 @@ function createMockSql() {
 
       const query = strings.join('?');
       console.info('[MOCK SQL]', query, values);
+
+      const userProfileResult = runUserProfileQuery(query, values);
+      if (userProfileResult) return userProfileResult;
 
       const chatResult = runChatQuery(query, values);
       if (chatResult) return chatResult;

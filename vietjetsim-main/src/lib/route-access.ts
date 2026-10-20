@@ -58,6 +58,8 @@ export const PUBLIC_API_ROUTES = [
   // 401 when no/invalid token is present, so the middleware must not
   // bounce it to login first.
   '/api/xac-thuc/lam-moi',
+  // Guest chat registration: anonymous by design — creates guest session for Amy chat
+  '/api/tro-chuyen/khach',
 ] as const;
 
 function matchesRoute(pathname: string, route: string): boolean {

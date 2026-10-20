@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
@@ -24,7 +24,7 @@ interface Conversation {
 }
 
 /** Suggested openers in the welcome state — the chip row vietjetair.com's chat shows. */
-const QUICK_REPLIES = [
+const _QUICK_REPLIES = [
   { icon: 'TicketIcon', label: 'Tra cứu vé đã đặt' },
   { icon: 'BriefcaseIcon', label: 'Quy định hành lý' },
   { icon: 'ArrowPathIcon', label: 'Đổi ngày bay' },
@@ -61,9 +61,83 @@ export default function UserChat() {
   const [sending, setSending] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
+  const [guestName, setGuestName] = useState('');
+  const [guestPhone, setGuestPhone] = useState('');
+  const [guestIdNumber, setGuestIdNumber] = useState('');
+  const [guestUser, setGuestUser] = useState<{
+    id: string;
+    fullName: string;
+    phone?: string;
+    email?: string;
+  } | null>(null);
+  const [isGuestChatStarted, setIsGuestChatStarted] = useState(false);
+  const [guestError, setGuestError] = useState('');
+  const [isStartingGuest, setIsStartingGuest] = useState(false);
+
+  // Active user can be authenticated user or guest user who entered info
+  const activeUser = useMemo(
+    () =>
+      user ? { id: user.id, fullName: user.fullName || user.email, phone: user.phone } : guestUser,
+    [user, guestUser]
+  );
+
   // Presence state
   const [adminOnline, setAdminOnline] = useState(false);
   const [adminTyping, setAdminTyping] = useState(false);
+
+  const handleStartGuestChat = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setGuestError('');
+    if (!guestName.trim()) {
+      setGuestError('Vui lòng nhập Họ & Tên');
+      return;
+    }
+    const cleanPhone = guestPhone.replace(/[^0-9]/g, '');
+    if (!cleanPhone || cleanPhone.length < 9) {
+      setGuestError('Vui lòng nhập Số điện thoại hợp lệ (9-11 chữ số)');
+      return;
+    }
+    if (!guestIdNumber.trim()) {
+      setGuestError('Vui lòng nhập Số CCCD');
+      return;
+    }
+
+    setIsStartingGuest(true);
+    try {
+      const res = await fetch('/api/tro-chuyen/khach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: guestName.trim(),
+          phone: cleanPhone,
+          idNumber: guestIdNumber.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setGuestError(data.message || 'Không thể bắt đầu trò chuyện');
+        return;
+      }
+      if (data.user) {
+        setGuestUser(data.user);
+      }
+      setIsGuestChatStarted(true);
+      if (data.conversationId) {
+        setConversation({
+          id: data.conversationId,
+          user_id: data.user?.id || 'guest',
+          unread_by_user: 0,
+        });
+        const msgs = await getConversationMessages(data.conversationId);
+        setMessages(msgs.messages || []);
+      }
+    } catch (err) {
+      console.error(err);
+      setGuestError('Đã có lỗi xảy ra. Vui lòng thử lại.');
+    } finally {
+      setIsStartingGuest(false);
+    }
+  };
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -225,7 +299,7 @@ export default function UserChat() {
   // Mark admin messages as read
   const markAdminMessagesRead = useCallback(
     async (convId: string) => {
-      if (!user) return;
+      if (!activeUser) return;
       try {
         await markConversationRead(convId);
         setMessages((prev) =>
@@ -239,12 +313,12 @@ export default function UserChat() {
         console.error('Mark read error:', err);
       }
     },
-    [user]
+    [activeUser]
   );
 
   // Load or create conversation
   const loadConversation = useCallback(async () => {
-    if (!user) return;
+    if (!activeUser) return;
     setLoading(true);
     try {
       const data = await listConversations();
@@ -261,13 +335,13 @@ export default function UserChat() {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [activeUser]);
 
   // The server derives the participant from the session cookie, so there is no
   // payload to send: fetching the list both finds and (for a first-time user)
   // creates the caller's conversation.
   const createConversation = useCallback(async () => {
-    if (!user) return null;
+    if (!activeUser) return null;
     try {
       const data = await listConversations();
       const existing = data.conversations?.[0];
@@ -280,11 +354,11 @@ export default function UserChat() {
       console.error('Create conversation error:', err);
       return null;
     }
-  }, [user]);
+  }, [activeUser]);
 
   // Poll for new messages
   const pollMessages = useCallback(async () => {
-    if (!conversation?.id || !user || authErrorRef.current) return;
+    if (!conversation?.id || !activeUser || authErrorRef.current) return;
     try {
       const data = await getConversationMessages(conversation.id);
       const newMessages = data.messages || [];
@@ -305,11 +379,11 @@ export default function UserChat() {
       if (handleAuthError(err)) return;
       console.error('Poll messages error:', err);
     }
-  }, [conversation?.id, isOpen, user, handleAuthError]);
+  }, [conversation?.id, isOpen, activeUser, handleAuthError]);
 
   // Poll for presence
   const pollPresence = useCallback(async () => {
-    if (!conversation?.id || !user || authErrorRef.current) return;
+    if (!conversation?.id || !activeUser || authErrorRef.current) return;
     try {
       const data = await getChatPresence(conversation.id);
       if (data.presence) {
@@ -321,7 +395,7 @@ export default function UserChat() {
       if (handleAuthError(err)) return;
       console.error('Poll presence error:', err);
     }
-  }, [conversation?.id, user, handleAuthError]);
+  }, [conversation?.id, activeUser, handleAuthError]);
 
   // Load conversation on mount
   useEffect(() => {
@@ -331,9 +405,9 @@ export default function UserChat() {
     return () => stopPolling();
   }, [user, loadConversation, stopPolling]);
 
-  // Start polling when conversation is loaded — and only while signed in.
+  // Start polling when conversation is loaded — and activeUser is present.
   useEffect(() => {
-    if (conversation?.id && user) {
+    if (conversation?.id && activeUser) {
       authErrorRef.current = false;
       pollingRef.current = setInterval(pollMessages, 3000);
       presencePollingRef.current = setInterval(pollPresence, 3000);
@@ -342,18 +416,18 @@ export default function UserChat() {
       pollPresence();
     }
     return () => stopPolling();
-  }, [conversation?.id, user, pollMessages, pollPresence, stopPolling]);
+  }, [conversation?.id, activeUser, pollMessages, pollPresence, stopPolling]);
 
   // Session lost mid-session: drop the conversation so polling stays off until
-  // the user signs in again (the effect above only re-arms on a new `user`).
+  // the user signs in again (the effect above only re-arms on a new `activeUser`).
   useEffect(() => {
-    if (!user && conversation) {
+    if (!activeUser && conversation) {
       setConversation(null);
       setMessages([]);
       setUnreadCount(0);
       lastMessageCountRef.current = 0;
     }
-  }, [user, conversation]);
+  }, [activeUser, conversation]);
 
   // Handle chat open/close
   useEffect(() => {
@@ -386,7 +460,7 @@ export default function UserChat() {
   // `override` lets the quick-reply chips send their own copy of the text.
   const handleSend = async (override?: string) => {
     const text = (override ?? inputText).trim();
-    if (!text || sending || !user) return;
+    if (!text || sending || !activeUser) return;
     setInputText('');
     setSending(true);
 
@@ -411,7 +485,7 @@ export default function UserChat() {
         {
           id: `temp-${Date.now()}`,
           conversation_id: conv!.id,
-          sender_id: user.id,
+          sender_id: activeUser.id,
           sender_role: 'user',
           content: text,
           created_at: new Date().toISOString(),
@@ -507,95 +581,219 @@ export default function UserChat() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed inset-x-0 bottom-[calc(128px+env(safe-area-inset-bottom))] z-50 flex h-[min(540px,calc(100dvh-128px))] flex-col overflow-hidden rounded-t-[28px] border border-white/60 bg-white shadow-2xl sm:inset-x-auto sm:bottom-24 sm:right-6 sm:h-[640px] sm:w-[400px] sm:rounded-[28px]">
-          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-accent via-primary to-accent" />
-          {/* Header */}
-          <div className="relative flex flex-shrink-0 items-center gap-3 overflow-hidden bg-gradient-vj px-4 py-4 text-white sm:px-5">
-            <div className="absolute -right-10 -top-16 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
-            <div className="absolute -bottom-16 -left-10 h-28 w-28 rounded-full bg-accent/20 blur-2xl" />
-            <div className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white/15 shadow-inner ring-1 ring-white/25">
-              <Icon name="ChatBubbleLeftRightIcon" size={22} className="text-accent" />
-              <span
-                className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-primary ${
-                  operatorOnline ? 'bg-green-400' : 'bg-gray-400'
-                }`}
-              />
-            </div>
-            <div className="relative min-w-0 flex-1">
-              <div className="truncate text-sm font-bold leading-tight">
-                {isGuest ? 'Tổng đài Vietjet Air' : 'Hỗ trợ Vietjet Air'}
+        <div className="fixed inset-x-0 bottom-[calc(128px+env(safe-area-inset-bottom))] z-50 flex h-[min(580px,calc(100dvh-128px))] flex-col overflow-hidden rounded-t-[24px] border border-gray-200 bg-white shadow-2xl sm:inset-x-auto sm:bottom-24 sm:right-6 sm:h-[620px] sm:w-[400px] sm:rounded-[24px]">
+          {/* Header chuẩn Trợ lý ảo Amy */}
+          <div className="relative flex flex-shrink-0 items-center justify-between border-b border-gray-100 bg-white px-4 py-3 shadow-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-600 text-white shadow-sm ring-1 ring-red-700">
+                <span className="font-black text-2xs italic tracking-tighter">vietjet</span>
               </div>
-              <div className="mt-1 flex items-center gap-1.5">
-                <span
-                  className={`h-2 w-2 rounded-full ${operatorOnline ? 'bg-green-400' : 'bg-gray-400'} ${
-                    operatorOnline ? 'animate-pulse' : ''
-                  }`}
-                />
-                <span className="text-xs text-white/80">
-                  {isGuest ? (
-                    'Đăng nhập để trò chuyện'
-                  ) : adminTyping ? (
-                    <span className="font-medium text-white">Đang nhập...</span>
-                  ) : adminOnline ? (
-                    'Sẵn sàng hỗ trợ'
-                  ) : (
-                    'Hiện đang ngoại tuyến'
-                  )}
-                </span>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <h3 className="font-bold text-red-600 font-koho text-sm sm:text-base leading-tight">
+                    Trợ lý ảo Amy
+                  </h3>
+                  <span
+                    className={`h-2 w-2 rounded-full ${operatorOnline ? 'bg-green-500' : 'bg-gray-400'}`}
+                    title={operatorOnline ? 'Online' : 'Offline'}
+                  />
+                </div>
+                <div className="text-3xs text-gray-400 leading-tight">Tổng đài Vietjet Air</div>
               </div>
             </div>
+
             <button
               onClick={() => setIsOpen(false)}
-              className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-white/10 transition-colors hover:bg-white/20 active:bg-white/25 touch-manipulation"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors font-black text-lg touch-manipulation"
               aria-label="Đóng chat hỗ trợ"
+              title="Thu nhỏ"
             >
-              <Icon name="XMarkIcon" size={18} className="text-white" />
+              —
             </button>
           </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-gray-50">
+          {/* Messages & Chat Body */}
+          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-gradient-to-b from-white via-gray-50/60 to-gray-50/90">
             {loading ? (
               <div className="flex items-center justify-center h-full">
-                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                <div className="w-6 h-6 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
               </div>
-            ) : isGuest ? (
-              <div className="flex min-h-full flex-col items-center justify-center gap-3 text-center">
-                <div>
-                  <p className="text-navy font-bold text-sm">Xin chào! 👋</p>
-                  <p className="text-gray-500 text-xs mt-1 leading-relaxed">
-                    Đăng nhập để trò chuyện cùng tổng đài viên và xem lại lịch sử hỗ trợ của bạn.
-                  </p>
+            ) : isGuest && !isGuestChatStarted ? (
+              <div className="space-y-3 pt-1">
+                {/* Lời chào của Amy */}
+                <div className="flex items-start gap-2">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-600 text-white text-3xs font-black italic">
+                    vj
+                  </div>
+                  <div className="bg-gray-100 rounded-2xl rounded-tl-sm p-3 text-xs text-gray-800 leading-relaxed shadow-xs max-w-[85%]">
+                    Mình là trợ lý ảo Amy, rất vui được trò chuyện với bạn 💖. Amy có thể hỗ trợ gì
+                    cho bạn hôm nay ạ?
+                  </div>
                 </div>
-                <Link
-                  href="/dang-nhap?redirect=/trang-chu"
-                  className="vj-cta w-full max-w-[230px] px-5 text-sm"
+
+                {/* Form thông tin khách hàng không cần đăng nhập */}
+                <form
+                  onSubmit={handleStartGuestChat}
+                  noValidate
+                  className="bg-white rounded-2xl border border-red-100 p-4 shadow-sm space-y-3"
                 >
-                  Đăng nhập để trò chuyện
-                </Link>
+                  <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                    <span className="text-xs font-bold text-red-600 font-koho uppercase tracking-wider">
+                      Thông tin khách hàng
+                    </span>
+                    <span className="text-3xs text-gray-400">Không cần đăng nhập</span>
+                  </div>
+
+                  <div className="space-y-2.5 text-xs">
+                    <div>
+                      <label className="block text-2xs font-bold text-gray-700 mb-1">
+                        Họ &amp; Tên : <span className="text-red-600">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={guestName}
+                        onChange={(e) => setGuestName(e.target.value)}
+                        placeholder="Nguyễn Văn A"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-900 focus:outline-none focus:border-red-500 focus:bg-white transition-all"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-2xs font-bold text-gray-700 mb-1">
+                        Số điện thoại : <span className="text-red-600">*</span>
+                      </label>
+                      <input
+                        type="tel"
+                        value={guestPhone}
+                        onChange={(e) => setGuestPhone(e.target.value.replace(/[^0-9]/g, ''))}
+                        placeholder="0912345678"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-900 focus:outline-none focus:border-red-500 focus:bg-white transition-all"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-2xs font-bold text-gray-700 mb-1">
+                        Số CCCD : <span className="text-red-600">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={guestIdNumber}
+                        onChange={(e) => setGuestIdNumber(e.target.value)}
+                        placeholder="001201012345"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-900 focus:outline-none focus:border-red-500 focus:bg-white transition-all"
+                        required
+                      />
+                    </div>
+
+                    {guestError && (
+                      <p className="text-2xs text-red-600 font-medium">{guestError}</p>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={isStartingGuest}
+                      className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold text-xs py-2 rounded-lg shadow-sm transition-colors mt-1"
+                    >
+                      {isStartingGuest ? 'Đang kết nối...' : 'Bắt đầu trò chuyện'}
+                    </button>
+                  </div>
+
+                  <div className="pt-2 border-t border-gray-100 text-center space-y-1">
+                    <p className="text-3xs text-gray-500">
+                      Đăng nhập để trò chuyện cùng tổng đài viên và xem lại lịch sử hỗ trợ của bạn.
+                    </p>
+                    <Link
+                      href="/dang-nhap?redirect=/trang-chu"
+                      className="text-2xs font-bold text-red-600 hover:underline inline-block"
+                    >
+                      Đăng nhập để trò chuyện
+                    </Link>
+                  </div>
+                </form>
               </div>
             ) : messages.length === 0 ? (
-              <div className="flex min-h-full flex-col items-center justify-center gap-4 text-center">
-                <div>
-                  <p className="text-navy font-bold text-sm">
-                    Xin chào{user?.fullName ? ` ${user.fullName}` : ''}! 👋
-                  </p>
-                  <p className="text-gray-500 text-xs mt-1">
-                    Vietjet Air có thể hỗ trợ gì cho bạn?
-                  </p>
+              <div className="space-y-3 pt-1">
+                {/* Lời chào 1 */}
+                <div className="flex items-start gap-2">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-600 text-white text-3xs font-black italic">
+                    vj
+                  </div>
+                  <div className="bg-gray-100 rounded-2xl rounded-tl-sm p-3 text-xs text-gray-800 leading-relaxed shadow-xs max-w-[85%]">
+                    Mình là trợ lý ảo Amy, rất vui được trò chuyện với bạn 💖. Amy có thể hỗ trợ gì
+                    cho bạn hôm nay ạ?
+                  </div>
                 </div>
-                <div className="w-full space-y-2">
-                  {QUICK_REPLIES.map((item) => (
+
+                {/* Thẻ thông tin khách hàng nếu có */}
+                {(guestName || user) && (
+                  <div className="bg-white rounded-xl border border-red-100 p-3 shadow-xs space-y-1 text-2xs text-gray-700">
+                    <div className="font-bold text-red-600 uppercase text-3xs">
+                      Thông tin đã ghi nhận:
+                    </div>
+                    <div>
+                      Họ &amp; Tên :{' '}
+                      <strong className="text-gray-900">{guestName || user?.fullName}</strong>
+                    </div>
+                    {(guestPhone || user?.phone) && (
+                      <div>
+                        Số điện thoại :{' '}
+                        <strong className="text-gray-900">{guestPhone || user?.phone}</strong>
+                      </div>
+                    )}
+                    {guestIdNumber && (
+                      <div>
+                        Số CCCD : <strong className="text-gray-900">{guestIdNumber}</strong>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Lời chào 2 */}
+                <div className="flex items-start gap-2">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-600 text-white text-3xs font-black italic">
+                    vj
+                  </div>
+                  <div className="bg-gray-100 rounded-2xl rounded-tl-sm p-3 text-xs text-gray-800 leading-relaxed shadow-xs max-w-[85%]">
+                    Is there anything else I can help you with?
+                  </div>
+                </div>
+
+                {/* Danh sách câu hỏi gợi ý dạng pills viền đỏ */}
+                <div className="flex flex-col items-end space-y-2 pt-1">
+                  {[
+                    'Online procedure times',
+                    'Online flight procedures',
+                    'How to find the best prices when purchasing Vietjet flights',
+                    'Canceling pre-ordered meals',
+                    'Quy định hành lý',
+                    'Tra cứu vé đã đặt',
+                  ].map((label) => (
                     <button
-                      key={item.label}
+                      key={label}
                       type="button"
-                      onClick={() => handleSend(item.label)}
-                      className="flex w-full items-center gap-2.5 rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-left text-xs font-semibold text-navy transition-colors hover:border-primary hover:bg-red-50 touch-manipulation"
+                      onClick={() => handleSend(label)}
+                      className="rounded-full border border-red-200 bg-white px-3.5 py-1.5 text-2xs font-medium text-red-600 shadow-xs hover:bg-red-50 hover:border-red-300 transition-colors text-right"
                     >
-                      <Icon name={item.icon} size={16} className="text-primary" />
-                      {item.label}
+                      {label}
                     </button>
                   ))}
+                </div>
+
+                {/* Rate the service quality card */}
+                <div className="bg-gray-100/80 rounded-2xl p-3.5 border border-gray-200/60 space-y-1.5 shadow-xs">
+                  <h4 className="font-bold text-xs text-gray-900">Rate the service quality</h4>
+                  <p className="text-2xs text-gray-600 leading-relaxed">
+                    With the desire to provide the best service experience for our customers, please
+                    help Amy by rating the quality of the support service. Your feedback is
+                    extremely valuable to Amy.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => handleSend('Đánh giá dịch vụ 5 sao')}
+                    className="text-2xs font-bold text-red-600 hover:underline pt-1 block"
+                  >
+                    Send feedback to Amy
+                  </button>
                 </div>
               </div>
             ) : (
@@ -604,23 +802,18 @@ export default function UserChat() {
                 return (
                   <div key={msg.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
                     {!isUser && (
-                      <div className="relative w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-2 flex-shrink-0 mt-1">
-                        <Icon name="UserIcon" size={14} className="text-white" />
-                        <span
-                          className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-gray-50 ${
-                            adminOnline ? 'bg-green-400' : 'bg-gray-400'
-                          }`}
-                        />
+                      <div className="relative w-7 h-7 bg-red-600 rounded-full flex items-center justify-center mr-2 flex-shrink-0 mt-1 text-white text-3xs font-black italic">
+                        vj
                       </div>
                     )}
                     <div
-                      className={`max-w-[80%] ${isUser ? 'items-end' : 'items-start'} flex flex-col gap-0.5`}
+                      className={`max-w-[82%] ${isUser ? 'items-end' : 'items-start'} flex flex-col gap-0.5`}
                     >
                       <div
-                        className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed select-text touch-manipulation ${
+                        className={`px-3.5 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed select-text whitespace-pre-wrap touch-manipulation ${
                           isUser
-                            ? 'bg-primary text-white rounded-br-sm'
-                            : 'bg-gray-100 text-navy border border-gray-200 rounded-bl-sm shadow-sm'
+                            ? 'bg-red-600 text-white rounded-br-sm'
+                            : 'bg-gray-100 text-gray-900 border border-gray-200/80 rounded-bl-sm shadow-xs'
                         }`}
                       >
                         {msg.content}
@@ -628,11 +821,11 @@ export default function UserChat() {
                       <div
                         className={`flex items-center gap-1 px-1 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
                       >
-                        <span className="text-xs text-gray-400">{formatTime(msg.created_at)}</span>
+                        <span className="text-3xs text-gray-400">{formatTime(msg.created_at)}</span>
                         {isUser && (
                           <span title={msg.read_at ? 'Đã xem' : 'Đã gửi'}>
                             {msg.read_at ? (
-                              <Icon name="CheckCircleIcon" size={12} className="text-blue-400" />
+                              <Icon name="CheckCircleIcon" size={12} className="text-blue-500" />
                             ) : (
                               <Icon name="CheckIcon" size={12} className="text-gray-400" />
                             )}
@@ -648,10 +841,10 @@ export default function UserChat() {
             {/* Admin typing indicator */}
             {adminTyping && (
               <div className="flex justify-start">
-                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-2 flex-shrink-0 mt-1">
-                  <Icon name="UserIcon" size={14} className="text-white" />
+                <div className="w-7 h-7 bg-red-600 rounded-full flex items-center justify-center mr-2 flex-shrink-0 mt-1 text-white text-3xs font-black italic">
+                  vj
                 </div>
-                <div className="bg-white border border-gray-100 rounded-2xl rounded-bl-sm shadow-sm px-4 py-3 flex items-center gap-1">
+                <div className="bg-gray-100 border border-gray-200 rounded-2xl rounded-bl-sm shadow-xs px-3.5 py-2.5 flex items-center gap-1">
                   <span
                     className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
                     style={{ animationDelay: '0ms' }}
@@ -671,10 +864,17 @@ export default function UserChat() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Composer — signed-in users only; guests get the prompt in the body. */}
-          {!isGuest && (
-            <div className="px-3 py-3 bg-white border-t border-gray-100 flex-shrink-0">
-              <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-200 focus-within:border-primary transition-colors">
+          {/* Composer — khi đã đăng nhập hoặc khách đã bấm Bắt đầu trò chuyện */}
+          {(!isGuest || isGuestChatStarted) && (
+            <div className="relative px-3 pt-2 pb-2 bg-white border-t border-gray-100 flex-shrink-0">
+              <div className="flex items-center gap-2 bg-gray-100 rounded-full px-3 py-1.5 border border-gray-200 focus-within:border-red-400 focus-within:bg-white transition-all shadow-xs">
+                <button
+                  type="button"
+                  className="text-gray-500 hover:text-gray-700 px-1 py-0.5"
+                  title="Menu"
+                >
+                  <span className="text-xs font-bold leading-none select-none">☰</span>
+                </button>
                 <input
                   id="chat-message-input"
                   name="message"
@@ -684,20 +884,34 @@ export default function UserChat() {
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
                   placeholder="Nhập tin nhắn..."
-                  className="flex-1 bg-transparent text-sm text-navy placeholder-gray-400 outline-none min-w-0"
+                  className="flex-1 bg-transparent text-xs text-gray-900 placeholder-gray-400 outline-none min-w-0 py-1"
                   disabled={sending}
                 />
                 <button
+                  type="button"
+                  className="text-gray-400 hover:text-gray-600 p-1"
+                  title="Đính kèm"
+                >
+                  <Icon name="PaperClipIcon" size={16} />
+                </button>
+                <button
                   onClick={() => handleSend()}
                   disabled={!inputText.trim() || sending}
-                  className="w-10 h-10 bg-primary disabled:bg-gray-200 rounded-xl flex items-center justify-center transition-colors hover:bg-red-700 active:bg-red-800 disabled:cursor-not-allowed flex-shrink-0 touch-manipulation"
+                  className="text-red-600 disabled:text-gray-300 p-1 hover:scale-105 transition-transform"
+                  title="Gửi"
                 >
                   {sending ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="w-3.5 h-3.5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
                   ) : (
-                    <Icon name="PaperAirplaneIcon" size={16} className="text-white" />
+                    <Icon name="PaperAirplaneIcon" size={16} className="rotate-45" />
                   )}
                 </button>
+              </div>
+
+              {/* Footer text & Vietjet swoosh */}
+              <div className="mt-1 flex items-center justify-center text-3xs text-gray-400 gap-1 select-none">
+                <span>Phát triển bởi</span>
+                <span className="font-bold text-red-600">VinBigdata</span>
               </div>
             </div>
           )}
