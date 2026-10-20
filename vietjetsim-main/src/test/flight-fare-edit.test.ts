@@ -133,6 +133,37 @@ describe('PATCH /api/quan-tri/chuyen-bay/[id] fare pair', () => {
     expect(res.status).toBe(400);
     expect(body.error).toBe('Validation Error');
   });
+
+  it('updates both flight number and fares in a single request', async () => {
+    const spy = vi.spyOn(db, 'updateFlight').mockResolvedValueOnce({
+      ...FLIGHT,
+      flight_no: 'VJ 202',
+      economy_price: 999000,
+      business_price: 2790000,
+    } as never);
+
+    const res = await patchFlight(
+      patchRequest({
+        flight_no: 'vj  202',
+        economy_price: 999000,
+        business_price: 2790000,
+      }),
+      {
+        params: Promise.resolve({ id: 'flight-1' }),
+      }
+    );
+
+    expect(res.status).toBe(200);
+    expect(spy).toHaveBeenCalledWith(
+      'flight-1',
+      expect.objectContaining({
+        flight_no: 'VJ 202',
+        economy_price: 999000,
+        business_price: 2790000,
+        price: 999000,
+      })
+    );
+  });
 });
 
 /**
