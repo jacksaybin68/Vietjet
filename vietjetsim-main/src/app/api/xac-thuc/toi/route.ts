@@ -18,11 +18,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const cleanFullName = payload.fullName
+      ? payload.fullName.replace(/\s*\(CCCD:.*?\)/gi, '').trim()
+      : payload.fullName;
+
     return NextResponse.json({
       user: {
         id: payload.userId,
         email: payload.email,
-        fullName: payload.fullName,
+        fullName: cleanFullName,
         role: payload.role,
         phone: payload.phone,
       },

@@ -25,11 +25,15 @@ export const SESSION_COOKIE = 'session_id';
 
 /** Response JSON dùng chung cho cả hai đường đăng nhập. */
 export function buildAuthResponse(user: User): NextResponse {
+  const cleanFullName = user.full_name
+    ? user.full_name.replace(/\s*\(CCCD:.*?\)/gi, '').trim()
+    : user.full_name;
+
   return NextResponse.json({
     user: {
       id: user.id,
       email: user.email,
-      fullName: user.full_name,
+      fullName: cleanFullName,
       role: user.role,
       phone: user.phone,
       avatarUrl: user.avatar_url,

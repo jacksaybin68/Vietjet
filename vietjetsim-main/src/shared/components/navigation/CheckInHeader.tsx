@@ -73,7 +73,7 @@ export default function CheckInHeader() {
                 {user ? (
                   <span className="flex items-center gap-1.5 text-white">
                     <HiOutlineUserCircle aria-hidden="true" className="h-4 w-4 text-white" />
-                    <span>{user.fullName || user.email}</span>
+                    <span>{(user.fullName || user.email)?.replace(/\s*\(CCCD:.*?\)/gi, '')}</span>
                   </span>
                 ) : (
                   <>

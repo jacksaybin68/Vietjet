@@ -305,7 +305,9 @@ export default function Header({ variant = 'default' }: { variant?: 'default' | 
                       aria-hidden="true"
                       className={`text-base ${lightChrome ? 'text-white' : 'text-vjred'}`}
                     />
-                    <span className="max-w-[120px] truncate">{user.fullName || user.email}</span>
+                    <span className="max-w-[120px] truncate">
+                      {(user.fullName || user.email)?.replace(/\s*\(CCCD:.*?\)/gi, '')}
+                    </span>
                     <HiOutlineChevronDown className="text-xs text-gray-400" />
                   </button>
 
@@ -313,7 +315,7 @@ export default function Header({ variant = 'default' }: { variant?: 'default' | 
                     <div className="absolute right-0 top-[calc(100%+8px)] w-60 overflow-hidden rounded-xl border border-gray-200 bg-white py-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
                       <div className="border-b border-gray-100 px-4 py-2.5 bg-gray-50/50">
                         <p className="truncate text-xs font-bold text-gray-900">
-                          {user.fullName || user.email}
+                          {(user.fullName || user.email)?.replace(/\s*\(CCCD:.*?\)/gi, '')}
                         </p>
                         <p className="truncate text-xs2 text-gray-500">{user.email}</p>
                       </div>
@@ -701,7 +703,9 @@ export default function Header({ variant = 'default' }: { variant?: 'default' | 
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 rounded-lg bg-gray-50 p-2.5 text-xs font-bold text-gray-800">
                     <HiOutlineUserCircle className="text-lg text-vjred" />
-                    <span className="truncate">{user.fullName || user.email}</span>
+                    <span className="truncate">
+                      {(user.fullName || user.email)?.replace(/\s*\(CCCD:.*?\)/gi, '')}
+                    </span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 pt-1">
                     <Link

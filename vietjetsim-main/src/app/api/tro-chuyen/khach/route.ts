@@ -51,21 +51,23 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const cleanName = fullName.replace(/\s*\(CCCD:.*?\)/gi, '').trim();
+
     if (!userRecord) {
       const passwordHash = await hashPassword(randomUUID());
-      userRecord = await createUser(
-        guestEmail,
-        passwordHash,
-        `${fullName} (CCCD: ${idNumber})`,
-        'user',
-        phone
-      );
+      userRecord = await createUser(guestEmail, passwordHash, cleanName, 'user', phone);
+    } else if (
+      userRecord.full_name &&
+      (userRecord.full_name.includes('(CCCD:') || userRecord.full_name !== cleanName)
+    ) {
+      await sql`UPDATE user_profiles SET full_name = ${cleanName} WHERE id = ${userRecord.id}`;
+      userRecord.full_name = cleanName;
     }
 
     const authUser: User = {
       id: userRecord.id,
       email: userRecord.email,
-      full_name: userRecord.full_name,
+      full_name: cleanName || userRecord.full_name,
       role: 'user',
       phone: userRecord.phone || phone,
       avatar_url: userRecord.avatar_url || undefined,
@@ -79,11 +81,11 @@ export async function POST(request: NextRequest) {
     const conversation = await getOrCreateConversation(
       authUser.id,
       authUser.email,
-      `${fullName} - ${phone} - CCCD: ${idNumber}`
+      `${cleanName} - ${phone} - CCCD: ${idNumber}`
     );
 
     // Gửi tin nhắn mở đầu chứa thông tin khách hàng vào hội thoại
-    const infoContent = `📋 Khách hàng bắt đầu trò chuyện:\n- Họ & Tên : ${fullName}\n- Số điện thoại : ${phone}\n- Số CCCD : ${idNumber}`;
+    const infoContent = `📋 Khách hàng bắt đầu trò chuyện:\n- Họ & Tên : ${cleanName}\n- Số điện thoại : ${phone}\n- Số CCCD : ${idNumber}`;
     await sendChatMessage({
       conversation_id: conversation.id,
       sender_id: authUser.id,
@@ -97,7 +99,7 @@ export async function POST(request: NextRequest) {
         conversationId: conversation.id,
         user: {
           id: authUser.id,
-          fullName,
+          fullName: cleanName,
           phone,
           idNumber,
           email: authUser.email,
