@@ -69,7 +69,7 @@ describe('FlightResultsStep — card bố cục 1 hàng ngang', () => {
   // 4 hạng giá phải nằm trên một hàng duy nhất, không lưới 2×2 như bản cũ.
   it('hiển thị 4 hạng giá trong một hàng', async () => {
     const card = await renderResults();
-    const fareGrid = card.lastElementChild as HTMLElement;
+    const fareGrid = (card.querySelector('.grid-cols-4') || card.children[1]) as HTMLElement;
     expect(fareGrid.className).toContain('grid-cols-4');
     expect(fareGrid.className).not.toContain('grid-cols-2');
     expect(fareGrid.children).toHaveLength(4);

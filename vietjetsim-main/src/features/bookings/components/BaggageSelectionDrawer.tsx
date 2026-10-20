@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Flight } from '@/features/bookings/types/booking-flow';
 import { BAGGAGE_PACKAGES, OVERSIZED_BAGGAGE } from '@/features/bookings/pricing';
 import {
@@ -14,9 +14,18 @@ interface BaggageSelectionDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   flight: Flight;
+  returnFlight?: Flight | null;
   passengerName?: string;
   initialPackageId?: string | null;
-  onConfirmBaggage: (packageId: string | null, baggageFee: number, label: string) => void;
+  initialReturnPackageId?: string | null;
+  onConfirmBaggage: (
+    packageId: string | null,
+    baggageFee: number,
+    label: string,
+    returnPackageId?: string | null,
+    returnLabel?: string,
+    returnFee?: number
+  ) => void;
   isRoundTrip?: boolean;
 }
 
@@ -24,30 +33,72 @@ export default function BaggageSelectionDrawer({
   isOpen,
   onClose,
   flight,
+  returnFlight,
   passengerName = 'LONG CHIN',
   initialPackageId = null,
+  initialReturnPackageId = null,
   onConfirmBaggage,
   isRoundTrip = false,
 }: BaggageSelectionDrawerProps) {
   const [activeLeg, setActiveLeg] = useState<'outbound' | 'inbound'>('outbound');
-  const [selectedPkgId, setSelectedPkgId] = useState<string | null>(initialPackageId);
-  const [priorityHandLuggage, setPriorityHandLuggage] = useState(false);
+  const [outboundPkgId, setOutboundPkgId] = useState<string | null>(initialPackageId);
+  const [returnPkgId, setReturnPkgId] = useState<string | null>(initialReturnPackageId);
+  const [outboundPriority, setOutboundPriority] = useState(false);
+  const [returnPriority, setReturnPriority] = useState(false);
+
+  useEffect(() => {
+    setOutboundPkgId(initialPackageId);
+    setReturnPkgId(initialReturnPackageId);
+  }, [initialPackageId, initialReturnPackageId, isOpen]);
 
   if (!isOpen) return null;
 
-  const allPackages = [...BAGGAGE_PACKAGES, ...OVERSIZED_BAGGAGE];
-  const currentPackage = allPackages.find((p) => p.id === selectedPkgId) ?? null;
+  const currentPkgId = activeLeg === 'outbound' ? outboundPkgId : returnPkgId;
+  const setCurrentPkgId = (pkgId: string | null) => {
+    if (activeLeg === 'outbound') {
+      setOutboundPkgId(pkgId);
+    } else {
+      setReturnPkgId(pkgId);
+    }
+  };
 
-  let totalFee = currentPackage ? currentPackage.price : 0;
-  if (priorityHandLuggage) totalFee += 230000;
+  const currentPriority = activeLeg === 'outbound' ? outboundPriority : returnPriority;
+  const setCurrentPriority = (val: boolean) => {
+    if (activeLeg === 'outbound') {
+      setOutboundPriority(val);
+    } else {
+      setReturnPriority(val);
+    }
+  };
+
+  const allPackages = [...BAGGAGE_PACKAGES, ...OVERSIZED_BAGGAGE];
+  const outboundPackage = allPackages.find((p) => p.id === outboundPkgId) ?? null;
+  const returnPackage = allPackages.find((p) => p.id === returnPkgId) ?? null;
+
+  const outboundFee =
+    (outboundPackage ? outboundPackage.price : 0) + (outboundPriority ? 230000 : 0);
+  const returnFee = isRoundTrip
+    ? (returnPackage ? returnPackage.price : 0) + (returnPriority ? 230000 : 0)
+    : 0;
+  const totalFee = outboundFee + returnFee;
 
   const handleSelectPkg = (pkgId: string) => {
-    setSelectedPkgId((prev) => (prev === pkgId ? null : pkgId));
+    setCurrentPkgId(currentPkgId === pkgId ? null : pkgId);
   };
 
   const handleConfirm = () => {
-    const label = currentPackage ? currentPackage.label : 'Không mua thêm';
-    onConfirmBaggage(selectedPkgId, totalFee, label);
+    const outboundLabel = outboundPackage
+      ? outboundPackage.label
+      : outboundPriority
+        ? 'Xách tay 9kg'
+        : 'Không mua thêm';
+    const returnLabel = returnPackage
+      ? returnPackage.label
+      : returnPriority
+        ? 'Xách tay 9kg'
+        : 'Không mua thêm';
+
+    onConfirmBaggage(outboundPkgId, totalFee, outboundLabel, returnPkgId, returnLabel, returnFee);
     onClose();
   };
 
@@ -86,7 +137,7 @@ export default function BaggageSelectionDrawer({
                 : 'border-transparent text-gray-500 hover:text-gray-800'
             }`}
           >
-            Chuyến đi
+            Chuyến đi {outboundPkgId ? '✓' : ''}
           </button>
           {isRoundTrip && (
             <button
@@ -98,7 +149,7 @@ export default function BaggageSelectionDrawer({
                   : 'border-transparent text-gray-500 hover:text-gray-800'
               }`}
             >
-              Chuyến về
+              Chuyến về {returnPkgId ? '✓' : ''}
             </button>
           )}
         </div>
@@ -110,7 +161,10 @@ export default function BaggageSelectionDrawer({
             <span className="uppercase">{passengerName}</span>
           </div>
           <div className="text-yellow-300 text-xs2">
-            {flight.from} - {flight.to} | Bạn đã có 7kg xách tay
+            {activeLeg === 'outbound'
+              ? `${flight.from} - ${flight.to}`
+              : `${returnFlight?.from || flight.to} - ${returnFlight?.to || flight.from}`}{' '}
+            | Bạn đã có 7kg xách tay
           </div>
         </div>
 
@@ -122,7 +176,9 @@ export default function BaggageSelectionDrawer({
               <RiSuitcaseLine size={28} className="text-yellow-300" />
             </div>
             <div>
-              <h3 className="text-sm font-black">Chọn hành lý trước, ưu đãi giá cước</h3>
+              <h3 className="text-sm font-black">
+                {activeLeg === 'outbound' ? 'Hành lý chuyến đi' : 'Hành lý chuyến về'}
+              </h3>
               <p className="text-xs2 text-red-100">
                 Tiết kiệm đến 40% so với mua trực tiếp tại sân bay
               </p>
@@ -140,11 +196,11 @@ export default function BaggageSelectionDrawer({
           {/* Section: Standard Baggage Packages */}
           <div>
             <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-2.5">
-              Chọn thêm hành lý
+              Chọn thêm hành lý ({activeLeg === 'outbound' ? 'Chiều đi' : 'Chiều về'})
             </h4>
             <div className="grid grid-cols-3 gap-2.5">
               {BAGGAGE_PACKAGES.map((pkg) => {
-                const isSelected = selectedPkgId === pkg.id;
+                const isSelected = currentPkgId === pkg.id;
                 return (
                   <div
                     key={pkg.id}
@@ -182,7 +238,7 @@ export default function BaggageSelectionDrawer({
             </h4>
             <div className="grid grid-cols-2 gap-2.5">
               {OVERSIZED_BAGGAGE.map((pkg) => {
-                const isSelected = selectedPkgId === pkg.id;
+                const isSelected = currentPkgId === pkg.id;
                 return (
                   <div
                     key={pkg.id}
@@ -211,17 +267,17 @@ export default function BaggageSelectionDrawer({
 
           {/* Radio: Không mua thêm */}
           <div
-            onClick={() => setSelectedPkgId(null)}
+            onClick={() => setCurrentPkgId(null)}
             className={`cursor-pointer rounded-xl border p-3 flex items-center gap-2.5 transition-all bg-white ${
-              selectedPkgId === null
+              currentPkgId === null
                 ? 'border-green-500 bg-emerald-50/30 ring-2 ring-emerald-500/20'
                 : 'border-gray-200 hover:border-gray-300'
             }`}
           >
             <input
               type="radio"
-              checked={selectedPkgId === null}
-              onChange={() => setSelectedPkgId(null)}
+              checked={currentPkgId === null}
+              onChange={() => setCurrentPkgId(null)}
               className="text-emerald-600 focus:ring-emerald-500"
             />
             <span className="text-xs font-bold text-gray-800">
@@ -232,7 +288,7 @@ export default function BaggageSelectionDrawer({
           {/* Priority Hand Luggage (+2kg) */}
           <div className="rounded-xl border border-gray-200 bg-white p-3.5 shadow-sm space-y-2">
             <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider">
-              Hành lý xách tay ưu tiên
+              Hành lý xách tay ưu tiên ({activeLeg === 'outbound' ? 'Chiều đi' : 'Chiều về'})
             </h4>
             <p className="text-xs2 text-gray-500">
               Bổ sung 2kg nâng tổng xách tay lên 9kg, kích thước 56x36x23cm
@@ -245,8 +301,8 @@ export default function BaggageSelectionDrawer({
                 <span className="text-xs font-bold text-primary-dark">230.000 VND</span>
                 <input
                   type="checkbox"
-                  checked={priorityHandLuggage}
-                  onChange={(e) => setPriorityHandLuggage(e.target.checked)}
+                  checked={currentPriority}
+                  onChange={(e) => setCurrentPriority(e.target.checked)}
                   className="rounded text-primary-dark focus:ring-primary-dark"
                 />
               </div>
@@ -258,7 +314,16 @@ export default function BaggageSelectionDrawer({
         <div className="bg-primary-dark text-white p-3 flex items-center justify-between shadow-lg">
           <div>
             <span className="text-xs2 text-gray-200 block">
-              {currentPackage ? currentPackage.label : 'Hành lý:'}
+              {isRoundTrip ? (
+                <>
+                  Đi: {outboundPackage ? outboundPackage.label : '7kg'} | Về:{' '}
+                  {returnPackage ? returnPackage.label : '7kg'}
+                </>
+              ) : outboundPackage ? (
+                outboundPackage.label
+              ) : (
+                'Hành lý:'
+              )}
             </span>
             <span className="text-base font-black">
               {totalFee > 0 ? `${totalFee.toLocaleString('vi-VN')} VND` : '0 VND'}

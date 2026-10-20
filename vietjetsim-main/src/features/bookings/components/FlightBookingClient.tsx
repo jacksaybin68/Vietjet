@@ -67,7 +67,8 @@ export interface FlightBookingClientProps {
     fareClass: string,
     fare: number,
     fares?: Partial<Record<string, number>>,
-    flight?: { departTime?: string; arriveTime?: string }
+    flight?: { departTime?: string; arriveTime?: string },
+    leg?: 'outbound' | 'inbound'
   ) => void;
   continueSignal?: number;
   onStepChange?: (step: number) => void;
@@ -92,6 +93,8 @@ function FlightBookingClientInner({
     cheapest: searchParams.get('cheapest') || undefined,
   };
 
+  const isRoundTrip = Boolean(params.return);
+  const [currentLeg, setCurrentLeg] = useState<'outbound' | 'inbound'>('outbound');
   const [step, setStep] = useState(1);
   const paxCounts: Record<PassengerType, number> = {
     adult: params.pax ? parseInt(params.pax, 10) || 1 : 1,
@@ -100,15 +103,19 @@ function FlightBookingClientInner({
   };
   const [booking, setBooking] = useState<BookingState>(() => ({
     selectedFlight: null,
+    returnFlight: null,
     passengers: buildPassengerRoster(paxCounts),
     selectedSeats: [],
+    returnSeats: [],
     ancillaries: [],
     selectedBaggage: null,
+    returnBaggage: null,
     hasInsurance: false,
   }));
   const [selectedSeatPrices, setSelectedSeatPrices] = useState<number[]>([]);
   const [baggageFee, setBaggageFee] = useState<number>(0);
   const [baggageLabel, setBaggageLabel] = useState<string>('');
+  const [returnBaggageLabel, setReturnBaggageLabel] = useState<string>('');
   const [isSeatDrawerOpen, setIsSeatDrawerOpen] = useState(false);
   const [isBaggageDrawerOpen, setIsBaggageDrawerOpen] = useState(false);
   const [isMealDrawerOpen, setIsMealDrawerOpen] = useState(false);
@@ -135,20 +142,52 @@ function FlightBookingClientInner({
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
+  const returnParams: SearchParams = {
+    ...params,
+    from: params.to,
+    to: params.from,
+    depart: params.return,
+    return: undefined,
+  };
+
   // Signal từ nút "Đi tiếp" ở panel bên ngoài → chuyển sang bước 2.
-  const stateRef = useRef({ step, selected: booking.selectedFlight });
-  stateRef.current = { step, selected: booking.selectedFlight };
-  // goStep là hàm tạo mới mỗi render — giữ qua ref để effect không phụ thuộc nó
-  // (thêm vào deps sẽ khiến effect chạy lại mỗi render và tự chuyển bước liên tục).
+  const stateRef = useRef({
+    step,
+    selected: booking.selectedFlight,
+    returnFlight: booking.returnFlight,
+    isRoundTrip,
+    currentLeg,
+  });
+  stateRef.current = {
+    step,
+    selected: booking.selectedFlight,
+    returnFlight: booking.returnFlight,
+    isRoundTrip,
+    currentLeg,
+  };
+
   const goStepRef = useRef(goStep);
   goStepRef.current = goStep;
+
   useEffect(() => {
     if (continueSignal && continueSignal > 0) {
-      if (!stateRef.current.selected) {
-        toast.error('Chưa chọn chuyến bay', 'Vui lòng chọn chuyến bay trước khi bấm Đi tiếp.');
-        return;
-      }
       if (stateRef.current.step === 1) {
+        if (!stateRef.current.selected) {
+          toast.error(
+            'Chưa chọn chuyến bay đi',
+            'Vui lòng chọn chuyến bay đi trước khi bấm Đi tiếp.'
+          );
+          return;
+        }
+        if (stateRef.current.isRoundTrip && !stateRef.current.returnFlight) {
+          if (stateRef.current.currentLeg === 'outbound') {
+            setCurrentLeg('inbound');
+            toast.info('Chọn chuyến bay về', 'Vui lòng chọn chuyến bay cho chiều về.');
+            return;
+          }
+          toast.error('Chưa chọn chuyến bay về', 'Vui lòng chọn chuyến bay cho chiều về.');
+          return;
+        }
         goStepRef.current(2);
       } else if (stateRef.current.step === 2) {
         goStepRef.current(3);
@@ -156,21 +195,58 @@ function FlightBookingClientInner({
     }
   }, [continueSignal, toast]);
 
-  const handleFlightSelect = (flight: Flight) => {
-    setBooking((b) => ({
-      ...b,
-      selectedFlight: flight,
-      selectedSeats: [],
-      ancillaries: [],
-    }));
-    setSelectedSeatPrices([]);
-    if (continueSignal === undefined) {
-      goStep(2);
+  const handleFlightSelect = (flight: Flight, leg: 'outbound' | 'inbound' = currentLeg) => {
+    if (leg === 'outbound') {
+      setBooking((b) => ({
+        ...b,
+        selectedFlight: flight,
+        selectedSeats: [],
+      }));
+      onFlightSelect?.(
+        flight.flightNo,
+        flight.fareClass || 'eco',
+        flight.price,
+        undefined,
+        flight,
+        'outbound'
+      );
+      if (isRoundTrip) {
+        setCurrentLeg('inbound');
+        toast.success(
+          'Đã chọn chuyến bay đi!',
+          `${flight.flightNo}: ${flight.fromCity} → ${flight.toCity}. Tiếp tục chọn chuyến về.`
+        );
+      } else {
+        if (continueSignal === undefined) {
+          goStep(2);
+        }
+        toast.success(
+          'Chuyến bay đã được chọn!',
+          `${flight.flightNo}: ${flight.fromCity} → ${flight.toCity} lúc ${flight.departTime}`
+        );
+      }
+    } else {
+      setBooking((b) => ({
+        ...b,
+        returnFlight: flight,
+        returnSeats: [],
+      }));
+      onFlightSelect?.(
+        flight.flightNo,
+        flight.fareClass || 'eco',
+        flight.price,
+        undefined,
+        flight,
+        'inbound'
+      );
+      toast.success(
+        'Đã chọn chuyến bay về!',
+        `${flight.flightNo}: ${flight.fromCity} → ${flight.toCity} lúc ${flight.departTime}`
+      );
+      if (continueSignal === undefined) {
+        goStep(2);
+      }
     }
-    toast.success(
-      'Chuyến bay đã được chọn!',
-      `${flight.flightNo}: ${flight.fromCity} → ${flight.toCity} lúc ${flight.departTime}`
-    );
   };
 
   const handlePassengersChange = (newPassengers: Passenger[]) => {
@@ -189,20 +265,42 @@ function FlightBookingClientInner({
     );
   };
 
-  const handleConfirmSeats = (seats: string[], seatFee: number) => {
-    setBooking((b) => ({ ...b, selectedSeats: seats }));
-    setSelectedSeatPrices(seats.length > 0 ? [seatFee] : []);
-    if (seats.length > 0) {
-      toast.success('Đã chọn chỗ ngồi!', `Ghế: ${seats.join(', ')}`);
+  const handleConfirmSeats = (seats: string[], seatFee: number, returnSeats?: string[]) => {
+    setBooking((b) => ({
+      ...b,
+      selectedSeats: seats,
+      returnSeats: returnSeats || [],
+    }));
+    setSelectedSeatPrices(seatFee > 0 ? [seatFee] : []);
+    const labels = [
+      seats.length > 0 ? `Đi: ${seats.join(', ')}` : null,
+      returnSeats && returnSeats.length > 0 ? `Về: ${returnSeats.join(', ')}` : null,
+    ].filter(Boolean);
+    if (labels.length > 0) {
+      toast.success('Đã chọn chỗ ngồi!', labels.join(' | '));
     }
   };
 
-  const handleConfirmBaggage = (packageId: string | null, fee: number, label: string) => {
-    setBooking((b) => ({ ...b, selectedBaggage: packageId }));
+  const handleConfirmBaggage = (
+    packageId: string | null,
+    fee: number,
+    label: string,
+    returnPackageId?: string | null,
+    retLabel?: string
+  ) => {
+    setBooking((b) => ({
+      ...b,
+      selectedBaggage: packageId,
+      returnBaggage: returnPackageId ?? null,
+    }));
     setBaggageFee(fee);
     setBaggageLabel(label);
+    if (retLabel) setReturnBaggageLabel(retLabel);
     if (fee > 0) {
-      toast.success('Đã chọn gói hành lý!', label);
+      toast.success(
+        'Đã chọn gói hành lý!',
+        isRoundTrip ? `Đi: ${label} | Về: ${retLabel || 'Không'}` : label
+      );
     }
   };
 
@@ -227,19 +325,35 @@ function FlightBookingClientInner({
 
   const seatFeeTotal = selectedSeatPrices.reduce((sum, price) => sum + price, 0);
   const insuranceFeeTotal = booking.hasInsurance ? TRAVEL_SAFE_INSURANCE_PRICE : 0;
-  const currentFlight = booking.selectedFlight;
+  const outboundFlight = booking.selectedFlight;
+  const returnFlight = booking.returnFlight;
 
-  const baseTotals = currentFlight
+  const outboundTotals = outboundFlight
     ? getBookingTotals({
-        farePerPassenger: currentFlight.price,
+        farePerPassenger: outboundFlight.price,
         passengerCount: booking.passengers.length,
         paxCounts: countByType(booking.passengers),
-        seatFee: seatFeeTotal,
+        seatFee: 0,
         ancillaries: booking.ancillaries,
       })
     : null;
 
-  const finalTotal = (baseTotals?.total ?? 0) + baggageFee + insuranceFeeTotal + mealFee;
+  const returnTotals =
+    isRoundTrip && returnFlight
+      ? getBookingTotals({
+          farePerPassenger: returnFlight.price,
+          passengerCount: booking.passengers.length,
+          paxCounts: countByType(booking.passengers),
+          seatFee: 0,
+          ancillaries: booking.ancillaries,
+        })
+      : null;
+
+  const fareSubtotal = (outboundTotals?.fareSubtotal ?? 0) + (returnTotals?.fareSubtotal ?? 0);
+  const taxAndFee = (outboundTotals?.taxAndFee ?? 0) + (returnTotals?.taxAndFee ?? 0);
+  const flightBaseTotal = fareSubtotal + taxAndFee;
+
+  const finalTotal = flightBaseTotal + seatFeeTotal + baggageFee + insuranceFeeTotal + mealFee;
 
   const handleFinalBookingSubmit = async () => {
     try {
@@ -272,19 +386,24 @@ function FlightBookingClientInner({
         JSON.stringify({
           bookingId,
           flightNo: selectedFlight.flightNo,
+          returnFlightNo: returnFlight?.flightNo,
           from: selectedFlight.from,
           to: selectedFlight.to,
           fromCity: selectedFlight.fromCity,
           toCity: selectedFlight.toCity,
           departTime: selectedFlight.departTime,
           arriveTime: selectedFlight.arriveTime,
+          returnDepartTime: returnFlight?.departTime,
+          returnArriveTime: returnFlight?.arriveTime,
           date: selectedFlight.departDate,
+          returnDate: returnFlight?.departDate,
           passengers: booking.passengers.map((passenger, index) => ({
             name: passenger.name,
             seat: seats[index],
+            returnSeat: booking.returnSeats?.[index],
           })),
-          fareSubtotal: baseTotals?.fareSubtotal ?? 0,
-          tax: baseTotals?.taxAndFee ?? 0,
+          fareSubtotal,
+          tax: taxAndFee,
           seatFee: seatFeeTotal,
           baggageFee,
           insuranceFee: insuranceFeeTotal,
@@ -311,10 +430,17 @@ function FlightBookingClientInner({
     }
   };
 
-  const handleDateChange = (isoDate: string) => {
+  const handleDepartDateChange = (isoDate: string) => {
     if (!isoDate || isoDate === params.depart) return;
     const next = new URLSearchParams(searchParams.toString());
     next.set('depart', isoDate);
+    router.replace(`/tim-ve?${next.toString()}`, { scroll: false });
+  };
+
+  const handleReturnDateChange = (isoDate: string) => {
+    if (!isoDate || isoDate === params.return) return;
+    const next = new URLSearchParams(searchParams.toString());
+    next.set('return', isoDate);
     router.replace(`/tim-ve?${next.toString()}`, { scroll: false });
   };
 
@@ -322,7 +448,7 @@ function FlightBookingClientInner({
 
   return (
     <div className="font-body">
-      {/* Booking progress steps (visually hidden, 4 circular steps are in top strip) */}
+      {/* Booking progress steps */}
       <div className="sr-only">
         <div className="mx-auto max-w-5xl px-3 py-3 sm:px-4 md:px-6">
           <nav
@@ -398,15 +524,82 @@ function FlightBookingClientInner({
       <div className="mx-auto max-w-5xl">
         {step === 1 && (
           <ErrorBoundary inline variant="api" retryLabel="Tìm lại chuyến bay">
-            <FlightResultsStep
-              onSelect={handleFlightSelect}
-              onFlightSelect={onFlightSelect}
-              search={params}
-              onDateChange={handleDateChange}
-              pax={params.pax}
-              child={params.child}
-              infant={params.infant}
-            />
+            {isRoundTrip && (
+              <div className="mb-4 flex items-center justify-center gap-2 sm:gap-3 bg-white p-2 rounded-xl border border-gray-200 shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => setCurrentLeg('outbound')}
+                  className={`flex-1 flex flex-col items-center py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    currentLeg === 'outbound'
+                      ? 'bg-primary-dark text-white shadow'
+                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <span className="uppercase text-3xs tracking-wider opacity-80">Chuyến đi</span>
+                  <span className="font-extrabold text-xs sm:text-sm2">
+                    {params.from} ➔ {params.to}
+                  </span>
+                  <span className="text-3xs font-medium opacity-90">
+                    {params.depart || 'Ngày đi'}{' '}
+                    {booking.selectedFlight ? `(${booking.selectedFlight.flightNo})` : ''}
+                  </span>
+                </button>
+
+                <div className="text-gray-400 font-black">⇄</div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!booking.selectedFlight) {
+                      toast.info('Vui lòng chọn chuyến bay đi trước');
+                    }
+                    setCurrentLeg('inbound');
+                  }}
+                  className={`flex-1 flex flex-col items-center py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    currentLeg === 'inbound'
+                      ? 'bg-primary-dark text-white shadow'
+                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <span className="uppercase text-3xs tracking-wider opacity-80">Chuyến về</span>
+                  <span className="font-extrabold text-xs sm:text-sm2">
+                    {params.to} ➔ {params.from}
+                  </span>
+                  <span className="text-3xs font-medium opacity-90">
+                    {params.return || 'Ngày về'}{' '}
+                    {booking.returnFlight ? `(${booking.returnFlight.flightNo})` : ''}
+                  </span>
+                </button>
+              </div>
+            )}
+
+            {currentLeg === 'outbound' ? (
+              <FlightResultsStep
+                key="outbound-step"
+                onSelect={(flight) => handleFlightSelect(flight, 'outbound')}
+                onFlightSelect={(fNo, fClass, fare, fares, fl) =>
+                  onFlightSelect?.(fNo, fClass, fare, fares, fl, 'outbound')
+                }
+                search={params}
+                onDateChange={handleDepartDateChange}
+                pax={params.pax}
+                child={params.child}
+                infant={params.infant}
+              />
+            ) : (
+              <FlightResultsStep
+                key="inbound-step"
+                onSelect={(flight) => handleFlightSelect(flight, 'inbound')}
+                onFlightSelect={(fNo, fClass, fare, fares, fl) =>
+                  onFlightSelect?.(fNo, fClass, fare, fares, fl, 'inbound')
+                }
+                search={returnParams}
+                onDateChange={handleReturnDateChange}
+                pax={params.pax}
+                child={params.child}
+                infant={params.infant}
+              />
+            )}
           </ErrorBoundary>
         )}
 
@@ -429,10 +622,14 @@ function FlightBookingClientInner({
           <ErrorBoundary inline variant="booking" retryLabel="Thử lại dịch vụ bổ sung">
             <AncillaryServicesStep
               flight={booking.selectedFlight}
+              returnFlight={booking.returnFlight}
+              isRoundTrip={isRoundTrip}
               passengerName={leadPassengerName}
               selectedSeats={booking.selectedSeats}
+              returnSeats={booking.returnSeats}
               seatFee={seatFeeTotal}
               baggageLabel={baggageLabel}
+              returnBaggageLabel={returnBaggageLabel}
               baggageFee={baggageFee}
               hasInsurance={booking.hasInsurance}
               insuranceFee={TRAVEL_SAFE_INSURANCE_PRICE}
@@ -460,10 +657,12 @@ function FlightBookingClientInner({
           isOpen={isSeatDrawerOpen}
           onClose={() => setIsSeatDrawerOpen(false)}
           flight={booking.selectedFlight}
+          returnFlight={booking.returnFlight}
           passengerName={leadPassengerName}
           initialSeats={booking.selectedSeats}
+          initialReturnSeats={booking.returnSeats}
           onConfirmSeats={handleConfirmSeats}
-          isRoundTrip={Boolean(params.return)}
+          isRoundTrip={isRoundTrip}
         />
       )}
 
@@ -473,10 +672,12 @@ function FlightBookingClientInner({
           isOpen={isBaggageDrawerOpen}
           onClose={() => setIsBaggageDrawerOpen(false)}
           flight={booking.selectedFlight}
+          returnFlight={booking.returnFlight}
           passengerName={leadPassengerName}
           initialPackageId={booking.selectedBaggage}
+          initialReturnPackageId={booking.returnBaggage}
           onConfirmBaggage={handleConfirmBaggage}
-          isRoundTrip={Boolean(params.return)}
+          isRoundTrip={isRoundTrip}
         />
       )}
 
@@ -489,7 +690,7 @@ function FlightBookingClientInner({
           passengerName={leadPassengerName}
           initialMeals={selectedMeals}
           onConfirmMeals={handleConfirmMeals}
-          isRoundTrip={Boolean(params.return)}
+          isRoundTrip={isRoundTrip}
         />
       )}
 
@@ -511,7 +712,7 @@ function FlightBookingClientInner({
           onClose={() => setIsPassengerServicesDrawerOpen(false)}
           flight={booking.selectedFlight}
           passengerName={leadPassengerName}
-          isRoundTrip={Boolean(params.return)}
+          isRoundTrip={isRoundTrip}
         />
       )}
 
@@ -522,7 +723,7 @@ function FlightBookingClientInner({
           onClose={() => setIsPetDrawerOpen(false)}
           flight={booking.selectedFlight}
           passengerName={leadPassengerName}
-          isRoundTrip={Boolean(params.return)}
+          isRoundTrip={isRoundTrip}
         />
       )}
 
@@ -544,6 +745,7 @@ export default function FlightBookingClient({
   onFlightSelect,
   continueSignal,
   onStepChange,
+  onPaxCountsChange,
 }: FlightBookingClientProps) {
   return (
     <Suspense fallback={<FlightSearchSkeleton />}>
@@ -551,6 +753,7 @@ export default function FlightBookingClient({
         onFlightSelect={onFlightSelect}
         continueSignal={continueSignal}
         onStepChange={onStepChange}
+        onPaxCountsChange={onPaxCountsChange}
       />
     </Suspense>
   );

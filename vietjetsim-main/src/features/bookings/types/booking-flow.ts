@@ -65,10 +65,13 @@ import type { AncillaryId } from '../pricing';
 
 export type BookingState = {
   selectedFlight: Flight | null;
+  returnFlight?: Flight | null;
   passengers: Passenger[];
   selectedSeats: string[];
+  returnSeats?: string[];
   ancillaries: AncillaryId[];
   selectedBaggage?: string | null;
+  returnBaggage?: string | null;
   hasInsurance?: boolean;
 };
 
