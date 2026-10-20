@@ -23,7 +23,7 @@ const TRIP_TYPES = [
 ] as const;
 
 const fieldGroupClass =
-  'grid grid-cols-[1.6fr_1.4fr] divide-x divide-[var(--border)] rounded-xl border border-[var(--border)] bg-white shadow-xs transition-all focus-within:border-[var(--accent)] min-h-[48px]';
+  'grid grid-cols-[1.6fr_1.4fr] divide-x divide-[var(--border)] rounded-xl border border-[var(--border)] bg-white shadow-xs transition-all focus-within:border-[var(--accent)] min-h-[48px] sm:grid-cols-[2fr_1fr] sm:divide-x';
 
 export default function HeroBookingWidget() {
   const router = useRouter();
@@ -143,9 +143,9 @@ export default function HeroBookingWidget() {
                     : active
                       ? 'bg-vj-tab-active text-white'
                       : 'bg-vj-tab-idle text-white/90 hover:bg-vj-tab-idle-hover hover:text-white'
-                } ${narrow ? 'w-[68px] sm:w-[72px] shrink-0' : 'flex-1'}`}
+                } ${narrow ? 'w-[72px] shrink-0' : 'flex-1'}`}
               >
-                <span className="line-clamp-2">{tab.label}</span>
+                {tab.label}
               </button>
             );
           })}
@@ -269,7 +269,7 @@ export default function HeroBookingWidget() {
                 airports={airports}
                 onChange={handleToChange}
                 variant="flush"
-                className={roundTrip ? '' : 'col-span-2'}
+                className={roundTrip ? '' : 'col-span-2 sm:col-span-2'}
               />
               {roundTrip && (
                 <label
