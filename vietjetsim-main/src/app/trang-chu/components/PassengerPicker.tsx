@@ -141,7 +141,7 @@ export default function PassengerPicker({
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-label="Số hành khách"
-        className="w-full flex items-center gap-2.5 bg-white px-3 py-2 text-left transition-colors cursor-pointer hover:bg-amber-50 rounded-[6px]"
+        className="w-full h-full min-h-[48px] flex items-center gap-2.5 bg-white px-3 py-1.5 text-left transition-colors cursor-pointer hover:bg-amber-50 rounded-xl"
       >
         <MdOutlinePerson className="shrink-0 text-xl text-gray-700" />
         <span className="min-w-0 flex-1">

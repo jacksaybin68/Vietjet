@@ -620,17 +620,6 @@ export default function UserChat() {
               </div>
             ) : isGuest && !isGuestChatStarted ? (
               <div className="space-y-3 pt-1">
-                {/* Lời chào của Amy */}
-                <div className="flex items-start gap-2">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-600 text-white text-3xs font-black italic">
-                    vj
-                  </div>
-                  <div className="bg-gray-100 rounded-2xl rounded-tl-sm p-3 text-xs text-gray-800 leading-relaxed shadow-xs max-w-[85%]">
-                    Mình là trợ lý ảo Amy, rất vui được trò chuyện với bạn 💖. Amy có thể hỗ trợ gì
-                    cho bạn hôm nay ạ?
-                  </div>
-                </div>
-
                 {/* Form thông tin khách hàng không cần đăng nhập */}
                 <form
                   onSubmit={handleStartGuestChat}
@@ -712,17 +701,6 @@ export default function UserChat() {
               </div>
             ) : messages.length === 0 ? (
               <div className="space-y-3 pt-1">
-                {/* Lời chào 1 */}
-                <div className="flex items-start gap-2">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-600 text-white text-3xs font-black italic">
-                    vj
-                  </div>
-                  <div className="bg-gray-100 rounded-2xl rounded-tl-sm p-3 text-xs text-gray-800 leading-relaxed shadow-xs max-w-[85%]">
-                    Mình là trợ lý ảo Amy, rất vui được trò chuyện với bạn 💖. Amy có thể hỗ trợ gì
-                    cho bạn hôm nay ạ?
-                  </div>
-                </div>
-
                 {/* Thẻ thông tin khách hàng nếu có */}
                 {(guestName || user) && (
                   <div className="bg-white rounded-xl border border-red-100 p-3 shadow-xs space-y-1 text-2xs text-gray-700">
@@ -748,10 +726,7 @@ export default function UserChat() {
                 )}
 
                 {/* Lời chào 2 */}
-                <div className="flex items-start gap-2">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-600 text-white text-3xs font-black italic">
-                    vj
-                  </div>
+                <div className="flex items-start">
                   <div className="bg-gray-100 rounded-2xl rounded-tl-sm p-3 text-xs text-gray-800 leading-relaxed shadow-xs max-w-[85%]">
                     Is there anything else I can help you with?
                   </div>
