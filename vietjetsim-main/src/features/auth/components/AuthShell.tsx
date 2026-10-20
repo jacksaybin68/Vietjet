@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { Header } from '@/shared/components/navigation';
 
 interface AuthShellProps {
@@ -20,7 +19,7 @@ export default function AuthShell({
   children,
 }: AuthShellProps) {
   return (
-    <div className="min-h-screen bg-[#edf2fb] bg-[url('/images/hero/hero-window-clouds.jpg')] bg-cover bg-center bg-fixed font-body text-[var(--foreground)] relative flex flex-col justify-between overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 bg-[url('/images/hero/hero-window-clouds.jpg')] bg-cover bg-center bg-fixed font-body text-[var(--foreground)] relative flex flex-col justify-between overflow-x-hidden">
       <Header variant="compact" />
       <main
         id="main-content"
@@ -51,7 +50,7 @@ export default function AuthShell({
           {/* Cột phải: Banner tương ứng theo Mode */}
           {mode === 'login' ? (
             /* Banner 1: Poster Ngoại tệ sẵn sàng - Hành trình an tâm khớp 100% Ảnh gốc từ CMS Vietjet */
-            <div className="relative hidden lg:flex items-center justify-center p-3 sm:p-4 bg-gradient-to-b from-[#e0f2fe]/40 via-[#f0f9ff]/30 to-[#fff1f2]/40 border-l border-gray-100 overflow-hidden">
+            <div className="relative hidden lg:flex items-center justify-center p-3 sm:p-4 bg-gradient-to-b from-sky-100/40 via-sky-50/30 to-rose-50/40 border-l border-gray-100 overflow-hidden">
               <a
                 href="https://vikkibank.vn/mua-ngoai-te-tren-app-vikki/?utm_source=vietjet&utm_medium=referral&utm_campaign=always_on"
                 target="_blank"
@@ -68,19 +67,19 @@ export default function AuthShell({
             </div>
           ) : (
             /* Banner 2: Đăng Ký Hội Viên VIETJET SkyJoy (3 Bước) khớp Ảnh chuẩn */
-            <div className="relative hidden lg:flex flex-col justify-between bg-gradient-to-b from-[#fffbeb] via-[#fef3c7]/30 to-[#fff7ed] p-6 sm:p-8 border-l border-amber-100 overflow-hidden">
+            <div className="relative hidden lg:flex flex-col justify-between bg-gradient-to-b from-amber-50 via-amber-100/30 to-orange-50 p-6 sm:p-8 border-l border-amber-100 overflow-hidden">
               <div>
                 <div className="text-center pt-1">
-                  <h3 className="text-xl sm:text-2xl font-bold text-[#5a4538] tracking-tight">
+                  <h3 className="text-xl sm:text-2xl font-bold text-amber-950 tracking-tight">
                     Đăng Ký Hội Viên
                   </h3>
                   <div className="text-2xl sm:text-3xl font-black mt-0.5 flex items-center justify-center gap-1.5">
-                    <span className="text-[#D71920]">VIETJET</span>
-                    <span className="text-[#D71920]">Sky</span>
-                    <span className="relative inline-block text-[#D71920]">
+                    <span className="text-primary">VIETJET</span>
+                    <span className="text-primary">Sky</span>
+                    <span className="relative inline-block text-primary">
                       Joy
                       <svg
-                        className="absolute -bottom-1 left-0 w-full h-2 text-[#FBB612]"
+                        className="absolute -bottom-1 left-0 w-full h-2 text-vjamber"
                         viewBox="0 0 40 8"
                         fill="none"
                         stroke="currentColor"
@@ -94,20 +93,16 @@ export default function AuthShell({
                 </div>
 
                 {/* Khung viền vàng 3 bước */}
-                <div className="mt-5 rounded-3xl border-2 border-[#FFC709] bg-white p-5 sm:p-6 shadow-sm space-y-4">
+                <div className="mt-5 rounded-3xl border-2 border-vjyellow bg-white p-5 sm:p-6 shadow-sm space-y-4">
                   {/* BƯỚC 1 */}
                   <div className="flex items-center gap-4">
-                    <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full border-2 border-[#FBB612] bg-white text-[#FBB612] flex items-center justify-center shrink-0 shadow-sm">
-                      <svg
-                        className="w-7 h-7 text-[#FBB612]"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                      >
+                    <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full border-2 border-vjamber bg-white text-vjamber flex items-center justify-center shrink-0 shadow-sm">
+                      <svg className="w-7 h-7 text-vjamber" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
                       </svg>
                     </div>
                     <div>
-                      <div className="text-sm font-black text-[#D71920] uppercase tracking-wide">
+                      <div className="text-sm font-black text-primary uppercase tracking-wide">
                         BƯỚC 1:
                       </div>
                       <div className="text-base font-bold text-gray-800">Đăng ký tại đây</div>
@@ -118,17 +113,17 @@ export default function AuthShell({
 
                   {/* BƯỚC 2 */}
                   <div className="flex items-center gap-4">
-                    <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full border-2 border-[#FBB612] bg-white flex flex-col items-center justify-center shrink-0 shadow-sm p-1">
-                      <div className="bg-[#D71920] text-white rounded px-1.5 py-0.5 text-center leading-none shadow-xs">
-                        <span className="text-[8px] font-black block">Sky</span>
-                        <span className="text-[8px] font-black block">Joy</span>
+                    <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full border-2 border-vjamber bg-white flex flex-col items-center justify-center shrink-0 shadow-sm p-1">
+                      <div className="bg-primary text-white rounded px-1.5 py-0.5 text-center leading-none shadow-xs">
+                        <span className="text-4xs font-black block">Sky</span>
+                        <span className="text-4xs font-black block">Joy</span>
                       </div>
-                      <span className="text-[10px] font-black text-[#FBB612] leading-none mt-0.5">
+                      <span className="text-2xs font-black text-vjamber leading-none mt-0.5">
                         ▼
                       </span>
                     </div>
                     <div>
-                      <div className="text-sm font-black text-[#D71920] uppercase tracking-wide">
+                      <div className="text-sm font-black text-primary uppercase tracking-wide">
                         BƯỚC 2:
                       </div>
                       <div className="text-base font-bold text-gray-800 leading-snug">
@@ -144,9 +139,9 @@ export default function AuthShell({
 
                   {/* BƯỚC 3 */}
                   <div className="flex items-start gap-4">
-                    <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full border-2 border-[#FBB612] bg-white text-[#FBB612] flex items-center justify-center shrink-0 shadow-sm">
+                    <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full border-2 border-vjamber bg-white text-vjamber flex items-center justify-center shrink-0 shadow-sm">
                       <svg
-                        className="w-8 h-8 text-[#FBB612]"
+                        className="w-8 h-8 text-vjamber"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -160,13 +155,13 @@ export default function AuthShell({
                       </svg>
                     </div>
                     <div>
-                      <div className="text-sm font-black text-[#D71920] uppercase tracking-wide">
+                      <div className="text-sm font-black text-primary uppercase tracking-wide">
                         BƯỚC 3:
                       </div>
                       <div className="text-base font-bold text-gray-800">Hưởng Ưu đãi</div>
                       <ul className="mt-1 space-y-0.5 text-xs sm:text-sm text-gray-700 italic">
                         <li className="flex items-start gap-1.5">
-                          <span className="text-[#D71920] font-black not-italic text-sm">•</span>
+                          <span className="text-primary font-black not-italic text-sm">•</span>
                           <span>
                             Tặng ngay{' '}
                             <strong className="not-italic font-black text-gray-900">
@@ -175,7 +170,7 @@ export default function AuthShell({
                           </span>
                         </li>
                         <li className="flex items-start gap-1.5">
-                          <span className="text-[#D71920] font-black not-italic text-sm">•</span>
+                          <span className="text-primary font-black not-italic text-sm">•</span>
                           <span>Tích SkyPoint cho các chuyến đã bay (*)</span>
                         </li>
                       </ul>

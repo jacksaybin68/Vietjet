@@ -96,23 +96,23 @@ export default function BookingSummaryPanel({
       {/* Desktop Panel */}
       <aside className="hidden lg:flex lg:w-[340px] flex-col rounded-t-lg overflow-hidden shadow-sm border border-gray-200 bg-white h-fit sticky top-16">
         {/* Panel header — solid brand red */}
-        <div className="bg-[#D71920] px-4 py-3 text-white text-center shadow-sm">
+        <div className="bg-primary px-4 py-3 text-white text-center shadow-sm">
           <h2 className="text-sm font-black uppercase tracking-wider font-koho">
             THÔNG TIN ĐẶT CHỖ
           </h2>
         </div>
 
         {/* Bar: Thông tin hành khách */}
-        <div className="bg-[#F0F2F5] px-4 py-2.5 border-b border-gray-200/80 flex items-center justify-between text-xs font-bold text-gray-800">
+        <div className="bg-gray-100 px-4 py-2.5 border-b border-gray-200/80 flex items-center justify-between text-xs font-bold text-gray-800">
           <span>Thông tin hành khách</span>
         </div>
 
         {/* Section: Chuyến đi */}
         <div className="border-b border-gray-200/80">
-          <div className="bg-[#CDE8F6] px-4 py-2 flex items-center justify-between text-xs font-bold text-[#006699] uppercase">
+          <div className="bg-sky-100 px-4 py-2 flex items-center justify-between text-xs font-bold text-sky-700 uppercase">
             <span>Chuyến đi</span>
             {data.flightNo && (
-              <div className="flex items-center gap-1 text-[#D71920] font-black font-koho text-sm tracking-tight normal-case">
+              <div className="flex items-center gap-1 text-primary font-black font-koho text-sm tracking-tight normal-case">
                 <span>{outboundTotal.toLocaleString('vi-VN')} VND</span>
                 <RiEditLine size={14} className="stroke-[1]" />
               </div>
@@ -121,7 +121,7 @@ export default function BookingSummaryPanel({
 
           <div className="p-3 space-y-1 bg-white">
             <div className="text-xs font-black text-gray-900 leading-tight">
-              {origin} <span className="text-[#D71920]">✈</span> {destination}
+              {origin} <span className="text-primary">✈</span> {destination}
             </div>
             <div className="text-2xs text-gray-500 font-semibold">
               {data.flightNo
@@ -133,7 +133,7 @@ export default function BookingSummaryPanel({
 
         {/* Bar: Giá vé */}
         <div
-          className="bg-[#F0F2F5] px-4 py-2.5 border-b border-gray-200/80 flex items-center justify-between text-xs font-bold text-gray-800 cursor-pointer"
+          className="bg-gray-100 px-4 py-2.5 border-b border-gray-200/80 flex items-center justify-between text-xs font-bold text-gray-800 cursor-pointer"
           onClick={() => setShowFareDetail(!showFareDetail)}
         >
           <span>Giá vé</span>
@@ -148,7 +148,7 @@ export default function BookingSummaryPanel({
         {/* Bar: Thuế, phí */}
         <div className="border-b border-gray-200/80">
           <div
-            className="bg-[#F0F2F5] px-4 py-2.5 flex items-center justify-between text-xs font-bold text-gray-800 cursor-pointer"
+            className="bg-gray-100 px-4 py-2.5 flex items-center justify-between text-xs font-bold text-gray-800 cursor-pointer"
             onClick={() => setShowTaxDetail(!showTaxDetail)}
           >
             <span>Thuế, phí</span>
@@ -190,7 +190,7 @@ export default function BookingSummaryPanel({
 
         {/* Bar: Dịch vụ */}
         <div
-          className="bg-[#F0F2F5] px-4 py-2.5 border-b border-gray-200/80 flex items-center justify-between text-xs font-bold text-gray-800 cursor-pointer"
+          className="bg-gray-100 px-4 py-2.5 border-b border-gray-200/80 flex items-center justify-between text-xs font-bold text-gray-800 cursor-pointer"
           onClick={() => setShowServiceDetail(!showServiceDetail)}
         >
           <span>Dịch vụ</span>
@@ -203,10 +203,10 @@ export default function BookingSummaryPanel({
         {/* Section: Chuyến về (always present for roundtrip matching screenshot) */}
         {(data.isRoundTrip || data.returnLeg !== undefined) && (
           <div className="border-b border-gray-200/80">
-            <div className="bg-[#CDE8F6] px-4 py-2 flex items-center justify-between text-xs font-bold text-[#006699] uppercase">
+            <div className="bg-sky-100 px-4 py-2 flex items-center justify-between text-xs font-bold text-sky-700 uppercase">
               <span>Chuyến về</span>
               {data.returnLeg?.flightNo && (
-                <div className="flex items-center gap-1 text-[#D71920] font-black font-koho text-sm tracking-tight normal-case">
+                <div className="flex items-center gap-1 text-primary font-black font-koho text-sm tracking-tight normal-case">
                   <span>
                     {(
                       data.returnLeg.total ?? (data.returnLeg.fare ?? 0) + (data.returnLeg.tax ?? 0)
@@ -219,7 +219,7 @@ export default function BookingSummaryPanel({
             </div>
             <div className="p-3 space-y-1 bg-white text-xs">
               <div className="text-xs font-black text-gray-900 leading-tight">
-                {destination} <span className="text-[#D71920]">✈</span> {origin}
+                {destination} <span className="text-primary">✈</span> {origin}
               </div>
               <div className="text-2xs text-gray-500 font-semibold">
                 {data.returnLeg?.flightNo
@@ -229,7 +229,7 @@ export default function BookingSummaryPanel({
             </div>
 
             {/* Bar: Giá vé (Chuyến về) */}
-            <div className="bg-[#F0F2F5] px-4 py-2.5 border-b border-gray-200/80 flex items-center justify-between text-xs font-bold text-gray-800">
+            <div className="bg-gray-100 px-4 py-2.5 border-b border-gray-200/80 flex items-center justify-between text-xs font-bold text-gray-800">
               <span>Giá vé</span>
               {data.returnLeg?.fare && data.returnLeg.fare > 0 ? (
                 <div className="flex items-center gap-1 font-bold text-gray-950 font-koho text-xs sm:text-sm">
@@ -240,7 +240,7 @@ export default function BookingSummaryPanel({
             </div>
 
             {/* Bar: Thuế, phí (Chuyến về) */}
-            <div className="bg-[#F0F2F5] px-4 py-2.5 flex items-center justify-between text-xs font-bold text-gray-800">
+            <div className="bg-gray-100 px-4 py-2.5 flex items-center justify-between text-xs font-bold text-gray-800">
               <span>Thuế, phí</span>
               {data.returnLeg?.tax && data.returnLeg.tax > 0 ? (
                 <div className="flex items-center gap-1 font-bold text-gray-950 font-koho text-xs sm:text-sm">
@@ -285,7 +285,7 @@ export default function BookingSummaryPanel({
         )}
 
         {/* Solid Red Total Bar at bottom of sidebar matching screenshot */}
-        <div className="bg-[#D71920] px-4 py-2.5 flex items-center justify-between text-white mt-auto">
+        <div className="bg-primary px-4 py-2.5 flex items-center justify-between text-white mt-auto">
           <span className="text-xs font-bold uppercase tracking-wider font-koho">Tổng tiền</span>
           <span className="text-base font-black font-koho">
             {(

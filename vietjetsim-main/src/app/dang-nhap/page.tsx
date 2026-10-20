@@ -16,7 +16,7 @@ const PROMO_BANNER = '/images/hero/banner-chuyenbay-ngoai-te.jpg';
 const PROMO_LINK =
   'https://vikkibank.vn/mua-ngoai-te-tren-app-vikki/?utm_source=vietjet&utm_medium=referral&utm_campaign=always_on';
 
-export default function LoginPage() {
+function LoginPageInner() {
   const [activeKey, setActiveKey] = React.useState<'register' | 'login'>('login');
   const [phone, setPhone] = React.useState('');
   const [loading, setLoading] = React.useState(false);
@@ -46,7 +46,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-[#fdeff5] bg-[url('/sky-clouds.svg')] bg-cover bg-top bg-no-repeat font-body text-[#222222]">
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-rose-50 bg-[url('/sky-clouds.svg')] bg-cover bg-top bg-no-repeat font-body text-gray-900">
       {/* 1. Header đỏ duy nhất — cao 74px, khung max-w-[1080px] */}
       <CheckInHeader />
 
@@ -97,7 +97,7 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="flex items-center gap-2">
                 {/* Country code box (+84) ▾ */}
-                <div className="flex h-12 w-[78px] shrink-0 items-center justify-between rounded-[4px] border border-[#d8dade] bg-white px-3 text-[15px] font-bold text-[#333]">
+                <div className="flex h-12 w-[78px] shrink-0 items-center justify-between rounded-[4px] border border-gray-300 bg-white px-3 text-[15px] font-bold text-gray-800">
                   <span>(+84)</span>
                   <span className="text-[10px]">▾</span>
                 </div>
@@ -108,7 +108,7 @@ export default function LoginPage() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="Số điện thoại"
-                  className="vj-auth-input h-12 w-full rounded-[4px] border border-[#d8dade] bg-white px-4 text-[15px] text-[#333] outline-none transition-colors focus:border-[var(--primary)]"
+                  className="vj-auth-input h-12 w-full rounded-[4px] border border-gray-300 bg-white px-4 text-[15px] text-gray-800 outline-none transition-colors focus:border-[var(--primary)]"
                 />
               </div>
 
@@ -125,7 +125,7 @@ export default function LoginPage() {
               Bạn chưa có tài khoản?{' '}
               <Link
                 href="/dang-ky"
-                className="font-semibold text-[#1967D2] underline hover:text-[#1553a8]"
+                className="font-semibold text-blue-600 underline hover:text-blue-700"
               >
                 Đăng ký ngay
               </Link>
@@ -133,7 +133,7 @@ export default function LoginPage() {
 
             {/* SkyJoy ID footer integration */}
             <div className="mt-10 flex flex-col items-center">
-              <p className="text-center text-[10.5px] text-[#666666]">
+              <p className="text-center text-[10.5px] text-gray-600">
                 Được cung cấp và xác thực bởi SkyJoy ID
               </p>
               <div className="mt-3 flex items-center gap-[12px]">
@@ -147,12 +147,12 @@ export default function LoginPage() {
                   alt="Vietjet Air"
                   className="h-[14px] w-auto brightness-0 invert"
                 />
-                <span className="flex h-[14px] items-center text-[13px] font-bold text-[#1967D2]">
+                <span className="flex h-[14px] items-center text-[13px] font-bold text-blue-600">
                   SkyPay
                 </span>
               </div>
               <p className="mt-[8px] text-center">
-                <span className="inline-flex items-center gap-1 font-semibold text-[#1967D2] underline">
+                <span className="inline-flex items-center gap-1 font-semibold text-blue-600 underline">
                   <span role="img" aria-label="info">
                     ℹ
                   </span>
@@ -163,7 +163,7 @@ export default function LoginPage() {
           </section>
 
           {/* 4. Cột phải — banner ngoại tệ thật (ảnh chiến dịch Vietjet) */}
-          <div className="relative hidden items-center justify-center overflow-hidden border-l border-gray-100 bg-gradient-to-b from-[#e0f2fe]/40 via-[#f0f9ff]/30 to-[#fff1f2]/40 p-3 sm:p-4 lg:flex">
+          <div className="relative hidden items-center justify-center overflow-hidden border-l border-gray-100 bg-gradient-to-b from-sky-100/40 via-sky-50/30 to-rose-50/40 p-3 sm:p-4 lg:flex">
             <a
               href={PROMO_LINK}
               target="_blank"
@@ -184,7 +184,7 @@ export default function LoginPage() {
       {/* 5. Floating chatbot mascot */}
       <div className="fixed right-[25px] bottom-[165px] z-40 flex flex-col items-end pointer-events-auto">
         <div className="relative mb-2">
-          <div className="inline-block rounded-[10px] bg-gradient-to-b from-[#FFFFFF] to-[#E2E2E2] px-[12px] py-[5px] text-[11px] font-bold whitespace-nowrap text-[#222222] shadow-[0_3px_6px_rgba(0,0,0,0.2)]">
+          <div className="inline-block rounded-[10px] bg-gradient-to-b from-white to-gray-200 px-[12px] py-[5px] text-[11px] font-bold whitespace-nowrap text-gray-900 shadow-[0_3px_6px_rgba(0,0,0,0.2)]">
             Xin chào!
           </div>
         </div>
@@ -209,5 +209,13 @@ export default function LoginPage() {
         <path d="M 0 35 Q 70 20 140 35 L 140 5 Q 70 -10 0 5 Z" fill="#76BC21" />
       </svg>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <React.Suspense fallback={null}>
+      <LoginPageInner />
+    </React.Suspense>
   );
 }

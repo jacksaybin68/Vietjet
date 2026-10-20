@@ -1,22 +1,14 @@
 'use client';
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useCallback, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { FlightBookingClient } from '@/features/bookings';
 import { PASSENGER_TYPE_LABELS, type PassengerType } from '@/features/bookings';
 import { getAirportCity } from '@/features/flights';
-import { FareBenefitsModal, type FlightSelection } from '@/features/flights';
+import { FareBenefitsModal } from '@/features/flights';
 import type { FareClassId } from '@/features/bookings/pricing';
-import { TAX_AND_FEE_RATE } from '@/features/bookings/pricing';
-import { RiInformationLine } from 'react-icons/ri';
 import { Icon } from '@/shared/components/ui';
-import DateStrip from './DateStrip';
-import type { DateStripItem } from './DateStrip';
-import FareClassTabs from './FareClassTabs';
 import BookingSummaryPanel from './BookingSummaryPanel';
-import TripLegTabs, { type TripLeg } from './TripLegTabs';
-
-const DAYS_OF_WEEK = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
 
 /** "2 Người lớn, 1 Trẻ em" — only the categories actually on the booking. */
 function describePax(counts: Record<PassengerType, number>): string {
@@ -24,34 +16,6 @@ function describePax(counts: Record<PassengerType, number>): string {
     .filter((type) => counts[type] > 0)
     .map((type) => `${counts[type]} ${PASSENGER_TYPE_LABELS[type]}`)
     .join(', ');
-}
-
-function generateDateItems(departParam?: string | null): DateStripItem[] {
-  let baseDate = new Date();
-  if (departParam) {
-    const parsed = new Date(departParam);
-    if (!isNaN(parsed.getTime())) {
-      baseDate = parsed;
-    }
-  }
-
-  const items: DateStripItem[] = [];
-  for (let offset = -2; offset <= 5; offset++) {
-    const cur = new Date(baseDate);
-    cur.setDate(baseDate.getDate() + offset);
-    const iso = cur.toISOString().slice(0, 10);
-    const dayName = DAYS_OF_WEEK[cur.getDay()];
-    const dateStr = `${cur.getDate()}/${cur.getMonth() + 1}`;
-    const daySeed = (cur.getDate() * 7 + cur.getMonth() * 13) % 9;
-    const price = 1150000 + daySeed * 60000;
-
-    items.push({
-      label: `${dayName} ${dateStr}`,
-      value: iso,
-      price,
-    });
-  }
-  return items;
 }
 
 interface FlightBookingResultsWrapperProps {
@@ -110,28 +74,17 @@ const FARE_CLASS_MULTIPLIER: Record<string, number> = {
   BIZ: 2.77,
 };
 
-/** Uppercase tab id → the bucket id the results cards and the modal use. */
-const FARE_CLASS_TO_ID: Record<string, FareClassId> = {
-  ECO: 'eco',
-  DELUXE: 'deluxe',
-  SKYBOSS: 'skyboss',
-  BUSINESS: 'business',
-};
-
 export default function FlightBookingResultsWrapper({
   trip,
-  date,
+  date: _date,
 }: FlightBookingResultsWrapperProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const departParam = searchParams.get('depart');
   const returnParam = searchParams.get('return');
   /** Khứ hồi chỉ tồn tại khi form tìm kiếm có ngày về (`return`). */
   const isRoundTrip = Boolean(returnParam);
-  /** Chặng nào đang mở: đi trước, về sau (URL `leg=return`). */
-  const leg: TripLeg = isRoundTrip && searchParams.get('leg') === 'return' ? 'return' : 'outbound';
   /** State key for the leg above — `return` reads better as `inbound` here. */
-  const bookingKey = leg === 'return' ? 'inbound' : 'outbound';
+  const bookingKey = isRoundTrip && searchParams.get('leg') === 'return' ? 'inbound' : 'outbound';
 
   /** Passenger mix from the search, for the yellow trip strip under the header. */
   const paxCounts: Record<PassengerType, number> = {
@@ -145,43 +98,10 @@ export default function FlightBookingResultsWrapper({
     outbound: null,
     inbound: null,
   });
-  /** Highlighted tab when no flight is held yet, so the row still answers a tap. */
-  const [activeFareClass, setActiveFareClass] = useState('ECO');
   const [continueSignal, setContinueSignal] = useState(0);
   const [showBenefitsModal, setShowBenefitsModal] = useState(false);
-  /** Which fare name opened the table; undefined = the plain "Quyền lợi" button. */
-  const [compareFare, setCompareFare] = useState<FareClassId | undefined>(undefined);
 
-  const dateItems = useMemo(() => generateDateItems(departParam), [departParam]);
   const selectedBooking = bookings[bookingKey];
-
-  const updateUrl = useCallback(
-    (mutate: (params: URLSearchParams) => void) => {
-      const next = new URLSearchParams(searchParams.toString());
-      mutate(next);
-      router.replace(`/tim-ve?${next.toString()}`, { scroll: false });
-    },
-    [searchParams, router]
-  );
-
-  const handleDateChange = useCallback(
-    (value: string) => {
-      // The strip follows the leg on screen, so a return-leg tap rewrites the
-      // return date and the outbound departure date stays where it was.
-      updateUrl((params) => params.set(leg === 'return' ? 'return' : 'depart', value));
-    },
-    [updateUrl, leg]
-  );
-
-  const handleLegChange = useCallback(
-    (next: TripLeg) => {
-      updateUrl((params) => {
-        if (next === 'return') params.set('leg', 'return');
-        else params.delete('leg');
-      });
-    },
-    [updateUrl]
-  );
 
   const handleFlightSelect = useCallback(
     (
@@ -189,7 +109,7 @@ export default function FlightBookingResultsWrapper({
       fareClass: string,
       fare: number,
       fares?: Partial<Record<FareClassId, number>>,
-      flight?: any
+      flight?: { departTime?: string; arriveTime?: string }
     ) => {
       const normalized = normalizeFareClass(fareClass);
       const tax = 581581 * (paxCounts.adult || 1);
@@ -210,47 +130,13 @@ export default function FlightBookingResultsWrapper({
           arriveTime: flight?.arriveTime,
         },
       }));
-      setActiveFareClass(normalized);
     },
     [bookingKey, paxCounts.adult]
-  );
-
-  const handleFareClassChange = useCallback(
-    (fareClass: string) => {
-      const normalized = normalizeFareClass(fareClass);
-      setActiveFareClass(normalized);
-      const current = bookings[bookingKey];
-      if (!current) return;
-      // Prefer the ladder the card printed; fall back to the Eco-based step only
-      // for a selection that arrived without one.
-      const fromLadder = current.fares?.[FARE_CLASS_TO_ID[normalized]];
-      const fare =
-        typeof fromLadder === 'number'
-          ? fromLadder
-          : Math.round(current.baseFare * (FARE_CLASS_MULTIPLIER[normalized] ?? 1));
-      const tax = 581581 * (paxCounts.adult || 1);
-      setBookings((prev) => ({
-        ...prev,
-        [bookingKey]: { ...current, fareClass: normalized, fare, tax, total: fare + tax },
-      }));
-    },
-    [bookings, bookingKey, paxCounts.adult]
   );
 
   const handleContinue = useCallback(() => {
     setContinueSignal((n) => n + 1);
   }, []);
-
-  // Panel + card highlight for whichever leg is on screen.
-  const _selection: FlightSelection | null = selectedBooking
-    ? {
-        flightNo: selectedBooking.flightNo,
-        fareClass:
-          FARE_CLASS_TO_ID[selectedBooking.fareClass] ?? selectedBooking.fareClass.toLowerCase(),
-        fare: selectedBooking.fare,
-        fares: selectedBooking.fares,
-      }
-    : null;
 
   const [outboundFrom, outboundTo] = trip.split('→').map((part) => part.trim());
   const returnTrip = [outboundTo, outboundFrom].filter(Boolean).join(' → ');
@@ -415,7 +301,6 @@ export default function FlightBookingResultsWrapper({
       <FareBenefitsModal
         open={showBenefitsModal}
         onClose={() => setShowBenefitsModal(false)}
-        highlight={compareFare}
         prices={selectedBooking?.fares}
       />
     </>

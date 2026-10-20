@@ -315,8 +315,8 @@ export default function MyFlightsPage() {
                         }}
                         className={`relative flex h-11 items-center gap-2 rounded-t-[10px] px-5 text-xs font-black uppercase tracking-wider transition-all sm:text-sm ${
                           active
-                            ? 'bg-white text-[#D71920] shadow-[0_-4px_16px_rgba(36,73,120,0.08)] border-t-2 border-[#D71920]'
-                            : 'bg-white/60 text-gray-500 hover:bg-white/80 hover:text-[#D71920] backdrop-blur-sm'
+                            ? 'bg-white text-primary shadow-[0_-4px_16px_rgba(36,73,120,0.08)] border-t-2 border-primary'
+                            : 'bg-white/60 text-gray-500 hover:bg-white/80 hover:text-primary backdrop-blur-sm'
                         }`}
                       >
                         <TabIcon aria-hidden="true" className="text-base" />
@@ -398,7 +398,7 @@ export default function MyFlightsPage() {
                           <button
                             type="submit"
                             disabled={loading}
-                            className="inline-flex h-10 px-8 items-center justify-center rounded-xl bg-[#FFDD00] hover:bg-[#FBB612] text-sm font-black text-gray-900 shadow-md transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+                            className="inline-flex h-10 px-8 items-center justify-center rounded-xl bg-vjyellow hover:bg-vjamber text-sm font-black text-gray-900 shadow-md transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
                           >
                             {loading ? 'Đang tìm…' : 'Tìm kiếm'}
                           </button>
@@ -431,7 +431,7 @@ export default function MyFlightsPage() {
                         </h2>
 
                         <div className="mt-6 mx-auto w-full max-w-[340px] space-y-4">
-                          <div className="flex rounded-md border border-gray-300 bg-white overflow-hidden focus-within:border-[#D71920]">
+                          <div className="flex rounded-md border border-gray-300 bg-white overflow-hidden focus-within:border-primary">
                             <span className="inline-flex items-center px-3 py-2 bg-gray-50 border-r border-gray-200 text-xs font-bold text-gray-700 select-none">
                               (+84) <span className="text-[9px] text-gray-400 ml-1">▼</span>
                             </span>
@@ -445,7 +445,7 @@ export default function MyFlightsPage() {
                           <div className="flex justify-center">
                             <Link
                               href="/dang-nhap?redirect=/chuyen-bay-cua-toi"
-                              className="w-full py-2.5 rounded-xl bg-gray-100 hover:bg-[#FFDD00] text-gray-400 hover:text-gray-900 text-center font-black text-xs border border-gray-200 transition-colors shadow-sm"
+                              className="w-full py-2.5 rounded-xl bg-gray-100 hover:bg-vjyellow text-gray-400 hover:text-gray-900 text-center font-black text-xs border border-gray-200 transition-colors shadow-sm"
                             >
                               Đăng nhập
                             </Link>
@@ -455,7 +455,7 @@ export default function MyFlightsPage() {
                             Bạn chưa có tài khoản?{' '}
                             <Link
                               href="/dang-ky?redirect=/chuyen-bay-cua-toi"
-                              className="font-bold text-[#2563d4] underline hover:text-blue-700"
+                              className="font-bold text-blue-600 underline hover:text-blue-700"
                             >
                               Đăng ký ngay
                             </Link>
@@ -467,19 +467,19 @@ export default function MyFlightsPage() {
                             </p>
                             <div className="flex items-center justify-center gap-4 text-xs font-black select-none">
                               <span>
-                                <span className="text-[#D71920]">Sky</span>
-                                <span className="text-[#FBB612]">Joy</span>
+                                <span className="text-primary">Sky</span>
+                                <span className="text-vjamber">Joy</span>
                               </span>
-                              <span className="text-[#D71920] italic">vietjetAir.com</span>
+                              <span className="text-primary italic">vietjetAir.com</span>
                               <span>
-                                <span className="text-[#D71920]">Sky</span>
-                                <span className="text-[#855B2C]">Pay</span>
+                                <span className="text-primary">Sky</span>
+                                <span className="text-amber-800">Pay</span>
                               </span>
                             </div>
                             <div>
                               <Link
                                 href="/gioi-thieu"
-                                className="inline-flex items-center gap-1 text-[11px] font-bold text-[#2563d4] hover:underline"
+                                className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:underline"
                               >
                                 <span className="text-xs">ℹ</span>
                                 <span>Bạn đã biết về Vietjet SkyJoy?</span>
