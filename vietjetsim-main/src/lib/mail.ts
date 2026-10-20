@@ -61,7 +61,7 @@ export function resolveMailFrom(env: NodeJS.ProcessEnv = process.env): string {
   // Gmail không cho đặt From khác tài khoản đăng nhập.
   if (isGmailHost(env.SMTP_HOST)) return normalizeMailFrom(env.SMTP_USER);
 
-  return normalizeMailFrom(env.SMTP_USER) || 'Vietjet Air <bookbooking@vietjet.shop>';
+  return normalizeMailFrom(env.SMTP_USER) || 'Vietjet Air <booking@vietjet.shop>';
 }
 
 function getTransporter(): Transporter | null {
