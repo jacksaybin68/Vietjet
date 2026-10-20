@@ -615,9 +615,9 @@ export default function FlightResultsStep({
       });
   }, [filters, sortBy, searchQuery, flights]);
 
-  // Auto-expand cheapest flight if cheapest=1 is in URL matching real Vietjet behavior
+  // Auto-expand and select first available flight by default so "Đi tiếp" is ready immediately
   useEffect(() => {
-    if (search?.cheapest === '1' && filtered.length > 0 && !expandedFlightNo) {
+    if (filtered.length > 0 && !expandedFlightNo) {
       const firstFlight = filtered[0];
       if (firstFlight) {
         setExpandedFlightNo(firstFlight.flightNo);
@@ -1145,7 +1145,41 @@ export default function FlightResultsStep({
                 className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 relative flex flex-col lg:flex-row flex-wrap mb-3"
               >
                 {/* Left: Flight Info - bright yellow box matching real Vietjet */}
-                <div className="w-full lg:w-[240px] shrink-0 bg-vjyellow p-3 sm:p-4 border-b lg:border-b-0 border-yellow-400 flex flex-col items-center justify-center text-center relative select-none">
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => {
+                    setExpandedFlightNo(flight.flightNo);
+                    setSelectedFareClassMap((prev) => ({
+                      ...prev,
+                      [flight.flightNo]: activeFareClass,
+                    }));
+                    const activeFare =
+                      fareClasses.find((item) => item.id === activeFareClass) ?? fareClasses[3];
+                    onSelect({
+                      ...flight,
+                      price: activeFare.price,
+                      class: activeFare.cabin,
+                      fareClass: activeFare.id,
+                    });
+                    const fares = Object.fromEntries(
+                      fareClasses.map((item) => [item.id, item.price])
+                    ) as Partial<Record<FareClassId, number>>;
+                    onFlightSelect?.(
+                      flight.flightNo,
+                      activeFare.id,
+                      activeFare.price,
+                      fares,
+                      flight
+                    );
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      setExpandedFlightNo(flight.flightNo);
+                    }
+                  }}
+                  className="w-full lg:w-[240px] shrink-0 bg-vjyellow p-3 sm:p-4 border-b lg:border-b-0 border-yellow-400 flex flex-col items-center justify-center text-center relative select-none cursor-pointer hover:bg-yellow-400 transition-colors"
+                >
                   <span className="text-2xs font-bold text-gray-900 tracking-wider uppercase">
                     {flight.flightNo}
                   </span>
