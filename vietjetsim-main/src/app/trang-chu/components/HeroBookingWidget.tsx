@@ -23,7 +23,7 @@ const TRIP_TYPES = [
 ] as const;
 
 const fieldGroupClass =
-  'grid grid-cols-1 divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-white shadow-xs transition-all focus-within:border-[var(--accent)] sm:grid-cols-[2fr_1fr] sm:divide-x sm:divide-y-0';
+  'grid grid-cols-1 divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-white shadow-xs transition-all focus-within:border-[var(--accent)] sm:grid-cols-[1.65fr_1.35fr] sm:divide-x sm:divide-y-0';
 
 export default function HeroBookingWidget() {
   const router = useRouter();
@@ -41,6 +41,7 @@ export default function HeroBookingWidget() {
   const [airports, setAirports] = useState<Airport[]>(ALL_AIRPORTS);
   const [promoCode, setPromoCode] = useState('');
   const [cheapestOnly, setCheapestOnly] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -72,14 +73,40 @@ export default function HeroBookingWidget() {
 
   const minDate = toInputDate(new Date());
 
+  const handleFromChange = (newFrom: string) => {
+    if (newFrom === to) {
+      setTo(from);
+    }
+    setFrom(newFrom);
+    setSearchError(null);
+  };
+
+  const handleToChange = (newTo: string) => {
+    if (newTo === from) {
+      setFrom(to);
+    }
+    setTo(newTo);
+    setSearchError(null);
+  };
+
   const handleSubmit = (event?: React.FormEvent) => {
     if (event) event.preventDefault();
+    if (from === to) {
+      setSearchError('Điểm khởi hành và điểm đến không thể trùng nhau');
+      return;
+    }
+    if (roundTrip && returnDate && returnDate < departDate) {
+      setSearchError('Ngày về không thể trước ngày đi');
+      return;
+    }
+    setSearchError(null);
     const params = new URLSearchParams();
     params.set('from', from);
     params.set('to', to);
     params.set('depart', departDate);
     if (roundTrip && returnDate) params.set('return', returnDate);
     params.set('currency', currency);
+    params.set('pax', String(paxCounts.adult));
     params.set('adult', String(paxCounts.adult));
     if (paxCounts.child) params.set('child', String(paxCounts.child));
     if (paxCounts.infant) params.set('infant', String(paxCounts.infant));
@@ -188,7 +215,7 @@ export default function HeroBookingWidget() {
                 icon="takeoff"
                 value={from}
                 airports={airports}
-                onChange={setFrom}
+                onChange={handleFromChange}
                 variant="flush"
               />
               <label
@@ -226,6 +253,7 @@ export default function HeroBookingWidget() {
               onClick={() => {
                 setFrom(to);
                 setTo(from);
+                setSearchError(null);
               }}
               className="absolute -left-3 top-[52px] -translate-y-1/2 z-10 grid h-7 w-7 place-items-center rounded-full bg-white text-vjred shadow-[0_2px_8px_rgba(0,0,0,0.22)] border border-gray-100 hover:scale-110 active:scale-95 transition-transform cursor-pointer"
             >
@@ -239,7 +267,7 @@ export default function HeroBookingWidget() {
                 icon="land"
                 value={to}
                 airports={airports}
-                onChange={setTo}
+                onChange={handleToChange}
                 variant="flush"
                 className={roundTrip ? '' : 'sm:col-span-2'}
               />
@@ -343,6 +371,13 @@ export default function HeroBookingWidget() {
             />
             <span>Tìm vé rẻ nhất</span>
           </label>
+
+          {/* Thông báo kiểm tra hợp lệ */}
+          {searchError && (
+            <div className="mt-2.5 p-2 rounded-lg bg-white/95 border border-red-500 text-red-600 text-xs font-bold text-center shadow-sm">
+              {searchError}
+            </div>
+          )}
 
           {/* Hàng 6: Nút Tìm chuyến bay — Màu vàng #FFD51A, bo góc dạng viên thuốc, chữ đỏ sẫm đậm */}
           <div className="mt-3.5 flex justify-center">

@@ -149,4 +149,37 @@ describe('HeroBookingWidget Date Selection Flow', () => {
     expect(screen.getByLabelText('Tháng sau')).toBeInTheDocument();
     expect(screen.getByText('Tháng 11 2026')).toBeInTheDocument();
   });
+
+  it('swaps origin and destination when clicking swap button', () => {
+    render(<HeroBookingWidget />);
+
+    const swapBtn = screen.getByRole('button', { name: /Đổi điểm khởi hành và điểm đến/i });
+    expect(swapBtn).toBeInTheDocument();
+
+    // Initially HAN -> SGN
+    expect(screen.getByRole('button', { name: 'Điểm khởi hành' })).toHaveTextContent(/HAN/);
+    expect(screen.getByRole('button', { name: 'Điểm đến' })).toHaveTextContent(/SGN/);
+
+    fireEvent.click(swapBtn);
+
+    // After swap: SGN -> HAN
+    expect(screen.getByRole('button', { name: 'Điểm khởi hành' })).toHaveTextContent(/SGN/);
+    expect(screen.getByRole('button', { name: 'Điểm đến' })).toHaveTextContent(/HAN/);
+  });
+
+  it('hides return date when switching to Một chiều and shows when Khứ hồi', () => {
+    render(<HeroBookingWidget />);
+
+    expect(screen.getByRole('button', { name: /Ngày về/i })).toBeInTheDocument();
+
+    const oneWayRadio = screen.getByLabelText('Một chiều');
+    fireEvent.click(oneWayRadio);
+
+    expect(screen.queryByRole('button', { name: /Ngày về/i })).not.toBeInTheDocument();
+
+    const roundTripRadio = screen.getByLabelText('Khứ hồi');
+    fireEvent.click(roundTripRadio);
+
+    expect(screen.getByRole('button', { name: /Ngày về/i })).toBeInTheDocument();
+  });
 });

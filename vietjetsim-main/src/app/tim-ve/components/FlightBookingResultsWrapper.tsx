@@ -88,7 +88,7 @@ export default function FlightBookingResultsWrapper({
 
   /** Passenger mix from the search, for the yellow trip strip under the header. */
   const [paxCounts, setPaxCounts] = useState<Record<PassengerType, number>>(() => ({
-    adult: Number(searchParams.get('pax') ?? 1) || 1,
+    adult: Number(searchParams.get('adult') ?? searchParams.get('pax') ?? 1) || 1,
     child: Number(searchParams.get('child') ?? 0) || 0,
     infant: Number(searchParams.get('infant') ?? 0) || 0,
   }));
