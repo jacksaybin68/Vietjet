@@ -5,6 +5,8 @@ import ContinueButton from './ContinueButton';
 import { RiEditLine, RiArrowDownSLine, RiArrowUpSLine } from 'react-icons/ri';
 import PassengerDetailModal from './PassengerDetailModal';
 
+import { PassengerType } from '@/features/bookings/types/booking-flow';
+
 export interface BookingSummaryData {
   trip: string; // "SGN → HAN"
   date: string; // "16/10/2026"
@@ -19,6 +21,7 @@ export interface BookingSummaryData {
   arriveTime?: string;
   total: number;
   isRoundTrip?: boolean;
+  paxCounts?: Record<PassengerType, number>;
   returnLeg?: {
     trip: string;
     date: string;
@@ -71,7 +74,9 @@ export default function BookingSummaryPanel({
   canContinue,
 }: BookingSummaryPanelProps) {
   const [mobileExpanded, setMobileExpanded] = useState(false);
+  const [showPaxDetail, setShowPaxDetail] = useState(true);
   const [showFareDetail, setShowFareDetail] = useState(true);
+  const [showReturnFareDetail, setShowReturnFareDetail] = useState(false);
   const [showTaxDetail, setShowTaxDetail] = useState(false);
   const [showServiceDetail, setShowServiceDetail] = useState(false);
   const [showPassengerDetailModal, setShowPassengerDetailModal] = useState(false);
@@ -79,6 +84,21 @@ export default function BookingSummaryPanel({
   const tripParts = (data.trip || '').split('→').map((s) => s.trim());
   const origin = tripParts[0] || 'Tp. Hồ Chí Minh (SGN)';
   const destination = tripParts[1] || 'Hà Nội (HAN)';
+
+  const adultCount = data.paxCounts?.adult ?? 1;
+  const childCount = data.paxCounts?.child ?? 0;
+  const infantCount = data.paxCounts?.infant ?? 0;
+  const totalPaxCount = adultCount + childCount + infantCount;
+
+  const paxRatio = adultCount + childCount * 0.75;
+  const singleAdultFare = paxRatio > 0 ? Math.round((data.fare ?? 0) / paxRatio) : (data.fare ?? 0);
+  const singleChildFare = Math.round(singleAdultFare * 0.75);
+
+  const returnSingleAdultFare =
+    data.returnLeg?.fare && paxRatio > 0
+      ? Math.round(data.returnLeg.fare / paxRatio)
+      : (data.returnLeg?.fare ?? 0);
+  const returnSingleChildFare = Math.round(returnSingleAdultFare * 0.75);
 
   const totalServices = (data.serviceFee ?? 0) + (data.baggageFee ?? 0) + (data.insuranceFee ?? 0);
   const outboundTotal = (data.fare ?? 0) + (data.tax ?? 0) + totalServices;
@@ -103,8 +123,37 @@ export default function BookingSummaryPanel({
         </div>
 
         {/* Bar: Thông tin hành khách */}
-        <div className="bg-gray-100 px-4 py-2.5 border-b border-gray-200/80 flex items-center justify-between text-xs font-bold text-gray-800">
-          <span>Thông tin hành khách</span>
+        <div className="border-b border-gray-200/80">
+          <div
+            className="bg-gray-100 px-4 py-2.5 flex items-center justify-between text-xs font-bold text-gray-800 cursor-pointer"
+            onClick={() => setShowPaxDetail(!showPaxDetail)}
+          >
+            <span>Thông tin hành khách</span>
+            <div className="flex items-center gap-1 font-bold text-gray-950 font-koho text-xs sm:text-sm">
+              <span>{totalPaxCount} khách</span>
+              {showPaxDetail ? <RiArrowUpSLine size={16} /> : <RiArrowDownSLine size={16} />}
+            </div>
+          </div>
+          {showPaxDetail && (
+            <div className="px-4 py-2 space-y-1 text-xs2 text-gray-600 bg-gray-50/70 border-t border-gray-100">
+              <div className="flex justify-between">
+                <span>Người lớn</span>
+                <span className="font-bold text-gray-900">{adultCount}</span>
+              </div>
+              {childCount > 0 && (
+                <div className="flex justify-between">
+                  <span>Trẻ em (2 - 11 tuổi)</span>
+                  <span className="font-bold text-gray-900">{childCount}</span>
+                </div>
+              )}
+              {infantCount > 0 && (
+                <div className="flex justify-between">
+                  <span>Em bé (&lt; 2 tuổi)</span>
+                  <span className="font-bold text-gray-900">{infantCount}</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Section: Chuyến đi */}
@@ -132,17 +181,40 @@ export default function BookingSummaryPanel({
         </div>
 
         {/* Bar: Giá vé */}
-        <div
-          className="bg-gray-100 px-4 py-2.5 border-b border-gray-200/80 flex items-center justify-between text-xs font-bold text-gray-800 cursor-pointer"
-          onClick={() => setShowFareDetail(!showFareDetail)}
-        >
-          <span>Giá vé</span>
-          {data.fare && data.fare > 0 ? (
-            <div className="flex items-center gap-1 font-bold text-gray-950 font-koho text-xs sm:text-sm">
-              <span>{data.fare.toLocaleString('vi-VN')} VND</span>
-              <RiArrowDownSLine size={16} />
+        <div className="border-b border-gray-200/80">
+          <div
+            className="bg-gray-100 px-4 py-2.5 flex items-center justify-between text-xs font-bold text-gray-800 cursor-pointer"
+            onClick={() => setShowFareDetail(!showFareDetail)}
+          >
+            <span>Giá vé</span>
+            {data.fare && data.fare > 0 ? (
+              <div className="flex items-center gap-1 font-bold text-gray-950 font-koho text-xs sm:text-sm">
+                <span>{data.fare.toLocaleString('vi-VN')} VND</span>
+                {showFareDetail ? <RiArrowUpSLine size={16} /> : <RiArrowDownSLine size={16} />}
+              </div>
+            ) : null}
+          </div>
+
+          {showFareDetail && data.fare && data.fare > 0 && (
+            <div className="px-4 py-2 space-y-1 text-xs2 text-gray-500 bg-gray-50/70 border-t border-gray-100">
+              <div className="flex justify-between">
+                <span>Người lớn x {adultCount}</span>
+                <span>{(singleAdultFare * adultCount).toLocaleString('vi-VN')} VND</span>
+              </div>
+              {childCount > 0 && (
+                <div className="flex justify-between">
+                  <span>Trẻ em x {childCount} (75%)</span>
+                  <span>{(singleChildFare * childCount).toLocaleString('vi-VN')} VND</span>
+                </div>
+              )}
+              {infantCount > 0 && (
+                <div className="flex justify-between">
+                  <span>Em bé x {infantCount} (Miễn phí)</span>
+                  <span>0 VND</span>
+                </div>
+              )}
             </div>
-          ) : null}
+          )}
         </div>
 
         {/* Bar: Thuế, phí */}
@@ -229,14 +301,46 @@ export default function BookingSummaryPanel({
             </div>
 
             {/* Bar: Giá vé (Chuyến về) */}
-            <div className="bg-gray-100 px-4 py-2.5 border-b border-gray-200/80 flex items-center justify-between text-xs font-bold text-gray-800">
-              <span>Giá vé</span>
-              {data.returnLeg?.fare && data.returnLeg.fare > 0 ? (
-                <div className="flex items-center gap-1 font-bold text-gray-950 font-koho text-xs sm:text-sm">
-                  <span>{data.returnLeg.fare.toLocaleString('vi-VN')} VND</span>
-                  <RiArrowDownSLine size={16} />
+            <div className="border-b border-gray-200/80">
+              <div
+                className="bg-gray-100 px-4 py-2.5 flex items-center justify-between text-xs font-bold text-gray-800 cursor-pointer"
+                onClick={() => setShowReturnFareDetail(!showReturnFareDetail)}
+              >
+                <span>Giá vé</span>
+                {data.returnLeg?.fare && data.returnLeg.fare > 0 ? (
+                  <div className="flex items-center gap-1 font-bold text-gray-950 font-koho text-xs sm:text-sm">
+                    <span>{data.returnLeg.fare.toLocaleString('vi-VN')} VND</span>
+                    {showReturnFareDetail ? (
+                      <RiArrowUpSLine size={16} />
+                    ) : (
+                      <RiArrowDownSLine size={16} />
+                    )}
+                  </div>
+                ) : null}
+              </div>
+
+              {showReturnFareDetail && data.returnLeg?.fare && data.returnLeg.fare > 0 && (
+                <div className="px-4 py-2 space-y-1 text-xs2 text-gray-500 bg-gray-50/70 border-t border-gray-100">
+                  <div className="flex justify-between">
+                    <span>Người lớn x {adultCount}</span>
+                    <span>{(returnSingleAdultFare * adultCount).toLocaleString('vi-VN')} VND</span>
+                  </div>
+                  {childCount > 0 && (
+                    <div className="flex justify-between">
+                      <span>Trẻ em x {childCount} (75%)</span>
+                      <span>
+                        {(returnSingleChildFare * childCount).toLocaleString('vi-VN')} VND
+                      </span>
+                    </div>
+                  )}
+                  {infantCount > 0 && (
+                    <div className="flex justify-between">
+                      <span>Em bé x {infantCount} (Miễn phí)</span>
+                      <span>0 VND</span>
+                    </div>
+                  )}
                 </div>
-              ) : null}
+              )}
             </div>
 
             {/* Bar: Thuế, phí (Chuyến về) */}
@@ -307,6 +411,14 @@ export default function BookingSummaryPanel({
               <span>Hành trình:</span>
               <span>
                 {origin} → {destination}
+              </span>
+            </div>
+            <div className="flex justify-between text-[var(--foreground-muted)]">
+              <span>Hành khách:</span>
+              <span>
+                {adultCount} Người lớn
+                {childCount > 0 ? `, ${childCount} Trẻ em` : ''}
+                {infantCount > 0 ? `, ${infantCount} Em bé` : ''}
               </span>
             </div>
             <div className="flex justify-between text-[var(--foreground-muted)]">

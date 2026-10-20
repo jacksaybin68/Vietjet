@@ -71,12 +71,14 @@ export interface FlightBookingClientProps {
   ) => void;
   continueSignal?: number;
   onStepChange?: (step: number) => void;
+  onPaxCountsChange?: (counts: Record<PassengerType, number>) => void;
 }
 
 function FlightBookingClientInner({
   onFlightSelect,
   continueSignal,
   onStepChange,
+  onPaxCountsChange,
 }: FlightBookingClientProps) {
   const searchParams = useSearchParams();
   const params: SearchParams = {
@@ -171,9 +173,15 @@ function FlightBookingClientInner({
     );
   };
 
+  const handlePassengersChange = (newPassengers: Passenger[]) => {
+    setBooking((b) => ({ ...b, passengers: newPassengers }));
+    onPaxCountsChange?.(countByType(newPassengers));
+  };
+
   const handlePassengerSubmit = (passengers: Passenger[], newConsents: BookingConsents) => {
     setBooking((b) => ({ ...b, passengers }));
     setConsents(newConsents);
+    onPaxCountsChange?.(countByType(passengers));
     goStep(3);
     toast.success(
       'Đã lưu thông tin hành khách!',
@@ -412,6 +420,7 @@ function FlightBookingClientInner({
               ancillaries={booking.ancillaries}
               onSubmit={handlePassengerSubmit}
               onBack={() => goStep(1)}
+              onPassengersChange={handlePassengersChange}
             />
           </ErrorBoundary>
         )}
