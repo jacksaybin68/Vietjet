@@ -86,7 +86,7 @@ function FlightBookingClientInner({
     to: searchParams.get('to') || undefined,
     depart: searchParams.get('depart') || undefined,
     return: searchParams.get('return') || undefined,
-    pax: searchParams.get('pax') || undefined,
+    pax: searchParams.get('pax') || searchParams.get('adult') || undefined,
     child: searchParams.get('child') || undefined,
     infant: searchParams.get('infant') || undefined,
     cheapest: searchParams.get('cheapest') || undefined,
