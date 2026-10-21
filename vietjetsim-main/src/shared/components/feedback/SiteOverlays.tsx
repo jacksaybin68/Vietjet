@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 
 import Mascot from '@/shared/components/ui/Mascot';
@@ -15,19 +16,28 @@ const PROMO_KEY = 'vj-promo-dismissed';
  * so server and client markup stay identical.
  */
 export function SiteOverlays() {
+  const pathname = usePathname();
+  const isBookingFlow = Boolean(
+    pathname?.startsWith('/tim-ve') ||
+    pathname?.startsWith('/dat-ve') ||
+    pathname?.startsWith('/thanh-toan')
+  );
+
   const [showCookie, setShowCookie] = useState(false);
   const [showPromo, setShowPromo] = useState(false);
 
   useEffect(() => {
     const hasCookieDecision = Boolean(localStorage.getItem(COOKIE_KEY));
     setShowCookie(!hasCookieDecision);
-    setShowPromo(hasCookieDecision && !sessionStorage.getItem(PROMO_KEY));
-  }, []);
+    if (!isBookingFlow) {
+      setShowPromo(hasCookieDecision && !sessionStorage.getItem(PROMO_KEY));
+    }
+  }, [isBookingFlow]);
 
   const decideCookie = (value: 'accepted' | 'rejected') => {
     localStorage.setItem(COOKIE_KEY, value);
     setShowCookie(false);
-    if (!sessionStorage.getItem(PROMO_KEY)) {
+    if (!isBookingFlow && !sessionStorage.getItem(PROMO_KEY)) {
       window.setTimeout(() => setShowPromo(true), 300);
     }
   };
