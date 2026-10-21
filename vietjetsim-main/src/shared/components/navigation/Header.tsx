@@ -252,7 +252,17 @@ export default function Header({
         {/* Mobile Header for compactMode (< lg) matching Screenshot 3 & 4 */}
         {compactMode && (
           <div className="flex lg:hidden h-14 items-center justify-between px-4 bg-[#D71920] text-white shadow-md">
-            <div className="w-8 shrink-0" />
+            <Link
+              href="/trang-chu"
+              aria-label="Vietjet Air - Trang chủ"
+              className="flex shrink-0 items-center transition hover:opacity-90"
+            >
+              <img
+                src="/images/vj-logo.svg"
+                alt="Vietjet Air"
+                className="h-[22px] w-auto brightness-0 invert"
+              />
+            </Link>
             <h1 className="font-sans font-black italic tracking-wide text-lg sm:text-xl uppercase text-white text-center truncate">
               {dynamicTitle || mobileTitle || 'LỰA CHỌN CHUYẾN BAY'}
             </h1>
@@ -289,8 +299,8 @@ export default function Header({
                 alt="Vietjet Air"
                 className={
                   compactMode
-                    ? 'h-[28px] w-auto brightness-0 invert lg:h-[30px]'
-                    : 'h-8 sm:h-9 w-auto'
+                    ? 'h-[25px] w-auto brightness-0 invert lg:h-[26px]'
+                    : 'h-7 sm:h-8 w-auto'
                 }
               />
             </Link>

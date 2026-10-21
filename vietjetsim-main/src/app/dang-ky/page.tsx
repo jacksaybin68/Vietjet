@@ -323,18 +323,18 @@ function RegisterPageInner() {
   return (
     <AuthShell mode="register" title="ĐĂNG KÝ TÀI KHOẢN SKYJOY">
       {/* Tab Đăng ký / Đăng nhập */}
-      <div className="mb-6 flex items-center justify-center gap-10 border-b border-gray-200">
+      <div className="mb-6 flex items-center justify-center gap-12 border-b border-gray-200">
         <button
           type="button"
           aria-pressed="true"
-          className="-mb-px border-b-2 border-primary pb-2 text-sm font-bold text-primary transition-colors"
+          className="-mb-px border-b-3 border-primary pb-3 text-base sm:text-lg font-black text-primary transition-all scale-105 cursor-pointer"
         >
           Đăng ký
         </button>
         <Link
           href="/dang-nhap"
           aria-pressed="false"
-          className="-mb-px border-b-2 border-transparent pb-2 text-sm font-bold text-gray-400 transition-colors hover:text-gray-600"
+          className="-mb-px border-b-3 border-transparent pb-3 text-base sm:text-lg font-bold text-gray-400 transition-colors hover:text-gray-700"
         >
           Đăng nhập
         </Link>
@@ -558,10 +558,10 @@ function RegisterPageInner() {
                 type="submit"
                 disabled={loading}
                 aria-label="Tiếp tục"
-                className={`w-40 py-2.5 rounded-lg text-center font-bold text-sm transition-all ${
+                className={`w-full sm:w-64 h-12 rounded-xl text-center font-black text-base transition-all ${
                   !agreeTerms || !surname.trim() || !givenName.trim() || (!phone && !email)
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none italic'
-                    : 'bg-primary hover:bg-red-700 text-white cursor-pointer shadow-md active:scale-95'
+                    : 'bg-gradient-to-r from-[#D71920] to-[#B31317] hover:from-[#E51E25] hover:to-[#C4161C] text-white cursor-pointer shadow-[0_4px_14px_rgba(215,25,32,0.35)] hover:shadow-[0_6px_20px_rgba(215,25,32,0.45)] active:scale-95'
                 }`}
               >
                 {loading ? <Spinner /> : 'Đăng ký'}

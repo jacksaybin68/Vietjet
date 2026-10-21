@@ -25,7 +25,7 @@ const NAV_LINKS = [
   { label: 'DỊCH VỤ KHÁC', href: '/dich-vu#khac' },
 ] as const;
 
-export default function CheckInHeader() {
+export default function CheckInHeader({ title = 'CHECK-IN' }: { title?: string }) {
   const { user } = useAuth();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -36,16 +36,26 @@ export default function CheckInHeader() {
   return (
     <>
       <header
-        className="sticky top-0 z-40 h-[54px] lg:h-[74px] text-white shadow-[0_2px_10px_rgba(0,0,0,0.20)]"
+        className="sticky top-0 z-40 h-[54px] lg:h-[70px] text-white shadow-[0_2px_10px_rgba(0,0,0,0.20)]"
         style={{
           background: 'linear-gradient(180deg, #D91E18 0%, #C4161C 100%)',
         }}
       >
         {/* Mobile Header (< lg) matching Screenshot 1 */}
         <div className="flex lg:hidden h-full items-center justify-between px-4">
-          <div className="w-8 shrink-0" />
-          <h1 className="font-sans font-black italic tracking-wider text-xl uppercase text-white text-center">
-            CHECK-IN
+          <Link
+            href="/trang-chu"
+            aria-label="Vietjet Air - Trang chủ"
+            className="flex shrink-0 items-center transition hover:opacity-90"
+          >
+            <img
+              src="/images/vj-logo.svg"
+              alt="Vietjet Air"
+              className="h-[22px] w-auto brightness-0 invert"
+            />
+          </Link>
+          <h1 className="font-sans font-black italic tracking-wider text-lg sm:text-xl uppercase text-white text-center">
+            {title}
           </h1>
           <button
             type="button"
@@ -64,12 +74,12 @@ export default function CheckInHeader() {
             <Link
               href="/trang-chu"
               aria-label="Vietjet Air - Trang chủ"
-              className="flex shrink-0 items-center"
+              className="flex shrink-0 items-center transition hover:opacity-90"
             >
               <img
                 src="/images/vj-logo.svg"
                 alt="Vietjet Air"
-                className="h-[40px] w-auto brightness-0 invert"
+                className="h-[28px] sm:h-[30px] w-auto brightness-0 invert"
               />
             </Link>
 
