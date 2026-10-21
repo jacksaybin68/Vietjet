@@ -413,42 +413,42 @@ export default function FlightBookingResultsWrapper({
           </div>
 
           {/* 4 circular step indicators from sample image */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <div
-              className={`w-7 h-7 rounded-full flex items-center justify-center shadow-sm text-white font-bold ${
+              className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shadow-xs text-white font-bold transition-all ${
                 bookingStep === 1
                   ? 'bg-[#54B848]'
-                  : 'bg-[#FFCC00] border border-black/10 text-gray-800'
+                  : 'bg-[#FFA500]'
               }`}
               title="Chọn chuyến bay"
             >
-              <Icon name="PaperAirplaneIcon" size={13} className="rotate-45" />
+              <Icon name="PaperAirplaneIcon" size={12} className="rotate-45" />
             </div>
             <div
-              className={`w-7 h-7 rounded-full flex items-center justify-center shadow-sm text-white font-bold ${
+              className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shadow-xs text-white font-bold transition-all ${
                 bookingStep === 2
                   ? 'bg-[#54B848]'
-                  : 'bg-[#FFCC00] border border-black/10 text-gray-800'
+                  : 'bg-[#FFA500]'
               }`}
               title="Thông tin hành khách"
             >
-              <Icon name="UserIcon" size={13} />
+              <Icon name="UserIcon" size={12} />
             </div>
             <div
-              className={`w-7 h-7 rounded-full flex items-center justify-center shadow-sm text-white font-bold ${
+              className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shadow-xs text-white font-bold transition-all ${
                 bookingStep === 3
                   ? 'bg-[#54B848]'
-                  : 'bg-[#FFCC00] border border-black/10 text-gray-800'
+                  : 'bg-[#FFA500]'
               }`}
               title="Dịch vụ bổ sung"
             >
-              <Icon name="ShoppingCartIcon" size={13} />
+              <Icon name="ShoppingCartIcon" size={12} />
             </div>
             <div
-              className={`w-7 h-7 rounded-full flex items-center justify-center shadow-sm text-white font-bold ${
+              className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shadow-xs text-white font-bold transition-all ${
                 bookingStep === 4
                   ? 'bg-[#54B848]'
-                  : 'bg-[#FFCC00] border border-black/10 text-gray-800'
+                  : 'bg-[#FFA500]'
               }`}
               title="Thanh toán"
             >
@@ -505,8 +505,8 @@ export default function FlightBookingResultsWrapper({
         </div>
       </div>
 
-      {/* Sticky Bottom Bar — Tong tien + Di tiep matching sample image */}
-      <div className="fixed bottom-0 left-0 right-0 z-[60] bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] py-3 px-4 sm:px-8">
+      {/* Desktop Sticky Bottom Bar */}
+      <div className="hidden sm:block fixed bottom-0 left-0 right-0 z-[60] bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] py-3 px-4 sm:px-8">
         <div className="mx-auto max-w-[1368px] flex items-center justify-between">
           <div className="flex-1 flex flex-col items-center">
             <span className="text-2xs text-gray-500 font-bold uppercase tracking-wider">
@@ -526,6 +526,21 @@ export default function FlightBookingResultsWrapper({
           </button>
         </div>
       </div>
+
+      {/* Mobile Floating "Đi tiếp" button matching Screenshot */}
+      <div className="sm:hidden fixed bottom-5 left-0 right-0 z-[60] flex justify-center pointer-events-none px-4">
+        <button
+          type="button"
+          onClick={handleContinue}
+          disabled={!bookings.outbound}
+          className="pointer-events-auto bg-[#FFCC00] hover:bg-[#FFD200] disabled:opacity-50 disabled:cursor-not-allowed text-gray-950 font-black text-base px-16 py-3 rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.2)] border border-yellow-400 active:scale-95 transition-all cursor-pointer"
+        >
+          Đi tiếp
+        </button>
+      </div>
+
+      {/* Red bottom accent stripe matching sample image */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 h-2 bg-[#D71920] z-50 pointer-events-none" />
 
       {/* Bảng so sánh 4 hạng vé */}
       <FareBenefitsModal

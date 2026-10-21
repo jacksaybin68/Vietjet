@@ -403,8 +403,8 @@ export default function BookingSummaryPanel({
         </div>
       </aside>
 
-      {/* Mobile Sticky Bottom Bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[var(--border)] shadow-[0_-4px_16px_rgba(0,0,0,0.08)]">
+      {/* Mobile Sticky Bottom Bar - hidden to avoid collision with wrapper floating button */}
+      <div className="hidden">
         {mobileExpanded && (
           <div className="p-4 bg-[var(--surface-2)] border-b border-[var(--border)] text-xs space-y-2 animate-fadeIn">
             <div className="flex justify-between font-bold text-[var(--foreground)]">

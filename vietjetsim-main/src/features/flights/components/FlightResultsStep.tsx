@@ -241,11 +241,12 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
       </button>
 
       <div className="flex items-center justify-center gap-1.5 sm:gap-3">
-        {days.map((day) => {
+        {days.map((day, idx) => {
           const iso = toIsoDate(day);
           const isSelected = iso === toIsoDate(selected);
           const daySeed = (day.getDate() * 7 + day.getMonth() * 13) % 5;
           const price = daySeed === 4 ? '1.990 000' : '890 000';
+          const isOuterDay = idx === 0 || idx === 4;
 
           if (isSelected) {
             return (
@@ -254,12 +255,12 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
                 type="button"
                 onClick={() => onSelect?.(iso)}
                 aria-current="date"
-                className="relative px-5 py-2 flex flex-col items-center justify-center text-center transition-transform hover:scale-105 active:scale-95 cursor-pointer min-w-[130px]"
+                className="relative px-3 sm:px-5 py-2 flex flex-col items-center justify-center text-center transition-transform hover:scale-105 active:scale-95 cursor-pointer min-w-[115px] sm:min-w-[130px]"
               >
                 {/* Scalloped / puffy cloud SVG badge background matching sample image */}
                 <svg
                   viewBox="0 0 140 70"
-                  className="absolute inset-0 w-full h-full text-vjyellow filter drop-shadow z-0"
+                  className="absolute inset-0 w-full h-full text-[#FFCC00] filter drop-shadow-[0_2px_4px_rgba(215,25,32,0.4)] z-0"
                   fill="currentColor"
                   preserveAspectRatio="none"
                 >
@@ -274,13 +275,13 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
                   <rect x="28" y="24" width="86" height="30" />
                 </svg>
                 <div className="relative z-10">
-                  <span className="block text-2xs sm:text-xs font-semibold text-gray-900 leading-tight">
+                  <span className="block text-3xs sm:text-xs font-semibold text-gray-900 leading-tight">
                     {WEEKDAY_LABELS[day.getDay()]}
                   </span>
-                  <span className="block text-xs sm:text-sm font-black text-gray-900 leading-tight my-0.5">
+                  <span className="block text-xs sm:text-sm font-black text-gray-950 leading-tight my-0.5">
                     {day.getDate()} tháng {day.getMonth() + 1}
                   </span>
-                  <span className="block text-2xs sm:text-xs font-black text-primary leading-tight">
+                  <span className="block text-3xs sm:text-xs font-black text-[#D71920] italic leading-tight">
                     Từ <span className="font-extrabold">{price}</span> VND
                   </span>
                 </div>
@@ -293,15 +294,15 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
               key={iso}
               type="button"
               onClick={() => onSelect?.(iso)}
-              className="flex flex-col items-center justify-center text-center px-3 py-2 transition-transform hover:scale-105 cursor-pointer min-w-[110px]"
+              className={`${isOuterDay ? 'hidden sm:flex' : 'flex'} flex-col items-center justify-center text-center px-2 sm:px-3 py-2 transition-transform hover:scale-105 cursor-pointer min-w-[95px] sm:min-w-[110px]`}
             >
-              <span className="text-2xs sm:text-xs font-medium text-gray-600 leading-tight">
+              <span className="text-3xs sm:text-xs font-medium text-gray-600 leading-tight">
                 {WEEKDAY_LABELS[day.getDay()]}
               </span>
-              <span className="text-xs sm:text-sm font-bold text-gray-900 leading-tight my-0.5">
+              <span className="text-xs sm:text-sm font-bold text-gray-950 leading-tight my-0.5">
                 {day.getDate()} tháng {day.getMonth() + 1}
               </span>
-              <span className="text-2xs sm:text-xs font-bold text-gray-800 leading-tight">
+              <span className="text-3xs sm:text-xs font-bold text-gray-900 leading-tight">
                 Từ <span className="font-extrabold">{price}</span> VND
               </span>
             </button>
@@ -943,10 +944,10 @@ export default function FlightResultsStep({
       <div className="w-full min-w-0 space-y-4">
         {/* Route board — clean white card with opposing red and gray arrows matching sample */}
         {search?.from && search?.to && (
-          <div className="rounded-lg bg-white border border-gray-100 shadow-sm px-6 py-3.5 mb-2">
-            <div className="flex items-center justify-center gap-6 sm:gap-14">
-              <div className="text-center min-w-0">
-                <div className="text-2xl sm:text-3xl font-black text-gray-900 font-koho leading-none">
+          <div className="rounded-xl bg-white border border-gray-100 shadow-xs px-3 py-2.5 sm:px-8 sm:py-3.5 mb-2 mx-auto max-w-lg">
+            <div className="flex items-center justify-between sm:justify-center gap-2 sm:gap-14">
+              <div className="text-center min-w-0 flex-1 sm:flex-initial">
+                <div className="text-2xl sm:text-3xl font-black text-gray-950 font-koho leading-none tracking-tight">
                   {search.from.toUpperCase()}
                 </div>
                 <div className="text-xs sm:text-sm text-gray-600 font-medium mt-1 truncate">
@@ -954,18 +955,18 @@ export default function FlightResultsStep({
                 </div>
               </div>
 
-              {/* Opposing arrows: top red right, bottom gray left */}
-              <div className="flex flex-col items-center justify-center gap-1 px-4 sm:px-8">
-                <div className="w-12 sm:w-16 h-0.5 bg-primary relative">
-                  <span className="absolute right-0 -top-1 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-l-[6px] border-l-primary" />
+              {/* Opposing arrows: top red right, bottom gray left matching screenshot */}
+              <div className="flex flex-col items-center justify-center gap-1.5 px-2 sm:px-8 shrink-0">
+                <div className="w-10 sm:w-16 h-1 bg-[#D71920] relative rounded-full">
+                  <span className="absolute right-0 -top-1 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-l-[8px] border-l-[#D71920]" />
                 </div>
-                <div className="w-12 sm:w-16 h-0.5 bg-gray-400 relative">
-                  <span className="absolute left-0 -top-1 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-r-[6px] border-r-gray-400" />
+                <div className="w-10 sm:w-16 h-1 bg-[#E0E0E0] relative rounded-full">
+                  <span className="absolute left-0 -top-1 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-r-[8px] border-r-[#E0E0E0]" />
                 </div>
               </div>
 
-              <div className="text-center min-w-0">
-                <div className="text-2xl sm:text-3xl font-black text-gray-900 font-koho leading-none">
+              <div className="text-center min-w-0 flex-1 sm:flex-initial">
+                <div className="text-2xl sm:text-3xl font-black text-gray-950 font-koho leading-none tracking-tight">
                   {search.to.toUpperCase()}
                 </div>
                 <div className="text-xs sm:text-sm text-gray-600 font-medium mt-1 truncate">
@@ -995,20 +996,20 @@ export default function FlightResultsStep({
           <h2>{filtered.length} chuyến bay phù hợp</h2>
         </div>
 
-        {/* 4 Fare Class Headers matching reference screenshot */}
+        {/* 4 Fare Class Headers matching reference screenshot (visible on mobile and desktop) */}
         {!isLoading && filtered.length > 0 && (
-          <div className="hidden lg:flex flex-row items-stretch gap-0 mt-4 mb-1">
-            {/* Empty space matching left yellow box (240px) */}
-            <div className="w-[240px] shrink-0" />
+          <div className="flex flex-row items-stretch gap-0 mt-3 mb-1">
+            {/* Empty space matching left yellow box */}
+            <div className="w-[27%] sm:w-[28%] lg:w-[240px] shrink-0" />
             {/* 4 Fare Headers aligned with flight card columns */}
             <div className="flex-1 min-w-0 grid grid-cols-4 gap-0.5">
               <div
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('business')}
-                className="bg-yellow-700 text-white py-2 px-2 text-center rounded-t-md flex items-center justify-center cursor-pointer hover:opacity-90 shadow-sm"
+                className="bg-[#8E7022] text-white py-1.5 sm:py-2 px-0.5 sm:px-2 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs"
               >
-                <span className="font-black italic uppercase text-xs sm:text-sm tracking-wider font-koho">
+                <span className="font-black italic uppercase text-[9px] sm:text-xs md:text-sm tracking-wider font-koho">
                   BUSINESS
                 </span>
               </div>
@@ -1016,9 +1017,9 @@ export default function FlightResultsStep({
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('skyboss')}
-                className="bg-primary text-white py-2 px-2 text-center rounded-t-md flex items-center justify-center cursor-pointer hover:opacity-90 shadow-sm"
+                className="bg-[#D71920] text-white py-1.5 sm:py-2 px-0.5 sm:px-2 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs"
               >
-                <span className="font-black italic text-xs sm:text-sm tracking-wider font-koho">
+                <span className="font-black italic text-[9px] sm:text-xs md:text-sm tracking-wider font-koho">
                   skyBOSS
                 </span>
               </div>
@@ -1026,9 +1027,9 @@ export default function FlightResultsStep({
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('deluxe')}
-                className="bg-orange-500 text-white py-2 px-2 text-center rounded-t-md flex items-center justify-center cursor-pointer hover:opacity-90 shadow-sm"
+                className="bg-[#FF8800] text-white py-1.5 sm:py-2 px-0.5 sm:px-2 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs"
               >
-                <span className="font-black italic text-xs sm:text-sm tracking-wider font-koho">
+                <span className="font-black italic text-[9px] sm:text-xs md:text-sm tracking-wider font-koho">
                   Deluxe
                 </span>
               </div>
@@ -1036,10 +1037,10 @@ export default function FlightResultsStep({
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('eco')}
-                className="bg-emerald-600 text-white py-2 px-2 text-center rounded-t-md flex items-center justify-center cursor-pointer hover:opacity-90 shadow-sm"
+                className="bg-[#388E3C] text-white py-1.5 sm:py-2 px-0.5 sm:px-2 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs"
               >
-                <span className="font-black italic lowercase text-xs sm:text-sm tracking-wider font-koho">
-                  eco
+                <span className="font-black italic text-[9px] sm:text-xs md:text-sm tracking-wider font-koho">
+                  Eco
                 </span>
               </div>
             </div>
@@ -1142,7 +1143,7 @@ export default function FlightResultsStep({
                 key={flight.id}
                 data-testid="flight-result-card"
                 style={{ transitionDelay: `${Math.min(idx * 50, 300)}ms` }}
-                className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 relative flex flex-col lg:flex-row flex-wrap mb-3"
+                className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs hover:shadow-md transition-shadow duration-200 relative flex flex-row flex-wrap mb-2 sm:mb-3"
               >
                 {/* Left: Flight Info - bright yellow box matching real Vietjet */}
                 <div
@@ -1178,28 +1179,29 @@ export default function FlightResultsStep({
                       setExpandedFlightNo(flight.flightNo);
                     }
                   }}
-                  className="w-full lg:w-[240px] shrink-0 bg-vjyellow p-3 sm:p-4 border-b lg:border-b-0 border-yellow-400 flex flex-col items-center justify-center text-center relative select-none cursor-pointer hover:bg-yellow-400 transition-colors"
+                  className="w-[27%] sm:w-[28%] lg:w-[240px] shrink-0 bg-[#FFC700] p-1 sm:p-3 lg:p-4 border-r border-yellow-400 flex flex-col items-center justify-center text-center relative select-none cursor-pointer hover:bg-yellow-400 transition-colors"
                 >
-                  <span className="text-2xs font-bold text-gray-900 tracking-wider uppercase">
+                  <span className="text-[9px] sm:text-2xs font-bold text-gray-900 tracking-wider uppercase leading-tight">
                     {flight.flightNo}
                   </span>
 
-                  <div className="flex items-baseline justify-center gap-1.5 my-1">
-                    <span className="text-xl sm:text-2xl font-black text-gray-950 font-koho leading-none">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 my-0.5 sm:my-1">
+                    <span className="text-xs sm:text-base lg:text-2xl font-black text-gray-950 font-koho leading-none">
                       {flight.departTime}
                     </span>
-                    <span className="text-2xs font-bold text-gray-700 leading-none">Đến</span>
-                    <span className="text-xl sm:text-2xl font-black text-gray-950 font-koho leading-none">
+                    <span className="text-[8px] sm:text-2xs font-bold text-gray-700 leading-none">Đến</span>
+                    <span className="text-xs sm:text-base lg:text-2xl font-black text-gray-950 font-koho leading-none">
                       {flight.arriveTime}
                     </span>
                   </div>
 
-                  <div className="text-2xs text-gray-800 font-medium">
-                    <span>{flight.aircraft ?? 'Airbus A321'}</span> -{' '}
-                    <span className="text-red-700 font-bold">Bay thẳng</span>
+                  <div className="text-[7.5px] sm:text-2xs text-gray-800 font-medium leading-tight">
+                    <span className="block sm:inline">{flight.aircraft ?? 'Airbus A321'}</span>
+                    <span className="hidden sm:inline"> - </span>
+                    <span className="text-red-700 font-bold block sm:inline">Bay thẳng</span>
                   </div>
 
-                  <span className="text-xs text-gray-700 mt-1">∨</span>
+                  <span className="text-[9px] sm:text-xs text-gray-700 mt-0.5 leading-none">∨</span>
                 </div>
 
                 {/* Right: Fare Classes - 4 columns matching sample */}
@@ -1232,15 +1234,15 @@ export default function FlightResultsStep({
                         <div className="sr-only">{fc.price.toLocaleString('vi-VN')}₫</div>
 
                         {isSoldOut ? (
-                          <div className="flex-1 flex flex-col items-center justify-center p-2 text-center select-none min-h-[78px]">
-                            <div className="w-7 h-7 rounded-full border border-gray-400/50 flex items-center justify-center text-gray-400 mb-1">
+                          <div className="flex-1 flex flex-col items-center justify-center p-1 sm:p-2 text-center select-none min-h-[64px] sm:min-h-[78px]">
+                            <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-full border border-gray-400/50 flex items-center justify-center text-gray-400 mb-0.5 sm:mb-1">
                               <Icon
                                 name="PaperAirplaneIcon"
-                                size={13}
+                                size={11}
                                 className="rotate-45 opacity-60"
                               />
                             </div>
-                            <span className="text-xs font-bold text-gray-500">Hết chỗ</span>
+                            <span className="text-[9px] sm:text-xs font-bold text-gray-500 leading-tight">Hết chỗ</span>
                             <button
                               data-testid="select-fare"
                               type="button"
@@ -1281,15 +1283,15 @@ export default function FlightResultsStep({
                               });
                               onFlightSelect?.(flight.flightNo, fc.id, fc.price, fares, flight);
                             }}
-                            className="w-full h-full py-2.5 px-1 flex flex-col items-center justify-center text-center cursor-pointer transition-transform active:scale-[0.98] min-h-[78px]"
+                            className="w-full h-full py-1.5 sm:py-2.5 px-0.5 sm:px-1 flex flex-col items-center justify-center text-center cursor-pointer transition-transform active:scale-[0.98] min-h-[64px] sm:min-h-[78px]"
                           >
-                            <span className="text-base sm:text-lg lg:text-xl font-black text-gray-950 font-koho leading-none tracking-tight">
+                            <span className="text-xs sm:text-base lg:text-xl font-black text-gray-950 font-koho leading-none tracking-tight">
                               {Math.floor(fc.price / 1000).toLocaleString('vi-VN')}
                             </span>
-                            <span className="text-2xs sm:text-xs font-bold text-gray-700 uppercase mt-0.5 leading-none">
+                            <span className="text-[8px] sm:text-2xs font-bold text-gray-700 uppercase mt-0.5 leading-none">
                               000 VND
                             </span>
-                            <span className="text-3xs text-gray-400 mt-0.5 leading-none">∨</span>
+                            <span className="text-[8px] sm:text-3xs text-gray-400 mt-0.5 leading-none">∨</span>
                           </button>
                         )}
                       </div>
