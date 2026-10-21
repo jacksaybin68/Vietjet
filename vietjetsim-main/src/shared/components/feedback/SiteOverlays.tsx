@@ -20,7 +20,9 @@ export function SiteOverlays() {
   const isBookingFlow = Boolean(
     pathname?.startsWith('/tim-ve') ||
     pathname?.startsWith('/dat-ve') ||
-    pathname?.startsWith('/thanh-toan')
+    pathname?.startsWith('/thanh-toan') ||
+    pathname?.startsWith('/dang-nhap') ||
+    pathname?.startsWith('/dang-ky')
   );
 
   const [showCookie, setShowCookie] = useState(false);
