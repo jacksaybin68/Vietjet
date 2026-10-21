@@ -102,18 +102,28 @@ export default function SeatSelectionDrawer({
 
       {/* Drawer content */}
       <div className="relative w-full max-w-lg bg-white h-full shadow-2xl flex flex-col z-10 animate-slideInRight">
-        {/* Header */}
-        <div className="bg-primary-dark text-white px-4 py-3 flex items-center justify-between shadow-md">
-          <h2 className="text-sm sm:text-base font-black uppercase tracking-wider font-koho">
-            CHỌN CHỖ NGỒI
+        {/* Header with Vietjet curve top-right (Screenshot 9) */}
+        <div className="relative bg-[#C4161C] text-white px-4 py-3 flex items-center justify-between shadow-md overflow-hidden">
+          <div className="w-8 shrink-0" />
+          <h2 className="font-sans font-black italic tracking-wide text-base sm:text-lg uppercase text-white text-center">
+            CHỌN CHỖ NGỒI YÊU THÍCH
           </h2>
-          <button
-            onClick={onClose}
-            className="text-white hover:text-vjgold p-1 rounded transition-colors"
-            aria-label="Đóng"
-          >
-            <RiCloseLine size={24} />
-          </button>
+          <div className="relative z-10">
+            <button
+              onClick={onClose}
+              className="text-gray-900 bg-white/90 hover:bg-white p-1 rounded-full transition-colors flex items-center justify-center h-7 w-7"
+              aria-label="Đóng"
+            >
+              <RiCloseLine size={20} />
+            </button>
+          </div>
+          {/* Vietjet green-yellow swoosh on top right */}
+          <div className="pointer-events-none absolute top-0 right-0 h-14 w-24 overflow-hidden">
+            <svg className="absolute -top-4 -right-4 h-20 w-28 opacity-95" viewBox="0 0 100 60" fill="none">
+              <path d="M100 0 L 20 0 C 40 30, 70 50, 100 60 Z" fill="#2E7D32" />
+              <path d="M100 0 L 45 0 C 60 25, 80 45, 100 50 Z" fill="#FBB612" />
+            </svg>
+          </div>
         </div>
 
         {/* Legs tabs */}
@@ -121,7 +131,7 @@ export default function SeatSelectionDrawer({
           <button
             type="button"
             onClick={() => setActiveLeg('outbound')}
-            className={`flex-1 py-2 text-center text-xs font-bold transition-all border-b-2 ${
+            className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${
               activeLeg === 'outbound'
                 ? 'border-primary-dark text-primary-dark'
                 : 'border-transparent text-gray-500 hover:text-gray-800'
@@ -133,7 +143,7 @@ export default function SeatSelectionDrawer({
             <button
               type="button"
               onClick={() => setActiveLeg('inbound')}
-              className={`flex-1 py-2 text-center text-xs font-bold transition-all border-b-2 ${
+              className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${
                 activeLeg === 'inbound'
                   ? 'border-primary-dark text-primary-dark'
                   : 'border-transparent text-gray-500 hover:text-gray-800'
@@ -144,16 +154,18 @@ export default function SeatSelectionDrawer({
           )}
         </div>
 
-        {/* Passenger Bar */}
-        <div className="bg-brand-wine text-white px-4 py-2 flex items-center justify-between text-xs font-bold">
-          <div>
-            <span className="text-gray-300 mr-1">Người lớn:</span>
-            <span className="uppercase">{passengerName}</span>
-          </div>
-          <div className="text-yellow-300">
-            {activeLeg === 'outbound'
-              ? `${flight.from} - ${flight.to}`
-              : `${returnFlight?.from || flight.to} - ${returnFlight?.to || flight.from}`}
+        {/* Passenger Card matching Screenshot 9 */}
+        <div className="p-4 bg-gray-50 border-b border-gray-200">
+          <div className="max-w-xs mx-auto overflow-hidden rounded-xl border border-red-200 shadow-sm bg-white text-center">
+            <div className="bg-[#C4161C] py-2 px-4 text-white">
+              <div className="text-3xs uppercase tracking-wider text-white/80">Người lớn</div>
+              <div className="text-sm font-black uppercase tracking-tight">{passengerName}</div>
+            </div>
+            <div className="py-2.5 px-4 text-sm font-bold text-gray-900 font-koho">
+              {activeLeg === 'outbound'
+                ? `${flight.from} - ${flight.to}`
+                : `${returnFlight?.from || flight.to} - ${returnFlight?.to || flight.from}`}
+            </div>
           </div>
         </div>
 

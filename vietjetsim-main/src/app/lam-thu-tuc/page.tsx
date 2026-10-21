@@ -256,39 +256,37 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
           trắng pha trong suốt + chữ/icon đỏ, tab còn lại chữ xám không nền; cả
           hai nhỏ gọn, đặt sát nhau. Nền trời mây đặt ở GỐC trang (phủ toàn bộ
           nội dung dưới header), giống trang /chuyen-bay-cua-toi. */}
-        <section className="relative overflow-hidden py-8 sm:py-10">
+        <section className="relative overflow-hidden py-4 sm:py-10">
           <div
-            className="relative mx-auto max-w-full px-4 sm:px-0"
-            style={{ width: 'min(1200px, calc(100vw - 80px))' }}
+            className="relative mx-auto max-w-full px-2 sm:px-0"
+            style={{ width: 'min(1200px, calc(100vw - 24px))' }}
           >
-            {/* Tab active + tab inactive */}
-            <div className="flex items-end">
+            {/* Tab active + tab inactive matching Screenshot 1 */}
+            <div className="flex w-full items-end bg-white/95 sm:bg-transparent shadow-xs sm:shadow-none rounded-t-lg overflow-hidden border-b border-gray-200 sm:border-b-0">
               <div
-                className="flex items-center justify-center gap-2 select-none"
+                className="flex-1 sm:flex-initial sm:w-[199px] flex items-center justify-center gap-2 select-none border-b-2 border-primary sm:border-b-0 px-2 sm:px-4"
                 style={{
-                  width: '199px',
                   height: '48px',
-                  background: 'rgba(255, 255, 255, 0.6)',
-                  borderRadius: '8px 8px 0 0',
+                  background: 'rgba(255, 255, 255, 0.95)',
                   color: '#EC2029',
-                  fontSize: '16px',
+                  fontSize: '15px',
                   fontWeight: 700,
                 }}
               >
-                <MdConfirmationNumber className="h-5 w-5 text-primary" />
-                <span>Tìm kiếm mã đặt chỗ</span>
+                <MdConfirmationNumber className="h-5 w-5 text-primary shrink-0" />
+                <span className="truncate">Tìm kiếm mã đặt chỗ</span>
               </div>
               <Link
                 href="/chuyen-bay-cua-toi"
-                className="flex items-center justify-center gap-2 px-5 text-gray-600 transition-colors hover:text-primary"
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-2 sm:px-5 text-gray-500 transition-colors hover:text-primary"
                 style={{
                   height: '48px',
-                  fontSize: '16px',
+                  fontSize: '15px',
                   fontWeight: 600,
                 }}
               >
-                <FlightIcon className="h-5 w-5" />
-                <span>Chuyến bay sắp tới</span>
+                <FlightIcon className="h-5 w-5 shrink-0" />
+                <span className="truncate">Chuyến bay sắp tới</span>
               </Link>
             </div>
 
@@ -297,33 +295,28 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
               <div
                 className="grid w-full grid-cols-1 overflow-hidden lg:grid-cols-[474px_minmax(0,1fr)]"
                 style={{
-                  background: 'rgba(255, 255, 255, 0.6)',
-                  borderRadius: '0 10px 10px 10px',
+                  background: 'rgba(255, 255, 255, 0.85)',
+                  borderRadius: '0 0 10px 10px',
                   boxShadow: '0 3px 12px rgba(0, 31, 62, 0.08)',
                 }}
               >
                 {/* Cột trái: CHECK-IN form */}
-                <div className="flex flex-col justify-start border-b border-gray-200 p-6 sm:p-8 lg:border-b-0 lg:border-r lg:border-gray-200">
+                <div className="flex flex-col justify-start border-b border-gray-200 p-4 sm:p-8 lg:border-b-0 lg:border-r lg:border-gray-200">
                   <div>
-                    <h1 className="text-xl font-black uppercase tracking-tight text-gray-900 font-sans">
+                    <h1 className="text-xl font-black uppercase tracking-tight text-gray-900 font-sans hidden sm:block">
                       CHECK-IN
                     </h1>
-                    <p className="mt-2 text-sm leading-relaxed text-gray-700 font-medium">
+                    <p className="text-sm leading-relaxed text-gray-700 font-medium">
                       Sẵn sàng cho chuyến bay vui vẻ, thoải mái, bạn có thể làm thủ tục chuyến bay
                       trực tuyến nhanh chóng và đơn giản.
                     </p>
                   </div>
 
-                  <form onSubmit={handleSearch} className="mt-6 flex flex-col items-center">
-                    <div className="flex w-full flex-col items-center gap-[10px]">
-                      {/* Ô nhập 1: Mã đặt chỗ (410x40) */}
+                  <form onSubmit={handleSearch} className="mt-5 flex flex-col items-center">
+                    <div className="flex w-full flex-col items-center gap-3">
+                      {/* Ô nhập 1: Mã đặt chỗ */}
                       <div
-                        className="relative flex h-[40px] items-center rounded-[5px] bg-white px-[20px]"
-                        style={{
-                          width: '410px',
-                          maxWidth: '100%',
-                          boxShadow: '0 4px 9px rgba(0, 0, 0, 0.09)',
-                        }}
+                        className="relative flex h-[46px] w-full max-w-[410px] items-center rounded-lg border border-gray-200 bg-white px-4 shadow-xs"
                       >
                         <input
                           id="booking-code"
@@ -337,21 +330,16 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                         {!bookingCode && (
                           <label
                             htmlFor="booking-code"
-                            className="pointer-events-none absolute left-[20px] flex select-none items-center text-base font-semibold text-gray-500 transition-opacity peer-focus:opacity-30"
+                            className="pointer-events-none absolute left-4 flex select-none items-center text-sm sm:text-base font-semibold text-gray-500 transition-opacity peer-focus:opacity-30"
                           >
                             Mã đặt chỗ<span className="ml-0.5 text-primary">*</span>
                           </label>
                         )}
                       </div>
 
-                      {/* Ô nhập 2: Họ (410x40) */}
+                      {/* Ô nhập 2: Họ */}
                       <div
-                        className="relative flex h-[40px] items-center rounded-[5px] bg-white px-[20px]"
-                        style={{
-                          width: '410px',
-                          maxWidth: '100%',
-                          boxShadow: '0 4px 9px rgba(0, 0, 0, 0.09)',
-                        }}
+                        className="relative flex h-[46px] w-full max-w-[410px] items-center rounded-lg border border-gray-200 bg-white px-4 shadow-xs"
                       >
                         <input
                           id="last-name"
@@ -365,7 +353,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                         {!lastName && (
                           <label
                             htmlFor="last-name"
-                            className="pointer-events-none absolute left-[20px] flex select-none items-center text-base font-semibold text-gray-500 transition-opacity peer-focus:opacity-30"
+                            className="pointer-events-none absolute left-4 flex select-none items-center text-sm sm:text-base font-semibold text-gray-500 transition-opacity peer-focus:opacity-30"
                           >
                             Họ<span className="ml-0.5 text-primary">*</span>
                           </label>
@@ -418,77 +406,65 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                     </p>
                   </div>
 
-                  {/* Khung vàng: <table> viền 1px #EDCE00, bo 8, nền trắng */}
-                  <div className="overflow-hidden rounded-[8px] border border-vjyellow bg-white">
-                    <table
-                      className="w-full border-collapse bg-white font-koho text-base font-medium leading-[24px] text-gray-900"
-                      style={{ borderSpacing: 0 }}
-                    >
-                      <tbody>
-                        <tr>
-                          <td
-                            className="block w-full border-b border-vjyellow p-5 align-top md:table-cell md:w-1/2 md:border-b-0 md:border-r"
-                            style={{ borderColor: '#EDCE00' }}
-                          >
-                            <h3 className="mb-3 font-bold text-base leading-[24px] text-gray-900">
-                              Lưu ý sau khi Online Check-in:
-                            </h3>
-                            <div className="space-y-4">
-                              <div>
-                                <p className="font-bold text-base leading-[24px] text-gray-900">
-                                  • Không có hành lý ký gửi:
-                                </p>
-                                <p className="mt-1">
-                                  Đối với chuyến bay nội địa tại Việt Nam, Quý khách chuẩn bị hành
-                                  lý xách tay đúng quy định và di chuyển trực tiếp đến khu vực kiểm
-                                  tra an ninh.
-                                </p>
-                              </div>
-                              <div>
-                                <p className="font-bold text-base leading-[24px] text-gray-900">
-                                  • Có hành lý ký gửi:
-                                </p>
-                                <p className="mt-1">
-                                  Vui lòng đến{' '}
-                                  <strong className="font-bold text-gray-900">
-                                    Quầy Online Check-in/Bag Drop
-                                  </strong>{' '}
-                                  để gửi hành lý. Quầy làm thủ tục chuyến bay nội địa{' '}
-                                  <strong className="font-bold text-gray-900">
-                                    đóng trước 40 phút
-                                  </strong>{' '}
-                                  so với giờ khởi hành (giờ đóng quầy quốc tế tùy sân bay).
-                                </p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="block w-full p-5 align-top md:table-cell md:w-1/2">
-                            <h3 className="mb-3 font-bold text-base leading-[24px] text-gray-900">
-                              Lưu ý quan trọng:
-                            </h3>
-                            <div className="space-y-3">
-                              <p>
-                                Nếu có thay đổi chuyến bay sau khi đã Online Check-in, Quý khách cần
-                                thực hiện{' '}
-                                <strong className="font-bold text-gray-900">
-                                  Online Check-in lại để nhận Thẻ lên tàu bay mới
-                                </strong>{' '}
-                                và{' '}
-                                <strong className="font-bold text-gray-900">
-                                  sử dụng đúng thẻ lên tàu bay của chuyến bay đang khởi hành
-                                </strong>
-                                .
-                              </p>
-                              <p>
-                                Trong giờ cao điểm hoặc mùa lễ Tết, khu vực an ninh/xuất nhập cảnh
-                                có thể đông; Quý khách nên đến sân bay sớm để đảm bảo hành trình
-                                thuận lợi.
-                              </p>
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                  {/* Khung vàng: bo 8, nền trắng, viền #EDCE00, trên mobile xếp dọc, desktop xếp 2 cột */}
+                  <div className="overflow-hidden rounded-[8px] border border-vjyellow bg-white divide-y md:divide-y-0 md:divide-x divide-vjyellow grid grid-cols-1 md:grid-cols-2">
+                    <div className="p-4 sm:p-5 font-koho text-sm sm:text-base font-medium leading-[22px] sm:leading-[24px] text-gray-900">
+                      <h3 className="mb-2 sm:mb-3 font-bold text-base leading-[24px] text-gray-900">
+                        Lưu ý sau khi Online Check-in:
+                      </h3>
+                      <div className="space-y-3 sm:space-y-4">
+                        <div>
+                          <p className="font-bold text-sm sm:text-base leading-[22px] sm:leading-[24px] text-gray-900">
+                            • Không có hành lý ký gửi:
+                          </p>
+                          <p className="mt-1">
+                            Đối với chuyến bay nội địa tại Việt Nam, Quý khách chuẩn bị hành
+                            lý xách tay đúng quy định và di chuyển trực tiếp đến khu vực kiểm
+                            tra an ninh.
+                          </p>
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm sm:text-base leading-[22px] sm:leading-[24px] text-gray-900">
+                            • Có hành lý ký gửi:
+                          </p>
+                          <p className="mt-1">
+                            Vui lòng đến{' '}
+                            <strong className="font-bold text-gray-900">
+                              Quầy Online Check-in/Bag Drop
+                            </strong>{' '}
+                            để gửi hành lý. Quầy làm thủ tục chuyến bay nội địa{' '}
+                            <strong className="font-bold text-gray-900">
+                              đóng trước 40 phút
+                            </strong>{' '}
+                            so với giờ khởi hành (giờ đóng quầy quốc tế tùy sân bay).
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4 sm:p-5 font-koho text-sm sm:text-base font-medium leading-[22px] sm:leading-[24px] text-gray-900">
+                      <h3 className="mb-2 sm:mb-3 font-bold text-base leading-[24px] text-gray-900">
+                        Lưu ý quan trọng:
+                      </h3>
+                      <div className="space-y-3">
+                        <p>
+                          Nếu có thay đổi chuyến bay sau khi đã Online Check-in, Quý khách cần
+                          thực hiện{' '}
+                          <strong className="font-bold text-gray-900">
+                            Online Check-in lại để nhận Thẻ lên tàu bay mới
+                          </strong>{' '}
+                          và{' '}
+                          <strong className="font-bold text-gray-900">
+                            sử dụng đúng thẻ lên tàu bay của chuyến bay đang khởi hành
+                          </strong>
+                          .
+                        </p>
+                        <p>
+                          Trong giờ cao điểm hoặc mùa lễ Tết, khu vực an ninh/xuất nhập cảnh
+                          có thể đông; Quý khách nên đến sân bay sớm để đảm bảo hành trình
+                          thuận lợi.
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Mục I, II, III & khôi phục toàn bộ nội dung hướng dẫn */}

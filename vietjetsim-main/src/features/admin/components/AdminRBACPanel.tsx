@@ -181,7 +181,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                 }}
               >
                 <div
-                  className={`text-[11px] font-black uppercase tracking-wider mb-1`}
+                  className={`text-xs2 font-black uppercase tracking-wider mb-1`}
                   style={{ color: def.color }}
                 >
                   {def.label}
@@ -191,7 +191,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                 </div>
                 <div className="flex items-center justify-between">
                   <span
-                    className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                    className="text-2xs font-bold px-2 py-0.5 rounded-full"
                     style={{
                       background: def.color.includes('red')
                         ? '#FEE2E2'
@@ -207,7 +207,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                   >
                     Level {def.level}
                   </span>
-                  <span className="text-[10px] text-gray-400">{def.permissions.size} quyền</span>
+                  <span className="text-2xs text-gray-400">{def.permissions.size} quyền</span>
                 </div>
               </div>
             ))}
@@ -243,7 +243,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                           className="px-2 py-2 text-center font-semibold min-w-[80px]"
                           style={{ color: r.color.replace('text-', '') }}
                           dangerouslySetInnerHTML={{
-                            __html: `<span class="${r.bgColor.split(' ')[0]} text-white px-2 py-0.5 rounded text-[10px] font-bold">${r.label}</span>`,
+                            __html: `<span class="${r.bgColor.split(' ')[0]} text-white px-2 py-0.5 rounded text-2xs font-bold">${r.label}</span>`,
                           }}
                         />
                       );
@@ -257,7 +257,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                       <tr className="border-t border-gray-100 bg-gray-50/50">
                         <td
                           colSpan={Object.keys(SYSTEM_ROLES).length + 1}
-                          className="px-3 py-1.5 font-bold text-gray-700 text-[10px] uppercase tracking-wider flex items-center gap-1.5 font-koho"
+                          className="px-3 py-1.5 font-bold text-gray-700 text-2xs uppercase tracking-wider flex items-center gap-1.5 font-koho"
                         >
                           <Icon name={cat.icon} size={12} /> {cat.label}
                         </td>
@@ -280,7 +280,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                             <td key={rk} className="px-2 py-1.5 text-center">
                               {rd.permissions.has(perm) ? (
                                 <span
-                                  className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold"
+                                  className="inline-flex items-center justify-center w-5 h-5 rounded-full text-2xs font-bold"
                                   style={{ background: '#DCFCE7', color: '#166534' }}
                                 >
                                   &#10003;
@@ -362,13 +362,13 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                       <div className="flex items-center gap-3">
                         {/* Role badge */}
                         <span
-                          className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${roleDef?.bgColor || 'bg-gray-200'} text-white`}
+                          className={`text-xs2 font-bold px-2.5 py-1 rounded-full ${roleDef?.bgColor || 'bg-gray-200'} text-white`}
                         >
                           {roleDef?.label || ar.role_name}
                         </span>
 
                         {/* Permission count */}
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold">
+                        <span className="text-2xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold">
                           {permList.length} quyền
                         </span>
 
@@ -388,13 +388,13 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                       {permList.slice(0, 8).map((p) => (
                         <span
                           key={p}
-                          className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 font-mono truncate max-w-[120px]"
+                          className="text-2xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 font-mono truncate max-w-[120px]"
                         >
                           {p}
                         </span>
                       ))}
                       {permList.length > 8 && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-400">
+                        <span className="text-2xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-400">
                           +{permList.length - 8} nữa
                         </span>
                       )}
@@ -446,20 +446,20 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <code className="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-gray-100 text-purple-700">
+                        <code className="text-xs2 font-mono font-bold px-1.5 py-0.5 rounded bg-gray-100 text-purple-700">
                           {log.action}
                         </code>
-                        <span className="text-[10px] text-gray-400">→</span>
-                        <span className="text-[10px] font-semibold text-gray-600">
+                        <span className="text-2xs text-gray-400">→</span>
+                        <span className="text-2xs font-semibold text-gray-600">
                           {log.target_type}
                         </span>
                         {log.target_id && (
-                          <span className="text-[10px] font-mono text-gray-400">
+                          <span className="text-2xs font-mono text-gray-400">
                             #{log.target_id.slice(0, 8)}
                           </span>
                         )}
                         <span
-                          className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                          className={`ml-auto text-2xs font-bold px-1.5 py-0.5 rounded ${
                             log.status === 'success'
                               ? 'bg-emerald-50 text-emerald-700'
                               : log.status === 'denied'
@@ -470,7 +470,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                           {log.status}
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 mt-1 text-[10px] text-gray-400">
+                      <div className="flex items-center gap-3 mt-1 text-2xs text-gray-400">
                         <span className="font-semibold">{log.admin_email}</span>
                         <span>{new Date(log.created_at).toLocaleString('vi-VN')}</span>
                       </div>
@@ -543,11 +543,11 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                   <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors">
                     <Icon name={cfg.icon} size={15} className="text-primary" />
                   </div>
-                  <span className="text-[10px] font-mono text-gray-400">{cfg.key}</span>
+                  <span className="text-2xs font-mono text-gray-400">{cfg.key}</span>
                 </div>
                 <div className="font-bold text-sm text-navy">{cfg.label}</div>
                 <div className="text-lg font-black mt-1 font-koho">{cfg.value}</div>
-                <div className="text-[10px] text-gray-400 mt-1">{cfg.desc}</div>
+                <div className="text-2xs text-gray-400 mt-1">{cfg.desc}</div>
               </div>
             ))}
           </div>
@@ -641,7 +641,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                           >
                             {def.label}
                           </div>
-                          <div className="text-[10px] text-gray-400">
+                          <div className="text-2xs text-gray-400">
                             {def.permissions.size} permissions
                           </div>
                         </div>
@@ -664,7 +664,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                   >
                     <div className="flex items-center gap-2">
                       <Icon name="EyeIcon" size={13} className="text-gray-400" />
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                      <span className="text-2xs font-bold uppercase tracking-wider text-gray-500">
                         Preview quyền:
                       </span>
                     </div>
@@ -674,13 +674,13 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
                         .map((p) => (
                           <span
                             key={p}
-                            className="text-[9px] px-1.5 py-0.5 rounded bg-white border border-gray-200 text-gray-600 font-mono"
+                            className="text-3xs px-1.5 py-0.5 rounded bg-white border border-gray-200 text-gray-600 font-mono"
                           >
                             {p}
                           </span>
                         ))}
                       {selected!.permissions.size > 12 && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-50 text-red-600 font-bold">
+                        <span className="text-3xs px-1.5 py-0.5 rounded bg-red-50 text-red-600 font-bold">
                           +{selected!.permissions.size - 12} nữa
                         </span>
                       )}

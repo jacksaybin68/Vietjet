@@ -132,7 +132,7 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                 setFilterStatus(s);
                 setCurrentPage(1);
               }}
-              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
+              className={`px-4 py-2 rounded-xl text-2xs font-black uppercase tracking-wider transition-all ${
                 filterStatus === s
                   ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
                   : 'text-slate-500 hover:text-slate-300'
@@ -157,19 +157,19 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-white/5 border-b border-white/5">
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest">
                   Giao dịch
                 </th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest whitespace-nowrap">
+                <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest whitespace-nowrap">
                   Khách hàng
                 </th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">
+                <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest text-right">
                   Số tiền
                 </th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">
+                <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest text-center">
                   Trạng thái
                 </th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">
+                <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest text-right">
                   Ngày thực hiện
                 </th>
               </tr>
@@ -200,7 +200,7 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                       <div className="font-mono font-bold text-indigo-400 text-sm group-hover:text-indigo-300 transition-colors">
                         #{t.id.slice(0, 8)}
                       </div>
-                      <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-0.5">
+                      <div className="text-2xs font-black text-slate-500 uppercase tracking-widest mt-0.5">
                         Đặt vé: {t.bookingId.slice(0, 8)}
                       </div>
                     </td>
@@ -208,7 +208,7 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                       <div className="font-bold text-slate-200 text-sm group-hover:text-white transition-colors">
                         {t.userName}
                       </div>
-                      <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                      <div className="text-2xs font-bold text-slate-500 uppercase tracking-wider">
                         {t.userEmail}
                       </div>
                     </td>
@@ -216,13 +216,13 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                       <div className="font-black text-white text-base tracking-tighter tabular-nums">
                         {formatCurrency(t.amount)}
                       </div>
-                      <div className="text-[10px] font-black text-indigo-300/50 uppercase tracking-widest">
+                      <div className="text-2xs font-black text-indigo-300/50 uppercase tracking-widest">
                         {t.method}
                       </div>
                     </td>
                     <td className="px-6 py-5 text-center">
                       <span
-                        className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getStatusBadge(t.status)}`}
+                        className={`px-3 py-1 rounded-lg text-3xs font-black uppercase tracking-widest border ${getStatusBadge(t.status)}`}
                       >
                         {getStatusLabel(t.status)}
                       </span>
@@ -231,7 +231,7 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                       <div className="text-sm font-bold text-slate-300 group-hover:text-slate-100 transition-colors">
                         {new Date(t.createdAt).toLocaleDateString('vi-VN')}
                       </div>
-                      <div className="text-[10px] font-black text-slate-600 uppercase tracking-widest mt-0.5">
+                      <div className="text-2xs font-black text-slate-600 uppercase tracking-widest mt-0.5">
                         {new Date(t.createdAt).toLocaleTimeString('vi-VN', {
                           hour: '2-digit',
                           minute: '2-digit',
@@ -276,7 +276,7 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                   <h3 className="text-lg font-black text-white tracking-tight">
                     Chi tiết giao dịch
                   </h3>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">
+                  <p className="text-2xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">
                     ID:{' '}
                     <span className="text-indigo-400 font-mono tracking-normal">
                       #{selectedTransaction.id}
@@ -297,7 +297,7 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
               {/* Amount Display */}
               <div className="text-center py-6 bg-white/[0.02] border border-white/5 rounded-3xl relative overflow-hidden group">
                 <div className="absolute top-[-20%] left-[-10%] w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 relative z-10">
+                <p className="text-2xs font-black text-slate-500 uppercase tracking-[0.2em] mb-2 relative z-10">
                   Số tiền giao dịch
                 </p>
                 <h4 className="text-4xl font-black text-white tracking-tighter tabular-nums relative z-10">
@@ -305,7 +305,7 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                 </h4>
                 <div className="mt-4 flex justify-center relative z-10">
                   <span
-                    className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${getStatusBadge(selectedTransaction.status)}`}
+                    className={`px-3 py-1 rounded-lg text-2xs font-black uppercase tracking-widest border ${getStatusBadge(selectedTransaction.status)}`}
                   >
                     {getStatusLabel(selectedTransaction.status)}
                   </span>
@@ -315,13 +315,13 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
               {/* Transaction Info Grid */}
               <div className="grid grid-cols-2 gap-x-8 gap-y-6">
                 <div>
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                  <p className="text-2xs font-black text-slate-500 uppercase tracking-widest mb-1">
                     Phương thức
                   </p>
                   <p className="text-sm font-bold text-slate-200">{selectedTransaction.method}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                  <p className="text-2xs font-black text-slate-500 uppercase tracking-widest mb-1">
                     Thời gian
                   </p>
                   <p className="text-sm font-bold text-slate-200">
@@ -330,16 +330,16 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                 </div>
                 <div className="col-span-2 h-[1px] bg-white/5" />
                 <div>
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                  <p className="text-2xs font-black text-slate-500 uppercase tracking-widest mb-1">
                     Khách hàng
                   </p>
                   <p className="text-sm font-bold text-slate-200">{selectedTransaction.userName}</p>
-                  <p className="text-[10px] font-bold text-slate-500">
+                  <p className="text-2xs font-bold text-slate-500">
                     {selectedTransaction.userEmail}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                  <p className="text-2xs font-black text-slate-500 uppercase tracking-widest mb-1">
                     Mã đặt chuyến
                   </p>
                   <p className="text-sm font-bold text-indigo-400 font-mono">
@@ -352,7 +352,7 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
               <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-2xl p-4">
                 <div className="flex gap-4 items-start">
                   <Icon name="InformationCircleIcon" size={18} className="text-indigo-400 mt-0.5" />
-                  <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
+                  <p className="text-xs2 text-slate-400 leading-relaxed font-medium">
                     Giao dịch này được tự động ghi nhận vào hệ thống sau khi khách hàng hoàn tất
                     cổng thanh toán. Liên hệ bộ phận kỹ thuật nếu có sai lệch về số dư.
                   </p>
@@ -362,11 +362,11 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
 
             {/* Modal Actions */}
             <div className="px-8 pb-8 flex gap-3">
-              <button className="flex-1 px-6 py-3 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95">
+              <button className="flex-1 px-6 py-3 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/5 rounded-2xl text-2xs font-black uppercase tracking-widest transition-all active:scale-95">
                 In hoá đơn
               </button>
               {selectedTransaction.status === 'completed' && (
-                <button className="flex-1 px-6 py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95">
+                <button className="flex-1 px-6 py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded-2xl text-2xs font-black uppercase tracking-widest transition-all active:scale-95">
                   Hoàn tiền
                 </button>
               )}

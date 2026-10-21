@@ -371,13 +371,13 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
             </div>
             <div>
               Quản lý người dùng
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mt-1 opacity-70">
+              <p className="text-2xs font-black text-slate-500 uppercase tracking-[0.2em] mt-1 opacity-70">
                 Tổng số {users.length} tài khoản trong hệ thống
               </p>
             </div>
           </h2>
         </div>
-        <button className="flex items-center justify-center gap-2 px-8 py-4 bg-primary hover:bg-primary-dark text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/20 transition-all active:scale-95 group">
+        <button className="flex items-center justify-center gap-2 px-8 py-4 bg-primary hover:bg-primary-dark text-white rounded-2xl text-xs2 font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/20 transition-all active:scale-95 group">
           <Icon
             name="PlusCircleIcon"
             size={18}
@@ -413,7 +413,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
               type="date"
               value={joinDateFrom}
               onChange={(e) => setJoinDateFrom(e.target.value)}
-              className="w-full pl-10 pr-3 py-2.5 bg-transparent border-none rounded-xl text-[11px] font-black text-slate-300 focus:ring-0 uppercase tracking-wider"
+              className="w-full pl-10 pr-3 py-2.5 bg-transparent border-none rounded-xl text-xs2 font-black text-slate-300 focus:ring-0 uppercase tracking-wider"
             />
             <Icon
               name="CalendarDaysIcon"
@@ -427,7 +427,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
               type="date"
               value={joinDateTo}
               onChange={(e) => setJoinDateTo(e.target.value)}
-              className="w-full pl-10 pr-3 py-2.5 bg-transparent border-none rounded-xl text-[11px] font-black text-slate-300 focus:ring-0 uppercase tracking-wider"
+              className="w-full pl-10 pr-3 py-2.5 bg-transparent border-none rounded-xl text-xs2 font-black text-slate-300 focus:ring-0 uppercase tracking-wider"
             />
             <Icon
               name="CalendarDaysIcon"
@@ -441,7 +441,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
           {(activeFilterCount > 0 || searchQuery) && (
             <button
               onClick={clearAllFilters}
-              className="flex items-center gap-2 px-6 py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[10px] font-black uppercase tracking-widest rounded-2xl border border-rose-500/20 transition-all group"
+              className="flex items-center gap-2 px-6 py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-2xs font-black uppercase tracking-widest rounded-2xl border border-rose-500/20 transition-all group"
             >
               <Icon
                 name="XMarkIcon"
@@ -460,7 +460,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
             <button
               key={tab.value}
               onClick={() => setFilterRole(tab.value)}
-              className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterRole === tab.value ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+              className={`px-5 py-2.5 rounded-xl text-2xs font-black uppercase tracking-widest transition-all ${filterRole === tab.value ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
             >
               {tab.label}
             </button>
@@ -471,7 +471,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
             <button
               key={tab.value}
               onClick={() => setFilterStatus(tab.value)}
-              className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === tab.value ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+              className={`px-5 py-2.5 rounded-xl text-2xs font-black uppercase tracking-widest transition-all ${filterStatus === tab.value ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
             >
               {tab.label}
             </button>
@@ -494,40 +494,40 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
             <thead>
               <tr className="bg-white/5 border-b border-white/5">
                 <th
-                  className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-6 py-5 cursor-pointer hover:text-white transition-colors select-none whitespace-nowrap"
+                  className="text-left text-2xs font-black text-slate-500 uppercase tracking-widest px-6 py-5 cursor-pointer hover:text-white transition-colors select-none whitespace-nowrap"
                   onClick={() => handleSort('name')}
                 >
                   Người dùng
                   <SortIcon col="name" />
                 </th>
-                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-6 py-5 hidden sm:table-cell">
+                <th className="text-left text-2xs font-black text-slate-500 uppercase tracking-widest px-6 py-5 hidden sm:table-cell">
                   Liên hệ
                 </th>
-                <th className="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest px-6 py-5">
+                <th className="text-center text-2xs font-black text-slate-500 uppercase tracking-widest px-6 py-5">
                   Vai trò
                 </th>
                 <th
-                  className="text-right text-[10px] font-black text-slate-500 uppercase tracking-widest px-6 py-5 hidden md:table-cell cursor-pointer hover:text-white transition-colors select-none whitespace-nowrap"
+                  className="text-right text-2xs font-black text-slate-500 uppercase tracking-widest px-6 py-5 hidden md:table-cell cursor-pointer hover:text-white transition-colors select-none whitespace-nowrap"
                   onClick={() => handleSort('bookings')}
                 >
                   Đặt vé
                   <SortIcon col="bookings" />
                 </th>
                 <th
-                  className="text-right text-[10px] font-black text-slate-500 uppercase tracking-widest px-6 py-5 hidden lg:table-cell cursor-pointer hover:text-white transition-colors select-none whitespace-nowrap"
+                  className="text-right text-2xs font-black text-slate-500 uppercase tracking-widest px-6 py-5 hidden lg:table-cell cursor-pointer hover:text-white transition-colors select-none whitespace-nowrap"
                   onClick={() => handleSort('spent')}
                 >
                   Chi tiêu
                   <SortIcon col="spent" />
                 </th>
                 <th
-                  className="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest px-6 py-5 cursor-pointer hover:text-white transition-colors select-none whitespace-nowrap"
+                  className="text-center text-2xs font-black text-slate-500 uppercase tracking-widest px-6 py-5 cursor-pointer hover:text-white transition-colors select-none whitespace-nowrap"
                   onClick={() => handleSort('status')}
                 >
                   Trạng thái
                   <SortIcon col="status" />
                 </th>
-                <th className="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest px-6 py-5">
+                <th className="text-center text-2xs font-black text-slate-500 uppercase tracking-widest px-6 py-5">
                   Thao tác
                 </th>
               </tr>
@@ -658,7 +658,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
                           <div className="font-bold text-slate-200 text-sm group-hover:text-white transition-colors">
                             {user.name}
                           </div>
-                          <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-0.5">
+                          <div className="text-2xs font-black text-slate-500 uppercase tracking-widest mt-0.5">
                             {user.joinDate}
                           </div>
                         </div>
@@ -668,13 +668,11 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
                       <div className="text-sm font-semibold text-slate-400 group-hover:text-slate-300 transition-colors">
                         {user.email}
                       </div>
-                      <div className="text-[10px] font-bold text-slate-500 mt-0.5">
-                        {user.phone}
-                      </div>
+                      <div className="text-2xs font-bold text-slate-500 mt-0.5">{user.phone}</div>
                     </td>
                     <td className="px-6 py-5 text-center">
                       <span
-                        className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider ${
+                        className={`text-2xs font-black px-2.5 py-1 rounded-lg uppercase tracking-wider ${
                           user.role === 'admin'
                             ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
                             : 'bg-slate-500/10 text-slate-400 border border-slate-500/20'
@@ -697,7 +695,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
                       <button
                         onClick={(e) => toggleStatus(e, user.id)}
                         disabled={user.role === 'admin' || togglingId === user.id}
-                        className={`text-[10px] font-black px-3 py-1 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed uppercase tracking-wider ${
+                        className={`text-2xs font-black px-3 py-1 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed uppercase tracking-wider ${
                           user.status === 'active'
                             ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20'
                             : 'bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20'
@@ -777,13 +775,13 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
         {sorted.length > 0 && (
           <div className="px-6 py-5 border-t border-white/5 bg-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+              <span className="text-2xs font-black text-slate-500 uppercase tracking-widest">
                 {sorted.length > pageSize
                   ? `Hiển thị ${(safePage - 1) * pageSize + 1}–${Math.min(safePage * pageSize, sorted.length)} / ${sorted.length} người dùng`
                   : `${sorted.length} / ${users.length} người dùng`}
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">
+                <span className="text-2xs font-black text-slate-600 uppercase tracking-widest">
                   Hiển thị:
                 </span>
                 <select
@@ -792,7 +790,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
                     setPageSize(Number(e.target.value));
                     setCurrentPage(1);
                   }}
-                  className="text-[10px] font-black border border-white/10 rounded-lg px-2 py-1 bg-slate-800 text-slate-300 focus:outline-none focus:border-indigo-500 cursor-pointer uppercase tracking-wider transition-all"
+                  className="text-2xs font-black border border-white/10 rounded-lg px-2 py-1 bg-slate-800 text-slate-300 focus:outline-none focus:border-indigo-500 cursor-pointer uppercase tracking-wider transition-all"
                 >
                   <option value={10}>10</option>
                   <option value={25}>25</option>
@@ -848,7 +846,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
                       {selectedUser.name}
                     </h3>
                     <span
-                      className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider ${selectedUser.role === 'admin' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : 'bg-slate-500/10 text-slate-400 border border-slate-500/20'}`}
+                      className={`text-2xs font-black px-2.5 py-1 rounded-lg uppercase tracking-wider ${selectedUser.role === 'admin' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : 'bg-slate-500/10 text-slate-400 border border-slate-500/20'}`}
                     >
                       {selectedUser.role}
                     </span>
@@ -905,7 +903,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
                     <div className="text-lg font-black text-white tracking-tighter">
                       {stat.value}
                     </div>
-                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    <div className="text-2xs font-bold text-slate-500 uppercase tracking-wider">
                       {stat.label}
                     </div>
                   </div>
@@ -915,7 +913,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
               {/* Advanced info */}
               <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
                 <section>
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">
+                  <label className="text-2xs font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">
                     Liên hệ chi tiết
                   </label>
                   <div className="space-y-4">
@@ -924,7 +922,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
                         <Icon name="PhoneIcon" size={18} />
                       </div>
                       <div>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                        <p className="text-2xs font-black text-slate-500 uppercase tracking-widest">
                           Số điện thoại
                         </p>
                         <p className="text-sm font-bold text-slate-200">{selectedUser.phone}</p>
@@ -935,7 +933,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
                         <Icon name="GlobeAltIcon" size={18} />
                       </div>
                       <div>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                        <p className="text-2xs font-black text-slate-500 uppercase tracking-widest">
                           Quốc tịch
                         </p>
                         <p className="text-sm font-bold text-slate-200">Việt Nam</p>
@@ -945,7 +943,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
                 </section>
 
                 <section>
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">
+                  <label className="text-2xs font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">
                     Ghi chú vận hành
                   </label>
                   <textarea
