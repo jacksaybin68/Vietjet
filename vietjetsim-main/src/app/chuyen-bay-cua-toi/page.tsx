@@ -949,25 +949,25 @@ export default function MyFlightsPage() {
             )}
           </div>
 
-          {/* Amy Mascot với tooltip "Xin chào!" khớp ảnh tham chiếu */}
-          <div className="fixed right-6 bottom-4 z-40 flex items-end pointer-events-none select-none">
-            <div className="relative mb-8 mr-1">
-              <div className="bg-white text-gray-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-md border border-gray-200">
+          {/* Amy Mascot với tooltip "Xin chào!" khớp 100% Ảnh tham chiếu */}
+          <div className="absolute right-3 bottom-2 z-40 flex items-end pointer-events-none select-none">
+            <div className="relative mb-14 -mr-1">
+              <div className="bg-white text-gray-800 text-sm font-bold px-3 py-1.5 rounded-xl shadow-lg border border-gray-200">
                 Xin chào!
               </div>
-              <div className="w-2.5 h-2.5 bg-white border-r border-b border-gray-200 rotate-45 ml-auto mr-3 -mt-1.5" />
+              <div className="w-3 h-3 bg-white border-r border-b border-gray-200 rotate-45 ml-auto mr-4 -mt-1.5 shadow-xs" />
             </div>
             <img
               src="/images/hero/amy-mascot.png"
               alt="Mascot Amy"
-              className="w-16 h-auto drop-shadow-md"
+              className="w-24 sm:w-28 h-auto drop-shadow-lg"
               loading="lazy"
             />
           </div>
 
           {/* Dải sóng cong 3 màu đặc trưng Vietjet: Xanh lá - Vàng - Đỏ ở góc dưới cùng bên phải */}
           <svg
-            className="fixed bottom-0 right-0 w-44 h-44 sm:w-52 sm:h-52 pointer-events-none z-30 overflow-hidden"
+            className="absolute bottom-0 right-0 w-48 h-48 sm:w-56 sm:h-56 pointer-events-none z-30 overflow-hidden"
             viewBox="0 0 200 200"
             fill="none"
           >
@@ -987,7 +987,9 @@ export default function MyFlightsPage() {
         </main>
       </div>
 
-      <Footer />
+      <div className="hidden xl:block">
+        <Footer />
+      </div>
       <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
     </div>
   );
