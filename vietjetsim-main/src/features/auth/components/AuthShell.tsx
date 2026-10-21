@@ -22,7 +22,7 @@ export default function AuthShell({
     <div className="min-h-screen bg-slate-50 bg-[url('/images/hero/hero-window-clouds.jpg')] bg-cover bg-center bg-fixed font-body text-[var(--foreground)] relative flex flex-col justify-between overflow-x-hidden">
       <Header
         variant="compact"
-        mobileTitle={title || (mode === 'register' ? 'ĐĂNG KÝ HỘI VIÊN' : 'ĐĂNG NHẬP')}
+        mobileTitle={mode === 'register' ? 'ĐĂNG KÝ' : (title || 'ĐĂNG NHẬP')}
       />
       <main
         id="main-content"
