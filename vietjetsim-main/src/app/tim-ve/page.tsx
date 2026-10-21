@@ -34,7 +34,7 @@ export default async function FlightBookingPage({
     : '--/--/----';
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#b4ddf5] via-[#d6ebf9] to-[#edf6fd] relative">
+    <div className="min-h-screen bg-gradient-to-b from-[#b4ddf5] via-[#d6ebf9] to-[#edf6fd] relative overflow-x-hidden w-full max-w-full">
       {/* Compact red band, not the full four-tier chrome: the booking flow keeps
           one nav row above the single yellow trip strip. */}
       <Header variant="compact" />
