@@ -147,8 +147,8 @@ function LoginPageInner() {
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-rose-50 bg-[url('/sky-clouds.svg')] bg-cover bg-top bg-no-repeat font-body text-gray-900">
-      {/* 1. Header đỏ duy nhất — cao 74px, khung max-w-[1080px] */}
-      <CheckInHeader />
+      {/* 1. Header đỏ duy nhất — cao 70px, khung max-w-[1080px] */}
+      <CheckInHeader title="ĐĂNG NHẬP" />
 
       {/* 2. Nền trời + mây phủ toàn trang, card auth canh giữa */}
       <main
@@ -156,18 +156,21 @@ function LoginPageInner() {
         className="relative flex flex-1 items-center justify-center px-4 py-8 pb-28 sm:px-6 lg:px-8"
       >
         {/* Khung auth kiểu vietjetair.com: card trắng bo 24px, 2 cột 1.12fr / 0.88fr */}
-        <div className="my-auto grid w-full max-w-[1040px] overflow-hidden rounded-3xl border border-white/80 bg-white/95 shadow-[0_20px_50px_rgba(0,0,0,0.12)] backdrop-blur-sm lg:grid-cols-[1.12fr_0.88fr]">
+        <div className="relative my-auto grid w-full max-w-[1040px] overflow-hidden rounded-3xl border border-white/80 bg-white/98 shadow-[0_25px_60px_-15px_rgba(215,25,32,0.18),0_12px_36px_rgba(0,0,0,0.08)] ring-1 ring-black/5 backdrop-blur-md lg:grid-cols-[1.12fr_0.88fr]">
+          {/* Top accent red-gold brand ribbon */}
+          <div className="h-1.5 w-full bg-gradient-to-r from-[#D71920] via-[#FFCC00] to-[#D71920] col-span-full" />
+
           {/* 3. Cột trái — khối tiêu đề, tab, form đăng nhập / đăng ký */}
           <section className="flex flex-col justify-start bg-white p-6 sm:p-8 lg:p-10">
             <div className="mb-5">
-              <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1 text-xs font-black uppercase tracking-wider text-[var(--primary)]">
+              <div className="mb-2.5 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-red-50 to-amber-50 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-[var(--primary)] border border-red-200/60 shadow-xs">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--primary)]" />
                 SkyJoy Member
               </div>
-              <h2 className="text-lg font-extrabold uppercase tracking-tight text-gray-900 sm:text-xl">
+              <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-gray-900 font-koho">
                 {activeKey === 'register' ? 'Đăng ký tài khoản' : 'Đăng nhập tài khoản'}
               </h2>
-              <p className="mt-1 text-xs font-medium text-gray-500">
+              <p className="mt-1 text-xs sm:text-sm font-medium text-gray-500">
                 {activeKey === 'register'
                   ? 'Đăng ký thành viên SkyJoy để nhận vô vàn ưu đãi và tích điểm đổi quà.'
                   : 'Đăng nhập để quản lý chuyến bay, đặt vé và tích điểm SkyJoy.'}
@@ -175,7 +178,7 @@ function LoginPageInner() {
             </div>
 
             {/* Tab Đăng ký / Đăng nhập — gạch chân đỏ cho tab đang chọn */}
-            <div className="mb-6 flex items-center justify-center gap-10 border-b border-gray-200">
+            <div className="mb-6 flex items-center justify-center gap-12 border-b border-gray-200">
               {TABS.map((tab) => {
                 const active = activeKey === tab.key;
                 return (
@@ -185,10 +188,10 @@ function LoginPageInner() {
                     data-testid={`tab-${tab.key}`}
                     onClick={() => handleTabChange(tab.key)}
                     aria-pressed={active}
-                    className={`-mb-px border-b-2 pb-2 text-[15px] font-bold transition-colors ${
+                    className={`-mb-px border-b-3 pb-3 text-base sm:text-lg font-black transition-all cursor-pointer ${
                       active
-                        ? 'border-[var(--primary)] text-[var(--primary)]'
-                        : 'border-transparent text-gray-400 hover:text-gray-600'
+                        ? 'border-[var(--primary)] text-[var(--primary)] scale-105'
+                        : 'border-transparent text-gray-400 hover:text-gray-700 font-bold'
                     }`}
                   >
                     {tab.label}
@@ -477,7 +480,7 @@ function LoginPageInner() {
                 <img
                   src="/images/vj-logo.svg"
                   alt="Vietjet Air"
-                  className="h-[14px] w-auto brightness-0 invert"
+                  className="h-[14px] w-auto"
                 />
                 <span className="flex h-[14px] items-center text-[13px] font-bold text-blue-600">
                   SkyPay

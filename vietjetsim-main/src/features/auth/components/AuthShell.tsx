@@ -20,27 +20,33 @@ export default function AuthShell({
 }: AuthShellProps) {
   return (
     <div className="min-h-screen bg-slate-50 bg-[url('/images/hero/hero-window-clouds.jpg')] bg-cover bg-center bg-fixed font-body text-[var(--foreground)] relative flex flex-col justify-between overflow-x-hidden">
-      <Header variant="compact" />
+      <Header
+        variant="compact"
+        mobileTitle={title || (mode === 'register' ? 'ĐĂNG KÝ HỘI VIÊN' : 'ĐĂNG NHẬP')}
+      />
       <main
         id="main-content"
         className="flex-1 flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8 pb-28"
       >
-        <div className="w-full max-w-[1040px] rounded-3xl bg-white/95 backdrop-blur-sm shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-white/80 overflow-hidden grid lg:grid-cols-[1.12fr_0.88fr] my-auto">
+        <div className="w-full max-w-[1040px] rounded-3xl bg-white/98 backdrop-blur-md shadow-[0_25px_60px_-15px_rgba(215,25,32,0.18),0_12px_36px_rgba(0,0,0,0.08)] border border-white/80 ring-1 ring-black/5 overflow-hidden grid lg:grid-cols-[1.12fr_0.88fr] my-auto">
+          {/* Accent red-gold top bar */}
+          <div className="h-1.5 w-full bg-gradient-to-r from-[#D71920] via-[#FFCC00] to-[#D71920] col-span-full" />
+
           {/* Cột trái: Form đăng nhập / đăng ký */}
           <section className="p-6 sm:p-8 lg:p-10 flex flex-col justify-start bg-white">
             <div>
               {title && (
                 <div className="mb-5 text-center">
                   {eyebrow && (
-                    <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1 text-xs font-black uppercase tracking-wider text-[var(--primary)]">
+                    <div className="mb-2.5 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-red-50 to-amber-50 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-[var(--primary)] border border-red-200/60 shadow-xs">
                       <span className="w-2 h-2 rounded-full bg-[var(--primary)] animate-pulse" />
                       {eyebrow}
                     </div>
                   )}
-                  <h2 className="font-extrabold text-lg sm:text-xl uppercase tracking-tight text-gray-900">
+                  <h2 className="font-black text-xl sm:text-2xl uppercase tracking-tight text-gray-900 font-koho">
                     {title}
                   </h2>
-                  {subtitle && <p className="mt-1 text-xs text-gray-500 font-medium">{subtitle}</p>}
+                  {subtitle && <p className="mt-1 text-xs sm:text-sm text-gray-500 font-medium">{subtitle}</p>}
                 </div>
               )}
               {children}
