@@ -587,7 +587,7 @@ export default function Footer() {
           </div>
 
           {/* Curved red/green Hotline banner in bottom-right corner */}
-          <div className="absolute -right-6 -bottom-6 overflow-hidden pointer-events-auto">
+          <div className="absolute right-0 bottom-0 sm:-right-6 sm:-bottom-6 overflow-hidden pointer-events-auto max-w-full">
             <div
               className="bg-gradient-to-r from-lime-500 via-primary-dark to-red-700 text-white font-black text-xs sm:text-sm px-10 pt-4 pb-2 shadow-xl rotate-[-25deg] transform origin-bottom-right"
               style={{

@@ -26,7 +26,7 @@ export default function PageHero({
 }: PageHeroProps) {
   return (
     <header className="vj-page-hero relative overflow-hidden border-b border-black/10 px-4 py-12 text-white sm:py-16">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -left-16 -top-24 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute -bottom-32 right-0 h-72 w-72 rounded-full bg-[var(--accent)]/15 blur-3xl" />
       </div>
