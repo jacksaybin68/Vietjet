@@ -515,7 +515,7 @@ function LoginPageInner() {
 
       {/* 6. Dải sóng cong 3 màu đặc trưng Vietjet ở góc dưới cùng bên phải */}
       <svg
-        className="pointer-events-none fixed -right-1 -bottom-1 z-30 h-28 w-36 sm:h-40 sm:w-52"
+        className="pointer-events-none fixed right-0 bottom-0 z-30 h-28 w-36 sm:h-40 sm:w-52 overflow-hidden"
         width="140"
         height="110"
         viewBox="0 0 140 110"

@@ -205,7 +205,7 @@ export default function AuthShell({
 
       {/* Dải sóng cong 3 màu đặc trưng Vietjet: Xanh lá - Vàng - Đỏ ở góc dưới cùng bên phải */}
       <svg
-        className="fixed -bottom-1 -right-1 w-44 h-44 sm:w-52 sm:h-52 pointer-events-none z-30"
+        className="fixed bottom-0 right-0 w-44 h-44 sm:w-52 sm:h-52 pointer-events-none z-30 overflow-hidden"
         viewBox="0 0 200 200"
         fill="none"
       >

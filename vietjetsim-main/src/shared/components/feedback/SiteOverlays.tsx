@@ -55,7 +55,7 @@ export function SiteOverlays() {
         <div
           role="dialog"
           aria-label="Ưu đãi"
-          className="fixed left-1/2 top-5 z-[60] w-[min(92vw,400px)] -translate-x-1/2 rounded-2xl bg-white p-5 shadow-[0_20px_50px_rgba(0,0,0,0.22)] ring-1 ring-black/5 animate-fade-in-up"
+          className="fixed inset-x-0 top-5 mx-auto z-[60] w-[min(92vw,400px)] rounded-2xl bg-white p-5 shadow-[0_20px_50px_rgba(0,0,0,0.22)] ring-1 ring-black/5 animate-fade-in-up"
         >
           <div className="flex items-start gap-4">
             <div
