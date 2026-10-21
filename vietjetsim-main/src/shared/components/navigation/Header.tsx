@@ -155,9 +155,11 @@ const isActivePath = (pathname: string, href: string) =>
 export default function Header({
   variant = 'default',
   mobileTitle,
+  hideMobileLogo = false,
 }: {
   variant?: 'default' | 'compact';
   mobileTitle?: string;
+  hideMobileLogo?: boolean;
 }) {
   const { user, signOut } = useAuth();
   const pathname = usePathname();
@@ -252,25 +254,29 @@ export default function Header({
         {/* Mobile Header for compactMode (< lg) matching Screenshot 3 & 4 */}
         {compactMode && (
           <div className="flex lg:hidden h-14 items-center justify-between px-4 bg-[#D71920] text-white shadow-md">
-            <Link
-              href="/trang-chu"
-              aria-label="Vietjet Air - Trang chủ"
-              className="flex shrink-0 items-center transition hover:opacity-90"
-            >
-              <img
-                src="/images/vj-logo.svg"
-                alt="Vietjet Air"
-                className="h-[22px] w-auto brightness-0 invert"
-              />
-            </Link>
-            <h1 className="font-sans font-black italic tracking-wide text-lg sm:text-xl uppercase text-white text-center truncate">
+            {hideMobileLogo ? (
+              <div className="w-8 shrink-0" aria-hidden="true" />
+            ) : (
+              <Link
+                href="/trang-chu"
+                aria-label="Vietjet Air - Trang chủ"
+                className="flex shrink-0 items-center transition hover:opacity-90"
+              >
+                <img
+                  src="/images/vj-logo.svg"
+                  alt="Vietjet Air"
+                  className="h-[22px] w-auto brightness-0 invert"
+                />
+              </Link>
+            )}
+            <h1 className="font-koho font-black italic tracking-wide text-lg sm:text-xl uppercase text-white text-center truncate">
               {dynamicTitle || mobileTitle || 'LỰA CHỌN CHUYẾN BAY'}
             </h1>
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Mở menu"
-              className="flex h-8 w-8 items-center justify-center text-white"
+              className="flex h-8 w-8 items-center justify-center text-white cursor-pointer"
             >
               <HiOutlineMenu className="h-7 w-7 text-white" />
             </button>
