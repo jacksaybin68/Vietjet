@@ -505,42 +505,47 @@ export default function FlightBookingResultsWrapper({
         </div>
       </div>
 
-      {/* Desktop Sticky Bottom Bar */}
-      <div className="hidden sm:block fixed bottom-0 left-0 right-0 z-[60] bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] py-3 px-4 sm:px-8">
-        <div className="mx-auto max-w-[1368px] flex items-center justify-between">
-          <div className="flex-1 flex flex-col items-center">
-            <span className="text-2xs text-gray-500 font-bold uppercase tracking-wider">
-              Tổng tiền
-            </span>
-            <span className="text-xl sm:text-2xl font-black text-gray-900 font-koho leading-none">
-              {totalBookingAmount.toLocaleString('vi-VN')} VND
-            </span>
+      {/* Bottom bars for Step 1 (Flight Selection) */}
+      {bookingStep === 1 && (
+        <>
+          {/* Desktop Sticky Bottom Bar */}
+          <div className="hidden sm:block fixed bottom-0 left-0 right-0 z-[60] bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] py-3 px-4 sm:px-8">
+            <div className="mx-auto max-w-[1368px] flex items-center justify-between">
+              <div className="flex-1 flex flex-col items-center">
+                <span className="text-2xs text-gray-500 font-bold uppercase tracking-wider">
+                  Tổng tiền
+                </span>
+                <span className="text-xl sm:text-2xl font-black text-gray-900 font-koho leading-none">
+                  {totalBookingAmount.toLocaleString('vi-VN')} VND
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleContinue}
+                disabled={!bookings.outbound}
+                className="bg-[#FFCC00] hover:bg-[#FFD200] disabled:opacity-50 disabled:cursor-not-allowed text-gray-950 font-black text-sm px-10 py-2.5 rounded-full shadow transition-all active:scale-95 cursor-pointer"
+              >
+                Đi tiếp
+              </button>
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={handleContinue}
-            disabled={!bookings.outbound}
-            className="bg-[#FFCC00] hover:bg-[#FFD200] disabled:opacity-50 disabled:cursor-not-allowed text-gray-950 font-black text-sm px-10 py-2.5 rounded-full shadow transition-all active:scale-95 cursor-pointer"
-          >
-            Đi tiếp
-          </button>
-        </div>
-      </div>
 
-      {/* Mobile Floating "Đi tiếp" button matching Screenshot */}
-      <div className="sm:hidden fixed bottom-5 left-0 right-0 z-[60] flex justify-center pointer-events-none px-4">
-        <button
-          type="button"
-          onClick={handleContinue}
-          disabled={!bookings.outbound}
-          className="pointer-events-auto bg-[#FFCC00] hover:bg-[#FFD200] disabled:opacity-50 disabled:cursor-not-allowed text-gray-950 font-black text-base px-16 py-3 rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.2)] border border-yellow-400 active:scale-95 transition-all cursor-pointer"
-        >
-          Đi tiếp
-        </button>
-      </div>
+          {/* Mobile Floating "Đi tiếp" button matching Screenshot */}
+          <div className="sm:hidden fixed bottom-5 left-0 right-0 z-[60] flex justify-center pointer-events-none px-4">
+            <button
+              type="button"
+              onClick={handleContinue}
+              disabled={!bookings.outbound}
+              className="pointer-events-auto bg-[#FFCC00] hover:bg-[#FFD200] disabled:opacity-50 disabled:cursor-not-allowed text-gray-950 font-black text-base px-16 py-3 rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.2)] border border-yellow-400 active:scale-95 transition-all cursor-pointer"
+            >
+              Đi tiếp
+            </button>
+          </div>
 
-      {/* Red bottom accent stripe matching sample image */}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 h-2 bg-[#D71920] z-50 pointer-events-none" />
+          {/* Red bottom accent stripe matching sample image */}
+          <div className="sm:hidden fixed bottom-0 left-0 right-0 h-2 bg-[#D71920] z-50 pointer-events-none" />
+        </>
+      )}
 
       {/* Bảng so sánh 4 hạng vé */}
       <FareBenefitsModal
