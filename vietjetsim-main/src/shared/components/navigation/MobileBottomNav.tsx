@@ -43,10 +43,10 @@ const TABS: readonly Tab[] = [
 ] as const;
 
 /** Highlight class for the tab matching the current route. */
-const ACTIVE_CLASS = 'text-[var(--primary)]';
+const ACTIVE_CLASS = 'text-vjyellow font-black';
 
 /** Paths where a bottom bar would fight the page's own sticky footer. */
-const HIDDEN_ON = ['/quan-tri', '/dang-nhap', '/dat-lai-mat-khau', '/quen-mat-khau'];
+const HIDDEN_ON = ['/quan-tri', '/dang-nhap', '/dat-lai-mat-khau', '/quen-mat-khau', '/tim-ve'];
 
 /**
  * Height the bar occupies, exported so pages that already pad for a sticky
@@ -62,7 +62,7 @@ export default function MobileBottomNav() {
     <nav
       aria-label="Điều hướng nhanh"
       data-testid="mobile-bottom-nav"
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--border)] bg-[var(--surface)] shadow-[0_-2px_12px_rgba(0,0,0,0.1)] lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#4A070A] text-white shadow-[0_-2px_12px_rgba(0,0,0,0.25)] lg:hidden"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <ul className="mx-auto flex max-w-lg items-stretch" style={{ height: BOTTOM_NAV_HEIGHT }}>
@@ -77,7 +77,7 @@ export default function MobileBottomNav() {
                 href={tab.href}
                 aria-current={active ? 'page' : undefined}
                 className={`flex h-full min-h-[56px] flex-col items-center justify-center gap-1 px-1 text-[10px] font-bold leading-none transition-colors ${
-                  active ? ACTIVE_CLASS : 'text-[var(--foreground-muted)]'
+                  active ? ACTIVE_CLASS : 'text-white/70 hover:text-white'
                 }`}
               >
                 <Icon name={tab.icon} size={20} />

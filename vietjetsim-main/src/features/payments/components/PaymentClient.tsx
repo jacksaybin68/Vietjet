@@ -1,6 +1,8 @@
 'use client';
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import PassengerDetailModal from '@/app/tim-ve/components/PassengerDetailModal';
 import { Icon } from '@/shared/components/ui';
 import { PaymentSkeleton } from '@/shared/components/ui';
 import { useToast } from '@/hooks/useToast';
@@ -304,6 +306,10 @@ function formatBookingDay(day: string): string {
 }
 
 export default function PaymentClient() {
+  const router = useRouter();
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [hasPromoChecked, setHasPromoChecked] = useState(false);
+  const [selectedMethodGroup, setSelectedMethodGroup] = useState<string>('card');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
   const [cardNumber, setCardNumber] = useState('');
   const [cardName, setCardName] = useState('');
@@ -1030,91 +1036,326 @@ export default function PaymentClient() {
 
   return (
     <>
-      <div className="pt-[128px] pb-12">
+      {/* Trip strip — brand-yellow band directly under header matching Screenshots 3 & 4 */}
+      <div className="bg-[#FFCC00] text-gray-950 shadow-sm" data-testid="trip-board">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-x-3 px-3 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-sm">
+          {/* Mobile "Tổng [X] VND ▾" button */}
+          <div className="flex sm:hidden items-center">
+            <button
+              type="button"
+              onClick={() => setShowSummaryModal(true)}
+              className="bg-white rounded-full px-3 py-1 text-xs font-black text-gray-900 flex items-center gap-1.5 shadow-xs cursor-pointer hover:bg-gray-50 active:scale-95 transition-all"
+            >
+              <span>Tổng</span>
+              <span className="text-red-600 font-black">
+                {total > 0 ? `${total.toLocaleString('vi-VN')} VND` : '0 VND'}
+              </span>
+              <span className="text-3xs text-gray-500">▾</span>
+            </button>
+          </div>
+
+          <div className="hidden sm:block font-bold">
+            <span className="font-black uppercase tracking-wide">
+              {booking?.flightNo ? `Chuyến bay ${booking.flightNo}` : 'Thanh toán đặt chỗ'}
+            </span>
+          </div>
+
+          {/* 4 Steps Indicator (with Step 4 active in green!) */}
+          <div className="flex items-center gap-2">
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center bg-[#54B848] text-white shadow-sm"
+              title="Chọn chuyến bay"
+            >
+              <Icon name="PaperAirplaneIcon" size={13} className="rotate-45" />
+            </div>
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center bg-[#54B848] text-white shadow-sm"
+              title="Thông tin hành khách"
+            >
+              <Icon name="UserIcon" size={13} />
+            </div>
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center bg-[#54B848] text-white shadow-sm"
+              title="Dịch vụ bổ sung"
+            >
+              <Icon name="ShoppingCartIcon" size={13} />
+            </div>
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center bg-[#54B848] text-white shadow-sm font-black text-xs leading-none"
+              title="Thanh toán"
+            >
+              $
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="pt-4 sm:pt-6 pb-28 sm:pb-12">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <h1 className="text-2xl font-bold text-[var(--foreground)] mb-6">Thanh toán</h1>
+          <h1 className="hidden sm:block text-2xl font-bold text-[var(--foreground)] mb-6">Thanh toán</h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Payment Form */}
-            <div className="lg:col-span-2 space-y-5">
-              {/* Payment Method */}
-              <div
-                className="bg-white rounded-2xl border border-[var(--border)] p-5"
-                style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
-              >
-                <h2 className="font-bold text-[var(--foreground)] mb-4">Phương thức thanh toán</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
-                  {(
-                    [
-                      {
-                        val: 'card',
-                        label: 'Thẻ tín dụng',
-                        desc: 'Visa · MasterCard · JCB · AMEX',
-                        icon: 'CreditCardIcon',
-                        color: 'text-primary',
-                      },
-                      {
-                        val: 'vietqr',
-                        label: 'VietQR',
-                        desc: 'Quét mã QR ngân hàng',
-                        icon: 'QrCodeIcon',
-                        color: 'text-primary',
-                      },
-                      {
-                        val: 'bank',
-                        label: 'Ngân hàng',
-                        desc: 'Chuyển khoản trực tiếp',
-                        icon: 'BuildingLibraryIcon',
-                        color: 'text-[var(--foreground)]',
-                      },
-                      {
-                        val: 'wallet',
-                        label: 'Số dư Ví',
-                        desc: 'Thanh toán nhanh từ ví',
-                        icon: 'WalletIcon',
-                        color: 'text-[var(--vj-green)]',
-                      },
-                      {
-                        val: 'e_wallet',
-                        label: 'Ví MoMo / VNPay',
-                        desc: 'Ví điện tử phổ biến',
-                        icon: 'DevicePhoneMobileIcon',
-                        color: 'text-[var(--vj-green)]',
-                      },
-                      {
-                        val: 'skypoint',
-                        label: 'SkyPoint',
-                        desc: 'Dùng điểm SkyJoy',
-                        icon: 'StarIcon',
-                        color: 'text-vjbrown',
-                      },
-                    ] as const
-                  ).map((method) => (
+            <div className="lg:col-span-2 space-y-4">
+              {/* Checkbox: Mã khuyến mãi hoặc phiếu quà tặng matching Screenshot 3 */}
+              <div className="bg-white rounded-xl border border-gray-200/90 p-4 shadow-2xs">
+                <label className="flex items-center gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={hasPromoChecked}
+                    onChange={(e) => setHasPromoChecked(e.target.checked)}
+                    className="w-5 h-5 rounded border-gray-300 text-red-600 focus:ring-red-500 cursor-pointer accent-red-600"
+                  />
+                  <span className="text-sm font-extrabold text-gray-900">
+                    Mã khuyến mãi hoặc phiếu quà tặng
+                  </span>
+                </label>
+                {hasPromoChecked && (
+                  <div className="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                    <input
+                      type="text"
+                      value={promoCode}
+                      onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                      placeholder="Nhập mã khuyến mãi"
+                      className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-xs uppercase font-bold outline-none focus:border-red-500"
+                    />
                     <button
-                      key={method.val}
                       type="button"
-                      onClick={() => setPaymentMethod(method.val)}
-                      className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all text-sm font-semibold ${
-                        paymentMethod === method.val
-                          ? `border-primary bg-primary-50 ${method.color} shadow-sm shadow-primary/10`
-                          : 'border-[var(--border)] text-[var(--foreground-muted)] hover:border-[var(--border)] hover:bg-[var(--surface-2)]'
+                      onClick={applyPromo}
+                      disabled={isApplyingPromo || !promoCode.trim()}
+                      className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold text-xs px-4 py-2 rounded-lg cursor-pointer transition-colors"
+                    >
+                      {isApplyingPromo ? 'Đang kiểm tra...' : 'Áp dụng'}
+                    </button>
+                  </div>
+                )}
+                {promoApplied && promoData && (
+                  <div className="mt-2 text-xs font-bold text-green-700 flex items-center gap-1">
+                    <span>✓</span> Đã áp dụng mã {promoData.code}: -{promoData.discountAmount.toLocaleString('vi-VN')} VND
+                  </div>
+                )}
+                {promoError && (
+                  <div className="mt-2 text-xs font-semibold text-red-600">
+                    {promoError}
+                  </div>
+                )}
+              </div>
+
+              {/* Payment Method Card */}
+              <div
+                className="bg-white rounded-2xl border border-[var(--border)] p-4 sm:p-5 shadow-sm"
+              >
+                <div className="mb-4">
+                  <h2 className="font-extrabold text-base text-gray-900">Phương thức thanh toán</h2>
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
+                    <span>Được xử lý bởi Cổng thanh toán</span>
+                    <span className="font-black italic text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700 tracking-wider font-sans">
+                      GALAXY PAY
+                    </span>
+                  </div>
+                </div>
+
+                {/* 1. Thẻ và tài khoản ngân hàng (Screenshot 3) */}
+                <div className="mb-5">
+                  <h3 className="text-xs sm:text-sm font-extrabold text-gray-900 mb-2.5">
+                    Thẻ và tài khoản ngân hàng
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    {/* Credit Card */}
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedMethodGroup('card'); setPaymentMethod('card'); }}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
+                        selectedMethodGroup === 'card'
+                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          paymentMethod === method.val
-                            ? 'bg-primary text-white'
-                            : 'bg-[var(--surface-2)] text-[var(--foreground-muted)]'
-                        }`}
-                      >
-                        <Icon name={method.icon} size={20} />
+                      <div className="flex items-center gap-1">
+                        <span className="text-3xs font-black px-1 py-0.5 rounded bg-blue-600 text-white">VISA</span>
+                        <span className="text-3xs font-black px-1 py-0.5 rounded bg-orange-600 text-white">MC</span>
+                        <span className="text-3xs font-black px-1 py-0.5 rounded bg-green-600 text-white">JCB</span>
                       </div>
-                      <span className="text-xs font-bold leading-none">{method.label}</span>
-                      <span className="text-2xs text-[var(--foreground-subtle)] leading-none">
-                        {method.desc}
+                      <span className="text-xs font-bold text-gray-900 mt-2 line-clamp-2 leading-tight">
+                        Thẻ tín dụng, thẻ ghi nợ quốc...
                       </span>
                     </button>
-                  ))}
+
+                    {/* ATM Napas */}
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedMethodGroup('napas'); setPaymentMethod('bank'); }}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
+                        selectedMethodGroup === 'napas'
+                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      <div className="text-xs font-black text-blue-700 tracking-wider">
+                        napas<span className="text-amber-500">✶</span>
+                      </div>
+                      <span className="text-xs font-bold text-gray-900 mt-2">
+                        Thẻ ATM
+                      </span>
+                    </button>
+
+                    {/* Mobile Banking VietQR */}
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedMethodGroup('vietqr'); setPaymentMethod('vietqr'); }}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
+                        selectedMethodGroup === 'vietqr'
+                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      <div className="w-6 h-6 rounded bg-red-600 text-white flex items-center justify-center text-xs font-bold">
+                        QR
+                      </div>
+                      <span className="text-xs font-bold text-gray-900 mt-2 line-clamp-2 leading-tight">
+                        Mobile Banking VietQR
+                      </span>
+                    </button>
+
+                    {/* Quét mã QR VNPAY */}
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedMethodGroup('vnpay_qr'); setPaymentMethod('vietqr'); }}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
+                        selectedMethodGroup === 'vnpay_qr'
+                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      <div className="text-3xs font-black text-red-600 tracking-tight">
+                        VNPAY<sup className="text-blue-600 font-bold">QR</sup>
+                      </div>
+                      <span className="text-xs font-bold text-gray-900 mt-2 line-clamp-2 leading-tight">
+                        Quét mã QR VNPAY
+                      </span>
+                    </button>
+
+                    {/* Thanh toán nội địa VNPAY */}
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedMethodGroup('vnpay_dom'); setPaymentMethod('bank'); }}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
+                        selectedMethodGroup === 'vnpay_dom'
+                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      <div className="text-3xs font-black text-blue-700">
+                        VNPAY
+                      </div>
+                      <span className="text-xs font-bold text-gray-900 mt-2 line-clamp-2 leading-tight">
+                        Thanh toán nội địa VNPAY
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 2. Ví điện tử (Screenshot 3) */}
+                <div className="mb-5">
+                  <h3 className="text-xs sm:text-sm font-extrabold text-gray-900 mb-2.5">
+                    Ví điện tử
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    {/* SkyPay */}
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedMethodGroup('skypay'); setPaymentMethod('skypoint'); }}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[85px] ${
+                        selectedMethodGroup === 'skypay'
+                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      <span className="text-xs font-black text-orange-600 tracking-wide">SkyPay</span>
+                      <span className="text-xs font-bold text-gray-900 mt-2">SkyPay</span>
+                    </button>
+
+                    {/* MoMo */}
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedMethodGroup('momo'); setPaymentMethod('e_wallet'); }}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[85px] ${
+                        selectedMethodGroup === 'momo'
+                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      <div className="w-6 h-6 rounded bg-[#A50064] text-white font-black text-3xs flex items-center justify-center">
+                        momo
+                      </div>
+                      <span className="text-xs font-bold text-gray-900 mt-2">Ví MoMo</span>
+                    </button>
+
+                    {/* ZaloPay */}
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedMethodGroup('zalopay'); setPaymentMethod('e_wallet'); }}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[85px] ${
+                        selectedMethodGroup === 'zalopay'
+                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      <div className="text-3xs font-black text-blue-500">ZaloPay</div>
+                      <span className="text-xs font-bold text-gray-900 mt-2">Ví ZaloPay</span>
+                    </button>
+
+                    {/* Apple Pay */}
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedMethodGroup('applepay'); setPaymentMethod('card'); }}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[85px] ${
+                        selectedMethodGroup === 'applepay'
+                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      <span className="text-xs font-black text-gray-900">Pay</span>
+                      <span className="text-xs font-bold text-gray-900 mt-2">Apple Pay</span>
+                    </button>
+
+                    {/* Google Pay */}
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedMethodGroup('googlepay'); setPaymentMethod('card'); }}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[85px] ${
+                        selectedMethodGroup === 'googlepay'
+                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      <span className="text-xs font-bold text-gray-700">G Pay</span>
+                      <span className="text-xs font-bold text-gray-900 mt-2">Google Pay</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 3. Giữ mã đặt chỗ & thanh toán sau (Screenshot 4) */}
+                <div className="mb-5">
+                  <h3 className="text-xs sm:text-sm font-extrabold text-gray-900 mb-2.5">
+                    Giữ mã đặt chỗ & thanh toán sau
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedMethodGroup('movi'); setPaymentMethod('bank'); }}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[85px] ${
+                        selectedMethodGroup === 'movi'
+                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      <div>
+                        <span className="text-sm font-black text-pink-600 block">movi</span>
+                        <span className="text-4xs text-gray-500 font-medium">Bay trước, trả sau</span>
+                      </div>
+                    </button>
+                  </div>
                 </div>
 
                 <form onSubmit={handlePayment}>
@@ -1503,8 +1744,38 @@ export default function PaymentClient() {
                     </div>
                   )}
 
+                  {/* Chi tiết thanh toán matching Screenshot 4 */}
+                  <div className="mt-6 pt-4 border-t border-gray-200">
+                    <h3 className="font-extrabold text-sm text-gray-900 mb-3">Chi tiết thanh toán</h3>
+                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-200/80 space-y-2 text-xs">
+                      <div className="flex justify-between items-center text-gray-700">
+                        <span>Tạm tính</span>
+                        <span className="font-bold text-gray-900">
+                          {(total > 108000 ? total - 108000 : total).toLocaleString('vi-VN')} VND
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-gray-700">
+                        <span>Mã khuyến mãi/Phiếu quà tặng</span>
+                        <span className="font-bold text-green-600">
+                          {discountAmount > 0 ? `-${discountAmount.toLocaleString('vi-VN')} VND` : '0 VND'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-gray-700">
+                        <span>Phí tiện ích</span>
+                        <span className="font-bold text-gray-900">108.000 VND</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm font-black text-gray-900 pt-2.5 border-t border-gray-200">
+                        <span>Tổng thanh toán</span>
+                        <span className="text-base text-gray-950 font-koho">
+                          {total.toLocaleString('vi-VN')} VND
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Submit */}
                   <button
+                    id="payment-submit-btn"
                     type="submit"
                     disabled={loading}
                     className="w-full mt-6 flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-xl transition-all duration-200 shadow-vj-btn hover:shadow-vj-btn-hover hover:-translate-y-1 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:scale-100 text-base"
@@ -1767,6 +2038,37 @@ export default function PaymentClient() {
             'Vui lòng quét mã QR để hoàn tất thanh toán.'
           );
         }}
+      />
+
+      {/* Mobile Sticky Bottom Bar matching Screenshots 3 & 4 */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] flex items-center gap-3 sm:hidden">
+        <button
+          type="button"
+          onClick={() => router.push('/tim-ve')}
+          className="flex-1 bg-[#38B000] hover:bg-[#329e00] text-white font-black italic text-sm py-3 rounded-xl shadow transition-all active:scale-95 cursor-pointer text-center"
+        >
+          Mua thêm
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            const submitBtn = document.getElementById('payment-submit-btn');
+            if (submitBtn) submitBtn.click();
+          }}
+          disabled={loading}
+          className="flex-1 bg-[#FFCC00] hover:bg-[#FFD200] disabled:opacity-50 text-gray-950 font-black italic text-sm py-3 rounded-xl shadow transition-all active:scale-95 cursor-pointer text-center"
+        >
+          {loading ? 'Đang xử lý...' : 'Thanh toán'}
+        </button>
+      </div>
+
+      {/* Modal Thông tin đặt chỗ (Screenshot 7) */}
+      <PassengerDetailModal
+        isOpen={showSummaryModal}
+        onClose={() => setShowSummaryModal(false)}
+        outboundFare={booking?.total ? Math.round(booking.total * 0.7) : 1220400}
+        outboundFlightNo={booking?.flightNo ?? 'VJ141'}
+        outboundTrip={booking?.from && booking?.to ? `${booking.from} ✈ ${booking.to}` : undefined}
       />
     </>
   );

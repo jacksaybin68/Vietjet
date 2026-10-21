@@ -9,6 +9,7 @@ import { FareBenefitsModal } from '@/features/flights';
 import type { FareClassId } from '@/features/bookings/pricing';
 import { Icon } from '@/shared/components/ui';
 import BookingSummaryPanel from './BookingSummaryPanel';
+import PassengerDetailModal from './PassengerDetailModal';
 
 /** "2 Người lớn, 1 Trẻ em" — only the categories actually on the booking. */
 function describePax(counts: Record<PassengerType, number>): string {
@@ -100,6 +101,7 @@ export default function FlightBookingResultsWrapper({
   });
   const [continueSignal, setContinueSignal] = useState(0);
   const [showBenefitsModal, setShowBenefitsModal] = useState(false);
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [isPaxDropdownOpen, setIsPaxDropdownOpen] = useState(false);
   const paxRef = useRef<HTMLDivElement>(null);
 
@@ -192,6 +194,19 @@ export default function FlightBookingResultsWrapper({
 
   const [bookingStep, setBookingStep] = useState(1);
 
+  useEffect(() => {
+    const titles: Record<number, string> = {
+      1: 'LỰA CHỌN CHUYẾN BAY',
+      2: 'THÔNG TIN HÀNH KHÁCH',
+      3: 'LỰA CHỌN DỊCH VỤ',
+      4: 'THANH TOÁN',
+    };
+    const title = titles[bookingStep] || 'LỰA CHỌN CHUYẾN BAY';
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('vj-booking-step-title', { detail: title }));
+    }
+  }, [bookingStep]);
+
   const totalBookingAmount =
     (bookings.outbound?.total ?? 0) + (isRoundTrip ? (bookings.inbound?.total ?? 0) : 0);
 
@@ -199,8 +214,25 @@ export default function FlightBookingResultsWrapper({
     <>
       {/* Trip strip — full-bleed brand-yellow band directly under the red header */}
       <div className="bg-[#FFCC00] text-gray-950 shadow-sm" data-testid="trip-board">
-        <div className="mx-auto flex max-w-[1368px] flex-wrap items-center justify-between gap-x-3 gap-y-1 px-4 py-2 text-xs sm:px-6 sm:text-sm lg:px-8">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-bold">
+        <div className="mx-auto flex max-w-[1368px] items-center justify-between gap-x-3 px-3 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-sm lg:px-8">
+          {/* Mobile "Tổng [X] VND ▾" button matching Screenshot 3 & 4 */}
+          <div className="flex sm:hidden items-center">
+            <button
+              type="button"
+              onClick={() => setShowSummaryModal(true)}
+              className="bg-white rounded-full px-3 py-1 text-xs font-black text-gray-900 flex items-center gap-1.5 shadow-xs cursor-pointer hover:bg-gray-50 active:scale-95 transition-all"
+            >
+              <span>Tổng</span>
+              <span className="text-red-600 font-black">
+                {totalBookingAmount > 0
+                  ? `${totalBookingAmount.toLocaleString('vi-VN')} VND`
+                  : '0 VND'}
+              </span>
+              <span className="text-3xs text-gray-500">▾</span>
+            </button>
+          </div>
+
+          <div className="hidden sm:flex flex-wrap items-center gap-x-3 gap-y-1 font-bold">
             <span className="font-black uppercase tracking-wide">{tripLabel}</span>
             <span className="opacity-50">|</span>
             <div className="relative inline-block" ref={paxRef}>
@@ -500,6 +532,19 @@ export default function FlightBookingResultsWrapper({
         open={showBenefitsModal}
         onClose={() => setShowBenefitsModal(false)}
         prices={selectedBooking?.fares}
+      />
+
+      {/* Modal Thông tin đặt chỗ (Screenshot 7) */}
+      <PassengerDetailModal
+        isOpen={showSummaryModal}
+        onClose={() => setShowSummaryModal(false)}
+        outboundFare={bookings.outbound?.fare ?? 1220400}
+        inboundFare={bookings.inbound?.fare ?? 549720}
+        outboundTax={bookings.outbound?.tax ?? 581581}
+        inboundTax={bookings.inbound?.tax ?? 581581}
+        outboundFlightNo={bookings.outbound?.flightNo ?? 'VJ141'}
+        inboundFlightNo={bookings.inbound?.flightNo ?? 'VJ134'}
+        isRoundTrip={isRoundTrip}
       />
     </>
   );

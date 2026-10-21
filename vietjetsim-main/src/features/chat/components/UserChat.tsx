@@ -560,7 +560,7 @@ export default function UserChat() {
           </span>
         ) : (
           <span className="flex items-end gap-2">
-            <span className="mb-7 whitespace-nowrap rounded-[8px] bg-white px-3.5 py-2 text-base2 font-bold text-[var(--foreground)] shadow-[0_6px_18px_rgba(0,0,0,0.16)] ring-1 ring-black/5">
+            <span className="mb-7 hidden sm:inline-block whitespace-nowrap rounded-[8px] bg-white px-3.5 py-2 text-base2 font-bold text-[var(--foreground)] shadow-[0_6px_18px_rgba(0,0,0,0.16)] ring-1 ring-black/5">
               Xin chào!
             </span>
             <img
@@ -568,7 +568,7 @@ export default function UserChat() {
               alt="Logo hỗ trợ Vietjet Air"
               width={86}
               height={96}
-              className="h-[74px] w-auto object-contain drop-shadow-[0_6px_14px_rgba(0,0,0,0.22)] sm:h-[92px]"
+              className="h-[52px] w-auto object-contain drop-shadow-[0_6px_14px_rgba(0,0,0,0.22)] sm:h-[92px]"
             />
           </span>
         )}

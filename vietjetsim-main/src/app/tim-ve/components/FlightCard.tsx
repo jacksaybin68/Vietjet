@@ -67,54 +67,63 @@ export default function FlightCard({
   const isSelected = Boolean(selectedClass);
 
   return (
-    <div className="rounded-xl border border-black/10 bg-white overflow-hidden shadow-sm transition-all mb-3">
-      <article className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 p-3 hover:bg-gray-50/50">
-        {/* Cột 1: Giờ bay & Số hiệu */}
-        <div className="shrink-0 flex items-center sm:flex-col gap-3 sm:gap-1 text-center min-w-[120px]">
-          <div className="flex items-center gap-1.5">
-            <span className="text-xl sm:text-2xl font-black text-gray-900 leading-none">
-              {depTime}:{depMin}
-            </span>
-            <span className="text-xs font-bold text-gray-400">→</span>
-            <span className="text-xl sm:text-2xl font-black text-gray-900 leading-none">
-              {arrTime}:{arrMin}
-            </span>
+    <div className="rounded-xl border border-black/10 bg-white overflow-hidden shadow-xs transition-all mb-3">
+      <article className="flex flex-row items-stretch">
+        {/* Cột 1: Giờ bay & Số hiệu — Khung vàng chuẩn Screenshot 3 */}
+        <div className="w-[100px] sm:w-[130px] shrink-0 bg-[#FFD100] p-2 flex flex-col justify-between items-center text-center">
+          <span className="text-3xs font-bold text-gray-700">{flight.no}</span>
+          <div className="py-1">
+            <div className="text-xs sm:text-sm font-black text-gray-950 leading-tight">
+              {flight.depart} <span className="text-3xs font-normal">Đến</span> {flight.arrive}
+            </div>
+            <div className="text-4xs sm:text-3xs text-gray-800 font-medium mt-0.5">
+              {flight.aircraft} - Bay thẳng
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-2xs text-gray-500 font-semibold">
-            <span>{flight.no}</span>
-            <span>•</span>
-            <span>{flight.aircraft}</span>
-            <span>•</span>
-            <span className="text-primary-dark font-bold uppercase">Bay thẳng</span>
-          </div>
+          <span className="text-3xs text-gray-600 leading-none">˅</span>
         </div>
 
         {/* Cột 2: 4 cột hạng ghế */}
-        <div className="w-full sm:flex-1 grid grid-cols-4 gap-1.5 min-w-0">
+        <div className="flex-1 grid grid-cols-4 gap-1 p-1.5 sm:p-2 min-w-0 bg-white">
           {FARE_COLUMNS.map((col) => {
             const active = selectedClass?.toUpperCase() === col.id;
             const priceVal = flight.prices[col.priceKey];
+            const isZero = !priceVal || priceVal <= 0;
+
             return (
               <button
                 key={col.id}
                 type="button"
+                disabled={isZero}
                 onClick={() => onSelect(flight.no, col.id, priceVal)}
-                className={`flex flex-col items-center justify-between rounded-lg border transition-all overflow-hidden ${
+                className={`flex flex-col items-center justify-between rounded-md border transition-all overflow-hidden ${
                   active
-                    ? 'border-success ring-2 ring-success/30 bg-green-50/40'
-                    : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                    ? 'border-success ring-2 ring-success/30 bg-green-50/50'
+                    : isZero
+                      ? 'border-gray-100 bg-gray-50/70 opacity-60 cursor-not-allowed'
+                      : 'border-gray-200 bg-white hover:border-gray-300'
                 }`}
               >
                 <div
-                  className={`w-full py-1 text-center text-2xs font-black uppercase tracking-wider ${col.bgHeader} ${col.textHeader}`}
+                  className={`w-full py-1 text-center text-4xs sm:text-3xs font-black uppercase tracking-wider ${col.bgHeader} ${col.textHeader}`}
                 >
                   {col.label}
                 </div>
-                <div className="py-2 flex flex-col items-center">
-                  <span className="text-sm sm:text-base font-black text-gray-900 leading-tight">
-                    {(priceVal / 1000).toLocaleString('vi-VN')}
-                  </span>
-                  <span className="text-3xs text-gray-500 font-medium">000 VND</span>
+                <div className="py-1.5 sm:py-2 flex flex-col items-center">
+                  {isZero ? (
+                    <div className="flex flex-col items-center justify-center py-1">
+                      <span className="text-xs text-gray-400">✈⃠</span>
+                      <span className="text-3xs text-gray-400 font-bold">Hết chỗ</span>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="text-xs sm:text-sm font-black text-gray-900 leading-tight">
+                        {(priceVal / 1000).toLocaleString('vi-VN')}
+                      </span>
+                      <span className="text-4xs text-gray-500 font-medium">000 VND</span>
+                      <span className="text-4xs text-gray-400">˅</span>
+                    </>
+                  )}
                 </div>
               </button>
             );

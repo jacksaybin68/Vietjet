@@ -152,7 +152,7 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
             resetForm();
             setShowAddModal(true);
           }}
-          className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-[11px] font-black uppercase tracking-[0.2em] px-6 py-3.5 rounded-2xl transition-all shadow-lg active:scale-95"
+          className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-xs2 font-black uppercase tracking-[0.2em] px-6 py-3.5 rounded-2xl transition-all shadow-lg active:scale-95"
         >
           <Icon name="PlusIcon" size={16} />
           Thêm sân bay
@@ -189,19 +189,19 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
           <table className="w-full">
             <thead>
               <tr className="bg-white/5 border-b border-white/5">
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-left">
+                <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest text-left">
                   Mã IATA
                 </th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-left">
+                <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest text-left">
                   Tên sân bay
                 </th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-left hidden sm:table-cell">
+                <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest text-left hidden sm:table-cell">
                   Thành phố
                 </th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-left hidden md:table-cell">
+                <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest text-left hidden md:table-cell">
                   Quốc gia
                 </th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">
+                <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest text-center">
                   Thao tác
                 </th>
               </tr>
@@ -227,7 +227,7 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
                       <p className="font-black text-slate-400">Không thể tải dữ liệu</p>
                       <button
                         onClick={() => fetchAirports(1, searchQuery)}
-                        className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline"
+                        className="text-2xs font-black uppercase tracking-widest text-primary hover:underline"
                       >
                         Thử lại
                       </button>
@@ -239,7 +239,7 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
                   <td colSpan={5} className="px-6 py-24 text-center">
                     <div className="flex flex-col items-center gap-4">
                       <Icon name="InboxIcon" size={32} className="text-slate-600" />
-                      <p className="font-black text-slate-400 uppercase text-[10px] tracking-widest">
+                      <p className="font-black text-slate-400 uppercase text-2xs tracking-widest">
                         Sân bay trống
                       </p>
                     </div>
@@ -353,7 +353,7 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
                   <h3 className="text-xl font-black text-white uppercase tracking-tight">
                     {viewingAirport.name}
                   </h3>
-                  <p className="text-[10px] font-black text-primary uppercase tracking-widest">
+                  <p className="text-2xs font-black text-primary uppercase tracking-widest">
                     Mã IATA: {viewingAirport.code}
                   </p>
                 </div>
@@ -369,19 +369,19 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
             <div className="p-8 space-y-8">
               <div className="grid grid-cols-2 gap-8">
                 <div>
-                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">
+                  <label className="text-2xs font-black text-slate-600 uppercase tracking-widest block mb-1">
                     Thành phố
                   </label>
                   <p className="text-sm font-black text-slate-200">{viewingAirport.city}</p>
                 </div>
                 <div>
-                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">
+                  <label className="text-2xs font-black text-slate-600 uppercase tracking-widest block mb-1">
                     Quốc gia
                   </label>
                   <p className="text-sm font-black text-slate-200">{viewingAirport.country}</p>
                 </div>
                 <div>
-                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">
+                  <label className="text-2xs font-black text-slate-600 uppercase tracking-widest block mb-1">
                     Ngày tạo
                   </label>
                   <p className="text-xs font-bold text-slate-400">
@@ -389,10 +389,10 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
                   </p>
                 </div>
                 <div>
-                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">
+                  <label className="text-2xs font-black text-slate-600 uppercase tracking-widest block mb-1">
                     ID Hệ thống
                   </label>
-                  <p className="text-[10px] font-mono text-slate-500 uppercase truncate">
+                  <p className="text-2xs font-mono text-slate-500 uppercase truncate">
                     {viewingAirport.id}
                   </p>
                 </div>
@@ -403,7 +403,7 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
                   <Icon name="GlobeAltIcon" size={24} />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">
+                  <p className="text-2xs font-black text-slate-500 uppercase tracking-widest mb-0.5">
                     Vị trí kết nối
                   </p>
                   <p className="text-xs font-bold text-slate-300">
@@ -419,13 +419,13 @@ export default function AirportsTab({ onToast }: { onToast?: ToastAPI }) {
                   setViewingAirport(null);
                   openEditModal(viewingAirport);
                 }}
-                className="flex-1 px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest border border-white/5 transition-all active:scale-95"
+                className="flex-1 px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl text-2xs font-black uppercase tracking-widest border border-white/5 transition-all active:scale-95"
               >
                 Chỉnh sửa
               </button>
               <button
                 onClick={() => setViewingAirport(null)}
-                className="flex-1 px-8 py-4 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-primary/20"
+                className="flex-1 px-8 py-4 bg-primary text-white rounded-2xl text-2xs font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-primary/20"
               >
                 Đóng
               </button>
@@ -469,7 +469,7 @@ function AirportModal({
         </div>
         <form onSubmit={onSubmit} className="p-8 space-y-6">
           <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+            <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
               Mã sân bay <span className="text-primary">*</span>
             </label>
             <input
@@ -484,7 +484,7 @@ function AirportModal({
             />
           </div>
           <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+            <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
               Tên sân bay <span className="text-primary">*</span>
             </label>
             <input
@@ -498,7 +498,7 @@ function AirportModal({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
                 Thành phố <span className="text-primary">*</span>
               </label>
               <input
@@ -511,7 +511,7 @@ function AirportModal({
               />
             </div>
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
                 Quốc gia
               </label>
               <input
@@ -528,14 +528,14 @@ function AirportModal({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="flex-1 bg-white/5 hover:bg-white/10 text-white font-black text-[10px] uppercase tracking-widest py-4 rounded-2xl transition-all border border-white/5 disabled:opacity-50"
+              className="flex-1 bg-white/5 hover:bg-white/10 text-white font-black text-2xs uppercase tracking-widest py-4 rounded-2xl transition-all border border-white/5 disabled:opacity-50"
             >
               Huỷ
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !formData.code || !formData.name || !formData.city}
-              className="flex-[2] bg-primary hover:bg-primary-dark text-white font-black text-[10px] uppercase tracking-widest py-4 rounded-2xl transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-[2] bg-primary hover:bg-primary-dark text-white font-black text-2xs uppercase tracking-widest py-4 rounded-2xl transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>

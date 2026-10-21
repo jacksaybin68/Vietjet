@@ -44,7 +44,7 @@ interface AncillaryServicesStepProps {
 
 export default function AncillaryServicesStep({
   flight,
-  returnFlight: _returnFlight,
+  returnFlight,
   isRoundTrip = false,
   passengerName: _passengerName = 'LONG CHIN',
   selectedSeats = [],
@@ -79,133 +79,104 @@ export default function AncillaryServicesStep({
       </div>
 
       {/* 7 Services in EXACT order of Vietjet reference */}
-      <div className="space-y-2.5">
-        {/* 1. Chọn chỗ ngồi yêu thích */}
+      <div className="space-y-3">
+        {/* 1. Chọn chỗ ngồi yêu thích (Screenshot 8) */}
         <div
           onClick={onOpenSeatDrawer}
-          className="group cursor-pointer rounded-2xl bg-white border border-gray-200/90 p-3.5 sm:p-4 shadow-sm hover:shadow-md hover:border-amber-300 transition-all flex items-center justify-between"
+          className="group cursor-pointer rounded-2xl bg-white border border-gray-200 p-4 shadow-xs hover:shadow-md transition-all flex items-center justify-between"
         >
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-full bg-amber-100/80 border border-amber-300 flex items-center justify-center text-primary-dark shadow-sm shrink-0">
-              <RiArmchairLine size={24} />
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="w-14 h-14 rounded-full bg-[#FBB612] flex items-center justify-center text-red-600 shadow-sm shrink-0">
+              <RiArmchairLine size={28} />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-gray-900 group-hover:text-primary-dark transition-colors">
-                  Chọn chỗ ngồi yêu thích
-                </h3>
-                {seatFee > 0 && (
-                  <span className="text-xs font-black text-primary-dark">
-                    {seatFee.toLocaleString('vi-VN')} VND
-                  </span>
-                )}
-              </div>
+            <div className="min-w-0">
+              <h3 className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">
+                Chọn chỗ ngồi yêu thích
+              </h3>
               <p className="text-xs text-gray-500 mt-0.5">
-                {isRoundTrip ? (
-                  selectedSeats.length > 0 || returnSeats.length > 0 ? (
-                    <>
-                      <span>
-                        Đi: {selectedSeats.length > 0 ? selectedSeats.join(', ') : 'Chưa chọn'}
-                      </span>
-                      <span className="mx-1.5">•</span>
-                      <span>
-                        Về: {returnSeats.length > 0 ? returnSeats.join(', ') : 'Chưa chọn'}
-                      </span>
-                    </>
-                  ) : (
-                    'Hãy chọn chỗ ngồi chuyến đi & về'
-                  )
-                ) : selectedSeats.length > 0 ? (
-                  `Đã chọn: ${selectedSeats.join(', ')}`
-                ) : (
-                  'Hãy chọn chỗ ngồi yêu thích của bạn'
-                )}
+                Hãy chọn chỗ ngồi yêu thích của bạn
               </p>
+              <div className="text-xs font-black text-red-600 mt-0.5">
+                {seatFee > 0 ? `${seatFee.toLocaleString('vi-VN')} VND` : '0 VND'}
+              </div>
+              <div className="flex items-center gap-3 text-3xs font-bold text-gray-700 mt-1 border-t border-gray-100 pt-1">
+                <span>{flight.from} ✈ {flight.to}</span>
+                {isRoundTrip && <span>{returnFlight?.from || flight.to} ✈ {returnFlight?.to || flight.from}</span>}
+              </div>
             </div>
           </div>
           <RiArrowRightSLine
-            size={20}
-            className="text-gray-400 group-hover:text-primary-dark group-hover:translate-x-0.5 transition-all"
+            size={22}
+            className="text-gray-400 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0"
           />
         </div>
 
-        {/* 2. Chọn hành lý/Dịch vụ nối chuyến */}
+        {/* 2. Chọn hành lý/Dịch vụ nối chuyến (Screenshot 8) */}
         <div
           onClick={onOpenBaggageDrawer}
-          className="group cursor-pointer rounded-2xl bg-white border border-gray-200/90 p-3.5 sm:p-4 shadow-sm hover:shadow-md hover:border-amber-300 transition-all flex items-center justify-between"
+          className="group cursor-pointer rounded-2xl bg-white border border-gray-200 p-4 shadow-xs hover:shadow-md transition-all flex items-center justify-between"
         >
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-full bg-amber-100/80 border border-amber-300 flex items-center justify-center text-primary-dark shadow-sm shrink-0">
-              <RiSuitcaseLine size={24} />
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="w-14 h-14 rounded-full bg-[#FBB612] flex items-center justify-center text-red-600 shadow-sm shrink-0">
+              <RiSuitcaseLine size={28} />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-gray-900 group-hover:text-primary-dark transition-colors">
-                  Chọn hành lý/Dịch vụ nối chuyến
-                </h3>
-                {baggageFee > 0 && (
-                  <span className="text-xs font-black text-primary-dark">
-                    {baggageFee.toLocaleString('vi-VN')} VND
+            <div className="min-w-0">
+              <h3 className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">
+                Chọn hành lý/Dịch vụ nối chuyến
+              </h3>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Hãy lựa chọn gói hành lý phù hợp
+              </p>
+              <div className="text-xs font-black text-red-600 mt-0.5">
+                {baggageFee > 0 ? `${baggageFee.toLocaleString('vi-VN')} VND` : '0 VND'}
+              </div>
+              <div className="flex items-center gap-3 text-3xs font-bold text-gray-700 mt-1 border-t border-gray-100 pt-1">
+                <span>
+                  {flight.from} ✈ {flight.to} {baggageLabel ? `(${baggageLabel})` : ''}
+                </span>
+                {isRoundTrip && (
+                  <span>
+                    {returnFlight?.from || flight.to} ✈ {returnFlight?.to || flight.from}{' '}
+                    {returnBaggageLabel ? `(${returnBaggageLabel})` : ''}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-gray-500 mt-0.5">
-                {isRoundTrip ? (
-                  baggageLabel || returnBaggageLabel ? (
-                    <span className="font-semibold text-gray-700">
-                      Đi: {baggageLabel || '7kg'} | Về: {returnBaggageLabel || '7kg'}
-                    </span>
-                  ) : (
-                    'Hãy lựa chọn gói hành lý chiều đi & về'
-                  )
-                ) : baggageLabel ? (
-                  <span className="font-semibold text-gray-700">
-                    {flight.from} ✈ {flight.to} ({baggageLabel})
-                  </span>
-                ) : (
-                  'Hãy lựa chọn gói hành lý phù hợp'
-                )}
-              </p>
             </div>
           </div>
           <RiArrowRightSLine
-            size={20}
-            className="text-gray-400 group-hover:text-primary-dark group-hover:translate-x-0.5 transition-all"
+            size={22}
+            className="text-gray-400 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0"
           />
         </div>
 
-        {/* 3. Chọn suất ăn */}
+        {/* 3. Chọn suất ăn (Screenshot 8) */}
         <div
           onClick={onOpenMealDrawer}
-          className="group cursor-pointer rounded-2xl bg-white border border-gray-200/90 p-3.5 sm:p-4 shadow-sm hover:shadow-md hover:border-amber-300 transition-all flex items-center justify-between"
+          className="group cursor-pointer rounded-2xl bg-white border border-gray-200 p-4 shadow-xs hover:shadow-md transition-all flex items-center justify-between"
         >
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-full bg-amber-100/80 border border-amber-300 flex items-center justify-center text-primary-dark shadow-sm shrink-0">
-              <RiRestaurantLine size={24} />
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="w-14 h-14 rounded-full bg-[#FBB612] flex items-center justify-center text-red-600 shadow-sm shrink-0">
+              <RiRestaurantLine size={28} />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-gray-900 group-hover:text-primary-dark transition-colors">
-                  Chọn suất ăn
-                </h3>
-                {mealFee > 0 && (
-                  <span className="text-xs font-black text-primary-dark">
-                    {mealFee.toLocaleString('vi-VN')} VND
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-gray-500 mt-0.5">
-                {mealCount > 0 ? (
-                  <span className="font-semibold text-gray-700">Đã chọn {mealCount} suất ăn</span>
-                ) : (
-                  <span className="text-primary-dark font-bold">jet café</span>
-                )}
+            <div className="min-w-0">
+              <h3 className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">
+                Chọn suất ăn
+              </h3>
+              <p className="text-xs font-bold italic text-red-600 mt-0.5">
+                jet café
               </p>
+              <div className="text-xs font-black text-red-600 mt-0.5">
+                {mealFee > 0 ? `${mealFee.toLocaleString('vi-VN')} VND` : '0 VND'}
+              </div>
+              <div className="flex items-center gap-3 text-3xs font-bold text-gray-700 mt-1 border-t border-gray-100 pt-1">
+                <span>{flight.from} ✈ {flight.to}</span>
+                {isRoundTrip && <span>{returnFlight?.from || flight.to} ✈ {returnFlight?.to || flight.from}</span>}
+              </div>
             </div>
           </div>
           <RiArrowRightSLine
-            size={20}
-            className="text-gray-400 group-hover:text-primary-dark group-hover:translate-x-0.5 transition-all"
+            size={22}
+            className="text-gray-400 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0"
           />
         </div>
 

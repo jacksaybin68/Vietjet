@@ -12,8 +12,9 @@ import {
   HiOutlineX,
 } from 'react-icons/hi';
 import { RiCalendarEventLine, RiHeadphoneLine } from 'react-icons/ri';
-import { useAuth } from '@/contexts/AuthContext';
 import AnnouncementBar from './AnnouncementBar';
+import VietjetMobileDrawer from './VietjetMobileDrawer';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Nav theo đúng bốn mục của vietjetair.com (site thật render uppercase qua CSS);
 // "Trang chủ" đi qua logo; thao tác đặt vé luôn dẫn về form booking trên trang chủ.
@@ -151,7 +152,13 @@ const QUICK_SERVICES = [
 const isActivePath = (pathname: string, href: string) =>
   href === '/trang-chu' ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 
-export default function Header({ variant = 'default' }: { variant?: 'default' | 'compact' }) {
+export default function Header({
+  variant = 'default',
+  mobileTitle,
+}: {
+  variant?: 'default' | 'compact';
+  mobileTitle?: string;
+}) {
   const { user, signOut } = useAuth();
   const pathname = usePathname();
   const isHomepage = pathname === '/trang-chu';
@@ -164,7 +171,20 @@ export default function Header({ variant = 'default' }: { variant?: 'default' | 
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState('Tiếng Việt');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dynamicTitle, setDynamicTitle] = useState(mobileTitle);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    setDynamicTitle(mobileTitle);
+  }, [mobileTitle]);
+
+  useEffect(() => {
+    const handleStepTitle = (e: CustomEvent<string>) => {
+      if (e.detail) setDynamicTitle(e.detail);
+    };
+    window.addEventListener('vj-booking-step-title' as any, handleStepTitle);
+    return () => window.removeEventListener('vj-booking-step-title' as any, handleStepTitle);
+  }, []);
   const [megaMenu, setMegaMenu] = useState<'flight' | 'other' | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const accountMenuRef = useRef<HTMLDivElement>(null);
@@ -229,12 +249,30 @@ export default function Header({ variant = 'default' }: { variant?: 'default' | 
               : 'bg-white/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.08)]'
         }`}
       >
+        {/* Mobile Header for compactMode (< lg) matching Screenshot 3 & 4 */}
+        {compactMode && (
+          <div className="flex lg:hidden h-14 items-center justify-between px-4 bg-[#D71920] text-white shadow-md">
+            <div className="w-8 shrink-0" />
+            <h1 className="font-sans font-black italic tracking-wide text-lg sm:text-xl uppercase text-white text-center truncate">
+              {dynamicTitle || mobileTitle || 'LỰA CHỌN CHUYẾN BAY'}
+            </h1>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Mở menu"
+              className="flex h-8 w-8 items-center justify-center text-white"
+            >
+              <HiOutlineMenu className="h-7 w-7 text-white" />
+            </button>
+          </div>
+        )}
+
         {/* Tầng 2: Hàng tiện ích (Utility) — Logo Vietjet + Hỗ trợ + Đăng ký/Đăng nhập + Tiếng Việt */}
         <div
           className={`transition-colors ${lightChrome ? 'bg-transparent' : 'border-b border-gray-100 bg-white'}`}
         >
           <div
-            className={`mx-auto flex items-center justify-between px-4 sm:px-6 ${
+            className={`mx-auto ${compactMode ? 'hidden lg:flex' : 'flex'} items-center justify-between px-4 sm:px-6 ${
               compactMode
                 ? 'h-14 max-w-[1368px] min-[1368px]:px-0 lg:h-[48px]'
                 : 'h-14 max-w-[1240px] sm:h-16 lg:px-0'
@@ -411,36 +449,67 @@ export default function Header({ variant = 'default' }: { variant?: 'default' | 
               </div>
             </div>
 
-            {/* Mobile controls: Hotline icon + hamburger */}
-            <div className="flex items-center gap-2 lg:hidden">
+            {/* Mobile controls for default mode (Screenshot 2) */}
+            <div className="flex items-center gap-1.5 sm:gap-2 lg:hidden text-xs font-semibold">
               <a
                 href="tel:19001166"
                 aria-label="Gọi hỗ trợ"
-                className={`grid h-10 w-10 place-items-center rounded-lg border ${
-                  lightChrome
-                    ? 'border-white/40 text-white bg-black/20'
-                    : 'border-gray-200 text-vjred'
+                className={`flex items-center gap-1 px-1.5 py-1 ${
+                  lightChrome ? 'text-white hover:text-vjyellow' : 'text-gray-700 hover:text-vjred'
                 }`}
               >
-                <RiHeadphoneLine className="text-lg" />
+                <RiHeadphoneLine className="text-base" />
+                <span className="hidden min-[380px]:inline text-3xs sm:text-xs">Hỗ trợ</span>
               </a>
+
+              {user ? (
+                <span
+                  className={`max-w-[75px] truncate text-3xs sm:text-xs font-bold ${
+                    lightChrome ? 'text-white' : 'text-gray-800'
+                  }`}
+                >
+                  {(user.fullName || user.email)?.replace(/\s*\(CCCD:.*?\)/gi, '')}
+                </span>
+              ) : (
+                <div
+                  className={`flex items-center gap-1 text-3xs sm:text-xs ${
+                    lightChrome ? 'text-white' : 'text-gray-700'
+                  }`}
+                >
+                  <Link href="/dang-ky" className="hover:text-vjyellow transition">
+                    Đăng ký
+                  </Link>
+                  <span className="opacity-60">|</span>
+                  <Link href="/dang-nhap" className="hover:text-vjyellow transition">
+                    Đăng nhập
+                  </Link>
+                </div>
+              )}
+
+              {/* Dropdown VI */}
               <button
                 type="button"
-                onClick={() => setMobileMenuOpen((open) => !open)}
-                aria-expanded={mobileMenuOpen}
-                aria-controls="mobile-menu"
-                aria-label={mobileMenuOpen ? 'Đóng menu' : 'Mở menu'}
-                className={`grid h-10 w-10 place-items-center rounded-lg border ${
+                onClick={() => setLangMenuOpen((open) => !open)}
+                className={`flex items-center gap-0.5 rounded px-1.5 py-0.5 text-3xs sm:text-xs font-bold border ${
                   lightChrome
-                    ? 'border-white/40 text-white bg-black/20'
-                    : 'border-gray-200 text-gray-700'
+                    ? 'border-white/50 bg-black/10 text-white'
+                    : 'border-gray-200 bg-gray-50 text-gray-700'
                 }`}
               >
-                {mobileMenuOpen ? (
-                  <HiOutlineX className={`text-xl ${lightChrome ? 'text-white' : 'text-vjred'}`} />
-                ) : (
-                  <HiOutlineMenu className="text-xl" />
-                )}
+                <span>VI</span>
+                <span className="text-3xs">▾</span>
+              </button>
+
+              {/* Hamburger button */}
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="Mở menu"
+                className={`flex h-8 w-8 items-center justify-center ${
+                  lightChrome ? 'text-white' : 'text-gray-700'
+                }`}
+              >
+                <HiOutlineMenu className="text-2xl" />
               </button>
             </div>
           </div>
@@ -656,102 +725,13 @@ export default function Header({ variant = 'default' }: { variant?: 'default' | 
           </div>
         )}
 
-        {/* Mobile menu drawer */}
-        {mobileMenuOpen && (
-          <div
-            id="mobile-menu"
-            className="max-h-[calc(100vh-4.5rem)] overflow-y-auto border-t border-gray-200 bg-white shadow-2xl lg:hidden"
-          >
-            <nav aria-label="Điều hướng chính" className="grid grid-cols-2 gap-px bg-gray-200">
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`bg-white px-4 py-3.5 text-xs font-bold uppercase tracking-wider ${
-                    isActivePath(pathname, link.href)
-                      ? 'text-vjred bg-red-50/50'
-                      : 'text-gray-800 hover:text-vjred'
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-
-            {/* Quick Services trong mobile menu */}
-            <div className="border-t border-gray-200 bg-gray-50 px-4 py-4">
-              <p className="mb-2.5 text-xs font-black uppercase tracking-wider text-gray-400">
-                Dịch vụ nổi bật
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                {QUICK_SERVICES.map((s) => (
-                  <Link
-                    key={s.label}
-                    href={s.href}
-                    className="flex items-center gap-2 rounded-xl bg-white p-2.5 text-xs font-bold text-gray-700 shadow-2xs transition hover:text-vjred"
-                  >
-                    <img src={s.iconSrc} alt="" className="w-4 h-4 object-contain" />
-                    <span>{s.label}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* User Auth Links on Mobile */}
-            <div className="border-t border-gray-200 bg-white p-4">
-              {user ? (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 rounded-lg bg-gray-50 p-2.5 text-xs font-bold text-gray-800">
-                    <HiOutlineUserCircle className="text-lg text-vjred" />
-                    <span className="truncate">
-                      {(user.fullName || user.email)?.replace(/\s*\(CCCD:.*?\)/gi, '')}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 pt-1">
-                    <Link
-                      href="/tai-khoan"
-                      className="rounded-lg border border-gray-200 p-2 text-center text-xs font-semibold text-gray-700"
-                    >
-                      Tài khoản
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => void signOut()}
-                      className="rounded-lg border border-red-200 p-2 text-center text-xs font-bold text-vjred"
-                    >
-                      Đăng xuất
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-2">
-                  <Link
-                    href="/dang-nhap"
-                    className="rounded-lg border border-gray-300 py-2.5 text-center text-xs font-bold text-gray-800"
-                  >
-                    Đăng nhập
-                  </Link>
-                  <Link
-                    href="/dang-ky"
-                    className="rounded-lg bg-vjred py-2.5 text-center text-xs font-bold text-white shadow-xs"
-                  >
-                    Đăng ký
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            <div className="border-t border-gray-200 p-4 bg-gray-50">
-              <Link
-                href="/trang-chu#hero-booking-form"
-                className="vj-cta flex min-h-12 items-center justify-center rounded-xl text-xs sm:text-sm font-black shadow-sm"
-              >
-                Tìm và đặt vé
-              </Link>
-            </div>
-          </div>
-        )}
       </header>
+
+      {/* Vietjet Mobile Drawer matching Screenshot 6 */}
+      <VietjetMobileDrawer
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+      />
     </>
   );
 }
