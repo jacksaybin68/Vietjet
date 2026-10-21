@@ -1146,7 +1146,7 @@ export default function FlightResultsStep({
                 key={flight.id}
                 data-testid="flight-result-card"
                 style={{ transitionDelay: `${Math.min(idx * 50, 300)}ms` }}
-                className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs hover:shadow-md transition-shadow duration-200 relative flex flex-row flex-wrap mb-2 sm:mb-3"
+                className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs hover:shadow-md transition-shadow duration-200 relative flex flex-row lg:flex-row flex-wrap mb-2 sm:mb-3"
               >
                 {/* Left: Flight Info - bright yellow box matching real Vietjet */}
                 <div
@@ -1182,7 +1182,7 @@ export default function FlightResultsStep({
                       setExpandedFlightNo(flight.flightNo);
                     }
                   }}
-                  className="w-[24%] sm:w-[28%] lg:w-[240px] shrink-0 bg-[#FFC700] p-1 sm:p-3 lg:p-4 border-r border-yellow-400 flex flex-col items-center justify-center text-center relative select-none cursor-pointer hover:bg-yellow-400 transition-colors"
+                  className="w-[24%] sm:w-[28%] lg:w-[240px] shrink-0 bg-[#FFC700] p-1 sm:p-3 lg:p-4 border-r border-yellow-400 lg:border-b-0 flex flex-col items-center justify-center text-center relative select-none cursor-pointer hover:bg-yellow-400 transition-colors"
                 >
                   <span className="text-[9px] sm:text-2xs font-bold text-gray-900 tracking-wider uppercase leading-tight">
                     {flight.flightNo}
