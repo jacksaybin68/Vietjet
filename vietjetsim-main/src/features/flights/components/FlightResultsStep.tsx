@@ -148,7 +148,7 @@ function SearchErrorModal({ message, onRetry, onDismiss }: SearchErrorModalProps
  */
 export interface FlightResultsStepProps {
   /** Called with the chosen flight; advances the booking wizard to step 2. */
-  onSelect: (f: Flight) => void;
+  onSelect: (f: Flight, isUserAction?: boolean) => void;
   /**
    * Called when a traveller taps a fare card: (flightNo, fareClass, fare, fares).
    * `fares` is the whole ladder for that flight so the summary panel and the fare
@@ -626,12 +626,15 @@ export default function FlightResultsStep({
           ...prev,
           [firstFlight.flightNo]: 'eco',
         }));
-        onSelect({
-          ...firstFlight,
-          price: firstFlight.price,
-          class: 'economy',
-          fareClass: 'eco',
-        });
+        onSelect(
+          {
+            ...firstFlight,
+            price: firstFlight.price,
+            class: 'economy',
+            fareClass: 'eco',
+          },
+          false
+        );
         const fares = {
           eco: firstFlight.price,
           deluxe: Math.round(firstFlight.price * 1.3),
@@ -944,32 +947,32 @@ export default function FlightResultsStep({
       <div className="w-full min-w-0 space-y-4">
         {/* Route board — clean white card with opposing red and gray arrows matching sample */}
         {search?.from && search?.to && (
-          <div className="rounded-xl bg-white border border-gray-100 shadow-xs px-3 py-2.5 sm:px-8 sm:py-3.5 mb-2 mx-auto max-w-lg">
-            <div className="flex items-center justify-between sm:justify-center gap-2 sm:gap-14">
+          <div className="rounded-xl bg-white border border-gray-100 shadow-xs px-2.5 py-2 sm:px-8 sm:py-3.5 mb-2 mx-auto w-full max-w-lg">
+            <div className="flex items-center justify-between sm:justify-center gap-1 sm:gap-14">
               <div className="text-center min-w-0 flex-1 sm:flex-initial">
-                <div className="text-2xl sm:text-3xl font-black text-gray-950 font-koho leading-none tracking-tight">
+                <div className="text-xl sm:text-3xl font-black text-gray-950 font-koho leading-none tracking-tight">
                   {search.from.toUpperCase()}
                 </div>
-                <div className="text-xs sm:text-sm text-gray-600 font-medium mt-1 truncate">
+                <div className="text-[11px] sm:text-sm text-gray-600 font-medium mt-1 truncate">
                   {getAirportCity(search.from)}
                 </div>
               </div>
 
               {/* Opposing arrows: top red right, bottom gray left matching screenshot */}
-              <div className="flex flex-col items-center justify-center gap-1.5 px-2 sm:px-8 shrink-0">
-                <div className="w-10 sm:w-16 h-1 bg-[#D71920] relative rounded-full">
-                  <span className="absolute right-0 -top-1 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-l-[8px] border-l-[#D71920]" />
+              <div className="flex flex-col items-center justify-center gap-1.5 px-1 sm:px-8 shrink-0">
+                <div className="w-8 sm:w-16 h-1 bg-[#D71920] relative rounded-full">
+                  <span className="absolute right-0 -top-1 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-l-[7px] border-l-[#D71920]" />
                 </div>
-                <div className="w-10 sm:w-16 h-1 bg-[#E0E0E0] relative rounded-full">
-                  <span className="absolute left-0 -top-1 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-r-[8px] border-r-[#E0E0E0]" />
+                <div className="w-8 sm:w-16 h-1 bg-[#E0E0E0] relative rounded-full">
+                  <span className="absolute left-0 -top-1 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-r-[7px] border-r-[#E0E0E0]" />
                 </div>
               </div>
 
               <div className="text-center min-w-0 flex-1 sm:flex-initial">
-                <div className="text-2xl sm:text-3xl font-black text-gray-950 font-koho leading-none tracking-tight">
+                <div className="text-xl sm:text-3xl font-black text-gray-950 font-koho leading-none tracking-tight">
                   {search.to.toUpperCase()}
                 </div>
-                <div className="text-xs sm:text-sm text-gray-600 font-medium mt-1 truncate">
+                <div className="text-[11px] sm:text-sm text-gray-600 font-medium mt-1 truncate">
                   {getAirportCity(search.to)}
                 </div>
               </div>
