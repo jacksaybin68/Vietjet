@@ -670,6 +670,7 @@ function formatDateViShort(iso?: string) {
               initialPassengers={booking.passengers}
               seatFee={seatFeeTotal}
               ancillaries={booking.ancillaries}
+              totalAmount={finalTotal}
               onSubmit={handlePassengerSubmit}
               onBack={() => goStep(1)}
               onPassengersChange={handlePassengersChange}
