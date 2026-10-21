@@ -810,20 +810,10 @@ function formatDateViShort(iso?: string) {
   );
 }
 
-export default function FlightBookingClient({
-  onFlightSelect,
-  continueSignal,
-  onStepChange,
-  onPaxCountsChange,
-}: FlightBookingClientProps) {
+export default function FlightBookingClient(props: FlightBookingClientProps) {
   return (
     <Suspense fallback={<FlightSearchSkeleton />}>
-      <FlightBookingClientInner
-        onFlightSelect={onFlightSelect}
-        continueSignal={continueSignal}
-        onStepChange={onStepChange}
-        onPaxCountsChange={onPaxCountsChange}
-      />
+      <FlightBookingClientInner {...props} />
     </Suspense>
   );
 }
