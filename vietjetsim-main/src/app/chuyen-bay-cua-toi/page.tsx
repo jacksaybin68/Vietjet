@@ -278,18 +278,56 @@ export default function MyFlightsPage() {
           className="pointer-events-none absolute bottom-0 right-0 z-0 w-[min(720px,58vw)] select-none opacity-90"
         />
 
-        <Header variant="compact" />
+        <Header variant="compact" mobileTitle="CHUYẾN BAY CỦA TÔI" hideMobileLogo />
+
+        {/* Thanh Tab Mobile: "Tìm kiếm mã đặt chỗ" | "Chuyến bay của tôi" khớp 100% Ảnh tham chiếu */}
+        <div className="xl:hidden w-full bg-white border-b border-gray-200 shadow-xs relative z-20">
+          <div className="flex">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={view === 'search'}
+              onClick={() => {
+                viewPinned.current = true;
+                setView('search');
+              }}
+              className={`flex-1 py-3 text-center text-sm font-bold transition-all border-b-2 cursor-pointer ${
+                view === 'search'
+                  ? 'text-primary border-primary'
+                  : 'text-gray-600 border-transparent hover:text-gray-900'
+              }`}
+            >
+              Tìm kiếm mã đặt chỗ
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={view === 'list'}
+              onClick={() => {
+                viewPinned.current = true;
+                setView('list');
+              }}
+              className={`flex-1 py-3 text-center text-sm font-bold transition-all border-b-2 cursor-pointer ${
+                view === 'list'
+                  ? 'text-primary border-primary'
+                  : 'text-gray-600 border-transparent hover:text-gray-900'
+              }`}
+            >
+              Chuyến bay của tôi
+            </button>
+          </div>
+        </div>
 
         <main id="main-content" className="relative z-10 flex flex-1 flex-col">
           {/* ===== Khung tra cứu: hai tab nằm trên thẻ, thẻ rộng 1368px ở
               màn hình tham chiếu 2048 (viền trái 340px). ===== */}
           <section className="relative flex-1">
             <div className="mx-auto w-full max-w-[1368px] px-4 sm:px-6 min-[1368px]:px-0">
-              <div className="pt-8 xl:pt-[65px]">
+              <div className="pt-4 xl:pt-[65px]">
                 <div
                   role="tablist"
                   aria-label="Chuyến bay của tôi"
-                  className="flex items-end overflow-hidden rounded-t-[10px] xl:overflow-visible gap-2"
+                  className="hidden xl:flex items-end overflow-hidden rounded-t-[10px] xl:overflow-visible gap-2"
                 >
                   {(
                     [
@@ -298,7 +336,7 @@ export default function MyFlightsPage() {
                         label: 'Tìm kiếm mã đặt chỗ',
                         TabIcon: MdConfirmationNumber,
                       },
-                      { id: 'list', label: 'Chuyến bay sắp tới', TabIcon: FlightIcon },
+                      { id: 'list', label: 'Chuyến bay của tôi', TabIcon: FlightIcon },
                     ] as const
                   ).map((chip) => {
                     const active = view === chip.id;
@@ -326,98 +364,183 @@ export default function MyFlightsPage() {
                   })}
                 </div>
 
-                {/* Tab 1: Form tra cứu đặt chỗ — desktop: cột nhập 458px + banner 800px. */}
+                {/* Tab 1: Form tra cứu đặt chỗ */}
                 {view === 'search' && (
-                  <form
-                    onSubmit={handleSearchBooking}
-                    className="rounded-[12px] bg-[rgba(248,251,255,0.95)] px-4 pb-8 pt-6 shadow-[0_18px_50px_rgba(36,73,120,0.14)] ring-1 ring-white/70 backdrop-blur-[2px] sm:px-6 xl:rounded-l-[12px] xl:pb-[39px] xl:pl-[46px] xl:pr-[3px] xl:pt-[34px] animate-fadeIn"
-                  >
-                    <div className="grid grid-cols-1 gap-8 xl:grid-cols-[458px_minmax(0,1fr)] xl:gap-[60px]">
-                      {/* Cột trái: tiêu đề + mô tả + ba trường nhập. */}
-                      <div className="flex flex-col">
-                        <h1 className="text-lg font-black uppercase tracking-tight text-gray-900">
-                          CHUYẾN BAY CỦA TÔI
-                        </h1>
-                        <p className="mt-2 text-xs leading-relaxed text-gray-600">
-                          Bạn muốn xem chuyến bay đã đặt, đổi lịch trình bay hay mua thêm dịch vụ
-                          hành lý, chỗ ngồi, suất ăn..., vui lòng điền thông tin bên dưới:
-                        </p>
+                  <>
+                    {/* Giao diện Mobile khớp 100% Ảnh mẫu tham chiếu */}
+                    <div className="xl:hidden w-full max-w-[540px] mx-auto pt-2 pb-16">
+                      <p className="text-[13px] sm:text-sm font-bold text-gray-800 leading-snug mb-4">
+                        Bạn muốn xem chuyến bay đã đặt, đổi lịch trình bay hay mua thêm dịch vụ hành lý, chỗ ngồi, suất ăn..., vui lòng điền thông tin bên dưới:
+                      </p>
 
-                        <div className="mt-[22px] space-y-[18px]">
-                          <div className="vj-lookup-field">
+                      <form onSubmit={handleSearchBooking} noValidate>
+                        <div className="space-y-3">
+                          <div className="relative">
                             <input
-                              id="booking-code"
+                              id="mobi-booking-code"
                               type="text"
                               required
                               autoComplete="off"
                               autoCapitalize="characters"
                               value={bookingCode}
                               onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
-                              placeholder=" "
-                              className="vj-lookup-input font-heading-800 uppercase tracking-wide"
+                              className="w-full h-12 rounded-lg bg-white px-4 text-sm font-bold text-gray-900 shadow-sm border border-gray-100 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                             />
-                            <label htmlFor="booking-code" className="vj-lookup-label">
-                              Mã đặt chỗ <span className="text-[var(--vj-red)]">*</span>
-                            </label>
+                            {!bookingCode && (
+                              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-700 select-none">
+                                Mã đặt chỗ<span className="text-primary font-bold">*</span>
+                              </span>
+                            )}
                           </div>
 
-                          <div className="vj-lookup-field">
+                          <div className="relative">
                             <input
-                              id="surname"
+                              id="mobi-surname"
                               type="text"
                               required
                               autoComplete="family-name"
                               value={surname}
                               onChange={(e) => setSurname(e.target.value)}
-                              placeholder=" "
-                              className="vj-lookup-input"
+                              className="w-full h-12 rounded-lg bg-white px-4 text-sm font-bold text-gray-900 shadow-sm border border-gray-100 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                             />
-                            <label htmlFor="surname" className="vj-lookup-label">
-                              Họ <span className="text-[var(--vj-red)]">*</span>
-                            </label>
+                            {!surname && (
+                              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-700 select-none">
+                                Họ<span className="text-primary font-bold">*</span>
+                              </span>
+                            )}
                           </div>
 
-                          <div className="vj-lookup-field">
+                          <div className="relative">
                             <input
-                              id="given-name"
+                              id="mobi-given-name"
                               type="text"
                               required
                               autoComplete="given-name"
                               value={givenName}
                               onChange={(e) => setGivenName(e.target.value)}
-                              placeholder=" "
-                              className="vj-lookup-input"
+                              className="w-full h-12 rounded-lg bg-white px-4 text-sm font-bold text-gray-900 shadow-sm border border-gray-100 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                             />
-                            <label htmlFor="given-name" className="vj-lookup-label">
-                              Tên đệm & Tên <span className="text-[var(--vj-red)]">*</span>
-                            </label>
+                            {!givenName && (
+                              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-700 select-none">
+                                Tên đệm và tên<span className="text-primary font-bold">*</span>
+                              </span>
+                            )}
                           </div>
                         </div>
 
-                        <div className="mt-6 flex justify-center">
+                        <div className="flex justify-center my-6">
                           <button
                             type="submit"
                             disabled={loading}
-                            className="inline-flex h-10 px-8 items-center justify-center rounded-xl bg-vjyellow hover:bg-vjamber text-sm font-black text-gray-900 shadow-md transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+                            className="inline-flex h-11 w-36 sm:w-40 items-center justify-center rounded-xl bg-[#FFCC00] hover:bg-[#FFB800] text-base font-black italic font-koho text-black shadow-md transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
                           >
                             {loading ? 'Đang tìm…' : 'Tìm kiếm'}
                           </button>
                         </div>
-                      </div>
+                      </form>
 
-                      {/* Cột phải: banner ngoại tệ thực tế theo Ảnh 1 & Ảnh 2 */}
-                      <div className="relative aspect-[750/650] w-full overflow-hidden rounded-[6px] min-[1368px]:aspect-auto min-[1368px]:h-[682px]">
-                        <AppImage
-                          src="/images/hero/banner-chuyenbay-ngoai-te.jpg"
+                      {/* Banner ngang Ngoại tệ sẵn sàng - Hành trình an tâm */}
+                      <div className="w-full overflow-hidden rounded-xl shadow-md border border-white/60 mb-6">
+                        <img
+                          src="/images/hero/banner-chuyenbay-mobile.png"
                           alt="Mua ngoại tệ dễ dàng khi đặt vé"
-                          fill
-                          priority
-                          quality={95}
-                          sizes="(min-width: 1280px) 800px, 100vw"
+                          className="w-full h-auto object-cover"
                         />
                       </div>
                     </div>
-                  </form>
+
+                    {/* Giao diện Desktop */}
+                    <form
+                      onSubmit={handleSearchBooking}
+                      className="hidden xl:block rounded-[12px] bg-[rgba(248,251,255,0.95)] px-4 pb-8 pt-6 shadow-[0_18px_50px_rgba(36,73,120,0.14)] ring-1 ring-white/70 backdrop-blur-[2px] sm:px-6 xl:rounded-l-[12px] xl:pb-[39px] xl:pl-[46px] xl:pr-[3px] xl:pt-[34px] animate-fadeIn"
+                    >
+                      <div className="grid grid-cols-1 gap-8 xl:grid-cols-[458px_minmax(0,1fr)] xl:gap-[60px]">
+                        {/* Cột trái: tiêu đề + mô tả + ba trường nhập. */}
+                        <div className="flex flex-col">
+                          <h1 className="text-lg font-black uppercase tracking-tight text-gray-900">
+                            CHUYẾN BAY CỦA TÔI
+                          </h1>
+                          <p className="mt-2 text-xs leading-relaxed text-gray-600">
+                            Bạn muốn xem chuyến bay đã đặt, đổi lịch trình bay hay mua thêm dịch vụ
+                            hành lý, chỗ ngồi, suất ăn..., vui lòng điền thông tin bên dưới:
+                          </p>
+
+                          <div className="mt-[22px] space-y-[18px]">
+                            <div className="vj-lookup-field">
+                              <input
+                                id="booking-code"
+                                type="text"
+                                required
+                                autoComplete="off"
+                                autoCapitalize="characters"
+                                value={bookingCode}
+                                onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
+                                placeholder=" "
+                                className="vj-lookup-input font-heading-800 uppercase tracking-wide"
+                              />
+                              <label htmlFor="booking-code" className="vj-lookup-label">
+                                Mã đặt chỗ <span className="text-[var(--vj-red)]">*</span>
+                              </label>
+                            </div>
+
+                            <div className="vj-lookup-field">
+                              <input
+                                id="surname"
+                                type="text"
+                                required
+                                autoComplete="family-name"
+                                value={surname}
+                                onChange={(e) => setSurname(e.target.value)}
+                                placeholder=" "
+                                className="vj-lookup-input"
+                              />
+                              <label htmlFor="surname" className="vj-lookup-label">
+                                Họ <span className="text-[var(--vj-red)]">*</span>
+                              </label>
+                            </div>
+
+                            <div className="vj-lookup-field">
+                              <input
+                                id="given-name"
+                                type="text"
+                                required
+                                autoComplete="given-name"
+                                value={givenName}
+                                onChange={(e) => setGivenName(e.target.value)}
+                                placeholder=" "
+                                className="vj-lookup-input"
+                              />
+                              <label htmlFor="given-name" className="vj-lookup-label">
+                                Tên đệm & Tên <span className="text-[var(--vj-red)]">*</span>
+                              </label>
+                            </div>
+                          </div>
+
+                          <div className="mt-6 flex justify-center">
+                            <button
+                              type="submit"
+                              disabled={loading}
+                              className="inline-flex h-10 px-8 items-center justify-center rounded-xl bg-vjyellow hover:bg-vjamber text-sm font-black text-gray-900 shadow-md transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+                            >
+                              {loading ? 'Đang tìm…' : 'Tìm kiếm'}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Cột phải: banner ngoại tệ thực tế theo Ảnh 1 & Ảnh 2 */}
+                        <div className="relative aspect-[750/650] w-full overflow-hidden rounded-[6px] min-[1368px]:aspect-auto min-[1368px]:h-[682px]">
+                          <AppImage
+                            src="/images/hero/banner-chuyenbay-ngoai-te.jpg"
+                            alt="Mua ngoại tệ dễ dàng khi đặt vé"
+                            fill
+                            priority
+                            quality={95}
+                            sizes="(min-width: 1280px) 800px, 100vw"
+                          />
+                        </div>
+                      </div>
+                    </form>
+                  </>
                 )}
 
                 {/* Tab 2: Chuyến bay sắp tới (khi khách chưa đăng nhập -> hiển thị form đăng nhập theo Ảnh 2 & 4) */}
@@ -825,6 +948,42 @@ export default function MyFlightsPage() {
               </section>
             )}
           </div>
+
+          {/* Amy Mascot với tooltip "Xin chào!" khớp ảnh tham chiếu */}
+          <div className="fixed right-6 bottom-4 z-40 flex items-end pointer-events-none select-none">
+            <div className="relative mb-8 mr-1">
+              <div className="bg-white text-gray-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-md border border-gray-200">
+                Xin chào!
+              </div>
+              <div className="w-2.5 h-2.5 bg-white border-r border-b border-gray-200 rotate-45 ml-auto mr-3 -mt-1.5" />
+            </div>
+            <img
+              src="/images/hero/amy-mascot.png"
+              alt="Mascot Amy"
+              className="w-16 h-auto drop-shadow-md"
+              loading="lazy"
+            />
+          </div>
+
+          {/* Dải sóng cong 3 màu đặc trưng Vietjet: Xanh lá - Vàng - Đỏ ở góc dưới cùng bên phải */}
+          <svg
+            className="fixed bottom-0 right-0 w-44 h-44 sm:w-52 sm:h-52 pointer-events-none z-30 overflow-hidden"
+            viewBox="0 0 200 200"
+            fill="none"
+          >
+            <path
+              d="M 10 200 C 60 195 150 165 200 45 L 200 85 C 145 170 55 196 25 200 Z"
+              fill="#84CC16"
+            />
+            <path
+              d="M 0 200 C 50 195 140 160 185 85 L 175 110 C 130 170 45 197 0 200 Z"
+              fill="#EAB308"
+            />
+            <path
+              d="M 0 200 C 45 195 130 165 160 120 L 200 200 Z"
+              fill="#D71920"
+            />
+          </svg>
         </main>
       </div>
 
