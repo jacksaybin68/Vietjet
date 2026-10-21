@@ -16,6 +16,7 @@ interface Props {
   initialPassengers?: Passenger[];
   seatFee?: number;
   ancillaries?: AncillaryId[];
+  totalAmount?: number;
   onSubmit: (passengers: Passenger[], consents: BookingConsents) => void | Promise<void>;
   onBack: () => void;
   onPassengersChange?: (passengers: Passenger[]) => void;
@@ -56,6 +57,7 @@ export default function PassengerInfoStep({
   initialPassengers,
   seatFee: _seatFee = 0,
   ancillaries: _ancillaries = [],
+  totalAmount,
   onSubmit,
   onBack,
   onPassengersChange,
@@ -660,7 +662,7 @@ export default function PassengerInfoStep({
 
         {/* Sticky Bottom Bar matching real Vietjet booking flow */}
         <BookingBottomBar
-          total={flight.price || 0}
+          total={totalAmount ?? (flight.price || 0)}
           onBack={onBack}
           formId="passenger-info-form"
           continueLabel="Đi tiếp"
