@@ -73,6 +73,8 @@ export interface FlightBookingClientProps {
   continueSignal?: number;
   onStepChange?: (step: number) => void;
   onPaxCountsChange?: (counts: Record<PassengerType, number>) => void;
+  baseTotal?: number;
+  onTotalChange?: (total: number) => void;
 }
 
 function FlightBookingClientInner({
@@ -80,6 +82,8 @@ function FlightBookingClientInner({
   continueSignal,
   onStepChange,
   onPaxCountsChange,
+  baseTotal,
+  onTotalChange,
 }: FlightBookingClientProps) {
   const searchParams = useSearchParams();
   const params: SearchParams = {
@@ -371,8 +375,13 @@ function formatDateViShort(iso?: string) {
   const fareSubtotal = (outboundTotals?.fareSubtotal ?? 0) + (returnTotals?.fareSubtotal ?? 0);
   const taxAndFee = (outboundTotals?.taxAndFee ?? 0) + (returnTotals?.taxAndFee ?? 0);
   const flightBaseTotal = fareSubtotal + taxAndFee;
+  const effectiveFlightBaseTotal = baseTotal && baseTotal > 0 ? baseTotal : flightBaseTotal;
 
-  const finalTotal = flightBaseTotal + seatFeeTotal + baggageFee + insuranceFeeTotal + mealFee;
+  const finalTotal = effectiveFlightBaseTotal + seatFeeTotal + baggageFee + insuranceFeeTotal + mealFee;
+
+  useEffect(() => {
+    onTotalChange?.(finalTotal);
+  }, [finalTotal, onTotalChange]);
 
   const handleFinalBookingSubmit = async () => {
     try {

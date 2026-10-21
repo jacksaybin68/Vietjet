@@ -207,8 +207,10 @@ export default function FlightBookingResultsWrapper({
     }
   }, [bookingStep]);
 
-  const totalBookingAmount =
+  const [clientTotal, setClientTotal] = useState<number>(0);
+  const flightBaseAmount =
     (bookings.outbound?.total ?? 0) + (isRoundTrip ? (bookings.inbound?.total ?? 0) : 0);
+  const totalBookingAmount = clientTotal > 0 ? clientTotal : flightBaseAmount;
 
   return (
     <>
@@ -467,6 +469,8 @@ export default function FlightBookingResultsWrapper({
               onFlightSelect={handleFlightSelect}
               onStepChange={setBookingStep}
               onPaxCountsChange={handlePaxCountsChange}
+              baseTotal={flightBaseAmount}
+              onTotalChange={setClientTotal}
             />
           </div>
 
