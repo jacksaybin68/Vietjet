@@ -255,7 +255,7 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
                 type="button"
                 onClick={() => onSelect?.(iso)}
                 aria-current="date"
-                className="relative px-3 sm:px-5 py-2 flex flex-col items-center justify-center text-center transition-transform hover:scale-105 active:scale-95 cursor-pointer min-w-[115px] sm:min-w-[130px]"
+                className="relative px-2 sm:px-5 py-1.5 sm:py-2 flex flex-col items-center justify-center text-center transition-transform hover:scale-105 active:scale-95 cursor-pointer min-w-[95px] sm:min-w-[130px] max-w-[120px]"
               >
                 {/* Scalloped / puffy cloud SVG badge background matching sample image */}
                 <svg
@@ -294,7 +294,7 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
               key={iso}
               type="button"
               onClick={() => onSelect?.(iso)}
-              className={`${isOuterDay ? 'hidden sm:flex' : 'flex'} flex-col items-center justify-center text-center px-2 sm:px-3 py-2 transition-transform hover:scale-105 cursor-pointer min-w-[95px] sm:min-w-[110px]`}
+              className={`${isOuterDay ? 'hidden sm:flex' : 'flex'} flex-col items-center justify-center text-center px-1 sm:px-3 py-1.5 sm:py-2 transition-transform hover:scale-105 cursor-pointer min-w-[75px] sm:min-w-[110px] max-w-[90px]`}
             >
               <span className="text-3xs sm:text-xs font-medium text-gray-600 leading-tight">
                 {WEEKDAY_LABELS[day.getDay()]}
@@ -1000,7 +1000,7 @@ export default function FlightResultsStep({
         {!isLoading && filtered.length > 0 && (
           <div className="flex flex-row items-stretch gap-0 mt-3 mb-1">
             {/* Empty space matching left yellow box */}
-            <div className="w-[27%] sm:w-[28%] lg:w-[240px] shrink-0" />
+            <div className="w-[24%] sm:w-[28%] lg:w-[240px] shrink-0" />
             {/* 4 Fare Headers aligned with flight card columns */}
             <div className="flex-1 min-w-0 grid grid-cols-4 gap-0.5">
               <div
@@ -1179,7 +1179,7 @@ export default function FlightResultsStep({
                       setExpandedFlightNo(flight.flightNo);
                     }
                   }}
-                  className="w-[27%] sm:w-[28%] lg:w-[240px] shrink-0 bg-[#FFC700] p-1 sm:p-3 lg:p-4 border-r border-yellow-400 flex flex-col items-center justify-center text-center relative select-none cursor-pointer hover:bg-yellow-400 transition-colors"
+                  className="w-[24%] sm:w-[28%] lg:w-[240px] shrink-0 bg-[#FFC700] p-1 sm:p-3 lg:p-4 border-r border-yellow-400 flex flex-col items-center justify-center text-center relative select-none cursor-pointer hover:bg-yellow-400 transition-colors"
                 >
                   <span className="text-[9px] sm:text-2xs font-bold text-gray-900 tracking-wider uppercase leading-tight">
                     {flight.flightNo}
@@ -1305,7 +1305,7 @@ export default function FlightResultsStep({
                     className={`w-full basis-full border-t border-black/5 animate-fadeIn ${benefits.bgClass}`}
                   >
                     {/* Header route line */}
-                    <div className="flex items-center justify-between text-xs sm:text-sm py-3 px-6 sm:px-10 border-b border-black/5">
+                    <div className="flex items-center justify-between text-xs sm:text-sm py-2 sm:py-3 px-2 sm:px-10 border-b border-black/5">
                       <div className="text-center min-w-0">
                         <div className="font-bold text-gray-950 text-sm leading-tight font-koho">
                           {flight.from}
@@ -1318,7 +1318,7 @@ export default function FlightResultsStep({
                         </div>
                       </div>
 
-                      <div className="flex-1 max-w-[280px] mx-4 flex flex-col items-center">
+                      <div className="flex-1 min-w-0 max-w-[120px] sm:max-w-[280px] mx-1 sm:mx-4 flex flex-col items-center">
                         <span className="text-2xs text-gray-700 font-semibold mb-0.5">
                           {flight.duration || '2 giờ 10 phút'}
                         </span>
@@ -2067,21 +2067,20 @@ export default function FlightResultsStep({
         </div>
       </aside>
 
-      {/* Sticky totals bar — the real /select-flight page pins this to the bottom
-          of the viewport with the amount on the left and "Đi tiếp" on the right.
-          It continues with the top-ranked flight so the wizard flow is unchanged:
-          picking an individual fare still goes through that card's "Chọn". */}
-      <BookingBottomBar
-        total={leadTotal}
-        ctaLabel="Đi tiếp"
-        onCta={() => {
-          if (!leadFlight) return;
-          onSelect(leadFlight);
-          onFlightSelect?.(leadFlight.flightNo, leadFlight.class as string, leadFlight.price);
-        }}
-        disabled={!leadFlight}
-        testId="results-bottom-bar"
-      />
+      {/* Sticky totals bar — desktop only */}
+      <div className="hidden lg:block">
+        <BookingBottomBar
+          total={leadTotal}
+          ctaLabel="Đi tiếp"
+          onCta={() => {
+            if (!leadFlight) return;
+            onSelect(leadFlight);
+            onFlightSelect?.(leadFlight.flightNo, leadFlight.class as string, leadFlight.price);
+          }}
+          disabled={!leadFlight}
+          testId="results-bottom-bar"
+        />
+      </div>
 
       <FareBenefitsModal
         open={Boolean(compareFare)}
