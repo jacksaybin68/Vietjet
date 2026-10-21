@@ -210,7 +210,7 @@ export default function FlightBookingResultsWrapper({
   const [clientTotal, setClientTotal] = useState<number>(0);
   const flightBaseAmount =
     (bookings.outbound?.total ?? 0) + (isRoundTrip ? (bookings.inbound?.total ?? 0) : 0);
-  const totalBookingAmount = clientTotal > 0 ? clientTotal : flightBaseAmount;
+  const totalBookingAmount = Math.max(clientTotal, flightBaseAmount);
 
   return (
     <>
