@@ -252,12 +252,12 @@ export interface ToastContainerProps {
 }
 
 const POSITION_CLASSES: Record<NonNullable<ToastContainerProps['position']>, string> = {
-  'top-right': 'top-4 right-4 items-end',
-  'top-left': 'top-4 left-4 items-start',
-  'bottom-right': 'bottom-4 right-4 items-end',
-  'bottom-left': 'bottom-4 left-4 items-start',
-  'top-center': 'top-4 left-1/2 -translate-x-1/2 items-center',
-  'bottom-center': 'bottom-4 left-1/2 -translate-x-1/2 items-center',
+  'top-right': 'top-3 sm:top-4 right-3 sm:right-4 left-3 sm:left-auto items-center sm:items-end',
+  'top-left': 'top-3 sm:top-4 left-3 sm:left-4 right-3 sm:right-auto items-center sm:items-start',
+  'bottom-right': 'bottom-4 right-3 sm:right-4 left-3 sm:left-auto items-center sm:items-end',
+  'bottom-left': 'bottom-4 left-3 sm:left-4 right-3 sm:right-auto items-center sm:items-start',
+  'top-center': 'top-3 sm:top-4 left-1/2 -translate-x-1/2 items-center px-2',
+  'bottom-center': 'bottom-4 left-1/2 -translate-x-1/2 items-center px-2',
 };
 
 export function ToastContainer({ toasts, onDismiss, position = 'top-right' }: ToastContainerProps) {

@@ -430,7 +430,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom Section: Socials, Quick Guides, App Downloads, Company Info, Mascot, Hotline */}
-        <div className="pt-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-center relative">
+        <div className="pt-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-center relative overflow-hidden">
           {/* Left: Kết nối với Vietjet + Flightradar */}
           <div className="md:col-span-3 space-y-3">
             <h4 className="font-bold text-xs text-gray-900">Kết nối với Vietjet</h4>
