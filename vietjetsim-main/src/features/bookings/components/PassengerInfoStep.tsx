@@ -8,6 +8,7 @@ import {
   requiresIdNumber,
 } from '@/features/bookings/types/booking-flow';
 import type { AncillaryId } from '@/features/bookings/pricing';
+import BookingBottomBar from '@/features/bookings/components/BookingBottomBar';
 
 interface Props {
   flight: Flight;
@@ -50,13 +51,13 @@ const fieldLabelClass =
   'block text-2xs sm:text-xs font-bold uppercase tracking-wider text-[var(--foreground)] mb-1 font-koho';
 
 export default function PassengerInfoStep({
-  flight: _flight,
+  flight,
   passengerCount,
   initialPassengers,
   seatFee: _seatFee = 0,
   ancillaries: _ancillaries = [],
   onSubmit,
-  onBack: _onBack,
+  onBack,
   onPassengersChange,
 }: Props) {
   const [passengers, setPassengers] = useState<Passenger[]>(
@@ -656,6 +657,15 @@ export default function PassengerInfoStep({
             Hoàn tất & thanh toán
           </button>
         </form>
+
+        {/* Sticky Bottom Bar matching real Vietjet booking flow */}
+        <BookingBottomBar
+          total={flight.price || 0}
+          onBack={onBack}
+          formId="passenger-info-form"
+          continueLabel="Đi tiếp"
+          canContinue={!isSubmitting}
+        />
       </div>
     </>
   );
