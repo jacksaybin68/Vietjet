@@ -467,13 +467,33 @@ export default function SeatSelectionStep({
                         >
                           <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                             <div
-                              className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center ${
+                              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center p-0.5 shrink-0 ${
                                 isOn
-                                  ? 'bg-primary text-white'
-                                  : 'bg-[var(--surface-2)] text-[var(--foreground-muted)]'
+                                  ? 'bg-amber-50 ring-1 ring-amber-400'
+                                  : 'bg-[var(--surface-2)]'
                               }`}
                             >
-                              <Icon name={svc.icon} size={16} />
+                              {svc.id === 'baggage' ? (
+                                <img
+                                  src="/images/ancillary/baggage.png"
+                                  alt={svc.title}
+                                  className="w-full h-full object-contain"
+                                />
+                              ) : svc.id === 'meal' ? (
+                                <img
+                                  src="/images/ancillary/meal.png"
+                                  alt={svc.title}
+                                  className="w-full h-full object-contain"
+                                />
+                              ) : svc.id === 'insurance' ? (
+                                <img
+                                  src="/images/ancillary/insurance.png"
+                                  alt={svc.title}
+                                  className="w-full h-full object-contain"
+                                />
+                              ) : (
+                                <Icon name={svc.icon} size={16} />
+                              )}
                             </div>
                             <span className="font-bold text-[var(--foreground)] font-koho">
                               {svc.title}

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { VisaLogo, MastercardLogo, JcbLogo } from './PaymentMethodLogos';
+import { VisaLogo, MastercardLogo, JcbLogo, AmexLogo } from './PaymentMethodLogos';
 
 interface VirtualCreditCardProps {
   cardNumber: string;
@@ -20,7 +20,7 @@ export default function VirtualCreditCard({
 }: VirtualCreditCardProps) {
   // Determine card type based on number
   const cleanNumber = cardNumber.replace(/\s/g, '');
-  let cardBrand: 'visa' | 'mastercard' | 'jcb' | 'generic' = 'generic';
+  let cardBrand: 'visa' | 'mastercard' | 'jcb' | 'amex' | 'generic' = 'generic';
 
   if (cleanNumber.startsWith('4')) {
     cardBrand = 'visa';
@@ -28,6 +28,8 @@ export default function VirtualCreditCard({
     cardBrand = 'mastercard';
   } else if (/^35/.test(cleanNumber)) {
     cardBrand = 'jcb';
+  } else if (/^3[47]/.test(cleanNumber)) {
+    cardBrand = 'amex';
   }
 
   // Format display number
@@ -90,6 +92,11 @@ export default function VirtualCreditCard({
                 {cardBrand === 'jcb' && (
                   <div className="bg-white/95 px-1 py-0.5 rounded shadow-xs flex items-center">
                     <JcbLogo className="h-4 w-auto" />
+                  </div>
+                )}
+                {cardBrand === 'amex' && (
+                  <div className="bg-white/95 px-1.5 py-0.5 rounded shadow-xs flex items-center">
+                    <AmexLogo className="h-4 w-auto" />
                   </div>
                 )}
                 {cardBrand === 'generic' && (

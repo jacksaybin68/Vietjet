@@ -167,25 +167,36 @@ export function MomoLogo({ className = 'h-6 w-auto' }: { className?: string }) {
 // ─── 8. ZaloPay Official Vector Logo ───────────────────────────────────────
 export function ZaloPayLogo({ className = 'h-5 w-auto' }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 85 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg className={className} viewBox="0 0 96 28" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="zalopayGrad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#0068FF" />
-          <stop offset="100%" stopColor="#00C4FF" />
+          <stop offset="100%" stopColor="#0084FF" />
         </linearGradient>
       </defs>
       <text
         x="2"
-        y="17"
+        y="20"
         fontFamily="sans-serif"
-        fontSize="15"
+        fontSize="18"
         fontWeight="900"
         fill="url(#zalopayGrad)"
-        letterSpacing="-0.02em"
+        letterSpacing="-0.03em"
       >
-        Zalo<tspan fill="#00D26A">Pay</tspan>
+        Zalo
       </text>
-      <circle cx="80" cy="8" r="2.5" fill="#00D26A" />
+      <rect x="50" y="3" width="44" height="22" rx="6" fill="#00BE62" />
+      <text
+        x="56"
+        y="19"
+        fontFamily="sans-serif"
+        fontSize="14"
+        fontWeight="900"
+        fill="#FFFFFF"
+        letterSpacing="-0.01em"
+      >
+        Pay
+      </text>
     </svg>
   );
 }
@@ -296,24 +307,61 @@ export function VietjetWalletLogo({ className = 'h-6 w-auto' }: { className?: st
   );
 }
 
-// ─── 14. GalaxyPay Official Gateway Seal ───────────────────────────────────
+// ─── 14. American Express (AMEX) Official Logo ────────────────────────────
+export function AmexLogo({ className = 'h-5 w-auto' }: { className?: string }) {
+  return (
+    <img
+      src="/images/payments/amex.png"
+      alt="American Express"
+      className={`${className} object-contain`}
+      onError={(e) => {
+        e.currentTarget.style.display = 'none';
+      }}
+    />
+  );
+}
+
+// ─── 15. GalaxyPay Official Logo ───────────────────────────────────────────
+export function GalaxyPayLogo({ className = 'h-5 w-auto' }: { className?: string }) {
+  return (
+    <img
+      src="/images/payments/galaxy-pay.png"
+      alt="Galaxy Pay"
+      className={`${className} object-contain`}
+    />
+  );
+}
+
+// ─── 16. Vietjet Air Official Round Circle Logo ────────────────────────────
+export function VietjetAirCircleLogo({ className = 'h-6 w-auto' }: { className?: string }) {
+  return (
+    <img
+      src="/images/brand/vietjet-air-circle.jpg"
+      alt="vietjetAir.com"
+      className={`${className} rounded-full object-contain`}
+    />
+  );
+}
+
+// ─── 17. GalaxyPay Official Gateway Seal ───────────────────────────────────
 export function GalaxyPayBadge({ className = 'h-5 w-auto' }: { className?: string }) {
   return (
-    <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-gradient-to-r from-slate-900 to-indigo-950 border border-indigo-500/30 text-white shadow-2xs ${className}`}>
-      <svg className="w-3.5 h-3.5 text-amber-400" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 16l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z" />
-      </svg>
-      <span className="font-black italic text-2xs tracking-wider text-amber-300 font-sans">
-        GALAXY PAY
-      </span>
-      <span className="text-3xs text-indigo-300 font-bold uppercase tracking-widest pl-1 border-l border-indigo-500/40">
+    <div
+      className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-white border border-gray-200 shadow-2xs ${className}`}
+    >
+      <img
+        src="/images/payments/galaxy-pay.png"
+        alt="Galaxy Pay"
+        className="h-3.5 w-auto object-contain"
+      />
+      <span className="text-[9px] text-emerald-700 font-bold uppercase tracking-wider pl-1.5 border-l border-gray-200">
         SECURE
       </span>
     </div>
   );
 }
 
-// ─── 15. Trust & Security Badges Bar ───────────────────────────────────────
+// ─── 18. Trust & Security Badges Bar ───────────────────────────────────────
 export function PaymentSecurityFooter() {
   return (
     <div className="mt-6 pt-5 border-t border-gray-100 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-500">
@@ -338,10 +386,11 @@ export function PaymentSecurityFooter() {
       </div>
 
       {/* Accepted logos row */}
-      <div className="flex items-center gap-2.5 opacity-90 grayscale-25 hover:grayscale-0 transition-all">
+      <div className="flex items-center gap-2.5 opacity-90 grayscale-25 hover:grayscale-0 transition-all flex-wrap">
         <VisaLogo className="h-4 w-auto" />
         <MastercardLogo className="h-4 w-auto" />
         <JcbLogo className="h-4 w-auto" />
+        <AmexLogo className="h-4 w-auto" />
         <NapasLogo className="h-3.5 w-auto" />
         <VietQrLogo className="h-4 w-auto" />
       </div>

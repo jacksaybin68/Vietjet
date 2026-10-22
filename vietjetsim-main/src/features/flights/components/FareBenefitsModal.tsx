@@ -204,10 +204,30 @@ export default function FareBenefitsModal({
                           isHighlighted ? 'ring-2 ring-primary' : ''
                         }`}
                       >
-                        <div className={`text-center py-1.5 ${col.headerClass}`}>
-                          <div className="text-xs font-black uppercase font-koho tracking-tight">
-                            {col.label}
-                          </div>
+                        <div className={`text-center py-1.5 px-1 flex items-center justify-center min-h-[30px] ${col.headerClass}`}>
+                          {col.id === 'business' ? (
+                            <img
+                              src="/images/fare-classes/business-logo.png"
+                              alt="Business"
+                              className="h-3.5 w-auto object-contain brightness-0 invert"
+                            />
+                          ) : col.id === 'skyboss' ? (
+                            <img
+                              src="/images/fare-classes/skyboss-logo.png"
+                              alt="skyBOSS"
+                              className="h-3.5 w-auto object-contain brightness-0 invert"
+                            />
+                          ) : col.id === 'deluxe' ? (
+                            <img
+                              src="/images/fare-classes/deluxe-logo.png"
+                              alt="Deluxe"
+                              className="h-3.5 w-auto object-contain brightness-0 invert"
+                            />
+                          ) : (
+                            <div className="text-xs font-black uppercase font-koho tracking-tight">
+                              {col.label}
+                            </div>
+                          )}
                         </div>
                         {prices?.[col.id] != null && (
                           <div className="text-center py-1.5 bg-[var(--surface-2)] border-x border-b border-[var(--border)]">

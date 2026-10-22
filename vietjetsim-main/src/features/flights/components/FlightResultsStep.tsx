@@ -1010,37 +1010,46 @@ export default function FlightResultsStep({
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('business')}
-                className="bg-[#8E7022] text-white py-1.5 sm:py-2 px-0.5 sm:px-2 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs"
+                className="bg-[#8E7022] text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs min-h-[28px]"
               >
-                <span className="font-black italic uppercase text-[9px] sm:text-xs md:text-sm tracking-wider font-koho">
-                  BUSINESS
-                </span>
+                <img
+                  src="/images/fare-classes/business-logo.png"
+                  alt="BUSINESS"
+                  className="h-3 sm:h-4 w-auto object-contain max-w-[85%]"
+                />
+                <span className="sr-only">BUSINESS</span>
               </div>
               <div
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('skyboss')}
-                className="bg-[#D71920] text-white py-1.5 sm:py-2 px-0.5 sm:px-2 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs"
+                className="bg-[#D71920] text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs min-h-[28px]"
               >
-                <span className="font-black italic text-[9px] sm:text-xs md:text-sm tracking-wider font-koho">
-                  skyBOSS
-                </span>
+                <img
+                  src="/images/fare-classes/skyboss-logo.png"
+                  alt="skyBOSS"
+                  className="h-3 sm:h-4 w-auto object-contain max-w-[85%]"
+                />
+                <span className="sr-only">skyBOSS</span>
               </div>
               <div
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('deluxe')}
-                className="bg-[#FF8800] text-white py-1.5 sm:py-2 px-0.5 sm:px-2 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs"
+                className="bg-[#FF8800] text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs min-h-[28px]"
               >
-                <span className="font-black italic text-[9px] sm:text-xs md:text-sm tracking-wider font-koho">
-                  Deluxe
-                </span>
+                <img
+                  src="/images/fare-classes/deluxe-logo.png"
+                  alt="Deluxe"
+                  className="h-3.5 sm:h-4.5 w-auto object-contain max-w-[85%]"
+                />
+                <span className="sr-only">Deluxe</span>
               </div>
               <div
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('eco')}
-                className="bg-[#388E3C] text-white py-1.5 sm:py-2 px-0.5 sm:px-2 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs"
+                className="bg-[#388E3C] text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs min-h-[28px]"
               >
                 <span className="font-black italic text-[9px] sm:text-xs md:text-sm tracking-wider font-koho">
                   Eco
