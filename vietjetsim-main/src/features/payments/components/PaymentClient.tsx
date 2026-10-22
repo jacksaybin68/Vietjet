@@ -27,6 +27,7 @@ import {
   VisaLogo,
   MastercardLogo,
   JcbLogo,
+  AmexLogo,
   NapasLogo,
   VietQrLogo,
   VnpayLogo,
@@ -1250,6 +1251,7 @@ export default function PaymentClient() {
                         <VisaLogo className="h-3.5 w-auto" />
                         <MastercardLogo className="h-3.5 w-auto" />
                         <JcbLogo className="h-3.5 w-auto" />
+                        <AmexLogo className="h-3.5 w-auto" />
                       </div>
                       <span className="text-xs font-bold text-gray-900 mt-2 line-clamp-2 leading-tight">
                         Thẻ tín dụng / ghi nợ quốc tế
