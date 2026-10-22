@@ -140,6 +140,16 @@ export function createAdminInvoice(input: AdminInvoiceInput) {
   });
 }
 
+export function updateAdminBookingStatus(bookingId: string, status: string) {
+  return apiRequest<{ success: boolean; message: string; bookingId: string; status: string }>(
+    EP.BOOKINGS,
+    {
+      method: 'PATCH',
+      body: { bookingId, status },
+    }
+  );
+}
+
 // ─── Discounts ──────────────────────────────────────────────────────────────
 
 export function listDiscounts(query: AdminListQuery = {}) {
@@ -276,6 +286,23 @@ export function setRefundFeatureLock(enabled: boolean) {
 
 export function listTransactions(query: AdminListQuery = {}) {
   return apiRequest<AdminTransaction[]>(`${EP.TRANSACTIONS}${buildQuery(query)}`);
+}
+
+export function confirmTransaction(input: {
+  transactionId?: string;
+  bookingId?: string;
+  action: 'confirm' | 'reject';
+  note?: string;
+}) {
+  return apiRequest<{
+    success: boolean;
+    message: string;
+    bookingId?: string;
+    status?: string;
+  }>(EP.TRANSACTIONS, {
+    method: 'PATCH',
+    body: input,
+  });
 }
 
 // ─── System settings ────────────────────────────────────────────────────────

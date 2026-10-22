@@ -211,6 +211,7 @@ export interface AdminTransaction {
   status: string;
   createdAt?: string;
   bookingId?: string;
+  bookingCode?: string;
   userEmail?: string;
   userName?: string;
   created_at?: string;

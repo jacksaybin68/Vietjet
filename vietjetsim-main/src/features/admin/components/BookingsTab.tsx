@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
-import { createAdminInvoice } from '@/features/admin';
+import { createAdminInvoice, updateAdminBookingStatus, confirmTransaction } from '@/features/admin';
 import { getApiErrorMessage } from '@/shared/services';
 import { renderInvoiceHtml } from '@/features/admin/invoice';
 
@@ -347,8 +347,17 @@ export default function BookingsTab() {
     }, 300);
   };
 
-  const handleStatusChange = (id: string, status: BookingStatus) => {
+  const handleStatusChange = async (id: string, status: BookingStatus) => {
     setBookings((prev) => prev.map((b) => (b.id === id ? { ...b, status } : b)));
+    try {
+      if (status === 'confirmed') {
+        await confirmTransaction({ bookingId: id, action: 'confirm' });
+      } else {
+        await updateAdminBookingStatus(id, status);
+      }
+    } catch (err) {
+      console.error('Failed to update booking status on server:', err);
+    }
   };
 
   const handleSaveEdit = () => {

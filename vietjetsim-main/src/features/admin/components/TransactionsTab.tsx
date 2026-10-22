@@ -2,16 +2,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
-import { listTransactions } from '@/features/admin';
+import { listTransactions, confirmTransaction } from '@/features/admin';
 import { getApiErrorMessage } from '@/shared/services';
 
 interface Transaction {
   id: string;
+  paymentId?: string;
   amount: number;
   method: string;
   status: 'pending' | 'completed' | 'failed' | 'refunded';
   createdAt: string;
   bookingId: string;
+  bookingCode?: string;
+  bookingStatus?: string;
   userEmail: string;
   userName: string;
 }
@@ -29,6 +32,7 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [processingId, setProcessingId] = useState<string | null>(null);
   const pageSize = 10;
 
   const fetchTransactions = useCallback(async () => {
@@ -37,7 +41,7 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
       const data = await listTransactions(
         filterStatus && filterStatus !== 'all' ? { status: filterStatus } : {}
       );
-      setTransactions((data ?? []) as Transaction[]);
+      setTransactions((data ?? []) as unknown as Transaction[]);
     } catch (error) {
       onToast?.error('Lỗi tải dữ liệu', getApiErrorMessage(error, 'Không thể tải giao dịch'));
     } finally {
@@ -49,11 +53,49 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
     fetchTransactions();
   }, [fetchTransactions]);
 
+  const handleProcessTransaction = async (
+    t: Transaction,
+    action: 'confirm' | 'reject',
+    note?: string
+  ) => {
+    setProcessingId(t.id);
+    try {
+      const res = await confirmTransaction({
+        transactionId: t.id,
+        bookingId: t.bookingId,
+        action,
+        note,
+      });
+
+      if (res.success) {
+        onToast?.success(
+          action === 'confirm' ? 'Xác nhận thành công!' : 'Đã từ chối giao dịch',
+          res.message || 'Cập nhật trạng thái thành công'
+        );
+
+        // Update local selected transaction if modal is open
+        if (selectedTransaction?.id === t.id) {
+          setSelectedTransaction((prev) =>
+            prev ? { ...prev, status: action === 'confirm' ? 'completed' : 'failed' } : null
+          );
+        }
+
+        // Refresh transactions list
+        await fetchTransactions();
+      }
+    } catch (err) {
+      onToast?.error('Lỗi xử lý', getApiErrorMessage(err, 'Không thể xác nhận giao dịch'));
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   const filtered = transactions.filter(
     (t) =>
       t.userEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.bookingId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (t.bookingCode && t.bookingCode.toLowerCase().includes(searchQuery.toLowerCase())) ||
       t.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -63,6 +105,14 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
   };
+
+  // KPI Metrics
+  const totalCount = transactions.length;
+  const pendingCount = transactions.filter((t) => t.status === 'pending').length;
+  const completedCount = transactions.filter((t) => t.status === 'completed').length;
+  const totalRevenue = transactions
+    .filter((t) => t.status === 'completed')
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -84,7 +134,7 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
       case 'completed':
         return 'Thành công';
       case 'pending':
-        return 'Đang xử lý';
+        return 'Chờ xác nhận';
       case 'failed':
         return 'Thất bại';
       case 'refunded':
@@ -94,56 +144,150 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
     }
   };
 
+  const getMethodBadge = (method: string) => {
+    const m = (method || '').toLowerCase();
+    if (m.includes('vietqr') || m.includes('qr')) {
+      return { label: 'VietQR', color: 'bg-teal-500/10 text-teal-300 border-teal-500/20' };
+    }
+    if (m.includes('bank') || m.includes('ngan')) {
+      return { label: 'Chuyển khoản', color: 'bg-blue-500/10 text-blue-300 border-blue-500/20' };
+    }
+    if (m.includes('card') || m.includes('the')) {
+      return {
+        label: 'Thẻ tín dụng',
+        color: 'bg-purple-500/10 text-purple-300 border-purple-500/20',
+      };
+    }
+    if (m.includes('momo') || m.includes('zalo') || m.includes('wallet')) {
+      return { label: 'Ví điện tử', color: 'bg-pink-500/10 text-pink-300 border-pink-500/20' };
+    }
+    return { label: method || 'Khác', color: 'bg-slate-500/10 text-slate-300 border-slate-500/20' };
+  };
+
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-            <Icon name="CurrencyDollarIcon" size={24} className="text-indigo-400" />
-            Lịch sử giao dịch
+            <Icon name="CurrencyDollarIcon" size={24} className="text-amber-400" />
+            Quản lý & Xác nhận thanh toán
           </h2>
           <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1 opacity-70">
-            Theo dõi toàn bộ dòng tiền trong hệ thống
+            Duyệt thanh toán VietQR / Ngân hàng, xuất vé điện tử tự động
           </p>
+        </div>
+        <button
+          onClick={() => fetchTransactions()}
+          disabled={isLoading}
+          className="flex items-center gap-2 px-4 py-2 bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 hover:text-white border border-white/10 rounded-xl text-xs font-bold transition-all active:scale-95 self-start sm:self-auto"
+        >
+          <Icon name="ArrowPathIcon" size={16} className={isLoading ? 'animate-spin' : ''} />
+          Làm mới
+        </button>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-slate-800/40 border border-white/5 rounded-2xl p-4 relative overflow-hidden">
+          <p className="text-2xs font-bold text-slate-500 uppercase tracking-wider">
+            Tổng giao dịch
+          </p>
+          <h3 className="text-2xl font-black text-white mt-1 tabular-nums">{totalCount}</h3>
+          <div className="text-2xs text-slate-400 mt-1">Giao dịch trong hệ thống</div>
+        </div>
+
+        <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-4 relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <p className="text-2xs font-bold text-amber-400 uppercase tracking-wider">
+              Chờ xác nhận
+            </p>
+            {pendingCount > 0 && (
+              <span className="flex h-2.5 w-2.5 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+              </span>
+            )}
+          </div>
+          <h3 className="text-2xl font-black text-amber-300 mt-1 tabular-nums">{pendingCount}</h3>
+          <div className="text-2xs text-amber-400/80 mt-1">Cần Admin đối soát & duyệt</div>
+        </div>
+
+        <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4 relative overflow-hidden">
+          <p className="text-2xs font-bold text-emerald-400 uppercase tracking-wider">
+            Đã hoàn tất
+          </p>
+          <h3 className="text-2xl font-black text-emerald-300 mt-1 tabular-nums">
+            {completedCount}
+          </h3>
+          <div className="text-2xs text-emerald-400/80 mt-1">Vé đã xuất thành công</div>
+        </div>
+
+        <div className="bg-indigo-500/5 border border-indigo-500/20 rounded-2xl p-4 relative overflow-hidden">
+          <p className="text-2xs font-bold text-indigo-400 uppercase tracking-wider">
+            Doanh thu đã duyệt
+          </p>
+          <h3 className="text-xl font-black text-indigo-300 mt-1 tabular-nums truncate">
+            {formatCurrency(totalRevenue)}
+          </h3>
+          <div className="text-2xs text-indigo-400/80 mt-1">Thực thu vào tài khoản</div>
         </div>
       </div>
 
+      {/* Filter & Search Bar */}
       <div className="flex flex-col xl:flex-row gap-4">
         <div className="relative flex-1 group">
           <Icon
             name="MagnifyingGlassIcon"
             size={18}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-amber-400 transition-colors"
           />
           <input
             type="text"
-            placeholder="Tìm theo email, tên, mã đặt vé..."
+            placeholder="Tìm theo email, tên, mã PNR, mã giao dịch..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-slate-800/40 border border-white/5 rounded-2xl text-sm font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 transition-all focus:bg-slate-800/60"
+            className="w-full pl-12 pr-4 py-3 bg-slate-800/40 border border-white/5 rounded-2xl text-sm font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50 transition-all focus:bg-slate-800/60"
           />
         </div>
 
-        <div className="flex items-center gap-1 bg-slate-800/40 border border-white/5 p-1 rounded-2xl">
-          {['all', 'completed', 'pending', 'failed', 'refunded'].map((s) => (
+        <div className="flex items-center gap-1 bg-slate-800/40 border border-white/5 p-1 rounded-2xl overflow-x-auto">
+          {[
+            { id: 'all', label: 'Tất cả' },
+            { id: 'pending', label: 'Chờ duyệt', count: pendingCount },
+            { id: 'completed', label: 'Đã thanh toán' },
+            { id: 'failed', label: 'Thất bại/Hủy' },
+          ].map((item) => (
             <button
-              key={s}
+              key={item.id}
               onClick={() => {
-                setFilterStatus(s);
+                setFilterStatus(item.id);
                 setCurrentPage(1);
               }}
-              className={`px-4 py-2 rounded-xl text-2xs font-black uppercase tracking-wider transition-all ${
-                filterStatus === s
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
-                  : 'text-slate-500 hover:text-slate-300'
+              className={`px-3 py-2 rounded-xl text-2xs font-black uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                filterStatus === item.id
+                  ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              {s === 'all' ? 'Tất cả' : getStatusLabel(s)}
+              <span>{item.label}</span>
+              {typeof item.count === 'number' && item.count > 0 && (
+                <span
+                  className={`px-1.5 py-0.2 rounded-full text-3xs font-extrabold ${
+                    filterStatus === item.id
+                      ? 'bg-slate-950 text-amber-300'
+                      : 'bg-amber-500/20 text-amber-400'
+                  }`}
+                >
+                  {item.count}
+                </span>
+              )}
             </button>
           ))}
         </div>
       </div>
 
+      {/* Table Section */}
       <div
         className="rounded-3xl border overflow-hidden transition-all duration-500"
         style={{
@@ -158,19 +302,22 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
             <thead>
               <tr className="bg-white/5 border-b border-white/5">
                 <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest">
-                  Giao dịch
+                  Mã GD / PNR
                 </th>
                 <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest whitespace-nowrap">
                   Khách hàng
                 </th>
                 <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest text-right">
-                  Số tiền
+                  Số tiền & Phương thức
                 </th>
                 <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest text-center">
                   Trạng thái
                 </th>
                 <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest text-right">
-                  Ngày thực hiện
+                  Thời gian
+                </th>
+                <th className="px-6 py-5 text-2xs font-black text-slate-500 uppercase tracking-widest text-center">
+                  Hành động
                 </th>
               </tr>
             </thead>
@@ -178,68 +325,111 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td colSpan={5} className="px-6 py-6">
+                    <td colSpan={6} className="px-6 py-6">
                       <div className="h-6 bg-slate-800/50 rounded-xl w-full"></div>
                     </td>
                   </tr>
                 ))
               ) : paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-20 text-center text-slate-500 italic">
+                  <td colSpan={6} className="px-6 py-20 text-center text-slate-500 italic">
                     Không có giao dịch nào được tìm thấy
                   </td>
                 </tr>
               ) : (
-                paginated.map((t) => (
-                  <tr
-                    key={t.id}
-                    onClick={() => setSelectedTransaction(t)}
-                    className="hover:bg-white/[0.04] transition-all cursor-pointer group"
-                  >
-                    <td className="px-6 py-5">
-                      <div className="font-mono font-bold text-indigo-400 text-sm group-hover:text-indigo-300 transition-colors">
-                        #{t.id.slice(0, 8)}
-                      </div>
-                      <div className="text-2xs font-black text-slate-500 uppercase tracking-widest mt-0.5">
-                        Đặt vé: {t.bookingId.slice(0, 8)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-5">
-                      <div className="font-bold text-slate-200 text-sm group-hover:text-white transition-colors">
-                        {t.userName}
-                      </div>
-                      <div className="text-2xs font-bold text-slate-500 uppercase tracking-wider">
-                        {t.userEmail}
-                      </div>
-                    </td>
-                    <td className="px-6 py-5 text-right">
-                      <div className="font-black text-white text-base tracking-tighter tabular-nums">
-                        {formatCurrency(t.amount)}
-                      </div>
-                      <div className="text-2xs font-black text-indigo-300/50 uppercase tracking-widest">
-                        {t.method}
-                      </div>
-                    </td>
-                    <td className="px-6 py-5 text-center">
-                      <span
-                        className={`px-3 py-1 rounded-lg text-3xs font-black uppercase tracking-widest border ${getStatusBadge(t.status)}`}
-                      >
-                        {getStatusLabel(t.status)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-5 text-right">
-                      <div className="text-sm font-bold text-slate-300 group-hover:text-slate-100 transition-colors">
-                        {new Date(t.createdAt).toLocaleDateString('vi-VN')}
-                      </div>
-                      <div className="text-2xs font-black text-slate-600 uppercase tracking-widest mt-0.5">
-                        {new Date(t.createdAt).toLocaleTimeString('vi-VN', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                paginated.map((t) => {
+                  const methodBadge = getMethodBadge(t.method);
+                  const isPending = t.status === 'pending';
+                  const isProcessing = processingId === t.id;
+
+                  return (
+                    <tr
+                      key={t.id}
+                      onClick={() => setSelectedTransaction(t)}
+                      className="hover:bg-white/[0.04] transition-all cursor-pointer group"
+                    >
+                      <td className="px-6 py-5">
+                        <div className="font-mono font-bold text-amber-400 text-sm group-hover:text-amber-300 transition-colors flex items-center gap-1.5">
+                          <span>#{t.id.slice(0, 10)}</span>
+                        </div>
+                        <div className="text-2xs font-black text-slate-400 uppercase tracking-widest mt-0.5">
+                          PNR:{' '}
+                          <span className="text-white font-mono font-extrabold">
+                            {t.bookingCode || t.bookingId.slice(0, 8)}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5">
+                        <div className="font-bold text-slate-200 text-sm group-hover:text-white transition-colors">
+                          {t.userName}
+                        </div>
+                        <div className="text-2xs font-bold text-slate-500">{t.userEmail}</div>
+                      </td>
+                      <td className="px-6 py-5 text-right">
+                        <div className="font-black text-white text-base tracking-tighter tabular-nums">
+                          {formatCurrency(t.amount)}
+                        </div>
+                        <span
+                          className={`inline-block px-2 py-0.5 mt-1 rounded text-3xs font-black uppercase tracking-wider border ${methodBadge.color}`}
+                        >
+                          {methodBadge.label}
+                        </span>
+                      </td>
+                      <td className="px-6 py-5 text-center">
+                        <span
+                          className={`px-3 py-1 rounded-lg text-3xs font-black uppercase tracking-widest border ${getStatusBadge(
+                            t.status
+                          )}`}
+                        >
+                          {getStatusLabel(t.status)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-5 text-right">
+                        <div className="text-sm font-bold text-slate-300 group-hover:text-slate-100 transition-colors">
+                          {new Date(t.createdAt).toLocaleDateString('vi-VN')}
+                        </div>
+                        <div className="text-2xs font-black text-slate-600 uppercase tracking-widest mt-0.5">
+                          {new Date(t.createdAt).toLocaleTimeString('vi-VN', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </div>
+                      </td>
+                      <td className="px-6 py-5 text-center" onClick={(e) => e.stopPropagation()}>
+                        {isPending ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => handleProcessTransaction(t, 'confirm')}
+                              disabled={isProcessing}
+                              className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-black text-xs rounded-xl shadow-md shadow-emerald-500/20 transition-all flex items-center gap-1"
+                              title="Xác nhận tiền đã về tài khoản và xuất vé"
+                            >
+                              {isProcessing ? (
+                                <Icon name="ArrowPathIcon" size={14} className="animate-spin" />
+                              ) : (
+                                <Icon name="CheckCircleIcon" size={14} />
+                              )}
+                              <span>Xác nhận</span>
+                            </button>
+                            <button
+                              onClick={() => handleProcessTransaction(t, 'reject')}
+                              disabled={isProcessing}
+                              className="px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 active:scale-95 text-rose-400 hover:text-rose-300 font-bold text-xs rounded-xl border border-rose-500/20 transition-all"
+                              title="Từ chối / Hủy giao dịch"
+                            >
+                              <Icon name="XMarkIcon" size={14} />
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-2xs font-semibold text-slate-500 flex items-center justify-center gap-1">
+                            <Icon name="CheckBadgeIcon" size={16} className="text-emerald-500" />
+                            Đã duyệt
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -263,22 +453,22 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
             style={{
               background:
                 'linear-gradient(135deg, rgba(30, 41, 59, 0.98) 0%, rgba(15, 23, 42, 0.98) 100%)',
-              boxShadow: '0 25px 70px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(99, 102, 241, 0.1)',
+              boxShadow: '0 25px 70px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(245, 158, 11, 0.1)',
             }}
           >
             {/* Modal Header */}
             <div className="px-8 py-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/20">
-                  <Icon name="CurrencyDollarIcon" size={24} className="text-indigo-400" />
+                <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center border border-amber-500/20">
+                  <Icon name="CurrencyDollarIcon" size={24} className="text-amber-400" />
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-white tracking-tight">
-                    Chi tiết giao dịch
+                    Chi tiết giao dịch thanh toán
                   </h3>
                   <p className="text-2xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">
-                    ID:{' '}
-                    <span className="text-indigo-400 font-mono tracking-normal">
+                    Mã GD:{' '}
+                    <span className="text-amber-400 font-mono tracking-normal">
                       #{selectedTransaction.id}
                     </span>
                   </p>
@@ -293,19 +483,42 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
             </div>
 
             {/* Modal Content */}
-            <div className="p-8 space-y-8">
+            <div className="p-8 space-y-6">
+              {/* Pending Action Banner */}
+              {selectedTransaction.status === 'pending' && (
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-start gap-3.5">
+                  <Icon
+                    name="ExclamationTriangleIcon"
+                    size={22}
+                    className="text-amber-400 shrink-0 mt-0.5"
+                  />
+                  <div>
+                    <h5 className="text-xs font-black text-amber-300 uppercase tracking-wider">
+                      Chờ xác nhận thanh toán
+                    </h5>
+                    <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                      Khách hàng đã chuyển tiền hoặc tạo lệnh thanh toán VietQR. Quản trị viên vui
+                      lòng kiểm tra tài khoản ngân hàng nhận, sau đó bấm{' '}
+                      <strong>Xác nhận thanh toán</strong> để hoàn tất xuất vé.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Amount Display */}
               <div className="text-center py-6 bg-white/[0.02] border border-white/5 rounded-3xl relative overflow-hidden group">
-                <div className="absolute top-[-20%] left-[-10%] w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
+                <div className="absolute top-[-20%] left-[-10%] w-32 h-32 bg-amber-500/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
                 <p className="text-2xs font-black text-slate-500 uppercase tracking-[0.2em] mb-2 relative z-10">
-                  Số tiền giao dịch
+                  Số tiền thanh toán
                 </p>
                 <h4 className="text-4xl font-black text-white tracking-tighter tabular-nums relative z-10">
                   {formatCurrency(selectedTransaction.amount)}
                 </h4>
                 <div className="mt-4 flex justify-center relative z-10">
                   <span
-                    className={`px-3 py-1 rounded-lg text-2xs font-black uppercase tracking-widest border ${getStatusBadge(selectedTransaction.status)}`}
+                    className={`px-3 py-1 rounded-lg text-2xs font-black uppercase tracking-widest border ${getStatusBadge(
+                      selectedTransaction.status
+                    )}`}
                   >
                     {getStatusLabel(selectedTransaction.status)}
                   </span>
@@ -313,19 +526,21 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
               </div>
 
               {/* Transaction Info Grid */}
-              <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+              <div className="grid grid-cols-2 gap-x-8 gap-y-5">
                 <div>
                   <p className="text-2xs font-black text-slate-500 uppercase tracking-widest mb-1">
                     Phương thức
                   </p>
-                  <p className="text-sm font-bold text-slate-200">{selectedTransaction.method}</p>
+                  <p className="text-sm font-bold text-slate-200 capitalize">
+                    {selectedTransaction.method}
+                  </p>
                 </div>
                 <div>
                   <p className="text-2xs font-black text-slate-500 uppercase tracking-widest mb-1">
-                    Thời gian
+                    Mã đặt chỗ (PNR)
                   </p>
-                  <p className="text-sm font-bold text-slate-200">
-                    {new Date(selectedTransaction.createdAt).toLocaleString('vi-VN')}
+                  <p className="text-sm font-black text-amber-400 font-mono">
+                    {selectedTransaction.bookingCode || selectedTransaction.bookingId.slice(0, 8)}
                   </p>
                 </div>
                 <div className="col-span-2 h-[1px] bg-white/5" />
@@ -340,34 +555,45 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                 </div>
                 <div>
                   <p className="text-2xs font-black text-slate-500 uppercase tracking-widest mb-1">
-                    Mã đặt chuyến
+                    Thời gian tạo
                   </p>
-                  <p className="text-sm font-bold text-indigo-400 font-mono">
-                    #{selectedTransaction.bookingId}
-                  </p>
-                </div>
-              </div>
-
-              {/* Additional Context */}
-              <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-2xl p-4">
-                <div className="flex gap-4 items-start">
-                  <Icon name="InformationCircleIcon" size={18} className="text-indigo-400 mt-0.5" />
-                  <p className="text-xs2 text-slate-400 leading-relaxed font-medium">
-                    Giao dịch này được tự động ghi nhận vào hệ thống sau khi khách hàng hoàn tất
-                    cổng thanh toán. Liên hệ bộ phận kỹ thuật nếu có sai lệch về số dư.
+                  <p className="text-sm font-bold text-slate-200">
+                    {new Date(selectedTransaction.createdAt).toLocaleString('vi-VN')}
                   </p>
                 </div>
               </div>
             </div>
 
             {/* Modal Actions */}
-            <div className="px-8 pb-8 flex gap-3">
-              <button className="flex-1 px-6 py-3 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/5 rounded-2xl text-2xs font-black uppercase tracking-widest transition-all active:scale-95">
-                In hoá đơn
-              </button>
-              {selectedTransaction.status === 'completed' && (
-                <button className="flex-1 px-6 py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded-2xl text-2xs font-black uppercase tracking-widest transition-all active:scale-95">
-                  Hoàn tiền
+            <div className="px-8 pb-8 flex flex-col sm:flex-row gap-3">
+              {selectedTransaction.status === 'pending' ? (
+                <>
+                  <button
+                    onClick={() => handleProcessTransaction(selectedTransaction, 'confirm')}
+                    disabled={processingId === selectedTransaction.id}
+                    className="flex-1 px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition-all active:scale-95 flex items-center justify-center gap-2"
+                  >
+                    {processingId === selectedTransaction.id ? (
+                      <Icon name="ArrowPathIcon" size={18} className="animate-spin" />
+                    ) : (
+                      <Icon name="CheckCircleIcon" size={18} />
+                    )}
+                    <span>Xác nhận thanh toán ngay</span>
+                  </button>
+                  <button
+                    onClick={() => handleProcessTransaction(selectedTransaction, 'reject')}
+                    disabled={processingId === selectedTransaction.id}
+                    className="px-6 py-3.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all active:scale-95"
+                  >
+                    Từ chối
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setSelectedTransaction(null)}
+                  className="w-full px-6 py-3 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/5 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all"
+                >
+                  Đóng
                 </button>
               )}
             </div>
