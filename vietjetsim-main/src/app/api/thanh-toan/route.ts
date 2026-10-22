@@ -199,12 +199,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Nếu khách hàng đính kèm ảnh biên lai để admin đối chiếu,
+    // giao dịch được đưa vào trạng thái 'pending' để admin kiểm tra tài khoản và xác nhận.
+    const initialStatus = receipt_image ? 'pending' : 'completed';
+
     // Create payment + confirm booking atomically (single transaction)
     const paymentUserId = user?.userId || booking.user_id;
     const result = await createPaymentAndConfirmBooking({
       booking_id,
       method,
       amount: discountedTotal,
+      status: initialStatus,
       user_id: paymentUserId,
       discount_code_id,
       discount_amount: discount_amount || 0,
@@ -212,26 +217,29 @@ export async function POST(request: NextRequest) {
       transfer_note: transfer_note || (booking.booking_code ? `VJ ${booking.booking_code}` : undefined),
     });
 
-    // Email xác nhận — fail-soft trong sendMail, không được chặn response.
+    // Chỉ gửi email xác nhận vé ngay nếu thanh toán đã hoàn tất trực tiếp (thẻ, ví).
+    // Nếu khách đính kèm ảnh biên lai để admin đối chiếu, email sẽ được gửi tự động khi admin bấm duyệt trong /quan-tri.
     let toEmail = user?.email;
     let recipientName = user?.fullName;
 
-    if (!toEmail && booking.user_id) {
-      const bookingUser = await findUserById(booking.user_id);
-      if (bookingUser) {
-        toEmail = bookingUser.email;
-        recipientName = bookingUser.full_name;
+    if (initialStatus === 'completed') {
+      if (!toEmail && booking.user_id) {
+        const bookingUser = await findUserById(booking.user_id);
+        if (bookingUser) {
+          toEmail = bookingUser.email;
+          recipientName = bookingUser.full_name;
+        }
       }
-    }
 
-    if (toEmail) {
-      void sendBookingConfirmationEmail({
-        to: toEmail,
-        fullName: recipientName || 'Quý khách',
-        bookingCode: result.booking.booking_code ?? null,
-        amount: discountedTotal,
-        method,
-      });
+      if (toEmail) {
+        void sendBookingConfirmationEmail({
+          to: toEmail,
+          fullName: recipientName || 'Quý khách',
+          bookingCode: result.booking.booking_code ?? null,
+          amount: discountedTotal,
+          method,
+        });
+      }
     }
 
     return NextResponse.json(

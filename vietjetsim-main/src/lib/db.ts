@@ -1126,12 +1126,16 @@ export async function createPaymentAndConfirmBooking(payment: {
   booking_id: string;
   method: string;
   amount: number;
+  status?: 'pending' | 'completed';
   user_id?: string;
   discount_code_id?: string;
   discount_amount?: number;
   receipt_image?: string;
   transfer_note?: string;
 }): Promise<{ payment: PaymentRecord; booking: BookingRecord }> {
+  const targetPaymentStatus = payment.status || 'completed';
+  const targetBookingStatus = targetPaymentStatus === 'completed' ? 'confirmed' : 'pending';
+
   if (payment.method === 'wallet') {
     if (!payment.user_id) {
       throw new Error('User id is required for wallet payment');
@@ -1163,11 +1167,11 @@ export async function createPaymentAndConfirmBooking(payment: {
     await sql.transaction([
       sql`
       INSERT INTO payments (booking_id, method, status, amount, receipt_image, transfer_note)
-      VALUES (${payment.booking_id}, ${payment.method}, 'completed', ${payment.amount}, ${payment.receipt_image || null}, ${payment.transfer_note || null})
+      VALUES (${payment.booking_id}, ${payment.method}, ${targetPaymentStatus}, ${payment.amount}, ${payment.receipt_image || null}, ${payment.transfer_note || null})
     `,
       sql`
       UPDATE bookings
-      SET status = 'confirmed',
+      SET status = ${targetBookingStatus},
           discount_code_id = ${payment.discount_code_id || null},
           discount_amount = ${payment.discount_amount || 0},
           receipt_image = ${payment.receipt_image || null},
