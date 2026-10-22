@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { VisaLogo, MastercardLogo, JcbLogo } from './PaymentMethodLogos';
 
 interface VirtualCreditCardProps {
   cardNumber: string;
@@ -77,23 +78,22 @@ export default function VirtualCreditCard({
               {/* Brand Logo */}
               <div className="h-7 flex items-center">
                 {cardBrand === 'visa' && (
-                  <span className="font-black italic text-lg tracking-wider text-white">VISA</span>
+                  <div className="bg-white/95 px-2 py-0.5 rounded shadow-xs flex items-center">
+                    <VisaLogo className="h-3.5 w-auto" />
+                  </div>
                 )}
                 {cardBrand === 'mastercard' && (
-                  <div className="flex -space-x-2">
-                    <div className="w-6 h-6 rounded-full bg-red-500/90" />
-                    <div className="w-6 h-6 rounded-full bg-amber-400/90" />
+                  <div className="bg-white/95 px-1.5 py-0.5 rounded shadow-xs flex items-center">
+                    <MastercardLogo className="h-4 w-auto" />
                   </div>
                 )}
                 {cardBrand === 'jcb' && (
-                  <div className="flex space-x-0.5 text-2xs font-black">
-                    <span className="bg-blue-600 px-1 py-0.5 rounded-xs">J</span>
-                    <span className="bg-red-600 px-1 py-0.5 rounded-xs">C</span>
-                    <span className="bg-green-600 px-1 py-0.5 rounded-xs">B</span>
+                  <div className="bg-white/95 px-1 py-0.5 rounded shadow-xs flex items-center">
+                    <JcbLogo className="h-4 w-auto" />
                   </div>
                 )}
                 {cardBrand === 'generic' && (
-                  <span className="text-2xs font-extrabold uppercase tracking-widest text-white/70">
+                  <span className="text-2xs font-extrabold uppercase tracking-widest text-white/80 border border-white/30 px-2 py-0.5 rounded">
                     DEBIT / CREDIT
                   </span>
                 )}
