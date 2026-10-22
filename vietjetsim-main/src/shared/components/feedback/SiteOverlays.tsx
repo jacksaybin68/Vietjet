@@ -5,6 +5,9 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 
 import Mascot from '@/shared/components/ui/Mascot';
+import { useToast } from '@/hooks/useToast';
+import { ToastContainer } from '@/shared/components/feedback';
+import { consumeFlashToast, SHOW_TOAST_EVENT } from '@/lib/toast';
 
 const COOKIE_KEY = 'vj-cookie-consent';
 const PROMO_KEY = 'vj-promo-dismissed';
@@ -14,9 +17,11 @@ const PROMO_KEY = 'vj-promo-dismissed';
  * near the top of the viewport and the cookie consent bar pinned to the
  * bottom. Both render only after mount (gated by localStorage/sessionStorage)
  * so server and client markup stay identical.
+ * Also hosts the global ToastContainer for app-wide and flash notifications.
  */
 export function SiteOverlays() {
   const pathname = usePathname();
+  const toast = useToast();
   const isBookingFlow = Boolean(
     pathname?.startsWith('/tim-ve') ||
     pathname?.startsWith('/dat-ve') ||
@@ -27,6 +32,27 @@ export function SiteOverlays() {
 
   const [showCookie, setShowCookie] = useState(false);
   const [showPromo, setShowPromo] = useState(false);
+
+  // Consume flash toasts on navigation
+  useEffect(() => {
+    const flash = consumeFlashToast();
+    if (flash) {
+      toast.show(flash);
+    }
+  }, [pathname, toast]);
+
+  // Listen for global custom events to show toast from anywhere in the app
+  useEffect(() => {
+    const handleToastEvent = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail) {
+        toast.show(customEvent.detail);
+      }
+    };
+
+    window.addEventListener(SHOW_TOAST_EVENT, handleToastEvent);
+    return () => window.removeEventListener(SHOW_TOAST_EVENT, handleToastEvent);
+  }, [toast]);
 
   useEffect(() => {
     const hasCookieDecision = Boolean(localStorage.getItem(COOKIE_KEY));
@@ -51,6 +77,9 @@ export function SiteOverlays() {
 
   return (
     <>
+      {/* Global Toast Container */}
+      <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
+
       {showPromo && (
         <div
           role="dialog"

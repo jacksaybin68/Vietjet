@@ -4,7 +4,9 @@ import React from 'react';
 import Link from 'next/link';
 import { CheckInHeader } from '@/shared/components/navigation';
 import { useToast } from '@/hooks/useToast';
+import { ToastContainer } from '@/shared/components/feedback';
 import { useSearchParams } from 'next/navigation';
+import { flashToast } from '@/lib/toast';
 
 const TABS = [
   { key: 'register' as const, label: 'Đăng ký' },
@@ -106,15 +108,22 @@ function LoginPageInner() {
 
       toast.success(
         'Đăng nhập thành công',
-        `Chào mừng ${data.user?.full_name || 'bạn'} đã đăng nhập thành công!`
+        `Chào mừng ${data.user?.full_name || 'Quý khách'} đã đăng nhập thành công. Đang chuyển hướng...`
       );
 
       const redirectParam = searchParams?.get('redirect');
       const targetUrl = redirectParam || (data.user?.role === 'admin' ? '/quan-tri' : '/trang-chu');
 
+      // Set flash toast so it shows on the target page
+      flashToast({
+        type: 'success',
+        title: 'Đăng nhập thành công',
+        message: `Chào mừng ${data.user?.full_name || 'Quý khách'} đã trở lại Vietjet Air!`,
+      });
+
       setTimeout(() => {
         window.location.href = targetUrl;
-      }, 500);
+      }, 1000);
     } catch {
       setLoading(false);
       toast.error('Lỗi kết nối', 'Không thể kết nối đến máy chủ. Vui lòng thử lại sau.');
@@ -477,11 +486,7 @@ function LoginPageInner() {
                   alt="SkyJoy"
                   className="h-[14px] w-auto"
                 />
-                <img
-                  src="/images/vj-logo.svg"
-                  alt="Vietjet Air"
-                  className="h-[14px] w-auto"
-                />
+                <img src="/images/vj-logo.svg" alt="Vietjet Air" className="h-[14px] w-auto" />
                 <span className="flex h-[14px] items-center text-[13px] font-bold text-blue-600">
                   SkyPay
                 </span>
@@ -528,6 +533,8 @@ function LoginPageInner() {
         <path d="M 0 70 Q 70 55 140 70 L 140 40 Q 70 15 0 40 Z" fill="#FFD700" />
         <path d="M 0 35 Q 70 20 140 35 L 140 5 Q 70 -10 0 5 Z" fill="#76BC21" />
       </svg>
+
+      <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
     </div>
   );
 }
