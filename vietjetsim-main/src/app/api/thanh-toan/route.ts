@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
       bank_account_id,
       transfer_note,
       transfer_amount,
+      receipt_image,
     } = body;
 
     // Validation
@@ -129,16 +130,20 @@ export async function POST(request: NextRequest) {
         discountCode: discount_code || '',
       });
 
-      const check = validateBankTransferInput(
-        { transferNote: transfer_note, amount: transfer_amount },
-        { transferNote: expectedNote, amount: discountedTotal }
-      );
-
-      if (!check.valid) {
-        return NextResponse.json(
-          { error: 'Transfer details do not match', message: check.message, field: check.field },
-          { status: 400 }
+      // Nếu khách đã tải ảnh biên lai giao dịch ngân hàng để Admin đối chiếu,
+      // hoặc đã bấm "Tôi đã thanh toán" kèm ảnh biên lai, cho phép tiếp tục ghi nhận giao dịch.
+      if (!receipt_image) {
+        const check = validateBankTransferInput(
+          { transferNote: transfer_note, amount: transfer_amount },
+          { transferNote: expectedNote, amount: discountedTotal }
         );
+
+        if (!check.valid) {
+          return NextResponse.json(
+            { error: 'Transfer details do not match', message: check.message, field: check.field },
+            { status: 400 }
+          );
+        }
       }
     }
     // Paying with SkyPoint or Wallet requires an authenticated user account
@@ -203,6 +208,8 @@ export async function POST(request: NextRequest) {
       user_id: paymentUserId,
       discount_code_id,
       discount_amount: discount_amount || 0,
+      receipt_image,
+      transfer_note: transfer_note || (booking.booking_code ? `VJ ${booking.booking_code}` : undefined),
     });
 
     // Email xác nhận — fail-soft trong sendMail, không được chặn response.

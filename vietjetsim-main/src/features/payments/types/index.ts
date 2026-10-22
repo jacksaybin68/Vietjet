@@ -18,6 +18,8 @@ export interface CreatePaymentInput {
   bank_account_id?: string | number;
   transfer_note?: string;
   transfer_amount?: string;
+  /** Proof of payment screenshot/receipt image uploaded by customer for admin reconciliation */
+  receipt_image?: string;
 }
 
 export interface Pagination {
