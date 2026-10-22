@@ -9,8 +9,12 @@ import AlertBanner from '@/features/auth/components/AlertBanner';
 import { isResetTokenValid, resetPassword } from '@/features/auth';
 import { getApiErrorMessage } from '@/shared/services';
 import { PASSWORD_POLICY } from '@/features/auth/constants';
+import { useToast } from '@/hooks/useToast';
+import { ToastContainer } from '@/shared/components/feedback';
+import { flashToast } from '@/lib/toast';
 
 function ResetPasswordPageInner() {
+  const toast = useToast();
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token') || '';
@@ -75,172 +79,188 @@ function ResetPasswordPageInner() {
     try {
       await resetPassword(token, password);
       setDone(true);
-      setTimeout(() => router.push('/dang-nhap'), 2000);
+      toast.success(
+        'Đặt lại mật khẩu thành công!',
+        'Mật khẩu của bạn đã được cập nhật thành công.'
+      );
+      flashToast({
+        type: 'success',
+        title: 'Đặt lại mật khẩu thành công',
+        message: 'Mật khẩu mới đã có hiệu lực. Bạn có thể đăng nhập ngay.',
+      });
+      setTimeout(() => router.push('/dang-nhap'), 1500);
     } catch (err) {
-      setError(getApiErrorMessage(err, 'Không thể đặt lại mật khẩu. Vui lòng thử lại.'));
+      const msg = getApiErrorMessage(err, 'Không thể đặt lại mật khẩu. Vui lòng thử lại.');
+      setError(msg);
+      toast.error('Đặt lại mật khẩu thất bại', msg);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <AuthShell
-      eyebrow="Bảo mật tài khoản"
-      title="Đặt lại mật khẩu"
-      subtitle="Tạo mật khẩu mới cho tài khoản Vietjet SkyJoy của bạn."
-    >
-      {checking ? (
-        <div className="flex flex-col items-center gap-4 py-10 text-sm text-[var(--foreground-muted)]">
-          <svg className="h-8 w-8 animate-spin" viewBox="0 0 24 24" fill="none">
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            />
-          </svg>
-          Đang kiểm tra liên kết...
-        </div>
-      ) : done ? (
-        <div className="space-y-5">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[var(--vj-green-light)]">
-            <Icon name="CheckCircleIcon" size={32} className="text-[var(--vj-green)]" />
+    <>
+      <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
+      <AuthShell
+        eyebrow="Bảo mật tài khoản"
+        title="Đặt lại mật khẩu"
+        subtitle="Tạo mật khẩu mới cho tài khoản Vietjet SkyJoy của bạn."
+      >
+        {checking ? (
+          <div className="flex flex-col items-center gap-4 py-10 text-sm text-[var(--foreground-muted)]">
+            <svg className="h-8 w-8 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+            Đang kiểm tra liên kết...
           </div>
-          <p className="text-center text-sm text-[var(--foreground-muted)]">
-            Mật khẩu đã được cập nhật. Bạn sẽ được chuyển tới trang đăng nhập...
-          </p>
-          <Link
-            href="/dang-nhap"
-            className="vj-auth-submit flex w-full items-center justify-center gap-2"
-          >
-            Đăng nhập ngay
-          </Link>
-        </div>
-      ) : !tokenValid ? (
-        <div className="space-y-5">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[rgb(var(--primary-rgb))]/10">
-            <Icon name="ExclamationTriangleIcon" size={32} className="text-primary" />
-          </div>
-          <p className="text-center text-sm text-[var(--foreground-muted)]">
-            Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu liên kết mới.
-          </p>
-          <Link
-            href="/quen-mat-khau"
-            className="vj-auth-submit flex w-full items-center justify-center gap-2"
-          >
-            Yêu cầu liên kết mới
-          </Link>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <AlertBanner message={error} variant="error" />
-
-          <div className={`form-field-float ${password ? 'has-value' : ''}`}>
-            <Icon
-              name="LockClosedIcon"
-              size={18}
-              className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-[var(--foreground-subtle)]"
-            />
-            <input
-              id="new-password"
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder=" "
-              className="form-input w-full rounded-xl border border-[var(--border)]bg-[var(--surface-2)]py-3 pl-10 pr-12 text-base transition-all sm:text-sm focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20"
-              required
-            />
-            <label className="form-label-float has-icon">Mật khẩu mới</label>
-            <button
-              type="button"
-              aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-[var(--foreground-subtle)] hover:text-[var(--foreground-muted)]"
+        ) : done ? (
+          <div className="space-y-5">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[var(--vj-green-light)]">
+              <Icon name="CheckCircleIcon" size={32} className="text-[var(--vj-green)]" />
+            </div>
+            <p className="text-center text-sm text-[var(--foreground-muted)]">
+              Mật khẩu đã được cập nhật. Bạn sẽ được chuyển tới trang đăng nhập...
+            </p>
+            <Link
+              href="/dang-nhap"
+              className="vj-auth-submit flex w-full items-center justify-center gap-2"
             >
-              <Icon name={showPassword ? 'EyeSlashIcon' : 'EyeIcon'} size={18} />
-            </button>
+              Đăng nhập ngay
+            </Link>
           </div>
+        ) : !tokenValid ? (
+          <div className="space-y-5">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[rgb(var(--primary-rgb))]/10">
+              <Icon name="ExclamationTriangleIcon" size={32} className="text-primary" />
+            </div>
+            <p className="text-center text-sm text-[var(--foreground-muted)]">
+              Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu liên kết mới.
+            </p>
+            <Link
+              href="/quen-mat-khau"
+              className="vj-auth-submit flex w-full items-center justify-center gap-2"
+            >
+              Yêu cầu liên kết mới
+            </Link>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <AlertBanner message={error} variant="error" />
 
-          <ul className="grid grid-cols-1 gap-1.5 rounded-xl bg-[var(--surface-2)]px-4 py-3 text-xs sm:grid-cols-2">
-            {requirements.map((req) => (
-              <li
-                key={req.label}
-                className={`flex items-center gap-1.5 ${req.met ? 'text-[var(--vj-green)]' : 'text-[var(--foreground-muted)]'}`}
+            <div className={`form-field-float ${password ? 'has-value' : ''}`}>
+              <Icon
+                name="LockClosedIcon"
+                size={18}
+                className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-[var(--foreground-subtle)]"
+              />
+              <input
+                id="new-password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder=" "
+                className="form-input w-full rounded-xl border border-[var(--border)]bg-[var(--surface-2)]py-3 pl-10 pr-12 text-base transition-all sm:text-sm focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20"
+                required
+              />
+              <label className="form-label-float has-icon">Mật khẩu mới</label>
+              <button
+                type="button"
+                aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-[var(--foreground-subtle)] hover:text-[var(--foreground-muted)]"
               >
-                <Icon
-                  name={req.met ? 'CheckCircleIcon' : 'XCircleIcon'}
-                  size={14}
-                  className={req.met ? 'text-[var(--vj-green)]' : 'text-[var(--foreground-subtle)]'}
-                />
-                {req.label}
-              </li>
-            ))}
-          </ul>
+                <Icon name={showPassword ? 'EyeSlashIcon' : 'EyeIcon'} size={18} />
+              </button>
+            </div>
 
-          <div className={`form-field-float ${confirmPassword ? 'has-value' : ''}`}>
-            <Icon
-              name="LockClosedIcon"
-              size={18}
-              className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-[var(--foreground-subtle)]"
-            />
-            <input
-              id="confirm-password"
-              name="confirmPassword"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="new-password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder=" "
-              className="form-input w-full rounded-xl border border-[var(--border)]bg-[var(--surface-2)]py-3 pl-10 pr-12 text-base transition-all sm:text-sm focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20"
-              required
-            />
-            <label className="form-label-float has-icon">Xác nhận mật khẩu</label>
-          </div>
+            <ul className="grid grid-cols-1 gap-1.5 rounded-xl bg-[var(--surface-2)]px-4 py-3 text-xs sm:grid-cols-2">
+              {requirements.map((req) => (
+                <li
+                  key={req.label}
+                  className={`flex items-center gap-1.5 ${req.met ? 'text-[var(--vj-green)]' : 'text-[var(--foreground-muted)]'}`}
+                >
+                  <Icon
+                    name={req.met ? 'CheckCircleIcon' : 'XCircleIcon'}
+                    size={14}
+                    className={
+                      req.met ? 'text-[var(--vj-green)]' : 'text-[var(--foreground-subtle)]'
+                    }
+                  />
+                  {req.label}
+                </li>
+              ))}
+            </ul>
 
-          {confirmPassword && !matches && (
-            <p className="text-xs font-medium text-primary">Mật khẩu xác nhận không khớp.</p>
-          )}
+            <div className={`form-field-float ${confirmPassword ? 'has-value' : ''}`}>
+              <Icon
+                name="LockClosedIcon"
+                size={18}
+                className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-[var(--foreground-subtle)]"
+              />
+              <input
+                id="confirm-password"
+                name="confirmPassword"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder=" "
+                className="form-input w-full rounded-xl border border-[var(--border)]bg-[var(--surface-2)]py-3 pl-10 pr-12 text-base transition-all sm:text-sm focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20"
+                required
+              />
+              <label className="form-label-float has-icon">Xác nhận mật khẩu</label>
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading || !passwordStrong || !matches}
-            className="vj-auth-submit flex w-full items-center justify-center gap-2"
-          >
-            {loading ? (
-              <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                />
-              </svg>
-            ) : (
-              <>
-                <Icon name="ShieldCheckIcon" size={18} />
-                Đặt lại mật khẩu
-              </>
+            {confirmPassword && !matches && (
+              <p className="text-xs font-medium text-primary">Mật khẩu xác nhận không khớp.</p>
             )}
-          </button>
-        </form>
-      )}
-    </AuthShell>
+
+            <button
+              type="submit"
+              disabled={loading || !passwordStrong || !matches}
+              className="vj-auth-submit flex w-full items-center justify-center gap-2"
+            >
+              {loading ? (
+                <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
+                </svg>
+              ) : (
+                <>
+                  <Icon name="ShieldCheckIcon" size={18} />
+                  Đặt lại mật khẩu
+                </>
+              )}
+            </button>
+          </form>
+        )}
+      </AuthShell>
+    </>
   );
 }
 

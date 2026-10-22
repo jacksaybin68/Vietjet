@@ -9,6 +9,7 @@ import { getCsrfHeaders } from '@/lib/csrf-client';
 
 import { isAdminRole } from '@/lib/roles';
 import { normalizePhone } from '@/lib/utils';
+import { flashToast } from '@/lib/toast';
 
 export { isAdminRole };
 
@@ -365,6 +366,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (refreshTimerRef.current) {
       clearInterval(refreshTimerRef.current);
     }
+
+    flashToast({
+      type: 'info',
+      title: 'Đã đăng xuất',
+      message: 'Bạn đã đăng xuất khỏi hệ thống thành công.',
+    });
 
     router.push('/dang-nhap');
   };

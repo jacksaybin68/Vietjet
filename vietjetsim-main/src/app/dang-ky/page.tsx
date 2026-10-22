@@ -7,6 +7,9 @@ import Icon from '@/shared/components/ui/AppIcon';
 import AuthShell from '@/features/auth/components/AuthShell';
 import AlertBanner from '@/features/auth/components/AlertBanner';
 import { useAuth, type CaptchaChallenge } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/useToast';
+import { ToastContainer } from '@/shared/components/feedback';
+import { flashToast } from '@/lib/toast';
 import {
   DEFAULT_SALUTATION,
   OTP_LENGTH,
@@ -92,6 +95,7 @@ function RegisterPageInner() {
   const [referralCode, setReferralCode] = useState('');
   const [referralError, setReferralError] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const toast = useToast();
 
   const [registerStep, setRegisterStep] = useState<1 | 2>(1);
   const [otpCode, setOtpCode] = useState('');
@@ -209,11 +213,25 @@ function RegisterPageInner() {
         captchaToken: captcha?.token,
         captchaAnswer: effectiveCaptcha,
       });
+      const registeredName = `${surname} ${givenName}`.trim();
       setSuccess('Đăng ký thành công! Đang chuyển hướng...');
+      toast.success(
+        'Đăng ký thành công!',
+        `Chào mừng ${registeredName} đã gia nhập Vietjet SkyJoy. Đang chuyển hướng...`
+      );
+
+      // Save flash toast for destination page
+      flashToast({
+        type: 'success',
+        title: 'Chào mừng thành viên SkyJoy!',
+        message: `Tài khoản của ${registeredName} đã sẵn sàng. Chúc bạn có những trải nghiệm tuyệt vời!`,
+      });
+
       setTimeout(() => router.push(redirectTo || '/tai-khoan'), 1200);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Có lỗi xảy ra khi đăng ký';
       setError(msg);
+      toast.error('Đăng ký thất bại', msg);
       void loadCaptcha();
     }
   };
@@ -277,9 +295,11 @@ function RegisterPageInner() {
       setSuccess(
         `Mã xác thực ${OTP_LENGTH} số đã được gửi tới ${sentDest}. Quý khách vui lòng kiểm tra hộp thư đến hoặc mục Spam.`
       );
+      toast.info('Đã gửi mã xác thực', `Mã OTP đã được gửi tới ${sentDest}.`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Có lỗi xảy ra khi đăng ký';
       setError(msg);
+      toast.error('Lỗi đăng ký', msg);
       void loadCaptcha();
     } finally {
       setLoading(false);
@@ -291,7 +311,9 @@ function RegisterPageInner() {
     setError('');
 
     if (otpCode.length !== OTP_LENGTH) {
-      setError(`Vui lòng nhập đủ ${OTP_LENGTH} chữ số của mã xác thực.`);
+      const msg = `Vui lòng nhập đủ ${OTP_LENGTH} chữ số của mã xác thực.`;
+      setError(msg);
+      toast.warning('Mã xác thực chưa đủ', msg);
       return;
     }
 
@@ -322,9 +344,11 @@ function RegisterPageInner() {
         ? `email ${email}${phone ? ` và số điện thoại ${phone}` : ''}`
         : `số điện thoại ${phone}`;
       setSuccess(`Mã xác thực mới đã được gửi tới ${sentDest}.`);
+      toast.success('Đã gửi lại mã OTP', `Mã mới đã được gửi tới ${sentDest}.`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Không gửi lại được mã.';
       setError(msg);
+      toast.error('Không gửi lại được mã', msg);
     } finally {
       setOtpSending(false);
     }
@@ -691,6 +715,8 @@ function RegisterPageInner() {
           </button>
         </form>
       )}
+
+      <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
     </AuthShell>
   );
 }
