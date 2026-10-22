@@ -23,6 +23,22 @@ import PaymentModal from './PaymentModal';
 import ReservationCountdown from './ReservationCountdown';
 import BookingTicketCard from './BookingTicketCard';
 import VirtualCreditCard from './VirtualCreditCard';
+import {
+  VisaLogo,
+  MastercardLogo,
+  JcbLogo,
+  NapasLogo,
+  VietQrLogo,
+  VnpayLogo,
+  MomoLogo,
+  ZaloPayLogo,
+  ApplePayLogo,
+  GooglePayLogo,
+  SkyPayLogo,
+  MoviLogo,
+  GalaxyPayBadge,
+  PaymentSecurityFooter,
+} from './PaymentMethodLogos';
 
 interface BankAccount {
   id: string;
@@ -1200,13 +1216,14 @@ export default function PaymentClient() {
 
               {/* Payment Method Card */}
               <div className="bg-white rounded-2xl border border-[var(--border)] p-4 sm:p-5 shadow-sm">
-                <div className="mb-4">
-                  <h2 className="font-extrabold text-base text-gray-900">Phương thức thanh toán</h2>
-                  <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
-                    <span>Được xử lý bởi Cổng thanh toán</span>
-                    <span className="font-black italic text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700 tracking-wider font-sans">
-                      GALAXY PAY
-                    </span>
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h2 className="font-extrabold text-base text-gray-900">Phương thức thanh toán</h2>
+                    <p className="text-xs text-gray-500 mt-0.5">Chọn một phương thức phù hợp để hoàn tất đặt chỗ</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                    <span className="hidden sm:inline">Cổng thanh toán:</span>
+                    <GalaxyPayBadge />
                   </div>
                 </div>
 
@@ -1223,25 +1240,19 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('card');
                         setPaymentMethod('card');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
                         selectedMethodGroup === 'card'
-                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div className="flex items-center gap-1">
-                        <span className="text-3xs font-black px-1 py-0.5 rounded bg-blue-600 text-white">
-                          VISA
-                        </span>
-                        <span className="text-3xs font-black px-1 py-0.5 rounded bg-orange-600 text-white">
-                          MC
-                        </span>
-                        <span className="text-3xs font-black px-1 py-0.5 rounded bg-green-600 text-white">
-                          JCB
-                        </span>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <VisaLogo className="h-3.5 w-auto" />
+                        <MastercardLogo className="h-3.5 w-auto" />
+                        <JcbLogo className="h-3.5 w-auto" />
                       </div>
                       <span className="text-xs font-bold text-gray-900 mt-2 line-clamp-2 leading-tight">
-                        Thẻ tín dụng, thẻ ghi nợ quốc...
+                        Thẻ tín dụng / ghi nợ quốc tế
                       </span>
                     </button>
 
@@ -1252,16 +1263,16 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('napas');
                         setPaymentMethod('bank');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
                         selectedMethodGroup === 'napas'
-                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div className="text-xs font-black text-blue-700 tracking-wider">
-                        napas<span className="text-amber-500">✶</span>
+                      <div className="py-0.5">
+                        <NapasLogo className="h-4 w-auto" />
                       </div>
-                      <span className="text-xs font-bold text-gray-900 mt-2">Thẻ ATM</span>
+                      <span className="text-xs font-bold text-gray-900 mt-2">Thẻ ATM nội địa</span>
                     </button>
 
                     {/* Mobile Banking VietQR */}
@@ -1271,7 +1282,7 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('vietqr');
                         setPaymentMethod('vietqr');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] relative overflow-hidden ${
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] relative overflow-hidden ${
                         selectedMethodGroup === 'vietqr'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/30 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
@@ -1280,8 +1291,8 @@ export default function PaymentClient() {
                       <div className="absolute top-0 right-0 bg-red-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-bl-md uppercase tracking-wider">
                         Khuyên dùng
                       </div>
-                      <div className="w-6 h-6 rounded bg-red-600 text-white flex items-center justify-center text-xs font-black">
-                        QR
+                      <div className="py-0.5">
+                        <VietQrLogo className="h-5 w-auto" />
                       </div>
                       <span className="text-xs font-bold text-gray-900 mt-2 line-clamp-2 leading-tight">
                         Mobile Banking VietQR
@@ -1295,14 +1306,14 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('vnpay_qr');
                         setPaymentMethod('vietqr');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
                         selectedMethodGroup === 'vnpay_qr'
-                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div className="text-3xs font-black text-red-600 tracking-tight">
-                        VNPAY<sup className="text-blue-600 font-bold">QR</sup>
+                      <div className="py-0.5">
+                        <VnpayLogo className="h-4 w-auto" />
                       </div>
                       <span className="text-xs font-bold text-gray-900 mt-2 line-clamp-2 leading-tight">
                         Quét mã QR VNPAY
@@ -1316,13 +1327,15 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('vnpay_dom');
                         setPaymentMethod('bank');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
                         selectedMethodGroup === 'vnpay_dom'
-                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div className="text-3xs font-black text-blue-700">VNPAY</div>
+                      <div className="py-0.5">
+                        <VnpayLogo className="h-4 w-auto" />
+                      </div>
                       <span className="text-xs font-bold text-gray-900 mt-2 line-clamp-2 leading-tight">
                         Thanh toán nội địa VNPAY
                       </span>
@@ -1343,16 +1356,16 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('skypay');
                         setPaymentMethod('skypoint');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[85px] ${
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
                         selectedMethodGroup === 'skypay'
-                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <span className="text-xs font-black text-orange-600 tracking-wide">
-                        SkyPay
-                      </span>
-                      <span className="text-xs font-bold text-gray-900 mt-2">SkyPay</span>
+                      <div className="py-0.5">
+                        <SkyPayLogo className="h-4.5 w-auto" />
+                      </div>
+                      <span className="text-xs font-bold text-gray-900 mt-2">Ví SkyPay</span>
                     </button>
 
                     {/* MoMo */}
@@ -1362,14 +1375,15 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('momo');
                         setPaymentMethod('e_wallet');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[85px] ${
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
                         selectedMethodGroup === 'momo'
-                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div className="w-6 h-6 rounded bg-[#A50064] text-white font-black text-3xs flex items-center justify-center">
-                        momo
+                      <div className="flex items-center gap-1.5 py-0.5">
+                        <MomoLogo className="h-6 w-auto" />
+                        <span className="font-extrabold text-xs text-[#A50064]">MoMo</span>
                       </div>
                       <span className="text-xs font-bold text-gray-900 mt-2">Ví MoMo</span>
                     </button>
@@ -1381,13 +1395,15 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('zalopay');
                         setPaymentMethod('e_wallet');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[85px] ${
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
                         selectedMethodGroup === 'zalopay'
-                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div className="text-3xs font-black text-blue-500">ZaloPay</div>
+                      <div className="py-0.5">
+                        <ZaloPayLogo className="h-4.5 w-auto" />
+                      </div>
                       <span className="text-xs font-bold text-gray-900 mt-2">Ví ZaloPay</span>
                     </button>
 
@@ -1398,13 +1414,15 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('applepay');
                         setPaymentMethod('card');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[85px] ${
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
                         selectedMethodGroup === 'applepay'
-                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <span className="text-xs font-black text-gray-900">Pay</span>
+                      <div className="py-0.5">
+                        <ApplePayLogo className="h-5 w-auto" />
+                      </div>
                       <span className="text-xs font-bold text-gray-900 mt-2">Apple Pay</span>
                     </button>
 
@@ -1415,13 +1433,15 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('googlepay');
                         setPaymentMethod('card');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[85px] ${
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
                         selectedMethodGroup === 'googlepay'
-                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <span className="text-xs font-bold text-gray-700">G Pay</span>
+                      <div className="py-0.5">
+                        <GooglePayLogo className="h-5 w-auto" />
+                      </div>
                       <span className="text-xs font-bold text-gray-900 mt-2">Google Pay</span>
                     </button>
                   </div>
@@ -1439,18 +1459,19 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('movi');
                         setPaymentMethod('bank');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[85px] ${
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
                         selectedMethodGroup === 'movi'
-                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
                       <div>
-                        <span className="text-sm font-black text-pink-600 block">movi</span>
-                        <span className="text-4xs text-gray-500 font-medium">
+                        <MoviLogo className="h-5 w-auto" />
+                        <span className="text-4xs text-gray-500 font-medium block mt-0.5">
                           Bay trước, trả sau
                         </span>
                       </div>
+                      <span className="text-xs font-bold text-gray-900 mt-1">Trả góp Movi</span>
                     </button>
                   </div>
                 </div>
@@ -1934,6 +1955,9 @@ export default function PaymentClient() {
                     </div>
                   )}
                 </form>
+
+                {/* Security and Accepted Logos Footer */}
+                <PaymentSecurityFooter />
               </div>
 
               {/* Security note */}
