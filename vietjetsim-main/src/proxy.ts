@@ -209,8 +209,8 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // User dashboard and payment routes require authentication
-  if (pathname.startsWith('/tai-khoan') || pathname.startsWith('/payment')) {
+  // User dashboard requires authentication
+  if (pathname.startsWith('/tai-khoan')) {
     if (!user) {
       const redirectUrl = new URL('/dang-nhap', request.url);
       redirectUrl.searchParams.set('redirect', pathname);

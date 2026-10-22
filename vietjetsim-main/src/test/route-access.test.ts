@@ -59,14 +59,17 @@ describe('route access classification', () => {
       expect(isPublicApiRoute('/api/xac-thuc/lam-moi')).toBe(true);
     });
 
+    it('allows guest checkout and payment without requiring login', () => {
+      expect(isPublicRoute('/thanh-toan')).toBe(true);
+      expect(isPublicRoute('/payment')).toBe(true);
+      expect(isPublicApiRoute('/api/dat-ve')).toBe(true);
+      expect(isPublicApiRoute('/api/thanh-toan')).toBe(true);
+      expect(isPublicApiRoute('/api/thanh-toan/vietqr')).toBe(true);
+      expect(isPublicApiRoute('/api/thanh-toan/trang-thai')).toBe(true);
+    });
+
     it('keeps authenticated data routes private', () => {
-      const privateRoutes = [
-        '/api/dat-ve',
-        '/api/hoan-tien',
-        '/api/thong-bao',
-        '/api/thanh-toan',
-        '/api/vi',
-      ];
+      const privateRoutes = ['/api/hoan-tien', '/api/thong-bao', '/api/vi'];
       for (const route of privateRoutes) {
         expect(isPublicApiRoute(route)).toBe(false);
       }

@@ -5,6 +5,7 @@ import {
   getActiveBankAccounts,
   getUserLoyaltyWithProgram,
   spendLoyaltyPoints,
+  findUserById,
 } from '@/lib/db';
 import { verifyAuthRequest } from '@/lib/auth';
 import { renderTransferNote } from '@/lib/transfer-note';
@@ -18,10 +19,7 @@ const ALLOWED_METHODS = new Set(['card', 'bank', 'vietqr', 'wallet', 'e_wallet',
 export async function POST(request: NextRequest) {
   // Validate CSRF token
   try {
-    const { user, error, response } = await verifyAuthRequest(request);
-    if (error || !user) return response!;
-
-    const payload = user;
+    const { user } = await verifyAuthRequest(request);
 
     const body = await request.json();
     const {
@@ -61,11 +59,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify booking exists and belongs to current user
+    // Verify booking exists
     const booking = await getBookingById(booking_id);
-    if (!booking || booking.user_id !== payload.userId) {
+    if (!booking) {
       return NextResponse.json(
-        { error: 'Forbidden', message: 'Booking not found or does not belong to you' },
+        { error: 'Not Found', message: 'Không tìm thấy thông tin đặt chỗ' },
+        { status: 404 }
+      );
+    }
+
+    // Nếu người dùng đã đăng nhập, đảm bảo đặt chỗ thuộc về tài khoản của họ (trừ admin)
+    if (user && booking.user_id && booking.user_id !== user.userId && user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Forbidden', message: 'Đặt chỗ không thuộc về tài khoản này' },
         { status: 403 }
       );
     }
@@ -134,13 +140,26 @@ export async function POST(request: NextRequest) {
         );
       }
     }
-    // Paying with SkyPoint: deduct the points first — if they are insufficient
-    // nothing is charged and the booking stays pending. Points are spent before
-    // the booking flips to confirmed so a failed deduction can never hand out a
-    // free ticket (worst case: a point refund an operator can reverse, not an
-    // unpaid flight).
+    // Paying with SkyPoint or Wallet requires an authenticated user account
+    if (method === 'wallet' && !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized', message: 'Vui lòng đăng nhập để thanh toán bằng ví Vietjet.' },
+        { status: 401 }
+      );
+    }
+
     if (method === 'skypoint') {
-      const loyaltyData = await getUserLoyaltyWithProgram(payload.userId);
+      if (!user) {
+        return NextResponse.json(
+          {
+            error: 'Unauthorized',
+            message: 'Vui lòng đăng nhập tài khoản SkyJoy để thanh toán bằng điểm thưởng.',
+          },
+          { status: 401 }
+        );
+      }
+
+      const loyaltyData = await getUserLoyaltyWithProgram(user.userId);
       if (!loyaltyData) {
         return NextResponse.json(
           { error: 'Loyalty unavailable', message: 'Chương trình SkyJoy chưa khả dụng' },
@@ -155,7 +174,7 @@ export async function POST(request: NextRequest) {
 
       try {
         await spendLoyaltyPoints(
-          payload.userId,
+          user.userId,
           pointsNeeded,
           `Thanh toán SkyPoint cho đặt chỗ ${booking.booking_code ?? booking_id}`
         );
@@ -175,23 +194,37 @@ export async function POST(request: NextRequest) {
     }
 
     // Create payment + confirm booking atomically (single transaction)
+    const paymentUserId = user?.userId || booking.user_id;
     const result = await createPaymentAndConfirmBooking({
       booking_id,
       method,
       amount: discountedTotal,
-      user_id: payload.userId,
+      user_id: paymentUserId,
       discount_code_id,
       discount_amount: discount_amount || 0,
     });
 
     // Email xác nhận — fail-soft trong sendMail, không được chặn response.
-    void sendBookingConfirmationEmail({
-      to: payload.email,
-      fullName: payload.fullName,
-      bookingCode: result.booking.booking_code ?? null,
-      amount: discountedTotal,
-      method,
-    });
+    let toEmail = user?.email;
+    let recipientName = user?.fullName;
+
+    if (!toEmail && booking.user_id) {
+      const bookingUser = await findUserById(booking.user_id);
+      if (bookingUser) {
+        toEmail = bookingUser.email;
+        recipientName = bookingUser.full_name;
+      }
+    }
+
+    if (toEmail) {
+      void sendBookingConfirmationEmail({
+        to: toEmail,
+        fullName: recipientName || 'Quý khách',
+        bookingCode: result.booking.booking_code ?? null,
+        amount: discountedTotal,
+        method,
+      });
+    }
 
     return NextResponse.json(
       {
