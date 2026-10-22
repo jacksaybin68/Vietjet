@@ -256,13 +256,14 @@ function RegisterPageInner() {
         return;
       }
 
-      if (!phone) {
+      if (!phone && !email) {
         await doSignUp('', effectivePassword);
         return;
       }
 
       const result = await auth.requestOtp({
-        phone,
+        phone: phone || undefined,
+        email: email || undefined,
         purpose: 'register',
         captchaToken: captcha.token,
         captchaAnswer: effectiveCaptcha,
@@ -270,7 +271,12 @@ function RegisterPageInner() {
       setRegisterStep(2);
       resend.start();
       setOtpDevHint(result?.devCode ? `Mã thử nghiệm (dev): ${result.devCode}` : '');
-      setSuccess(`Mã xác thực ${OTP_LENGTH} số đã được gửi tới số điện thoại ${phone}.`);
+      const sentDest = email
+        ? `email ${email}${phone ? ` và số điện thoại ${phone}` : ''}`
+        : `số điện thoại ${phone}`;
+      setSuccess(
+        `Mã xác thực ${OTP_LENGTH} số đã được gửi tới ${sentDest}. Quý khách vui lòng kiểm tra hộp thư đến hoặc mục Spam.`
+      );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Có lỗi xảy ra khi đăng ký';
       setError(msg);
@@ -298,20 +304,24 @@ function RegisterPageInner() {
   };
 
   const handleResendRegisterOtp = async () => {
-    if (!phone) return;
+    if (!phone && !email) return;
     setOtpSending(true);
     setError('');
     try {
       const effectiveCaptcha = captchaAnswer || autoSolveCaptcha(captcha);
       const result = await auth.requestOtp({
-        phone,
+        phone: phone || undefined,
+        email: email || undefined,
         purpose: 'register',
         captchaToken: captcha?.token,
         captchaAnswer: effectiveCaptcha,
       });
       resend.start();
       setOtpDevHint(result?.devCode ? `Mã thử nghiệm (dev): ${result.devCode}` : '');
-      setSuccess(`Mã xác thực mới đã được gửi tới số điện thoại ${phone}.`);
+      const sentDest = email
+        ? `email ${email}${phone ? ` và số điện thoại ${phone}` : ''}`
+        : `số điện thoại ${phone}`;
+      setSuccess(`Mã xác thực mới đã được gửi tới ${sentDest}.`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Không gửi lại được mã.';
       setError(msg);
@@ -600,9 +610,26 @@ function RegisterPageInner() {
       {registerStep === 2 && (
         <form onSubmit={handleVerifyRegisterOtp} className="space-y-4">
           <div className="rounded-md border border-[var(--border)] bg-slate-50 px-4 py-3 text-xs font-bold leading-5 text-[var(--foreground-muted)]">
-            Mã xác thực gồm {OTP_LENGTH} chữ số đã được gửi tới số điện thoại{' '}
-            <span className="text-[var(--foreground)] font-bold">{phone}</span>. Nhập mã để hoàn tất
-            tạo tài khoản.
+            Mã xác thực gồm {OTP_LENGTH} chữ số đã được gửi tới{' '}
+            {email ? (
+              <>
+                hộp thư email <span className="text-[var(--foreground)] font-bold">{email}</span>
+                {phone ? (
+                  <>
+                    {' '}
+                    và số điện thoại{' '}
+                    <span className="text-[var(--foreground)] font-bold">{phone}</span>
+                  </>
+                ) : null}
+                . Quý khách vui lòng kiểm tra hộp thư đến (hoặc mục Spam/Rác) và nhập mã để hoàn
+                tất.
+              </>
+            ) : (
+              <>
+                số điện thoại <span className="text-[var(--foreground)] font-bold">{phone}</span>.
+                Nhập mã để hoàn tất tạo tài khoản.
+              </>
+            )}
           </div>
 
           <div className="relative">
