@@ -5,10 +5,7 @@ import { getBookingById } from '@/lib/db';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { user, error, response } = await verifyAuthRequest(request);
-    if (error || !user) return response!;
-
-    const payload = user;
+    const { user } = await verifyAuthRequest(request);
     const { id } = await params;
 
     const booking = await getBookingById(id);
@@ -16,8 +13,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
     }
 
-    // Users can only view their own bookings (admins can view any)
-    if (!isAdminRole(payload.role) && booking.user_id !== payload.userId) {
+    // Users can only view their own bookings (admins can view any, guests can view unlinked/pending)
+    if (user && !isAdminRole(user.role) && booking.user_id && booking.user_id !== user.userId) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

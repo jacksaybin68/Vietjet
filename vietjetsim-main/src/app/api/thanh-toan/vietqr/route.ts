@@ -14,8 +14,7 @@ import { getApiErrorMessage } from '@/shared/services';
  */
 export async function GET(request: NextRequest) {
   try {
-    const { user, error, response } = await verifyAuthRequest(request);
-    if (error || !user) return response!;
+    const { user } = await verifyAuthRequest(request);
 
     const bookingId = request.nextUrl.searchParams.get('bookingId');
     if (!bookingId) {
@@ -26,9 +25,16 @@ export async function GET(request: NextRequest) {
     }
 
     const booking = await getBookingById(bookingId);
-    if (!booking || booking.user_id !== user.userId) {
+    if (!booking) {
       return NextResponse.json(
-        { error: 'Forbidden', message: 'Không tìm thấy đặt chỗ' },
+        { error: 'Not Found', message: 'Không tìm thấy thông tin đặt chỗ' },
+        { status: 404 }
+      );
+    }
+
+    if (user && booking.user_id && booking.user_id !== user.userId && user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Forbidden', message: 'Đặt chỗ không thuộc về tài khoản này' },
         { status: 403 }
       );
     }

@@ -28,6 +28,9 @@ export const PUBLIC_ROUTES = [
   '/lam-thu-tuc-truc-tuyen',
   '/dat-ve',
   '/tim-ve',
+  // Trang thanh toán cho phép khách vãng lai thanh toán mà không cần đăng nhập
+  '/thanh-toan',
+  '/payment',
   // Programs alias that immediately 307s to the (public) services page — it
   // must stay reachable signed-out, otherwise the middleware bounces it
   // to login before the page's own redirect can run.
@@ -43,6 +46,12 @@ export const PUBLIC_API_ROUTES = [
   // Lookup by booking code + passenger name: the credentials are the booking
   // code, and requiring a session would break the anonymous check-in lookup.
   '/api/checkin',
+  // Cho phép khách vãng lai tạo và xem thông tin đặt vé
+  '/api/dat-ve',
+  // Cho phép khách vãng lai thanh toán, lấy mã VietQR và kiểm tra trạng thái thanh toán
+  '/api/thanh-toan',
+  // Kiểm tra mã giảm giá công khai
+  '/api/ma-giam-gia/xac-thuc',
   // Public bank/transfer config shown on the payment page.
   '/api/cong-khai/cau-hinh-ngan-hang',
   // Active announcements for the header notice bar. Operator-published

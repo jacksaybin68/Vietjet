@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAuthRequest } from '@/lib/auth';
-import { getBookingsByUserId, createBooking, getFlightById } from '@/lib/db';
+import { randomUUID } from 'crypto';
+import { verifyAuthRequest, hashPassword } from '@/lib/auth';
+import {
+  getBookingsByUserId,
+  createBooking,
+  getFlightById,
+  createUser,
+  findUserByEmail,
+  type UserRecord,
+} from '@/lib/db';
 import { sql } from '@/lib/neon';
 import { parsePaginationParams, getPaginationMeta } from '@/lib/pagination';
 import {
@@ -50,10 +58,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { user, error, response } = await verifyAuthRequest(request);
-    if (error || !user) return response!;
-
-    const userId = user.userId;
+    const { user } = await verifyAuthRequest(request);
 
     // `seats` are numbers the client picked from the map, `ancillaries` the
     // service ids it ticked, and `fareClass` the fare card it tapped. All three
@@ -214,8 +219,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    let bookingUserId: string;
+
+    if (user) {
+      bookingUserId = user.userId;
+    } else {
+      // Find primary passenger to associate with guest user account
+      const primaryAdult =
+        normalizedPassengers.find(
+          (p) => p.passenger_type === 'adult' && p.email && p.email.includes('@')
+        ) || normalizedPassengers[0];
+
+      const rawEmail = primaryAdult?.email?.trim().toLowerCase();
+      const rawPhone = primaryAdult?.phone
+        ? String(primaryAdult.phone).replace(/[^0-9]/g, '')
+        : null;
+      const passengerName = primaryAdult?.name?.trim() || 'Khách vãng lai';
+
+      const guestEmail =
+        rawEmail && rawEmail !== 'null' && rawEmail !== 'undefined'
+          ? rawEmail
+          : `${rawPhone || Date.now()}@khach.vietjetsim.vn`;
+
+      let userRecord = await findUserByEmail(guestEmail);
+
+      if (!userRecord && rawPhone && rawPhone.length >= 9) {
+        const byPhone = await sql`SELECT * FROM user_profiles WHERE phone = ${rawPhone} LIMIT 1`;
+        userRecord = (byPhone as unknown as UserRecord[])[0] || null;
+      }
+
+      if (!userRecord) {
+        const passwordHash = await hashPassword(randomUUID());
+        userRecord = await createUser(guestEmail, passwordHash, passengerName, 'user', rawPhone);
+      }
+
+      bookingUserId = userRecord.id;
+    }
+
     const booking = await createBooking(
-      { user_id: userId as string, flight_id, total_price: totalPrice },
+      { user_id: bookingUserId, flight_id, total_price: totalPrice },
       normalizedPassengers,
       seatRows,
       ancillaryRows,
