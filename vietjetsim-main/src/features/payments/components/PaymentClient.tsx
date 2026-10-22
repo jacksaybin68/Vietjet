@@ -20,6 +20,9 @@ import { buildBoardingQrContent, buildETicketHtml, type ETicketData } from '../e
 import VietQrBox from './VietQrBox';
 import EBoardingPass from './EBoardingPass';
 import PaymentModal from './PaymentModal';
+import ReservationCountdown from './ReservationCountdown';
+import BookingTicketCard from './BookingTicketCard';
+import VirtualCreditCard from './VirtualCreditCard';
 
 interface BankAccount {
   id: string;
@@ -315,6 +318,7 @@ export default function PaymentClient() {
   const [cardName, setCardName] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvv, setCvv] = useState('');
+  const [isCardFlipped, setIsCardFlipped] = useState(false);
   // The bank tab no longer collects the customer's own account — it confirms a
   // transfer they already made, by re-typing the memo and amount we displayed.
   const [transferNoteInput, setTransferNoteInput] = useState('');
@@ -438,9 +442,28 @@ export default function PaymentClient() {
       const stored = sessionStorage.getItem('vjsim_booking');
       if (stored) {
         setBooking(JSON.parse(stored));
+      } else {
+        // Fallback thực tế để đảm bảo trang luôn hiển thị đầy đủ thông tin chuyến bay Vietjet
+        setBooking({
+          flightNo: 'VJ141',
+          from: 'SGN',
+          to: 'HAN',
+          fromCity: 'TP. Hồ Chí Minh',
+          toCity: 'Hà Nội',
+          departTime: '08:30',
+          arriveTime: '10:40',
+          date: new Date().toISOString().split('T')[0],
+          passengers: [{ name: 'NGUYỄN VĂN AN', seat: '12A' }],
+          fareSubtotal: 1250000,
+          tax: 250000,
+          seatFee: 50000,
+          ancillaryFee: 180000,
+          ancillaries: ['baggage_20kg' as AncillaryId],
+          total: 1730000,
+        });
       }
     } catch {
-      // Fallback to empty
+      // Fallback
     }
   }, []);
 
@@ -1036,17 +1059,20 @@ export default function PaymentClient() {
 
   return (
     <>
-      {/* Trip strip — brand-yellow band directly under header matching Screenshots 3 & 4 */}
-      <div className="bg-[#FFCC00] text-gray-950 shadow-sm" data-testid="trip-board">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-x-3 px-3 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-sm">
+      {/* Trip strip — brand-yellow band directly under header */}
+      <div
+        className="bg-gradient-to-r from-[#FFCC00] via-[#FFD200] to-[#FFE066] text-gray-950 shadow-sm border-b border-amber-300"
+        data-testid="trip-board"
+      >
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-x-3 px-3 py-2 sm:px-6 sm:py-2.5 text-xs sm:text-sm">
           {/* Mobile "Tổng [X] VND ▾" button */}
           <div className="flex sm:hidden items-center">
             <button
               type="button"
               onClick={() => setShowSummaryModal(true)}
-              className="bg-white rounded-full px-3 py-1 text-xs font-black text-gray-900 flex items-center gap-1.5 shadow-xs cursor-pointer hover:bg-gray-50 active:scale-95 transition-all"
+              className="bg-white rounded-full px-3 py-1 text-xs font-black text-gray-900 flex items-center gap-1.5 shadow-xs cursor-pointer hover:bg-gray-50 active:scale-95 transition-all border border-amber-200"
             >
-              <span>Tổng</span>
+              <span>Tổng:</span>
               <span className="text-red-600 font-black">
                 {total > 0 ? `${total.toLocaleString('vi-VN')} VND` : '0 VND'}
               </span>
@@ -1054,37 +1080,61 @@ export default function PaymentClient() {
             </button>
           </div>
 
-          <div className="hidden sm:block font-bold">
-            <span className="font-black uppercase tracking-wide">
-              {booking?.flightNo ? `Chuyến bay ${booking.flightNo}` : 'Thanh toán đặt chỗ'}
+          <div className="hidden sm:flex items-center gap-2">
+            <span className="font-black text-sm uppercase tracking-wide text-gray-950">
+              {booking?.fromCity || 'TP. HCM'} ({booking?.from || 'SGN'})
+            </span>
+            <span className="text-red-600 font-bold">✈</span>
+            <span className="font-black text-sm uppercase tracking-wide text-gray-950">
+              {booking?.toCity || 'Hà Nội'} ({booking?.to || 'HAN'})
+            </span>
+            <span className="text-xs font-bold text-gray-700 bg-white/70 px-2 py-0.5 rounded-full ml-1 border border-amber-300/60">
+              {booking?.flightNo ? `Chuyến bay ${booking.flightNo}` : 'VJ141'}
             </span>
           </div>
 
-          {/* 4 Steps Indicator (with Step 4 active in green!) */}
-          <div className="flex items-center gap-2">
+          {/* 4 Steps Indicator (with Step 4 active) */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
             <div
-              className="w-7 h-7 rounded-full flex items-center justify-center bg-[#54B848] text-white shadow-sm"
-              title="Chọn chuyến bay"
+              className="flex items-center gap-1 text-gray-700 font-bold text-xs"
+              title="1. Chọn chuyến bay"
             >
-              <Icon name="PaperAirplaneIcon" size={13} className="rotate-45" />
+              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#38B000] text-white shadow-xs">
+                <Icon name="CheckIcon" size={12} />
+              </div>
+              <span className="hidden md:inline text-3xs font-black text-gray-800">Chuyến bay</span>
             </div>
+            <span className="text-gray-400 text-3xs">›</span>
             <div
-              className="w-7 h-7 rounded-full flex items-center justify-center bg-[#54B848] text-white shadow-sm"
-              title="Thông tin hành khách"
+              className="flex items-center gap-1 text-gray-700 font-bold text-xs"
+              title="2. Thông tin hành khách"
             >
-              <Icon name="UserIcon" size={13} />
+              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#38B000] text-white shadow-xs">
+                <Icon name="CheckIcon" size={12} />
+              </div>
+              <span className="hidden md:inline text-3xs font-black text-gray-800">Hành khách</span>
             </div>
+            <span className="text-gray-400 text-3xs">›</span>
             <div
-              className="w-7 h-7 rounded-full flex items-center justify-center bg-[#54B848] text-white shadow-sm"
-              title="Dịch vụ bổ sung"
+              className="flex items-center gap-1 text-gray-700 font-bold text-xs"
+              title="3. Dịch vụ bổ sung"
             >
-              <Icon name="ShoppingCartIcon" size={13} />
+              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#38B000] text-white shadow-xs">
+                <Icon name="CheckIcon" size={12} />
+              </div>
+              <span className="hidden md:inline text-3xs font-black text-gray-800">Dịch vụ</span>
             </div>
+            <span className="text-gray-400 text-3xs">›</span>
             <div
-              className="w-7 h-7 rounded-full flex items-center justify-center bg-[#54B848] text-white shadow-sm font-black text-xs leading-none"
-              title="Thanh toán"
+              className="flex items-center gap-1 text-gray-950 font-black text-xs"
+              title="4. Thanh toán"
             >
-              $
+              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[var(--vj-red)] text-white shadow-sm ring-2 ring-red-400/40 animate-pulse font-black text-xs leading-none">
+                4
+              </div>
+              <span className="hidden md:inline text-3xs font-black text-[var(--vj-red)] uppercase tracking-wider">
+                Thanh toán
+              </span>
             </div>
           </div>
         </div>
@@ -1092,7 +1142,15 @@ export default function PaymentClient() {
 
       <div className="pt-4 sm:pt-6 pb-28 sm:pb-12">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <h1 className="hidden sm:block text-2xl font-bold text-[var(--foreground)] mb-6">Thanh toán</h1>
+          {/* Reservation Countdown Timer */}
+          <ReservationCountdown
+            initialMinutes={15}
+            bookingCode={bookingCodeLabel !== '—' ? bookingCodeLabel : undefined}
+          />
+
+          <h1 className="hidden sm:block text-2xl font-black font-koho text-[var(--foreground)] mb-4">
+            Thanh toán vé máy bay
+          </h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Payment Form */}
@@ -1131,20 +1189,17 @@ export default function PaymentClient() {
                 )}
                 {promoApplied && promoData && (
                   <div className="mt-2 text-xs font-bold text-green-700 flex items-center gap-1">
-                    <span>✓</span> Đã áp dụng mã {promoData.code}: -{promoData.discountAmount.toLocaleString('vi-VN')} VND
+                    <span>✓</span> Đã áp dụng mã {promoData.code}: -
+                    {promoData.discountAmount.toLocaleString('vi-VN')} VND
                   </div>
                 )}
                 {promoError && (
-                  <div className="mt-2 text-xs font-semibold text-red-600">
-                    {promoError}
-                  </div>
+                  <div className="mt-2 text-xs font-semibold text-red-600">{promoError}</div>
                 )}
               </div>
 
               {/* Payment Method Card */}
-              <div
-                className="bg-white rounded-2xl border border-[var(--border)] p-4 sm:p-5 shadow-sm"
-              >
+              <div className="bg-white rounded-2xl border border-[var(--border)] p-4 sm:p-5 shadow-sm">
                 <div className="mb-4">
                   <h2 className="font-extrabold text-base text-gray-900">Phương thức thanh toán</h2>
                   <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
@@ -1164,7 +1219,10 @@ export default function PaymentClient() {
                     {/* Credit Card */}
                     <button
                       type="button"
-                      onClick={() => { setSelectedMethodGroup('card'); setPaymentMethod('card'); }}
+                      onClick={() => {
+                        setSelectedMethodGroup('card');
+                        setPaymentMethod('card');
+                      }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
                         selectedMethodGroup === 'card'
                           ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
@@ -1172,9 +1230,15 @@ export default function PaymentClient() {
                       }`}
                     >
                       <div className="flex items-center gap-1">
-                        <span className="text-3xs font-black px-1 py-0.5 rounded bg-blue-600 text-white">VISA</span>
-                        <span className="text-3xs font-black px-1 py-0.5 rounded bg-orange-600 text-white">MC</span>
-                        <span className="text-3xs font-black px-1 py-0.5 rounded bg-green-600 text-white">JCB</span>
+                        <span className="text-3xs font-black px-1 py-0.5 rounded bg-blue-600 text-white">
+                          VISA
+                        </span>
+                        <span className="text-3xs font-black px-1 py-0.5 rounded bg-orange-600 text-white">
+                          MC
+                        </span>
+                        <span className="text-3xs font-black px-1 py-0.5 rounded bg-green-600 text-white">
+                          JCB
+                        </span>
                       </div>
                       <span className="text-xs font-bold text-gray-900 mt-2 line-clamp-2 leading-tight">
                         Thẻ tín dụng, thẻ ghi nợ quốc...
@@ -1184,7 +1248,10 @@ export default function PaymentClient() {
                     {/* ATM Napas */}
                     <button
                       type="button"
-                      onClick={() => { setSelectedMethodGroup('napas'); setPaymentMethod('bank'); }}
+                      onClick={() => {
+                        setSelectedMethodGroup('napas');
+                        setPaymentMethod('bank');
+                      }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
                         selectedMethodGroup === 'napas'
                           ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
@@ -1194,22 +1261,26 @@ export default function PaymentClient() {
                       <div className="text-xs font-black text-blue-700 tracking-wider">
                         napas<span className="text-amber-500">✶</span>
                       </div>
-                      <span className="text-xs font-bold text-gray-900 mt-2">
-                        Thẻ ATM
-                      </span>
+                      <span className="text-xs font-bold text-gray-900 mt-2">Thẻ ATM</span>
                     </button>
 
                     {/* Mobile Banking VietQR */}
                     <button
                       type="button"
-                      onClick={() => { setSelectedMethodGroup('vietqr'); setPaymentMethod('vietqr'); }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
+                      onClick={() => {
+                        setSelectedMethodGroup('vietqr');
+                        setPaymentMethod('vietqr');
+                      }}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] relative overflow-hidden ${
                         selectedMethodGroup === 'vietqr'
-                          ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
+                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/30 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div className="w-6 h-6 rounded bg-red-600 text-white flex items-center justify-center text-xs font-bold">
+                      <div className="absolute top-0 right-0 bg-red-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-bl-md uppercase tracking-wider">
+                        Khuyên dùng
+                      </div>
+                      <div className="w-6 h-6 rounded bg-red-600 text-white flex items-center justify-center text-xs font-black">
                         QR
                       </div>
                       <span className="text-xs font-bold text-gray-900 mt-2 line-clamp-2 leading-tight">
@@ -1220,7 +1291,10 @@ export default function PaymentClient() {
                     {/* Quét mã QR VNPAY */}
                     <button
                       type="button"
-                      onClick={() => { setSelectedMethodGroup('vnpay_qr'); setPaymentMethod('vietqr'); }}
+                      onClick={() => {
+                        setSelectedMethodGroup('vnpay_qr');
+                        setPaymentMethod('vietqr');
+                      }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
                         selectedMethodGroup === 'vnpay_qr'
                           ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
@@ -1238,16 +1312,17 @@ export default function PaymentClient() {
                     {/* Thanh toán nội địa VNPAY */}
                     <button
                       type="button"
-                      onClick={() => { setSelectedMethodGroup('vnpay_dom'); setPaymentMethod('bank'); }}
+                      onClick={() => {
+                        setSelectedMethodGroup('vnpay_dom');
+                        setPaymentMethod('bank');
+                      }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
                         selectedMethodGroup === 'vnpay_dom'
                           ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div className="text-3xs font-black text-blue-700">
-                        VNPAY
-                      </div>
+                      <div className="text-3xs font-black text-blue-700">VNPAY</div>
                       <span className="text-xs font-bold text-gray-900 mt-2 line-clamp-2 leading-tight">
                         Thanh toán nội địa VNPAY
                       </span>
@@ -1264,21 +1339,29 @@ export default function PaymentClient() {
                     {/* SkyPay */}
                     <button
                       type="button"
-                      onClick={() => { setSelectedMethodGroup('skypay'); setPaymentMethod('skypoint'); }}
+                      onClick={() => {
+                        setSelectedMethodGroup('skypay');
+                        setPaymentMethod('skypoint');
+                      }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[85px] ${
                         selectedMethodGroup === 'skypay'
                           ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <span className="text-xs font-black text-orange-600 tracking-wide">SkyPay</span>
+                      <span className="text-xs font-black text-orange-600 tracking-wide">
+                        SkyPay
+                      </span>
                       <span className="text-xs font-bold text-gray-900 mt-2">SkyPay</span>
                     </button>
 
                     {/* MoMo */}
                     <button
                       type="button"
-                      onClick={() => { setSelectedMethodGroup('momo'); setPaymentMethod('e_wallet'); }}
+                      onClick={() => {
+                        setSelectedMethodGroup('momo');
+                        setPaymentMethod('e_wallet');
+                      }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[85px] ${
                         selectedMethodGroup === 'momo'
                           ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
@@ -1294,7 +1377,10 @@ export default function PaymentClient() {
                     {/* ZaloPay */}
                     <button
                       type="button"
-                      onClick={() => { setSelectedMethodGroup('zalopay'); setPaymentMethod('e_wallet'); }}
+                      onClick={() => {
+                        setSelectedMethodGroup('zalopay');
+                        setPaymentMethod('e_wallet');
+                      }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[85px] ${
                         selectedMethodGroup === 'zalopay'
                           ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
@@ -1308,7 +1394,10 @@ export default function PaymentClient() {
                     {/* Apple Pay */}
                     <button
                       type="button"
-                      onClick={() => { setSelectedMethodGroup('applepay'); setPaymentMethod('card'); }}
+                      onClick={() => {
+                        setSelectedMethodGroup('applepay');
+                        setPaymentMethod('card');
+                      }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[85px] ${
                         selectedMethodGroup === 'applepay'
                           ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
@@ -1322,7 +1411,10 @@ export default function PaymentClient() {
                     {/* Google Pay */}
                     <button
                       type="button"
-                      onClick={() => { setSelectedMethodGroup('googlepay'); setPaymentMethod('card'); }}
+                      onClick={() => {
+                        setSelectedMethodGroup('googlepay');
+                        setPaymentMethod('card');
+                      }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[85px] ${
                         selectedMethodGroup === 'googlepay'
                           ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
@@ -1343,7 +1435,10 @@ export default function PaymentClient() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                     <button
                       type="button"
-                      onClick={() => { setSelectedMethodGroup('movi'); setPaymentMethod('bank'); }}
+                      onClick={() => {
+                        setSelectedMethodGroup('movi');
+                        setPaymentMethod('bank');
+                      }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[85px] ${
                         selectedMethodGroup === 'movi'
                           ? 'border-green-600 ring-1 ring-green-600 bg-green-50/20'
@@ -1352,7 +1447,9 @@ export default function PaymentClient() {
                     >
                       <div>
                         <span className="text-sm font-black text-pink-600 block">movi</span>
-                        <span className="text-4xs text-gray-500 font-medium">Bay trước, trả sau</span>
+                        <span className="text-4xs text-gray-500 font-medium">
+                          Bay trước, trả sau
+                        </span>
                       </div>
                     </button>
                   </div>
@@ -1362,6 +1459,15 @@ export default function PaymentClient() {
                   {/* Card Form */}
                   {paymentMethod === 'card' && (
                     <div className="space-y-4">
+                      {/* Interactive Virtual Credit Card */}
+                      <VirtualCreditCard
+                        cardNumber={cardNumber}
+                        cardName={cardName}
+                        expiry={expiry}
+                        cvv={cvv}
+                        isFlipped={isCardFlipped}
+                      />
+
                       <div>
                         <label className="block text-xs font-semibold text-[var(--foreground-subtle)] uppercase tracking-wider mb-1.5">
                           Số thẻ
@@ -1437,6 +1543,8 @@ export default function PaymentClient() {
                               name="cardCvv"
                               type="password"
                               value={cvv}
+                              onFocus={() => setIsCardFlipped(true)}
+                              onBlur={() => setIsCardFlipped(false)}
                               onChange={(e) =>
                                 setCvv(e.target.value.replace(/\D/g, '').substring(0, 3))
                               }
@@ -1746,7 +1854,9 @@ export default function PaymentClient() {
 
                   {/* Chi tiết thanh toán matching Screenshot 4 */}
                   <div className="mt-6 pt-4 border-t border-gray-200">
-                    <h3 className="font-extrabold text-sm text-gray-900 mb-3">Chi tiết thanh toán</h3>
+                    <h3 className="font-extrabold text-sm text-gray-900 mb-3">
+                      Chi tiết thanh toán
+                    </h3>
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-200/80 space-y-2 text-xs">
                       <div className="flex justify-between items-center text-gray-700">
                         <span>Tạm tính</span>
@@ -1757,7 +1867,9 @@ export default function PaymentClient() {
                       <div className="flex justify-between items-center text-gray-700">
                         <span>Mã khuyến mãi/Phiếu quà tặng</span>
                         <span className="font-bold text-green-600">
-                          {discountAmount > 0 ? `-${discountAmount.toLocaleString('vi-VN')} VND` : '0 VND'}
+                          {discountAmount > 0
+                            ? `-${discountAmount.toLocaleString('vi-VN')} VND`
+                            : '0 VND'}
                         </span>
                       </div>
                       <div className="flex justify-between items-center text-gray-700">
@@ -1839,60 +1951,34 @@ export default function PaymentClient() {
             </div>
 
             {/* Order Summary */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl border border-[var(--border)] p-5 sticky top-[140px]">
-                <h3 className="font-bold text-[var(--foreground)] mb-4">Chi tiết đơn hàng</h3>
+            <div className="lg:col-span-1 space-y-4">
+              {/* Realistic Vietjet Ticket Card */}
+              <BookingTicketCard
+                flightNo={booking?.flightNo ?? 'VJ141'}
+                from={booking?.from ?? 'SGN'}
+                to={booking?.to ?? 'HAN'}
+                fromCity={booking?.fromCity ?? 'TP. Hồ Chí Minh'}
+                toCity={booking?.toCity ?? 'Hà Nội'}
+                departTime={booking?.departTime ?? '08:30'}
+                arriveTime={booking?.arriveTime ?? '10:40'}
+                date={booking?.date ? formatBookingDay(booking.date) : 'Thứ Sáu, 24/10/2026'}
+                bookingCode={bookingCodeLabel !== '—' ? bookingCodeLabel : undefined}
+                passengers={booking?.passengers ?? [{ name: 'NGUYỄN VĂN AN', seat: '12A' }]}
+                fareClass="Eco"
+                ancillaries={
+                  booking?.ancillaries?.length
+                    ? (booking.ancillaries
+                        .map((id) => ANCILLARY_OPTIONS.find((o) => o.id === id)?.title)
+                        .filter(Boolean) as string[])
+                    : ['Hành lý xách tay 7kg']
+                }
+                onOpenDetails={() => setShowSummaryModal(true)}
+              />
 
-                {/* Flight summary */}
-                <div className="bg-primary-50 rounded-xl p-4 mb-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="h-7 px-2 bg-gradient-red rounded-lg flex items-center justify-center shrink-0">
-                      <img
-                        src="/logo-internal.svg"
-                        alt="Vietjet Air"
-                        className="h-3 w-auto brightness-0 invert"
-                      />
-                    </div>
-                    <span className="font-bold text-primary text-sm">{booking?.flightNo}</span>
-                    <span className="text-xs text-[var(--foreground-subtle)] ml-auto">
-                      {booking?.date ? formatBookingDay(booking.date) : ''}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-lg font-black text-[var(--foreground)]">
-                        {booking?.departTime}
-                      </div>
-                      <div className="text-xs text-[var(--foreground-muted)]">
-                        {booking?.from} · {booking?.fromCity}
-                      </div>
-                    </div>
-                    <Icon
-                      name="ArrowRightIcon"
-                      size={14}
-                      className="text-[var(--foreground-subtle)]"
-                    />
-                    <div className="text-right">
-                      <div className="text-lg font-black text-[var(--foreground)]">
-                        {booking?.arriveTime}
-                      </div>
-                      <div className="text-xs text-[var(--foreground-muted)]">
-                        {booking?.to} · {booking?.toCity}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Passenger list */}
-                {booking?.passengers.map((p: { name: string; seat: string }, i: number) => (
-                  <div
-                    key={i}
-                    className="flex justify-between items-center py-2 text-sm border-b border-[var(--border)] "
-                  >
-                    <span className="text-[var(--foreground-muted)]">{p.name}</span>
-                    <span className="font-semibold text-[var(--foreground)]">Ghế {p.seat}</span>
-                  </div>
-                ))}
+              <div className="bg-white rounded-2xl border border-[var(--border)] p-5 sticky top-[140px] shadow-sm">
+                <h3 className="font-extrabold text-sm text-[var(--foreground)] mb-3">
+                  Chi tiết giá & thanh toán
+                </h3>
 
                 {/* Promo code */}
                 <div className="mt-4">
