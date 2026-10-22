@@ -354,6 +354,12 @@ export default function PaymentClient() {
   const [loading, setLoading] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [copied, setCopied] = useState(false);
+  // Receipt image upload state for bank transfer & VietQR verification
+  const [receiptImage, setReceiptImage] = useState<string | null>(null);
+  const [receiptFileName, setReceiptFileName] = useState<string | null>(null);
+  const [receiptFileSize, setReceiptFileSize] = useState<string | null>(null);
+  const [isDraggingReceipt, setIsDraggingReceipt] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   // The PNR is assigned by the database when the booking is created. It used to
   // be invented here — a random string when the URL carried no bookingId, or the
   // raw booking UUID otherwise — and then shown to the customer as "Mã đặt chỗ",
@@ -550,23 +556,24 @@ export default function PaymentClient() {
 
     // A bank transfer (or a VietQR scan into the same account) is confirmed
     // here: the customer re-types the memo and amount this page displayed.
-    // Checked against the values we rendered, so the same helper the API uses
-    // decides — the client copy exists only to fail fast, never to be the
-    // authority.
+    // If the customer attached an image of their payment receipt screenshot,
+    // we allow submission for manual Admin cross-checking and verification.
     if (paymentMethod === 'bank' || paymentMethod === 'vietqr') {
       if (!selectedAdminAccount) {
         setPaymentError('Chưa có thông tin tài khoản nhận. Vui lòng thử lại sau.');
         setShowErrorModal(true);
         return;
       }
-      const check = validateBankTransferInput(
-        { transferNote: transferNoteInput, amount: transferAmountInput },
-        { transferNote, amount: total }
-      );
-      if (!check.valid) {
-        setPaymentError(check.message);
-        setShowErrorModal(true);
-        return;
+      if (!receiptImage) {
+        const check = validateBankTransferInput(
+          { transferNote: transferNoteInput, amount: transferAmountInput },
+          { transferNote, amount: total }
+        );
+        if (!check.valid) {
+          setPaymentError(check.message);
+          setShowErrorModal(true);
+          return;
+        }
       }
     }
 
@@ -606,8 +613,9 @@ export default function PaymentClient() {
         discount_amount: discountAmount,
         discount_code: promoData?.code,
         bank_account_id: selectedAdminAccount?.id,
-        transfer_note: transferNoteInput,
-        transfer_amount: transferAmountInput,
+        transfer_note: transferNoteInput || transferNote,
+        transfer_amount: transferAmountInput || String(total),
+        receipt_image: receiptImage || undefined,
       });
 
       setLoading(false);
@@ -748,43 +756,203 @@ export default function PaymentClient() {
     setTimeout(() => printWindow.print(), 350);
   }, [booking, bookingCodeLabel, toast]);
 
+  // Xử lý tệp ảnh biên lai chuyển khoản
+  const processReceiptFile = useCallback(
+    (file: File) => {
+      if (!file.type.startsWith('image/')) {
+        toast.error('Định dạng không hợp lệ', 'Vui lòng chọn file hình ảnh (PNG, JPG, JPEG, WEBP)');
+        return;
+      }
+      if (file.size > 8 * 1024 * 1024) {
+        toast.error('File quá lớn', 'Kích thước ảnh tối đa là 8MB');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        setReceiptImage(reader.result as string);
+        setReceiptFileName(file.name);
+        setReceiptFileSize((file.size / 1024).toFixed(0) + ' KB');
+        toast.success(
+          'Đã tải ảnh biên lai thành công!',
+          'Ảnh chụp biên lai sẽ được gửi tới Admin để đối chiếu xuất vé.'
+        );
+      };
+      reader.onerror = () => {
+        toast.error('Lỗi đọc ảnh', 'Không thể đọc file ảnh, vui lòng thử lại.');
+      };
+      reader.readAsDataURL(file);
+    },
+    [toast]
+  );
+
+  const handleReceiptFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processReceiptFile(file);
+  };
+
+  const handleReceiptDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingReceipt(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) processReceiptFile(file);
+  };
+
   // Form xác nhận đã chuyển khoản — dùng chung cho tab Ngân hàng và tab VietQR
-  // (khách quét mã VietQR xong quay lại đây gõ nội dung + số tiền trong trường
-  // hợp hệ thống chưa tự nhận giao dịch qua polling).
   const transferConfirmBlock = (
-    <div className="bg-white border border-[var(--border)] rounded-xl p-4 space-y-3">
-      <h4 className="text-sm font-bold text-[var(--foreground)] flex items-center gap-2">
-        <Icon name="CheckCircleIcon" size={18} className="text-primary" />
-        Xác nhận đã chuyển khoản
-      </h4>
-      <p className="text-xs text-[var(--foreground-muted)]">
-        Nhập đúng nội dung và số tiền đã chuyển để hoàn tất thanh toán.
+    <div className="bg-white border border-[var(--border)] rounded-2xl p-5 space-y-4 shadow-sm">
+      <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+        <h4 className="text-sm font-bold font-koho text-[var(--foreground)] flex items-center gap-2">
+          <Icon name="CheckCircleIcon" size={18} className="text-primary" />
+          Xác nhận chuyển khoản & Tải ảnh biên lai
+        </h4>
+        <span className="text-3xs font-extrabold font-koho uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+          Đối chiếu Admin
+        </span>
+      </div>
+
+      <p className="text-xs text-[var(--foreground-muted)] leading-relaxed">
+        Sau khi chuyển khoản thành công từ ứng dụng ngân hàng của bạn, quý khách vui lòng đính kèm ảnh chụp màn hình biên lai hoặc xác nhận bên dưới để Admin đối chiếu xuất vé ngay lập tức.
       </p>
-      <div>
-        <label className="block text-xs font-medium text-[var(--foreground-muted)] mb-1">
-          Nội dung chuyển khoản <span className="text-primary">*</span>
+
+      {/* Vị trí tải ảnh lên để admin đối chiếu */}
+      <div className="space-y-2">
+        <label className="block text-xs font-bold font-koho text-gray-800">
+          Ảnh chụp biên lai chuyển khoản (Khuyên dùng để duyệt vé nhanh)
         </label>
+
         <input
-          type="text"
-          value={transferNoteInput}
-          onChange={(e) => setTransferNoteInput(e.target.value)}
-          placeholder={transferNote}
-          className="w-full px-3 py-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+          ref={fileInputRef}
+          type="file"
+          accept="image/png,image/jpeg,image/jpg,image/webp"
+          onChange={handleReceiptFileChange}
+          className="hidden"
+          id="receipt-file-input"
         />
+
+        {!receiptImage ? (
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDraggingReceipt(true);
+            }}
+            onDragLeave={() => setIsDraggingReceipt(false)}
+            onDrop={handleReceiptDrop}
+            onClick={() => fileInputRef.current?.click()}
+            className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-2 ${
+              isDraggingReceipt
+                ? 'border-primary bg-primary/5 scale-[1.01]'
+                : 'border-gray-300 hover:border-primary hover:bg-red-50/20 bg-gray-50/60'
+            }`}
+          >
+            <div className="w-12 h-12 rounded-full bg-white shadow-xs border border-gray-200 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+              <Icon name="ArrowUpTrayIcon" size={22} className="text-primary" />
+            </div>
+            <div>
+              <p className="text-xs font-bold font-koho text-gray-900">
+                Kéo thả ảnh hoặc <span className="text-primary underline">bấm để chọn ảnh</span> biên lai
+              </p>
+              <p className="text-3xs text-gray-500 mt-0.5 font-medium">
+                Hỗ trợ định dạng PNG, JPG, JPEG, WEBP (Tối đa 8MB)
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-emerald-50/40 border border-emerald-200 rounded-xl p-3.5 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-emerald-700 text-xs font-bold font-koho">
+                <Icon name="CheckCircleIcon" size={16} className="text-emerald-600" />
+                <span>Đã đính kèm ảnh biên lai thành công</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setReceiptImage(null)}
+                className="text-3xs font-bold text-red-600 hover:text-red-700 hover:underline cursor-pointer flex items-center gap-1 font-koho"
+              >
+                <Icon name="TrashIcon" size={12} />
+                <span>Xóa ảnh</span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3 bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
+              <img
+                src={receiptImage}
+                alt="Ảnh biên lai"
+                className="w-16 h-16 object-cover rounded-md border border-gray-200 shrink-0"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-gray-900 truncate">
+                  {receiptFileName || 'bien-lai-chuyen-khoan.png'}
+                </p>
+                <p className="text-3xs text-gray-500 mt-0.5">{receiptFileSize || 'Ảnh hợp lệ'}</p>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-3xs font-semibold text-primary hover:underline mt-1 cursor-pointer block font-koho"
+                >
+                  Thay đổi ảnh khác
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-      <div>
-        <label className="block text-xs font-medium text-[var(--foreground-muted)] mb-1">
-          Số tiền đã chuyển <span className="text-primary">*</span>
-        </label>
-        <input
-          type="text"
-          inputMode="numeric"
-          value={transferAmountInput}
-          onChange={(e) => setTransferAmountInput(e.target.value)}
-          placeholder={String(total)}
-          className="w-full px-3 py-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-        />
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+        <div>
+          <label className="block text-xs font-semibold font-koho text-[var(--foreground-muted)] mb-1">
+            Nội dung chuyển khoản
+          </label>
+          <input
+            type="text"
+            value={transferNoteInput}
+            onChange={(e) => setTransferNoteInput(e.target.value)}
+            placeholder={transferNote}
+            className="w-full px-3 py-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-xs font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold font-koho text-[var(--foreground-muted)] mb-1">
+            Số tiền đã chuyển (VND)
+          </label>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={transferAmountInput}
+            onChange={(e) => setTransferAmountInput(e.target.value)}
+            placeholder={String(total)}
+            className="w-full px-3 py-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-xs font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+          />
+        </div>
       </div>
+
+      {/* Nút ĐÃ THANH TOÁN */}
+      <button
+        id="btn-da-thanh-toan"
+        type="button"
+        onClick={handlePayment}
+        disabled={loading}
+        className="w-full mt-2 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-koho font-extrabold py-3.5 px-6 rounded-xl shadow-md shadow-emerald-600/25 hover:shadow-emerald-600/35 hover:-translate-y-0.5 active:scale-[0.99] transition-all text-sm cursor-pointer disabled:opacity-50"
+      >
+        {loading ? (
+          <>
+            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            <span>Đang gửi xác nhận thanh toán...</span>
+          </>
+        ) : (
+          <>
+            <Icon name="CheckCircleIcon" size={18} className="text-white" />
+            <span>
+              {receiptImage
+                ? 'Tôi đã chuyển khoản (Đã đính kèm ảnh biên lai)'
+                : 'Tôi đã chuyển khoản xong — Đã thanh toán'}
+            </span>
+          </>
+        )}
+      </button>
     </div>
   );
 
@@ -1097,21 +1265,21 @@ export default function PaymentClient() {
             </button>
           </div>
 
-          <div className="hidden sm:flex items-center gap-2">
-            <span className="font-black text-sm uppercase tracking-wide text-gray-950">
+          <div className="hidden sm:flex items-center gap-2 font-koho">
+            <span className="font-black text-sm uppercase tracking-wide text-gray-950 font-koho">
               {booking?.fromCity || 'TP. HCM'} ({booking?.from || 'SGN'})
             </span>
             <span className="text-red-600 font-bold">✈</span>
-            <span className="font-black text-sm uppercase tracking-wide text-gray-950">
+            <span className="font-black text-sm uppercase tracking-wide text-gray-950 font-koho">
               {booking?.toCity || 'Hà Nội'} ({booking?.to || 'HAN'})
             </span>
-            <span className="text-xs font-bold text-gray-700 bg-white/70 px-2 py-0.5 rounded-full ml-1 border border-amber-300/60">
+            <span className="text-xs font-bold text-gray-700 bg-white/70 px-2 py-0.5 rounded-full ml-1 border border-amber-300/60 font-koho">
               {booking?.flightNo ? `Chuyến bay ${booking.flightNo}` : 'VJ141'}
             </span>
           </div>
 
           {/* 4 Steps Indicator (with Step 4 active) */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 font-koho">
             <div
               className="flex items-center gap-1 text-gray-700 font-bold text-xs"
               title="1. Chọn chuyến bay"
@@ -1119,7 +1287,7 @@ export default function PaymentClient() {
               <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#38B000] text-white shadow-xs">
                 <Icon name="CheckIcon" size={12} />
               </div>
-              <span className="hidden md:inline text-3xs font-black text-gray-800">Chuyến bay</span>
+              <span className="hidden md:inline text-3xs font-black text-gray-800 font-koho">Chuyến bay</span>
             </div>
             <span className="text-gray-400 text-3xs">›</span>
             <div
@@ -1129,7 +1297,7 @@ export default function PaymentClient() {
               <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#38B000] text-white shadow-xs">
                 <Icon name="CheckIcon" size={12} />
               </div>
-              <span className="hidden md:inline text-3xs font-black text-gray-800">Hành khách</span>
+              <span className="hidden md:inline text-3xs font-black text-gray-800 font-koho">Hành khách</span>
             </div>
             <span className="text-gray-400 text-3xs">›</span>
             <div
@@ -1139,17 +1307,17 @@ export default function PaymentClient() {
               <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#38B000] text-white shadow-xs">
                 <Icon name="CheckIcon" size={12} />
               </div>
-              <span className="hidden md:inline text-3xs font-black text-gray-800">Dịch vụ</span>
+              <span className="hidden md:inline text-3xs font-black text-gray-800 font-koho">Dịch vụ</span>
             </div>
             <span className="text-gray-400 text-3xs">›</span>
             <div
               className="flex items-center gap-1 text-gray-950 font-black text-xs"
               title="4. Thanh toán"
             >
-              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[var(--vj-red)] text-white shadow-sm ring-2 ring-red-400/40 animate-pulse font-black text-xs leading-none">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[var(--vj-red)] text-white shadow-sm ring-2 ring-red-400/40 animate-pulse font-black text-xs leading-none font-koho">
                 4
               </div>
-              <span className="hidden md:inline text-3xs font-black text-[var(--vj-red)] uppercase tracking-wider">
+              <span className="hidden md:inline text-3xs font-black text-[var(--vj-red)] uppercase tracking-wider font-koho">
                 Thanh toán
               </span>
             </div>
@@ -1219,18 +1387,18 @@ export default function PaymentClient() {
               <div className="bg-white rounded-2xl border border-[var(--border)] p-4 sm:p-5 shadow-sm">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <h2 className="font-extrabold text-base text-gray-900">Phương thức thanh toán</h2>
+                    <h2 className="font-extrabold font-koho text-base text-gray-900">Phương thức thanh toán</h2>
                     <p className="text-xs text-gray-500 mt-0.5">Chọn một phương thức phù hợp để hoàn tất đặt chỗ</p>
                   </div>
                   <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                    <span className="hidden sm:inline">Cổng thanh toán:</span>
+                    <span className="hidden sm:inline font-koho">Cổng thanh toán:</span>
                     <GalaxyPayBadge />
                   </div>
                 </div>
 
                 {/* 1. Thẻ và tài khoản ngân hàng (Screenshot 3) */}
                 <div className="mb-5">
-                  <h3 className="text-xs sm:text-sm font-extrabold text-gray-900 mb-2.5">
+                  <h3 className="text-xs sm:text-sm font-extrabold font-koho text-gray-900 mb-2.5">
                     Thẻ và tài khoản ngân hàng
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -1913,7 +2081,7 @@ export default function PaymentClient() {
                     id="payment-submit-btn"
                     type="submit"
                     disabled={loading}
-                    className="w-full mt-6 flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-xl transition-all duration-200 shadow-vj-btn hover:shadow-vj-btn-hover hover:-translate-y-1 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:scale-100 text-base"
+                    className="w-full mt-6 flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white font-koho font-black py-4 rounded-xl transition-all duration-200 shadow-vj-btn hover:shadow-vj-btn-hover hover:-translate-y-1 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:scale-100 text-base cursor-pointer"
                   >
                     {loading ? (
                       <>
@@ -1932,12 +2100,21 @@ export default function PaymentClient() {
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                           />
                         </svg>
-                        Đang xử lý thanh toán...
+                        <span>Đang xử lý thanh toán...</span>
+                      </>
+                    ) : paymentMethod === 'bank' || paymentMethod === 'vietqr' ? (
+                      <>
+                        <Icon name="CheckCircleIcon" size={20} />
+                        <span>
+                          {receiptImage
+                            ? `✓ Xác nhận đã thanh toán (${total.toLocaleString('vi-VN')} VND)`
+                            : `Tôi đã chuyển khoản — Xác nhận (${total.toLocaleString('vi-VN')} VND)`}
+                        </span>
                       </>
                     ) : (
                       <>
                         <Icon name="LockClosedIcon" size={18} />
-                        Thanh toán {total.toLocaleString('vi-VN')}₫
+                        <span>Thanh toán {total.toLocaleString('vi-VN')}₫</span>
                       </>
                     )}
                   </button>

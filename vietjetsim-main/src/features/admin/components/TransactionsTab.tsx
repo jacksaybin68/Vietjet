@@ -17,6 +17,8 @@ interface Transaction {
   bookingStatus?: string;
   userEmail: string;
   userName: string;
+  receiptImage?: string;
+  transferNote?: string;
 }
 
 interface ToastAPI {
@@ -33,6 +35,7 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [viewingReceiptImage, setViewingReceiptImage] = useState<string | null>(null);
   const pageSize = 10;
 
   const fetchTransactions = useCallback(async () => {
@@ -369,11 +372,18 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                         <div className="font-black text-white text-base tracking-tighter tabular-nums">
                           {formatCurrency(t.amount)}
                         </div>
-                        <span
-                          className={`inline-block px-2 py-0.5 mt-1 rounded text-3xs font-black uppercase tracking-wider border ${methodBadge.color}`}
-                        >
-                          {methodBadge.label}
-                        </span>
+                        <div className="flex items-center gap-1.5 justify-end mt-1">
+                          <span
+                            className={`inline-block px-2 py-0.5 rounded text-3xs font-black uppercase tracking-wider border ${methodBadge.color}`}
+                          >
+                            {methodBadge.label}
+                          </span>
+                          {t.receiptImage && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-3xs font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                              📷 Có biên lai
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-5 text-center">
                         <span
@@ -562,6 +572,57 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                   </p>
                 </div>
               </div>
+
+              {/* Receipt Image for Admin Verification */}
+              <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Icon name="PhotoIcon" size={18} className="text-amber-400" />
+                    <h5 className="text-xs font-black text-white uppercase tracking-wider">
+                      Ảnh biên lai chuyển khoản (Đối chiếu Admin)
+                    </h5>
+                  </div>
+                  {selectedTransaction.receiptImage ? (
+                    <span className="px-2.5 py-0.5 rounded-full text-3xs font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      ✓ Đã đính kèm ảnh
+                    </span>
+                  ) : (
+                    <span className="px-2.5 py-0.5 rounded-full text-3xs font-black uppercase tracking-wider bg-slate-800 text-slate-400 border border-white/5">
+                      Chưa có ảnh
+                    </span>
+                  )}
+                </div>
+
+                {selectedTransaction.receiptImage ? (
+                  <div className="space-y-2">
+                    <div
+                      onClick={() => setViewingReceiptImage(selectedTransaction.receiptImage || null)}
+                      className="group relative cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-slate-950/60 hover:border-amber-400/50 transition-all flex items-center justify-center max-h-56 p-2"
+                      title="Bấm để phóng to ảnh biên lai"
+                    >
+                      <img
+                        src={selectedTransaction.receiptImage}
+                        alt="Ảnh biên lai đối chiếu"
+                        className="max-h-52 w-auto object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-slate-950/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-white text-xs font-bold backdrop-blur-xs">
+                        <Icon name="MagnifyingGlassPlusIcon" size={20} />
+                        <span>Bấm để phóng to đối chiếu</span>
+                      </div>
+                    </div>
+                    {selectedTransaction.transferNote && (
+                      <p className="text-xs text-slate-300 bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+                        <span className="text-slate-400">Nội dung CK:</span>{' '}
+                        <span className="text-amber-300 font-mono font-bold">{selectedTransaction.transferNote}</span>
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-4 bg-slate-950/30 rounded-xl border border-dashed border-white/10 text-xs text-slate-500">
+                    Khách hàng chưa đính kèm ảnh chụp màn hình biên lai.
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Modal Actions */}
@@ -596,6 +657,47 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                   Đóng
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox Modal for Full-Size Receipt Image Preview */}
+      {viewingReceiptImage && (
+        <div 
+          onClick={() => setViewingReceiptImage(null)}
+          className="fixed inset-0 bg-black/90 backdrop-blur-md z-[120] flex flex-col items-center justify-center p-4 animate-in fade-in duration-200"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-4xl max-h-[90vh] bg-slate-900 border border-white/20 rounded-2xl overflow-hidden flex flex-col shadow-2xl relative"
+          >
+            <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-slate-950">
+              <div className="flex items-center gap-2">
+                <Icon name="PhotoIcon" size={18} className="text-amber-400" />
+                <h4 className="text-sm font-black text-white">Ảnh biên lai thanh toán đối chiếu</h4>
+              </div>
+              <button
+                onClick={() => setViewingReceiptImage(null)}
+                className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all"
+              >
+                <Icon name="XMarkIcon" size={18} />
+              </button>
+            </div>
+            <div className="p-4 overflow-auto flex items-center justify-center bg-black/50">
+              <img
+                src={viewingReceiptImage}
+                alt="Ảnh biên lai phóng to"
+                className="max-h-[75vh] w-auto object-contain rounded-lg shadow-lg"
+              />
+            </div>
+            <div className="px-6 py-3 border-t border-white/10 bg-slate-950 text-right">
+              <button
+                onClick={() => setViewingReceiptImage(null)}
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-lg transition-all"
+              >
+                Đóng ảnh
+              </button>
             </div>
           </div>
         </div>

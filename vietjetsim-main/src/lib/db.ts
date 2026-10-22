@@ -127,6 +127,8 @@ export interface BookingRecord {
   total_price: number;
   discount_code_id?: string | null;
   discount_amount?: number;
+  receipt_image?: string | null;
+  transfer_note?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -158,6 +160,8 @@ export interface PaymentRecord {
   method: string;
   status: 'pending' | 'completed' | 'failed' | 'refunded';
   amount: number;
+  receipt_image?: string | null;
+  transfer_note?: string | null;
   created_at: string;
 }
 
@@ -172,6 +176,8 @@ export interface BookingDetail {
   total_price: number;
   discount_code_id?: string | null;
   discount_amount?: number;
+  receipt_image?: string | null;
+  transfer_note?: string | null;
   created_at: string;
   updated_at: string;
   flight: Pick<
@@ -1100,10 +1106,12 @@ export async function createPayment(payment: {
   booking_id: string;
   method: string;
   amount: number;
+  receipt_image?: string;
+  transfer_note?: string;
 }): Promise<PaymentRecord> {
   const results = await sql`
-    INSERT INTO payments (booking_id, method, status, amount)
-    VALUES (${payment.booking_id}, ${payment.method}, 'completed', ${payment.amount})
+    INSERT INTO payments (booking_id, method, status, amount, receipt_image, transfer_note)
+    VALUES (${payment.booking_id}, ${payment.method}, 'completed', ${payment.amount}, ${payment.receipt_image || null}, ${payment.transfer_note || null})
     RETURNING *
   `;
   return (results as PaymentRecord[])[0];
@@ -1121,6 +1129,8 @@ export async function createPaymentAndConfirmBooking(payment: {
   user_id?: string;
   discount_code_id?: string;
   discount_amount?: number;
+  receipt_image?: string;
+  transfer_note?: string;
 }): Promise<{ payment: PaymentRecord; booking: BookingRecord }> {
   if (payment.method === 'wallet') {
     if (!payment.user_id) {
@@ -1152,14 +1162,16 @@ export async function createPaymentAndConfirmBooking(payment: {
   try {
     await sql.transaction([
       sql`
-      INSERT INTO payments (booking_id, method, status, amount)
-      VALUES (${payment.booking_id}, ${payment.method}, 'completed', ${payment.amount})
+      INSERT INTO payments (booking_id, method, status, amount, receipt_image, transfer_note)
+      VALUES (${payment.booking_id}, ${payment.method}, 'completed', ${payment.amount}, ${payment.receipt_image || null}, ${payment.transfer_note || null})
     `,
       sql`
       UPDATE bookings
       SET status = 'confirmed',
           discount_code_id = ${payment.discount_code_id || null},
           discount_amount = ${payment.discount_amount || 0},
+          receipt_image = ${payment.receipt_image || null},
+          transfer_note = ${payment.transfer_note || null},
           updated_at = NOW()
       WHERE id = ${payment.booking_id}
     `,

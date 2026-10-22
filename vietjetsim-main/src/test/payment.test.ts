@@ -167,5 +167,48 @@ describe('Payment Database Module', () => {
       expect(result.payment).toEqual(mockPaymentRecord);
       expect(result.booking).toEqual(mockBookingRecord);
     });
+
+    it('should save receipt_image and transfer_note when provided for admin reconciliation', async () => {
+      const mockPaymentRecord = {
+        id: 'payment-2',
+        booking_id: 'booking-2',
+        amount: 2500000,
+        method: 'vietqr',
+        status: 'completed',
+        receipt_image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+        transfer_note: 'VJ VJ8899',
+      };
+      const mockBookingRecord = {
+        id: 'booking-2',
+        status: 'confirmed',
+        receipt_image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+        transfer_note: 'VJ VJ8899',
+      };
+
+      (sql as any).transaction.mockResolvedValueOnce([]);
+      (sql as any).mockImplementation((strings: any) => {
+        if (strings[0].includes('SELECT * FROM payments')) {
+          return Promise.resolve([mockPaymentRecord]);
+        }
+        if (strings[0].includes('SELECT * FROM bookings')) {
+          return Promise.resolve([mockBookingRecord]);
+        }
+        return Promise.resolve([]);
+      });
+
+      const result = await createPaymentAndConfirmBooking({
+        booking_id: 'booking-2',
+        method: 'vietqr',
+        amount: 2500000,
+        receipt_image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+        transfer_note: 'VJ VJ8899',
+      });
+
+      expect(sql.transaction).toHaveBeenCalledTimes(1);
+      expect(result.payment.receipt_image).toBe(mockPaymentRecord.receipt_image);
+      expect(result.payment.transfer_note).toBe('VJ VJ8899');
+      expect(result.booking.status).toBe('confirmed');
+    });
   });
 });
+

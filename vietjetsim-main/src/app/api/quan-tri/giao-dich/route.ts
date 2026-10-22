@@ -26,6 +26,8 @@ export async function GET(request: NextRequest) {
           COALESCE(p.method, 'vietqr') as method,
           COALESCE(p.status, CASE WHEN b.status = 'confirmed' THEN 'completed' ELSE 'pending' END) as status,
           b.status as "bookingStatus",
+          COALESCE(p.receipt_image, b.receipt_image) as "receiptImage",
+          COALESCE(p.transfer_note, b.transfer_note) as "transferNote",
           COALESCE(p.created_at, b.created_at) as "createdAt",
           COALESCE(u.email, (
             SELECT email FROM passengers WHERE booking_id = b.id AND email IS NOT NULL AND email != '' LIMIT 1
@@ -51,6 +53,8 @@ export async function GET(request: NextRequest) {
           COALESCE(p.method, 'vietqr') as method,
           COALESCE(p.status, CASE WHEN b.status = 'confirmed' THEN 'completed' ELSE 'pending' END) as status,
           b.status as "bookingStatus",
+          COALESCE(p.receipt_image, b.receipt_image) as "receiptImage",
+          COALESCE(p.transfer_note, b.transfer_note) as "transferNote",
           COALESCE(p.created_at, b.created_at) as "createdAt",
           COALESCE(u.email, (
             SELECT email FROM passengers WHERE booking_id = b.id AND email IS NOT NULL AND email != '' LIMIT 1

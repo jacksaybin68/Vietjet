@@ -155,13 +155,13 @@ export default function VietQrBox({
             </div>
           )}
           <div className="min-w-0">
-            <div className="text-xs font-bold text-[var(--foreground-subtle)] uppercase tracking-widest">
+            <div className="text-xs font-bold text-[var(--foreground-subtle)] uppercase tracking-widest font-koho">
               Ngân hàng thụ hưởng
             </div>
-            <div className="font-black text-[var(--foreground)] text-sm truncate">
+            <div className="font-black text-[var(--foreground)] text-sm truncate font-koho">
               {data?.bank.name ?? 'Đang tải...'}
             </div>
-            <div className="text-xs text-[var(--foreground-muted)] truncate">
+            <div className="text-xs text-[var(--foreground-muted)] truncate font-medium">
               {data?.bank.accountHolder} · {data?.bank.accountNumber}
             </div>
           </div>
@@ -187,14 +187,14 @@ export default function VietQrBox({
         {/* PNR + số tiền + addInfo (nội dung CK chứa mã đặt chỗ). */}
         <div className="w-full mt-4 space-y-2 text-sm">
           <div className="flex justify-between items-center">
-            <span className="text-[var(--foreground-muted)] text-xs">Mã đặt chỗ</span>
+            <span className="text-[var(--foreground-muted)] text-xs font-koho font-semibold">Mã đặt chỗ</span>
             <span className="font-mono font-black text-[var(--foreground)] tracking-wider">
               {data?.pnr ?? '—'}
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-[var(--foreground-muted)] text-xs">Số tiền</span>
-            <span className="font-black text-primary">
+            <span className="text-[var(--foreground-muted)] text-xs font-koho font-semibold">Số tiền</span>
+            <span className="font-black text-primary font-koho text-base">
               {(data?.amount ?? 0).toLocaleString('vi-VN')}₫
             </span>
           </div>
@@ -204,7 +204,7 @@ export default function VietQrBox({
             className="w-full flex justify-between items-center gap-2 bg-primary/5 border border-primary/10 rounded-xl px-3 py-2 hover:bg-primary/10 transition-colors"
           >
             <span className="text-left min-w-0">
-              <span className="block text-xs font-bold text-primary/60 uppercase tracking-widest">
+              <span className="block text-xs font-bold text-primary/70 uppercase tracking-widest font-koho">
                 Nội dung CK (PNR)
               </span>
               <span className="block font-mono font-bold text-primary text-sm truncate">
