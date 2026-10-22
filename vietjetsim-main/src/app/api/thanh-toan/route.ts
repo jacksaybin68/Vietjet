@@ -19,7 +19,8 @@ const ALLOWED_METHODS = new Set(['card', 'bank', 'vietqr', 'wallet', 'e_wallet',
 export async function POST(request: NextRequest) {
   // Validate CSRF token
   try {
-    const { user } = await verifyAuthRequest(request);
+    const { user, error, response } = await verifyAuthRequest(request);
+    if (error === 'CSRF validation failed') return response!;
 
     const body = await request.json();
     const {
