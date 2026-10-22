@@ -86,11 +86,13 @@ export async function POST(request: NextRequest) {
     // and one typed as 986349061 pass the uniqueness check as different
     // strings and end up as two accounts for the same person.
     const normalizedPhone = normalizePhone(phone);
+    const trimmedEmail = (email || '').trim();
 
     // A phone-registered account must prove it owns the number before it exists.
     // The OTP is consumed by this call, so the same code cannot create twice.
-    if (normalizedPhone) {
-      const otpOk = await verifyPhoneOtp(normalizedPhone, 'register', String(otp_code ?? ''));
+    if (normalizedPhone || (otp_code && trimmedEmail)) {
+      const otpTarget = normalizedPhone || trimmedEmail;
+      const otpOk = await verifyPhoneOtp(otpTarget, 'register', String(otp_code ?? ''));
       if (!otpOk) {
         return NextResponse.json(
           { error: 'Mã OTP không đúng hoặc đã hết hạn. Vui lòng lấy mã mới.' },
@@ -133,13 +135,15 @@ export async function POST(request: NextRequest) {
         const newUser = await sql`
           INSERT INTO user_profiles (
             email, password_hash, full_name, role, phone, dob,
-            salutation, last_name, first_name, skyjoy_member_id, referred_by_code
+            salutation, last_name, first_name, skyjoy_member_id, referred_by_code,
+            email_verified
           )
           VALUES (
             ${email || null}, ${password_hash}, ${resolvedFullName}, 'user',
             ${normalizedPhone}, ${dob || null},
             ${salutation || null}, ${lastName || null}, ${firstName || null},
-            ${skyjoyMemberId}, ${referralCode}
+            ${skyjoyMemberId}, ${referralCode},
+            true
           )
           RETURNING id, email, full_name, role, phone, dob, salutation, last_name,
                     first_name, skyjoy_member_id, created_at, updated_at

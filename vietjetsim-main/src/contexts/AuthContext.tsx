@@ -90,6 +90,8 @@ export interface SocialProviderConfig {
 export interface SendOtpInput {
   /** Số điện thoại cho `purpose: 'register'`. */
   phone?: string;
+  /** Email cho `purpose: 'register'`. */
+  email?: string;
   /** Email / số điện thoại / mã hội viên cho `purpose: 'login'`. */
   identifier?: string;
   purpose: 'register' | 'login';
@@ -101,6 +103,8 @@ export interface SendOtpResult {
   success: boolean;
   message?: string;
   phone?: string;
+  email?: string;
+  sentToEmail?: boolean;
   expiresInMinutes?: number;
   /** Chỉ có ở môi trường không phải production (chưa cấu hình SMS gateway). */
   devCode?: string;

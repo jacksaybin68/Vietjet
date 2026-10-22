@@ -372,3 +372,57 @@ export async function sendPasswordChangedEmail(opts: { to: string }): Promise<bo
   const { subject, html, text } = buildPasswordChangedHtml();
   return sendMail({ to: opts.to, subject, html, text });
 }
+
+/** Mail chứa mã xác thực OTP đăng ký hoặc đăng nhập. */
+export function buildOtpEmailHtml(opts: {
+  code: string;
+  expiresInMinutes?: number;
+  purpose?: string;
+}): { subject: string; html: string; text: string } {
+  const mins = opts.expiresInMinutes || 5;
+  const isRegister = opts.purpose !== 'login';
+  const actionText = isRegister
+    ? 'hoàn tất đăng ký tài khoản Vietjet SkyJoy'
+    : 'đăng nhập vào tài khoản';
+  const subject = isRegister
+    ? `Mã xác thực OTP đăng ký tài khoản: ${opts.code} — Vietjet Air`
+    : `Mã xác thực OTP đăng nhập: ${opts.code} — Vietjet Air`;
+
+  const inner = `<p style="margin:0 0 16px;">Kính chào Quý khách,</p>
+<p style="margin:0 0 16px;">Mã xác thực (OTP) của Quý khách để ${actionText} là:</p>
+<div style="margin:24px 0;text-align:center;">
+  <span style="display:inline-block;padding:14px 28px;background-color:#fff5f5;border:2px dashed ${BRAND_RED};border-radius:10px;font-family:'Courier New',Courier,monospace;font-size:32px;font-weight:900;letter-spacing:8px;color:${BRAND_RED};">
+    ${escapeHtml(opts.code)}
+  </span>
+</div>
+${noticeBox(`Mã xác thực này có hiệu lực trong vòng <strong>${mins} phút</strong>. Quý khách vui lòng không chia sẻ mã này cho bất kỳ ai để đảm bảo an toàn tài khoản.`)}`;
+
+  const text = [
+    subject,
+    ``,
+    `Kính chào Quý khách,`,
+    `Mã xác thực (OTP) của Quý khách là: ${opts.code}`,
+    `Mã này có hiệu lực trong vòng ${mins} phút. Tuyệt đối không chia sẻ mã với bất kỳ ai.`,
+  ].join('\n');
+
+  return {
+    subject,
+    html: shell(
+      inner,
+      `Mã OTP của Quý khách: ${opts.code}`,
+      isRegister ? 'Đăng ký SkyJoy' : 'Xác thực OTP'
+    ),
+    text,
+  };
+}
+
+/** Gửi email chứa mã xác thực OTP. */
+export async function sendOtpEmail(opts: {
+  to: string;
+  code: string;
+  expiresInMinutes?: number;
+  purpose?: string;
+}): Promise<boolean> {
+  const { subject, html, text } = buildOtpEmailHtml(opts);
+  return sendMail({ to: opts.to, subject, html, text });
+}
