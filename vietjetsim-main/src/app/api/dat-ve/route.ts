@@ -58,7 +58,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { user } = await verifyAuthRequest(request);
+    const { user, error, response } = await verifyAuthRequest(request);
+    if (error === 'CSRF validation failed') return response!;
 
     // `seats` are numbers the client picked from the map, `ancillaries` the
     // service ids it ticked, and `fareClass` the fare card it tapped. All three
