@@ -987,8 +987,14 @@ export default function PaymentClient() {
                 />
                 <div className="relative z-10">
                   <AnimatedCheckmark />
-                  <h2 className="text-2xl font-black text-white mb-1">Đặt vé thành công!</h2>
-                  <p className="text-white/80 text-sm">Vé điện tử đã được gửi đến email của bạn</p>
+                  <h2 className="text-2xl font-black font-koho text-white mb-1">
+                    {receiptImage ? 'Đã ghi nhận thanh toán & ảnh biên lai!' : 'Đặt vé thành công!'}
+                  </h2>
+                  <p className="text-white/90 text-sm font-medium">
+                    {receiptImage
+                      ? 'Ảnh biên lai đã được gửi đến Admin đối chiếu. Vé điện tử sẽ được kích hoạt ngay khi kiểm tra.'
+                      : 'Vé điện tử đã được gửi đến email của bạn'}
+                  </p>
                 </div>
               </div>
 
