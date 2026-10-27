@@ -22,9 +22,13 @@ import { verifyPhoneOtp } from '@/lib/skyjoy-otp';
 import { verifyCaptcha } from '@/lib/captcha';
 import { findAccountByIdentifier } from '@/lib/account-lookup';
 import { awardLoyaltyPoints } from '@/lib/db';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
+    const limited = rateLimit(request, { windowMs: 60_000, maxRequests: 20 });
+    if (limited) return limited;
+
     const body = await request.json();
     const {
       email,

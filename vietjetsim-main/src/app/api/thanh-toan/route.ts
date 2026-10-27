@@ -54,6 +54,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (receipt_image) {
+      if (typeof receipt_image !== 'string' || receipt_image.length > 5_000_000) {
+        return NextResponse.json(
+          {
+            error: 'Invalid receipt image',
+            message: 'Ảnh biên lai không hợp lệ hoặc vượt quá kích thước cho phép (tối đa 5MB)',
+          },
+          { status: 400 }
+        );
+      }
+      if (!receipt_image.startsWith('data:image/') && !receipt_image.startsWith('/images/')) {
+        return NextResponse.json(
+          { error: 'Invalid receipt image format', message: 'Định dạng ảnh biên lai không hợp lệ' },
+          { status: 400 }
+        );
+      }
+    }
+
     if (!ALLOWED_METHODS.has(method)) {
       return NextResponse.json(
         { error: 'Invalid method', message: 'Phương thức thanh toán không hợp lệ' },
