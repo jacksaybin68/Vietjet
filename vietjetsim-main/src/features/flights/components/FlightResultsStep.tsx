@@ -1236,16 +1236,35 @@ export default function FlightResultsStep({
                     return (
                       <div
                         key={fc.id}
-                        className={`relative flex min-w-0 flex-col overflow-hidden transition-colors ${
+                        className={`relative flex min-w-0 flex-col overflow-hidden transition-all duration-200 ${
                           isSoldOut
-                            ? 'bg-gray-100'
+                            ? 'bg-gray-100/80 text-gray-400'
                             : isSelected
-                              ? 'bg-yellow-50/80 ring-2 ring-inset ring-vjyellow'
-                              : 'bg-white hover:bg-yellow-50/40'
+                              ? 'bg-amber-50/90 ring-2 ring-inset ring-[#FFC700] shadow-xs'
+                              : 'bg-white hover:bg-amber-50/30'
                         }`}
                       >
                         {/* Hidden fare div for test suite expectation */}
                         <div className="sr-only">{fc.price.toLocaleString('vi-VN')}₫</div>
+
+                        {isSelected && !isSoldOut && (
+                          <div className="absolute top-1 inset-x-0 flex justify-center pointer-events-none z-10">
+                            <span className="inline-flex items-center gap-0.5 text-[7px] sm:text-[8px] font-black text-emerald-800 bg-emerald-100/90 px-1.5 py-0.5 rounded-full shadow-2xs leading-none uppercase tracking-wider">
+                              <svg
+                                className="w-2 h-2"
+                                viewBox="0 0 12 12"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <polyline points="2.5 6 5 8.5 9.5 3.5" />
+                              </svg>
+                              <span>Đã chọn</span>
+                            </span>
+                          </div>
+                        )}
 
                         {isSoldOut ? (
                           <div className="flex-1 flex flex-col items-center justify-center p-1 sm:p-2 text-center select-none min-h-[64px] sm:min-h-[78px]">
@@ -1299,17 +1318,36 @@ export default function FlightResultsStep({
                               });
                               onFlightSelect?.(flight.flightNo, fc.id, fc.price, fares, flight);
                             }}
-                            className="w-full h-full py-1.5 sm:py-2.5 px-0.5 sm:px-1 flex flex-col items-center justify-center text-center cursor-pointer transition-transform active:scale-[0.98] min-h-[64px] sm:min-h-[78px]"
+                            className={`group w-full h-full py-1.5 sm:py-2.5 px-0.5 sm:px-1 flex flex-col items-center justify-center text-center cursor-pointer transition-transform active:scale-[0.98] min-h-[64px] sm:min-h-[78px] ${
+                              isSelected ? 'pt-3.5 sm:pt-4' : ''
+                            }`}
                           >
-                            <span className="text-xs sm:text-base lg:text-xl font-black text-gray-950 font-koho leading-none tracking-tight">
-                              {Math.floor(fc.price / 1000).toLocaleString('vi-VN')}
+                            <span
+                              className={`text-xs sm:text-base lg:text-xl font-black font-koho leading-none tracking-tight transition-colors ${
+                                isSelected
+                                  ? 'text-primary'
+                                  : 'text-gray-950 group-hover:text-primary'
+                              }`}
+                            >
+                              {fc.price.toLocaleString('vi-VN')}
                             </span>
-                            <span className="text-[8px] sm:text-2xs font-bold text-gray-700 uppercase mt-0.5 leading-none">
-                              000 VND
+                            <span className="text-[8px] sm:text-2xs font-bold text-gray-500 uppercase tracking-widest mt-0.5 sm:mt-1 leading-none">
+                              VND
                             </span>
-                            <span className="text-[8px] sm:text-3xs text-gray-400 mt-0.5 leading-none">
-                              ∨
-                            </span>
+                            <svg
+                              className={`w-2.5 h-2.5 sm:w-3 sm:h-3 text-gray-400 mt-0.5 sm:mt-1 transition-transform duration-200 ${
+                                isSelected ? 'rotate-180 text-primary' : 'group-hover:text-gray-600'
+                              }`}
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              aria-hidden="true"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
                           </button>
                         )}
                       </div>
