@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { Flight } from '@/features/bookings/types/booking-flow';
 import { RiCloseLine, RiHeartFill, RiAddLine, RiCheckLine } from 'react-icons/ri';
-import { MdPets } from 'react-icons/md';
 
 interface PetServiceDrawerProps {
   isOpen: boolean;

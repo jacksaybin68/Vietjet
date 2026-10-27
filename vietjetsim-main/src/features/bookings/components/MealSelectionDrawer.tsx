@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Flight } from '@/features/bookings/types/booking-flow';
-import { RiCloseLine, RiRestaurantLine, RiAddLine, RiSubtractLine } from 'react-icons/ri';
+import { RiCloseLine, RiAddLine } from 'react-icons/ri';
 
 export interface SelectedMeal {
   id: string;

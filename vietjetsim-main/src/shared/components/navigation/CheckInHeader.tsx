@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { HiOutlineUserCircle } from 'react-icons/hi';
 import { RiHeadphoneLine } from 'react-icons/ri';
-import { HiOutlineMenu, HiOutlineX } from 'react-icons/hi';
+import { HiOutlineMenu } from 'react-icons/hi';
 import { useAuth } from '@/contexts/AuthContext';
 
 import VietjetMobileDrawer from './VietjetMobileDrawer';

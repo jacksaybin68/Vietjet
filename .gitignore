@@ -38,3 +38,6 @@ Vietjet/
 # `logs/` alone only matches the directory; the dev server's log sits beside it
 # and was a 2 MB untracked file one `git add .` away from being pushed.
 *.log
+
+# Headless browser binary on server
+chrome-bin/

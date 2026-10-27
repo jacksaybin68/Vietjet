@@ -9,7 +9,6 @@ import {
   HiOutlineLogout,
   HiOutlineMenu,
   HiOutlineUserCircle,
-  HiOutlineX,
 } from 'react-icons/hi';
 import { RiCalendarEventLine, RiHeadphoneLine } from 'react-icons/ri';
 import AnnouncementBar from './AnnouncementBar';

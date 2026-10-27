@@ -2,13 +2,7 @@
 
 import React, { useState } from 'react';
 import { Flight } from '@/features/bookings/types/booking-flow';
-import {
-  RiCloseLine,
-  RiLuggageCartLine,
-  RiAddLine,
-  RiCheckLine,
-  RiArrowDownSLine,
-} from 'react-icons/ri';
+import { RiCloseLine, RiAddLine, RiCheckLine, RiArrowDownSLine } from 'react-icons/ri';
 
 interface PassengerServicesDrawerProps {
   isOpen: boolean;
