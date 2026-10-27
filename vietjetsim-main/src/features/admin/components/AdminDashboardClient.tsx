@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Icon } from '@/shared/components/ui';
 import { BreadcrumbNav } from '@/shared/components/navigation';
@@ -30,6 +30,16 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 import { ErrorBoundary } from '@/shared/components/feedback';
+import {
+  getIncomingAdminCall,
+  acceptChatCall,
+  rejectChatCall,
+  endChatCall,
+  listConversations,
+  type ChatCall,
+} from '@/features/chat/services';
+import { playNewMessageChime } from '@/features/chat/services/callSounds';
+import VoiceCallModal from '@/features/chat/components/VoiceCallModal';
 
 export type AdminTab =
   | 'overview'
@@ -134,6 +144,116 @@ export default function AdminDashboardClient() {
   const toast = useToast();
   const { user, profile, roleLabel } = useAuth();
 
+  // Global incoming call monitoring for admin
+  const [globalCall, setGlobalCall] = useState<ChatCall | null>(null);
+  const [isGlobalCallModalOpen, setIsGlobalCallModalOpen] = useState(false);
+
+  // Real-time unread messages monitoring for Admin
+  const [chatUnreadCount, setChatUnreadCount] = useState(0);
+  const prevUnreadCountRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const fetchChatStatus = async () => {
+      try {
+        const data = await listConversations();
+        const convs = data.conversations || [];
+        const unread = convs.reduce((sum, c) => sum + (c.unread_by_admin || 0), 0);
+        setChatUnreadCount(unread);
+
+        // If new message arrived while admin is on another tab
+        if (
+          activeTab !== 'chat' &&
+          prevUnreadCountRef.current !== null &&
+          unread > prevUnreadCountRef.current
+        ) {
+          playNewMessageChime();
+          const targetConv = convs.find((c) => c.unread_by_admin > 0);
+          if (targetConv) {
+            toast.info(
+              `Tin nhắn mới từ ${targetConv.user_name || 'Khách hàng'}`,
+              targetConv.last_message || 'Khách hàng vừa gửi tin nhắn mới',
+              {
+                duration: 6000,
+                actions: [
+                  {
+                    label: 'Xem chat',
+                    onClick: () => setActiveTab('chat'),
+                  },
+                ],
+              }
+            );
+          }
+        }
+        prevUnreadCountRef.current = unread;
+      } catch {
+        // silent
+      }
+    };
+
+    fetchChatStatus();
+    const interval = setInterval(fetchChatStatus, 4000);
+    return () => clearInterval(interval);
+  }, [activeTab, toast]);
+
+  useEffect(() => {
+    if (activeTab === 'chat') return; // ChatTab handles calls itself when active
+
+    const checkIncoming = async () => {
+      try {
+        const res = await getIncomingAdminCall();
+        if (res.incomingCall) {
+          setGlobalCall(res.incomingCall);
+          setIsGlobalCallModalOpen(true);
+        } else {
+          if (globalCall?.status === 'ringing') {
+            setIsGlobalCallModalOpen(false);
+            setGlobalCall(null);
+          }
+        }
+      } catch {
+        // silent polling
+      }
+    };
+
+    const interval = setInterval(checkIncoming, 3500);
+    return () => clearInterval(interval);
+  }, [activeTab, globalCall?.status]);
+
+  const handleGlobalAccept = async () => {
+    if (!globalCall) return;
+    try {
+      const res = await acceptChatCall(globalCall.id);
+      if (res.call) {
+        setGlobalCall(res.call);
+        setActiveTab('chat');
+      }
+    } catch (err) {
+      console.error('Accept global call error:', err);
+    }
+  };
+
+  const handleGlobalReject = async () => {
+    if (!globalCall) return;
+    try {
+      await rejectChatCall(globalCall.id, globalCall.conversation_id);
+      setIsGlobalCallModalOpen(false);
+      setGlobalCall(null);
+    } catch (err) {
+      console.error('Reject global call error:', err);
+    }
+  };
+
+  const handleGlobalEnd = async (durationSec: number) => {
+    if (!globalCall) return;
+    try {
+      await endChatCall(globalCall.id, durationSec, globalCall.conversation_id);
+      setIsGlobalCallModalOpen(false);
+      setGlobalCall(null);
+    } catch (err) {
+      console.error('End global call error:', err);
+    }
+  };
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(timer);
@@ -212,14 +332,21 @@ export default function AdminDashboardClient() {
         <button
           key={item.id}
           onClick={() => handleTabSelect(item.id)}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl mb-1 text-sm font-semibold transition-all text-left"
+          className="w-full flex items-center justify-between px-4 py-3 rounded-xl mb-1 text-sm font-semibold transition-all text-left"
           style={{
             background: activeTab === item.id ? 'var(--primary)' : 'transparent',
             color: activeTab === item.id ? 'white' : '#94a3b8',
           }}
         >
-          <Icon name={item.icon} size={18} />
-          <span>{item.label}</span>
+          <div className="flex items-center gap-3">
+            <Icon name={item.icon} size={18} />
+            <span>{item.label}</span>
+          </div>
+          {item.id === 'chat' && chatUnreadCount > 0 && (
+            <span className="bg-red-600 text-white text-3xs font-black px-1.5 py-0.5 rounded-full">
+              {chatUnreadCount > 9 ? '9+' : chatUnreadCount}
+            </span>
+          )}
         </button>
       ));
     }
@@ -255,19 +382,34 @@ export default function AdminDashboardClient() {
               size={18}
               className={`flex-shrink-0 transition-transform duration-300 ${activeTab === item.id ? 'scale-110' : 'group-hover:scale-110'}`}
             />
-            {!sidebarCollapsed && <span className="relative z-10">{item.label}</span>}
+            {!sidebarCollapsed && (
+              <div className="flex items-center justify-between flex-1 min-w-0">
+                <span className="relative z-10 truncate">{item.label}</span>
+                {item.id === 'chat' && chatUnreadCount > 0 && (
+                  <span className="ml-auto bg-red-600 text-white text-3xs font-black px-1.5 py-0.5 rounded-full shadow-sm">
+                    {chatUnreadCount > 9 ? '9+' : chatUnreadCount}
+                  </span>
+                )}
+              </div>
+            )}
             {sidebarCollapsed && (
-              <span
-                className="absolute left-full ml-3 px-3 py-2 text-white text-xs font-bold rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 translate-x-[-10px] group-hover:translate-x-0 z-50"
-                style={{
-                  background: 'rgba(30, 41, 59, 0.95)',
-                  backdropFilter: 'blur(8px)',
-                  boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                }}
-              >
-                {item.label}
-              </span>
+              <>
+                {item.id === 'chat' && chatUnreadCount > 0 && (
+                  <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 ring-2 ring-slate-900" />
+                )}
+                <span
+                  className="absolute left-full ml-3 px-3 py-2 text-white text-xs font-bold rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 translate-x-[-10px] group-hover:translate-x-0 z-50"
+                  style={{
+                    background: 'rgba(30, 41, 59, 0.95)',
+                    backdropFilter: 'blur(8px)',
+                    boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                  }}
+                >
+                  {item.label}
+                  {item.id === 'chat' && chatUnreadCount > 0 ? ` (${chatUnreadCount})` : ''}
+                </span>
+              </>
             )}
           </button>
         ))}
@@ -661,6 +803,18 @@ export default function AdminDashboardClient() {
 
       {/* Keyboard shortcut for search */}
       <KeyboardShortcut handler={() => setSearchOpen(true)} keyCode="k" ctrl />
+
+      {/* Global Voice Call Modal when not in Chat tab */}
+      {activeTab !== 'chat' && (
+        <VoiceCallModal
+          isOpen={isGlobalCallModalOpen}
+          call={globalCall}
+          currentRole="admin"
+          onAccept={handleGlobalAccept}
+          onReject={handleGlobalReject}
+          onEnd={handleGlobalEnd}
+        />
+      )}
 
       <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
     </div>

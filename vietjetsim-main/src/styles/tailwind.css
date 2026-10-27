@@ -1503,8 +1503,6 @@ select option {
   vertical-align: middle;
 }
 
-
-
 /* Primary 50 background */
 .bg-primary-50 {
   background-color: #fff1f1;
@@ -2078,11 +2076,11 @@ select option {
   animation: chatMascotBob 3.2s ease-in-out infinite;
 }
 @keyframes chatMascotBob {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
     transform: translateY(-5px);
   }
 }
-

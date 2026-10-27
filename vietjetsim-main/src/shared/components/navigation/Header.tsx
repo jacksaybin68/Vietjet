@@ -740,14 +740,10 @@ export default function Header({
             </div>
           </div>
         )}
-
       </header>
 
       {/* Vietjet Mobile Drawer matching Screenshot 6 */}
-      <VietjetMobileDrawer
-        isOpen={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
-      />
+      <VietjetMobileDrawer isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
     </>
   );
 }

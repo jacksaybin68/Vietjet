@@ -370,7 +370,8 @@ export default function MyFlightsPage() {
                     {/* Giao diện Mobile khớp 100% Ảnh mẫu tham chiếu */}
                     <div className="xl:hidden w-full max-w-[540px] mx-auto pt-2 pb-16">
                       <p className="text-[13px] sm:text-sm font-bold text-gray-800 leading-snug mb-4">
-                        Bạn muốn xem chuyến bay đã đặt, đổi lịch trình bay hay mua thêm dịch vụ hành lý, chỗ ngồi, suất ăn..., vui lòng điền thông tin bên dưới:
+                        Bạn muốn xem chuyến bay đã đặt, đổi lịch trình bay hay mua thêm dịch vụ hành
+                        lý, chỗ ngồi, suất ăn..., vui lòng điền thông tin bên dưới:
                       </p>
 
                       <form onSubmit={handleSearchBooking} noValidate>
@@ -979,10 +980,7 @@ export default function MyFlightsPage() {
               d="M 0 200 C 50 195 140 160 185 85 L 175 110 C 130 170 45 197 0 200 Z"
               fill="#EAB308"
             />
-            <path
-              d="M 0 200 C 45 195 130 165 160 120 L 200 200 Z"
-              fill="#D71920"
-            />
+            <path d="M 0 200 C 45 195 130 165 160 120 L 200 200 Z" fill="#D71920" />
           </svg>
         </main>
       </div>

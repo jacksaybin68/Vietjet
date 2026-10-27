@@ -47,7 +47,15 @@ import {
   getChatPresence,
   updateChatPresence,
   markConversationRead,
+  initiateChatCall,
+  getActiveChatCall,
+  acceptChatCall,
+  rejectChatCall,
+  endChatCall,
+  type ChatCall,
 } from '../services';
+import { playNewMessageChime } from '../services/callSounds';
+import VoiceCallModal from './VoiceCallModal';
 
 export default function UserChat() {
   const { user } = useAuth();
@@ -60,6 +68,13 @@ export default function UserChat() {
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Voice call states
+  const [activeCall, setActiveCall] = useState<ChatCall | null>(null);
+  const [isCallModalOpen, setIsCallModalOpen] = useState(false);
+  const [isCallConnecting, setIsCallConnecting] = useState(false);
+  const [latestAdminMessagePreview, setLatestAdminMessagePreview] = useState<string | null>(null);
+  const callPollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [guestName, setGuestName] = useState('');
   const [guestPhone, setGuestPhone] = useState('');
@@ -259,7 +274,7 @@ export default function UserChat() {
     setIsOpen((open) => !open);
   };
 
-  /** Cancel both poll timers (unmount, logout, or auth failure). */
+  /** Cancel all poll timers (unmount, logout, or auth failure). */
   const stopPolling = useCallback(() => {
     if (pollingRef.current) {
       clearInterval(pollingRef.current);
@@ -268,6 +283,10 @@ export default function UserChat() {
     if (presencePollingRef.current) {
       clearInterval(presencePollingRef.current);
       presencePollingRef.current = null;
+    }
+    if (callPollingRef.current) {
+      clearInterval(callPollingRef.current);
+      callPollingRef.current = null;
     }
   }, []);
 
@@ -356,7 +375,7 @@ export default function UserChat() {
     }
   }, [activeUser]);
 
-  // Poll for new messages
+  // Poll for new messages & audio notifications
   const pollMessages = useCallback(async () => {
     if (!conversation?.id || !activeUser || authErrorRef.current) return;
     try {
@@ -364,13 +383,18 @@ export default function UserChat() {
       const newMessages = data.messages || [];
       if (newMessages.length !== lastMessageCountRef.current) {
         setMessages(newMessages);
+        const prevCount = lastMessageCountRef.current;
         lastMessageCountRef.current = newMessages.length;
         // Check for new admin messages
         const newAdminMsgs = newMessages.filter(
           (m: Message) => m.sender_role === 'admin' && !m.read_at
         );
-        if (newAdminMsgs.length > 0 && !isOpen) {
-          setUnreadCount((c) => c + newAdminMsgs.length);
+        if (newAdminMsgs.length > 0 && prevCount > 0) {
+          playNewMessageChime();
+          if (!isOpen) {
+            setUnreadCount((c) => c + newAdminMsgs.length);
+            setLatestAdminMessagePreview(newAdminMsgs[newAdminMsgs.length - 1].content);
+          }
         }
       }
       authErrorRef.current = false;
@@ -380,6 +404,92 @@ export default function UserChat() {
       console.error('Poll messages error:', err);
     }
   }, [conversation?.id, isOpen, activeUser, handleAuthError]);
+
+  // Poll for incoming voice call
+  const pollCall = useCallback(async () => {
+    if (!conversation?.id || !activeUser || authErrorRef.current) return;
+    try {
+      const data = await getActiveChatCall(conversation.id);
+      const currentCall = data.call;
+      if (currentCall) {
+        setActiveCall(currentCall);
+        if (currentCall.status === 'ringing') {
+          setIsCallModalOpen(true);
+        } else if (currentCall.status === 'ended' || currentCall.status === 'rejected') {
+          setTimeout(() => {
+            setIsCallModalOpen(false);
+            setActiveCall(null);
+          }, 1500);
+        }
+      } else {
+        if (activeCall && (activeCall.status === 'ringing' || activeCall.status === 'connected')) {
+          setActiveCall(null);
+          setIsCallModalOpen(false);
+        }
+      }
+    } catch (err) {
+      if (handleAuthError(err)) return;
+      console.error('Poll call error:', err);
+    }
+  }, [conversation?.id, activeUser, activeCall, handleAuthError]);
+
+  const handleStartCall = async () => {
+    if (!activeUser) return;
+    let conv = conversation;
+    if (!conv) {
+      conv = await createConversation();
+      if (!conv) return;
+    }
+    setIsCallConnecting(true);
+    try {
+      const res = await initiateChatCall(
+        conv.id,
+        user ? user.fullName || user.email : guestName || 'Khách hàng'
+      );
+      if (res.call) {
+        setActiveCall(res.call);
+        setIsCallModalOpen(true);
+      }
+    } catch (err) {
+      console.error('Failed to initiate call:', err);
+    } finally {
+      setIsCallConnecting(false);
+    }
+  };
+
+  const handleAcceptCall = async () => {
+    if (!activeCall) return;
+    try {
+      const res = await acceptChatCall(activeCall.id);
+      if (res.call) setActiveCall(res.call);
+    } catch (err) {
+      console.error('Accept call error:', err);
+    }
+  };
+
+  const handleRejectCall = async () => {
+    if (!activeCall) return;
+    try {
+      await rejectChatCall(activeCall.id, conversation?.id);
+      setIsCallModalOpen(false);
+      setActiveCall(null);
+      pollMessages();
+    } catch (err) {
+      console.error('Reject call error:', err);
+    }
+  };
+
+  const handleEndCall = async (durationSec: number) => {
+    if (!activeCall) return;
+    try {
+      await endChatCall(activeCall.id, durationSec, conversation?.id);
+      setIsCallModalOpen(false);
+      setActiveCall(null);
+      pollMessages();
+    } catch (err) {
+      console.error('End call error:', err);
+    }
+  };
 
   // Poll for presence
   const pollPresence = useCallback(async () => {
@@ -411,12 +521,14 @@ export default function UserChat() {
       authErrorRef.current = false;
       pollingRef.current = setInterval(pollMessages, 3000);
       presencePollingRef.current = setInterval(pollPresence, 3000);
+      callPollingRef.current = setInterval(pollCall, 2500);
       // Initial poll
       pollMessages();
       pollPresence();
+      pollCall();
     }
     return () => stopPolling();
-  }, [conversation?.id, activeUser, pollMessages, pollPresence, stopPolling]);
+  }, [conversation?.id, activeUser, pollMessages, pollPresence, pollCall, stopPolling]);
 
   // Session lost mid-session: drop the conversation so polling stays off until
   // the user signs in again (the effect above only re-arms on a new `activeUser`).
@@ -435,6 +547,7 @@ export default function UserChat() {
     if (isOpen) {
       markAdminMessagesRead(conversation.id);
       setUnreadCount(0);
+      setLatestAdminMessagePreview(null);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [isOpen, conversation?.id, markAdminMessagesRead]);
@@ -577,6 +690,43 @@ export default function UserChat() {
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
+
+        {/* Floating preview toast when chat is closed and new message arrived */}
+        {!isOpen && latestAdminMessagePreview && (
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsOpen(true);
+              setLatestAdminMessagePreview(null);
+            }}
+            className="absolute bottom-full right-0 mb-3 w-64 p-3 bg-white border border-red-200 rounded-2xl shadow-xl animate-fadeIn cursor-pointer hover:border-red-400 transition-all text-left z-50"
+          >
+            <div className="flex items-center justify-between pb-1 mb-1 border-b border-gray-100">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-3xs font-bold text-red-600 uppercase">
+                  Tin nhắn từ Tổng đài
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLatestAdminMessagePreview(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 text-xs px-1"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="text-xs text-gray-800 line-clamp-2 leading-relaxed">
+              {latestAdminMessagePreview}
+            </p>
+            <span className="text-3xs text-red-600 font-bold mt-1 inline-block hover:underline">
+              Bấm để trả lời →
+            </span>
+          </div>
+        )}
       </button>
 
       {/* Chat Window */}
@@ -602,14 +752,29 @@ export default function UserChat() {
               </div>
             </div>
 
-            <button
-              onClick={() => setIsOpen(false)}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors font-black text-lg touch-manipulation"
-              aria-label="Đóng chat hỗ trợ"
-              title="Thu nhỏ"
-            >
-              —
-            </button>
+            <div className="flex items-center gap-1.5">
+              {(!isGuest || isGuestChatStarted) && (
+                <button
+                  type="button"
+                  onClick={handleStartCall}
+                  disabled={isCallConnecting}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 text-xs font-bold transition-all shadow-2xs touch-manipulation active:scale-95"
+                  title="Gọi thoại trực tiếp với tổng đài viên Vietjet 24/7"
+                >
+                  <Icon name="PhoneIcon" size={13} className="text-green-600" />
+                  <span className="text-2xs sm:inline">Gọi điện</span>
+                </button>
+              )}
+
+              <button
+                onClick={() => setIsOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors font-black text-lg touch-manipulation"
+                aria-label="Đóng chat hỗ trợ"
+                title="Thu nhỏ"
+              >
+                —
+              </button>
+            </div>
           </div>
 
           {/* Messages & Chat Body */}
@@ -773,6 +938,30 @@ export default function UserChat() {
             ) : (
               messages.map((msg) => {
                 const isUser = msg.sender_role === 'user';
+
+                // Display call logs as special status pills
+                if (msg.content.startsWith('📞')) {
+                  const isMissed = msg.content.includes('nhỡ') || msg.content.includes('từ chối');
+                  return (
+                    <div key={msg.id} className="flex justify-center my-1.5">
+                      <div
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-2xs font-medium border shadow-2xs ${
+                          isMissed
+                            ? 'bg-red-50 border-red-200 text-red-700'
+                            : 'bg-green-50 border-green-200 text-green-800'
+                        }`}
+                      >
+                        <Icon
+                          name={isMissed ? 'PhoneXMarkIcon' : 'PhoneIcon'}
+                          size={13}
+                          className={isMissed ? 'text-red-500' : 'text-green-600'}
+                        />
+                        <span>{msg.content}</span>
+                      </div>
+                    </div>
+                  );
+                }
+
                 return (
                   <div key={msg.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
                     {!isUser && (
@@ -891,6 +1080,16 @@ export default function UserChat() {
           )}
         </div>
       )}
+
+      {/* Voice Call Modal */}
+      <VoiceCallModal
+        isOpen={isCallModalOpen}
+        call={activeCall}
+        currentRole="user"
+        onAccept={handleAcceptCall}
+        onReject={handleRejectCall}
+        onEnd={handleEndCall}
+      />
     </>
   );
 }

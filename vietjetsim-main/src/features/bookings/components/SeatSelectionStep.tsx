@@ -468,9 +468,7 @@ export default function SeatSelectionStep({
                           <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                             <div
                               className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center p-0.5 shrink-0 ${
-                                isOn
-                                  ? 'bg-amber-50 ring-1 ring-amber-400'
-                                  : 'bg-[var(--surface-2)]'
+                                isOn ? 'bg-amber-50 ring-1 ring-amber-400' : 'bg-[var(--surface-2)]'
                               }`}
                             >
                               {svc.id === 'baggage' ? (

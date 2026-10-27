@@ -150,9 +150,7 @@ export default function VietjetMobileDrawer({ isOpen, onClose }: VietjetMobileDr
                     <Icon className="h-5 w-5 shrink-0 text-white" />
                     <span className="truncate">{item.label}</span>
                   </div>
-                  {item.hasChevron && (
-                    <HiChevronRight className="h-4 w-4 text-white/70 shrink-0" />
-                  )}
+                  {item.hasChevron && <HiChevronRight className="h-4 w-4 text-white/70 shrink-0" />}
                 </Link>
               );
             })}
@@ -166,18 +164,9 @@ export default function VietjetMobileDrawer({ isOpen, onClose }: VietjetMobileDr
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path
-                d="M100 20 C 70 45, 30 75, 0 100 L 100 100 Z"
-                fill="#2E7D32"
-              />
-              <path
-                d="M100 40 C 75 58, 45 80, 20 100 L 100 100 Z"
-                fill="#FBB612"
-              />
-              <path
-                d="M100 60 C 85 72, 65 88, 42 100 L 100 100 Z"
-                fill="#ED1C24"
-              />
+              <path d="M100 20 C 70 45, 30 75, 0 100 L 100 100 Z" fill="#2E7D32" />
+              <path d="M100 40 C 75 58, 45 80, 20 100 L 100 100 Z" fill="#FBB612" />
+              <path d="M100 60 C 85 72, 65 88, 42 100 L 100 100 Z" fill="#ED1C24" />
             </svg>
           </div>
         </div>

@@ -1201,7 +1201,9 @@ export default function FlightResultsStep({
                     <span className="text-xs sm:text-base lg:text-2xl font-black text-gray-950 font-koho leading-none">
                       {flight.departTime}
                     </span>
-                    <span className="text-[8px] sm:text-2xs font-bold text-gray-700 leading-none">Đến</span>
+                    <span className="text-[8px] sm:text-2xs font-bold text-gray-700 leading-none">
+                      Đến
+                    </span>
                     <span className="text-xs sm:text-base lg:text-2xl font-black text-gray-950 font-koho leading-none">
                       {flight.arriveTime}
                     </span>
@@ -1254,7 +1256,9 @@ export default function FlightResultsStep({
                                 className="rotate-45 opacity-60"
                               />
                             </div>
-                            <span className="text-[9px] sm:text-xs font-bold text-gray-500 leading-tight">Hết chỗ</span>
+                            <span className="text-[9px] sm:text-xs font-bold text-gray-500 leading-tight">
+                              Hết chỗ
+                            </span>
                             <button
                               data-testid="select-fare"
                               type="button"
@@ -1303,7 +1307,9 @@ export default function FlightResultsStep({
                             <span className="text-[8px] sm:text-2xs font-bold text-gray-700 uppercase mt-0.5 leading-none">
                               000 VND
                             </span>
-                            <span className="text-[8px] sm:text-3xs text-gray-400 mt-0.5 leading-none">∨</span>
+                            <span className="text-[8px] sm:text-3xs text-gray-400 mt-0.5 leading-none">
+                              ∨
+                            </span>
                           </button>
                         )}
                       </div>

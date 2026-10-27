@@ -291,6 +291,21 @@ export interface ChatPresenceRecord {
   updated_at: string;
 }
 
+export interface ChatCallRecord {
+  id: string;
+  conversation_id: string;
+  caller_id: string;
+  caller_role: 'user' | 'admin';
+  caller_name: string | null;
+  status: 'ringing' | 'connected' | 'ended' | 'rejected' | 'missed';
+  started_at: string;
+  connected_at: string | null;
+  ended_at: string | null;
+  duration_seconds: number;
+  created_at: string;
+  updated_at: string;
+}
+
 // ─── User Queries ───────────────────────────────────────────────────────────
 
 export async function findUserByEmail(email: string): Promise<UserRecord | null> {
@@ -1769,6 +1784,72 @@ export async function updateChatPresence(
     RETURNING *
   `;
   return (results as ChatPresenceRecord[])[0];
+}
+
+// ─── Voice Calls & Signaling ────────────────────────────────────────────────
+
+export async function createChatCall(call: {
+  conversation_id: string;
+  caller_id: string;
+  caller_role: 'user' | 'admin';
+  caller_name?: string;
+}): Promise<ChatCallRecord> {
+  const callerName =
+    call.caller_name || (call.caller_role === 'admin' ? 'Tổng đài Vietjet Air' : 'Khách hàng');
+  const results = await sql`
+    INSERT INTO chat_calls (conversation_id, caller_id, caller_role, caller_name, status)
+    VALUES (${call.conversation_id}, ${call.caller_id}, ${call.caller_role}, ${callerName}, 'ringing')
+    RETURNING *
+  `;
+  return (results as ChatCallRecord[])[0];
+}
+
+export async function getActiveChatCall(conversationId: string): Promise<ChatCallRecord | null> {
+  const results = await sql`
+    SELECT * FROM chat_calls
+    WHERE conversation_id = ${conversationId} AND status IN ('ringing', 'connected')
+    ORDER BY created_at DESC
+    LIMIT 1
+  `;
+  return (results as ChatCallRecord[])[0] || null;
+}
+
+export async function getLatestRingingCallForAdmin(): Promise<ChatCallRecord | null> {
+  const results = await sql`
+    SELECT * FROM chat_calls
+    WHERE status = 'ringing' AND caller_role = 'user'
+    ORDER BY created_at DESC
+    LIMIT 1
+  `;
+  return (results as ChatCallRecord[])[0] || null;
+}
+
+export async function updateChatCallStatus(
+  callId: string,
+  status: 'connected' | 'ended' | 'rejected' | 'missed',
+  durationSeconds?: number
+): Promise<ChatCallRecord | null> {
+  if (status === 'connected') {
+    const results = await sql`
+      UPDATE chat_calls
+      SET status = ${status}, connected_at = NOW(), updated_at = NOW()
+      WHERE id = ${callId}
+      RETURNING *
+    `;
+    return (results as ChatCallRecord[])[0] || null;
+  }
+
+  const duration = durationSeconds ?? 0;
+  const results = await sql`
+    UPDATE chat_calls
+    SET status = ${status},
+        ended_at = NOW(),
+        duration_seconds = ${duration},
+        updated_at = NOW()
+    WHERE id = ${callId}
+    RETURNING *
+  `;
+  return (results as ChatCallRecord[])[0] || null;
 }
 
 // ─── Admin Analytics Queries ────────────────────────────────────────────────

@@ -2,7 +2,13 @@
 
 import React, { useState } from 'react';
 import { Flight } from '@/features/bookings/types/booking-flow';
-import { RiCloseLine, RiLuggageCartLine, RiAddLine, RiCheckLine, RiArrowDownSLine } from 'react-icons/ri';
+import {
+  RiCloseLine,
+  RiLuggageCartLine,
+  RiAddLine,
+  RiCheckLine,
+  RiArrowDownSLine,
+} from 'react-icons/ri';
 
 interface PassengerServicesDrawerProps {
   isOpen: boolean;
@@ -53,7 +59,11 @@ export default function PassengerServicesDrawer({
           </div>
           {/* Vietjet green-yellow swoosh on top right */}
           <div className="pointer-events-none absolute top-0 right-0 h-14 w-24 overflow-hidden">
-            <svg className="absolute -top-4 -right-4 h-20 w-28 opacity-95" viewBox="0 0 100 60" fill="none">
+            <svg
+              className="absolute -top-4 -right-4 h-20 w-28 opacity-95"
+              viewBox="0 0 100 60"
+              fill="none"
+            >
               <path d="M100 0 L 20 0 C 40 30, 70 50, 100 60 Z" fill="#2E7D32" />
               <path d="M100 0 L 45 0 C 60 25, 80 45, 100 50 Z" fill="#FBB612" />
             </svg>
@@ -114,7 +124,9 @@ export default function PassengerServicesDrawer({
               <h3 className="text-sm sm:text-base font-black italic text-red-700 leading-tight mt-1.5">
                 CON TỰ TIN BAY MỘT MÌNH
               </h3>
-              <p className="text-3xs text-gray-600 mt-1">Dịch vụ chăm sóc & đồng hành cùng trẻ em chu đáo</p>
+              <p className="text-3xs text-gray-600 mt-1">
+                Dịch vụ chăm sóc & đồng hành cùng trẻ em chu đáo
+              </p>
             </div>
             <div className="absolute right-3 top-1/2 -translate-y-1/2 text-5xl opacity-90 select-none">
               ✈️👦
@@ -175,9 +187,7 @@ export default function PassengerServicesDrawer({
               >
                 <div
                   className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
-                    !isSelected
-                      ? 'border-green-600 bg-white'
-                      : 'border-gray-300 bg-white'
+                    !isSelected ? 'border-green-600 bg-white' : 'border-gray-300 bg-white'
                   }`}
                 >
                   {!isSelected && <div className="w-2 h-2 rounded-full bg-green-600" />}

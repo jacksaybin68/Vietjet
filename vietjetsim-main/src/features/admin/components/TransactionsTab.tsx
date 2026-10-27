@@ -596,7 +596,9 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                 {selectedTransaction.receiptImage ? (
                   <div className="space-y-2">
                     <div
-                      onClick={() => setViewingReceiptImage(selectedTransaction.receiptImage || null)}
+                      onClick={() =>
+                        setViewingReceiptImage(selectedTransaction.receiptImage || null)
+                      }
                       className="group relative cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-slate-950/60 hover:border-amber-400/50 transition-all flex items-center justify-center max-h-56 p-2"
                       title="Bấm để phóng to ảnh biên lai"
                     >
@@ -613,7 +615,9 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                     {selectedTransaction.transferNote && (
                       <p className="text-xs text-slate-300 bg-white/5 px-3 py-2 rounded-lg border border-white/5">
                         <span className="text-slate-400">Nội dung CK:</span>{' '}
-                        <span className="text-amber-300 font-mono font-bold">{selectedTransaction.transferNote}</span>
+                        <span className="text-amber-300 font-mono font-bold">
+                          {selectedTransaction.transferNote}
+                        </span>
                       </p>
                     )}
                   </div>
@@ -664,11 +668,11 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
 
       {/* Lightbox Modal for Full-Size Receipt Image Preview */}
       {viewingReceiptImage && (
-        <div 
+        <div
           onClick={() => setViewingReceiptImage(null)}
           className="fixed inset-0 bg-black/90 backdrop-blur-md z-[120] flex flex-col items-center justify-center p-4 animate-in fade-in duration-200"
         >
-          <div 
+          <div
             onClick={(e) => e.stopPropagation()}
             className="max-w-4xl max-h-[90vh] bg-slate-900 border border-white/20 rounded-2xl overflow-hidden flex flex-col shadow-2xl relative"
           >
