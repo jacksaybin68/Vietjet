@@ -62,8 +62,6 @@ export default function FlightCard({
   onSelect,
   onOpenBenefits,
 }: FlightCardProps) {
-  const [depTime, depMin] = flight.depart.split(':');
-  const [arrTime, arrMin] = flight.arrive.split(':');
   const isSelected = Boolean(selectedClass);
 
   return (
@@ -117,11 +115,24 @@ export default function FlightCard({
                     </div>
                   ) : (
                     <>
-                      <span className="text-xs sm:text-sm font-black text-gray-900 leading-tight">
-                        {(priceVal / 1000).toLocaleString('vi-VN')}
+                      <span className="text-xs sm:text-sm font-black text-gray-900 leading-tight font-koho group-hover:text-primary transition-colors">
+                        {priceVal.toLocaleString('vi-VN')}
                       </span>
-                      <span className="text-4xs text-gray-500 font-medium">000 VND</span>
-                      <span className="text-4xs text-gray-400">˅</span>
+                      <span className="text-4xs text-gray-500 font-bold uppercase tracking-wider mt-0.5">
+                        VND
+                      </span>
+                      <svg
+                        className="w-2.5 h-2.5 text-gray-400 mt-0.5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
                     </>
                   )}
                 </div>
