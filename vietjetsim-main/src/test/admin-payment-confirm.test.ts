@@ -36,7 +36,7 @@ vi.mock('@/lib/db', () => ({
 vi.mock('@/lib/neon', () => {
   const sqlMock = vi
     .fn()
-    .mockImplementation(async (strings: TemplateStringsArray, ...values: any[]) => {
+    .mockImplementation(async (strings: TemplateStringsArray, ..._values: any[]) => {
       const query = strings.join(' ');
 
       if (query.includes('FROM bookings b')) {

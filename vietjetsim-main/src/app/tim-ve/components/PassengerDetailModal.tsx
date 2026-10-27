@@ -312,6 +312,14 @@ export default function PassengerDetailModal({
                         )}
                       </div>
                     </div>
+                    {openInService && (
+                      <div className="p-2.5 pt-0 text-2xs text-gray-600 border-t border-gray-100">
+                        <div className="flex justify-between">
+                          <span>Hành lý ({inboundBaggage}):</span>
+                          <span>{inboundBaggageFee.toLocaleString('vi-VN')} VND</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
