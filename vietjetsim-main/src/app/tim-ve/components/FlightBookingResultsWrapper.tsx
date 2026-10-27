@@ -418,9 +418,7 @@ export default function FlightBookingResultsWrapper({
           <div className="flex items-center gap-1.5 sm:gap-2">
             <div
               className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shadow-xs text-white font-bold transition-all ${
-                bookingStep === 1
-                  ? 'bg-[#54B848]'
-                  : 'bg-[#FFA500]'
+                bookingStep === 1 ? 'bg-[#54B848]' : 'bg-[#FFA500]'
               }`}
               title="Chọn chuyến bay"
             >
@@ -428,9 +426,7 @@ export default function FlightBookingResultsWrapper({
             </div>
             <div
               className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shadow-xs text-white font-bold transition-all ${
-                bookingStep === 2
-                  ? 'bg-[#54B848]'
-                  : 'bg-[#FFA500]'
+                bookingStep === 2 ? 'bg-[#54B848]' : 'bg-[#FFA500]'
               }`}
               title="Thông tin hành khách"
             >
@@ -438,9 +434,7 @@ export default function FlightBookingResultsWrapper({
             </div>
             <div
               className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shadow-xs text-white font-bold transition-all ${
-                bookingStep === 3
-                  ? 'bg-[#54B848]'
-                  : 'bg-[#FFA500]'
+                bookingStep === 3 ? 'bg-[#54B848]' : 'bg-[#FFA500]'
               }`}
               title="Dịch vụ bổ sung"
             >
@@ -448,9 +442,7 @@ export default function FlightBookingResultsWrapper({
             </div>
             <div
               className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shadow-xs text-white font-bold transition-all ${
-                bookingStep === 4
-                  ? 'bg-[#54B848]'
-                  : 'bg-[#FFA500]'
+                bookingStep === 4 ? 'bg-[#54B848]' : 'bg-[#FFA500]'
               }`}
               title="Thanh toán"
             >

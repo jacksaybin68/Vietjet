@@ -812,7 +812,8 @@ export default function PaymentClient() {
       </div>
 
       <p className="text-xs text-[var(--foreground-muted)] leading-relaxed">
-        Sau khi chuyển khoản thành công từ ứng dụng ngân hàng của bạn, quý khách vui lòng đính kèm ảnh chụp màn hình biên lai hoặc xác nhận bên dưới để Admin đối chiếu xuất vé ngay lập tức.
+        Sau khi chuyển khoản thành công từ ứng dụng ngân hàng của bạn, quý khách vui lòng đính kèm
+        ảnh chụp màn hình biên lai hoặc xác nhận bên dưới để Admin đối chiếu xuất vé ngay lập tức.
       </p>
 
       {/* Vị trí tải ảnh lên để admin đối chiếu */}
@@ -850,7 +851,8 @@ export default function PaymentClient() {
             </div>
             <div>
               <p className="text-xs font-bold font-koho text-gray-900">
-                Kéo thả ảnh hoặc <span className="text-primary underline">bấm để chọn ảnh</span> biên lai
+                Kéo thả ảnh hoặc <span className="text-primary underline">bấm để chọn ảnh</span>{' '}
+                biên lai
               </p>
               <p className="text-3xs text-gray-500 mt-0.5 font-medium">
                 Hỗ trợ định dạng PNG, JPG, JPEG, WEBP (Tối đa 8MB)
@@ -937,8 +939,19 @@ export default function PaymentClient() {
         {loading ? (
           <>
             <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
             </svg>
             <span>Đang gửi xác nhận thanh toán...</span>
           </>
@@ -1293,7 +1306,9 @@ export default function PaymentClient() {
               <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#38B000] text-white shadow-xs">
                 <Icon name="CheckIcon" size={12} />
               </div>
-              <span className="hidden md:inline text-3xs font-black text-gray-800 font-koho">Chuyến bay</span>
+              <span className="hidden md:inline text-3xs font-black text-gray-800 font-koho">
+                Chuyến bay
+              </span>
             </div>
             <span className="text-gray-400 text-3xs">›</span>
             <div
@@ -1303,7 +1318,9 @@ export default function PaymentClient() {
               <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#38B000] text-white shadow-xs">
                 <Icon name="CheckIcon" size={12} />
               </div>
-              <span className="hidden md:inline text-3xs font-black text-gray-800 font-koho">Hành khách</span>
+              <span className="hidden md:inline text-3xs font-black text-gray-800 font-koho">
+                Hành khách
+              </span>
             </div>
             <span className="text-gray-400 text-3xs">›</span>
             <div
@@ -1313,7 +1330,9 @@ export default function PaymentClient() {
               <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#38B000] text-white shadow-xs">
                 <Icon name="CheckIcon" size={12} />
               </div>
-              <span className="hidden md:inline text-3xs font-black text-gray-800 font-koho">Dịch vụ</span>
+              <span className="hidden md:inline text-3xs font-black text-gray-800 font-koho">
+                Dịch vụ
+              </span>
             </div>
             <span className="text-gray-400 text-3xs">›</span>
             <div
@@ -1393,8 +1412,12 @@ export default function PaymentClient() {
               <div className="bg-white rounded-2xl border border-[var(--border)] p-4 sm:p-5 shadow-sm">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <h2 className="font-extrabold font-koho text-base text-gray-900">Phương thức thanh toán</h2>
-                    <p className="text-xs text-gray-500 mt-0.5">Chọn một phương thức phù hợp để hoàn tất đặt chỗ</p>
+                    <h2 className="font-extrabold font-koho text-base text-gray-900">
+                      Phương thức thanh toán
+                    </h2>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Chọn một phương thức phù hợp để hoàn tất đặt chỗ
+                    </p>
                   </div>
                   <div className="flex items-center gap-1.5 text-xs text-gray-500">
                     <span className="hidden sm:inline font-koho">Cổng thanh toán:</span>

@@ -95,6 +95,7 @@ function createMockSql() {
   const chatConversations: MockResult[] = [];
   const chatMessages: MockResult[] = [];
   const chatPresence: MockResult[] = [];
+  const chatCalls: MockResult[] = [];
   const userProfiles: MockResult[] = [];
 
   const nowIso = () => new Date().toISOString();
@@ -262,6 +263,85 @@ function createMockSql() {
         );
       const start = typeof offset === 'number' ? offset : 0;
       return rows.slice(start, typeof limit === 'number' ? start + limit : undefined);
+    }
+
+    if (q.includes('insert into chat_calls')) {
+      const [convId, callerId, callerRole, callerName, status] = values as [
+        string,
+        string,
+        'user' | 'admin',
+        string,
+        string,
+      ];
+      const row: MockResult = {
+        id: nextChatId('call'),
+        conversation_id: convId,
+        caller_id: callerId,
+        caller_role: callerRole,
+        caller_name: callerName || (callerRole === 'admin' ? 'Tổng đài Vietjet Air' : 'Khách hàng'),
+        status: status || 'ringing',
+        started_at: nowIso(),
+        connected_at: null,
+        ended_at: null,
+        duration_seconds: 0,
+        created_at: nowIso(),
+        updated_at: nowIso(),
+      };
+      chatCalls.push(row);
+      return [row];
+    }
+
+    if (q.includes('from chat_calls')) {
+      if (q.includes('where id = ?')) {
+        const found = chatCalls.find((c) => c.id === values[0]);
+        return found ? [found] : [];
+      }
+      if (q.includes("status = 'ringing'")) {
+        return chatCalls
+          .filter((c) => c.status === 'ringing')
+          .sort(
+            (a, b) =>
+              new Date(b.created_at as string).getTime() -
+              new Date(a.created_at as string).getTime()
+          )
+          .slice(0, 1);
+      }
+      if (q.includes('conversation_id = ?')) {
+        let list = chatCalls.filter((c) => c.conversation_id === values[0]);
+        if (q.includes("status in ('ringing', 'connected')")) {
+          list = list.filter((c) => c.status === 'ringing' || c.status === 'connected');
+        }
+        return list
+          .sort(
+            (a, b) =>
+              new Date(b.created_at as string).getTime() -
+              new Date(a.created_at as string).getTime()
+          )
+          .slice(0, 1);
+      }
+      return chatCalls;
+    }
+
+    if (q.includes('update chat_calls set')) {
+      // Find row by call id (usually values[values.length - 1] or first arg)
+      const callId = values[values.length - 1];
+      const row = chatCalls.find((c) => c.id === callId);
+      if (!row) return [];
+      if (q.includes('status = ?')) {
+        row.status = values[0] as string;
+      }
+      if (q.includes('connected_at = now()')) {
+        row.connected_at = nowIso();
+      }
+      if (q.includes('ended_at = now()')) {
+        row.ended_at = nowIso();
+      }
+      if (q.includes('duration_seconds = ?')) {
+        const duration = values.find((v) => typeof v === 'number');
+        if (typeof duration === 'number') row.duration_seconds = duration;
+      }
+      row.updated_at = nowIso();
+      return [row];
     }
 
     if (q.includes('insert into chat_presence')) {

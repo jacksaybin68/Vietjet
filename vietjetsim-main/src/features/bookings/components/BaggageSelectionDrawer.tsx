@@ -130,7 +130,11 @@ export default function BaggageSelectionDrawer({
           </div>
           {/* Vietjet green-yellow swoosh on top right */}
           <div className="pointer-events-none absolute top-0 right-0 h-14 w-24 overflow-hidden">
-            <svg className="absolute -top-4 -right-4 h-20 w-28 opacity-95" viewBox="0 0 100 60" fill="none">
+            <svg
+              className="absolute -top-4 -right-4 h-20 w-28 opacity-95"
+              viewBox="0 0 100 60"
+              fill="none"
+            >
               <path d="M100 0 L 20 0 C 40 30, 70 50, 100 60 Z" fill="#2E7D32" />
               <path d="M100 0 L 45 0 C 60 25, 80 45, 100 50 Z" fill="#FBB612" />
             </svg>

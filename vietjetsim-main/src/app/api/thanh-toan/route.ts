@@ -214,7 +214,8 @@ export async function POST(request: NextRequest) {
       discount_code_id,
       discount_amount: discount_amount || 0,
       receipt_image,
-      transfer_note: transfer_note || (booking.booking_code ? `VJ ${booking.booking_code}` : undefined),
+      transfer_note:
+        transfer_note || (booking.booking_code ? `VJ ${booking.booking_code}` : undefined),
     });
 
     // Chỉ gửi email xác nhận vé ngay nếu thanh toán đã hoàn tất trực tiếp (thẻ, ví).

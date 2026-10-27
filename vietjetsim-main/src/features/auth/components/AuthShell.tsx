@@ -22,7 +22,7 @@ export default function AuthShell({
     <div className="min-h-screen bg-slate-50 bg-[url('/images/hero/hero-window-clouds.jpg')] bg-cover bg-center bg-fixed font-body text-[var(--foreground)] relative flex flex-col justify-between overflow-x-hidden">
       <Header
         variant="compact"
-        mobileTitle={mode === 'register' ? 'ĐĂNG KÝ' : (title || 'ĐĂNG NHẬP')}
+        mobileTitle={mode === 'register' ? 'ĐĂNG KÝ' : title || 'ĐĂNG NHẬP'}
       />
       <main
         id="main-content"
@@ -46,7 +46,9 @@ export default function AuthShell({
                   <h2 className="font-black text-xl sm:text-2xl uppercase tracking-tight text-gray-900 font-koho">
                     {title}
                   </h2>
-                  {subtitle && <p className="mt-1 text-xs sm:text-sm text-gray-500 font-medium">{subtitle}</p>}
+                  {subtitle && (
+                    <p className="mt-1 text-xs sm:text-sm text-gray-500 font-medium">{subtitle}</p>
+                  )}
                 </div>
               )}
               {children}

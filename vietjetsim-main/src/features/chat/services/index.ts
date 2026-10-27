@@ -75,6 +75,72 @@ export function markConversationRead(conversationId: string): Promise<{ success:
   });
 }
 
+export interface ChatCall {
+  id: string;
+  conversation_id: string;
+  caller_id: string;
+  caller_role: 'user' | 'admin';
+  caller_name: string | null;
+  status: 'ringing' | 'connected' | 'ended' | 'rejected' | 'missed';
+  started_at: string;
+  connected_at: string | null;
+  ended_at: string | null;
+  duration_seconds: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export function initiateChatCall(
+  conversationId: string,
+  callerName?: string
+): Promise<{ success: boolean; call: ChatCall }> {
+  return apiRequest(CHAT.CALLS, {
+    method: 'POST',
+    body: { action: 'initiate', conversation_id: conversationId, caller_name: callerName },
+  });
+}
+
+export function getActiveChatCall(conversationId: string): Promise<{ call: ChatCall | null }> {
+  return apiRequest(`${CHAT.CALLS}?conversationId=${encodeURIComponent(conversationId)}`);
+}
+
+export function getIncomingAdminCall(): Promise<{ incomingCall: ChatCall | null }> {
+  return apiRequest(`${CHAT.CALLS}?checkIncoming=true`);
+}
+
+export function acceptChatCall(callId: string): Promise<{ success: boolean; call: ChatCall }> {
+  return apiRequest(CHAT.CALLS, {
+    method: 'POST',
+    body: { action: 'accept', call_id: callId },
+  });
+}
+
+export function rejectChatCall(
+  callId: string,
+  conversationId?: string
+): Promise<{ success: boolean; call: ChatCall }> {
+  return apiRequest(CHAT.CALLS, {
+    method: 'POST',
+    body: { action: 'reject', call_id: callId, conversation_id: conversationId },
+  });
+}
+
+export function endChatCall(
+  callId: string,
+  durationSeconds: number,
+  conversationId?: string
+): Promise<{ success: boolean; call: ChatCall }> {
+  return apiRequest(CHAT.CALLS, {
+    method: 'POST',
+    body: {
+      action: 'end',
+      call_id: callId,
+      duration_seconds: durationSeconds,
+      conversation_id: conversationId,
+    },
+  });
+}
+
 /** Câu trả lời của trợ lý admin, kèm backend đã phục vụ lượt chat. */
 export interface AssistantReply {
   content: string;

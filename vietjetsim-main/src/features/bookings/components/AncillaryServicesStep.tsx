@@ -93,15 +93,19 @@ export default function AncillaryServicesStep({
               <h3 className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">
                 Chọn chỗ ngồi yêu thích
               </h3>
-              <p className="text-xs text-gray-500 mt-0.5">
-                Hãy chọn chỗ ngồi yêu thích của bạn
-              </p>
+              <p className="text-xs text-gray-500 mt-0.5">Hãy chọn chỗ ngồi yêu thích của bạn</p>
               <div className="text-xs font-black text-red-600 mt-0.5">
                 {seatFee > 0 ? `${seatFee.toLocaleString('vi-VN')} VND` : '0 VND'}
               </div>
               <div className="flex items-center gap-3 text-3xs font-bold text-gray-700 mt-1 border-t border-gray-100 pt-1">
-                <span>{flight.from} ✈ {flight.to}</span>
-                {isRoundTrip && <span>{returnFlight?.from || flight.to} ✈ {returnFlight?.to || flight.from}</span>}
+                <span>
+                  {flight.from} ✈ {flight.to}
+                </span>
+                {isRoundTrip && (
+                  <span>
+                    {returnFlight?.from || flight.to} ✈ {returnFlight?.to || flight.from}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -124,9 +128,7 @@ export default function AncillaryServicesStep({
               <h3 className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">
                 Chọn hành lý/Dịch vụ nối chuyến
               </h3>
-              <p className="text-xs text-gray-500 mt-0.5">
-                Hãy lựa chọn gói hành lý phù hợp
-              </p>
+              <p className="text-xs text-gray-500 mt-0.5">Hãy lựa chọn gói hành lý phù hợp</p>
               <div className="text-xs font-black text-red-600 mt-0.5">
                 {baggageFee > 0 ? `${baggageFee.toLocaleString('vi-VN')} VND` : '0 VND'}
               </div>
@@ -162,15 +164,19 @@ export default function AncillaryServicesStep({
               <h3 className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">
                 Chọn suất ăn
               </h3>
-              <p className="text-xs font-bold italic text-red-600 mt-0.5">
-                jet café
-              </p>
+              <p className="text-xs font-bold italic text-red-600 mt-0.5">jet café</p>
               <div className="text-xs font-black text-red-600 mt-0.5">
                 {mealFee > 0 ? `${mealFee.toLocaleString('vi-VN')} VND` : '0 VND'}
               </div>
               <div className="flex items-center gap-3 text-3xs font-bold text-gray-700 mt-1 border-t border-gray-100 pt-1">
-                <span>{flight.from} ✈ {flight.to}</span>
-                {isRoundTrip && <span>{returnFlight?.from || flight.to} ✈ {returnFlight?.to || flight.from}</span>}
+                <span>
+                  {flight.from} ✈ {flight.to}
+                </span>
+                {isRoundTrip && (
+                  <span>
+                    {returnFlight?.from || flight.to} ✈ {returnFlight?.to || flight.from}
+                  </span>
+                )}
               </div>
             </div>
           </div>

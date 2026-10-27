@@ -204,7 +204,9 @@ export default function FareBenefitsModal({
                           isHighlighted ? 'ring-2 ring-primary' : ''
                         }`}
                       >
-                        <div className={`text-center py-1.5 px-1 flex items-center justify-center min-h-[30px] ${col.headerClass}`}>
+                        <div
+                          className={`text-center py-1.5 px-1 flex items-center justify-center min-h-[30px] ${col.headerClass}`}
+                        >
                           {col.id === 'business' ? (
                             <img
                               src="/images/fare-classes/business-logo.png"

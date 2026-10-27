@@ -315,9 +315,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                   <form onSubmit={handleSearch} className="mt-5 flex flex-col items-center">
                     <div className="flex w-full flex-col items-center gap-3">
                       {/* Ô nhập 1: Mã đặt chỗ */}
-                      <div
-                        className="relative flex h-[46px] w-full max-w-[410px] items-center rounded-lg border border-gray-200 bg-white px-4 shadow-xs"
-                      >
+                      <div className="relative flex h-[46px] w-full max-w-[410px] items-center rounded-lg border border-gray-200 bg-white px-4 shadow-xs">
                         <input
                           id="booking-code"
                           type="text"
@@ -338,9 +336,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                       </div>
 
                       {/* Ô nhập 2: Họ */}
-                      <div
-                        className="relative flex h-[46px] w-full max-w-[410px] items-center rounded-lg border border-gray-200 bg-white px-4 shadow-xs"
-                      >
+                      <div className="relative flex h-[46px] w-full max-w-[410px] items-center rounded-lg border border-gray-200 bg-white px-4 shadow-xs">
                         <input
                           id="last-name"
                           type="text"
@@ -418,9 +414,8 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                             • Không có hành lý ký gửi:
                           </p>
                           <p className="mt-1">
-                            Đối với chuyến bay nội địa tại Việt Nam, Quý khách chuẩn bị hành
-                            lý xách tay đúng quy định và di chuyển trực tiếp đến khu vực kiểm
-                            tra an ninh.
+                            Đối với chuyến bay nội địa tại Việt Nam, Quý khách chuẩn bị hành lý xách
+                            tay đúng quy định và di chuyển trực tiếp đến khu vực kiểm tra an ninh.
                           </p>
                         </div>
                         <div>
@@ -433,9 +428,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                               Quầy Online Check-in/Bag Drop
                             </strong>{' '}
                             để gửi hành lý. Quầy làm thủ tục chuyến bay nội địa{' '}
-                            <strong className="font-bold text-gray-900">
-                              đóng trước 40 phút
-                            </strong>{' '}
+                            <strong className="font-bold text-gray-900">đóng trước 40 phút</strong>{' '}
                             so với giờ khởi hành (giờ đóng quầy quốc tế tùy sân bay).
                           </p>
                         </div>
@@ -447,8 +440,8 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                       </h3>
                       <div className="space-y-3">
                         <p>
-                          Nếu có thay đổi chuyến bay sau khi đã Online Check-in, Quý khách cần
-                          thực hiện{' '}
+                          Nếu có thay đổi chuyến bay sau khi đã Online Check-in, Quý khách cần thực
+                          hiện{' '}
                           <strong className="font-bold text-gray-900">
                             Online Check-in lại để nhận Thẻ lên tàu bay mới
                           </strong>{' '}
@@ -459,9 +452,8 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                           .
                         </p>
                         <p>
-                          Trong giờ cao điểm hoặc mùa lễ Tết, khu vực an ninh/xuất nhập cảnh
-                          có thể đông; Quý khách nên đến sân bay sớm để đảm bảo hành trình
-                          thuận lợi.
+                          Trong giờ cao điểm hoặc mùa lễ Tết, khu vực an ninh/xuất nhập cảnh có thể
+                          đông; Quý khách nên đến sân bay sớm để đảm bảo hành trình thuận lợi.
                         </p>
                       </div>
                     </div>

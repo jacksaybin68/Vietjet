@@ -14,6 +14,12 @@ const { authState, pathnameRef, services } = vi.hoisted(() => ({
     getChatPresence: vi.fn(),
     updateChatPresence: vi.fn(),
     markConversationRead: vi.fn(),
+    initiateChatCall: vi.fn().mockResolvedValue({ success: true, call: null }),
+    getActiveChatCall: vi.fn().mockResolvedValue({ call: null }),
+    getIncomingAdminCall: vi.fn().mockResolvedValue({ incomingCall: null }),
+    acceptChatCall: vi.fn().mockResolvedValue({ success: true, call: null }),
+    rejectChatCall: vi.fn().mockResolvedValue({ success: true, call: null }),
+    endChatCall: vi.fn().mockResolvedValue({ success: true, call: null }),
   },
 }));
 

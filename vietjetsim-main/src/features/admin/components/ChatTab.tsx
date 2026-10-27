@@ -9,7 +9,23 @@ import {
   sendChatMessage,
   markConversationRead,
   setConversationStatus,
+  initiateChatCall,
+  getActiveChatCall,
+  acceptChatCall,
+  rejectChatCall,
+  endChatCall,
+  type ChatCall,
 } from '@/features/chat/services';
+import { playNewMessageChime } from '@/features/chat/services/callSounds';
+import VoiceCallModal from '@/features/chat/components/VoiceCallModal';
+
+const QUICK_ADMIN_RESPONSES = [
+  'Dạ chào Quý khách! Em là tổng đài viên Vietjet Air, em có thể hỗ trợ gì cho mình ạ?',
+  'Quý khách vui lòng cung cấp Mã đặt chỗ (PNR 6 ký tự) và Họ tên để em kiểm tra vé ạ.',
+  'Thủ tục check-in trực tuyến mở từ 24h đến 60 phút trước giờ khởi hành trên website/app.',
+  'Hành lý xách tay tiêu chuẩn là 7kg (56x36x23cm). Quý khách có muốn mua thêm hành lý ký gửi không ạ?',
+  'Vé của Quý khách đã được xác nhận thành công. Chúc Quý khách có chuyến bay an toàn và vui vẻ!',
+];
 
 interface Conversation {
   id: string;
@@ -43,7 +59,7 @@ interface Message {
 const CONVS_PER_PAGE = 10;
 
 // ─── Polling interval for chat refresh (replaces dead Supabase realtime) ─
-const CHAT_POLL_INTERVAL = 8000; // 8 seconds
+const _CHAT_POLL_INTERVAL = 4000; // 4 seconds
 
 export default function ChatTab() {
   const { user } = useAuth();
@@ -55,6 +71,13 @@ export default function ChatTab() {
   const [loadingConvs, setLoadingConvs] = useState(true);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
   const [sending, setSending] = useState(false);
+
+  // Voice call states for admin
+  const [activeCall, setActiveCall] = useState<ChatCall | null>(null);
+  const [isCallModalOpen, setIsCallModalOpen] = useState(false);
+  const [isCalling, setIsCalling] = useState(false);
+  const lastMsgCountRef = useRef(0);
+  const callPollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Sidebar collapsed state for mobile
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -115,17 +138,104 @@ export default function ChatTab() {
   }, []);
 
   // Load messages for selected conversation via API
-  const loadMessages = useCallback(async (convId: string) => {
-    setLoadingMsgs(true);
+  const loadMessages = useCallback(async (convId: string, isPoll = false) => {
+    if (!isPoll) setLoadingMsgs(true);
     try {
       const json = await getConversationMessages(convId);
-      setMessages((json.messages || []) as unknown as Message[]);
+      const newMsgs = (json.messages || []) as unknown as Message[];
+      setMessages(newMsgs);
+      if (isPoll && newMsgs.length > lastMsgCountRef.current && lastMsgCountRef.current > 0) {
+        const lastUserMsg = newMsgs[newMsgs.length - 1];
+        if (lastUserMsg && lastUserMsg.sender_role === 'user') {
+          playNewMessageChime();
+        }
+      }
+      lastMsgCountRef.current = newMsgs.length;
     } catch (err) {
       console.error('Load messages error:', err);
     } finally {
-      setLoadingMsgs(false);
+      if (!isPoll) setLoadingMsgs(false);
     }
   }, []);
+
+  const handleStartCall = async () => {
+    if (!selectedConv) return;
+    setIsCalling(true);
+    try {
+      const res = await initiateChatCall(
+        selectedConv.id,
+        user?.fullName || 'Tổng đài viên Vietjet'
+      );
+      if (res.call) {
+        setActiveCall(res.call);
+        setIsCallModalOpen(true);
+      }
+    } catch (err) {
+      console.error('Failed to start call from admin:', err);
+    } finally {
+      setIsCalling(false);
+    }
+  };
+
+  const handleAcceptCall = async () => {
+    if (!activeCall) return;
+    try {
+      const res = await acceptChatCall(activeCall.id);
+      if (res.call) setActiveCall(res.call);
+    } catch (err) {
+      console.error('Accept call error:', err);
+    }
+  };
+
+  const handleRejectCall = async () => {
+    if (!activeCall) return;
+    try {
+      await rejectChatCall(activeCall.id, selectedConv?.id);
+      setIsCallModalOpen(false);
+      setActiveCall(null);
+      if (selectedConv) loadMessages(selectedConv.id);
+    } catch (err) {
+      console.error('Reject call error:', err);
+    }
+  };
+
+  const handleEndCall = async (durationSec: number) => {
+    if (!activeCall) return;
+    try {
+      await endChatCall(activeCall.id, durationSec, selectedConv?.id);
+      setIsCallModalOpen(false);
+      setActiveCall(null);
+      if (selectedConv) loadMessages(selectedConv.id);
+    } catch (err) {
+      console.error('End call error:', err);
+    }
+  };
+
+  const pollCall = useCallback(async () => {
+    if (!selectedConv) return;
+    try {
+      const data = await getActiveChatCall(selectedConv.id);
+      const currentCall = data.call;
+      if (currentCall) {
+        setActiveCall(currentCall);
+        if (currentCall.status === 'ringing') {
+          setIsCallModalOpen(true);
+        } else if (currentCall.status === 'ended' || currentCall.status === 'rejected') {
+          setTimeout(() => {
+            setIsCallModalOpen(false);
+            setActiveCall(null);
+          }, 1500);
+        }
+      } else {
+        if (activeCall && (activeCall.status === 'ringing' || activeCall.status === 'connected')) {
+          setActiveCall(null);
+          setIsCallModalOpen(false);
+        }
+      }
+    } catch (err) {
+      console.error('Poll call error:', err);
+    }
+  }, [selectedConv, activeCall]);
 
   useEffect(() => {
     scrollToBottom();
@@ -363,23 +473,31 @@ export default function ChatTab() {
     pollingRef.current = setInterval(() => {
       loadConversations();
       if (selectedConv) {
-        loadMessages(selectedConv.id);
+        loadMessages(selectedConv.id, true);
       }
-    }, CHAT_POLL_INTERVAL);
+    }, 4000);
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedConv?.id, loadConversations, loadMessages]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!selectedConv) return;
-    loadMessages(selectedConv.id);
+    loadMessages(selectedConv.id, false);
     markUserMessagesRead(selectedConv.id);
+    pollCall();
+    if (callPollingRef.current) clearInterval(callPollingRef.current);
+    callPollingRef.current = setInterval(pollCall, 2500);
+
     // Mark conversation unread count as cleared
     setConversations((prev) =>
       prev.map((c) => (c.id === selectedConv.id ? { ...c, unread_by_admin: 0 } : c))
     );
-  }, [selectedConv?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    return () => {
+      if (callPollingRef.current) clearInterval(callPollingRef.current);
+    };
+  }, [selectedConv?.id, pollCall, loadMessages, markUserMessagesRead]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div
@@ -656,6 +774,18 @@ export default function ChatTab() {
                   {selectedConv.user_email}
                 </span>
 
+                {/* Voice Call Button */}
+                <button
+                  type="button"
+                  onClick={handleStartCall}
+                  disabled={isCalling}
+                  title="Thực hiện cuộc gọi đàm thoại trực tiếp tới hành khách"
+                  className="flex items-center gap-1.5 px-3 py-2 bg-green-50 hover:bg-green-100 active:bg-green-200 border border-green-200 rounded-lg text-xs font-bold text-green-700 transition-colors touch-manipulation"
+                >
+                  <Icon name="PhoneIcon" size={14} className="text-green-600" />
+                  <span className="hidden sm:inline">Gọi cho khách</span>
+                </button>
+
                 {/* Archive / reopen */}
                 <button
                   onClick={() => handleToggleArchive(selectedConv)}
@@ -746,6 +876,30 @@ export default function ChatTab() {
               ) : (
                 messages.map((msg) => {
                   const isAdmin = msg.sender_role === 'admin';
+
+                  // Display call logs as special status pills
+                  if (msg.content.startsWith('📞')) {
+                    const isMissed = msg.content.includes('nhỡ') || msg.content.includes('từ chối');
+                    return (
+                      <div key={msg.id} className="flex justify-center my-2">
+                        <div
+                          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border shadow-2xs ${
+                            isMissed
+                              ? 'bg-red-50 border-red-200 text-red-700'
+                              : 'bg-green-50 border-green-200 text-green-800'
+                          }`}
+                        >
+                          <Icon
+                            name={isMissed ? 'PhoneXMarkIcon' : 'PhoneIcon'}
+                            size={14}
+                            className={isMissed ? 'text-red-500' : 'text-green-600'}
+                          />
+                          <span>{msg.content}</span>
+                        </div>
+                      </div>
+                    );
+                  }
+
                   return (
                     <div
                       key={msg.id}
@@ -803,7 +957,28 @@ export default function ChatTab() {
             </div>
 
             {/* Input */}
-            <div className="px-4 py-3 bg-white border-t border-gray-100 flex-shrink-0">
+            <div className="px-4 py-3 bg-white border-t border-gray-100 flex-shrink-0 space-y-2">
+              {/* Quick reply templates */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-2xs">
+                <span className="text-gray-400 font-bold whitespace-nowrap uppercase tracking-wider text-3xs">
+                  Trả lời nhanh:
+                </span>
+                {QUICK_ADMIN_RESPONSES.map((tmpl, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      setInputText(tmpl);
+                      setTimeout(() => inputRef.current?.focus(), 50);
+                    }}
+                    className="whitespace-nowrap px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-red-50 hover:text-primary text-gray-700 border border-gray-200 transition-colors"
+                    title={tmpl}
+                  >
+                    {tmpl.length > 28 ? tmpl.slice(0, 28) + '...' : tmpl}
+                  </button>
+                ))}
+              </div>
+
               <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-200 focus-within:border-primary transition-colors">
                 <input
                   ref={inputRef}
@@ -831,6 +1006,16 @@ export default function ChatTab() {
           </>
         )}
       </div>
+
+      {/* Voice Call Modal for Admin */}
+      <VoiceCallModal
+        isOpen={isCallModalOpen}
+        call={activeCall}
+        currentRole="admin"
+        onAccept={handleAcceptCall}
+        onReject={handleRejectCall}
+        onEnd={handleEndCall}
+      />
     </div>
   );
 }

@@ -49,6 +49,7 @@ export const API_ENDPOINTS = {
     PRESENCE: '/api/tro-chuyen/truc-tuyen',
     MARK_READ: '/api/tro-chuyen/danh-dau-da-doc',
     ASSISTANT: '/api/tro-ly-ai/tro-chuyen',
+    CALLS: '/api/tro-chuyen/cuoc-goi',
   },
   ADMIN: {
     REVENUE: '/api/quan-tri/doanh-thu',

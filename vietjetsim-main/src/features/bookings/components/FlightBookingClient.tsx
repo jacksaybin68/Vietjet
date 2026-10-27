@@ -199,16 +199,18 @@ function FlightBookingClientInner({
     }
   }, [continueSignal, toast]);
 
-function formatDateViShort(iso?: string) {
-  if (!iso) return '';
-  try {
-    const parts = iso.split('-');
-    if (parts.length === 3) {
-      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  function formatDateViShort(iso?: string) {
+    if (!iso) return '';
+    try {
+      const parts = iso.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+    } catch {
+      /* ignore formatting error and fallback to raw iso */
     }
-  } catch {}
-  return iso;
-}
+    return iso;
+  }
 
   const handleFlightSelect = (
     flight: Flight,
@@ -377,7 +379,8 @@ function formatDateViShort(iso?: string) {
   const flightBaseTotal = fareSubtotal + taxAndFee;
   const effectiveFlightBaseTotal = baseTotal && baseTotal > 0 ? baseTotal : flightBaseTotal;
 
-  const finalTotal = effectiveFlightBaseTotal + seatFeeTotal + baggageFee + insuranceFeeTotal + mealFee;
+  const finalTotal =
+    effectiveFlightBaseTotal + seatFeeTotal + baggageFee + insuranceFeeTotal + mealFee;
 
   useEffect(() => {
     onTotalChange?.(finalTotal);

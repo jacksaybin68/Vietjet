@@ -187,13 +187,17 @@ export default function VietQrBox({
         {/* PNR + số tiền + addInfo (nội dung CK chứa mã đặt chỗ). */}
         <div className="w-full mt-4 space-y-2 text-sm">
           <div className="flex justify-between items-center">
-            <span className="text-[var(--foreground-muted)] text-xs font-koho font-semibold">Mã đặt chỗ</span>
+            <span className="text-[var(--foreground-muted)] text-xs font-koho font-semibold">
+              Mã đặt chỗ
+            </span>
             <span className="font-mono font-black text-[var(--foreground)] tracking-wider">
               {data?.pnr ?? '—'}
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-[var(--foreground-muted)] text-xs font-koho font-semibold">Số tiền</span>
+            <span className="text-[var(--foreground-muted)] text-xs font-koho font-semibold">
+              Số tiền
+            </span>
             <span className="font-black text-primary font-koho text-base">
               {(data?.amount ?? 0).toLocaleString('vi-VN')}₫
             </span>

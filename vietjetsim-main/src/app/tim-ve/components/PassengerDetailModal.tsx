@@ -90,7 +90,11 @@ export default function PassengerDetailModal({
           </div>
           {/* Vietjet green-yellow swoosh on top right */}
           <div className="pointer-events-none absolute top-0 right-0 h-14 w-24 overflow-hidden">
-            <svg className="absolute -top-4 -right-4 h-20 w-28 opacity-95" viewBox="0 0 100 60" fill="none">
+            <svg
+              className="absolute -top-4 -right-4 h-20 w-28 opacity-95"
+              viewBox="0 0 100 60"
+              fill="none"
+            >
               <path d="M100 0 L 20 0 C 40 30, 70 50, 100 60 Z" fill="#2E7D32" />
               <path d="M100 0 L 45 0 C 60 25, 80 45, 100 50 Z" fill="#FBB612" />
             </svg>
@@ -115,9 +119,7 @@ export default function PassengerDetailModal({
             </div>
 
             <div className="p-3 space-y-2">
-              <div className="font-bold text-gray-900 text-xs">
-                {outboundTrip}
-              </div>
+              <div className="font-bold text-gray-900 text-xs">{outboundTrip}</div>
               <div className="text-2xs text-gray-500 font-medium">
                 {outboundDate} | {outboundFlightNo} | Eco
               </div>
@@ -144,7 +146,10 @@ export default function PassengerDetailModal({
                       </div>
                       <div className="flex justify-between">
                         <span>Thuế VAT:</span>
-                        <span>{(outboundFare - Math.round(outboundFare / 1.08)).toLocaleString('vi-VN')} VND</span>
+                        <span>
+                          {(outboundFare - Math.round(outboundFare / 1.08)).toLocaleString('vi-VN')}{' '}
+                          VND
+                        </span>
                       </div>
                     </div>
                   )}
@@ -193,7 +198,11 @@ export default function PassengerDetailModal({
                     <span>Dịch vụ</span>
                     <div className="flex items-center gap-1">
                       <span>{outboundBaggageFee.toLocaleString('vi-VN')} VND</span>
-                      {openOutService ? <RiArrowUpSLine size={16} /> : <RiArrowDownSLine size={16} />}
+                      {openOutService ? (
+                        <RiArrowUpSLine size={16} />
+                      ) : (
+                        <RiArrowDownSLine size={16} />
+                      )}
                     </div>
                   </div>
                   {openOutService && (
@@ -221,9 +230,7 @@ export default function PassengerDetailModal({
               </div>
 
               <div className="p-3 space-y-2">
-                <div className="font-bold text-gray-900 text-xs">
-                  {inboundTrip}
-                </div>
+                <div className="font-bold text-gray-900 text-xs">{inboundTrip}</div>
                 <div className="text-2xs text-gray-500 font-medium">
                   {inboundDate} | {inboundFlightNo} | Eco
                 </div>
@@ -250,7 +257,10 @@ export default function PassengerDetailModal({
                         </div>
                         <div className="flex justify-between">
                           <span>Thuế VAT:</span>
-                          <span>{(inboundFare - Math.round(inboundFare / 1.08)).toLocaleString('vi-VN')} VND</span>
+                          <span>
+                            {(inboundFare - Math.round(inboundFare / 1.08)).toLocaleString('vi-VN')}{' '}
+                            VND
+                          </span>
                         </div>
                       </div>
                     )}
@@ -295,7 +305,11 @@ export default function PassengerDetailModal({
                       <span>Dịch vụ</span>
                       <div className="flex items-center gap-1">
                         <span>{inboundBaggageFee.toLocaleString('vi-VN')} VND</span>
-                        {openInService ? <RiArrowUpSLine size={16} /> : <RiArrowDownSLine size={16} />}
+                        {openInService ? (
+                          <RiArrowUpSLine size={16} />
+                        ) : (
+                          <RiArrowDownSLine size={16} />
+                        )}
                       </div>
                     </div>
                   </div>

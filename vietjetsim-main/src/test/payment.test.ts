@@ -175,13 +175,15 @@ describe('Payment Database Module', () => {
         amount: 2500000,
         method: 'vietqr',
         status: 'completed',
-        receipt_image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+        receipt_image:
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
         transfer_note: 'VJ VJ8899',
       };
       const mockBookingRecord = {
         id: 'booking-2',
         status: 'confirmed',
-        receipt_image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+        receipt_image:
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
         transfer_note: 'VJ VJ8899',
       };
 
@@ -200,7 +202,8 @@ describe('Payment Database Module', () => {
         booking_id: 'booking-2',
         method: 'vietqr',
         amount: 2500000,
-        receipt_image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+        receipt_image:
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
         transfer_note: 'VJ VJ8899',
       });
 
@@ -211,4 +214,3 @@ describe('Payment Database Module', () => {
     });
   });
 });
-
