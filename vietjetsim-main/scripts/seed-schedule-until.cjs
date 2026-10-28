@@ -141,17 +141,17 @@ async function main() {
           WITH ins AS (
             INSERT INTO flights (
               flight_no, from_code, to_code, depart_time, arrive_time,
-              price, class, available, economy_price, business_price
+              price, class, available, economy_price, business_price, aircraft
             )
             SELECT
               x.flight_no, x.from_code, x.to_code,
               x.depart_time::timestamptz, x.arrive_time::timestamptz,
-              x.price, x.class, x.available, x.economy_price, x.business_price
+              x.price, x.class, x.available, x.economy_price, x.business_price, x.aircraft
             FROM jsonb_to_recordset(${JSON.stringify(chunk)}::jsonb) AS x(
               flight_no text, from_code text, to_code text,
               depart_time text, arrive_time text,
               price numeric, class text, available int,
-              economy_price numeric, business_price numeric
+              economy_price numeric, business_price numeric, aircraft text
             )
             ON CONFLICT (from_code, to_code, depart_time) DO NOTHING
             RETURNING 1

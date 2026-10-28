@@ -13,36 +13,53 @@ export interface Seat {
   isEmergencyExit: boolean;
 }
 
+export type AircraftSeatType = 'A320' | 'B737' | 'A321' | 'A321neo' | 'A330';
+
+export function resolveAircraftSeatType(type?: string | null): AircraftSeatType {
+  if (!type) return 'A321';
+  const upper = type.toUpperCase();
+  if (upper.includes('330')) return 'A330';
+  if (upper.includes('737')) return 'B737';
+  if (upper.includes('NEO')) return 'A321neo';
+  if (upper.includes('320')) return 'A320';
+  return 'A321';
+}
+
 interface SeatMapProps {
   seats: Seat[];
   selectedSeats: string[];
   onSeatToggle: (seatId: string) => void;
   flightClass?: 'economy' | 'business' | 'first';
-  aircraftType?: 'A320' | 'B737' | 'A321';
+  aircraftType?: AircraftSeatType | string;
   className?: string;
 }
 
-const COLUMN_CONFIG = {
+const COLUMN_CONFIG: Record<AircraftSeatType, string[]> = {
   A320: ['A', 'B', 'C', 'D', 'E', 'F'],
   B737: ['A', 'B', 'C', 'D', 'E', 'F'],
   A321: ['A', 'B', 'C', 'D', 'E', 'F'],
+  A321neo: ['A', 'B', 'C', 'D', 'E', 'F'],
+  A330: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'K'],
 };
 
-const ROWS_CONFIG = {
+const ROWS_CONFIG: Record<AircraftSeatType, number> = {
   A320: 30,
   B737: 32,
   A321: 35,
+  A321neo: 36,
+  A330: 42,
 };
 
 export function SeatMap({
   seats,
   selectedSeats,
   onSeatToggle,
-  aircraftType = 'A320',
+  aircraftType = 'A321',
   className = '',
 }: SeatMapProps) {
-  const columns = COLUMN_CONFIG[aircraftType];
-  const totalRows = ROWS_CONFIG[aircraftType];
+  const resolvedType = resolveAircraftSeatType(aircraftType);
+  const columns = COLUMN_CONFIG[resolvedType];
+  const totalRows = ROWS_CONFIG[resolvedType];
 
   // Group seats by row
   const seatsByRow = seats.reduce(
@@ -205,11 +222,12 @@ export function SeatMap({
 // Helper function to generate seats for a flight
 export function generateSeatsForFlight(
   flightId: string,
-  aircraftType: 'A320' | 'B737' | 'A321' = 'A320',
+  aircraftType: AircraftSeatType | string = 'A321',
   existingBookings: string[] = []
 ): Seat[] {
-  const columns = COLUMN_CONFIG[aircraftType];
-  const totalRows = ROWS_CONFIG[aircraftType];
+  const resolvedType = resolveAircraftSeatType(aircraftType);
+  const columns = COLUMN_CONFIG[resolvedType];
+  const totalRows = ROWS_CONFIG[resolvedType];
   const seats: Seat[] = [];
 
   for (let row = 1; row <= totalRows; row++) {

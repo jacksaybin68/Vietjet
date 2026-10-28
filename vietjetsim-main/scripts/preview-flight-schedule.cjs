@@ -33,8 +33,8 @@ function printRoutes() {
   console.log(`📄 Nguồn: ${CSV_PATH}`);
   console.log(`🧭 ${ROUTES.length} tuyến (mỗi tuyến 2 sóng/ngày: economy + business)\n`);
 
-  const head = ['Số hiệu', 'Chặng', 'Giờ', 'Bay', 'Giá Eco', 'Giá Business', 'Ghế'];
-  const rows = ROUTES.map(([no, from, to, depart, minutes, eco, biz, seats]) => [
+  const head = ['Số hiệu', 'Chặng', 'Giờ', 'Bay', 'Giá Eco', 'Giá Business', 'Ghế', 'Máy bay'];
+  const rows = ROUTES.map(([no, from, to, depart, minutes, eco, biz, seats, aircraft]) => [
     no,
     `${from}→${to}`,
     depart,
@@ -42,6 +42,7 @@ function printRoutes() {
     vnd(eco),
     vnd(biz),
     String(seats),
+    aircraft || 'A321',
   ]);
 
   const widths = head.map((h, c) => Math.max(h.length, ...rows.map((r) => r[c].length)));

@@ -162,16 +162,17 @@ async function main() {
 
     for (const [
       index,
-      [no, from, to, depart, durationMin, ecoPrice, bizPrice, seats],
+      [no, from, to, depart, durationMin, ecoPrice, bizPrice, seats, aircraft],
     ] of ROUTES.entries()) {
       const variants = [
-        { cls: 'economy', price: ecoPrice, available: seats, shift: 0, no },
+        { cls: 'economy', price: ecoPrice, available: seats, shift: 0, no, aircraft: aircraft || 'A321' },
         {
           cls: 'business',
           price: bizPrice,
           available: Math.max(20, Math.round(seats / 3)),
           shift: BUSINESS_SHIFT_MIN,
           no: businessNo(index),
+          aircraft: aircraft || 'A321',
         },
       ];
 
@@ -188,6 +189,7 @@ async function main() {
             price: v.price,
             class: v.cls,
             available: v.available,
+            aircraft: v.aircraft,
           }),
         });
         const text = await res.text();

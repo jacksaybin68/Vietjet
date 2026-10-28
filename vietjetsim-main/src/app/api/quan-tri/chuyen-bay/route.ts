@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
       business_price: businessPrice,
       class: seatClass,
       available,
+      aircraft,
     } = body;
     attempted = { from_code, to_code, depart_time };
     if (
@@ -141,6 +142,7 @@ export async function POST(request: NextRequest) {
       businessPrice,
       class: normalizedClass,
       available,
+      aircraft: aircraft ? String(aircraft).trim() : null,
     });
     return NextResponse.json(
       { success: true, message: 'Flight created successfully', flight },

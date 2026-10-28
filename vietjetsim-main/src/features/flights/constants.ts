@@ -30,3 +30,16 @@ export const AIRLINE_PREFIXES = {
   QH: 'BambooSim',
   BL: 'BambooSim',
 } as const;
+
+/** Common aircraft fleet models operated or partnered with Vietjet. */
+export const AIRCRAFT_MODELS = {
+  A321NEO: 'Airbus A321neo',
+  A321: 'Airbus A321',
+  A320: 'Airbus A320',
+  A330: 'Airbus A330-300',
+  B737_MAX: 'Boeing 737 MAX',
+  B787: 'Boeing 787 Dreamliner',
+} as const;
+
+export type AircraftModel = (typeof AIRCRAFT_MODELS)[keyof typeof AIRCRAFT_MODELS];
+

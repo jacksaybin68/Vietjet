@@ -3,6 +3,9 @@ import { apiRequest } from '@/shared/services';
 import type { FlightRecord } from '@/lib/db';
 import { toVietnamWallClock } from '@/lib/utils';
 import type { Flight, FlightSearchParams, FlightSearchResponse } from '../types';
+import { resolveAircraft, normalizeAircraftName } from './aircraft';
+
+export { resolveAircraft, normalizeAircraftName };
 
 export function getAirportCity(code: string): string {
   return AIRPORT_CITIES[code.toUpperCase()] || code;
@@ -53,7 +56,12 @@ export function mapFlightRecordToFlight(row: FlightRecord): Flight {
     flightNo,
     available: Number(row.available) || 0,
     stops: 0,
-    aircraft: (row as unknown as { aircraft?: string }).aircraft || 'Airbus A321',
+    aircraft: resolveAircraft(
+      flightNo,
+      row.from_code,
+      row.to_code,
+      (row as unknown as { aircraft?: string }).aircraft
+    ),
   };
 }
 
