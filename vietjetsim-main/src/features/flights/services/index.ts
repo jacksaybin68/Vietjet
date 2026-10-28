@@ -53,6 +53,7 @@ export function mapFlightRecordToFlight(row: FlightRecord): Flight {
     flightNo,
     available: Number(row.available) || 0,
     stops: 0,
+    aircraft: (row as unknown as { aircraft?: string }).aircraft || 'Airbus A321',
   };
 }
 
