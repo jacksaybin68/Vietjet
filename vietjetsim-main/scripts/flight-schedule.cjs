@@ -133,6 +133,8 @@ function loadRoutes() {
     if (seen.has(key)) fail(`trùng khoá duy nhất (from, to, depart_time): ${key}`);
     seen.add(key);
 
+    const aircraft = row.aircraft || 'A321';
+
     return [
       flight_no,
       from_code,
@@ -142,6 +144,7 @@ function loadRoutes() {
       economy_price,
       business_price,
       seats,
+      aircraft,
     ];
   });
 }
@@ -176,15 +179,16 @@ function buildSchedule({ from, until }) {
   while (cursor <= last) {
     const date = new Date(cursor);
     ROUTES.forEach(
-      ([no, fromCode, toCode, depart, durationMin, ecoPrice, bizPrice, seats], index) => {
+      ([no, fromCode, toCode, depart, durationMin, ecoPrice, bizPrice, seats, aircraft], index) => {
         const waves = [
-          { cls: 'economy', price: ecoPrice, available: seats, shift: 0, no },
+          { cls: 'economy', price: ecoPrice, available: seats, shift: 0, no, aircraft: aircraft || 'A321' },
           {
             cls: 'business',
             price: bizPrice,
             available: Math.max(20, Math.round(seats / 3)),
             shift: BUSINESS_SHIFT_MIN,
             no: businessNo(index),
+            aircraft: aircraft || 'A321',
           },
         ];
         for (const wave of waves) {
@@ -197,6 +201,7 @@ function buildSchedule({ from, until }) {
             price: wave.price,
             class: wave.cls,
             available: wave.available,
+            aircraft: wave.aircraft,
             ...fareLadder(wave.cls, wave.price),
           });
         }

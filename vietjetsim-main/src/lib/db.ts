@@ -113,6 +113,7 @@ export interface FlightRecord {
   status: FlightStatus;
   gate: string | null;
   terminal: string | null;
+  aircraft?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -676,6 +677,7 @@ export async function createFlight(flight: {
   businessPrice?: number | null;
   class: string;
   available: number;
+  aircraft?: string | null;
 }): Promise<FlightRecord> {
   // The same ratio migration 030 seeds from, so a derived row is
   // indistinguishable from a seeded one. `price` is the fare of the cabin the
@@ -692,12 +694,13 @@ export async function createFlight(flight: {
   const results = await sql`
     INSERT INTO flights (
       flight_no, from_code, to_code, depart_time, arrive_time, price,
-      economy_price, business_price, class, available
+      economy_price, business_price, class, available, aircraft
     )
     VALUES (
       ${flight.flight_no}, ${flight.from_code}, ${flight.to_code},
       ${flight.depart_time}, ${flight.arrive_time}, ${flight.price},
-      ${economyPrice}, ${businessPrice}, ${flight.class}, ${flight.available}
+      ${economyPrice}, ${businessPrice}, ${flight.class}, ${flight.available},
+      ${flight.aircraft ?? 'A321'}
     )
     RETURNING *
   `;
@@ -723,6 +726,7 @@ export async function updateFlight(
     status?: FlightStatus;
     gate?: string | null;
     terminal?: string | null;
+    aircraft?: string | null;
   }>
 ): Promise<FlightRecord> {
   // Whitelist of allowed column names (prevent SQL key injection)
@@ -740,6 +744,7 @@ export async function updateFlight(
     'status',
     'gate',
     'terminal',
+    'aircraft',
   ] as const;
   const setClauses: string[] = [];
   const values: DbParam[] = [];
