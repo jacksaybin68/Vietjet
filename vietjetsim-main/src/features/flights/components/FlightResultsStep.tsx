@@ -1212,9 +1212,19 @@ export default function FlightResultsStep({
                     </span>
                   </div>
 
-                  <div className="text-[7.5px] sm:text-2xs text-gray-800 font-medium leading-tight">
-                    <span className="block sm:inline">{flight.aircraft ?? 'Airbus A321'}</span>
-                    <span className="hidden sm:inline"> - </span>
+                  <div className="text-[7.5px] sm:text-2xs text-gray-800 font-medium leading-tight flex items-center justify-center flex-wrap gap-x-1 gap-y-0.5">
+                    <span className="inline-flex items-center justify-center gap-1">
+                      <svg
+                        className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-gray-800 shrink-0 rotate-45 inline-block"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
+                      </svg>
+                      <span className="block sm:inline">{flight.aircraft ?? 'Airbus A321'}</span>
+                    </span>
+                    <span className="hidden sm:inline text-gray-500"> - </span>
                     <span className="text-red-700 font-bold block sm:inline">Bay thẳng</span>
                   </div>
 
@@ -1386,7 +1396,21 @@ export default function FlightResultsStep({
                           <span className="text-primary rotate-45 inline-block text-xs">✈</span>
                           <span className="h-px flex-1 border-t border-dashed border-gray-400" />
                         </div>
-                        <span className="text-2xs text-gray-700 font-medium">Bay thẳng</span>
+                        <div className="flex items-center gap-1.5 text-2xs text-gray-700 font-medium">
+                          <span className="inline-flex items-center gap-1">
+                            <svg
+                              className="w-2.5 h-2.5 text-gray-700 shrink-0 rotate-45 inline-block"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              aria-hidden="true"
+                            >
+                              <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
+                            </svg>
+                            <span>{flight.aircraft ?? 'Airbus A321'}</span>
+                          </span>
+                          <span className="text-gray-400">•</span>
+                          <span className="text-red-700 font-bold">Bay thẳng</span>
+                        </div>
                       </div>
 
                       <div className="text-center min-w-0">
