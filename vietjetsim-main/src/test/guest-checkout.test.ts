@@ -13,6 +13,10 @@ vi.mock('@/lib/auth', async () => {
 
 vi.mock('@/lib/mail', () => ({
   sendBookingConfirmationEmail: vi.fn().mockResolvedValue(true),
+  sendPaymentSuccessEmail: vi.fn().mockResolvedValue(true),
+  sendPaymentInstructionEmail: vi.fn().mockResolvedValue(true),
+  sendPaymentFailedEmail: vi.fn().mockResolvedValue(true),
+  sendRefundNotificationEmail: vi.fn().mockResolvedValue(true),
 }));
 
 vi.mock('@/lib/db', async () => {

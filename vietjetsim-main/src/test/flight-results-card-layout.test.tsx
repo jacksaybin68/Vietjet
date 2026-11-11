@@ -52,9 +52,13 @@ describe('FlightResultsStep — card bố cục 1 hàng ngang', () => {
   // Điều chỉnh từ phản hồi UI: card kết quả xếp dọc ở viewport 1219px vì bố cục
   // hàng ngang chỉ bật từ `xl` (1280px) — trong khi cột kết quả chỉ rộng ~480px
   // từ `lg` trở lên, nên phải bật hàng ngang ngay tại `lg`.
-  it('bật bố cục hàng ngang từ lg, không phải xl', async () => {
+  // Mobile-first: trên điện thoại card xếp dọc (khối thông tin chuyến bay ở
+  // trên, lưới giá 2×2 bên dưới) vì bốn cột giá không vừa 390px; từ `sm` trở
+  // lên nó trở về hàng ngang như desktop.
+  it('xếp dọc trên mobile, hàng ngang từ sm, không phải xl', async () => {
     const card = await renderResults();
-    expect(card.className).toContain('lg:flex-row');
+    expect(card.className).toContain('flex-col');
+    expect(card.className).toContain('sm:flex-row');
     expect(card.className).not.toContain('xl:flex-row');
   });
 
@@ -64,14 +68,19 @@ describe('FlightResultsStep — card bố cục 1 hàng ngang', () => {
     expect(info.className).toContain('lg:w-[240px]');
     expect(info.className).toContain('lg:border-b-0');
     expect(info.className).not.toContain('xl:w-[240px]');
+    // Mobile: khối này chiếm hết một hàng, viền dưới thay cho viền phải.
+    expect(info.className).toContain('w-full');
+    expect(info.className).toContain('border-b');
   });
 
-  // 4 hạng giá phải nằm trên một hàng duy nhất, không lưới 2×2 như bản cũ.
-  it('hiển thị 4 hạng giá trong một hàng', async () => {
+  // Bốn hạng giá phải nằm trên MỘT hàng từ `sm` trở lên — lưới 2×2 như bản cũ
+  // chỉ là bố cục riêng cho mobile, không được áp lên desktop.
+  it('hiển thị 4 hạng giá trong một hàng từ sm trở lên', async () => {
     const card = await renderResults();
-    const fareGrid = (card.querySelector('.grid-cols-4') || card.children[1]) as HTMLElement;
-    expect(fareGrid.className).toContain('grid-cols-4');
-    expect(fareGrid.className).not.toContain('grid-cols-2');
+    const fareGrid = (card.querySelector('.sm\\:grid-cols-4') || card.children[1]) as HTMLElement;
+    expect(fareGrid.className).toContain('sm:grid-cols-4');
+    // Mobile: 2×2 — bốn cột giá không vừa bề ngang 390px.
+    expect(fareGrid.className).toContain('grid-cols-2');
     expect(fareGrid.children).toHaveLength(4);
   });
 });

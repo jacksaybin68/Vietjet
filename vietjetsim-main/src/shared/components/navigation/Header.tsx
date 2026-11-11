@@ -399,8 +399,8 @@ export default function Header({
                     compactMode ? 'text-xs px-2.5 py-1' : 'text-sm px-3.5 py-1.5'
                   } rounded-full border transition-all ${
                     lightChrome
-                      ? 'border-white/35 bg-black/25 hover:bg-black/35 text-white backdrop-blur-xs shadow-2xs'
-                      : 'border-gray-200 bg-gray-100 hover:bg-gray-200/80 text-gray-800 shadow-2xs'
+                      ? 'border-white/35 bg-black/25 hover:bg-black/35 text-white backdrop-blur-sm shadow-sm'
+                      : 'border-gray-200 bg-gray-100 hover:bg-gray-200/80 text-gray-800 shadow-sm'
                   }`}
                 >
                   <HiOutlineUserCircle
@@ -442,7 +442,7 @@ export default function Header({
                   aria-expanded={langMenuOpen}
                   className={`flex items-center gap-1 rounded-full px-2 py-0.5 font-bold transition text-xs ${
                     lightChrome
-                      ? 'border border-white/50 bg-black/10 backdrop-blur-xs text-white hover:border-white'
+                      ? 'border border-white/50 bg-black/10 backdrop-blur-sm text-white hover:border-white'
                       : 'border border-gray-200 bg-gray-50 text-gray-700 hover:text-vjred'
                   }`}
                 >
@@ -501,7 +501,7 @@ export default function Header({
                 <div
                   className={`flex items-center gap-1 text-3xs sm:text-xs font-bold px-2.5 py-1 rounded-full border transition-all ${
                     lightChrome
-                      ? 'border-white/35 bg-black/25 text-white backdrop-blur-xs'
+                      ? 'border-white/35 bg-black/25 text-white backdrop-blur-sm'
                       : 'border-gray-200 bg-gray-100 text-gray-800'
                   }`}
                 >
@@ -509,7 +509,10 @@ export default function Header({
                     Đăng ký
                   </Link>
                   <span className={lightChrome ? 'text-white/40' : 'text-gray-400'}>|</span>
-                  <Link href="/dang-nhap" className="hover:text-vjyellow transition hover:underline">
+                  <Link
+                    href="/dang-nhap"
+                    className="hover:text-vjyellow transition hover:underline"
+                  >
                     Đăng nhập
                   </Link>
                 </div>

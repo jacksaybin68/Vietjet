@@ -455,7 +455,12 @@ export default function FlightBookingResultsWrapper({
       <div className="mx-auto w-full max-w-[1368px] px-2 sm:px-6 lg:px-8 pt-3 sm:pt-5 pb-24 sm:pb-28 overflow-x-hidden">
         <div className="flex flex-col lg:flex-row gap-6 items-start w-full">
           {/* Cột trái: danh sách chuyến bay (~68%) */}
-          <div className="flex-1 lg:w-[68%] min-w-0">
+          {/* `w-full` là bắt buộc ở mobile: parent dùng `items-start`, nên cột
+              con không tự giãn theo bề rộng container — nó lấy bề rộng nội
+              dung. Không có `w-full`, lưới 4 cột giá đẩy cột này rộng ~658px
+              trong viewport 390px và bị `overflow-x-hidden` của wrapper cắt mất
+              (giá vé của các hạng bên phải không chạm được trên điện thoại). */}
+          <div className="w-full lg:w-[68%] flex-1 min-w-0">
             <FlightBookingClient
               continueSignal={continueSignal}
               onFlightSelect={handleFlightSelect}

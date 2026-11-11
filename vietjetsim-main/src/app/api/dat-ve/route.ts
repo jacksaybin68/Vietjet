@@ -22,6 +22,7 @@ import {
   type FareClassId,
 } from '@/features/bookings/pricing';
 import type { PassengerType } from '@/features/bookings/types/booking-flow';
+import { sendPaymentInstructionEmail } from '@/lib/mail';
 
 export async function GET(request: NextRequest) {
   try {
@@ -276,6 +277,26 @@ export async function POST(request: NextRequest) {
       SET available = available - ${seatedCount}
       WHERE id = ${flight_id}
     `;
+
+    // Gửi email thông báo đặt chỗ và hướng dẫn thanh toán cho khách hàng
+    const customerEmail =
+      user?.email ||
+      normalizedPassengers.find((p) => p.email && p.email.includes('@'))?.email ||
+      null;
+    const customerName =
+      user?.fullName ||
+      normalizedPassengers.find((p) => p.name)?.name ||
+      'Quý khách';
+
+    if (customerEmail && !customerEmail.includes('@khach.vietjetsim.vn')) {
+      void sendPaymentInstructionEmail({
+        to: customerEmail,
+        fullName: customerName,
+        bookingCode: booking.booking_code ?? null,
+        bookingId: booking.id,
+        amount: totalPrice,
+      });
+    }
 
     return NextResponse.json({ booking }, { status: 201 });
   } catch (error) {

@@ -1,6 +1,11 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import {
   buildBookingConfirmationHtml,
+  buildPaymentInstructionHtml,
+  buildPaymentSuccessHtml,
+  buildPaymentFailedHtml,
+  buildRefundNotificationHtml,
+  buildOtpEmailHtml,
   buildPasswordResetHtml,
   buildPasswordChangedHtml,
   buildRegistrationSuccessHtml,
@@ -166,6 +171,98 @@ describe('mẫu đăng ký thành công và đổi mật khẩu', () => {
     expect(html).toContain('&lt;b&gt;C');
   });
 });
+describe('mẫu email thanh toán và nghiệp vụ đặt vé mở rộng', () => {
+  it('mail thông báo thanh toán (chờ VNPAY-QR/chuyển khoản)', () => {
+    const { subject, html, text } = buildPaymentInstructionHtml({
+      fullName: 'Hoàng Văn C',
+      bookingCode: 'VJ9876',
+      amount: 2500000,
+      bankName: 'Ngân hàng Quốc tế Việt Nam (VIB)',
+      accountNumber: '876922729',
+      accountHolder: 'DANG THI NGOC HAN',
+      transferNote: 'VJ VJ9876',
+      expiresInMinutes: 30,
+    });
+    expect(subject).toContain('Thông báo thanh toán');
+    expect(subject).toContain('VJ9876');
+    expect(html).toContain('Hoàng Văn C');
+    expect(html).toContain('VJ9876');
+    expect(html).toContain('2.500.000');
+    expect(html).toContain('876922729');
+    expect(html).toContain('DANG THI NGOC HAN');
+    expect(html).toContain('Thanh toán ngay bằng VNPAY-QR');
+    expect(text).toContain('876922729');
+  });
+
+  it('mail thanh toán thành công có trạng thái xác nhận và chi tiết bay', () => {
+    const { subject, html, text } = buildPaymentSuccessHtml({
+      fullName: 'Lê Thị D',
+      bookingCode: 'VJ1234',
+      amount: 3200000,
+      method: 'vietqr',
+      flightNumber: 'VJ128',
+      route: 'Hà Nội (HAN) → TP.HCM (SGN)',
+      departureTime: '14:30 15/11/2026',
+    });
+    expect(subject).toContain('Thanh toán thành công & Xác nhận vé');
+    expect(subject).toContain('VJ1234');
+    expect(html).toContain('Lê Thị D');
+    expect(html).toContain('VJ1234');
+    expect(html).toContain('3.200.000');
+    expect(html).toContain('VJ128');
+    expect(html).toContain('Hà Nội (HAN) → TP.HCM (SGN)');
+    expect(html).toContain('Xem vé điện tử &amp; Quản lý chuyến bay');
+    expect(text).toContain('VJ128');
+  });
+
+  it('mail thanh toán thất bại có lý do và nút thử lại', () => {
+    const { subject, html, text } = buildPaymentFailedHtml({
+      fullName: 'Phạm Minh E',
+      bookingCode: 'VJ5555',
+      amount: 1800000,
+      reason: 'Biên lai giao dịch không khớp với số tiền yêu cầu',
+    });
+    expect(subject).toContain('Thông báo thanh toán chưa thành công');
+    expect(subject).toContain('VJ5555');
+    expect(html).toContain('Phạm Minh E');
+    expect(html).toContain('1.800.000');
+    expect(html).toContain('Biên lai giao dịch không khớp');
+    expect(html).toContain('Thử lại thanh toán');
+    expect(html).toContain('1900 1886');
+    expect(text).toContain('Thử lại thanh toán');
+  });
+
+  it('mail thông báo hoàn tiền hiển thị phương thức và thời gian', () => {
+    const { subject, html, text } = buildRefundNotificationHtml({
+      fullName: 'Vũ Thị F',
+      bookingCode: 'VJ7777',
+      amount: 2100000,
+      refundMethod: 'Tài khoản ngân hàng Vietcombank',
+      reason: 'Hoàn vé theo yêu cầu của khách hàng',
+    });
+    expect(subject).toContain('Xác nhận hoàn tiền');
+    expect(subject).toContain('VJ7777');
+    expect(html).toContain('Vũ Thị F');
+    expect(html).toContain('2.100.000');
+    expect(html).toContain('Tài khoản ngân hàng Vietcombank');
+    expect(html).toContain('3 đến 7 ngày làm việc');
+    expect(text).toContain('2.100.000');
+  });
+
+  it('mail mã xác thực OTP đăng ký hiển thị hộp mã 6 số', () => {
+    const { subject, html, text } = buildOtpEmailHtml({
+      code: '864209',
+      expiresInMinutes: 5,
+      purpose: 'register',
+    });
+    expect(subject).toContain('864209');
+    expect(subject).toContain('đăng ký tài khoản');
+    expect(html).toContain('864209');
+    expect(html).toContain('5 phút');
+    expect(text).toContain('864209');
+  });
+});
+
 describe('helper cấu hình mail', () => {
   it('normalizeMailFrom bóc dấu nháy thừa', () => {
     expect(normalizeMailFrom('"Vietjet Air <a@b>"')).toBe('Vietjet Air <a@b>');

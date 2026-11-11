@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
 import { verifyAdminRequest } from '@/lib/admin-auth';
-import { sendBookingConfirmationEmail } from '@/lib/mail';
+import { sendBookingConfirmationEmail, sendPaymentFailedEmail, sendPaymentSuccessEmail } from '@/lib/mail';
 import { writeAuditLog } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
@@ -270,6 +270,41 @@ export async function PATCH(request: NextRequest) {
           SET available = available + ${seatedCount} 
           WHERE id = ${targetBooking.flight_id}
         `;
+      }
+
+      // Gửi email thông báo thanh toán không thành công / từ chối đối soát cho khách hàng
+      let rejectEmail: string | null = null;
+      let rejectName: string = 'Quý khách';
+
+      if (targetBooking.user_id) {
+        const uRes =
+          await sql`SELECT email, full_name FROM user_profiles WHERE id = ${targetBooking.user_id} LIMIT 1`;
+        const userRow = (uRes as any[])[0];
+        if (userRow?.email) {
+          rejectEmail = userRow.email;
+          rejectName = userRow.full_name || rejectName;
+        }
+      }
+
+      if (!rejectEmail) {
+        const pRes =
+          await sql`SELECT name, email FROM passengers WHERE booking_id = ${targetBooking.id} AND email IS NOT NULL LIMIT 1`;
+        const pRow = (pRes as any[])[0];
+        if (pRow?.email) {
+          rejectEmail = pRow.email;
+          rejectName = pRow.name || rejectName;
+        }
+      }
+
+      if (rejectEmail) {
+        void sendPaymentFailedEmail({
+          to: rejectEmail,
+          fullName: rejectName,
+          bookingCode: targetBooking.booking_code,
+          bookingId: targetBooking.id,
+          amount: targetBooking.total_price,
+          reason: note || 'Biên lai giao dịch không hợp lệ hoặc không nhận được khoản thanh toán đối soát',
+        });
       }
 
       // Audit Log

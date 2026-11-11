@@ -10,7 +10,7 @@ import {
 import { verifyAuthRequest } from '@/lib/auth';
 import { renderTransferNote } from '@/lib/transfer-note';
 import { validateBankTransferInput } from '@/lib/bank-transfer';
-import { sendBookingConfirmationEmail } from '@/lib/mail';
+import { sendBookingConfirmationEmail, sendPaymentInstructionEmail, sendPaymentSuccessEmail } from '@/lib/mail';
 import { skypointPointsForAmount } from '@/lib/skypoint';
 
 /** Methods the payment page may submit. Anything else is rejected up front. */
@@ -236,20 +236,19 @@ export async function POST(request: NextRequest) {
         transfer_note || (booking.booking_code ? `VJ ${booking.booking_code}` : undefined),
     });
 
-    // Chỉ gửi email xác nhận vé ngay nếu thanh toán đã hoàn tất trực tiếp (thẻ, ví).
-    // Nếu khách đính kèm ảnh biên lai để admin đối chiếu, email sẽ được gửi tự động khi admin bấm duyệt trong /quan-tri.
+    // Tìm thông tin người nhận email
     let toEmail = user?.email;
     let recipientName = user?.fullName;
 
-    if (initialStatus === 'completed') {
-      if (!toEmail && booking.user_id) {
-        const bookingUser = await findUserById(booking.user_id);
-        if (bookingUser) {
-          toEmail = bookingUser.email;
-          recipientName = bookingUser.full_name;
-        }
+    if (!toEmail && booking.user_id) {
+      const bookingUser = await findUserById(booking.user_id);
+      if (bookingUser) {
+        toEmail = bookingUser.email;
+        recipientName = bookingUser.full_name;
       }
+    }
 
+    if (initialStatus === 'completed') {
       if (toEmail) {
         void sendBookingConfirmationEmail({
           to: toEmail,
@@ -257,6 +256,18 @@ export async function POST(request: NextRequest) {
           bookingCode: result.booking.booking_code ?? null,
           amount: discountedTotal,
           method,
+        });
+      }
+    } else if (initialStatus === 'pending') {
+      // Đơn hàng thanh toán chuyển khoản / VNPAY-QR đang chờ đối soát: gửi email thông báo và hướng dẫn thanh toán
+      if (toEmail) {
+        void sendPaymentInstructionEmail({
+          to: toEmail,
+          fullName: recipientName || 'Quý khách',
+          bookingCode: result.booking.booking_code ?? null,
+          bookingId: booking.id,
+          amount: discountedTotal,
+          transferNote: transfer_note || (result.booking.booking_code ? `VJ ${result.booking.booking_code}` : undefined),
         });
       }
     }

@@ -46,6 +46,18 @@ const FARE_CLASS_CONFIG: Record<
   },
 };
 
+/**
+ * Màu nền nhãn hạng vé trong card kết quả — khớp đúng với hàng header ở
+ * desktop (`bg-[#8E7022]` / `#D71920` / `#FF8800` / `#388E3C`), để nhãn ở
+ * mobile và header ở desktop nói cùng một ngôn ngữ màu.
+ */
+const FARE_BADGE_CLASS: Record<string, string> = {
+  business: 'bg-[#8E7022]',
+  skyboss: 'bg-[#D71920]',
+  deluxe: 'bg-[#FF8800]',
+  eco: 'bg-[#388E3C]',
+};
+
 const DEPARTURE_TIME_SLOTS = [
   { label: 'Sáng sớm', sublabel: '00:00 – 06:00', start: 0, end: 6 },
   { label: 'Buổi sáng', sublabel: '06:00 – 12:00', start: 6, end: 12 },
@@ -1055,11 +1067,14 @@ export default function FlightResultsStep({
           </div>
         )}
 
-        {/* 4 Fare Class Headers matching reference screenshot (visible on mobile and desktop) */}
+        {/* 4 Fare Class Headers — chỉ hiện từ `sm` trở lên. Ở mobile, mỗi ô
+            giá trong card tự mang nhãn hạng của nó (xem `FARE_BADGE`), nên hàng
+            header này không còn đường nào để canh — giữ nó ở mobile sẽ sinh
+            một hàng logo trôi lệch khỏi lưới giá bên dưới. */}
         {!isLoading && filtered.length > 0 && (
-          <div className="flex flex-row items-stretch gap-0 mt-3 mb-1">
+          <div className="hidden sm:flex flex-row items-stretch gap-0 mt-3 mb-1">
             {/* Empty space matching left yellow box */}
-            <div className="w-[24%] sm:w-[28%] lg:w-[240px] shrink-0" />
+            <div className="w-[28%] lg:w-[240px] shrink-0" />
             {/* 4 Fare Headers aligned with flight card columns */}
             <div className="flex-1 min-w-0 grid grid-cols-4 gap-0.5">
               <div
@@ -1214,7 +1229,7 @@ export default function FlightResultsStep({
                 key={flight.id}
                 data-testid="flight-result-card"
                 style={{ transitionDelay: `${Math.min(idx * 50, 300)}ms` }}
-                className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs hover:shadow-md transition-shadow duration-200 relative flex flex-row lg:flex-row flex-wrap mb-2 sm:mb-3"
+                className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs hover:shadow-md transition-shadow duration-200 relative flex flex-col sm:flex-row flex-wrap mb-2 sm:mb-3"
               >
                 {/* Left: Flight Info - bright yellow box matching real Vietjet */}
                 <div
@@ -1250,22 +1265,26 @@ export default function FlightResultsStep({
                       setExpandedFlightNo(flight.flightNo);
                     }
                   }}
-                  className="w-[24%] sm:w-[28%] lg:w-[240px] shrink-0 bg-[#FFC700] p-1 sm:p-3 lg:p-4 border-r border-yellow-400 lg:border-b-0 flex flex-col items-center justify-center text-center relative select-none cursor-pointer hover:bg-yellow-400 transition-colors focus:outline-none focus:ring-0"
+                  className="w-full sm:w-[28%] lg:w-[240px] shrink-0 bg-[#FFC700] p-2.5 sm:p-3 lg:p-4 border-b sm:border-b-0 sm:border-r border-yellow-400 lg:border-b-0 flex flex-row sm:flex-col items-center justify-between sm:justify-center gap-x-2.5 gap-y-0.5 sm:gap-y-0 text-center relative select-none cursor-pointer hover:bg-yellow-400 transition-colors focus:outline-none focus:ring-0"
                 >
-                  <span className="text-[9px] sm:text-2xs font-bold text-gray-900 tracking-wider uppercase leading-tight">
-                    {flight.flightNo}
-                  </span>
+                  {/* Mobile: số hiệu + giờ nằm cạnh nhau, máy bay đẩy sang phải.
+                      Desktop: trở về khối dọc như trước. */}
+                  <div className="flex items-center justify-center gap-2.5 sm:flex-col sm:gap-0">
+                    <span className="text-[9px] sm:text-2xs font-bold text-gray-900 tracking-wider uppercase leading-tight">
+                      {flight.flightNo}
+                    </span>
 
-                  <div className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 my-0.5 sm:my-1">
-                    <span className="text-xs sm:text-base lg:text-2xl font-black text-gray-950 font-koho leading-none">
-                      {flight.departTime}
-                    </span>
-                    <span className="text-[8px] sm:text-2xs font-bold text-gray-700 leading-none">
-                      Đến
-                    </span>
-                    <span className="text-xs sm:text-base lg:text-2xl font-black text-gray-950 font-koho leading-none">
-                      {flight.arriveTime}
-                    </span>
+                    <div className="flex flex-row items-center justify-center gap-0.5 sm:gap-1.5 sm:my-1">
+                      <span className="text-xs sm:text-base lg:text-2xl font-black text-gray-950 font-koho leading-none">
+                        {flight.departTime}
+                      </span>
+                      <span className="text-[8px] sm:text-2xs font-bold text-gray-700 leading-none">
+                        Đến
+                      </span>
+                      <span className="text-xs sm:text-base lg:text-2xl font-black text-gray-950 font-koho leading-none">
+                        {flight.arriveTime}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="text-[7.5px] sm:text-2xs text-gray-800 font-medium leading-tight flex items-center justify-center flex-wrap gap-x-1 gap-y-0.5">
@@ -1284,11 +1303,14 @@ export default function FlightResultsStep({
                     <span className="text-red-700 font-bold block sm:inline">Bay thẳng</span>
                   </div>
 
-                  <span className="text-[9px] sm:text-xs text-gray-700 mt-0.5 leading-none">∨</span>
+                  <span className="hidden sm:block text-[9px] sm:text-xs text-gray-700 mt-0.5 leading-none">
+                    ∨
+                  </span>
                 </div>
 
-                {/* Right: Fare Classes - 4 columns matching sample */}
-                <div className="flex-1 min-w-0 grid grid-cols-4 gap-0.5 bg-gray-100/60">
+                {/* Right: Fare Classes — 4 hàng cột trên desktop, 2×2 trên mobile
+                    (mỗi ô tự mang nhãn hạng nên không cần hàng header riêng). */}
+                <div className="flex-1 min-w-0 grid grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-0.5 p-1.5 sm:p-0 bg-gray-100/60">
                   {fareClasses.map((fc) => {
                     const fares = Object.fromEntries(
                       fareClasses.map((item) => [item.id, item.price])
@@ -1337,6 +1359,15 @@ export default function FlightResultsStep({
 
                         {isSoldOut ? (
                           <div className="flex-1 flex flex-col items-center justify-center p-1 sm:p-2 text-center select-none min-h-[64px] sm:min-h-[78px]">
+                            {/* Mobile: vẫn phải ghi tên hạng — ô "Hết chỗ" không
+                                nói rõ đó là hạng nào. */}
+                            <span
+                              className={`sm:hidden mb-1 inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider leading-none text-white opacity-70 ${
+                                FARE_BADGE_CLASS[fc.id] ?? 'bg-gray-500'
+                              }`}
+                            >
+                              {fc.name}
+                            </span>
                             <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-full border border-gray-400/50 flex items-center justify-center text-gray-400 mb-0.5 sm:mb-1">
                               <Icon
                                 name="PaperAirplaneIcon"
@@ -1388,9 +1419,19 @@ export default function FlightResultsStep({
                               onFlightSelect?.(flight.flightNo, fc.id, fc.price, fares, flight);
                             }}
                             className={`group w-full h-full py-1.5 sm:py-2.5 px-0.5 sm:px-1 flex flex-col items-center justify-center text-center cursor-pointer transition-transform active:scale-[0.98] min-h-[64px] sm:min-h-[78px] focus:outline-none focus:ring-0 ${
-                              isSelected ? 'pt-3.5 sm:pt-4' : ''
+                              isSelected ? 'pt-6 sm:pt-4' : ''
                             }`}
                           >
+                            {/* Mobile: hàng header hạng vé đã bị ẩn, nên mỗi ô
+                                phải tự nói hạng của nó — nếu không, bốn giá trên
+                                màn hình không phân biệt được hạng nào. */}
+                            <span
+                              className={`sm:hidden mb-1 inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider leading-none text-white ${
+                                FARE_BADGE_CLASS[fc.id] ?? 'bg-gray-500'
+                              }`}
+                            >
+                              {fc.name}
+                            </span>
                             <span
                               className={`text-xs sm:text-base lg:text-xl font-black font-koho leading-none tracking-tight transition-colors ${
                                 isSelected
