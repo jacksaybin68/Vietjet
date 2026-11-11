@@ -35,7 +35,7 @@ import {
   ZaloPayLogo,
   ApplePayLogo,
   GooglePayLogo,
-  SkyPayLogo,
+  SkyJoyLogo,
   MoviLogo,
   GalaxyPayBadge,
   PaymentSecurityFooter,
@@ -329,8 +329,20 @@ export default function PaymentClient() {
   const router = useRouter();
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [hasPromoChecked, setHasPromoChecked] = useState(false);
-  const [selectedMethodGroup, setSelectedMethodGroup] = useState<string>('card');
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
+  const [selectedMethodGroup, setSelectedMethodGroup] = useState<string>(() => {
+    if (typeof window === 'undefined') return 'vnpay_qr';
+    const param = new URLSearchParams(window.location.search).get('method');
+    return param || 'vnpay_qr';
+  });
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(() => {
+    if (typeof window === 'undefined') return 'vietqr';
+    const param = new URLSearchParams(window.location.search).get('method');
+    if (param === 'card') return 'card';
+    if (param === 'bank') return 'bank';
+    if (param === 'wallet') return 'wallet';
+    if (param === 'skypoint') return 'skypoint';
+    return 'vietqr';
+  });
   const [cardNumber, setCardNumber] = useState('');
   const [cardName, setCardName] = useState('');
   const [expiry, setExpiry] = useState('');
@@ -515,6 +527,19 @@ export default function PaymentClient() {
     ]
   );
 
+  // Tự động điền nội dung và số tiền chuyển khoản dự kiến nếu khách chưa nhập
+  useEffect(() => {
+    if (transferNote && !transferNoteInput) {
+      setTransferNoteInput(transferNote);
+    }
+  }, [transferNote, transferNoteInput]);
+
+  useEffect(() => {
+    if (total > 0 && !transferAmountInput) {
+      setTransferAmountInput(String(total));
+    }
+  }, [total, transferAmountInput]);
+
   const applyPromo = async () => {
     if (!promoCode.trim()) return;
     setPromoError('');
@@ -566,7 +591,10 @@ export default function PaymentClient() {
       }
       if (!receiptImage) {
         const check = validateBankTransferInput(
-          { transferNote: transferNoteInput, amount: transferAmountInput },
+          {
+            transferNote: transferNoteInput.trim() || transferNote,
+            amount: transferAmountInput.trim() || String(total),
+          },
           { transferNote, amount: total }
         );
         if (!check.valid) {
@@ -613,8 +641,8 @@ export default function PaymentClient() {
         discount_amount: discountAmount,
         discount_code: promoData?.code,
         bank_account_id: selectedAdminAccount?.id,
-        transfer_note: transferNoteInput || transferNote,
-        transfer_amount: transferAmountInput || String(total),
+        transfer_note: transferNoteInput.trim() || transferNote,
+        transfer_amount: transferAmountInput.trim() || String(total),
         receipt_image: receiptImage || undefined,
       });
 
@@ -960,8 +988,8 @@ export default function PaymentClient() {
             <Icon name="CheckCircleIcon" size={18} className="text-white" />
             <span>
               {receiptImage
-                ? 'Tôi đã chuyển khoản (Đã đính kèm ảnh biên lai)'
-                : 'Tôi đã chuyển khoản xong — Đã thanh toán'}
+                ? 'Tôi đã thanh toán VNPAY (Đã đính kèm ảnh biên lai)'
+                : 'Tôi đã quét mã VNPAY — Đã thanh toán'}
             </span>
           </>
         )}
@@ -979,7 +1007,7 @@ export default function PaymentClient() {
         <ConfettiCanvas />
         <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
 
-        <div className="pt-[128px] pb-12 min-h-screen flex items-center justify-center">
+        <div className="pb-12 min-h-screen flex items-center justify-center">
           <div className="max-w-lg w-full mx-auto px-4">
             {/* Success state */}
             <div
@@ -1288,7 +1316,14 @@ export default function PaymentClient() {
             <span className="font-black text-sm uppercase tracking-wide text-gray-950 font-koho">
               {booking?.fromCity || 'TP. HCM'} ({booking?.from || 'SGN'})
             </span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-red-600 rotate-45 inline shrink-0" aria-hidden="true">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="text-red-600 rotate-45 inline shrink-0"
+              aria-hidden="true"
+            >
               <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
             </svg>
             <span className="font-black text-sm uppercase tracking-wide text-gray-950 font-koho">
@@ -1433,50 +1468,31 @@ export default function PaymentClient() {
                     Thẻ và tài khoản ngân hàng
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                    {/* Credit Card */}
+                    {/* 1. Quét mã QR VNPAY (Khuyên dùng - Mặc định) */}
                     <button
                       type="button"
                       onClick={() => {
-                        setSelectedMethodGroup('card');
-                        setPaymentMethod('card');
+                        setSelectedMethodGroup('vnpay_qr');
+                        setPaymentMethod('vietqr');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
-                        selectedMethodGroup === 'card'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] relative overflow-hidden ${
+                        selectedMethodGroup === 'vnpay_qr'
+                          ? 'border-[#005BAA] ring-2 ring-[#005BAA] bg-blue-50/40 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <VisaLogo className="h-3.5 w-auto" />
-                        <MastercardLogo className="h-3.5 w-auto" />
-                        <JcbLogo className="h-3.5 w-auto" />
-                        <AmexLogo className="h-3.5 w-auto" />
+                      <div className="absolute top-0 right-0 bg-[#ED1C24] text-white text-[8px] font-black px-1.5 py-0.5 rounded-bl-md uppercase tracking-wider">
+                        Khuyên dùng
+                      </div>
+                      <div className="flex items-center h-8">
+                        <VnpayLogo className="h-5 w-auto max-w-[104px]" />
                       </div>
                       <span className="text-xs font-bold text-gray-900 mt-2 line-clamp-2 leading-tight">
-                        Thẻ tín dụng / ghi nợ quốc tế
+                        Quét mã VNPAY-QR
                       </span>
                     </button>
 
-                    {/* ATM Napas */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedMethodGroup('napas');
-                        setPaymentMethod('bank');
-                      }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
-                        selectedMethodGroup === 'napas'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
-                    >
-                      <div className="py-0.5">
-                        <NapasLogo className="h-4 w-auto" />
-                      </div>
-                      <span className="text-xs font-bold text-gray-900 mt-2">Thẻ ATM nội địa</span>
-                    </button>
-
-                    {/* Mobile Banking VietQR */}
+                    {/* 2. Mobile Banking VietQR */}
                     <button
                       type="button"
                       onClick={() => {
@@ -1489,39 +1505,59 @@ export default function PaymentClient() {
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div className="absolute top-0 right-0 bg-red-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-bl-md uppercase tracking-wider">
-                        Khuyên dùng
-                      </div>
-                      <div className="py-0.5">
-                        <VietQrLogo className="h-5 w-auto" />
+                      <div className="flex items-center h-8">
+                        <VietQrLogo className="h-5 w-auto max-w-[104px]" />
                       </div>
                       <span className="text-xs font-bold text-gray-900 mt-2 line-clamp-2 leading-tight">
                         Mobile Banking VietQR
                       </span>
                     </button>
 
-                    {/* Quét mã QR VNPAY */}
+                    {/* 3. Thẻ ATM nội địa Napas */}
                     <button
                       type="button"
                       onClick={() => {
-                        setSelectedMethodGroup('vnpay_qr');
-                        setPaymentMethod('vietqr');
+                        setSelectedMethodGroup('napas');
+                        setPaymentMethod('bank');
                       }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
-                        selectedMethodGroup === 'vnpay_qr'
+                        selectedMethodGroup === 'napas'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div className="py-0.5">
-                        <VnpayLogo className="h-4 w-auto" />
+                      <div className="flex items-center h-8">
+                        <NapasLogo className="h-4 w-auto max-w-[104px]" />
+                      </div>
+                      <span className="text-xs font-bold text-gray-900 mt-2">Thẻ ATM nội địa</span>
+                    </button>
+
+                    {/* 4. Thẻ tín dụng / ghi nợ quốc tế */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedMethodGroup('card');
+                        setPaymentMethod('card');
+                      }}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
+                        selectedMethodGroup === 'card'
+                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      {/* Bốn logo mạng thẻ xếp 2×2 để không bị chồng lên nhau */}
+                      <div className="grid grid-cols-2 gap-x-2 gap-y-1 h-8 items-center">
+                        <VisaLogo className="h-4 w-auto" />
+                        <MastercardLogo className="h-4 w-auto" />
+                        <JcbLogo className="h-4 w-auto" />
+                        <AmexLogo className="h-4 w-auto" />
                       </div>
                       <span className="text-xs font-bold text-gray-900 mt-2 line-clamp-2 leading-tight">
-                        Quét mã QR VNPAY
+                        Thẻ tín dụng / ghi nợ quốc tế
                       </span>
                     </button>
 
-                    {/* Thanh toán nội địa VNPAY */}
+                    {/* 5. Thanh toán nội địa VNPAY */}
                     <button
                       type="button"
                       onClick={() => {
@@ -1530,12 +1566,12 @@ export default function PaymentClient() {
                       }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
                         selectedMethodGroup === 'vnpay_dom'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
+                          ? 'border-[#005BAA] ring-2 ring-[#005BAA] bg-blue-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div className="py-0.5">
-                        <VnpayLogo className="h-4 w-auto" />
+                      <div className="flex items-center h-8">
+                        <VnpayLogo className="h-4 w-auto max-w-[104px]" />
                       </div>
                       <span className="text-xs font-bold text-gray-900 mt-2 line-clamp-2 leading-tight">
                         Thanh toán nội địa VNPAY
@@ -1550,7 +1586,7 @@ export default function PaymentClient() {
                     Ví điện tử
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                    {/* SkyPay */}
+                    {/* SkyJoy (ví tích lũy / điểm SkyPoint) */}
                     <button
                       type="button"
                       onClick={() => {
@@ -1563,10 +1599,10 @@ export default function PaymentClient() {
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div className="py-0.5">
-                        <SkyPayLogo className="h-4.5 w-auto" />
+                      <div className="flex items-center h-8">
+                        <SkyJoyLogo className="h-7 w-auto" />
                       </div>
-                      <span className="text-xs font-bold text-gray-900 mt-2">Ví SkyPay</span>
+                      <span className="text-xs font-bold text-gray-900 mt-2">Ví SkyJoy</span>
                     </button>
 
                     {/* MoMo */}
@@ -1582,9 +1618,8 @@ export default function PaymentClient() {
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div className="flex items-center gap-1.5 py-0.5">
-                        <MomoLogo className="h-6 w-auto" />
-                        <span className="font-extrabold text-xs text-[#A50064]">MoMo</span>
+                      <div className="flex items-center h-8">
+                        <MomoLogo className="h-7 w-auto" />
                       </div>
                       <span className="text-xs font-bold text-gray-900 mt-2">Ví MoMo</span>
                     </button>
@@ -1602,8 +1637,8 @@ export default function PaymentClient() {
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div className="py-0.5">
-                        <ZaloPayLogo className="h-4.5 w-auto" />
+                      <div className="flex items-center h-8">
+                        <ZaloPayLogo className="h-5 w-auto max-w-[104px]" />
                       </div>
                       <span className="text-xs font-bold text-gray-900 mt-2">Ví ZaloPay</span>
                     </button>
@@ -1621,8 +1656,8 @@ export default function PaymentClient() {
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div className="py-0.5">
-                        <ApplePayLogo className="h-5 w-auto" />
+                      <div className="flex items-center h-8">
+                        <ApplePayLogo className="h-6 w-auto max-w-[104px]" />
                       </div>
                       <span className="text-xs font-bold text-gray-900 mt-2">Apple Pay</span>
                     </button>
@@ -1640,8 +1675,8 @@ export default function PaymentClient() {
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div className="py-0.5">
-                        <GooglePayLogo className="h-5 w-auto" />
+                      <div className="flex items-center h-8">
+                        <GooglePayLogo className="h-5 w-auto max-w-[104px]" />
                       </div>
                       <span className="text-xs font-bold text-gray-900 mt-2">Google Pay</span>
                     </button>
@@ -1666,12 +1701,12 @@ export default function PaymentClient() {
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div>
-                        <MoviLogo className="h-5 w-auto" />
-                        <span className="text-4xs text-gray-500 font-medium block mt-0.5">
-                          Bay trước, trả sau
-                        </span>
+                      <div className="flex items-center h-8">
+                        <MoviLogo className="h-6 w-auto max-w-[104px]" />
                       </div>
+                      <span className="text-4xs text-gray-500 font-medium block mt-0.5">
+                        Bay trước, trả sau
+                      </span>
                       <span className="text-xs font-bold text-gray-900 mt-1">Trả góp Movi</span>
                     </button>
                   </div>
@@ -1929,13 +1964,21 @@ export default function PaymentClient() {
                     </div>
                   )}
 
-                  {/* VietQR — mã EMVCo sinh ở server, QR render cục bộ,
+                  {/* VNPAY-QR / VietQR — mã EMVCo sinh ở server, QR render cục bộ theo STK admin,
                       polling tự dò giao dịch; form xác nhận thủ công là fallback. */}
                   {paymentMethod === 'vietqr' && (
                     <div className="space-y-4">
                       <VietQrBox
                         bookingId={booking?.bookingId ?? bookingId}
                         onPaid={() => setConfirmed(true)}
+                        fallbackAccount={selectedAdminAccount}
+                        fallbackAmount={total}
+                        fallbackPnr={
+                          bookingCodeLabel !== '—'
+                            ? bookingCodeLabel
+                            : (booking?.flightNo ?? 'VJ141')
+                        }
+                        fallbackAddInfo={transferNote}
                       />
                       {transferConfirmBlock}
                     </div>
@@ -2157,7 +2200,7 @@ export default function PaymentClient() {
                         <span>
                           {receiptImage
                             ? `✓ Xác nhận đã thanh toán (${total.toLocaleString('vi-VN')} VND)`
-                            : `Tôi đã chuyển khoản — Xác nhận (${total.toLocaleString('vi-VN')} VND)`}
+                            : `Tôi đã quét mã VNPAY — Xác nhận (${total.toLocaleString('vi-VN')} VND)`}
                         </span>
                       </>
                     ) : (
