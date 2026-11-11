@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import HeroBookingWidget from '@/app/trang-chu/components/HeroBookingWidget';
 import {
   FlightDatePickerPopover,
@@ -124,6 +124,15 @@ describe('FlightDatePickerPopover Component', () => {
 });
 
 describe('HeroBookingWidget Date Selection Flow', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-10-15T08:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('opens date picker popover when clicking Ngày đi', () => {
     render(<HeroBookingWidget />);
 

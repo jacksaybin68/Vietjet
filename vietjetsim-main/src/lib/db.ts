@@ -677,6 +677,7 @@ export async function createFlight(flight: {
   businessPrice?: number | null;
   class: string;
   available: number;
+  /** Aircraft type code (migration 040), e.g. 'A321', 'A321neo', 'A330'. */
   aircraft?: string | null;
 }): Promise<FlightRecord> {
   // The same ratio migration 030 seeds from, so a derived row is
@@ -700,7 +701,7 @@ export async function createFlight(flight: {
       ${flight.flight_no}, ${flight.from_code}, ${flight.to_code},
       ${flight.depart_time}, ${flight.arrive_time}, ${flight.price},
       ${economyPrice}, ${businessPrice}, ${flight.class}, ${flight.available},
-      ${flight.aircraft ?? 'A321'}
+      ${flight.aircraft ?? null}
     )
     RETURNING *
   `;

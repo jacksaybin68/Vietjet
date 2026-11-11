@@ -2079,11 +2079,33 @@ export default function PaymentClient() {
                     </h3>
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-200/80 space-y-2 text-xs">
                       <div className="flex justify-between items-center text-gray-700">
-                        <span>Tạm tính</span>
+                        <span>Giá vé cơ bản</span>
                         <span className="font-bold text-gray-900">
-                          {(total > 108000 ? total - 108000 : total).toLocaleString('vi-VN')} VND
+                          {(booking?.fareSubtotal ?? total).toLocaleString('vi-VN')} VND
                         </span>
                       </div>
+                      <div className="flex justify-between items-center text-gray-700">
+                        <span>Thuế &amp; phí sân bay ({Math.round(TAX_AND_FEE_RATE * 100)}%)</span>
+                        <span className="font-bold text-gray-900">
+                          +{(booking?.tax ?? 0).toLocaleString('vi-VN')} VND
+                        </span>
+                      </div>
+                      {(booking?.seatFee ?? 0) > 0 && (
+                        <div className="flex justify-between items-center text-gray-700">
+                          <span>Phí chọn chỗ</span>
+                          <span className="font-bold text-gray-900">
+                            +{(booking?.seatFee ?? 0).toLocaleString('vi-VN')} VND
+                          </span>
+                        </div>
+                      )}
+                      {(booking?.ancillaryFee ?? 0) > 0 && (
+                        <div className="flex justify-between items-center text-gray-700">
+                          <span>Dịch vụ bổ sung</span>
+                          <span className="font-bold text-gray-900">
+                            +{booking!.ancillaryFee!.toLocaleString('vi-VN')} VND
+                          </span>
+                        </div>
+                      )}
                       <div className="flex justify-between items-center text-gray-700">
                         <span>Mã khuyến mãi/Phiếu quà tặng</span>
                         <span className="font-bold text-green-600">
@@ -2091,10 +2113,6 @@ export default function PaymentClient() {
                             ? `-${discountAmount.toLocaleString('vi-VN')} VND`
                             : '0 VND'}
                         </span>
-                      </div>
-                      <div className="flex justify-between items-center text-gray-700">
-                        <span>Phí tiện ích</span>
-                        <span className="font-bold text-gray-900">108.000 VND</span>
                       </div>
                       <div className="flex justify-between items-center text-sm font-black text-gray-900 pt-2.5 border-t border-gray-200">
                         <span>Tổng thanh toán</span>
@@ -2370,8 +2388,15 @@ export default function PaymentClient() {
         <button
           type="button"
           onClick={() => {
+            // For bank/vietqr tabs, the confirmation button is #btn-da-thanh-toan;
+            // for all other methods the submit button is #payment-submit-btn.
+            const transferBtn = document.getElementById('btn-da-thanh-toan');
             const submitBtn = document.getElementById('payment-submit-btn');
-            if (submitBtn) submitBtn.click();
+            if (paymentMethod === 'bank' || paymentMethod === 'vietqr') {
+              (transferBtn ?? submitBtn)?.click();
+            } else {
+              submitBtn?.click();
+            }
           }}
           disabled={loading}
           className="flex-1 bg-[#FFCC00] hover:bg-[#FFD200] disabled:opacity-50 text-gray-950 font-black italic text-sm py-3 rounded-xl shadow transition-all active:scale-95 cursor-pointer text-center"
