@@ -395,22 +395,34 @@ export default function Header({
                 </div>
               ) : (
                 <div
-                  className={`flex items-center gap-1.5 font-bold ${compactMode ? 'text-xs' : 'text-sm'} ${lightChrome ? 'text-white' : 'text-gray-700'}`}
+                  className={`flex items-center gap-1.5 font-bold ${
+                    compactMode ? 'text-xs px-2.5 py-1' : 'text-sm px-3.5 py-1.5'
+                  } rounded-full border transition-all ${
+                    lightChrome
+                      ? 'border-white/35 bg-black/25 hover:bg-black/35 text-white backdrop-blur-xs shadow-2xs'
+                      : 'border-gray-200 bg-gray-100 hover:bg-gray-200/80 text-gray-800 shadow-2xs'
+                  }`}
                 >
                   <HiOutlineUserCircle
                     aria-hidden="true"
-                    className={`${compactMode ? 'text-sm' : 'text-base'} ${lightChrome ? 'text-white' : 'text-gray-400'}`}
+                    className={`${compactMode ? 'text-sm' : 'text-base'} ${
+                      lightChrome ? 'text-white' : 'text-vjred'
+                    }`}
                   />
                   <Link
                     href="/dang-ky"
-                    className={`transition ${lightChrome ? 'hover:text-vjgold' : 'hover:text-vjred'}`}
+                    className={`transition hover:underline ${
+                      lightChrome ? 'hover:text-vjgold' : 'hover:text-vjred'
+                    }`}
                   >
                     Đăng ký
                   </Link>
-                  <span className={lightChrome ? 'text-white/40' : 'text-gray-300'}>|</span>
+                  <span className={lightChrome ? 'text-white/40' : 'text-gray-400'}>|</span>
                   <Link
                     href="/dang-nhap"
-                    className={`transition ${lightChrome ? 'hover:text-vjgold' : 'hover:text-vjred'}`}
+                    className={`transition hover:underline ${
+                      lightChrome ? 'hover:text-vjgold' : 'hover:text-vjred'
+                    }`}
                   >
                     Đăng nhập
                   </Link>
@@ -487,15 +499,17 @@ export default function Header({
                 </span>
               ) : (
                 <div
-                  className={`flex items-center gap-1 text-3xs sm:text-xs ${
-                    lightChrome ? 'text-white' : 'text-gray-700'
+                  className={`flex items-center gap-1 text-3xs sm:text-xs font-bold px-2.5 py-1 rounded-full border transition-all ${
+                    lightChrome
+                      ? 'border-white/35 bg-black/25 text-white backdrop-blur-xs'
+                      : 'border-gray-200 bg-gray-100 text-gray-800'
                   }`}
                 >
-                  <Link href="/dang-ky" className="hover:text-vjyellow transition">
+                  <Link href="/dang-ky" className="hover:text-vjyellow transition hover:underline">
                     Đăng ký
                   </Link>
-                  <span className="opacity-60">|</span>
-                  <Link href="/dang-nhap" className="hover:text-vjyellow transition">
+                  <span className={lightChrome ? 'text-white/40' : 'text-gray-400'}>|</span>
+                  <Link href="/dang-nhap" className="hover:text-vjyellow transition hover:underline">
                     Đăng nhập
                   </Link>
                 </div>

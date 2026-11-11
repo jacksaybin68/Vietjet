@@ -432,6 +432,9 @@ async function main() {
   // khác, admin xem được mọi booking nên lookup không phải 404.
   await captureAll('19-dat-ve', `${BASE}/dat-ve/VJ644052`);
 
+  // /editor là standalone route, admin-only (giống /quan-tri).
+  await captureAll('20-editor', `${BASE}/editor`);
+
   // ── Widget OpenClaw: mở panel, đọc nhãn backend và thử gửi một câu ─────────
   const widgetLauncher = `[...document.querySelectorAll('button')].find((b) => (b.getAttribute('aria-label') || '').includes('OpenClaw'))`;
   const widget = { launcherFound: await evaluate(cdp, `!!${widgetLauncher}`) };

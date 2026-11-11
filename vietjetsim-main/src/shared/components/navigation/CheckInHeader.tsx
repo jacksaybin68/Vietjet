@@ -101,21 +101,22 @@ export default function CheckInHeader({ title = 'CHECK-IN' }: { title?: string }
                     <span>{(user.fullName || user.email)?.replace(/\s*\(CCCD:.*?\)/gi, '')}</span>
                   </span>
                 ) : (
-                  <>
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/35 bg-black/25 hover:bg-black/35 text-white backdrop-blur-xs transition-all shadow-2xs font-bold text-xs">
+                    <HiOutlineUserCircle aria-hidden="true" className="h-4 w-4 text-white" />
                     <Link
                       href="/dang-ky"
-                      className="text-white hover:text-vjyellow transition-colors"
+                      className="text-white hover:text-vjyellow transition-colors hover:underline"
                     >
                       Đăng ký
                     </Link>
-                    <span className="text-white/80">|</span>
+                    <span className="text-white/40">|</span>
                     <Link
                       href="/dang-nhap"
-                      className="text-white hover:text-vjyellow transition-colors"
+                      className="text-white hover:text-vjyellow transition-colors hover:underline"
                     >
                       Đăng nhập
                     </Link>
-                  </>
+                  </div>
                 )}
 
                 <button

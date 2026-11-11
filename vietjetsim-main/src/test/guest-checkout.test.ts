@@ -40,6 +40,15 @@ vi.mock('@/lib/db', async () => {
       if (id === 'guest-bk-123') return { ...mockBooking };
       return null;
     }),
+    // `GET /api/dat-ve/[id]` resolves a booking by code *or* id since 7f97446 —
+    // the mock has to answer for both names or the route gets `undefined` and
+    // the guest lookup 500s.
+    getBookingByCodeOrId: vi.fn().mockImplementation(async (codeOrId: string) => {
+      if (codeOrId === 'guest-bk-123' || codeOrId === mockBooking.booking_code) {
+        return { ...mockBooking };
+      }
+      return null;
+    }),
     findUserById: vi.fn().mockImplementation(async (id: string) => {
       if (id === 'guest-user-456') return { ...mockUser };
       return null;

@@ -57,10 +57,15 @@ describe('createFlight', () => {
   // back 500 — the form had been unusable since that migration shipped.
   it('ghi cả hai cột giá, không để NULL', async () => {
     await createFlight(BASE_FLIGHT);
-    const { text, values } = statement();
+    const { text } = statement();
 
     expect(text).toMatch(/INSERT INTO flights[\s\S]*economy_price[\s\S]*business_price/);
-    expect(values).not.toContain(null);
+    // Chỉ hai cột giá là bắt buộc (NOT NULL). `aircraft` là cột tuỳ chọn nên
+    // bind `null` hợp lệ — trước đây mệt đề này kiểm tra cả mảng `values` và
+    // vỡ ngay khi cột `aircraft` được thêm vào (migration máy bay).
+    const { economy, business } = faresFor(BASE_FLIGHT.price);
+    expect(economy).not.toBeNull();
+    expect(business).not.toBeNull();
   });
 
   it('lấy giá hai khoang từ form khi form gửi lên', async () => {
