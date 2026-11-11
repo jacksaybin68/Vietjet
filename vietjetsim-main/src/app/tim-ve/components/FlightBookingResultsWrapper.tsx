@@ -222,7 +222,7 @@ export default function FlightBookingResultsWrapper({
             <button
               type="button"
               onClick={() => setShowSummaryModal(true)}
-              className="bg-white rounded-full px-3 py-1 text-xs font-black text-gray-900 flex items-center gap-1.5 shadow-xs cursor-pointer hover:bg-gray-50 active:scale-95 transition-all"
+              className="bg-white rounded-full px-3 py-1 text-xs font-black text-gray-900 flex items-center gap-1.5 shadow-xs cursor-pointer hover:bg-gray-50 active:scale-95 transition-all focus:outline-none focus:ring-0"
             >
               <span>Tổng</span>
               <span className="text-red-600 font-black">
@@ -241,7 +241,7 @@ export default function FlightBookingResultsWrapper({
               <button
                 type="button"
                 onClick={() => setIsPaxDropdownOpen((v) => !v)}
-                className="inline-flex items-center gap-1 hover:underline cursor-pointer bg-black/10 hover:bg-black/15 px-2 py-0.5 rounded transition-colors"
+                className="inline-flex items-center gap-1 hover:underline cursor-pointer bg-black/10 hover:bg-black/15 px-2 py-0.5 rounded transition-colors focus:outline-none focus:ring-0"
                 title="Thay đổi số lượng hành khách"
               >
                 <span>{describePax(paxCounts)}</span>

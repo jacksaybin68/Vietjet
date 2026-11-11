@@ -560,9 +560,9 @@ function FlightBookingClientInner({
                 <button
                   type="button"
                   onClick={() => setCurrentLeg('outbound')}
-                  className={`flex-1 min-w-0 flex flex-col items-center py-2 px-2 sm:px-3 rounded-xl transition-all cursor-pointer relative ${
+                  className={`flex-1 min-w-0 flex flex-col items-center py-2 px-2 sm:px-3 rounded-xl transition-all cursor-pointer relative focus:outline-none focus:ring-0 ${
                     currentLeg === 'outbound'
-                      ? 'bg-[#D71920] text-white shadow-md ring-2 ring-[#FFCC00]/50'
+                      ? 'bg-[#D71920] text-white shadow-md'
                       : 'bg-gray-50/90 text-gray-700 hover:bg-gray-100 border border-gray-100'
                   }`}
                 >
@@ -605,9 +605,9 @@ function FlightBookingClientInner({
                     }
                     setCurrentLeg('inbound');
                   }}
-                  className={`flex-1 min-w-0 flex flex-col items-center py-2 px-2 sm:px-3 rounded-xl transition-all cursor-pointer relative ${
+                  className={`flex-1 min-w-0 flex flex-col items-center py-2 px-2 sm:px-3 rounded-xl transition-all cursor-pointer relative focus:outline-none focus:ring-0 ${
                     currentLeg === 'inbound'
-                      ? 'bg-[#D71920] text-white shadow-md ring-2 ring-[#FFCC00]/50'
+                      ? 'bg-[#D71920] text-white shadow-md'
                       : 'bg-gray-50/90 text-gray-700 hover:bg-gray-100 border border-gray-100'
                   }`}
                 >

@@ -73,21 +73,19 @@ export default function ReservationCountdown({
   return (
     <>
       <div
-        className={`w-full transition-all duration-300 rounded-2xl border shadow-sm overflow-hidden mb-5 ${
-          isUrgent
-            ? 'bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 border-red-300 text-white shadow-red-200/50'
-            : 'bg-gradient-to-r from-red-700 via-red-600 to-amber-500 border-red-400/40 text-white shadow-amber-100/50'
-        }`}
+        className={`w-full transition-all duration-300 rounded-2xl border shadow-sm overflow-hidden mb-5 ${isUrgent
+          ? 'bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 border-red-300 text-white shadow-red-200/50'
+          : 'bg-gradient-to-r from-red-700 via-red-600 to-amber-500 border-red-400/40 text-white shadow-amber-100/50'
+          }`}
       >
         <div className="px-4 py-3 sm:px-6 sm:py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
           {/* Left: Icon & Text */}
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <div
-              className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
-                isUrgent
-                  ? 'bg-white text-red-600 animate-bounce'
-                  : 'bg-white/20 text-white backdrop-blur-xs'
-              }`}
+              className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isUrgent
+                ? 'bg-white text-red-600 animate-bounce'
+                : 'bg-white/20 text-white backdrop-blur-xs'
+                }`}
             >
               <svg
                 className={`w-5 h-5 ${timeLeft > 0 ? 'animate-spin' : ''}`}
@@ -139,9 +137,8 @@ export default function ReservationCountdown({
         {/* Progress bar line */}
         <div className="w-full h-1 bg-black/20">
           <div
-            className={`h-full transition-all duration-1000 ${
-              isUrgent ? 'bg-yellow-300' : 'bg-emerald-400'
-            }`}
+            className={`h-full transition-all duration-1000 ${isUrgent ? 'bg-yellow-300' : 'bg-emerald-400'
+              }`}
             style={{ width: `${percentLeft}%` }}
           />
         </div>

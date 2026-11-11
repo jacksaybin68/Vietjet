@@ -128,6 +128,19 @@ html {
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Loại bỏ hoàn toàn viền đỏ / bóng đỏ khi người dùng bấm/chạm chuột vào các trường */
+*:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid rgba(255, 204, 0, 0.9);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.35);
 }
 
 body {
@@ -165,11 +178,7 @@ h6 {
     transform 160ms ease;
 }
 
-:where(a, button, input, select, textarea):focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 3px;
-  box-shadow: 0 0 0 5px rgba(236, 32, 41, 0.38);
-}
+
 
 /* Đích của skip link. Chừa chỗ cho announcement bar + header sticky: không có
    nó thì tiêu đề trang nằm ngay dưới thanh điều hướng vừa được bỏ qua.
@@ -861,7 +870,7 @@ h6 {
   transform: translateY(-1px);
 }
 .seat:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid #f59e0b;
   outline-offset: 1px;
 }
 .seat-available {
@@ -1066,10 +1075,10 @@ select option {
 
 .form-input:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: #f59e0b;
   box-shadow:
-    0 0 0 3px rgba(236, 32, 41, 0.14),
-    0 1px 4px rgba(236, 32, 41, 0.08);
+    0 0 0 3px rgba(245, 158, 11, 0.16),
+    0 1px 3px rgba(0, 0, 0, 0.05);
   background-color: #fff;
 }
 
@@ -1700,8 +1709,8 @@ select option {
   color: #333333;
 }
 .vj-input-field:focus-within {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(236, 32, 41, 0.08);
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.16);
 }
 
 /* VietJet Typography helpers */

@@ -102,7 +102,7 @@ export default function FlightCard({
                 type="button"
                 disabled={isZero}
                 onClick={() => onSelect(flight.no, col.id, priceVal)}
-                className={`flex flex-col items-center justify-between rounded-md border transition-all overflow-hidden ${
+                className={`flex flex-col items-center justify-between rounded-md border transition-all overflow-hidden focus:outline-none focus:ring-0 ${
                   active
                     ? 'border-success ring-2 ring-success/30 bg-green-50/50'
                     : isZero

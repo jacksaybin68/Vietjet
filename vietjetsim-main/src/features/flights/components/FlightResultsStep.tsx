@@ -257,12 +257,12 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
                 type="button"
                 onClick={() => onSelect?.(iso)}
                 aria-current="date"
-                className="relative px-2 sm:px-5 py-1.5 sm:py-2 flex flex-col items-center justify-center text-center transition-transform hover:scale-105 active:scale-95 cursor-pointer min-w-[95px] sm:min-w-[130px] max-w-[120px]"
+                className="relative px-2 sm:px-5 py-1.5 sm:py-2 flex flex-col items-center justify-center text-center transition-transform hover:scale-105 active:scale-95 cursor-pointer min-w-[95px] sm:min-w-[130px] max-w-[120px] focus:outline-none focus:ring-0"
               >
                 {/* Scalloped / puffy cloud SVG badge background matching sample image */}
                 <svg
                   viewBox="0 0 140 70"
-                  className="absolute inset-0 w-full h-full text-[#FFCC00] filter drop-shadow-[0_2px_4px_rgba(215,25,32,0.4)] z-0"
+                  className="absolute inset-0 w-full h-full text-[#FFCC00] filter drop-shadow-[0_2px_4px_rgba(245,158,11,0.35)] z-0"
                   fill="currentColor"
                   preserveAspectRatio="none"
                 >
@@ -296,7 +296,7 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
               key={iso}
               type="button"
               onClick={() => onSelect?.(iso)}
-              className={`${isOuterDay ? 'hidden sm:flex' : 'flex'} flex-col items-center justify-center text-center px-1 sm:px-3 py-1.5 sm:py-2 transition-transform hover:scale-105 cursor-pointer min-w-[75px] sm:min-w-[110px] max-w-[90px]`}
+              className={`${isOuterDay ? 'hidden sm:flex' : 'flex'} flex-col items-center justify-center text-center px-1 sm:px-3 py-1.5 sm:py-2 transition-transform hover:scale-105 cursor-pointer min-w-[75px] sm:min-w-[110px] max-w-[90px] focus:outline-none focus:ring-0`}
             >
               <span className="text-3xs sm:text-xs font-medium text-gray-600 leading-tight">
                 {WEEKDAY_LABELS[day.getDay()]}
@@ -755,7 +755,7 @@ export default function FlightResultsStep({
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full text-base sm:text-sm border border-[var(--border)] rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 text-[var(--foreground)] focus:outline-none focus:border-primary bg-[var(--surface-2)] form-input"
+                  className="w-full text-base sm:text-sm border border-[var(--border)] rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 text-[var(--foreground)] focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200/40 bg-[var(--surface-2)] form-input transition-all"
                 >
                   {SORT_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -1250,7 +1250,7 @@ export default function FlightResultsStep({
                       setExpandedFlightNo(flight.flightNo);
                     }
                   }}
-                  className="w-[24%] sm:w-[28%] lg:w-[240px] shrink-0 bg-[#FFC700] p-1 sm:p-3 lg:p-4 border-r border-yellow-400 lg:border-b-0 flex flex-col items-center justify-center text-center relative select-none cursor-pointer hover:bg-yellow-400 transition-colors"
+                  className="w-[24%] sm:w-[28%] lg:w-[240px] shrink-0 bg-[#FFC700] p-1 sm:p-3 lg:p-4 border-r border-yellow-400 lg:border-b-0 flex flex-col items-center justify-center text-center relative select-none cursor-pointer hover:bg-yellow-400 transition-colors focus:outline-none focus:ring-0"
                 >
                   <span className="text-[9px] sm:text-2xs font-bold text-gray-900 tracking-wider uppercase leading-tight">
                     {flight.flightNo}
@@ -1387,7 +1387,7 @@ export default function FlightResultsStep({
                               });
                               onFlightSelect?.(flight.flightNo, fc.id, fc.price, fares, flight);
                             }}
-                            className={`group w-full h-full py-1.5 sm:py-2.5 px-0.5 sm:px-1 flex flex-col items-center justify-center text-center cursor-pointer transition-transform active:scale-[0.98] min-h-[64px] sm:min-h-[78px] ${
+                            className={`group w-full h-full py-1.5 sm:py-2.5 px-0.5 sm:px-1 flex flex-col items-center justify-center text-center cursor-pointer transition-transform active:scale-[0.98] min-h-[64px] sm:min-h-[78px] focus:outline-none focus:ring-0 ${
                               isSelected ? 'pt-3.5 sm:pt-4' : ''
                             }`}
                           >
