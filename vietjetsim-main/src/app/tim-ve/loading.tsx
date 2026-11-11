@@ -7,8 +7,8 @@ export default function Loading() {
     <div className="min-h-screen flex items-center justify-center bg-[var(--surface)]">
       {/* Fast skeleton - no spinner animation */}
       <div className="flex flex-col items-center gap-5">
-        <div className="w-10 h-10 rounded-lg bg-[var(--surface-2)]animate-pulse" />
-        <div className="w-32 h-3 bg-[var(--surface)]rounded animate-pulse" />
+        <div className="w-10 h-10 rounded-lg bg-[var(--surface-2)] animate-pulse" />
+        <div className="w-32 h-3 bg-[var(--surface)] rounded animate-pulse" />
       </div>
     </div>
   );

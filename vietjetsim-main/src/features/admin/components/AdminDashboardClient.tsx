@@ -695,6 +695,7 @@ export default function AdminDashboardClient() {
           style={{ background: 'linear-gradient(180deg, #1a2948 0%, #0f172a 100%)' }}
         >
           <div className="max-w-7xl mx-auto">
+            <h1 className="sr-only">Bảng điều hành Vietjet Air</h1>
             {activeTab === 'overview' && (
               <ErrorBoundary inline variant="api">
                 <OverviewTab onNavigate={setActiveTab} />

@@ -52,6 +52,7 @@ function PaymentDetailModal({ payment, onClose }: { payment: Payment; onClose: (
             Chi tiết giao dịch
           </h3>
           <button
+            aria-label="Đóng"
             onClick={onClose}
             className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--surface-2)] transition-colors"
           >
@@ -110,6 +111,7 @@ function PaymentDetailModal({ payment, onClose }: { payment: Payment; onClose: (
 
         <div className="p-4 bg-[var(--surface-2)]">
           <button
+            aria-label="Đóng"
             onClick={onClose}
             className="w-full py-2.5 bg-[#1A2948] text-white rounded-xl font-semibold text-sm font-[KoHo,sans-serif] hover:bg-[#2A3F6F] transition-all"
           >
@@ -236,11 +238,7 @@ export default function PaymentHistoryTab() {
       {payments.length === 0 ? (
         <div className="bg-white rounded-2xl border border-[var(--border)] p-8 text-center shadow-vj-card">
           <div className="w-16 h-16 bg-[var(--surface-2)] rounded-full flex items-center justify-center mx-auto mb-3">
-            <Icon
-              name="ReceiptPercentIcon"
-              size={28}
-              className="text-[var(--foreground-subtle)] [var(--foreground-subtle)]"
-            />
+            <Icon name="ReceiptPercentIcon" size={28} className="text-[var(--foreground-subtle)]" />
           </div>
           <p className="text-[var(--foreground-muted)] text-sm font-[Be Vietnam Pro,sans-serif]">
             Chưa có giao dịch thanh toán nào.
@@ -289,7 +287,7 @@ export default function PaymentHistoryTab() {
                     <Icon
                       name="ChevronRightIcon"
                       size={14}
-                      className="text-[var(--foreground-subtle)] [var(--foreground-subtle)] ml-auto mt-1"
+                      className="text-[var(--foreground-subtle)] ml-auto mt-1"
                     />
                   </div>
                 </button>

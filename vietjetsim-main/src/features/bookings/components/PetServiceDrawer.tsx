@@ -70,10 +70,11 @@ export default function PetServiceDrawer({
           <button
             type="button"
             onClick={() => setActiveLeg('outbound')}
-            className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${activeLeg === 'outbound'
-              ? 'border-[#C4161C] text-[#C4161C]'
-              : 'border-transparent text-gray-500 hover:text-gray-800'
-              }`}
+            className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${
+              activeLeg === 'outbound'
+                ? 'border-[#C4161C] text-[#C4161C]'
+                : 'border-transparent text-gray-500 hover:text-gray-800'
+            }`}
           >
             Chuyến đi
           </button>
@@ -81,10 +82,11 @@ export default function PetServiceDrawer({
             <button
               type="button"
               onClick={() => setActiveLeg('inbound')}
-              className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${activeLeg === 'inbound'
-                ? 'border-[#C4161C] text-[#C4161C]'
-                : 'border-transparent text-gray-500 hover:text-gray-800'
-                }`}
+              className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${
+                activeLeg === 'inbound'
+                  ? 'border-[#C4161C] text-[#C4161C]'
+                  : 'border-transparent text-gray-500 hover:text-gray-800'
+              }`}
             >
               Chuyến về
             </button>
@@ -156,10 +158,11 @@ export default function PetServiceDrawer({
             {/* Service Package Card */}
             <div
               onClick={() => setIsSelected((prev) => !prev)}
-              className={`p-3.5 rounded-xl border bg-white shadow-2xs flex items-center justify-between cursor-pointer transition-all ${isSelected
-                ? 'border-green-600 ring-1 ring-green-600'
-                : 'border-gray-200 hover:border-red-300'
-                }`}
+              className={`p-3.5 rounded-xl border bg-white shadow-2xs flex items-center justify-between cursor-pointer transition-all ${
+                isSelected
+                  ? 'border-green-600 ring-1 ring-green-600'
+                  : 'border-gray-200 hover:border-red-300'
+              }`}
             >
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-[#FFCC00] flex items-center justify-center shrink-0 shadow-xs p-1">
@@ -209,6 +212,7 @@ export default function PetServiceDrawer({
             </div>
           </div>
           <button
+            aria-label="Đóng"
             type="button"
             onClick={onClose}
             className="bg-[#FFCC00] hover:bg-[#FFD200] text-gray-950 font-black px-6 py-2.5 rounded-xl text-xs sm:text-sm shadow transition-all active:scale-95 cursor-pointer italic"

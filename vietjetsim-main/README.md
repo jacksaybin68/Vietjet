@@ -19,17 +19,21 @@ A complete **Vietjet Air booking experience simulator** built with Next.js 15 (A
 ## 🛠️ Installation
 
 ### 1. Install dependencies
+
 ```bash
 npm install
 ```
 
 ### 2. Environment Setup
+
 Copy the example environment file and configure:
+
 ```bash
 cp .env.local.example .env.local
 ```
 
 Edit `.env.local`:
+
 ```env
 # Neon (Serverless Postgres) connection string.
 # Leave empty to use the in-memory mock database (development only).
@@ -45,7 +49,9 @@ NEXT_PUBLIC_SITE_URL=http://localhost:4028
 > 🔑 Get your Neon connection string from: [Neon Console](https://console.neon.tech) → Project → Connection Details
 
 ### 3. Database Setup
+
 Run the SQL migrations in order against your Neon database (any psql client or the Neon SQL Editor):
+
 ```bash
 psql "$DATABASE_URL" -f migrations/000_core_schema.sql
 psql "$DATABASE_URL" -f migrations/001_bank_accounts.sql
@@ -82,9 +88,11 @@ psql "$DATABASE_URL" -f migrations/001_bank_accounts.sql
 ```
 
 ### 4. Start Development Server
+
 ```bash
 npm run dev
 ```
+
 Open [http://localhost:4028](http://localhost:4028) in your browser.
 
 ## 📁 Project Structure
@@ -145,25 +153,25 @@ vietjetsim-main/
 
 ## 🗄️ Database Schema
 
-| Table | Description |
-|-------|-------------|
-| `user_profiles` | User accounts with roles (user/admin) |
-| `airports` | Vietnam airport codes & details |
-| `flights` | Flight schedules, pricing, availability |
-| `seats` | Seat map per flight with class & occupancy |
-| `bookings` | Booking records with status tracking |
-| `passengers` | Passenger details per booking |
-| `payments` | Payment transactions & gateway responses |
-| `user_wallets` | Wallet balance per user (VND) |
-| `wallet_transactions` | Wallet ledger (topup/withdraw/payment/refund/bonus) |
-| `saved_payment_methods` | Linked cards & bank accounts |
-| `discount_codes` | Promo codes with usage limits |
-| `loyalty_*` | Loyalty tiers & points history |
-| `chat_conversations` | Support chat threads |
-| `chat_messages` | Chat message history |
-| `chat_presence` | Online/typing status |
-| `refund_requests` | Refund application tracking |
-| `notifications` | User notification hub |
+| Table                   | Description                                         |
+| ----------------------- | --------------------------------------------------- |
+| `user_profiles`         | User accounts with roles (user/admin)               |
+| `airports`              | Vietnam airport codes & details                     |
+| `flights`               | Flight schedules, pricing, availability             |
+| `seats`                 | Seat map per flight with class & occupancy          |
+| `bookings`              | Booking records with status tracking                |
+| `passengers`            | Passenger details per booking                       |
+| `payments`              | Payment transactions & gateway responses            |
+| `user_wallets`          | Wallet balance per user (VND)                       |
+| `wallet_transactions`   | Wallet ledger (topup/withdraw/payment/refund/bonus) |
+| `saved_payment_methods` | Linked cards & bank accounts                        |
+| `discount_codes`        | Promo codes with usage limits                       |
+| `loyalty_*`             | Loyalty tiers & points history                      |
+| `chat_conversations`    | Support chat threads                                |
+| `chat_messages`         | Chat message history                                |
+| `chat_presence`         | Online/typing status                                |
+| `refund_requests`       | Refund application tracking                         |
+| `notifications`         | User notification hub                               |
 
 Data isolation is enforced at the **query layer** (every user-scoped query filters by
 `user_id` from the verified JWT) plus **RBAC route guards** (`verifyAdminRequest`,
@@ -172,11 +180,11 @@ in transactions with compensating rollback on failure.
 
 ## 🔐 Default Test Accounts
 
-| Email | Password | Role |
-|-------|----------|------|
-| `user@vietjetair.vn` | `user123` | User |
-| `Admin` | `Deohieusao123@` | Admin |
->
+| Email                 | Password   | Role  |
+| --------------------- | ---------- | ----- |
+| `user@vietjetair.vn`  | `user123`  | User  |
+| `admin@vietjetair.vn` | `admin123` | Admin |
+
 > Reset the admin in place (same `user_id`, so existing bookings and chats stay
 > attached): `node scripts/reset-admin.cjs`.
 
@@ -210,6 +218,7 @@ npm test          # or: npx vitest run
 ```
 
 The suite (23 test files, 225 tests) covers:
+
 - **Wallet & payments** (topup/withdraw/refund validation, double-entry checks)
 - **Admin refund workflow** (seat release + wallet credit)
 - **Edge JWT contract** (HS256 pinning, expiry enforcement, signature checks)
@@ -224,37 +233,40 @@ Route handlers are exercised directly with a real `NextRequest` and a real JWT;
 
 ## 🔧 Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start dev server on port 4028 |
-| `npm run build` | Build for production |
-| `npm run start` | Start production server on port 4028 |
-| `npm run serve` | Start production server (default port) |
-| `npm run lint` | Run ESLint checks |
-| `npm run lint:fix` | Auto-fix ESLint issues |
-| `npm run format` | Format code with Prettier |
-| `npm run type-check` | Run TypeScript type checking |
-| `npm test` | Run the Vitest suite |
-| `npm run test:smoke` | HTTP smoke test against a running server (defaults to `http://localhost:4028`, override with `SMOKE_BASE_URL`) |
-| `npm run db:check` | Validate DB connectivity & schema |
-| `npm run db:setup-admin` | Promote a user to admin role |
-| `npm run db:seed-demo` | Reset the two README demo accounts to their documented passwords |
+| Command                  | Description                                                                                                    |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`            | Start dev server on port 4028                                                                                  |
+| `npm run build`          | Build for production                                                                                           |
+| `npm run start`          | Start production server on port 4028                                                                           |
+| `npm run serve`          | Start production server (default port)                                                                         |
+| `npm run lint`           | Run ESLint checks                                                                                              |
+| `npm run lint:fix`       | Auto-fix ESLint issues                                                                                         |
+| `npm run format`         | Format code with Prettier                                                                                      |
+| `npm run type-check`     | Run TypeScript type checking                                                                                   |
+| `npm test`               | Run the Vitest suite                                                                                           |
+| `npm run test:smoke`     | HTTP smoke test against a running server (defaults to `http://localhost:4028`, override with `SMOKE_BASE_URL`) |
+| `npm run db:check`       | Validate DB connectivity & schema                                                                              |
+| `npm run db:setup-admin` | Promote a user to admin role                                                                                   |
+| `npm run db:seed-demo`   | Reset the two README demo accounts to their documented passwords                                               |
 
 ## 📱 Deployment
 
 ### Build for Production
+
 ```bash
 npm run build
 npm run serve
 ```
 
 ### Deploy to Vercel
+
 1. Push your code to GitHub
 2. Import project in [Vercel](https://vercel.com)
 3. Add environment variables in Vercel dashboard
 4. Deploy!
 
 ### Deploy to Netlify
+
 The project includes `@netlify/plugin-nextjs` for seamless deployment.
 
 ## ⚠️ Important Notes

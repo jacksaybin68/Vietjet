@@ -173,7 +173,7 @@ function ResetPasswordPageInner() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder=" "
-                className="form-input w-full rounded-xl border border-[var(--border)]bg-[var(--surface-2)]py-3 pl-10 pr-12 text-base transition-all sm:text-sm focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20"
+                className="form-input w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] py-3 pl-10 pr-12 text-base transition-all sm:text-sm focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20"
                 required
               />
               <label className="form-label-float has-icon">Mật khẩu mới</label>
@@ -187,7 +187,7 @@ function ResetPasswordPageInner() {
               </button>
             </div>
 
-            <ul className="grid grid-cols-1 gap-1.5 rounded-xl bg-[var(--surface-2)]px-4 py-3 text-xs sm:grid-cols-2">
+            <ul className="grid grid-cols-1 gap-1.5 rounded-xl bg-[var(--surface-2)] px-4 py-3 text-xs sm:grid-cols-2">
               {requirements.map((req) => (
                 <li
                   key={req.label}
@@ -219,7 +219,7 @@ function ResetPasswordPageInner() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder=" "
-                className="form-input w-full rounded-xl border border-[var(--border)]bg-[var(--surface-2)]py-3 pl-10 pr-12 text-base transition-all sm:text-sm focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20"
+                className="form-input w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] py-3 pl-10 pr-12 text-base transition-all sm:text-sm focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20"
                 required
               />
               <label className="form-label-float has-icon">Xác nhận mật khẩu</label>

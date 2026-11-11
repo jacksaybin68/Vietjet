@@ -382,7 +382,8 @@ async function main() {
     for (const viewport of VIEWPORTS) await capture(name, url, { viewport });
   };
 
-  // 10 route công khai, mỗi route ở cả ba viewport canonical.
+  // Route công khai + auth public, mỗi route ở cả ba viewport canonical.
+  // Cộng dồn 3 màn auth public (/dang-ky, /quen-mat-khau, /dat-lai-mat-khau).
   await captureAll('01-trang-chu', `${BASE}/trang-chu`);
   await captureAll('02-ket-qua-tim-ve', RESULTS_URL);
   await captureAll('03-dang-nhap', `${BASE}/dang-nhap`);
@@ -393,6 +394,9 @@ async function main() {
   await captureAll('08-gioi-thieu', `${BASE}/gioi-thieu`);
   await captureAll('09-hoi-dap', `${BASE}/hoi-dap`);
   await captureAll('10-lien-he', `${BASE}/lien-he`);
+  await captureAll('11-dang-ky', `${BASE}/dang-ky`);
+  await captureAll('12-quen-mat-khau', `${BASE}/quen-mat-khau`);
+  await captureAll('13-dat-lai-mat-khau', `${BASE}/dat-lai-mat-khau`);
 
   const login = async (who) => {
     await goto(cdp, `${BASE}/dang-nhap`);
@@ -412,14 +416,19 @@ async function main() {
   };
 
   const userLogin = await login(USER);
-  await captureAll('11-tai-khoan-vi', `${BASE}/tai-khoan`);
+  await captureAll('14-tai-khoan-vi', `${BASE}/tai-khoan`);
   const adminLogin = await login(ADMIN);
   // `/quan-tri` là console nghiệp vụ desktop-first (AGENTS.md: "không ép giao
   // diện public lên console nghiệp vụ"), nên kiểm desktop + tablet và bỏ mobile
   // — bảng dữ liệu dày không có thiết kế mobile để đối chiếu.
   for (const viewport of VIEWPORTS.filter((v) => v.label !== 'mobile')) {
-    await capture('12-quan-tri-tong-quan', `${BASE}/quan-tri`, { viewport });
+    await capture('15-quan-tri-tong-quan', `${BASE}/quan-tri`, { viewport });
   }
+
+  // /thanh-toan và /dat-ve/[id] cần session user + booking thật. Mã đặt chỗ demo
+  // `VJ644052` (nguồn từ migrations 014) là con đường sạch nhất.
+  await captureAll('18-thanh-toan', `${BASE}/thanh-toan`);
+  await captureAll('19-dat-ve', `${BASE}/dat-ve/VJ644052`);
 
   // ── Widget OpenClaw: mở panel, đọc nhãn backend và thử gửi một câu ─────────
   const widgetLauncher = `[...document.querySelectorAll('button')].find((b) => (b.getAttribute('aria-label') || '').includes('OpenClaw'))`;
@@ -441,7 +450,7 @@ async function main() {
         };
       })()`
     );
-    widget.file = await shot(cdp, '13-openclaw-widget');
+    widget.file = await shot(cdp, '16-openclaw-widget');
 
     // Gửi thử một câu để xem luồng chat thật (Ollama ngoại tuyến ⇒ phải trả lời
     // lịch sự, không được hiện khung trống hay lỗi).
@@ -471,7 +480,7 @@ async function main() {
           };
         })()`
       );
-      widget.afterSendFile = await shot(cdp, '14-openclaw-sau-khi-gui');
+      widget.afterSendFile = await shot(cdp, '17-openclaw-sau-khi-gui');
     }
   }
 

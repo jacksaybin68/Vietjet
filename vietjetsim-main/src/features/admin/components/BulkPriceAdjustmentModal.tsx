@@ -203,6 +203,7 @@ export default function BulkPriceAdjustmentModal({
             </div>
           </div>
           <button
+            aria-label="Đóng"
             type="button"
             onClick={onClose}
             className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-all"
@@ -489,6 +490,7 @@ export default function BulkPriceAdjustmentModal({
 
           <div className="flex items-center gap-2">
             <button
+              aria-label="Đóng"
               type="button"
               onClick={onClose}
               disabled={isSubmitting}

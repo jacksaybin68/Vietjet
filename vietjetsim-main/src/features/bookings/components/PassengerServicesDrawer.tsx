@@ -216,6 +216,7 @@ export default function PassengerServicesDrawer({
             </div>
           </div>
           <button
+            aria-label="Đóng"
             type="button"
             onClick={onClose}
             className="bg-[#FFCC00] hover:bg-[#FFD200] text-gray-950 font-black px-6 py-2.5 rounded-xl text-xs sm:text-sm shadow transition-all active:scale-95 cursor-pointer italic"

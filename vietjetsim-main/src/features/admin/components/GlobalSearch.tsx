@@ -244,6 +244,7 @@ export default function GlobalSearch({ isOpen, onClose, onSelectResult }: Global
             <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
           )}
           <button
+            aria-label="Đóng"
             onClick={onClose}
             className="px-2 py-1 text-xs font-medium text-slate-400 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors"
           >

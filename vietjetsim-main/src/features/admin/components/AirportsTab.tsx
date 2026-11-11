@@ -461,6 +461,7 @@ function AirportModal({
         <div className="flex items-center justify-between p-8 border-b border-white/5 bg-white/[0.02]">
           <h3 className="text-lg font-black text-white uppercase tracking-tight">{title}</h3>
           <button
+            aria-label="Đóng"
             onClick={onClose}
             className="w-10 h-10 bg-white/5 hover:bg-white/10 text-slate-400 rounded-2xl flex items-center justify-center transition-all"
           >
@@ -525,6 +526,7 @@ function AirportModal({
           </div>
           <div className="flex gap-3 pt-4">
             <button
+              aria-label="Đóng"
               type="button"
               onClick={onClose}
               disabled={isSubmitting}

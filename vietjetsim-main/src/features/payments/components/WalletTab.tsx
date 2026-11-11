@@ -197,6 +197,7 @@ function AddPaymentMethodModal({
             Thêm phương thức thanh toán
           </h3>
           <button
+            aria-label="Đóng"
             onClick={onClose}
             className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--surface-2)] transition-colors"
           >
@@ -228,7 +229,7 @@ function AddPaymentMethodModal({
                   : 'text-[var(--foreground-muted)] hover:text-[var(--foreground)]'
               }`}
             >
-              <Icon name="BuildingColumnsIcon" size={16} className="inline mr-1.5" />
+              <Icon name="BuildingStorefrontIcon" size={16} className="inline mr-1.5" />
               Tài khoản ngân hàng
             </button>
           </div>
@@ -370,6 +371,7 @@ function AddPaymentMethodModal({
               )}
             </button>
             <button
+              aria-label="Đóng"
               type="button"
               onClick={onClose}
               className="px-6 py-3 bg-[var(--surface-2)] text-[var(--foreground-muted)] rounded-xl font-semibold font-[KoHo,sans-serif] hover:bg-[var(--surface-3)] transition-all"
@@ -785,7 +787,7 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
                     />
                   ) : (
                     <Icon
-                      name="BuildingColumnsIcon"
+                      name="BuildingStorefrontIcon"
                       size={22}
                       className="text-[var(--foreground)]"
                     />
@@ -846,7 +848,7 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="bg-[var(--background)] rounded-2xl border border-[var(--border)] p-5 shadow-vj-card">
           <div className="flex items-center gap-2 mb-3">
-            <Icon name="BuildingColumnsIcon" size={18} className="text-[var(--primary)]" />
+            <Icon name="BuildingStorefrontIcon" size={18} className="text-[var(--primary)]" />
             <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[var(--foreground)]">
               Rút tiền về tài khoản liên kết
             </h3>

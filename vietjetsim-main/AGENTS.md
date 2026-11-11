@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Repository memory for Vietjet Air (Next.js 15 / React 19 / TypeScript / Tailwind / Neon Postgres).
+Repository memory for Vietjet Air (Next.js 16 / React 19 / TypeScript / Tailwind / Neon Postgres).
 
 ## Commands
 
@@ -9,11 +9,11 @@ npm run dev        # next dev --turbo -p 4028
 npm run build      # next build (runs its own TS type check ‚Äî a tsc error fails the build)
 npm run type-check # tsc --noEmit
 npm test           # vitest run
-npm run lint       # eslint .   (NOT `next lint` ‚Äî that is removed in Next 15)
+npm run lint       # eslint .   (NOT `next lint` ‚Äî that is removed in Next 16)
 npm run lint:fix   # eslint . --fix
 npm run test:migrations # 4 migration passes on throwaway Docker Postgres (needs Docker)
 npm run test:smoke # post-build HTTP assertions against a running server
-npm run test:ui    # headless Chrome render check of 35 screens (3 viewports × routes; needs build + start + Chrome)
+npm run test:ui    # headless Chrome render check of 35 screens + auth-public/post-login (3 viewports; needs build + start + Chrome)
 ```
 
 Lint/format rules live in `eslint.config.mjs` (flat config, prettier printWidth 100,
@@ -54,7 +54,7 @@ fixes is in `034`, and none came from the PNR work.
 first half.** `scripts/test-migrations.cjs` counts and fingerprints `flights`
 and nothing else, so every defect below lived in a table it never queried — and
 a `DROP TABLE` is invisible even in principle, because the fingerprint diff
-catches a row that was *rewritten*, not one that was deleted. Six files shipped
+catches a row that was _rewritten_, not one that was deleted. Six files shipped
 damage of that kind (`000`, `003`, `005`, `006`, `010`, `011`, `012`, `020`),
 each reproduced on a real Postgres 16 and each now measured before and after.
 The harness grows a canary customer — a booked, checked-in trip with a support
@@ -63,8 +63,8 @@ When you add a table that holds user data, add it to `OPERATING_TABLES_SQL`;
 an unmeasured table is an unguarded one.
 
 **Check it the way CI does, or you are checking something else.** The CI step is
-`psql -f <file>` with no `BEGIN` and no wrapping transaction, so *every statement
-in a migration is its own transaction*. A driver-based replay is not equivalent:
+`psql -f <file>` with no `BEGIN` and no wrapping transaction, so _every statement
+in a migration is its own transaction_. A driver-based replay is not equivalent:
 `client.query(<whole file>)` sends the file through the simple-query protocol as
 one implicit transaction, so anything that depends on statement boundaries
 passes locally and dies in CI. Two real cases this repo has already hit:
@@ -119,7 +119,7 @@ multiply again.
 time-zone measurement, not the data.** Neon runs sessions with
 `TimeZone = GMT`, so `GROUP BY flight_no, depart_time::date` puts two
 different Vietnamese departures in the same bucket. `VJ 2010` on 2026-09-29 is
-09:00 and 2026-09-30 is 06:00 *Vietnam time* — two ordinary daily departures,
+09:00 and 2026-09-30 is 06:00 _Vietnam time_ — two ordinary daily departures,
 one flight number, two consecutive local days. Counted in UTC they collide;
 counted in `Asia/Ho_Chi_Minh` they do not:
 
@@ -138,6 +138,7 @@ a defect that customers would then see in their booking history.
 1224 flights whose `flight_no` never matched `VJ <digits>` — 1174 written as
 `VJ351` / `VJ341B` (no space) and 50 as `VJ101-1000`. `035` moved all 89 of
 those numbers into the empty 3001–3089 block. Two consequences worth keeping:
+
 - `VJ341B` was **uneditable through the admin console** — the validator at
   `src/app/api/quan-tri/chuyen-bay/[id]/route.ts:59` is
   `/^[A-Z]{2}\s?\d{2,4}$/i`, which rejects a trailing `B`. Two thirds of this
@@ -167,7 +168,7 @@ after the first must add exactly zero rows.
 
 Two limits worth knowing before you trust it:
 
-- **Counting rows is the weaker check**, because a seed that *rewrites* prices
+- **Counting rows is the weaker check**, because a seed that _rewrites_ prices
   without adding rows passes it. The script diffs a fingerprint of every row for
   this reason.
 - **The fingerprint diff cannot see pass 1.** If a file prices rows it does not
@@ -180,31 +181,31 @@ mock and never executes a migration.
 
 - **030's fare columns are `NOT NULL` with no default, and every seed file
   predates them.** A seed cannot name `economy_price` in its column list — 030 has
-  not created the column yet on a fresh database, so the *first* apply would fail
+  not created the column yet on a fresh database, so the _first_ apply would fail
   on "column does not exist". The shape every seed file now uses, and the one
   027 already had, is: drop `NOT NULL` in a guarded `DO` block before the INSERT,
   price the file's own rows with 030's formula, re-apply `NOT NULL` after. All
   three blocks no-op on a fresh database. Every seed file does this now.
 - **`WHERE economy_price IS NULL` is not a scope, but it is not yet a bug
   either.** It reads like one — "price the rows this file added" — yet it matches
-  *every* unpriced flight in the table, so the block also touches rows another
+  _every_ unpriced flight in the table, so the block also touches rows another
   file left unpriced. Three files scoped this way (`027`, `028`, `032`) before
-  they staged ids. Two things keep it harmless *today*, and both are load-bearing
+  they staged ids. Two things keep it harmless _today_, and both are load-bearing
   enough to be worth stating plainly:
   - Every seed closes its own ratchet: `DROP NOT NULL` at the top, `SET NOT NULL`
-    at the bottom. A file that leaves a null behind fails its *own* `SET NOT NULL`
+    at the bottom. A file that leaves a null behind fails its _own_ `SET NOT NULL`
     immediately, so no file can hand a null to the next one. Measured across all
     35 files: the flight table never holds a null price between two files.
   - Every seed copies `030`'s ladder verbatim, so "wrong file, right formula"
     produces the same two numbers. A wide scope here rewrites rows to a value
     they already had.
-  So the exposure is *latent*, not active: it opens the moment a file diverges
-  from `030`'s ladder, or the moment a file stops closing its ratchet. Both are
-  one edit away, and neither has a test. These files stage `RETURNING id` and
-  price `WHERE f.id IN (...)` so the scope is exact regardless. Do not cite this
-  as a fixed user-visible bug — it never was one.
+    So the exposure is _latent_, not active: it opens the moment a file diverges
+    from `030`'s ladder, or the moment a file stops closing its ratchet. Both are
+    one edit away, and neither has a test. These files stage `RETURNING id` and
+    price `WHERE f.id IN (...)` so the scope is exact regardless. Do not cite this
+    as a fixed user-visible bug — it never was one.
 - **`row_number() OVER ()` cannot identify a file's own rows.** It numbers the
-  *select*, not the insert, so the counter advances even for a row
+  _select_, not the insert, so the counter advances even for a row
   `ON CONFLICT DO NOTHING` then skips. On a first run that is invisible — the
   numbers come out as the tidy block the author expected (014 → 101-160, 024 →
   201-370). On a replay, where most rows already exist, the few that do get
@@ -217,14 +218,14 @@ mock and never executes a migration.
   a TBB route. Name the temp table after the file: two seed files can share one
   session in a replay harness.
 - **A staging `CREATE TEMP TABLE` must precede the first `WITH`, and the INSERT
-  goes *inside* that same `WITH`.** Two shapes are wrong, and both fail at parse
+  goes _inside_ that same `WITH`.** Two shapes are wrong, and both fail at parse
   time rather than run time: putting the `CREATE` between two `WITH` clauses
   makes it a CTE body (`syntax error at or near "CREATE"`), and starting a
   second `WITH inserted AS (` after the CTE list has already closed gives two
   consecutive `WITH` keywords (`syntax error at or near "WITH"`). The working
   shape is: `CREATE TEMP TABLE ...;` → one
   `WITH cte AS (...), inserted AS (INSERT ... RETURNING id) INSERT INTO
-  _vj_seeded_x SELECT id FROM inserted;`.
+_vj_seeded_x SELECT id FROM inserted;`.
 - **A `SET NOT NULL` that fails tells you the pricing `WHERE` under-reached, not
   that the constraint is wrong.** It is the only reliable signal, and it fires
   after the damage is done. When it happens, count the orphans by flight number
@@ -237,11 +238,11 @@ mock and never executes a migration.
 - **`ADD CONSTRAINT` validates the rows already in the table — use `NOT VALID`
   plus `VALIDATE` whenever the table holds real data.** `ADD CONSTRAINT ... CHECK`
   and `ADD CONSTRAINT ... FOREIGN KEY` both check existing rows immediately, so
-  a file written to *repair* dirty data aborts on the very dirt it was written
+  a file written to _repair_ dirty data aborts on the very dirt it was written
   for. `017` and `023` both shipped this way. Measured on a database seeded
   with exactly the damage each file exists to fix:
   - `017`: `ERROR: insert or update on table "bookings" violates foreign key
-    constraint` — and the constraint was left at **0**, i.e. the file could not
+constraint` — and the constraint was left at **0**, i.e. the file could not
     add the very key it exists to add. After `NOT VALID` → clear orphans →
     `VALIDATE`: constraint present, `convalidated = t`, orphan gone, and the
   - `023`: `ERROR: check constraint ... is violated by some row`, with
@@ -256,26 +257,26 @@ mock and never executes a migration.
     pair rather than deleting the row).
   - `007` (phone UNIQUE): **UNIQUE has no `NOT VALID` form**, so the shape does
     not apply. `ADD CONSTRAINT UNIQUE` aborted with `could not create unique
-    index` on a database holding two accounts on one number, which also cost
+  index` on a database holding two accounts on one number, which also cost
     step 3 — `user_profiles_contact_check` was never created. It now checks for
-    duplicates first and *skips with a `RAISE NOTICE`* instead of aborting;
+    duplicates first and _skips with a `RAISE NOTICE`_ instead of aborting;
     `016` then merges those accounts properly (it moves bookings, wallets and
     loyalty before deleting a row) and re-adds the constraint. Measured end to
     end: `007` no longer aborts, the duplicate survives until `016` handles it,
     and afterwards the UNIQUE is present with zero duplicate numbers.
-  So the rule has two branches: `NOT VALID` → repair → `VALIDATE` where the
-  syntax allows it, and *detect and defer* where it does not (UNIQUE) — and
-  whichever branch is taken, a later file has to finish the job.
-  The replay test **cannot** catch this class: it starts from an empty database,
-  where there is nothing to violate. Only a database carrying the damage
-  exercises it, so build one by hand when adding a constraint to a table that
-  ships rows.
+    So the rule has two branches: `NOT VALID` → repair → `VALIDATE` where the
+    syntax allows it, and _detect and defer_ where it does not (UNIQUE) — and
+    whichever branch is taken, a later file has to finish the job.
+    The replay test **cannot** catch this class: it starts from an empty database,
+    where there is nothing to violate. Only a database carrying the damage
+    exercises it, so build one by hand when adding a constraint to a table that
+    ships rows.
 - **`DROP TABLE` in a migration is not idempotency, it is a data delete — and
   because CI replays the whole set, "on every re-apply" is the real frequency.**
   Three files shipped the same defect, each with its own table, and all three
   were invisible to the harness for the same reason (below).
   - `011_checkin_system.sql:5` opened with `DROP TABLE IF EXISTS check_in
-    CASCADE`, commented "for idempotent migrations". The same file already had
+CASCADE`, commented "for idempotent migrations". The same file already had
     `CREATE TABLE IF NOT EXISTS` plus six guarded `ADD COLUMN` blocks, so the
     DROP bought nothing and cost the table's contents: measured on a database
     holding one check-in, 1 row before and **0** after re-running that file
@@ -284,10 +285,10 @@ mock and never executes a migration.
     offered to issue one. `check_in` is a leaf — no constraint anywhere
     references it, so `CASCADE` had nothing else to drop.
   - `000_core_schema.sql:107` had `DROP TABLE IF EXISTS announcements` followed
-    by a *bare* `CREATE TABLE`, in a file where every other table is
+    by a _bare_ `CREATE TABLE`, in a file where every other table is
     `IF NOT EXISTS`. 1 row before, 0 after; the operator's published notices at
     `/api/quan-tri/thong-bao` came back blank.
-  - `010_chat.sql:5-7` dropped all three chat tables. This one *was* a deliberate
+  - `010_chat.sql:5-7` dropped all three chat tables. This one _was_ a deliberate
     repair of an older minimal schema, which is why it cannot simply lose the
     DROP — so it now drops only when a table is actually missing a column this
     file defines, resolved children-first because both children hold an FK to
@@ -295,19 +296,19 @@ mock and never executes a migration.
     correct, 1 conversation and 1 message before and after; after dropping
     `unread_by_admin`, the rebuild fired (three `NOTICE`s) and restored the
     column.
-  The rule: reach for `CREATE TABLE IF NOT EXISTS`, a guard on
-  `information_schema`, or a guard on behaviour. Never a `DROP` for idempotency.
+    The rule: reach for `CREATE TABLE IF NOT EXISTS`, a guard on
+    `information_schema`, or a guard on behaviour. Never a `DROP` for idempotency.
 - **The four-pass harness counts `flights` and nothing else — so every one of
   those three tables was unmeasured.** `checkInvariants()` (script lines 194-214)
   asserts two tables by name and one constraint; `checkDataInvariants()`
   (216-259) only ever queries `flights`; the row count (274) and the
   fingerprint (133-140) are both `SELECT … FROM flights`. A table the seed files
   do not touch is not covered by "pass 2 added zero rows", and the fingerprint
-  diff cannot even *see* rows that were deleted rather than rewritten. If you
+  diff cannot even _see_ rows that were deleted rather than rewritten. If you
   add a table that carries user data, either extend the harness to count it or
   accept that CI is silent about it.
 - **A targetless `ON CONFLICT DO NOTHING` is not idempotency; it is a comment.**
-  It guards only the unique indexes the table *happens* to have, so it degrades
+  It guards only the unique indexes the table _happens_ to have, so it degrades
   to "insert another row" the moment one is missing. `003_loyalty_program.sql`
   seeded a program and four tiers with exactly that, and both tables had nothing
   but `id UUID PRIMARY KEY` — so every re-apply inserted a fresh copy. Measured
@@ -319,9 +320,9 @@ mock and never executes a migration.
   two calls.
   The fix follows the `007`/`016` rule: `UNIQUE` has no `NOT VALID` form, so
   merge first and add the key after. `003` now merges duplicate programs —
-  repointing `loyalty_tiers` *and* `user_loyalty` at the survivor before
+  repointing `loyalty_tiers` _and_ `user_loyalty` at the survivor before
   deleting, because the FK blocks the delete and because `user_loyalty
-  .program_id` is what decides the ladder a customer sees — collapses duplicate
+.program_id` is what decides the ladder a customer sees — collapses duplicate
   tiers, then adds both constraints under a `conrelid` guard. Every seed now
   names its conflict target. Measured on a database left at 4 programs / 40
   tiers with a customer enrolled on one of the duplicates: after one apply, 1
@@ -333,7 +334,7 @@ mock and never executes a migration.
   written twice on purpose: once in the `CREATE TABLE` for a fresh database,
   once as a guarded `ALTER TABLE … ADD CONSTRAINT` after the dedupe block for
   every other one. Read a constraint declared inside `CREATE TABLE IF NOT
-  EXISTS` as applying to new databases only.
+EXISTS` as applying to new databases only.
 - **Never put a statement that other files depend on inside another object's
   existence guard — the guarded object outlives any one attempt to create
   it.** `012` defined `generate_booking_code()` as the last statement inside
@@ -341,12 +342,12 @@ mock and never executes a migration.
   the column did not. The column is the thing that persists: on a database
   holding the column and not the function, re-running `012` recreated neither,
   and `013` — `ALTER TABLE bookings ALTER COLUMN booking_code SET DEFAULT
-  generate_booking_code()` — aborted with `function generate_booking_code()
-  does not exist`.
+generate_booking_code()` — aborted with `function generate_booking_code()
+does not exist`.
   The damage outlives the abort. The column is already `NOT NULL` with no
   default, nothing in the application supplies `booking_code`, and so every
   insert failed with `null value in column "booking_code" … violates not-null
-  constraint`: **no booking could be created at all**, and the driver error went
+constraint`: **no booking could be created at all**, and the driver error went
   straight to the customer. Measured end to end on a database in that state —
   re-run `012`, re-run `013`, then insert — before the fix the insert failed and
   `fn=0 / default=NONE`; after it `fn=1 / default=generate_booking_code()` and
@@ -356,7 +357,7 @@ mock and never executes a migration.
   `034` cannot drift into two different definitions. `CREATE OR REPLACE FUNCTION`
   needs no guard of its own.
 - **A constraint guard must filter by table, not by name.** A constraint name is
-  unique per *schema*, not per table. `023` checked only `conname`, so any
+  unique per _schema_, not per table. `023` checked only `conname`, so any
   constraint anywhere named `passengers_passenger_type_check` would skip the
   block and leave the column permanently unchecked. Add
   `AND conrelid = '<table>'::regclass` — `017` already did, `007` and `016` did
@@ -367,7 +368,7 @@ mock and never executes a migration.
   the rest of the definition, constraints included. No error, no warning that
   anything was dropped — the constraint simply never lands, on any apply, ever.
   `005` carried `ADD COLUMN IF NOT EXISTS gender VARCHAR(20) CHECK (gender IN
-  ('male','female','other'))`. Measured on a database whose `user_profiles.gender`
+('male','female','other'))`. Measured on a database whose `user_profiles.gender`
   already existed without the CHECK — which is exactly the state that file meets,
   since its own header tells the reader to paste it into a Neon console where the
   column may have been added by hand — the constraint count was still 0 after
@@ -387,17 +388,17 @@ mock and never executes a migration.
   number is not a value to normalise — it means a payout account was recorded
   twice and only the accounts team can say which is right. Measured both ways: on
   the duplicated database it printed `1 value(s) are shared by more than one
-  wallet; skipping the UNIQUE constraint until an operator resolves them` and
+wallet; skipping the UNIQUE constraint until an operator resolves them` and
   exited 0; after the duplicate was resolved the same file installed the
   constraint with no notice.
 - **A `CREATE UNIQUE INDEX` can abort a file just as badly as an inline
   constraint fails to install — and the abort takes the rest of the file with
   it.** `020` had `CREATE UNIQUE INDEX … ON refund_requests (booking_id) WHERE
-  status IN ('pending','approved')`, which is the right idea (one open ticket per
+status IN ('pending','approved')`, which is the right idea (one open ticket per
   booking, so a customer cannot queue a refund twice) with no way to install it on
   a database that already violates it. Measured on a database holding two open
   tickets for one booking: `ERROR: could not create unique index
-  "idx_refund_requests_open_booking"`, and because the file has no `BEGIN`, the
+"idx_refund_requests_open_booking"`, and because the file has no `BEGIN`, the
   `INSERT` below it never ran either — so the refund feature had no
   `refund_feature_enabled` switch in `system_config` to read.
   It now closes the surplus first, keeping the **oldest** open ticket so the one
@@ -410,7 +411,7 @@ mock and never executes a migration.
   and `scheduled`, none of which `021`'s CHECK accepts, while the CHECK's
   `completed` and `departed` were not offered. So `status: 'boarding'` passed
   validation and then died as `new row ... violates check constraint
-  "flights_status_check"`, surfacing to the operator as a 500 with a raw driver
+"flights_status_check"`, surfacing to the operator as a 500 with a raw driver
   message. The same route already does this correctly for the fare ladder (it
   returns a 400 explaining the inversion instead of letting the CHECK throw),
   so the omission was inconsistent rather than deliberate.
@@ -464,7 +465,7 @@ a join use lives in `AIRPORT_CITIES` in `src/shared/constants` and must stay
 in step with the table. Add an airport to both, plus a migration, together.
 
 **Write seed timestamps with an explicit +07:00 offset.** A `TIMESTAMPTZ` built
-from `CURRENT_DATE + make_interval(hours => n)` is read in the *session* time
+from `CURRENT_DATE + make_interval(hours => n)` is read in the _session_ time
 zone, and Neon sessions run `TimeZone = GMT` — a slot meant to be 06:00 lands
 at 13:00 in Vietnam. 014/024/025 all did this, and 026 had to delete and
 re-seed 440 rows to undo it. Format the local time as text with a literal
@@ -475,9 +476,9 @@ row that is already correct are indistinguishable, and any relative `UPDATE`
 you can write will be wrong on its second run.
 
 **And read timestamps back in Vietnam, too — not just write them.** The same
-`TimeZone = GMT` makes a *query* lie. `GROUP BY depart_time::date` is a UTC
-day, so `VJ 2010` departing 09:00 on the 29th and 06:00 on the 30th *Vietnam
-time* both fall in 2026-09-29 UTC, and the number looks like it flies twice a
+`TimeZone = GMT` makes a _query_ lie. `GROUP BY depart_time::date` is a UTC
+day, so `VJ 2010` departing 09:00 on the 29th and 06:00 on the 30th _Vietnam
+time_ both fall in 2026-09-29 UTC, and the number looks like it flies twice a
 day. Counted in UTC: **20 duplicates**. Counted in
 `(depart_time AT TIME ZONE 'Asia/Ho_Chi_Minh')::date`: **0**. Those are two
 ordinary daily departures, and "fixing" them would have renamed flights
@@ -487,7 +488,7 @@ surfaced as a failure.
 
 **The server owns every amount in a booking.** `POST /api/dat-ve` re-derives
 the fare, the seats and the services from `features/bookings/pricing` and ignores
-`total_price`; the client sends only *which* seat, *which* service and *which*
+`total_price`; the client sends only _which_ seat, _which_ service and _which_
 fare card. Migrations `029` (`seats.price`, `booking_ancillaries`) and `030`
 (`flights.economy_price` / `business_price`) are what make that possible — before
 them the browser's number was the record. Keep a new charge in `pricing.ts` and
@@ -500,10 +501,10 @@ them by `getFareForClass` in `pricing.ts`, which both `FlightResultsStep` and
 `POST /api/dat-ve` call. Deriving the ladder inside the card and sending only
 `cabin` made SkyBOSS quote 10,682,000₫ and bill 13,573,000₫. **Coerce the two
 fares with `Number`**: a `NUMERIC(12, 2)` column comes back from the driver as a
-*string*, so plain arithmetic concatenates (`step` → `NaN`) and every
+_string_, so plain arithmetic concatenates (`step` → `NaN`) and every
 interpolated card silently collapses onto the cheapest fare — the page quotes
 7,791,000₫ while the API charges 4,900,000₫. `flight_no` has the same hazard in
-seed files: `LPAD(x, 3, '0')` *truncates* 4-digit numbers, which is what
+seed files: `LPAD(x, 3, '0')` _truncates_ 4-digit numbers, which is what
 `031_unique_flight_numbers.sql` repairs.
 
 **`028` adds the international network** (13 airports, flights from HAN/SGN in
@@ -518,7 +519,7 @@ seat map in `SeatSelectionStep` calls them rather than keeping its own row
 bands. It used to carry separate bands (row 12 was 55,000₫ on the map, 70,000₫ on
 the server), so a customer agreed to 63,250₫ and was billed 80,500₫. Likewise
 `seat-adjacency.ts` had one `adjacentSeats`: the aisle test looked at the origin
-column, which dropped C's *left* neighbour along with its right, so
+column, which dropped C's _left_ neighbour along with its right, so
 `adjacentSeats('12C')` returned only `['12D']` and a child could not sit beside
 an adult in 12B — the picker showed "1 chỗ ngồi còn lại" forever. `src/test/
 seat-adjacency.test.ts` and the `seat pricing` block in `passenger-types.test.ts`
@@ -586,7 +587,7 @@ bookings, or `getPaymentHistory` for rows that are payments — that query
 such column, so `PaymentRecord.booking_code` is optional at the type level and
 only `PaymentHistoryEntry` (which `GET /api/thanh-toan/lich-su` returns, via an
 inner join against a NOT NULL column) narrows it to `string`. That distinction
-exists so a caller that *can* prove the join cannot silently accept `undefined`
+exists so a caller that _can_ prove the join cannot silently accept `undefined`
 and print `#AC5F3313` under a heading the customer will read out to support.
 `payment.id.slice(0, 8)` under "Mã giao dịch" is fine — it is a payment, not a
 booking, and there is no short reference for one.
@@ -614,7 +615,7 @@ route accepted `economy_price` / `business_price` from its `ALLOWED_FIELDS` from
 the start, but `updateFlight` filtered through its own whitelist and dropped
 both before SQL: an operator edited a fare, saw "Cập nhật thành công", and the
 results page still quoted the old number. Any new column added to a write path
-has to be added to *every* write path — `createFlight` and `updateFlight` keep
+has to be added to _every_ write path — `createFlight` and `updateFlight` keep
 separate whitelists, and only one being updated reads as "already handled".
 The route also derives `price` from whichever side of the ladder the row's own
 `class` seats and refuses an inverted pair with a 400, because migration 030's
@@ -657,7 +658,7 @@ money.
 
 - **A nullable status column defeats a partial index built on it.** 020's
   `idx_refund_requests_open_booking` covers `WHERE status IN ('pending',
-  'approved')`, so a ticket written with NULL is in *neither* branch and is not
+'approved')`, so a ticket written with NULL is in _neither_ branch and is not
   in the index at all. Reproduced: two NULL tickets for one booking inserted
   cleanly while the equivalent `pending` pair was correctly rejected — the
   "at most one open ticket per booking" guarantee had a hole exactly where a
@@ -677,7 +678,7 @@ money.
 The ledger lookup inside `refundWallet` is not the enforcement — the index is —
 but it is what lets the PATCH route say "wallet was already refunded for this
 booking" instead of logging a credit failure for money that already moved.
-When you add a money-moving write path, the test has to sit *below* the mock:
+When you add a money-moving write path, the test has to sit _below_ the mock:
 asserting that a handler reports a `refundWallet` rejection proves nothing about
 `refundWallet`, and passes with the guard deleted.
 
@@ -695,9 +696,9 @@ transaction around them. That is a lost update: two concurrent writes read the
 same balance, both compute `before + delta`, and the second `UPDATE` overwrites
 the first one's money. Measured on Postgres 17:
 
-| Two concurrent writes | Old balance | Correct |
-|---|---|---|
-| two 40,000 top-ups against 50,000 | **90,000** | 130,000 |
+| Two concurrent writes                | Old balance            | Correct       |
+| ------------------------------------ | ---------------------- | ------------- |
+| two 40,000 top-ups against 50,000    | **90,000**             | 130,000       |
 | two 100,000 withdrawals from 100,000 | **0** — both succeeded | one must fail |
 
 `CHECK (balance >= 0)` does **not** catch this. It reads the final value, and the
@@ -707,7 +708,7 @@ the race happened to push the balance negative.
 `moveWalletBalance` in `db.ts` is now the only place a balance changes, and it
 needs no transaction API and no `FOR UPDATE`: Postgres re-evaluates an
 `UPDATE`'s `WHERE` after it unblocks on a concurrent writer (READ COMMITTED,
-EPQ), so putting the funds check *inside* the `UPDATE` makes each write test
+EPQ), so putting the funds check _inside_ the `UPDATE` makes each write test
 its own precondition against the balance it actually found. Re-measured with
 the statements the function emits: two 40,000 top-ups land on 130,000 with a
 coherent ledger (50,000 → 90,000 → 130,000), and of two 100,000 withdrawals
@@ -728,7 +729,7 @@ Its `ON CONFLICT` target is `user_id` (from 002), never `account_number` —
 006 only adds that UNIQUE on a database with no duplicates, so it may not exist.
 
 **Reading back a `sql` call's text needs the placeholders rebuilt.** A tagged
-template hands the driver its literal chunks *separated* from the values, so
+template hands the driver its literal chunks _separated_ from the values, so
 `strings.join(' ')` — the obvious way to read a statement back out of a spy —
 silently drops every parameter and welds fragments together ("balance + ," where
 the SQL really reads "balance + $2"). `sqlText` in `wallet.test.ts` re-inserts
@@ -766,13 +767,13 @@ Two details in there are load-bearing. The host comes from `new URL(url)
 .hostname`, not a `/.*@([^/]+)\//` regex — a regex mis-reads credentials
 containing `@`, and a mis-read host means the guard checks the wrong string,
 the one way a broken guard still looks like it works. And values are split on
-the *first* `=`, so a password containing `=` survives. `clean-test-bookings
+the _first_ `=`, so a password containing `=` survives. `clean-test-bookings
 --apply` is the sharpest edge of the five: it deletes real bookings, which is
 why it prints its target host too.
 
 **A bound parameter inside SQL quotes is a bug, and a mocked `sql` cannot see
 it.** `SELECT id, '${type}', …` looks interpolated; the driver emits a
-placeholder anyway, so the statement reaches Postgres as the *string literal*
+placeholder anyway, so the statement reaches Postgres as the _string literal_
 `'$5'`. No parameter occupies `$5`, so its type cannot be inferred and every
 call fails with 42P18, `could not determine data type of parameter $5`. The unit
 suite stayed green — a mocked `sql` records the text and never executes it —
@@ -801,7 +802,7 @@ NODE_TLS_REJECT_UNAUTHORIZED=0 npm run test:wallet-e2e
 ```
 
 `src/lib/neon.ts` already honours `NEON_FETCH_ENDPOINT`, so no runtime code
-changed for this. What the bridge has to get right is the *wire format*, and
+changed for this. What the bridge has to get right is the _wire format_, and
 every mistake here fails silently rather than loudly:
 
 - **`pg` parses dates and JSON before the bridge ever sees them.** It ignores
@@ -855,7 +856,7 @@ exit 401 everywhere except the database it was written against.
 **The schedule's values live in a CSV, not in the seed script.** Block times,
 departure times, fares, aircraft and capacity are in
 `data/vietjet-schedule.csv`; `scripts/flight-schedule.cjs` only loads, validates
-and shapes them. They are *curated* from public Vietjet references — the
+and shapes them. They are _curated_ from public Vietjet references — the
 `vietjetair.com` fare/route/fleet pages and published block times — **not**
 scraped. The booking API (`vietjet-api.vietjetair.com/booking/api/v1/…`) sits
 behind AWS WAF, an HMAC `X-Signature` plus proof-of-work and a reCAPTCHA
@@ -895,7 +896,7 @@ block too when cleaning up, or every re-run doubles the business rows.
 
 **A duplicate departure is a 409, and the bridge decides whether that happens.**
 `flights` keeps `(from_code, to_code, depart_time)` unique as a plain unique
-*index*, so Postgres reports the violation with `code = 23505` and the index
+_index_, so Postgres reports the violation with `code = 23505` and the index
 name in `constraint`. Measured on Postgres 16: `constraint` carries the name
 for an index just as it does for a constraint, and `routine` is the C function
 that raised it — `_bt_check_unique` for this index, `ExecConstraints` for a
@@ -919,7 +920,7 @@ window.
 `discount_codes.agency_id` (nullable, `ON DELETE SET NULL`) plus `issued_by`. Admins
 manage agencies at `/quan-tri` → "Đại lý" and pick one from the "Phát hành cho đại lý"
 selector when creating a code; the percentage presets (10/20/30%) exist because those
-are the tiers the business issues. `agency_id` is *provenance only* — `/api/ma-giam-gia/xac-thuc`
+are the tiers the business issues. `agency_id` is _provenance only_ — `/api/ma-giam-gia/xac-thuc`
 deliberately does not filter by agency, so a customer holding an agency code can enter
 it at checkout exactly like a platform-wide one. Deleting an agency therefore orphans
 its codes into platform-wide rather than invalidating them.
@@ -1026,7 +1027,7 @@ return response;` narrows correctly and avoids returning `undefined` from a hand
   stays challenge-free, while registration and `/otp/gui` require it always.
   Five consecutive failures lock the account for 15 minutes via a **single**
   `UPDATE` (`registerFailedLoginAttempt`) whose `COALESCE(failed_login_attempts,
-  0) + 1` prevents the lost-update that a read-then-write allows. The OTP table
+0) + 1` prevents the lost-update that a read-then-write allows. The OTP table
   (`phone_otp`), referral ledger (`referral_events`) and member-id backfill come
   from `038_skyjoy_auth_enhancements.sql`; referral bonus is best-effort and
   idempotent on `referee_user_id` UNIQUE. SMS, OAuth credentials and reCAPTCHA
@@ -1069,14 +1070,14 @@ with services in `src/features/chat/services` and APIs under `src/app/api/tro-ch
   reports which backend is live and what `GET /api/tags` offers, which is also what the
   widget prints under "Đang trực tuyến".
 - **The new question travels as the last `user` message, not only in `history`.**
-  The widget sends the typed text in `message` and only the *previous* turns in `history`,
+  The widget sends the typed text in `message` and only the _previous_ turns in `history`,
   so a turn assembled from `history` alone answers the previous question — measured against
   a stub Ollama before `ollamaMessages = [...context, question]` existed. Two details came
   with the fix: a duplicate-tail guard (a client that also puts the question at the end of
   `history` must not send it twice) and `OLLAMA_THINK` only forwarded when set, because
   older Ollama builds do not know the `think` field.
 - **Archiving is a real `status` column**, not a UI-only flag. `PATCH
-  /api/tro-chuyen/cuoc-hoi-thoai` is admin-only, rejects any status other than
+/api/tro-chuyen/cuoc-hoi-thoai` is admin-only, rejects any status other than
   `active`/`closed`, and backs the Admin `ChatTab` "L∆∞u tr·ªØ" filter and its
   archive/reopen button (`setConversationStatus`).
 - **The mock DB models chat in memory.** `src/lib/neon.ts` has a `runChatQuery` branch
@@ -1127,15 +1128,15 @@ handshake and auth guards, not happy-path writes ‚Äî the mock DB cannot regi
 persistence flows are out of scope. Point it elsewhere with `SMOKE_BASE_URL`.
 
 `npm run test:ui` (`scripts/ui-check.cjs`) drives real headless Chrome over the DevTools
-Protocol and asserts the *browser* side that smoke cannot see: no `console.error`, no JS
+Protocol and asserts the _browser_ side that smoke cannot see: no `console.error`, no JS
 exception, no non-401 HTTP error, no horizontal overflow, no overlapping boxes, no
 `<img>` with an empty `src`, and no capture taken while a `.skeleton-*` is still on
 screen. It also asserts the landmark shape of every screen — exactly one `<main>`,
-exactly one `#main-content`, no `<main>` nested in another, and the target *after*
+exactly one `#main-content`, no `<main>` nested in another, and the target _after_
 `<header>` in document order — because that is the only place it can be seen: three routes
 (`/dang-nhap`, `/dat-lai-mat-khau`, `/lam-thu-tuc`) read `useSearchParams` and serve only
 an empty `Suspense` fallback in the raw HTML, so a `curl | grep <main` says zero on pages
-that are correct. It screenshots 35 screens (plus the OpenClaw widget) and exits non-zero if any
+that are correct. It screenshots 35 screens plus the auth-public and post-login captures (plus the OpenClaw widget) and exits non-zero if any
 screen has a flag, so it works as a gate. **Run it against a production build** (`npm run
 build && npm start`) — this is where the difference is load-bearing: `next dev` does not
 prefetch, so `router.prefetch('/dat-ve')` for a non-existent route (only `/dat-ve/[id]`
@@ -1197,7 +1198,7 @@ past palette (`#ED1D23`, `#E30613`, `#FFD400`, `#FFC400`) was removed, so reintr
 one of those hexes is a regression, not a neutral choice. The same applies to off-brand
 neutrals that ignore the tokens: `/chuyen-bay-cua-toi` and `/lam-thu-tuc` once used
 `#1e293b`/`#fff5f5`/`#FFF8E1`/`#7a6a00`/`#111827` and raw `gray-50`/`gray-300`; use
-`var(--foreground*)`, `var(--surface*)` and `var(--border)` instead so dark mode works.
+`var(--foreground*)`, `var(--surface*)` and `var(--border)` instead so the light-only canvas stays consistent.
 
 `vj-menubar` styles the red uppercase nav row and `vj-cta` the gold pill button; prefer
 those utilities over restyling a bespoke button. `vj-btn` + `vj-btn-primary` is the
@@ -1212,7 +1213,7 @@ does not: `<Header />` sits inside `children` (each page renders it), so a landm
 layout level wrapped the very navigation the link exists to skip, and Tab from the skip
 link landed back on the announcement bar. Which surface owns the landmark follows where
 the chrome is rendered, not where the route is: `/quan-tri`'s header is emitted by
-`AdminDashboardClient`, so its `main#main-content` is the tab panel *inside* that
+`AdminDashboardClient`, so its `main#main-content` is the tab panel _inside_ that
 component, not the page wrapper in `src/app/quan-tri/page.tsx`. Two consequences for a
 new component: a component rendered inside another page's `main` (`FlightResultsStep`,
 `AdminDashboardClient`) is not a `<main>` itself — only one `<main>` per document — and a
@@ -1220,7 +1221,7 @@ new component: a component rendered inside another page's `main` (`FlightResults
 `src/test/hero-banner.test.tsx` pins the source shape; `npm run test:ui` pins the live DOM.
 `test:ui` also presses the keys a visitor would, once per run on `/trang-chu`: the first Tab
 must land on the skip link, Enter must set `#main-content` as the target, and the next Tab
-must land *inside* it. That check cannot pass by doing nothing — if Tab never moved, the
+must land _inside_ it. That check cannot pass by doing nothing — if Tab never moved, the
 focused element is still the skip link, which is outside `#main-content`.
 
 The auth screens do **not** use `vj-btn-primary`. Their submit buttons use
@@ -1231,9 +1232,9 @@ That theme lives on `skyjoy-authen.vietjetair.com`, which fronts a Keycloak real
 values above come from the theme's own leaked stylesheet ‚Äî don't "correct" them to red.
 Keep auth CTAs on that one utility rather than reintroducing `.vj-btn`.
 
-Floating labels (`.form-label-float`) sit on a `var(--background)` chip when lifted, so
-in dark mode they need the `.dark` override to `var(--dark-surface)`; a hard-coded
-`background: white` there produces a white notch over a dark input.
+Floating labels (`.form-label-float`) sit on a `var(--background)` chip when lifted; the
+light-only canvas has no `.dark` override to feed, and a hard-coded `background: white`
+there would show a white notch over the input.
 
 Public information pages share `<PageHero>` (`@/shared/components/navigation`), which
 renders the brand red sweep via `.vj-page-hero`. Do not re-add an inline
@@ -1263,7 +1264,7 @@ preselect a panel. Link services as `/dich-vu?service=<id>` rather than as subpa
 `/lam-thu-tuc-truc-tuyen` is a legacy alias that 307s to `/lam-thu-tuc`; it forwards the
 whole query string, so `?code=` survives. Both are in `PUBLIC_ROUTES` ‚Äî the check-in
 lookup is anonymous (booking code + surname are the credentials). `/chuyen-bay-cua-toi`
-is public too, but it reads `/api/checkin/status/[bookingId]`, which is *not* in
+is public too, but it reads `/api/checkin/status/[bookingId]`, which is _not_ in
 `PUBLIC_API_ROUTES`, so a signed-out visitor sees the booking-code lookup and an empty
 state rather than someone else's reservations.
 

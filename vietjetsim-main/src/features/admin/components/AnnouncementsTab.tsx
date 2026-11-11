@@ -451,6 +451,7 @@ function AnnouncementModal({
         <div className="flex items-center justify-between p-5 border-b border-white/5">
           <h3 className="font-bold text-white">{title}</h3>
           <button
+            aria-label="Đóng"
             onClick={onClose}
             className="w-8 h-8 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-lg flex items-center justify-center transition-colors"
           >
@@ -566,6 +567,7 @@ function AnnouncementModal({
 
           <div className="flex gap-3 pt-2">
             <button
+              aria-label="Đóng"
               type="button"
               onClick={onClose}
               disabled={isSubmitting}

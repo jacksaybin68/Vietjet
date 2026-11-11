@@ -3,7 +3,13 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiRequest } from '@/shared/services';
-import { RiDoorOpenLine, RiTimeLine, RiAlertLine, RiCloseCircleLine, RiTimerLine } from 'react-icons/ri';
+import {
+  RiDoorOpenLine,
+  RiTimeLine,
+  RiAlertLine,
+  RiCloseCircleLine,
+  RiTimerLine,
+} from 'react-icons/ri';
 
 type NotificationType = 'all' | 'booking' | 'flight' | 'promo';
 
@@ -172,10 +178,19 @@ function MetadataBadge({ type, metadata }: { type: string; metadata?: Record<str
   if (!metadata) return null;
   if (type === 'flight' && metadata.delay_type) {
     const delayDetails: Record<string, { label: string; icon: React.ReactNode }> = {
-      gate_change: { label: 'Đổi cổng', icon: <RiDoorOpenLine className="inline text-amber-600 mr-1" /> },
-      schedule_change: { label: 'Đổi giờ', icon: <RiTimeLine className="inline text-blue-600 mr-1" /> },
+      gate_change: {
+        label: 'Đổi cổng',
+        icon: <RiDoorOpenLine className="inline text-amber-600 mr-1" />,
+      },
+      schedule_change: {
+        label: 'Đổi giờ',
+        icon: <RiTimeLine className="inline text-blue-600 mr-1" />,
+      },
       delay: { label: 'Trễ chuyến', icon: <RiAlertLine className="inline text-orange-600 mr-1" /> },
-      cancellation: { label: 'Huỷ chuyến', icon: <RiCloseCircleLine className="inline text-red-600 mr-1" /> },
+      cancellation: {
+        label: 'Huỷ chuyến',
+        icon: <RiCloseCircleLine className="inline text-red-600 mr-1" />,
+      },
     };
     const item = delayDetails[metadata.delay_type];
     return (
@@ -330,7 +345,7 @@ function NotifCard({ notif, onMarkRead, onDismiss, onArchive, onSnooze }: NotifC
               </span>
             </div>
             <span
-              className="flex-shrink-0 text-xs text-[var(--foreground-subtle)]whitespace-nowrap"
+              className="flex-shrink-0 text-xs text-[var(--foreground-subtle)] whitespace-nowrap"
               title={formatFullDate(notif.timestamp)}
             >
               {formatRelativeTime(notif.timestamp)}
@@ -338,7 +353,7 @@ function NotifCard({ notif, onMarkRead, onDismiss, onArchive, onSnooze }: NotifC
           </div>
 
           {/* Body */}
-          <p className="text-xs text-[var(--foreground-muted)]mt-1 leading-relaxed line-clamp-2">
+          <p className="text-xs text-[var(--foreground-muted)] mt-1 leading-relaxed line-clamp-2">
             {notif.body}
           </p>
 
@@ -661,7 +676,7 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllRead}
-                className="text-xs font-semibold text-[var(--foreground-muted)]hover:text-primary transition-colors flex items-center gap-1"
+                className="text-xs font-semibold text-[var(--foreground-muted)] hover:text-primary transition-colors flex items-center gap-1"
               >
                 <Icon name="CheckCircleIcon" size={13} />
                 <span className="hidden sm:inline">Đánh dấu tất cả đã đọc</span>
@@ -669,7 +684,7 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
             )}
             <button
               onClick={loadNotifications}
-              className="text-[var(--foreground-subtle)]hover:text-primary transition-colors"
+              className="text-[var(--foreground-subtle)] hover:text-primary transition-colors"
               title="Tải lại"
             >
               <Icon name="ArrowPathIcon" size={14} />
@@ -731,7 +746,7 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
           <select
             value={timestampFilter}
             onChange={(e) => setTimestampFilter(e.target.value as TimestampFilter)}
-            className="text-xs border border-[var(--border)]rounded-lg px-2 py-1.5 bg-[var(--surface)]text-[var(--foreground-muted)]focus:outline-none"
+            className="text-xs border border-[var(--border)] rounded-lg px-2 py-1.5 bg-[var(--surface)] text-[var(--foreground-muted)] focus:outline-none"
           >
             <option value="all">Tất cả thời gian</option>
             <option value="today">Hôm nay</option>
@@ -776,8 +791,8 @@ export default function NotificationsTab({ onUnreadCountChange }: NotificationsT
           <div className="w-14 h-14 bg-[var(--surface-2)] rounded-2xl flex items-center justify-center mb-3">
             <Icon name="BellSlashIcon" size={28} className="text-[var(--foreground-subtle)]" />
           </div>
-          <p className="font-bold text-[var(--foreground-muted)]text-sm">Không có thông báo</p>
-          <p className="text-xs text-[var(--foreground-subtle)]mt-1 max-w-xs">
+          <p className="font-bold text-[var(--foreground-muted)] text-sm">Không có thông báo</p>
+          <p className="text-xs text-[var(--foreground-subtle)] mt-1 max-w-xs">
             {searchQuery || activeType !== 'all' || showUnreadOnly
               ? 'Không tìm thấy thông báo phù hợp với bộ lọc.'
               : 'Bạn đã xem hết tất cả thông báo.'}

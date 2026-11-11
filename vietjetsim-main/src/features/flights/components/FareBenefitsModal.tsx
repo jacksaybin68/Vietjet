@@ -282,6 +282,7 @@ export default function FareBenefitsModal({
             hành của Vietjet.
           </p>
           <button
+            aria-label="Đóng"
             type="button"
             onClick={onClose}
             className="shrink-0 vj-btn vj-btn-sm vj-btn-accent rounded-xl font-bold font-koho"

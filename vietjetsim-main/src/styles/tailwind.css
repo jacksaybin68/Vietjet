@@ -90,6 +90,8 @@ input[type='date'].vj-no-native-icon::-moz-calendar-picker-indicator {
   --brand-cta: #ffdd00;
   --brand-cta-hover: #fbb612;
   --vj-green-leaf: #7cb342;
+  --vj-green: #2db95e;
+  --vj-green-light: #e6f4ea;
   --vj-blue-soft: #f0f6fc;
   --vj-blue-tint: #f0f7fe;
   /* RGB channels: Tailwind's `/N` modifier only compiles against
@@ -177,8 +179,6 @@ h6 {
     box-shadow 160ms ease,
     transform 160ms ease;
 }
-
-
 
 /* Đích của skip link. Chừa chỗ cho announcement bar + header sticky: không có
    nó thì tiêu đề trang nằm ngay dưới thanh điều hướng vừa được bỏ qua.

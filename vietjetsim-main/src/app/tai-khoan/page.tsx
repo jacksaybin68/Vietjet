@@ -11,6 +11,7 @@ export default function UserDashboardPage() {
       <div className="min-h-screen bg-[var(--surface)]">
         <Header />
         <main id="main-content">
+          <h1 className="sr-only">Tài khoản</h1>
           <ErrorBoundary variant="api">
             <UserDashboardClient />
           </ErrorBoundary>

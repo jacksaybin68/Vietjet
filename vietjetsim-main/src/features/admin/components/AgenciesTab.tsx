@@ -344,6 +344,7 @@ function AgencyModal({
             {agency ? 'Chỉnh sửa đại lý' : 'Thêm đại lý mới'}
           </h3>
           <button
+            aria-label="Đóng"
             onClick={onClose}
             className="w-10 h-10 bg-white/5 hover:bg-white/10 text-slate-400 rounded-2xl flex items-center justify-center transition-all border border-white/5"
           >
@@ -450,6 +451,7 @@ function AgencyModal({
 
           <div className="flex gap-4 pt-2">
             <button
+              aria-label="Đóng"
               type="button"
               onClick={onClose}
               className="flex-1 py-5 bg-white/5 hover:bg-white/10 text-white font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all border border-white/5"
