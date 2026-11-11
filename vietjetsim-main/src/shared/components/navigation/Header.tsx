@@ -268,7 +268,7 @@ export default function Header({
                 />
               </Link>
             )}
-            <h1 className="font-koho font-black italic tracking-wide text-lg sm:text-xl uppercase text-white text-center truncate">
+            <h1 className="font-koho font-black italic tracking-wide text-[15px] sm:text-xl uppercase text-white text-center truncate">
               {dynamicTitle || mobileTitle || 'LỰA CHỌN CHUYẾN BAY'}
             </h1>
             <button

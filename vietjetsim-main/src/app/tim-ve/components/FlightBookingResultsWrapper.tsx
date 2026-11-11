@@ -195,13 +195,16 @@ export default function FlightBookingResultsWrapper({
   const [bookingStep, setBookingStep] = useState(1);
 
   useEffect(() => {
+    // Tiêu đề bước trên mobile: rút ngắn vì thanh header chỉ còn ~230px bề
+    // rộng cho chữ (logo + nút menu), nên "LỰA CHỌN CHUYẾN BAY" bị cắt thành
+    // "LỰA CHỌN CHUYẾN …". Desktop không dùng chuỗi này.
     const titles: Record<number, string> = {
-      1: 'LỰA CHỌN CHUYẾN BAY',
-      2: 'THÔNG TIN HÀNH KHÁCH',
-      3: 'LỰA CHỌN DỊCH VỤ',
+      1: 'CHỌN CHUYẾN BAY',
+      2: 'THÔNG TIN KHÁCH',
+      3: 'CHỌN DỊCH VỤ',
       4: 'THANH TOÁN',
     };
-    const title = titles[bookingStep] || 'LỰA CHỌN CHUYẾN BAY';
+    const title = titles[bookingStep] || 'CHỌN CHUYẾN BAY';
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('vj-booking-step-title', { detail: title }));
     }
