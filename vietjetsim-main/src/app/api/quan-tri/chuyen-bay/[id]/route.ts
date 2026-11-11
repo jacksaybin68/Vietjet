@@ -15,6 +15,7 @@ const ALLOWED_FIELDS = [
   'economy_price',
   'business_price',
   'status',
+  'aircraft',
 ] as const;
 
 type AllowedField = (typeof ALLOWED_FIELDS)[number];
@@ -31,6 +32,7 @@ const FIELD_LABELS: Record<AllowedField, string> = {
   economy_price: 'Giá vé Phổ thông',
   business_price: 'Giá vé Thương gia',
   status: 'Trạng thái chuyến bay',
+  aircraft: 'Máy bay',
 };
 
 /**

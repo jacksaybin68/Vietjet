@@ -105,6 +105,8 @@ export interface AdminFlight {
   available: number;
   available_seats?: number;
   status?: string;
+  /** Aircraft type (migration 040). Null/absent means the UI resolves it. */
+  aircraft?: string | null;
 }
 
 export interface AdminBooking {

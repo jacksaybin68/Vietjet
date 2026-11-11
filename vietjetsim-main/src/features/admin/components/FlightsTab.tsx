@@ -17,6 +17,7 @@ import {
 import { getApiErrorMessage } from '@/shared/services';
 import { AdminTabHeader, ADMIN_CARD_STYLE, ADMIN_ACTION_BTN } from './AdminSection';
 import { AIRPORT_CITIES } from '@/shared/constants';
+import { AIRCRAFT_MODELS } from '@/features/flights/constants';
 import { FLIGHT_NO_PATTERN, normalizeFlightNo } from '@/lib/flight-no';
 import { toVietnamInstant, toVietnamWallClock } from '@/lib/utils';
 import BulkCollectPanel from './BulkCollectPanel';
@@ -49,6 +50,8 @@ interface Flight {
   capacity: number;
   booked: number;
   status: FlightStatus;
+  /** Dòng máy bay (migration 040). Rỗng = để resolver suy ra từ số hiệu/tuyến. */
+  aircraft?: string;
 }
 
 const INITIAL_FLIGHTS: Flight[] = [
@@ -192,6 +195,7 @@ function toFlightRow(f: AdminFlight): Flight {
     capacity: Number(f.available ?? f.available_seats ?? 180) || 180,
     booked: Math.max(0, 180 - (Number(f.available ?? f.available_seats ?? 180) || 180)),
     status: (f.status as FlightStatus) || 'active',
+    aircraft: f.aircraft ?? '',
   };
 }
 
@@ -407,6 +411,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
     economyPrice: '',
     businessPrice: '',
     capacity: '',
+    aircraft: '',
   });
 
   const activeFilterCount = [statusFilter !== 'all', !!dateFrom, !!dateTo].filter(Boolean).length;
@@ -552,6 +557,8 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
         // Postgres with flights_class_check and the whole POST returns 500.
         class: 'economy',
         available: parseInt(newFlight.capacity),
+        // Rỗng = để `resolveAircraft` chọn theo số hiệu/tuyến.
+        aircraft: newFlight.aircraft || null,
       };
       await createAdminFlight(payload);
       onToast?.success(
@@ -569,6 +576,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
         economyPrice: '',
         businessPrice: '',
         capacity: '',
+        aircraft: '',
       });
       fetchFlights();
     } catch (err) {
@@ -635,6 +643,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
         economy_price: editingFlight.economyPrice,
         business_price: editingFlight.businessPrice,
         status: editingFlight.status,
+        aircraft: editingFlight.aircraft || null,
       };
 
       const data = (await updateAdminFlight(editingFlight.id, payload)) as {
@@ -661,6 +670,7 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                 economyPrice: Number(data.flight?.economy_price ?? editingFlight.economyPrice),
                 businessPrice: Number(data.flight?.business_price ?? editingFlight.businessPrice),
                 status: (data.flight?.status as FlightStatus) || editingFlight.status,
+                aircraft: data.flight?.aircraft ?? editingFlight.aircraft,
               }
             : f
         )
@@ -1857,6 +1867,23 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                     <label className="form-label-float">180</label>
                   </div>
                 </div>
+                <div>
+                  <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-1">
+                    Máy bay
+                  </label>
+                  <select
+                    value={newFlight.aircraft}
+                    onChange={(e) => setNewFlight((p) => ({ ...p, aircraft: e.target.value }))}
+                    className="w-full px-3 py-2 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500/50"
+                  >
+                    <option value="">Tự động (theo số hiệu)</option>
+                    {Object.values(AIRCRAFT_MODELS).map((model) => (
+                      <option key={model} value={model}>
+                        {model}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <div className="flex gap-3 pt-2">
                 <button
@@ -2143,6 +2170,31 @@ export default function FlightsTab({ onToast }: { onToast?: ToastAPI }) {
                   }
                   className="w-full px-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-white [color-scheme:dark] focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-500/20 transition-all"
                 />
+              </div>
+
+              {/* ── Máy bay (migration 040) ── */}
+              <div>
+                <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                  <Icon name="PaperAirplaneIcon" size={12} className="text-slate-500" />
+                  Máy bay
+                </label>
+                <select
+                  value={editingFlight.aircraft ?? ''}
+                  onChange={(e) =>
+                    setEditingFlight((p) => (p ? { ...p, aircraft: e.target.value } : p))
+                  }
+                  className="w-full px-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-500/20 transition-all"
+                >
+                  <option value="">Tự động (theo số hiệu)</option>
+                  {Object.values(AIRCRAFT_MODELS).map((model) => (
+                    <option key={model} value={model}>
+                      {model}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-2xs text-slate-500">
+                  Để trống để hệ thống tự chọn theo số hiệu chuyến bay hoặc tuyến.
+                </p>
               </div>
 
               {/* Time validation warning */}
