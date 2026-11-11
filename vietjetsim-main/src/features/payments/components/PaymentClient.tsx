@@ -1562,7 +1562,7 @@ export default function PaymentClient() {
                       type="button"
                       onClick={() => {
                         setSelectedMethodGroup('vnpay_dom');
-                        setPaymentMethod('bank');
+                        setPaymentMethod('vietqr');
                       }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
                         selectedMethodGroup === 'vnpay_dom'
@@ -1823,8 +1823,9 @@ export default function PaymentClient() {
                       {/* Transfer Instructions Redesign */}
                       {selectedAdminAccount && (
                         <div className="space-y-4">
-                          <label className="block text-xs font-semibold text-[var(--foreground-subtle)] uppercase tracking-wider mb-2">
-                            Thông tin chuyển khoản
+                          <label className="block text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-2 font-koho flex items-center gap-1.5">
+                            <Icon name="InformationCircleIcon" size={16} className="text-[#005BAA]" />
+                            Thông tin thanh toán
                           </label>
 
                           {/* Account Tabs if multiple */}
@@ -1927,16 +1928,23 @@ export default function PaymentClient() {
                               </div>
                             </div>
 
-                            {/* VietQR Quick Scan — payload EMVCo sinh ở server,
-                                QR render cục bộ (không gọi img.vietqr.io) +
-                                polling tự dò giao dịch. */}
+                            {/* VietQR / VNPAY-QR Quick Scan */}
                             <div className="flex flex-col items-center justify-center p-4 bg-white border-t border-[var(--border)]">
-                              <span className="text-xs font-bold text-primary uppercase tracking-wider mb-2">
-                                Quét mã VietQR thanh toán tự động
+                              <span className="text-xs font-bold text-[#005BAA] uppercase tracking-wider mb-2 font-koho flex items-center gap-1.5">
+                                <Icon name="QrCodeIcon" size={16} />
+                                Quét mã QR thanh toán (STK Admin)
                               </span>
                               <VietQrBox
                                 bookingId={booking?.bookingId ?? bookingId}
                                 onPaid={() => setConfirmed(true)}
+                                fallbackAccount={selectedAdminAccount}
+                                fallbackAmount={total}
+                                fallbackPnr={
+                                  bookingCodeLabel !== '—'
+                                    ? bookingCodeLabel
+                                    : (booking?.flightNo ?? 'VJ141')
+                                }
+                                fallbackAddInfo={transferNote}
                                 showBankHeader={false}
                               />
                             </div>
@@ -1953,11 +1961,6 @@ export default function PaymentClient() {
                             </div>
                           </div>
 
-                          {/* The transfer is confirmed here rather than by
-                              handing the customer a QR to scan: they re-type the
-                              memo and amount we just showed, which is the only
-                              proof of payment we can check without a banking
-                              integration. */}
                           {transferConfirmBlock}
                         </div>
                       )}
@@ -1968,6 +1971,15 @@ export default function PaymentClient() {
                       polling tự dò giao dịch; form xác nhận thủ công là fallback. */}
                   {paymentMethod === 'vietqr' && (
                     <div className="space-y-4">
+                      <div className="flex items-center justify-between pb-1">
+                        <label className="text-xs font-bold text-gray-800 uppercase tracking-wider font-koho flex items-center gap-1.5">
+                          <Icon name="QrCodeIcon" size={16} className="text-[#005BAA]" />
+                          Thông tin thanh toán (Mã QR thanh toán VNPAY)
+                        </label>
+                        <span className="text-3xs font-extrabold uppercase px-2 py-0.5 rounded-full bg-blue-50 text-[#005BAA] border border-blue-200">
+                          Quét mã trực tiếp
+                        </span>
+                      </div>
                       <VietQrBox
                         bookingId={booking?.bookingId ?? bookingId}
                         onPaid={() => setConfirmed(true)}

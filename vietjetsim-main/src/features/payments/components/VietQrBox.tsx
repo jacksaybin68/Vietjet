@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { apiRequest } from '@/shared/services';
-import { buildVietQrPayload } from '@/lib/vietqr';
+import { buildVietQrPayload, lookupBankBin } from '@/lib/vietqr';
 import { VnpayLogo } from './PaymentMethodLogos';
 
 /**
@@ -122,7 +122,7 @@ export default function VietQrBox({
     function applyLocalFallback() {
       if (!fallbackAccount) return;
       try {
-        const bin = fallbackAccount.bank_bin || '970422';
+        const bin = lookupBankBin(fallbackAccount.admin_bank_name, fallbackAccount.bank_bin);
         const amount = fallbackAmount > 0 ? fallbackAmount : 1730000;
         const pnr = fallbackPnr || 'VJ141';
         const addInfo = fallbackAddInfo || `VJ ${pnr}`;
@@ -280,7 +280,7 @@ export default function VietQrBox({
             <div className="flex items-center gap-1.5 mb-2.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200">
               <VnpayLogo className="h-4 w-auto" />
               <span className="text-3xs font-black text-[#005BAA] uppercase tracking-wider">
-                Quét mã để thanh toán
+                Mã QR thanh toán VNPAY
               </span>
             </div>
 
@@ -307,8 +307,18 @@ export default function VietQrBox({
           </div>
         </div>
 
-        {/* Thông tin chuyển khoản chi tiết (STK Admin, Tên, Số tiền, Nội dung) */}
+        {/* Thông tin thanh toán chi tiết (STK Admin, Tên, Số tiền, Nội dung) */}
         <div className="w-full mt-6 space-y-2.5 bg-gradient-to-b from-slate-50 to-blue-50/30 p-4 sm:p-5 rounded-2xl border border-blue-200/80 shadow-xs">
+          <div className="flex items-center justify-between pb-2 border-b border-blue-200/60">
+            <span className="text-xs font-black uppercase tracking-wider text-[#005BAA] font-koho flex items-center gap-1.5">
+              <Icon name="InformationCircleIcon" size={16} />
+              Thông tin thanh toán
+            </span>
+            <span className="text-3xs font-extrabold uppercase px-2 py-0.5 rounded-full bg-blue-100/70 text-[#005BAA] border border-blue-200">
+              STK Admin chính thức
+            </span>
+          </div>
+
           {/* Hàng 1: Số tài khoản thụ hưởng của Admin */}
           <div className="flex justify-between items-center bg-white p-2.5 sm:p-3 rounded-xl border border-gray-200 shadow-2xs">
             <div>

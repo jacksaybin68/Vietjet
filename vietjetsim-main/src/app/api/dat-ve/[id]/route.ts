@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthRequest } from '@/lib/auth';
 import { isAdminRole } from '@/lib/rbac';
-import { getBookingById } from '@/lib/db';
+import { getBookingByCodeOrId } from '@/lib/db';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { user } = await verifyAuthRequest(request);
     const { id } = await params;
 
-    const booking = await getBookingById(id);
+    const booking = await getBookingByCodeOrId(id);
     if (!booking) {
       return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
     }

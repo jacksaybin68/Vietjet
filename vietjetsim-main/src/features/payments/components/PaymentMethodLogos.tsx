@@ -87,7 +87,7 @@ export function VietQrLogo({ className = 'h-6 w-auto' }: { className?: string })
 
 // ─── 7. VNPAY ───────────────────────────────────────────────────────────────
 export function VnpayLogo({ className = 'h-5 w-auto' }: { className?: string }) {
-  return <BrandLogo className={className} src="vnpay.svg" alt="VNPAY" width={138} height={42} />;
+  return <BrandLogo className={className} src="vnpay.svg" alt="VNPAY" width={138} height={28} />;
 }
 
 // ─── 8. MoMo ────────────────────────────────────────────────────────────────

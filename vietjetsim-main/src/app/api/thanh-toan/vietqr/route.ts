@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getBookingById, getActiveBankAccounts } from '@/lib/db';
 import { verifyAuthRequest } from '@/lib/auth';
 import { renderTransferNote } from '@/lib/transfer-note';
-import { buildVietQrPayload } from '@/lib/vietqr';
+import { buildVietQrPayload, lookupBankBin } from '@/lib/vietqr';
 import { getApiErrorMessage } from '@/shared/services';
 
 /**
@@ -58,8 +58,10 @@ export async function GET(request: NextRequest) {
       discountCode: '',
     });
 
+    const effectiveBin = lookupBankBin(account.bank_name, account.bank_bin);
+
     const payload = buildVietQrPayload({
-      bin: account.bank_bin || '',
+      bin: effectiveBin,
       accountNumber: account.account_number,
       amount,
       addInfo,
@@ -75,7 +77,7 @@ export async function GET(request: NextRequest) {
       bank: {
         id: account.id,
         name: account.bank_name,
-        bin: account.bank_bin || null,
+        bin: effectiveBin,
         accountNumber: account.account_number,
         accountHolder: account.account_holder,
         logoUrl: account.logo_url || null,

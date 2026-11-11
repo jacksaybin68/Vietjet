@@ -68,9 +68,68 @@ function sub(id: string, value: string): string {
   return tlv(id, value);
 }
 
+/** Map tên viết tắt hoặc tên phổ biến của ngân hàng Việt Nam sang mã BIN (NAPAS). */
+export const BANK_BIN_MAP: Record<string, string> = {
+  VIB: '970441',
+  VIETCOMBANK: '970436',
+  VCB: '970436',
+  VIETINBANK: '970415',
+  CTG: '970415',
+  BIDV: '970418',
+  MB: '970422',
+  MBBANK: '970422',
+  TECHCOMBANK: '970407',
+  TCB: '970407',
+  VPBANK: '970432',
+  VPB: '970432',
+  ACB: '970416',
+  TPBANK: '970423',
+  TPB: '970423',
+  HDBANK: '970437',
+  HDB: '970437',
+  SACOMBANK: '970403',
+  STB: '970403',
+  AGRIBANK: '970405',
+  VBA: '970405',
+  SHB: '970443',
+  MSB: '970426',
+  OCB: '970448',
+  LPBANK: '970449',
+  SEABANK: '970454',
+  BVBANK: '970457',
+  NCB: '970419',
+  PVCOMBANK: '970412',
+  SAIGONBANK: '970400',
+  BACABANK: '970409',
+  BAOVIETBANK: '970438',
+  KIENLONGBANK: '970452',
+  NAMABANK: '970428',
+  VIETABANK: '970427',
+  EXIMBANK: '970431',
+  EIB: '970431',
+  SCB: '970429',
+  SHINHAN: '970424',
+  WOORI: '970457',
+  CAKE: '546034',
+  TIMO: '963388',
+};
+
+/**
+ * Tự động tìm mã BIN NAPAS (6 chữ số) từ tên ngân hàng nếu chưa được cấu hình.
+ */
+export function lookupBankBin(bankName?: string | null, explicitBin?: string | null): string {
+  if (explicitBin && explicitBin.trim().length >= 6) {
+    return explicitBin.trim();
+  }
+  if (!bankName) return '970441';
+  const raw = sanitizeVietQrText(bankName);
+  const clean = raw.replace(/NGAN HANG|BANK|TMCP/g, '').trim();
+  return BANK_BIN_MAP[clean] || BANK_BIN_MAP[raw] || '970441';
+}
+
 export interface VietQrInput {
-  /** BIN ngân hàng thụ hưởng (6–9 chữ số), ví dụ MB = 970422. */
-  bin: string;
+  /** BIN ngân hàng thụ hưởng (6–9 chữ số), ví dụ MB = 970422, VIB = 970441. */
+  bin?: string;
   /** Số tài khoản thụ hưởng, chỉ giữ chữ số. */
   accountNumber: string;
   /** Số tiền VND (số nguyên). Bỏ qua nếu <= 0. */
@@ -86,7 +145,10 @@ export interface VietQrInput {
  * Trả về chuỗi khách hàng app ngân hàng có thể quét (upi/vietqr string).
  */
 export function buildVietQrPayload(input: VietQrInput): string {
-  const bin = (input.bin || '').trim();
+  let bin = (input.bin || '').trim();
+  if (!bin && input.bankName) {
+    bin = lookupBankBin(input.bankName);
+  }
   const accountNumber = (input.accountNumber || '').replace(/\D/g, '');
   if (!bin || !accountNumber) {
     throw new Error('VietQR cần BIN ngân hàng và số tài khoản thụ hưởng');

@@ -417,6 +417,9 @@ async function main() {
 
   const userLogin = await login(USER);
   await captureAll('14-tai-khoan-vi', `${BASE}/tai-khoan`);
+
+  // /thanh-toan cần session user.
+  await captureAll('18-thanh-toan', `${BASE}/thanh-toan`);
   const adminLogin = await login(ADMIN);
   // `/quan-tri` là console nghiệp vụ desktop-first (AGENTS.md: "không ép giao
   // diện public lên console nghiệp vụ"), nên kiểm desktop + tablet và bỏ mobile
@@ -425,9 +428,8 @@ async function main() {
     await capture('15-quan-tri-tong-quan', `${BASE}/quan-tri`, { viewport });
   }
 
-  // /thanh-toan và /dat-ve/[id] cần session user + booking thật. Mã đặt chỗ demo
-  // `VJ644052` (nguồn từ migrations 014) là con đường sạch nhất.
-  await captureAll('18-thanh-toan', `${BASE}/thanh-toan`);
+  // /dat-ve/[id] kiểm bằng session admin: mã đặt chỗ demo có thể thuộc tài khoản
+  // khác, admin xem được mọi booking nên lookup không phải 404.
   await captureAll('19-dat-ve', `${BASE}/dat-ve/VJ644052`);
 
   // ── Widget OpenClaw: mở panel, đọc nhãn backend và thử gửi một câu ─────────
