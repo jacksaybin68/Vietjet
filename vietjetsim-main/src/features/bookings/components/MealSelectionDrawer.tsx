@@ -143,11 +143,10 @@ export default function MealSelectionDrawer({
           <button
             type="button"
             onClick={() => setActiveLeg('outbound')}
-            className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${
-              activeLeg === 'outbound'
-                ? 'border-primary-dark text-primary-dark'
-                : 'border-transparent text-gray-500 hover:text-gray-800'
-            }`}
+            className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${activeLeg === 'outbound'
+              ? 'border-primary-dark text-primary-dark'
+              : 'border-transparent text-gray-500 hover:text-gray-800'
+              }`}
           >
             Chuyến đi
           </button>
@@ -155,11 +154,10 @@ export default function MealSelectionDrawer({
             <button
               type="button"
               onClick={() => setActiveLeg('inbound')}
-              className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${
-                activeLeg === 'inbound'
-                  ? 'border-primary-dark text-primary-dark'
-                  : 'border-transparent text-gray-500 hover:text-gray-800'
-              }`}
+              className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${activeLeg === 'inbound'
+                ? 'border-primary-dark text-primary-dark'
+                : 'border-transparent text-gray-500 hover:text-gray-800'
+                }`}
             >
               Chuyến về
             </button>

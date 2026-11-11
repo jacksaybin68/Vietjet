@@ -268,20 +268,18 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                 setFilterStatus(item.id);
                 setCurrentPage(1);
               }}
-              className={`px-3 py-2 rounded-xl text-2xs font-black uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                filterStatus === item.id
-                  ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
+              className={`px-3 py-2 rounded-xl text-2xs font-black uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 ${filterStatus === item.id
+                ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
+                : 'text-slate-400 hover:text-slate-200'
+                }`}
             >
               <span>{item.label}</span>
               {typeof item.count === 'number' && item.count > 0 && (
                 <span
-                  className={`px-1.5 py-0.2 rounded-full text-3xs font-extrabold ${
-                    filterStatus === item.id
-                      ? 'bg-slate-950 text-amber-300'
-                      : 'bg-amber-500/20 text-amber-400'
-                  }`}
+                  className={`px-1.5 py-0.2 rounded-full text-3xs font-extrabold ${filterStatus === item.id
+                    ? 'bg-slate-950 text-amber-300'
+                    : 'bg-amber-500/20 text-amber-400'
+                    }`}
                 >
                   {item.count}
                 </span>

@@ -13,6 +13,8 @@ import {
   DutyFreeBagIcon,
   AirportTaxiIcon,
   EvoucherGiftIcon,
+  PriorityFastTrackIcon,
+  BusinessLoungeIcon,
 } from '@/shared/components/ui/RealisticServiceIcons';
 import { Header, Footer, PageHero } from '@/shared/components/navigation';
 
@@ -38,9 +40,9 @@ function renderServiceIcon(id: string, size = 28) {
     case 'insurance':
       return <SkyCareInsuranceIcon size={size} />;
     case 'priority':
-      return <OnlineCheckinIcon size={size} />;
+      return <PriorityFastTrackIcon size={size} />;
     case 'lounge':
-      return <SkyJoyStarIcon size={size} />;
+      return <BusinessLoungeIcon size={size} />;
     case 'dutyfree':
     case 'skyshop':
       return <DutyFreeBagIcon size={size} />;

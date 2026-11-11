@@ -88,7 +88,7 @@ export default function AncillaryServicesStep({
           className="group cursor-pointer rounded-2xl bg-white border border-gray-200 p-4 shadow-xs hover:shadow-md transition-all flex items-center justify-between"
         >
           <div className="flex items-center gap-4 min-w-0">
-            <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200/80 flex items-center justify-center p-2 shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+            <div className="w-14 h-14 rounded-2xl bg-amber-50/70 border border-amber-200/80 flex items-center justify-center p-2 shadow-xs shrink-0 group-hover:scale-105 transition-transform">
               <SeatArmchairIcon size={36} />
             </div>
             <div className="min-w-0">
@@ -123,7 +123,7 @@ export default function AncillaryServicesStep({
           className="group cursor-pointer rounded-2xl bg-white border border-gray-200 p-4 shadow-xs hover:shadow-md transition-all flex items-center justify-between"
         >
           <div className="flex items-center gap-4 min-w-0">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center p-2 shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+            <div className="w-14 h-14 rounded-2xl bg-red-50/70 border border-red-200/80 flex items-center justify-center p-2 shadow-xs shrink-0 group-hover:scale-105 transition-transform">
               <BaggageLuggageIcon size={36} />
             </div>
             <div className="min-w-0">

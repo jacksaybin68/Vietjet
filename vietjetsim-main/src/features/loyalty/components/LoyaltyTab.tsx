@@ -376,9 +376,8 @@ export default function LoyaltyTab() {
             return (
               <div
                 key={tier.id}
-                className={`flex-1 min-w-[140px] p-4 text-center border-r border-[var(--border)] last:border-r-0 ${
-                  isCurrentTier ? 'bg-[var(--surface-2)]' : ''
-                }`}
+                className={`flex-1 min-w-[140px] p-4 text-center border-r border-[var(--border)] last:border-r-0 ${isCurrentTier ? 'bg-[var(--surface-2)]' : ''
+                  }`}
               >
                 <div
                   className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2"
@@ -455,9 +454,8 @@ export default function LoyaltyTab() {
                     </div>
                   </div>
                   <div
-                    className={`font-bold text-sm font-[KoHo,sans-serif] ${
-                      isPositive ? 'text-[#10B981]' : 'text-[#EF4444]'
-                    }`}
+                    className={`font-bold text-sm font-[KoHo,sans-serif] ${isPositive ? 'text-[#10B981]' : 'text-[#EF4444]'
+                      }`}
                   >
                     {isPositive ? '+' : '-'}
                     {formatPoints(tx.points)}

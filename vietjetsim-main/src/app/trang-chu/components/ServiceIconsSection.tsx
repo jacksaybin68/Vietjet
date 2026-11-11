@@ -14,7 +14,7 @@ import {
   EvoucherGiftIcon,
 } from '@/shared/components/ui/RealisticServiceIcons';
 
-/* 9 khối dịch vụ nhanh dạng "squircle" 3D với icon thực tế theo chuẩn Vietjet Air. */
+/* 10 khối dịch vụ nhanh dạng "squircle" 3D với icon thực tế theo chuẩn Vietjet Air. */
 const SERVICES = [
   {
     label: 'Đặt chuyến bay',
@@ -29,7 +29,7 @@ const SERVICES = [
     sub: 'Baggage & Seat',
     href: '/dich-vu?service=baggage',
     Icon: BaggageLuggageIcon,
-    color: '#22C55E', // Xanh lá
+    color: '#DC2626', // Đỏ hành lý Vietjet
     badge: 'Tiết kiệm 20%',
   },
   {
@@ -37,14 +37,14 @@ const SERVICES = [
     sub: 'Seat Selection',
     href: '/dich-vu?service=seat',
     Icon: SeatArmchairIcon,
-    color: '#2563EB', // Xanh dương
+    color: '#D97706', // Vàng hổ phách tựa đầu đỏ
   },
   {
     label: 'Suất ăn & Đồ uống',
     sub: 'Hot Meals & Drinks',
     href: '/dich-vu?service=meal',
     Icon: HotMealIcon,
-    color: '#F59E0B', // Cam hổ phách
+    color: '#EA580C', // Cam nóng Jet Café
     badge: 'Jet Café',
   },
   {
@@ -52,7 +52,7 @@ const SERVICES = [
     sub: 'Thủ tục trực tuyến',
     href: '/lam-thu-tuc',
     Icon: OnlineCheckinIcon,
-    color: '#0284C7', // Xanh biển
+    color: '#0284C7', // Xanh công nghệ
     badge: 'Nhanh chóng',
   },
   {
@@ -60,7 +60,7 @@ const SERVICES = [
     sub: 'Travel Insurance',
     href: '/dich-vu?service=insurance',
     Icon: SkyCareInsuranceIcon,
-    color: '#06B6D4', // Cyan
+    color: '#EC2029', // Đỏ Vietjet Sky Care
     badge: 'Sky Care',
   },
   {
@@ -68,7 +68,7 @@ const SERVICES = [
     sub: 'Duty Free Sky Shop',
     href: '/dich-vu?service=dutyfree',
     Icon: DutyFreeBagIcon,
-    color: '#BE185D', // Đỏ mận
+    color: '#B91C1C', // Đỏ Sky Shop
   },
   {
     label: 'Đổi thưởng SkyJoy',
@@ -83,7 +83,7 @@ const SERVICES = [
     sub: 'Airport Transfer',
     href: '/dich-vu?service=taxi',
     Icon: AirportTaxiIcon,
-    color: '#0D9488', // Teal Green SM
+    color: '#059669', // Xanh Green SM taxi điện
     badge: 'Green SM',
   },
   {
@@ -91,7 +91,7 @@ const SERVICES = [
     sub: 'Gift Voucher',
     href: '/dich-vu?service=voucher',
     Icon: EvoucherGiftIcon,
-    color: '#8B5CF6', // Tím
+    color: '#EC2029', // Đỏ Vietjet e-Voucher
     badge: 'Quà tặng',
   },
 ] as const;

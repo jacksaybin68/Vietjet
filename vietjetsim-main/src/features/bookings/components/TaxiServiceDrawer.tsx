@@ -60,11 +60,10 @@ export default function TaxiServiceDrawer({
           <button
             type="button"
             onClick={() => setActiveLeg('outbound')}
-            className={`flex-1 py-2 text-center text-xs font-bold transition-all border-b-2 ${
-              activeLeg === 'outbound'
-                ? 'border-primary-dark text-primary-dark'
-                : 'border-transparent text-gray-500 hover:text-gray-800'
-            }`}
+            className={`flex-1 py-2 text-center text-xs font-bold transition-all border-b-2 ${activeLeg === 'outbound'
+              ? 'border-primary-dark text-primary-dark'
+              : 'border-transparent text-gray-500 hover:text-gray-800'
+              }`}
           >
             Chuyến đi
           </button>
@@ -72,11 +71,10 @@ export default function TaxiServiceDrawer({
             <button
               type="button"
               onClick={() => setActiveLeg('inbound')}
-              className={`flex-1 py-2 text-center text-xs font-bold transition-all border-b-2 ${
-                activeLeg === 'inbound'
-                  ? 'border-primary-dark text-primary-dark'
-                  : 'border-transparent text-gray-500 hover:text-gray-800'
-              }`}
+              className={`flex-1 py-2 text-center text-xs font-bold transition-all border-b-2 ${activeLeg === 'inbound'
+                ? 'border-primary-dark text-primary-dark'
+                : 'border-transparent text-gray-500 hover:text-gray-800'
+                }`}
             >
               Chuyến về
             </button>
@@ -147,11 +145,10 @@ export default function TaxiServiceDrawer({
             <button
               type="button"
               onClick={() => setSelectedTaxi(!selectedTaxi)}
-              className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg transition-all shrink-0 ${
-                selectedTaxi
-                  ? 'bg-green-600 text-white shadow-sm'
-                  : 'border-2 border-green-500 text-green-600 hover:bg-green-50'
-              }`}
+              className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg transition-all shrink-0 ${selectedTaxi
+                ? 'bg-green-600 text-white shadow-sm'
+                : 'border-2 border-green-500 text-green-600 hover:bg-green-50'
+                }`}
               aria-label="Chọn dịch vụ taxi"
             >
               {selectedTaxi ? <RiCheckLine size={18} /> : <RiAddLine size={18} />}
