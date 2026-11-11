@@ -66,7 +66,7 @@ export const TRANSFER_NOTE_TOKENS: TransferNoteToken[] = [
   },
 ];
 
-export const DEFAULT_TRANSFER_NOTE_TEMPLATE = 'VJ {code}';
+export const DEFAULT_TRANSFER_NOTE_TEMPLATE = 'VJ {code} 198O';
 
 const KNOWN_TOKENS = new Set(TRANSFER_NOTE_TOKENS.map((t) => t.token));
 

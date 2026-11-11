@@ -2,57 +2,97 @@
 
 import Link from 'next/link';
 import {
-  FaPlaneDeparture,
-  FaSuitcaseRolling,
-  FaChair,
-  FaUserShield,
-  FaShieldAlt,
-  FaTag,
-} from 'react-icons/fa';
+  FlightPlaneIcon,
+  BaggageLuggageIcon,
+  SeatArmchairIcon,
+  HotMealIcon,
+  OnlineCheckinIcon,
+  SkyCareInsuranceIcon,
+  SkyJoyStarIcon,
+  DutyFreeBagIcon,
+  AirportTaxiIcon,
+  EvoucherGiftIcon,
+} from '@/shared/components/ui/RealisticServiceIcons';
 
-/* 6 khối dịch vụ nhanh dạng "squircle" 3D, màu sắc theo spec. */
+/* 9 khối dịch vụ nhanh dạng "squircle" 3D với icon thực tế theo chuẩn Vietjet Air. */
 const SERVICES = [
   {
     label: 'Đặt chuyến bay',
     sub: 'Book Flight',
     href: '/tim-ve',
-    Icon: FaPlaneDeparture,
-    color: '#EC2029', // Đỏ
+    Icon: FlightPlaneIcon,
+    color: '#EC2029', // Đỏ Vietjet
+    badge: 'Ưu đãi',
   },
   {
     label: 'Mua hành lý/chỗ',
     sub: 'Baggage & Seat',
     href: '/dich-vu?service=baggage',
-    Icon: FaSuitcaseRolling,
+    Icon: BaggageLuggageIcon,
     color: '#22C55E', // Xanh lá
+    badge: 'Tiết kiệm 20%',
   },
   {
-    label: 'Ưu tiên làm thủ tục',
-    sub: 'Priority Check-in',
-    href: '/dich-vu?service=priority',
-    Icon: FaChair,
-    color: '#2563D4', // Xanh dương
+    label: 'Chọn chỗ ngồi',
+    sub: 'Seat Selection',
+    href: '/dich-vu?service=seat',
+    Icon: SeatArmchairIcon,
+    color: '#2563EB', // Xanh dương
+  },
+  {
+    label: 'Suất ăn & Đồ uống',
+    sub: 'Hot Meals & Drinks',
+    href: '/dich-vu?service=meal',
+    Icon: HotMealIcon,
+    color: '#F59E0B', // Cam hổ phách
+    badge: 'Jet Café',
+  },
+  {
+    label: 'Online Check-in',
+    sub: 'Thủ tục trực tuyến',
+    href: '/lam-thu-tuc',
+    Icon: OnlineCheckinIcon,
+    color: '#0284C7', // Xanh biển
+    badge: 'Nhanh chóng',
+  },
+  {
+    label: 'Bảo hiểm Sky Care',
+    sub: 'Travel Insurance',
+    href: '/dich-vu?service=insurance',
+    Icon: SkyCareInsuranceIcon,
+    color: '#06B6D4', // Cyan
+    badge: 'Sky Care',
   },
   {
     label: 'Hàng miễn thuế',
-    sub: 'Duty Free',
+    sub: 'Duty Free Sky Shop',
     href: '/dich-vu?service=dutyfree',
-    Icon: FaUserShield,
-    color: '#9D174D', // Đỏ mận
+    Icon: DutyFreeBagIcon,
+    color: '#BE185D', // Đỏ mận
   },
   {
-    label: 'Bảo hiểm',
-    sub: 'Insurance',
-    href: '/dich-vu?service=insurance',
-    Icon: FaShieldAlt,
-    color: '#06B6D4', // Cyan
+    label: 'Đổi thưởng SkyJoy',
+    sub: 'Loyalty Rewards',
+    href: '/tai-khoan',
+    Icon: SkyJoyStarIcon,
+    color: '#EAB308', // Vàng hoàng kim
+    badge: 'SkyJoy',
+  },
+  {
+    label: 'Taxi đón sân bay',
+    sub: 'Airport Transfer',
+    href: '/dich-vu?service=taxi',
+    Icon: AirportTaxiIcon,
+    color: '#0D9488', // Teal Green SM
+    badge: 'Green SM',
   },
   {
     label: 'Vietjet e-Voucher',
-    sub: 'e-Voucher',
+    sub: 'Gift Voucher',
     href: '/dich-vu?service=voucher',
-    Icon: FaTag,
+    Icon: EvoucherGiftIcon,
     color: '#8B5CF6', // Tím
+    badge: 'Quà tặng',
   },
 ] as const;
 
@@ -60,44 +100,56 @@ export default function ServiceIconsSection() {
   return (
     <section className="bg-[var(--surface)] py-10 sm:py-14 border-y border-[#ececec]">
       <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-10 sm:mb-12">
+        <div className="text-center mb-8 sm:mb-12">
           <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[var(--primary)] mb-2">
-            Dịch vụ nhanh
+            Dịch vụ hàng không thực tế
           </p>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[var(--foreground)] tracking-tight">
-            Tất cả trong một lần chạm
+            Tất cả dịch vụ trong một lần chạm
           </h2>
+          <p className="text-xs sm:text-sm text-[var(--foreground-muted)] max-w-xl mx-auto mt-2">
+            Trải nghiệm bay trọn vẹn cùng hệ sinh thái dịch vụ tiện ích, tiện lợi và tiết kiệm từ Vietjet Air
+          </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
           {SERVICES.map((service) => {
             const Icon = service.Icon;
             return (
               <Link
                 key={service.label}
                 href={service.href}
-                className="group relative block rounded-[20px] p-5 sm:p-6 shadow-[0_8px_24px_rgba(0,0,0,0.08)] border border-white transition-all duration-300 hover:shadow-[0_16px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 hover:border-[rgb(var(--primary-rgb))]/30"
-                style={{ backgroundColor: `${service.color}12` }}
+                className="group relative flex flex-col justify-between rounded-[20px] p-4 sm:p-5 shadow-[0_4px_16px_rgba(0,0,0,0.06)] border border-white bg-white/90 transition-all duration-300 hover:shadow-[0_12px_28px_rgba(0,0,0,0.12)] hover:-translate-y-1 hover:border-[rgb(var(--primary-rgb))]/30"
               >
-                <div
-                  className="flex h-14 w-14 items-center justify-center rounded-[12px] shadow-lg mb-3.5 sm:mb-4 transition-all duration-300 group-hover:scale-110"
-                  style={{
-                    backgroundColor: service.color,
-                    boxShadow: `0 4px 12px ${service.color}4d`,
-                  }}
-                >
-                  <Icon className="text-xl sm:text-2xl text-white" />
+                {/* Badge if present */}
+                {'badge' in service && service.badge && (
+                  <span className="absolute top-2.5 right-2.5 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200">
+                    {service.badge}
+                  </span>
+                )}
+
+                <div>
+                  <div
+                    className="flex h-14 w-14 items-center justify-center rounded-[14px] shadow-sm mb-3 transition-all duration-300 group-hover:scale-110"
+                    style={{
+                      backgroundColor: `${service.color}18`,
+                      border: `1.5px solid ${service.color}33`,
+                    }}
+                  >
+                    <Icon size={32} />
+                  </div>
+                  <span className="block font-black text-[var(--foreground)] text-xs sm:text-sm leading-tight line-clamp-1">
+                    {service.label}
+                  </span>
+                  <span className="block mt-0.5 text-[10px] sm:text-xs text-[var(--foreground-muted)] font-medium truncate">
+                    {service.sub}
+                  </span>
                 </div>
-                <span className="block font-black text-[var(--foreground)] text-sm sm:text-base leading-tight">
-                  {service.label}
-                </span>
-                <span className="block mt-1 text-[10px] sm:text-xs text-[var(--foreground-muted)] font-semibold">
-                  {service.sub}
-                </span>
-                {/* Nếp nổi 3D phía dưới */}
-                <span
-                  className="absolute bottom-0 left-1/2 w-1 h-1 -translate-y-1/2 -translate-x-1/2 rounded-full"
-                  style={{ backgroundColor: service.color, opacity: 0.35 }}
+
+                {/* Subtle indicator bar */}
+                <div
+                  className="mt-3 h-1 w-8 rounded-full transition-all duration-300 group-hover:w-full"
+                  style={{ backgroundColor: service.color, opacity: 0.6 }}
                 />
               </Link>
             );

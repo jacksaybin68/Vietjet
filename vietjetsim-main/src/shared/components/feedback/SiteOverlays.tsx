@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 
 import Mascot from '@/shared/components/ui/Mascot';
+import { EvoucherGiftIcon } from '@/shared/components/ui/RealisticServiceIcons';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 import { consumeFlashToast, SHOW_TOAST_EVENT } from '@/lib/toast';
@@ -89,9 +90,9 @@ export function SiteOverlays() {
           <div className="flex items-start gap-4">
             <div
               aria-hidden="true"
-              className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[var(--vj-yellow)] to-accent-light text-2xl shadow-inner"
+              className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100 text-2xl shadow-inner border border-amber-200"
             >
-              🎁
+              <EvoucherGiftIcon size={34} />
             </div>
             <div className="flex-1">
               <h4 className="text-sm font-black text-gray-900">Ưu đãi cá nhân hoá</h4>

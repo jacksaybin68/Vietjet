@@ -9,6 +9,13 @@ import {
   RiFolderShield2Line,
 } from 'react-icons/ri';
 import { SiLine, SiZalo, SiApple, SiGoogleplay } from 'react-icons/si';
+import { FlightPlaneIcon, CreditCardPaymentIcon } from '@/shared/components/ui/RealisticServiceIcons';
+
+const BulletPlane = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" className="text-primary-dark shrink-0" aria-hidden="true">
+    <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
+  </svg>
+);
 
 export default function Footer() {
   return (
@@ -28,7 +35,7 @@ export default function Footer() {
           {/* Cột 1: Để có chuyến bay tốt đẹp */}
           <div className="space-y-2.5">
             <h3 className="font-black text-gray-900 text-xs sm:text-sm2 flex items-center gap-1.5 leading-snug">
-              <span className="text-primary-dark font-bold text-sm">✈</span>
+              <BulletPlane />
               <span>Để có chuyến bay tốt đẹp</span>
             </h3>
             <ul className="space-y-1.5 text-xs2 text-gray-700">
@@ -150,7 +157,7 @@ export default function Footer() {
           {/* Cột 2: Mua hành lý, suất ăn, chọn chỗ ngồi và hơn thế nữa... */}
           <div className="space-y-2.5">
             <h3 className="font-black text-gray-900 text-xs sm:text-sm2 flex items-center gap-1.5 leading-snug">
-              <span className="text-primary-dark font-bold text-sm">✈</span>
+              <BulletPlane />
               <span>Mua hành lý, suất ăn, chọn chỗ ngồi và hơn thế nữa...</span>
             </h3>
             <ul className="space-y-1.5 text-xs2 text-gray-700">
@@ -241,7 +248,7 @@ export default function Footer() {
           <div className="space-y-4">
             <div>
               <h3 className="font-black text-gray-900 text-xs sm:text-sm2 flex items-center gap-1.5 leading-snug mb-2">
-                <span className="text-primary-dark font-bold text-sm">✈</span>
+                <BulletPlane />
                 <span>Dịch vụ cao cấp</span>
               </h3>
               <ul className="space-y-1.5 text-xs2 text-gray-700">
@@ -274,7 +281,7 @@ export default function Footer() {
 
             <div>
               <h3 className="font-black text-gray-900 text-xs sm:text-sm2 flex items-center gap-1.5 leading-snug mb-2">
-                <span className="text-primary-dark font-bold text-sm">✈</span>
+                <BulletPlane />
                 <span>Vé Vietjet</span>
               </h3>
               <ul className="space-y-1.5 text-xs2 text-gray-700">
@@ -339,7 +346,7 @@ export default function Footer() {
           <div className="space-y-4">
             <div>
               <h3 className="font-black text-gray-900 text-xs sm:text-sm2 flex items-center gap-1.5 leading-snug mb-2">
-                <span className="text-primary-dark font-bold text-sm">✈</span>
+                <BulletPlane />
                 <span>Trung tâm phục vụ Khách hàng</span>
               </h3>
               <ul className="space-y-1.5 text-xs2 text-gray-700">
@@ -358,7 +365,7 @@ export default function Footer() {
 
             <div>
               <h3 className="font-black text-gray-900 text-xs sm:text-sm2 flex items-center gap-1.5 leading-snug mb-2">
-                <span className="text-primary-dark font-bold text-sm">✈</span>
+                <BulletPlane />
                 <span>Mua vé ở đâu?</span>
               </h3>
               <ul className="space-y-1.5 text-xs2 text-gray-700">
@@ -421,7 +428,7 @@ export default function Footer() {
                   href={href}
                   className="font-bold text-gray-900 hover:text-primary-dark text-xs sm:text-xs flex items-start gap-1.5 leading-snug transition-colors"
                 >
-                  <span className="text-primary-dark font-bold text-sm shrink-0">✈</span>
+                  <BulletPlane />
                   <span>{title}</span>
                 </Link>
               </div>
@@ -506,8 +513,8 @@ export default function Footer() {
                 href="/hoi-dap#dat-ve"
                 className="flex items-center gap-1.5 hover:text-primary-dark transition-colors"
               >
-                <span className="w-5 h-5 rounded border border-primary-dark text-primary-dark flex items-center justify-center text-2xs">
-                  ✈
+                <span className="w-5 h-5 rounded border border-primary-dark flex items-center justify-center p-0.5">
+                  <FlightPlaneIcon size={14} />
                 </span>
                 <span className="italic font-bold">Hướng dẫn đặt chuyến bay</span>
               </Link>
@@ -515,7 +522,7 @@ export default function Footer() {
                 href="/hoi-dap#thanh-toan"
                 className="flex items-center gap-1.5 hover:text-primary-dark transition-colors"
               >
-                <span className="text-primary-dark text-sm">💳</span>
+                <CreditCardPaymentIcon size={20} className="shrink-0" />
                 <span className="italic font-bold">Hướng dẫn thanh toán</span>
               </Link>
             </div>

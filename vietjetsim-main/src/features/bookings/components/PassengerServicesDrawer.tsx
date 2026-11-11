@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Flight } from '@/features/bookings/types/booking-flow';
 import { RiCloseLine, RiAddLine, RiCheckLine, RiArrowDownSLine } from 'react-icons/ri';
+import { SkyKidsIcon, BaggageLuggageIcon } from '@/shared/components/ui/RealisticServiceIcons';
 
 interface PassengerServicesDrawerProps {
   isOpen: boolean;
@@ -122,8 +123,8 @@ export default function PassengerServicesDrawer({
                 Dịch vụ chăm sóc & đồng hành cùng trẻ em chu đáo
               </p>
             </div>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-5xl opacity-90 select-none">
-              ✈️👦
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 select-none">
+              <SkyKidsIcon size={56} className="drop-shadow-md" />
             </div>
           </div>
 
@@ -144,8 +145,8 @@ export default function PassengerServicesDrawer({
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-[#FFCC00] flex items-center justify-center shrink-0 shadow-xs text-2xl">
-                  👧
+                <div className="w-12 h-12 rounded-full bg-[#FFCC00] flex items-center justify-center shrink-0 shadow-xs p-1">
+                  <SkyKidsIcon size={32} />
                 </div>
                 <div>
                   <h5 className="text-xs font-extrabold text-gray-900 leading-snug">
@@ -202,8 +203,8 @@ export default function PassengerServicesDrawer({
         {/* Footer Red Bar matching Screenshot 1 */}
         <div className="bg-[#C4161C] text-white p-3 flex items-center justify-between shadow-lg">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#FFCC00] flex items-center justify-center shrink-0 shadow-xs">
-              <span className="text-xl">🧳</span>
+            <div className="w-9 h-9 rounded-xl bg-[#FFCC00] flex items-center justify-center shrink-0 shadow-xs p-1">
+              <BaggageLuggageIcon size={24} />
             </div>
             <div className="text-xs leading-tight">
               <span className="opacity-95 font-medium block text-white text-3xs sm:text-xs">

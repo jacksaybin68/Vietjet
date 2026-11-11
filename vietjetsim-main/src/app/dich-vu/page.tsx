@@ -3,6 +3,17 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Icon } from '@/shared/components/ui';
+import {
+  BaggageLuggageIcon,
+  HotMealIcon,
+  SeatArmchairIcon,
+  SkyCareInsuranceIcon,
+  OnlineCheckinIcon,
+  SkyJoyStarIcon,
+  DutyFreeBagIcon,
+  AirportTaxiIcon,
+  EvoucherGiftIcon,
+} from '@/shared/components/ui/RealisticServiceIcons';
 import { Header, Footer, PageHero } from '@/shared/components/navigation';
 
 interface ServiceItem {
@@ -14,6 +25,33 @@ interface ServiceItem {
   price: string;
   priceNote: string;
   features: string[];
+}
+
+function renderServiceIcon(id: string, size = 28) {
+  switch (id) {
+    case 'baggage':
+      return <BaggageLuggageIcon size={size} />;
+    case 'meal':
+      return <HotMealIcon size={size} />;
+    case 'seat':
+      return <SeatArmchairIcon size={size} />;
+    case 'insurance':
+      return <SkyCareInsuranceIcon size={size} />;
+    case 'priority':
+      return <OnlineCheckinIcon size={size} />;
+    case 'lounge':
+      return <SkyJoyStarIcon size={size} />;
+    case 'dutyfree':
+    case 'skyshop':
+      return <DutyFreeBagIcon size={size} />;
+    case 'taxi':
+      return <AirportTaxiIcon size={size} />;
+    case 'voucher':
+    case 'evoucher':
+      return <EvoucherGiftIcon size={size} />;
+    default:
+      return <BaggageLuggageIcon size={size} />;
+  }
 }
 
 const SERVICES: ServiceItem[] = [
@@ -107,6 +145,51 @@ const SERVICES: ServiceItem[] = [
       'Thông báo lên máy bay riêng',
     ],
   },
+  {
+    id: 'dutyfree',
+    icon: 'ShoppingBagIcon',
+    title: 'Hàng miễn thuế Sky Shop',
+    subtitle: 'Duty Free Shopping',
+    description: 'Tận hưởng mua sắm mỹ phẩm, nước hoa, quà lưu niệm miễn thuế giao tận chỗ ngồi.',
+    price: 'Ưu đãi đến 30%',
+    priceNote: 'Theo mặt hàng',
+    features: [
+      'Mỹ phẩm, nước hoa chính hãng 100%',
+      'Miễn thuế hoàn toàn cho chặng quốc tế',
+      'Giao hàng tận chỗ ngồi trên chuyến bay',
+      'Tích lũy điểm SkyJoy trên mỗi hóa đơn',
+    ],
+  },
+  {
+    id: 'taxi',
+    icon: 'TruckIcon',
+    title: 'Taxi đưa đón sân bay',
+    subtitle: 'Green SM Airport Taxi',
+    description: 'Đặt trước xe điện Green SM đón tại sân bay với lộ trình định sẵn và giá cước tiết kiệm.',
+    price: '250.000₫',
+    priceNote: 'Từ 20km',
+    features: [
+      'Xe điện thông minh VinFast êm ái',
+      'Tài xế chờ sẵn tại cửa ga đến',
+      'Không phụ phí giờ cao điểm',
+      'Tiết kiệm đến 20% khi đặt kèm vé bay',
+    ],
+  },
+  {
+    id: 'voucher',
+    icon: 'GiftIcon',
+    title: 'Vietjet e-Voucher',
+    subtitle: 'Gift Voucher',
+    description: 'Phiếu quà tặng du lịch bay thỏa thích dành tặng người thân, bạn bè hoặc đối tác.',
+    price: 'Từ 200.000₫',
+    priceNote: 'Mệnh giá tùy chọn',
+    features: [
+      'Hạn sử dụng dài hạn lên đến 12 tháng',
+      'Áp dụng cho mọi đường bay Vietjet',
+      'Tặng kèm thông điệp chúc mừng cá nhân',
+      'Thanh toán vé và dịch vụ bổ sung dễ dàng',
+    ],
+  },
 ];
 
 export default function ServicesPage() {
@@ -155,8 +238,8 @@ export default function ServicesPage() {
             >
               <div className="p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[rgb(var(--vj-red-rgb))]/10">
-                    <Icon name={service.icon} size={24} className="text-[var(--vj-red)]" />
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-white border border-gray-100 shadow-2xs p-1.5 shrink-0">
+                    {renderServiceIcon(service.id, 28)}
                   </div>
                   <span className="text-xs font-black px-2.5 py-1 rounded-full bg-[rgb(var(--vj-yellow-rgb))]/25 text-[var(--vj-red)]">
                     {service.price}
@@ -180,8 +263,8 @@ export default function ServicesPage() {
             {/* Detail Header */}
             <div className="p-6 sm:p-8 bg-[rgb(var(--vj-red-rgb))]/5">
               <div className="flex items-start gap-4">
-                <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 bg-[rgb(var(--vj-red-rgb))]/10">
-                  <Icon name={selected.icon} size={28} className="text-[var(--vj-red)]" />
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 bg-white border border-gray-100 shadow-sm p-2">
+                  {renderServiceIcon(selected.id, 36)}
                 </div>
                 <div className="flex-1">
                   <h2 className="text-xl font-black text-[var(--foreground)]">{selected.title}</h2>

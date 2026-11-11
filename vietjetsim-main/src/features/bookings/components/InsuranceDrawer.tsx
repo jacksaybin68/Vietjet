@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Flight } from '@/features/bookings/types/booking-flow';
 import { RiCloseLine, RiShieldCheckLine } from 'react-icons/ri';
+import { SkyCareInsuranceIcon } from '@/shared/components/ui/RealisticServiceIcons';
 import { TRAVEL_SAFE_INSURANCE_PRICE } from '@/features/bookings/pricing';
 
 interface InsuranceDrawerProps {
@@ -56,15 +57,15 @@ export default function InsuranceDrawer({
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs text-gray-700 leading-relaxed">
           {/* Banner */}
-          <div className="rounded-xl overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-600 text-white p-4 shadow-sm relative">
+          <div className="rounded-xl overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-600 text-white p-4 shadow-sm relative flex items-center min-h-[90px]">
             <div className="relative z-10 max-w-[70%]">
               <h3 className="text-base font-black italic mb-1 text-white">Bảo hiểm du lịch,</h3>
               <p className="text-xs font-bold text-amber-200">
-                an tâm tận hưởng hành trình của bạn ({flight.from} ✈ {flight.to}).
+                an tâm tận hưởng hành trình của bạn ({flight.from} → {flight.to}).
               </p>
             </div>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white">
-              <RiShieldCheckLine size={36} />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 select-none">
+              <SkyCareInsuranceIcon size={56} className="drop-shadow-md" />
             </div>
           </div>
 

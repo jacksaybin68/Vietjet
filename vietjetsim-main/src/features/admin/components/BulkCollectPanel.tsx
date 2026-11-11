@@ -11,6 +11,7 @@
  */
 import React, { useState, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
+import { RiCalendarLine } from 'react-icons/ri';
 import { AIRPORT_CITIES } from '@/shared/constants';
 import {
   collectAdminBulk,
@@ -322,8 +323,9 @@ export default function BulkCollectPanel({
           </div>
         </div>
         {dates.length > 0 && (
-          <p className="text-xs text-slate-400">
-            📅 {dates.length} ngày:{' '}
+          <p className="text-xs text-slate-400 flex items-center gap-1.5">
+            <RiCalendarLine className="text-indigo-400 shrink-0" size={14} />
+            <span>{dates.length} ngày:</span>{' '}
             <span className="text-indigo-400">
               {dates.slice(0, 5).join(', ')}
               {dates.length > 5 ? ` ... +${dates.length - 5}` : ''}

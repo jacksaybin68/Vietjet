@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Flight } from '@/features/bookings/types/booking-flow';
 import { RiCloseLine, RiHeartFill, RiAddLine, RiCheckLine } from 'react-icons/ri';
+import { PetTravelIcon } from '@/shared/components/ui/RealisticServiceIcons';
 
 interface PetServiceDrawerProps {
   isOpen: boolean;
@@ -69,11 +70,10 @@ export default function PetServiceDrawer({
           <button
             type="button"
             onClick={() => setActiveLeg('outbound')}
-            className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${
-              activeLeg === 'outbound'
-                ? 'border-[#C4161C] text-[#C4161C]'
-                : 'border-transparent text-gray-500 hover:text-gray-800'
-            }`}
+            className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${activeLeg === 'outbound'
+              ? 'border-[#C4161C] text-[#C4161C]'
+              : 'border-transparent text-gray-500 hover:text-gray-800'
+              }`}
           >
             Chuyến đi
           </button>
@@ -81,11 +81,10 @@ export default function PetServiceDrawer({
             <button
               type="button"
               onClick={() => setActiveLeg('inbound')}
-              className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${
-                activeLeg === 'inbound'
-                  ? 'border-[#C4161C] text-[#C4161C]'
-                  : 'border-transparent text-gray-500 hover:text-gray-800'
-              }`}
+              className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${activeLeg === 'inbound'
+                ? 'border-[#C4161C] text-[#C4161C]'
+                : 'border-transparent text-gray-500 hover:text-gray-800'
+                }`}
             >
               Chuyến về
             </button>
@@ -119,17 +118,17 @@ export default function PetServiceDrawer({
 
               {/* 3 airplane window frames with pets */}
               <div className="flex justify-center items-center gap-3 py-2">
-                <div className="w-16 h-20 rounded-full border-4 border-amber-200/90 bg-white/80 shadow-md flex flex-col items-center justify-center text-3xl overflow-hidden relative">
-                  <span>🐕</span>
-                  <span className="text-4xs text-gray-600 font-bold">Poodle</span>
+                <div className="w-16 h-20 rounded-full border-4 border-amber-200/90 bg-white/90 shadow-md flex flex-col items-center justify-center p-1 overflow-hidden relative">
+                  <PetTravelIcon size={30} />
+                  <span className="text-4xs text-gray-700 font-extrabold mt-0.5">Poodle</span>
                 </div>
-                <div className="w-16 h-20 rounded-full border-4 border-amber-200/90 bg-white/80 shadow-md flex flex-col items-center justify-center text-3xl overflow-hidden relative">
-                  <span>🐱</span>
-                  <span className="text-4xs text-gray-600 font-bold">Mèo cưng</span>
+                <div className="w-16 h-20 rounded-full border-4 border-amber-200/90 bg-white/90 shadow-md flex flex-col items-center justify-center p-1 overflow-hidden relative">
+                  <PetTravelIcon size={30} />
+                  <span className="text-4xs text-gray-700 font-extrabold mt-0.5">Mèo cưng</span>
                 </div>
-                <div className="w-16 h-20 rounded-full border-4 border-amber-200/90 bg-white/80 shadow-md flex flex-col items-center justify-center text-3xl overflow-hidden relative">
-                  <span>🐶</span>
-                  <span className="text-4xs text-gray-600 font-bold">Cún yêu</span>
+                <div className="w-16 h-20 rounded-full border-4 border-amber-200/90 bg-white/90 shadow-md flex flex-col items-center justify-center p-1 overflow-hidden relative">
+                  <PetTravelIcon size={30} />
+                  <span className="text-4xs text-gray-700 font-extrabold mt-0.5">Cún yêu</span>
                 </div>
               </div>
             </div>
@@ -157,15 +156,14 @@ export default function PetServiceDrawer({
             {/* Service Package Card */}
             <div
               onClick={() => setIsSelected((prev) => !prev)}
-              className={`p-3.5 rounded-xl border bg-white shadow-2xs flex items-center justify-between cursor-pointer transition-all ${
-                isSelected
-                  ? 'border-green-600 ring-1 ring-green-600'
-                  : 'border-gray-200 hover:border-red-300'
-              }`}
+              className={`p-3.5 rounded-xl border bg-white shadow-2xs flex items-center justify-between cursor-pointer transition-all ${isSelected
+                ? 'border-green-600 ring-1 ring-green-600'
+                : 'border-gray-200 hover:border-red-300'
+                }`}
             >
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-[#FFCC00] flex items-center justify-center shrink-0 shadow-xs text-2xl">
-                  🐕
+                <div className="w-12 h-12 rounded-full bg-[#FFCC00] flex items-center justify-center shrink-0 shadow-xs p-1">
+                  <PetTravelIcon size={28} />
                 </div>
                 <div>
                   <h5 className="text-xs font-extrabold text-gray-900 leading-snug">
@@ -198,8 +196,8 @@ export default function PetServiceDrawer({
         {/* Footer Red Bar matching Screenshot 2 */}
         <div className="bg-[#C4161C] text-white p-3 flex items-center justify-between shadow-lg">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#FFCC00] flex items-center justify-center shrink-0 shadow-xs">
-              <span className="text-xl">🐾</span>
+            <div className="w-9 h-9 rounded-xl bg-[#FFCC00] flex items-center justify-center shrink-0 shadow-xs p-1">
+              <PetTravelIcon size={24} />
             </div>
             <div className="text-xs leading-tight">
               <span className="opacity-95 font-medium block text-white text-3xs sm:text-xs">

@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
+import { RiImageLine } from 'react-icons/ri';
 import { listTransactions, confirmTransaction } from '@/features/admin';
 import { getApiErrorMessage } from '@/shared/services';
 
@@ -380,7 +381,8 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                           </span>
                           {t.receiptImage && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-3xs font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                              📷 Có biên lai
+                              <RiImageLine size={12} />
+                              <span>Có biên lai</span>
                             </span>
                           )}
                         </div>

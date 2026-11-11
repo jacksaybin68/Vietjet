@@ -431,7 +431,7 @@ export default function SeatSelectionStep({
                       }
                     />
                     <span className="text-2xs sm:text-sm font-semibold font-koho">
-                      {timerUrgent ? '⚠️ Ghế sắp hết hạn giữ!' : 'Thời gian giữ chỗ còn lại'}
+                      {timerUrgent ? 'Ghế sắp hết hạn giữ!' : 'Thời gian giữ chỗ còn lại'}
                     </span>
                   </div>
                   <div

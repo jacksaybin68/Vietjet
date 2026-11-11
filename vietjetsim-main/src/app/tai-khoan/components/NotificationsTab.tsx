@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiRequest } from '@/shared/services';
+import { RiDoorOpenLine, RiTimeLine, RiAlertLine, RiCloseCircleLine, RiTimerLine } from 'react-icons/ri';
 
 type NotificationType = 'all' | 'booking' | 'flight' | 'promo';
 
@@ -170,29 +171,37 @@ const SNOOZE_OPTIONS = [
 function MetadataBadge({ type, metadata }: { type: string; metadata?: Record<string, string> }) {
   if (!metadata) return null;
   if (type === 'flight' && metadata.delay_type) {
-    const labels: Record<string, string> = {
-      gate_change: '🚪 Đổi cổng',
-      schedule_change: '⏰ Đổi giờ',
-      delay: '⚠️ Trễ chuyến',
-      cancellation: '❌ Huỷ chuyến',
+    const delayDetails: Record<string, { label: string; icon: React.ReactNode }> = {
+      gate_change: { label: 'Đổi cổng', icon: <RiDoorOpenLine className="inline text-amber-600 mr-1" /> },
+      schedule_change: { label: 'Đổi giờ', icon: <RiTimeLine className="inline text-blue-600 mr-1" /> },
+      delay: { label: 'Trễ chuyến', icon: <RiAlertLine className="inline text-orange-600 mr-1" /> },
+      cancellation: { label: 'Huỷ chuyến', icon: <RiCloseCircleLine className="inline text-red-600 mr-1" /> },
     };
+    const item = delayDetails[metadata.delay_type];
     return (
-      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-50/10 text-red-600border border-red-100">
-        {labels[metadata.delay_type] || metadata.delay_type}
+      <span className="inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full bg-red-50/10 text-red-600 border border-red-100">
+        {item ? (
+          <>
+            {item.icon}
+            {item.label}
+          </>
+        ) : (
+          metadata.delay_type
+        )}
       </span>
     );
   }
   if (type === 'promo' && metadata.promo_code) {
     return (
-      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-purple-50/10 text-purple-700border border-purple-100tracking-wide">
+      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-purple-50/10 text-purple-700 border border-purple-100 tracking-wide">
         {metadata.promo_code}
       </span>
     );
   }
   if (type === 'promo' && metadata.expires_hours) {
     return (
-      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50/10 text-amber-700border border-[rgb(var(--accent-rgb))]/20">
-        ⏱ Còn {metadata.expires_hours}h
+      <span className="inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50/10 text-amber-700 border border-[rgb(var(--accent-rgb))]/20">
+        <RiTimerLine className="inline mr-1 text-amber-600" /> Còn {metadata.expires_hours}h
       </span>
     );
   }

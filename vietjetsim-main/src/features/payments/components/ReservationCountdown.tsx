@@ -117,7 +117,7 @@ export default function ReservationCountdown({
               </div>
               <p className="text-xs text-white/90 font-medium">
                 {isUrgent
-                  ? '⚠️ Sắp hết hạn giữ vé! Vui lòng hoàn tất thanh toán để đảm bảo giá vé này.'
+                  ? 'Sắp hết hạn giữ vé! Vui lòng hoàn tất thanh toán để đảm bảo giá vé này.'
                   : 'Vé của bạn đang được Vietjet tạm giữ. Hoàn tất thanh toán trước khi hết giờ.'}
               </p>
             </div>
@@ -151,8 +151,11 @@ export default function ReservationCountdown({
       {showExpiredModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 text-center shadow-2xl animate-scale-in border border-gray-100">
-            <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-500 mx-auto flex items-center justify-center text-3xl mb-4 border-2 border-amber-200">
-              ⏱️
+            <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-500 mx-auto flex items-center justify-center mb-4 border-2 border-amber-200">
+              <svg className="w-8 h-8 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
             </div>
             <h3 className="text-xl font-black text-gray-900 font-koho mb-2">
               Hết thời gian giữ chỗ

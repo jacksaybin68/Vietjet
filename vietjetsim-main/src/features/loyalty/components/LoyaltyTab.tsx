@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Icon } from '@/shared/components/ui';
+import { Icon, SkyJoyStarIcon } from '@/shared/components/ui';
 import { useToast } from '@/hooks/useToast';
 import { getTierColor } from '@/lib/loyalty';
 import { Pagination } from '@/shared/components/ui';
@@ -400,8 +400,9 @@ export default function LoyaltyTab() {
                   {formatPoints(tier.minLifetimePoints)} điểm
                 </div>
                 {isCurrentTier && (
-                  <div className="mt-2 text-xs font-bold text-[#EC2029] font-[Be Vietnam Pro,sans-serif]">
-                    ★ Hạng hiện tại
+                  <div className="mt-2 text-xs font-bold text-[#EC2029] font-[Be Vietnam Pro,sans-serif] flex items-center justify-center gap-1">
+                    <SkyJoyStarIcon size={14} />
+                    <span>Hạng hiện tại</span>
                   </div>
                 )}
               </div>

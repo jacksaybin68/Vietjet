@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Flight } from '@/features/bookings/types/booking-flow';
 import { RiCloseLine, RiAddLine } from 'react-icons/ri';
+import { HotMealIcon, MealDishIllustration } from '@/shared/components/ui/RealisticServiceIcons';
 
 export interface SelectedMeal {
   id: string;
@@ -17,42 +18,36 @@ const COMBO_MEALS = [
     name: 'Combo Mỳ Ý và Nước suối và Hạt điều',
     price: 119000,
     desc: 'Mỳ Ý sốt bò bằm đậm đà, hạt điều giòn bùi cùng nước suối tinh khiết.',
-    img: '🍝',
   },
   {
     id: 'meal-com-chien-thai',
     name: 'Combo Cơm chiên Thái và Nước suối và Hạt điều',
     price: 119000,
     desc: 'Cơm chiên kiểu Thái chua cay đậm vị, kèm hạt điều và nước suối.',
-    img: '🍛',
   },
   {
     id: 'meal-mien-xao-tom-cua',
     name: 'Combo Miến xào Tôm cua và Nước suối và Hạt điều',
     price: 119000,
     desc: 'Miến xào dai mềm hòa quyện tôm thịt cua ngọt lành, hạt điều và nước suối.',
-    img: '🍜',
   },
   {
     id: 'meal-bun-xao-singapore',
     name: 'Combo Bún xào Singapore và Nước suối và Hạt điều',
     price: 119000,
     desc: 'Bún xào Singapore sốt cà ri thơm lừng, thịt xá xíu, tôm và rau củ.',
-    img: '🥢',
   },
   {
     id: 'meal-com-chien-duong-chau',
     name: 'Combo Cơm chiên dương châu chay và Nước suối và Hạt điều',
     price: 119000,
     desc: 'Cơm chiên thanh đạm cùng nấm, rau củ tươi ngon phù hợp ăn chay.',
-    img: '🥗',
   },
   {
     id: 'meal-xoi-khuc-gio',
     name: 'Combo Xôi khúc giò, hạt điều và nước suối',
     price: 119000,
     desc: 'Xôi khúc dẻo thơm đậu xanh hạt tiêu ăn kèm giò lụa thơm ngậy.',
-    img: '🍚',
   },
 ];
 
@@ -195,8 +190,8 @@ export default function MealSelectionDrawer({
                 Mời bạn thưởng thức những món ăn nóng hổi, tươi ngon
               </h3>
             </div>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-5xl opacity-80 select-none">
-              🍱
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 select-none">
+              <HotMealIcon size={56} className="drop-shadow-md" />
             </div>
           </div>
 
@@ -216,9 +211,9 @@ export default function MealSelectionDrawer({
                   >
                     <div>
                       {/* Meal thumbnail container */}
-                      <div className="w-full aspect-[4/3] rounded-lg bg-gradient-to-br from-amber-50 to-orange-100 border border-amber-200/80 flex items-center justify-center text-4xl mb-2 relative overflow-hidden shadow-2xs">
-                        <span>{meal.img}</span>
-                        <div className="absolute top-1 right-1 bg-red-600 text-white text-3xs font-black px-1.5 py-0.5 rounded-full uppercase">
+                      <div className="w-full aspect-[4/3] rounded-lg bg-gradient-to-br from-amber-50 to-orange-100 border border-amber-200/80 flex items-center justify-center mb-2 relative overflow-hidden shadow-2xs">
+                        <MealDishIllustration mealId={meal.id} size={64} className="drop-shadow-sm transition-transform hover:scale-105 duration-200" />
+                        <div className="absolute top-1 right-1 bg-red-600 text-white text-3xs font-black px-1.5 py-0.5 rounded-full uppercase shadow-xs">
                           Hot
                         </div>
                       </div>
@@ -283,8 +278,8 @@ export default function MealSelectionDrawer({
         {/* Footer Red Bar matching Screenshot 11 */}
         <div className="bg-[#C4161C] text-white p-3 flex items-center justify-between shadow-lg">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#FFCC00] flex items-center justify-center shrink-0 shadow-xs">
-              <span className="text-xl">🍴</span>
+            <div className="w-9 h-9 rounded-xl bg-[#FFCC00] flex items-center justify-center shrink-0 shadow-xs p-1">
+              <HotMealIcon size={24} />
             </div>
             <div className="text-xs leading-tight">
               <span className="opacity-95 font-medium block text-white text-3xs sm:text-xs">

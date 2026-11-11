@@ -9,6 +9,7 @@ import {
 } from '@/features/bookings/types/booking-flow';
 import type { AncillaryId } from '@/features/bookings/pricing';
 import BookingBottomBar from '@/features/bookings/components/BookingBottomBar';
+import { SkyJoyStarIcon } from '@/shared/components/ui/RealisticServiceIcons';
 
 interface Props {
   flight: Flight;
@@ -143,8 +144,8 @@ export default function PassengerInfoStep({
         {/* SkyJoy Banner Card matching screenshot */}
         <div className="bg-white rounded-lg border border-gray-200/90 p-3.5 sm:p-4 flex items-center justify-between mb-4 shadow-sm">
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-full bg-orange-50 flex items-center justify-center shrink-0 border border-orange-200">
-              <span className="text-xl">🎁</span>
+            <div className="w-11 h-11 rounded-full bg-amber-50 flex items-center justify-center shrink-0 border border-amber-200 p-1.5 shadow-2xs">
+              <SkyJoyStarIcon size={26} />
             </div>
             <div>
               <h3 className="font-bold text-xs sm:text-sm text-gray-900 leading-tight font-koho">
@@ -299,7 +300,9 @@ export default function PassengerInfoStep({
                 {/* Passenger Accordion Header */}
                 <div className="bg-gray-100 px-4 py-2.5 border-b border-gray-200/80 flex items-center justify-between cursor-pointer">
                   <div className="flex items-center gap-2 text-xs font-bold text-gray-800">
-                    <span className="text-sm">👤</span>
+                    <svg className="w-4 h-4 text-gray-500 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                    </svg>
                     <span>
                       {typeLabel} {ordinal}
                     </span>

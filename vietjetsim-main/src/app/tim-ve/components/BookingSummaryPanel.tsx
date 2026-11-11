@@ -5,6 +5,12 @@ import ContinueButton from './ContinueButton';
 import { RiEditLine, RiArrowDownSLine, RiArrowUpSLine } from 'react-icons/ri';
 import PassengerDetailModal from './PassengerDetailModal';
 
+const SummaryPlaneIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="text-primary inline-block mx-1 align-middle" aria-hidden="true">
+    <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
+  </svg>
+);
+
 import { PassengerType } from '@/features/bookings/types/booking-flow';
 
 export interface BookingSummaryData {
@@ -169,8 +175,10 @@ export default function BookingSummaryPanel({
           </div>
 
           <div className="p-3 space-y-1 bg-white">
-            <div className="text-xs font-black text-gray-900 leading-tight">
-              {origin} <span className="text-primary">✈</span> {destination}
+            <div className="text-xs font-black text-gray-900 leading-tight flex items-center">
+              <span>{origin}</span>
+              <SummaryPlaneIcon />
+              <span>{destination}</span>
             </div>
             <div className="text-2xs text-gray-500 font-semibold">
               {data.flightNo
@@ -290,8 +298,10 @@ export default function BookingSummaryPanel({
               )}
             </div>
             <div className="p-3 space-y-1 bg-white text-xs">
-              <div className="text-xs font-black text-gray-900 leading-tight">
-                {destination} <span className="text-primary">✈</span> {origin}
+              <div className="text-xs font-black text-gray-900 leading-tight flex items-center">
+                <span>{destination}</span>
+                <SummaryPlaneIcon />
+                <span>{origin}</span>
               </div>
               <div className="text-2xs text-gray-500 font-semibold">
                 {data.returnLeg?.flightNo

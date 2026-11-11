@@ -3,15 +3,17 @@
 import React from 'react';
 import { Flight } from '@/features/bookings/types/booking-flow';
 import {
-  RiArmchairLine,
-  RiSuitcaseLine,
-  RiRestaurantLine,
-  RiTaxiLine,
-  RiShieldCheckLine,
-  RiUserSharedLine,
   RiArrowRightSLine,
 } from 'react-icons/ri';
-import { MdPets } from 'react-icons/md';
+import {
+  SeatArmchairIcon,
+  BaggageLuggageIcon,
+  HotMealIcon,
+  AirportTaxiIcon,
+  SkyCareInsuranceIcon,
+  SkyKidsIcon,
+  PetTravelIcon,
+} from '@/shared/components/ui/RealisticServiceIcons';
 import BookingBottomBar from './BookingBottomBar';
 
 interface AncillaryServicesStepProps {
@@ -86,8 +88,8 @@ export default function AncillaryServicesStep({
           className="group cursor-pointer rounded-2xl bg-white border border-gray-200 p-4 shadow-xs hover:shadow-md transition-all flex items-center justify-between"
         >
           <div className="flex items-center gap-4 min-w-0">
-            <div className="w-14 h-14 rounded-full bg-[#FBB612] flex items-center justify-center text-red-600 shadow-sm shrink-0">
-              <RiArmchairLine size={28} />
+            <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200/80 flex items-center justify-center p-2 shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <SeatArmchairIcon size={36} />
             </div>
             <div className="min-w-0">
               <h3 className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">
@@ -99,11 +101,11 @@ export default function AncillaryServicesStep({
               </div>
               <div className="flex items-center gap-3 text-3xs font-bold text-gray-700 mt-1 border-t border-gray-100 pt-1">
                 <span>
-                  {flight.from} ✈ {flight.to}
+                  {flight.from} → {flight.to}
                 </span>
                 {isRoundTrip && (
                   <span>
-                    {returnFlight?.from || flight.to} ✈ {returnFlight?.to || flight.from}
+                    {returnFlight?.from || flight.to} → {returnFlight?.to || flight.from}
                   </span>
                 )}
               </div>
@@ -121,8 +123,8 @@ export default function AncillaryServicesStep({
           className="group cursor-pointer rounded-2xl bg-white border border-gray-200 p-4 shadow-xs hover:shadow-md transition-all flex items-center justify-between"
         >
           <div className="flex items-center gap-4 min-w-0">
-            <div className="w-14 h-14 rounded-full bg-[#FBB612] flex items-center justify-center text-red-600 shadow-sm shrink-0">
-              <RiSuitcaseLine size={28} />
+            <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center p-2 shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <BaggageLuggageIcon size={36} />
             </div>
             <div className="min-w-0">
               <h3 className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">
@@ -134,11 +136,11 @@ export default function AncillaryServicesStep({
               </div>
               <div className="flex items-center gap-3 text-3xs font-bold text-gray-700 mt-1 border-t border-gray-100 pt-1">
                 <span>
-                  {flight.from} ✈ {flight.to} {baggageLabel ? `(${baggageLabel})` : ''}
+                  {flight.from} → {flight.to} {baggageLabel ? `(${baggageLabel})` : ''}
                 </span>
                 {isRoundTrip && (
                   <span>
-                    {returnFlight?.from || flight.to} ✈ {returnFlight?.to || flight.from}{' '}
+                    {returnFlight?.from || flight.to} → {returnFlight?.to || flight.from}{' '}
                     {returnBaggageLabel ? `(${returnBaggageLabel})` : ''}
                   </span>
                 )}
@@ -157,8 +159,8 @@ export default function AncillaryServicesStep({
           className="group cursor-pointer rounded-2xl bg-white border border-gray-200 p-4 shadow-xs hover:shadow-md transition-all flex items-center justify-between"
         >
           <div className="flex items-center gap-4 min-w-0">
-            <div className="w-14 h-14 rounded-full bg-[#FBB612] flex items-center justify-center text-red-600 shadow-sm shrink-0">
-              <RiRestaurantLine size={28} />
+            <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-center justify-center p-2 shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <HotMealIcon size={36} />
             </div>
             <div className="min-w-0">
               <h3 className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">
@@ -170,11 +172,11 @@ export default function AncillaryServicesStep({
               </div>
               <div className="flex items-center gap-3 text-3xs font-bold text-gray-700 mt-1 border-t border-gray-100 pt-1">
                 <span>
-                  {flight.from} ✈ {flight.to}
+                  {flight.from} → {flight.to}
                 </span>
                 {isRoundTrip && (
                   <span>
-                    {returnFlight?.from || flight.to} ✈ {returnFlight?.to || flight.from}
+                    {returnFlight?.from || flight.to} → {returnFlight?.to || flight.from}
                   </span>
                 )}
               </div>
@@ -192,8 +194,8 @@ export default function AncillaryServicesStep({
           className="group cursor-pointer rounded-2xl bg-white border border-gray-200/90 p-3.5 sm:p-4 shadow-sm hover:shadow-md hover:border-amber-300 transition-all flex items-center justify-between"
         >
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-full bg-amber-100/80 border border-amber-300 flex items-center justify-center text-primary-dark shadow-sm shrink-0">
-              <RiTaxiLine size={24} />
+            <div className="w-12 h-12 rounded-xl bg-cyan-50 border border-cyan-200 flex items-center justify-center p-1.5 shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
+              <AirportTaxiIcon size={32} />
             </div>
             <div>
               <h3 className="text-sm font-bold text-gray-900 group-hover:text-primary-dark transition-colors">
@@ -218,8 +220,8 @@ export default function AncillaryServicesStep({
           }`}
         >
           <div className="flex items-center gap-3.5 flex-1 pr-2">
-            <div className="w-11 h-11 rounded-full bg-amber-100/80 border border-amber-300 flex items-center justify-center text-primary-dark shadow-sm shrink-0">
-              <RiShieldCheckLine size={24} />
+            <div className="w-12 h-12 rounded-xl bg-cyan-50 border border-cyan-200 flex items-center justify-center p-1.5 shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
+              <SkyCareInsuranceIcon size={32} />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -232,7 +234,7 @@ export default function AncillaryServicesStep({
               </div>
               <div className="text-xs2 text-gray-500 mt-0.5 space-y-0.5">
                 <span className="font-bold text-gray-700 block">
-                  {flight.from} ✈ {flight.to}
+                  {flight.from} → {flight.to}
                 </span>
                 <p className="line-clamp-2">
                   Bảo hiểm du lịch. Giấy chứng nhận bảo hiểm sẽ được cấp cùng vé máy bay, và không
@@ -253,8 +255,8 @@ export default function AncillaryServicesStep({
           className="group cursor-pointer rounded-2xl bg-white border border-gray-200/90 p-3.5 sm:p-4 shadow-sm hover:shadow-md hover:border-amber-300 transition-all flex items-center justify-between"
         >
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-full bg-amber-100/80 border border-amber-300 flex items-center justify-center text-primary-dark shadow-sm shrink-0">
-              <RiUserSharedLine size={24} />
+            <div className="w-12 h-12 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center p-1 shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
+              <SkyKidsIcon size={34} />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -280,8 +282,8 @@ export default function AncillaryServicesStep({
           className="group cursor-pointer rounded-2xl bg-white border border-gray-200/90 p-3.5 sm:p-4 shadow-sm hover:shadow-md hover:border-amber-300 transition-all flex items-center justify-between"
         >
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-full bg-amber-100/80 border border-amber-300 flex items-center justify-center text-primary-dark shadow-sm shrink-0">
-              <MdPets size={24} />
+            <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center p-1.5 shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
+              <PetTravelIcon size={30} />
             </div>
             <div>
               <div className="flex items-center gap-2">

@@ -1393,7 +1393,14 @@ export default function FlightResultsStep({
                         </span>
                         <div className="w-full flex items-center gap-1.5 my-0.5">
                           <span className="h-px flex-1 border-t border-dashed border-gray-400" />
-                          <span className="text-primary rotate-45 inline-block text-xs">✈</span>
+                          <svg
+                            className="w-3.5 h-3.5 text-primary rotate-45 inline-block shrink-0"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            aria-hidden="true"
+                          >
+                            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
+                          </svg>
                           <span className="h-px flex-1 border-t border-dashed border-gray-400" />
                         </div>
                         <div className="flex items-center gap-1.5 text-2xs text-gray-700 font-medium">

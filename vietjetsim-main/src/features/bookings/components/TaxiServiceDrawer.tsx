@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Flight } from '@/features/bookings/types/booking-flow';
 import { RiCloseLine, RiTaxiLine, RiAddLine, RiCheckLine } from 'react-icons/ri';
+import { AirportTaxiIcon } from '@/shared/components/ui/RealisticServiceIcons';
 
 interface TaxiServiceDrawerProps {
   isOpen: boolean;
@@ -95,15 +96,17 @@ export default function TaxiServiceDrawer({
               </h3>
               <p className="text-xs2 font-bold text-amber-100 mt-1">Đặt trước tiết kiệm đến 20%</p>
             </div>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-4xl">🚕</div>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 select-none">
+              <AirportTaxiIcon size={52} className="drop-shadow-md" />
+            </div>
           </div>
 
           <div className="space-y-1.5 text-xs2 text-gray-600">
             <p className="font-semibold text-gray-800">
               Chặng bay:{' '}
               {activeLeg === 'outbound'
-                ? `${flight.from} ✈ ${flight.to}`
-                : `${flight.to} ✈ ${flight.from}`}
+                ? `${flight.from} → ${flight.to}`
+                : `${flight.to} → ${flight.from}`}
             </p>
             <p>
               Hướng dẫn sử dụng Dịch Vụ Taxi Đón Sân bay{' '}
@@ -121,13 +124,13 @@ export default function TaxiServiceDrawer({
           {/* Green SM Taxi Card matching Screenshot 3 */}
           <div className="p-3.5 rounded-xl border border-gray-200 bg-white hover:border-green-300 shadow-sm transition-all flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-cyan-900 text-white flex items-center justify-center text-2xl shrink-0">
-                🚗
+              <div className="w-12 h-12 rounded-xl bg-cyan-900/10 border border-cyan-700/30 text-white flex items-center justify-center shrink-0 p-1">
+                <AirportTaxiIcon size={34} />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h4 className="font-black text-xs text-gray-900">Green SM Premium</h4>
-                  <span className="text-2xs text-gray-500 font-semibold">👤 4 seats</span>
+                  <span className="text-2xs text-gray-500 font-semibold">4 chỗ ngồi</span>
                 </div>
                 <p className="text-xs2 text-gray-500">Dịch Vụ Taxi Đón Sân bay</p>
                 <div className="mt-1 flex items-center gap-2">
