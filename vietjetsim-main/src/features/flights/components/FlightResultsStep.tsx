@@ -9,6 +9,7 @@ import { FlightResultsSkeleton } from '@/shared/components/ui';
 import { getErrorMessage } from '@/lib/utils';
 import { searchFlightsWithDates, getAirportCity } from '@/features/flights/services';
 import FareBenefitsModal from './FareBenefitsModal';
+import { RiTimeLine, RiMoneyDollarCircleLine, RiSpeedUpLine, RiArrowUpDownLine } from 'react-icons/ri';
 
 /**
  * The fare the summary panel holds for the flight being looked at.
@@ -53,10 +54,11 @@ const DEPARTURE_TIME_SLOTS = [
 ];
 
 const SORT_OPTIONS = [
-  { value: 'price_asc', label: 'Giá thấp nhất' },
-  { value: 'price_desc', label: 'Giá cao nhất' },
-  { value: 'time_asc', label: 'Giờ bay sớm nhất' },
-  { value: 'duration_asc', label: 'Bay ngắn nhất' },
+  { value: 'time_asc', label: 'Giờ cất cánh (Sớm nhất)' },
+  { value: 'time_desc', label: 'Giờ cất cánh (Muộn nhất)' },
+  { value: 'price_asc', label: 'Giá vé (Thấp nhất)' },
+  { value: 'price_desc', label: 'Giá vé (Cao nhất)' },
+  { value: 'duration_asc', label: 'Thời gian bay (Ngắn nhất)' },
   { value: 'stops_asc', label: 'Ít điểm dừng nhất' },
 ];
 
@@ -404,7 +406,7 @@ export default function FlightResultsStep({
   infant,
 }: FlightResultsStepProps) {
   const [flights, setFlights] = useState<Flight[]>([]);
-  const [sortBy, setSortBy] = useState<string>('price_asc');
+  const [sortBy, setSortBy] = useState<string>('time_asc');
   const [filters, setFilters] = useState<Filters>({
     airlines: [],
     minPrice: 0,
@@ -600,18 +602,28 @@ export default function FlightResultsStep({
       .filter((f) => parseDurationMinutes(f.duration) <= filters.maxDuration)
       .sort((a, b) => {
         switch (sortBy) {
-          case 'price_asc':
-            return a.price - b.price;
-          case 'price_desc':
-            return b.price - a.price;
-          case 'time_asc':
-            return a.departTime.localeCompare(b.departTime);
+          case 'time_asc': {
+            const timeDiff = a.departTime.localeCompare(b.departTime);
+            return timeDiff !== 0 ? timeDiff : a.price - b.price;
+          }
+          case 'time_desc': {
+            const timeDiff = b.departTime.localeCompare(a.departTime);
+            return timeDiff !== 0 ? timeDiff : a.price - b.price;
+          }
+          case 'price_asc': {
+            const priceDiff = a.price - b.price;
+            return priceDiff !== 0 ? priceDiff : a.departTime.localeCompare(b.departTime);
+          }
+          case 'price_desc': {
+            const priceDiff = b.price - a.price;
+            return priceDiff !== 0 ? priceDiff : a.departTime.localeCompare(b.departTime);
+          }
           case 'duration_asc':
             return parseDurationMinutes(a.duration) - parseDurationMinutes(b.duration);
           case 'stops_asc':
             return a.stops - b.stops;
           default:
-            return 0;
+            return a.departTime.localeCompare(b.departTime);
         }
       });
   }, [filters, sortBy, searchQuery, flights]);
@@ -998,6 +1010,50 @@ export default function FlightResultsStep({
         <div className="hidden">
           <h2>{filtered.length} chuyến bay phù hợp</h2>
         </div>
+
+        {/* Quick Sorting Bar */}
+        {!isLoading && filtered.length > 0 && (
+          <div className="bg-white border border-gray-200/90 rounded-xl p-2 sm:p-2.5 my-2.5 shadow-2xs flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-red-50 text-primary flex items-center justify-center shrink-0">
+                <RiArrowUpDownLine size={13} />
+              </span>
+              <span className="text-xs font-black text-gray-900 font-koho">
+                {filtered.length} chuyến bay
+              </span>
+              <span className="text-gray-300 hidden sm:inline">|</span>
+              <span className="text-2xs font-bold text-gray-500 uppercase tracking-wide hidden sm:inline font-koho">
+                Sắp xếp:
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-full pb-0.5">
+              {[
+                { value: 'time_asc', label: 'Giờ cất cánh (Sớm nhất)', icon: <RiTimeLine size={13} className="shrink-0" /> },
+                { value: 'time_desc', label: 'Giờ cất cánh (Muộn nhất)', icon: <RiTimeLine size={13} className="shrink-0" /> },
+                { value: 'price_asc', label: 'Giá vé (Thấp nhất)', icon: <RiMoneyDollarCircleLine size={13} className="shrink-0" /> },
+                { value: 'duration_asc', label: 'Bay nhanh nhất', icon: <RiSpeedUpLine size={13} className="shrink-0" /> },
+              ].map((opt) => {
+                const isActive = sortBy === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setSortBy(opt.value)}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all font-koho border ${
+                      isActive
+                        ? 'bg-primary text-white border-primary shadow-xs'
+                        : 'bg-stone-50 text-gray-700 border-gray-200 hover:bg-stone-100 hover:text-gray-900'
+                    }`}
+                  >
+                    {opt.icon}
+                    <span>{opt.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* 4 Fare Class Headers matching reference screenshot (visible on mobile and desktop) */}
         {!isLoading && filtered.length > 0 && (
