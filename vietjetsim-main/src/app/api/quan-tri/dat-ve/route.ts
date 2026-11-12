@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { getAllBookings, updateBookingStatus } from '@/lib/db';
 import { parsePaginationParams } from '@/lib/pagination';
+import { sendAutomaticPaymentInvoiceEmail } from '@/lib/payment-invoice';
 
 // ─── GET: Get all bookings (admin) ──────────────────────────────────────────
 
@@ -80,17 +81,29 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // Tự động gửi email hoá đơn & vé điện tử khi đơn vé được chuyển sang Confirmed
+    if (status === 'confirmed') {
+      await sendAutomaticPaymentInvoiceEmail(bookingId).catch((err) => {
+        console.error('Failed to auto-send payment invoice email:', err);
+      });
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Booking status updated successfully',
       bookingId,
       status,
     });
-  } catch (error) {
-    console.error('Error updating booking status:', error);
+  } catch (error: unknown) {
+    console.error('Error updating booking status:', error instanceof Error ? error.message : error);
+    // Distinguish between DB errors and unexpected errors
+    const status = error instanceof Error && error.message?.includes('violates') ? 409 : 500;
     return NextResponse.json(
-      { error: 'Internal Server Error', message: 'Failed to update booking status' },
-      { status: 500 }
+      {
+        error: 'Internal Server Error',
+        message: error instanceof Error ? error.message : 'Failed to update booking status',
+      },
+      { status }
     );
   }
 }

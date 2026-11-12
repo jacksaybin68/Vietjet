@@ -22,8 +22,7 @@ describe('VietQR EMVCo payload', () => {
     const payload = buildVietQrPayload({
       bin: '970422',
       accountNumber: '0123456789',
-      amount: 1_500_000,
-      addInfo: 'VJ ABC123',
+      accountHolder: 'DANG THI NGOC HAN',
       bankName: 'MB Bank',
     });
 
@@ -33,26 +32,40 @@ describe('VietQR EMVCo payload', () => {
     expect(payload).toContain('01100123456789'); // Sub-tag 01: Số tài khoản bên trong beneficiary
     expect(payload).toContain('0208QRIBFTTA'); // Sub-tag 02: Service Code NAPAS 247
     expect(payload).toContain(`5303${VIETQR_CURRENCY_VND}`); // VND
-    expect(payload).toContain('54071500000'); // Số tiền không dấu phân cách
     expect(payload).toContain('5802VN');
   });
 
-  it('PNR nằm trong additional data (62/08) để ngân hàng hiện khi chuyển', () => {
+  it('payload mang tên ngân hàng (41) và tên chủ tài khoản (38/03)', () => {
+    const payload = buildVietQrPayload({
+      bin: '970441',
+      accountNumber: '876922729',
+      accountHolder: 'DANG THI NGOC HAN',
+      bankName: 'VIB',
+    });
+
+    expect(payload).toContain('0317DANG THI NGOC HAN'); // Sub-tag 03: tên chủ tài khoản
+    expect(payload).toContain('4103VIB'); // Tag 41: tên ngân hàng thụ hưởng
+  });
+
+  it('không nhúng số tiền (54) và nội dung chuyển khoản (62) vào QR', () => {
     const payload = buildVietQrPayload({
       bin: '970419',
       accountNumber: '999999',
-      amount: 850_000,
-      addInfo: 'VJ XY7K9P',
+      accountHolder: 'CONG TY VIETJET AIR',
+      bankName: 'NCB',
     });
-    expect(payload).toContain('VJ XY7K9P');
+
+    expect(payload).not.toContain('5405'); // Transaction Amount
+    expect(payload).not.toContain('6208'); // Additional Data / reference label
+    expect(payload).not.toContain('VJ XY7K9P'); // nội dung CK (PNR) không nằm trong QR
   });
 
   it('kết thúc bằng field CRC 6304 + đúng giá trị tính riêng', () => {
     const payload = buildVietQrPayload({
       bin: '970415',
       accountNumber: '123456',
-      amount: 100_000,
-      addInfo: 'VJ TEST',
+      accountHolder: 'CONG TY VIETJET AIR',
+      bankName: 'VietinBank',
     });
     const body = payload.slice(0, -8); // bỏ "6304" + 4 ký tự CRC
     expect(payload.startsWith(`${body}6304`)).toBe(true);
@@ -60,11 +73,9 @@ describe('VietQR EMVCo payload', () => {
   });
 
   it('thiếu BIN hoặc STK thì ném lỗi thay vì trả payload hỏng', () => {
+    expect(() => buildVietQrPayload({ bin: '', accountNumber: '123' })).toThrow();
     expect(() =>
-      buildVietQrPayload({ bin: '', accountNumber: '123', amount: 1, addInfo: 'X' })
-    ).toThrow();
-    expect(() =>
-      buildVietQrPayload({ bin: '970422', accountNumber: 'abc', amount: 1, addInfo: 'X' })
+      buildVietQrPayload({ bin: '970422', accountNumber: 'abc', accountHolder: 'X' })
     ).toThrow();
   });
 });

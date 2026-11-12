@@ -111,11 +111,19 @@ export async function PATCH(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, conversation });
-  } catch (error) {
-    console.error('Error updating conversation status:', error);
+  } catch (error: unknown) {
+    console.error(
+      'Error updating conversation status:',
+      error instanceof Error ? error.message : error
+    );
+    const status =
+      error instanceof Error && error.message?.includes('Pi process thoát') ? 502 : 500;
     return NextResponse.json(
-      { error: 'Internal Server Error', message: 'Failed to update conversation' },
-      { status: 500 }
+      {
+        error: 'Internal Server Error',
+        message: error instanceof Error ? error.message : 'Failed to update conversation',
+      },
+      { status }
     );
   }
 }

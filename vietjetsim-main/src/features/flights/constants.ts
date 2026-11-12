@@ -42,4 +42,3 @@ export const AIRCRAFT_MODELS = {
 } as const;
 
 export type AircraftModel = (typeof AIRCRAFT_MODELS)[keyof typeof AIRCRAFT_MODELS];
-

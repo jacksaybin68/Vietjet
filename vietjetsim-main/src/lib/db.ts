@@ -943,6 +943,7 @@ export async function createBooking(
     user_id: string;
     flight_id: string;
     total_price: number;
+    seatedCount?: number;
   },
   passengers: {
     name: string;
@@ -988,10 +989,19 @@ export async function createBooking(
     passenger_type: p.passenger_type || 'adult',
   }));
 
+  const seatedCount = Math.max(0, Number(booking.seatedCount) || 0);
+
   const rows = (await sql`
-    WITH new_booking AS (
+    WITH reserved_flight AS (
+      UPDATE flights
+      SET available = available - ${seatedCount}
+      WHERE id = ${booking.flight_id} AND available >= ${seatedCount}
+      RETURNING id
+    ),
+    new_booking AS (
       INSERT INTO bookings (user_id, flight_id, status, total_price)
-      VALUES (${booking.user_id}, ${booking.flight_id}, 'pending', ${booking.total_price})
+      SELECT ${booking.user_id}, ${booking.flight_id}, 'pending', ${booking.total_price}
+      FROM reserved_flight
       RETURNING id, user_id, flight_id, status, total_price, created_at, updated_at, booking_code
     ),
     inserted_passengers AS (
@@ -1054,13 +1064,49 @@ export async function updateBookingStatus(
   bookingId: string,
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded'
 ): Promise<BookingRecord> {
-  const results = await sql`
-    UPDATE bookings
-    SET status = ${status}, updated_at = NOW()
-    WHERE id = ${bookingId}
-    RETURNING *
-  `;
-  return (results as BookingRecord[])[0];
+  const releasesSeats = status === 'cancelled' || status === 'refunded';
+
+  const results = releasesSeats
+    ? await sql`
+        UPDATE bookings
+        SET status = ${status}, updated_at = NOW()
+        WHERE id = ${bookingId} AND status NOT IN ('cancelled', 'refunded')
+        RETURNING *
+      `
+    : await sql`
+        UPDATE bookings
+        SET status = ${status}, updated_at = NOW()
+        WHERE id = ${bookingId}
+        RETURNING *
+      `;
+
+  const booking = (results as BookingRecord[])[0];
+
+  if (!booking && releasesSeats) {
+    const existing = await sql`SELECT * FROM bookings WHERE id = ${bookingId}`;
+    return (existing as BookingRecord[])[0];
+  }
+
+  if (booking && releasesSeats) {
+    await sql`DELETE FROM seats WHERE booking_id = ${bookingId}`;
+
+    const countRows = await sql`
+      SELECT COUNT(*)::int AS count
+      FROM passengers
+      WHERE booking_id = ${bookingId} AND passenger_type <> 'infant'
+    `;
+    const seatedCount = Number((countRows as Array<{ count: number }>)[0]?.count || 0);
+
+    if (seatedCount > 0) {
+      await sql`
+        UPDATE flights
+        SET available = available + ${seatedCount}
+        WHERE id = ${booking.flight_id}
+      `;
+    }
+  }
+
+  return booking;
 }
 
 export async function getAllBookings(params?: {
@@ -3143,25 +3189,59 @@ export async function spendLoyaltyPoints(
 
   const loyalty = await getOrEnrollLoyalty(userId);
 
-  if (loyalty.available_points < pointsToSpend) {
-    throw new Error('Insufficient loyalty points');
-  }
-
-  // Create transaction and update available points in a single operation
   const result = await sql`
+    WITH updated AS (
+      UPDATE user_loyalty
+      SET available_points = available_points - ${pointsToSpend},
+          updated_at = NOW()
+      WHERE id = ${loyalty.id} AND available_points >= ${pointsToSpend}
+      RETURNING id
+    )
     INSERT INTO loyalty_transactions (user_loyalty_id, points, type, description)
-    VALUES (${loyalty.id}, ${-pointsToSpend}, 'redeem', ${description})
+    SELECT id, ${-pointsToSpend}, 'redeem', ${description}
+    FROM updated
     RETURNING id, user_loyalty_id, points, type, description, created_at
   `;
 
-  // Update available points
-  await sql`
-    UPDATE user_loyalty
-    SET available_points = available_points - ${pointsToSpend}
-    WHERE id = ${loyalty.id}
+  const transaction = (result as LoyaltyTransactionRecord[])[0];
+  if (!transaction) {
+    throw new Error('Insufficient loyalty points');
+  }
+
+  return transaction;
+}
+
+export async function refundLoyaltyPoints(
+  userId: string,
+  points: number,
+  description: string = 'Hoàn điểm thưởng'
+): Promise<LoyaltyTransactionRecord> {
+  if (!Number.isFinite(points) || points <= 0) {
+    throw new Error('Points to refund must be greater than 0');
+  }
+
+  const loyalty = await getOrEnrollLoyalty(userId);
+
+  const result = await sql`
+    WITH updated AS (
+      UPDATE user_loyalty
+      SET available_points = available_points + ${points},
+          updated_at = NOW()
+      WHERE id = ${loyalty.id}
+      RETURNING id
+    )
+    INSERT INTO loyalty_transactions (user_loyalty_id, points, type, description)
+    SELECT id, ${points}, 'adjust', ${description}
+    FROM updated
+    RETURNING id, user_loyalty_id, points, type, description, created_at
   `;
 
-  return (result as LoyaltyTransactionRecord[])[0];
+  const transaction = (result as LoyaltyTransactionRecord[])[0];
+  if (!transaction) {
+    throw new Error('Cannot refund loyalty points');
+  }
+
+  return transaction;
 }
 
 /**

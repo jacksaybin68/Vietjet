@@ -573,3 +573,4 @@ export default function SendBookingEmailModal({
     </div>
   );
 }
+

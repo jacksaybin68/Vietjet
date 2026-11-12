@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
 import { verifyAdminRequest } from '@/lib/admin-auth';
-import { sendBookingConfirmationEmail, sendPaymentFailedEmail, sendPaymentSuccessEmail } from '@/lib/mail';
+import {
+  sendBookingConfirmationEmail,
+  sendPaymentFailedEmail,
+  sendPaymentSuccessEmail,
+} from '@/lib/mail';
+import { sendAutomaticPaymentInvoiceEmail } from '@/lib/payment-invoice';
 import { writeAuditLog } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
@@ -183,39 +188,12 @@ export async function PATCH(request: NextRequest) {
         WHERE id = ${targetBooking.id}
       `;
 
-      // 3. Resolve customer email and name for confirmation notice
-      let toEmail: string | null = null;
-      let fullName: string = 'Quý khách';
-
-      if (targetBooking.user_id) {
-        const uRes =
-          await sql`SELECT email, full_name FROM user_profiles WHERE id = ${targetBooking.user_id} LIMIT 1`;
-        const userRow = (uRes as any[])[0];
-        if (userRow?.email) {
-          toEmail = userRow.email;
-          fullName = userRow.full_name || fullName;
-        }
-      }
-
-      if (!toEmail) {
-        const pRes =
-          await sql`SELECT name, email FROM passengers WHERE booking_id = ${targetBooking.id} AND email IS NOT NULL LIMIT 1`;
-        const pRow = (pRes as any[])[0];
-        if (pRow?.email) {
-          toEmail = pRow.email;
-          fullName = pRow.name || fullName;
-        }
-      }
-
-      if (toEmail) {
-        void sendBookingConfirmationEmail({
-          to: toEmail,
-          fullName,
-          bookingCode: targetBooking.booking_code,
-          amount: targetBooking.total_price,
-          method: targetPayment?.method || 'vietqr',
-        });
-      }
+      // 3. Tự động gửi email hoá đơn thanh toán & vé điện tử cho khách hàng
+      await sendAutomaticPaymentInvoiceEmail(targetBooking.id, {
+        paymentMethod: targetPayment?.method || 'vietqr',
+      }).catch((err) => {
+        console.error('Failed to auto-send payment invoice email:', err);
+      });
 
       // 4. Audit Log
       void writeAuditLog({
@@ -303,7 +281,9 @@ export async function PATCH(request: NextRequest) {
           bookingCode: targetBooking.booking_code,
           bookingId: targetBooking.id,
           amount: targetBooking.total_price,
-          reason: note || 'Biên lai giao dịch không hợp lệ hoặc không nhận được khoản thanh toán đối soát',
+          reason:
+            note ||
+            'Biên lai giao dịch không hợp lệ hoặc không nhận được khoản thanh toán đối soát',
         });
       }
 

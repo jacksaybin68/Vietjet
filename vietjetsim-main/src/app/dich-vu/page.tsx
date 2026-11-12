@@ -167,7 +167,8 @@ const SERVICES: ServiceItem[] = [
     icon: 'TruckIcon',
     title: 'Taxi đưa đón sân bay',
     subtitle: 'Green SM Airport Taxi',
-    description: 'Đặt trước xe điện Green SM đón tại sân bay với lộ trình định sẵn và giá cước tiết kiệm.',
+    description:
+      'Đặt trước xe điện Green SM đón tại sân bay với lộ trình định sẵn và giá cước tiết kiệm.',
     price: '250.000₫',
     priceNote: 'Từ 20km',
     features: [

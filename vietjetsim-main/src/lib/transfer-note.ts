@@ -66,7 +66,18 @@ export const TRANSFER_NOTE_TOKENS: TransferNoteToken[] = [
   },
 ];
 
-export const DEFAULT_TRANSFER_NOTE_TEMPLATE = 'VJ {code} 198O';
+/**
+ * Mặc định nội dung chuyển khoản: mã đặt chỗ 6 ký tự (PNR sinh bởi
+ * `generate_booking_code()`: A-Z0-9, đúng 6 ký tự) viết liền với hậu tố
+ * `I98O` — ví dụ mã `GKJU6T` cho nội dung `GKJU6TI98O`.
+ *
+ * Hậu tố là phần dấu hiệu cố định của hệ thống: nhờ vậy một giao dịch vào
+ * tài khoản thụ hưởng mà không có nội dung này không bị nhầm là thanh toán
+ * vé. Nội dung không chứa số tiền và không chứa dấu phân cách — số tiền đi
+ * kèm ở trường riêng, và một dấu phân cách trong nội dung có thể bị ngân
+ * hàng đọc sai.
+ */
+export const DEFAULT_TRANSFER_NOTE_TEMPLATE = '{code}I98O';
 
 const KNOWN_TOKENS = new Set(TRANSFER_NOTE_TOKENS.map((t) => t.token));
 

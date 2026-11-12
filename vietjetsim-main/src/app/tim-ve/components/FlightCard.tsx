@@ -119,8 +119,19 @@ export default function FlightCard({
                   {isZero ? (
                     <div className="flex flex-col items-center justify-center py-1 gap-0.5">
                       <svg className="w-3.5 h-3.5 text-gray-400" viewBox="0 0 24 24" fill="none">
-                        <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="currentColor" />
-                        <line x1="4" y1="4" x2="20" y2="20" stroke="#EF4444" strokeWidth="2.5" strokeLinecap="round" />
+                        <path
+                          d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"
+                          fill="currentColor"
+                        />
+                        <line
+                          x1="4"
+                          y1="4"
+                          x2="20"
+                          y2="20"
+                          stroke="#EF4444"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                        />
                       </svg>
                       <span className="text-3xs text-gray-400 font-bold">Hết chỗ</span>
                     </div>
@@ -157,7 +168,14 @@ export default function FlightCard({
             <div className="flex items-center gap-2 font-bold text-gray-900">
               <span className="inline-flex items-center gap-1">
                 <span>{flight.from || 'SGN'}</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="text-gray-400 inline shrink-0" aria-hidden="true">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="text-gray-400 inline shrink-0"
+                  aria-hidden="true"
+                >
                   <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
                 </svg>
                 <span>{flight.to || 'HAN'}</span>
@@ -176,8 +194,16 @@ export default function FlightCard({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
             <div>
               <div className="font-bold text-gray-900 mb-1 flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5 text-success shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <svg
+                  className="w-3.5 h-3.5 text-success shrink-0"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 <span>Bao gồm:</span>
               </div>

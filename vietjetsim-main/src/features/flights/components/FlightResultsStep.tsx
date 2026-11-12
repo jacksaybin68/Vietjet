@@ -9,7 +9,12 @@ import { FlightResultsSkeleton } from '@/shared/components/ui';
 import { getErrorMessage } from '@/lib/utils';
 import { searchFlightsWithDates, getAirportCity } from '@/features/flights/services';
 import FareBenefitsModal from './FareBenefitsModal';
-import { RiTimeLine, RiMoneyDollarCircleLine, RiSpeedUpLine, RiArrowUpDownLine } from 'react-icons/ri';
+import {
+  RiTimeLine,
+  RiMoneyDollarCircleLine,
+  RiSpeedUpLine,
+  RiArrowUpDownLine,
+} from 'react-icons/ri';
 
 /**
  * The fare the summary panel holds for the flight being looked at.
@@ -1041,10 +1046,26 @@ export default function FlightResultsStep({
 
             <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-full pb-0.5">
               {[
-                { value: 'time_asc', label: 'Giờ cất cánh (Sớm nhất)', icon: <RiTimeLine size={13} className="shrink-0" /> },
-                { value: 'time_desc', label: 'Giờ cất cánh (Muộn nhất)', icon: <RiTimeLine size={13} className="shrink-0" /> },
-                { value: 'price_asc', label: 'Giá vé (Thấp nhất)', icon: <RiMoneyDollarCircleLine size={13} className="shrink-0" /> },
-                { value: 'duration_asc', label: 'Bay nhanh nhất', icon: <RiSpeedUpLine size={13} className="shrink-0" /> },
+                {
+                  value: 'time_asc',
+                  label: 'Giờ cất cánh (Sớm nhất)',
+                  icon: <RiTimeLine size={13} className="shrink-0" />,
+                },
+                {
+                  value: 'time_desc',
+                  label: 'Giờ cất cánh (Muộn nhất)',
+                  icon: <RiTimeLine size={13} className="shrink-0" />,
+                },
+                {
+                  value: 'price_asc',
+                  label: 'Giá vé (Thấp nhất)',
+                  icon: <RiMoneyDollarCircleLine size={13} className="shrink-0" />,
+                },
+                {
+                  value: 'duration_asc',
+                  label: 'Bay nhanh nhất',
+                  icon: <RiSpeedUpLine size={13} className="shrink-0" />,
+                },
               ].map((opt) => {
                 const isActive = sortBy === opt.value;
                 return (

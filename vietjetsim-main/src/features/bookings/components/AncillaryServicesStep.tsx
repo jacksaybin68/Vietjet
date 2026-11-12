@@ -2,9 +2,7 @@
 
 import React from 'react';
 import { Flight } from '@/features/bookings/types/booking-flow';
-import {
-  RiArrowRightSLine,
-} from 'react-icons/ri';
+import { RiArrowRightSLine } from 'react-icons/ri';
 import {
   SeatArmchairIcon,
   BaggageLuggageIcon,

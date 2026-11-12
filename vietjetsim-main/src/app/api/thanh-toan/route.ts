@@ -5,12 +5,18 @@ import {
   getActiveBankAccounts,
   getUserLoyaltyWithProgram,
   spendLoyaltyPoints,
+  refundLoyaltyPoints,
   findUserById,
+  getDiscountCodeById,
+  getDiscountCodeByCode,
+  countUserDiscountUsage,
 } from '@/lib/db';
 import { verifyAuthRequest } from '@/lib/auth';
+import { isAdminRole } from '@/lib/rbac';
 import { renderTransferNote } from '@/lib/transfer-note';
 import { validateBankTransferInput } from '@/lib/bank-transfer';
-import { sendBookingConfirmationEmail, sendPaymentInstructionEmail, sendPaymentSuccessEmail } from '@/lib/mail';
+import { sendBookingConfirmationEmail, sendPaymentInstructionEmail } from '@/lib/mail';
+import { sendAutomaticPaymentInvoiceEmail } from '@/lib/payment-invoice';
 import { skypointPointsForAmount } from '@/lib/skypoint';
 
 /** Methods the payment page may submit. Anything else is rejected up front. */
@@ -28,7 +34,6 @@ export async function POST(request: NextRequest) {
       method,
       amount,
       discount_code_id,
-      discount_amount,
       discount_code,
       bank_account_id,
       transfer_note,
@@ -89,7 +94,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Nếu người dùng đã đăng nhập, đảm bảo đặt chỗ thuộc về tài khoản của họ (trừ admin)
-    if (user && booking.user_id && booking.user_id !== user.userId && user.role !== 'admin') {
+    if (user && booking.user_id && booking.user_id !== user.userId && !isAdminRole(user.role)) {
       return NextResponse.json(
         { error: 'Forbidden', message: 'Đặt chỗ không thuộc về tài khoản này' },
         { status: 403 }
@@ -97,7 +102,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Prevent double-charge: a booking can only be paid once.
-    if (booking.status === 'confirmed') {
+    if (booking.status === 'confirmed' || booking.status === 'completed') {
       return NextResponse.json(
         {
           error: 'Already paid',
@@ -107,11 +112,83 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    let validatedDiscountId: string | undefined;
+    let validatedDiscountAmount = 0;
+
+    if (discount_code_id || discount_code) {
+      const discount =
+        (discount_code_id ? await getDiscountCodeById(String(discount_code_id)) : null) ??
+        (discount_code ? await getDiscountCodeByCode(String(discount_code)) : null);
+
+      if (!discount) {
+        return NextResponse.json(
+          { error: 'Invalid discount', message: 'Mã giảm giá không tồn tại' },
+          { status: 400 }
+        );
+      }
+
+      const now = new Date();
+      if (
+        !discount.is_active ||
+        now < new Date(discount.start_date) ||
+        now > new Date(discount.end_date)
+      ) {
+        return NextResponse.json(
+          { error: 'Invalid discount', message: 'Mã giảm giá không còn hiệu lực' },
+          { status: 400 }
+        );
+      }
+
+      if (discount.usage_limit !== null && discount.used_count >= discount.usage_limit) {
+        return NextResponse.json(
+          { error: 'Invalid discount', message: 'Mã giảm giá đã hết lượt sử dụng' },
+          { status: 400 }
+        );
+      }
+
+      if (discount.usage_per_user_limit !== null) {
+        const usedByUser = await countUserDiscountUsage(booking.user_id, discount.id);
+        if (usedByUser >= discount.usage_per_user_limit) {
+          return NextResponse.json(
+            { error: 'Invalid discount', message: 'Bạn đã sử dụng mã giảm giá này rồi' },
+            { status: 400 }
+          );
+        }
+      }
+
+      if (booking.total_price < Number(discount.min_booking_amount)) {
+        return NextResponse.json(
+          {
+            error: 'Invalid discount',
+            message: `Mã giảm giá chỉ áp dụng cho đơn hàng từ ${Number(
+              discount.min_booking_amount
+            ).toLocaleString('vi-VN')}₫`,
+          },
+          { status: 400 }
+        );
+      }
+
+      let computedDiscount =
+        discount.type === 'fixed'
+          ? Number(discount.value)
+          : (booking.total_price * Number(discount.value)) / 100;
+
+      if (discount.type === 'percentage' && discount.max_discount_amount !== null) {
+        computedDiscount = Math.min(computedDiscount, Number(discount.max_discount_amount));
+      }
+
+      validatedDiscountAmount = Math.max(
+        0,
+        Math.min(Math.round(computedDiscount), booking.total_price)
+      );
+      validatedDiscountId = discount.id;
+    }
+
     // Charge exactly what the booking is worth. `amount` from the browser is for
     // display only — trusting it let a client pay one đồng (or ten times the
     // fare) and have the booking marked confirmed. A discount legitimately
     // lowers the charge, so the expected amount is the discounted total.
-    const discountedTotal = Math.max(0, booking.total_price - (discount_amount || 0));
+    const discountedTotal = Math.max(0, booking.total_price - validatedDiscountAmount);
     if (amount !== discountedTotal) {
       return NextResponse.json(
         {
@@ -143,7 +220,7 @@ export async function POST(request: NextRequest) {
       const expectedNote = renderTransferNote(account.transfer_note_template, {
         code: booking.booking_code ?? '',
         originalAmount: booking.total_price,
-        discountAmount: discount_amount || 0,
+        discountAmount: validatedDiscountAmount,
         amount: discountedTotal,
         discountCode: discount_code || '',
       });
@@ -171,6 +248,8 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    let loyaltyPointsSpent = 0;
 
     if (method === 'skypoint') {
       if (!user) {
@@ -202,6 +281,7 @@ export async function POST(request: NextRequest) {
           pointsNeeded,
           `Thanh toán SkyPoint cho đặt chỗ ${booking.booking_code ?? booking_id}`
         );
+        loyaltyPointsSpent = pointsNeeded;
       } catch (loyaltyError) {
         const message = loyaltyError instanceof Error ? loyaltyError.message : '';
         if (message.includes('Insufficient')) {
@@ -229,11 +309,27 @@ export async function POST(request: NextRequest) {
       amount: discountedTotal,
       status: initialStatus,
       user_id: paymentUserId,
-      discount_code_id,
-      discount_amount: discount_amount || 0,
+      discount_code_id: validatedDiscountId,
+      discount_amount: validatedDiscountAmount,
       receipt_image,
       transfer_note:
         transfer_note || (booking.booking_code ? `VJ ${booking.booking_code}` : undefined),
+    }).catch(async (paymentError) => {
+      if (loyaltyPointsSpent > 0 && user) {
+        try {
+          await refundLoyaltyPoints(
+            user.userId,
+            loyaltyPointsSpent,
+            `Hoàn điểm do thanh toán thất bại cho đặt chỗ ${booking.booking_code ?? booking_id}`
+          );
+        } catch (refundError) {
+          console.error(
+            '[PAYMENT][CRITICAL] SkyPoint spend occurred but payment failed and auto-refund failed.',
+            { paymentError, refundError }
+          );
+        }
+      }
+      throw paymentError;
     });
 
     // Tìm thông tin người nhận email
@@ -249,15 +345,13 @@ export async function POST(request: NextRequest) {
     }
 
     if (initialStatus === 'completed') {
-      if (toEmail) {
-        void sendBookingConfirmationEmail({
-          to: toEmail,
-          fullName: recipientName || 'Quý khách',
-          bookingCode: result.booking.booking_code ?? null,
-          amount: discountedTotal,
-          method,
-        });
-      }
+      // Tự động gửi email hoá đơn thanh toán & vé điện tử cho khách hàng
+      await sendAutomaticPaymentInvoiceEmail(booking.id, {
+        paymentMethod: method,
+        customAmount: discountedTotal,
+      }).catch((err) => {
+        console.error('Failed to auto-send payment invoice email:', err);
+      });
     } else if (initialStatus === 'pending') {
       // Đơn hàng thanh toán chuyển khoản / VNPAY-QR đang chờ đối soát: gửi email thông báo và hướng dẫn thanh toán
       if (toEmail) {
@@ -267,7 +361,9 @@ export async function POST(request: NextRequest) {
           bookingCode: result.booking.booking_code ?? null,
           bookingId: booking.id,
           amount: discountedTotal,
-          transferNote: transfer_note || (result.booking.booking_code ? `VJ ${result.booking.booking_code}` : undefined),
+          transferNote:
+            transfer_note ||
+            (result.booking.booking_code ? `VJ ${result.booking.booking_code}` : undefined),
         });
       }
     }

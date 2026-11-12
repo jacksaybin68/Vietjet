@@ -152,7 +152,9 @@ describe('Booking Database Module', () => {
       // inserting CTE. Interpolating it from another query's result passed
       // undefined and violated passengers.booking_id NOT NULL.
       const [strings, ...params] = (sql as any).mock.calls[0];
-      expect(strings.join(' ')).toContain('WITH new_booking AS');
+      expect(strings.join(' ')).toContain('WITH reserved_flight AS');
+      expect(strings.join(' ')).toContain('new_booking AS');
+      expect(strings.join(' ')).toContain('available >= ');
       expect(strings.join(' ')).toContain('nb.id, p.name');
       expect(strings.join(' ')).toContain('INSERT INTO booking_consents');
       expect(params.every((param: unknown) => param !== undefined)).toBe(true);
@@ -172,6 +174,32 @@ describe('Booking Database Module', () => {
       await updateBookingStatus('booking-1', 'confirmed');
 
       expect(sql).toHaveBeenCalledTimes(1);
+    });
+
+    it('releases seats when cancelling an active booking', async () => {
+      (sql as any).mockResolvedValueOnce([
+        { id: 'booking-1', flight_id: 'flight-1', status: 'cancelled' },
+      ]);
+      (sql as any).mockResolvedValueOnce([]);
+      (sql as any).mockResolvedValueOnce([{ count: 2 }]);
+      (sql as any).mockResolvedValueOnce([]);
+
+      await updateBookingStatus('booking-1', 'cancelled');
+
+      expect(sql).toHaveBeenCalledTimes(4);
+      expect((sql as any).mock.calls[1][0].join(' ')).toContain('DELETE FROM seats');
+      const stringified = (sql as any).mock.calls[3][0].join(' ');
+      expect(stringified).toContain('available = available +');
+    });
+
+    it('does not release seats twice for an already cancelled booking', async () => {
+      (sql as any).mockResolvedValueOnce([]);
+      (sql as any).mockResolvedValueOnce([{ id: 'booking-1', status: 'cancelled' }]);
+
+      await updateBookingStatus('booking-1', 'cancelled');
+
+      expect(sql).toHaveBeenCalledTimes(2);
+      expect((sql as any).mock.calls[1][0].join(' ')).toContain('SELECT * FROM bookings');
     });
   });
 

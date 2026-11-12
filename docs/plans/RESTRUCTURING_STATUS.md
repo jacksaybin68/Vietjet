@@ -1,7 +1,7 @@
 # Vietjet Air — Trạng Thái Tái Cấu Trúc
 
-**Cập nhật:** 2026-09-23
-**Trạng thái:** Phase 1–6 HOÀN TẤT — TypeScript 0 lỗi, 309/309 tests passed, ESLint 0 lỗi, build thành công
+**Cập nhật:** 2026-11-12
+**Trạng thái:** Phase 1–6 HOÀN TẤT — TypeScript 0 lỗi, 915/915 tests passed, ESLint 0 lỗi (24 warnings), build thành công
 
 ## Tổng Quan
 
@@ -26,6 +26,7 @@ src/
 │   ├── auth/
 │   ├── bookings/
 │   ├── chat/
+│   ├── coding-pi/
 │   ├── flights/
 │   ├── loyalty/
 │   └── payments/
@@ -36,10 +37,7 @@ src/
 │   │   ├── navigation/
 │   │   └── ui/
 │   ├── constants/
-│   ├── hooks/
-│   ├── services/
-│   ├── types/
-│   └── utils/
+│   └── services/
 ├── lib/
 └── styles/
 ```
@@ -57,16 +55,13 @@ Các alias chính được cấu hình trong `vietjetsim-main/tsconfig.json`:
 - `@/shared/*`
 - `@/shared/components`
 - `@/shared/constants`
-- `@/shared/hooks`
 - `@/shared/services`
-- `@/shared/utils`
-- `@/shared/types`
 - `@/lib/*`
 
 Shared infrastructure hiện có:
 
 - HTTP client dùng chung tại `src/shared/services/httpClient.ts`.
-- Error handling, validator, date formatter và currency formatter tại `src/shared/utils/`.
+- Error handling, validator, date formatter và currency formatter tại `src/lib/utils.ts`.
 - Global constants tại `src/shared/constants/`.
 - Barrel exports ở từng feature và nhóm shared component.
 
@@ -183,10 +178,10 @@ Kết quả:
 
 ```text
 0 errors
-13 warnings (trong src/ — tập trung ở admin components, pre-existing)
+24 warnings (trong src/ — `no-explicit-any`, unused vars, hook deps, pre-existing)
 ```
 
-Lưu ý: Cảnh báo ESLint trong `scripts/` (remove-dark-classes.js, remove-dark-mode.js) chưa được xử lý, nhưng không ảnh hưởng đến build. Toàn bộ source code trong `src/` đều vượt qua ESLint với 0 lỗi. 13 warnings còn lại chủ yếu là `no-explicit-any`, `unused vars`, React hook dependencies, và image optimization — tất cả đều pre-existing trong components admin và chưa được thay đổi trong đợt này.
+Lưu ý: Cảnh báo ESLint trong `scripts/` (remove-dark-classes.js, remove-dark-mode.js) chưa được xử lý, nhưng không ảnh hưởng đến build. Toàn bộ source code trong `src/` đều vượt qua ESLint với 0 lỗi. 24 warnings còn lại chủ yếu là `no-explicit-any`, `unused vars`, React hook dependencies, và image optimization — tất cả đều pre-existing và không chặn build.
 
 Cấu hình ESLint đã được migrates sang flat config (`eslint.config.mjs`).
 
@@ -211,11 +206,11 @@ npm test
 Kết quả:
 
 ```text
-Test Files  27 passed (27)
-Tests       309 passed (309)
+Test Files  95 passed (95)
+Tests       915 passed (915)
 ```
 
-Test suite bao phủ wallet/payments, admin refund workflow, JWT contract, RBAC, auth, CSRF, route access, login hardening, booking flow, và pagination helpers.
+Test suite bao phủ wallet/payments, admin refund workflow, JWT contract, RBAC, auth, CSRF, route access, login hardening, booking flow, guest checkout, seat inventory, và pagination helpers.
 
 ### Production build
 
@@ -229,9 +224,7 @@ Kết quả:
 
 ```text
 Compiled successfully
-Generating static pages: 66/66
-Routes trong build output: 73
-First Load JS shared by all: 103 kB
+Toàn bộ route được generate thành công.
 ```
 
 Production build hoàn tất mà không có lỗi compile hoặc type-check.

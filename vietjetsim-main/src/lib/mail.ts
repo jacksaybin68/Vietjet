@@ -702,13 +702,9 @@ export async function sendRefundNotificationEmail(opts: {
 }
 
 /** Gửi email xác nhận đặt vé — gọi sau khi thanh toán thành công. */
-export async function sendBookingConfirmationEmail(opts: {
-  to: string;
-  fullName: string;
-  bookingCode: string | null;
-  amount: number;
-  method: string;
-}): Promise<boolean> {
+export async function sendBookingConfirmationEmail(
+  opts: Parameters<typeof sendPaymentSuccessEmail>[0]
+): Promise<boolean> {
   return sendPaymentSuccessEmail(opts);
 }
 

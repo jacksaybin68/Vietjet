@@ -571,7 +571,10 @@ function DiscountModal({
             <Icon name="XMarkIcon" size={18} />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="min-h-0 flex-1 overflow-y-auto p-6 sm:p-8 space-y-6">
+        <form
+          onSubmit={handleSubmit}
+          className="min-h-0 flex-1 overflow-y-auto p-6 sm:p-8 space-y-6"
+        >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
             <div className="sm:col-span-2">
               <label className="block text-2xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">
@@ -598,8 +601,12 @@ function DiscountModal({
                     setFormData({ ...formData, type: e.target.value as 'percentage' | 'fixed' })
                   }
                 >
-                  <option value="percentage" className="bg-slate-900 text-white">Phần trăm (%)</option>
-                  <option value="fixed" className="bg-slate-900 text-white">Cố định (₫)</option>
+                  <option value="percentage" className="bg-slate-900 text-white">
+                    Phần trăm (%)
+                  </option>
+                  <option value="fixed" className="bg-slate-900 text-white">
+                    Cố định (₫)
+                  </option>
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
                   <Icon name="ChevronDownIcon" size={16} />
@@ -646,7 +653,9 @@ function DiscountModal({
                   value={formData.agency_id}
                   onChange={(e) => setFormData({ ...formData, agency_id: e.target.value })}
                 >
-                  <option value="" className="bg-slate-900 text-white">— Không gắn đại lý (dùng chung) —</option>
+                  <option value="" className="bg-slate-900 text-white">
+                    — Không gắn đại lý (dùng chung) —
+                  </option>
                   {agencies.map((a) => (
                     <option key={a.id} value={a.id} className="bg-slate-900 text-white">
                       {a.name} ({a.code})

@@ -2,14 +2,16 @@
  * Giao thức Coding Pi — phần thuần, không đọc biến môi trường.
  *
  * Coding Pi nói chuyện với NVIDIA NIM qua API tương thích OpenAI:
- * `POST {baseUrl}/chat/completions`. File này giữ toàn bộ phần dựng request,
- * kiểm tra dữ liệu client gửi lên và đọc luồng SSE (`reasoning_content`,
- * `content`, `tool_calls`) để cả route server lẫn service phía client dùng
- * chung một định nghĩa.
+ * `POST {baseUrl}/chat/completions`. File này giữ toàn bộ phần định nghĩa
+ * dữ liệu: kiểu dữ liệu, giới hạn, kiểm tra body do client gửi lên và dựng
+ * payload gửi đi.
  *
  * Tách khỏi `config.ts` để client bundle không kéo theo `process.env` và
- * không bao giờ nhìn thấy khoá API.
+ * không bao giờ nhìn thấy khoá API. Phần đọc luồng SSE nằm ở `stream.ts`.
  */
+
+/** Nhà cung cấp hiện tại — API trả kèm provider để client biết đang hỏi ai. */
+export const CODING_PI_PROVIDER = 'nvidia';
 
 export type CodingPiRole = 'system' | 'user' | 'assistant' | 'tool';
 
@@ -86,8 +88,30 @@ export class CodingPiValidationError extends Error {
   }
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+export function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+/**
+ * Tool call đến trong delta: `name` chỉ có ở delta đầu còn `arguments` bị
+ * chia thành nhiều mảnh — nối theo `index`, không thay thế.
+ */
+export function normalizeCodingPiToolCallDeltas(value: unknown): CodingPiToolCall[] {
+  if (!Array.isArray(value)) return [];
+  const calls: CodingPiToolCall[] = [];
+  for (const [index, item] of value.entries()) {
+    if (!isRecord(item) || !isRecord(item.function)) continue;
+    const name = typeof item.function.name === 'string' ? item.function.name : '';
+    const args = typeof item.function.arguments === 'string' ? item.function.arguments : '';
+    if (!name && !args) continue;
+    calls.push({
+      id: typeof item.id === 'string' && item.id ? item.id : undefined,
+      type: 'function',
+      index: typeof item.index === 'number' ? item.index : index,
+      function: { name, arguments: args },
+    });
+  }
+  return calls;
 }
 
 function toImagePart(value: unknown): CodingPiImagePart | null {
@@ -145,24 +169,6 @@ export function normalizeCodingPiContent(value: unknown): string | CodingPiConte
   return parts.length ? parts : null;
 }
 
-function normalizeToolCallDeltas(value: unknown): CodingPiToolCall[] {
-  if (!Array.isArray(value)) return [];
-  const calls: CodingPiToolCall[] = [];
-  for (const [index, item] of value.entries()) {
-    if (!isRecord(item) || !isRecord(item.function)) continue;
-    const name = typeof item.function.name === 'string' ? item.function.name : '';
-    const args = typeof item.function.arguments === 'string' ? item.function.arguments : '';
-    if (!name && !args) continue;
-    calls.push({
-      id: typeof item.id === 'string' && item.id ? item.id : undefined,
-      type: 'function',
-      index: typeof item.index === 'number' ? item.index : index,
-      function: { name, arguments: args },
-    });
-  }
-  return calls;
-}
-
 /** Lịch sử hội thoại do client gửi: chỉ nhận user/assistant, bỏ lượt rỗng. */
 export function normalizeCodingPiHistory(value: unknown): CodingPiMessage[] {
   if (!Array.isArray(value)) return [];
@@ -195,7 +201,7 @@ export function normalizeCodingPiMessages(value: unknown): CodingPiMessage[] {
     const content = normalizeCodingPiContent(item.content);
 
     if (role === 'assistant') {
-      const toolCalls = normalizeToolCallDeltas(item.tool_calls);
+      const toolCalls = normalizeCodingPiToolCallDeltas(item.tool_calls);
       if (content === null && toolCalls.length === 0) continue;
       messages.push({
         role,
@@ -442,239 +448,5 @@ export function buildCodingPiPayload(request: CodingPiRequest): CodingPiPayload 
     chat_template_kwargs: { enable_thinking: request.enableThinking },
     ...(request.tools.length ? { tools: request.tools } : {}),
     ...(request.toolChoice ? { tool_choice: request.toolChoice } : {}),
-  };
-}
-
-export interface CodingPiSseEvent {
-  /** `message` khi phía gửi không đặt tên sự kiện (chuẩn SSE). */
-  event: string;
-  data: string;
-}
-
-export interface CodingPiSseParser {
-  push(chunk: string): CodingPiSseEvent[];
-  flush(): CodingPiSseEvent[];
-}
-
-function parseSseBlock(block: string): CodingPiSseEvent | null {
-  let event = 'message';
-  const data: string[] = [];
-
-  for (const rawLine of block.split('\n')) {
-    const line = rawLine.endsWith('\r') ? rawLine.slice(0, -1) : rawLine;
-    if (!line || line.startsWith(':')) continue;
-
-    const colon = line.indexOf(':');
-    const field = colon === -1 ? line : line.slice(0, colon);
-    let value = colon === -1 ? '' : line.slice(colon + 1);
-    if (value.startsWith(' ')) value = value.slice(1);
-
-    if (field === 'event') event = value;
-    else if (field === 'data') data.push(value);
-  }
-
-  return data.length ? { event, data: data.join('\n') } : null;
-}
-
-/**
- * Bộ tách SSE theo khối, giữ được khối bị chia cắt giữa hai chunk mạng —
- * đúng là điều xảy ra khi NVIDIA trả một object JSON dài.
- */
-export function createCodingPiSseParser(): CodingPiSseParser {
-  let buffer = '';
-  const BLOCK_SEPARATOR = /\r?\n\r?\n/;
-
-  const take = (block: string, out: CodingPiSseEvent[]) => {
-    const event = parseSseBlock(block);
-    if (event) out.push(event);
-  };
-
-  return {
-    push(chunk: string): CodingPiSseEvent[] {
-      buffer += chunk;
-      const events: CodingPiSseEvent[] = [];
-      for (;;) {
-        const match = BLOCK_SEPARATOR.exec(buffer);
-        if (!match || match.index === undefined) break;
-        take(buffer.slice(0, match.index), events);
-        buffer = buffer.slice(match.index + match[0].length);
-      }
-      return events;
-    },
-    flush(): CodingPiSseEvent[] {
-      const events: CodingPiSseEvent[] = [];
-      if (buffer.trim()) take(buffer, events);
-      buffer = '';
-      return events;
-    },
-  };
-}
-
-/** Một frame SSE do route Coding Pi phát ra (client đọc bằng parser ở trên). */
-export function encodeCodingPiSseEvent(event: string, data: unknown): string {
-  const payload = typeof data === 'string' ? data : JSON.stringify(data);
-  const lines = payload.split('\n').map((line) => `data: ${line}`);
-  return `event: ${event}\n${lines.join('\n')}\n\n`;
-}
-
-export interface CodingPiParsedChunk {
-  content: string;
-  reasoning: string;
-  toolCalls: CodingPiToolCall[];
-  finishReason: string | null;
-  usage: CodingPiUsage | null;
-  model: string | null;
-  /** `data: [DONE]` — không phải object JSON. */
-  done: boolean;
-}
-
-function deltaText(value: unknown): string {
-  if (typeof value === 'string') return value;
-  if (!Array.isArray(value)) return '';
-  return value
-    .map((part) => (isRecord(part) && typeof part.text === 'string' ? part.text : ''))
-    .join('');
-}
-
-function readUsage(value: unknown): CodingPiUsage | null {
-  return isRecord(value) ? (value as CodingPiUsage) : null;
-}
-
-/**
- * Đọc một `data:` của NVIDIA. Trả null cho dòng không phải JSON để một chunk
- * lỗi không làm gãy cả stream.
- */
-export function parseCodingPiStreamData(data: string): CodingPiParsedChunk | null {
-  const trimmed = data.trim();
-  if (!trimmed) return null;
-  if (trimmed === '[DONE]') {
-    return {
-      content: '',
-      reasoning: '',
-      toolCalls: [],
-      finishReason: null,
-      usage: null,
-      model: null,
-      done: true,
-    };
-  }
-
-  let payload: unknown;
-  try {
-    payload = JSON.parse(trimmed);
-  } catch {
-    return null;
-  }
-  if (!isRecord(payload)) return null;
-
-  const choices = Array.isArray(payload.choices) ? payload.choices : [];
-  const choice = isRecord(choices[0]) ? choices[0] : null;
-  const delta = choice && isRecord(choice.delta) ? choice.delta : {};
-
-  const reasoningValue = delta.reasoning_content ?? delta.reasoning;
-  return {
-    content: deltaText(delta.content),
-    reasoning: deltaText(reasoningValue),
-    toolCalls: normalizeToolCallDeltas(delta.tool_calls),
-    finishReason: choice && typeof choice.finish_reason === 'string' ? choice.finish_reason : null,
-    usage: readUsage(payload.usage),
-    model: typeof payload.model === 'string' ? payload.model : null,
-    done: false,
-  };
-}
-
-export interface CodingPiResult {
-  content: string;
-  reasoning: string;
-  toolCalls: CodingPiToolCall[];
-  finishReason: string | null;
-  usage: CodingPiUsage | null;
-  model: string | null;
-}
-
-export interface CodingPiAccumulator {
-  add(chunk: CodingPiParsedChunk): void;
-  result(): CodingPiResult;
-}
-
-/**
- * Ghép các delta thành câu trả lời cuối. Tool call đến theo `index`; `name`
- * chỉ có ở delta đầu còn `arguments` bị chia thành nhiều mảnh — nối theo
- * đúng thứ tự, không thay thế.
- */
-export function createCodingPiAccumulator(): CodingPiAccumulator {
-  let content = '';
-  let reasoning = '';
-  let finishReason: string | null = null;
-  let usage: CodingPiUsage | null = null;
-  let model: string | null = null;
-  const calls: Array<CodingPiToolCall | undefined> = [];
-
-  return {
-    add(chunk: CodingPiParsedChunk) {
-      content += chunk.content;
-      reasoning += chunk.reasoning;
-      if (chunk.finishReason) finishReason = chunk.finishReason;
-      if (chunk.usage) usage = chunk.usage;
-      if (chunk.model) model = chunk.model;
-
-      for (const call of chunk.toolCalls) {
-        const index = call.index ?? calls.length;
-        const existing = calls[index];
-        if (!existing) {
-          calls[index] = {
-            ...(call.id ? { id: call.id } : {}),
-            type: 'function',
-            index,
-            function: { name: call.function.name, arguments: call.function.arguments },
-          };
-          continue;
-        }
-        if (call.id) existing.id = call.id;
-        existing.function.name += call.function.name;
-        existing.function.arguments += call.function.arguments;
-      }
-    },
-    result(): CodingPiResult {
-      return {
-        content,
-        reasoning,
-        toolCalls: calls
-          .filter((call): call is CodingPiToolCall => Boolean(call))
-          .map(({ index: _index, ...call }) => call),
-        finishReason,
-        usage,
-        model,
-      };
-    },
-  };
-}
-
-/** Đọc phản hồi không stream (`stream: false`). */
-export function parseCodingPiCompletion(data: unknown): CodingPiResult {
-  if (!isRecord(data)) {
-    return {
-      content: '',
-      reasoning: '',
-      toolCalls: [],
-      finishReason: null,
-      usage: null,
-      model: null,
-    };
-  }
-
-  const choices = Array.isArray(data.choices) ? data.choices : [];
-  const choice = isRecord(choices[0]) ? choices[0] : null;
-  const message = choice && isRecord(choice.message) ? choice.message : {};
-
-  return {
-    content: deltaText(message.content),
-    reasoning: deltaText(message.reasoning_content ?? message.reasoning),
-    toolCalls: normalizeToolCallDeltas(message.tool_calls).map(
-      ({ index: _index, ...call }) => call
-    ),
-    finishReason: choice && typeof choice.finish_reason === 'string' ? choice.finish_reason : null,
-    usage: readUsage(data.usage),
-    model: typeof data.model === 'string' ? data.model : null,
   };
 }

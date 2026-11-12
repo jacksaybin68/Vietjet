@@ -76,3 +76,4 @@ describe('SendBookingEmailModal Component UI', () => {
     expect(screen.getByText(/Thông báo thanh toán đặt chỗ VJ9988 — Vietjet Air/i)).toBeDefined();
   });
 });
+

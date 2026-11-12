@@ -217,9 +217,7 @@ function ToastNotification({ toast, onDismiss }: ToastProps) {
             {toast.title}
           </p>
           {toast.message && (
-            <p className={`text-xs mt-1 leading-relaxed ${config.messageColor}`}>
-              {toast.message}
-            </p>
+            <p className={`text-xs mt-1 leading-relaxed ${config.messageColor}`}>{toast.message}</p>
           )}
 
           {/* Action buttons */}

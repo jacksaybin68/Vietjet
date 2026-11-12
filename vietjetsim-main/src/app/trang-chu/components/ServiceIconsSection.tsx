@@ -108,7 +108,8 @@ export default function ServiceIconsSection() {
             Tất cả dịch vụ trong một lần chạm
           </h2>
           <p className="text-xs sm:text-sm text-[var(--foreground-muted)] max-w-xl mx-auto mt-2">
-            Trải nghiệm bay trọn vẹn cùng hệ sinh thái dịch vụ tiện ích, tiện lợi và tiết kiệm từ Vietjet Air
+            Trải nghiệm bay trọn vẹn cùng hệ sinh thái dịch vụ tiện ích, tiện lợi và tiết kiệm từ
+            Vietjet Air
           </p>
         </div>
 

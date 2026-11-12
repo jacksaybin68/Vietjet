@@ -262,6 +262,7 @@ const OPERATING_TABLES_SQL = `
   UNION ALL SELECT 'loyalty_tiers=' || count(*) FROM loyalty_tiers
   UNION ALL SELECT 'phone_otp=' || count(*) FROM phone_otp
   UNION ALL SELECT 'referral_events=' || count(*) FROM referral_events
+  UNION ALL SELECT 'bank_accounts=' || count(*) FROM bank_accounts
   ORDER BY 1
 `;
 

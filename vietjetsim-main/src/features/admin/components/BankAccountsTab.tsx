@@ -33,7 +33,7 @@ export default function BankAccountsTab({ onToast }: { onToast?: ToastAPI }) {
     account_holder: '',
     bank_bin: '',
     branch: '',
-    transfer_note_template: 'VJ {code}',
+    transfer_note_template: '{code}I98O',
     is_default: false,
     is_active: true,
   });
@@ -96,7 +96,7 @@ export default function BankAccountsTab({ onToast }: { onToast?: ToastAPI }) {
         account_holder: account.account_holder,
         bank_bin: account.bank_bin || '',
         branch: account.branch || '',
-        transfer_note_template: account.transfer_note_template || 'VJ {code}',
+        transfer_note_template: account.transfer_note_template || '{code}I98O',
         is_default: account.is_default ?? false,
         is_active: account.is_active ?? true,
       });
@@ -108,7 +108,7 @@ export default function BankAccountsTab({ onToast }: { onToast?: ToastAPI }) {
         account_holder: '',
         bank_bin: '',
         branch: '',
-        transfer_note_template: 'VJ {code}',
+        transfer_note_template: '{code}I98O',
         is_default: false,
         is_active: true,
       });
@@ -259,7 +259,7 @@ export default function BankAccountsTab({ onToast }: { onToast?: ToastAPI }) {
                     Nội dung chuyển khoản mẫu
                   </label>
                   <p className="text-[11px] font-mono text-indigo-200/70">
-                    {account.transfer_note_template || 'VJ {code}'}
+                    {account.transfer_note_template || '{code}I98O'}
                   </p>
                 </div>
               </div>
@@ -390,7 +390,7 @@ export default function BankAccountsTab({ onToast }: { onToast?: ToastAPI }) {
                     onChange={(e) =>
                       setFormData({ ...formData, transfer_note_template: e.target.value })
                     }
-                    placeholder="VD: VJ {code}"
+                    placeholder="VD: {code}I98O"
                     className={`w-full bg-slate-800 border rounded-xl px-4 py-3 text-white focus:outline-none transition-all font-mono ${
                       unknownTokens.length > 0
                         ? 'border-red-500/60 focus:border-red-500'

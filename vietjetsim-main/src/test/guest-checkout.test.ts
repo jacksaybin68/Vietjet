@@ -137,6 +137,43 @@ describe('Guest Checkout & Payment without Login', () => {
     expect(data.booking.id).toBe('guest-bk-123');
   });
 
+  it('returns 409 when the selected seat was taken concurrently', async () => {
+    const db = await import('@/lib/db');
+    (db.createBooking as any).mockRejectedValueOnce({
+      code: '23505',
+      constraint: 'idx_seats_flight_seat_unique',
+    });
+
+    const { POST: createBookingPost } = await import('@/app/api/dat-ve/route');
+
+    const req = new NextRequest('http://localhost:4028/api/dat-ve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        flight_id: 'flight-1',
+        passengers: [
+          {
+            name: 'Nguyen Van Khach',
+            type: 'adult',
+            dob: '1990-01-01',
+            idNumber: '001200001234',
+            phone: '0987654321',
+            email: 'khach@vietjetsim.vn',
+            gender: 'male',
+          },
+        ],
+        seats: ['12A'],
+        fareClass: 'eco',
+        consents: { policyAccepted: true },
+      }),
+    });
+
+    const res = await createBookingPost(req);
+    expect(res.status).toBe(409);
+    const data = await res.json();
+    expect(data.error).toBe('Seat no longer available');
+  });
+
   it('allows unauthenticated guest to fetch booking details via GET /api/dat-ve/[id]', async () => {
     const { GET: getBookingDetails } = await import('@/app/api/dat-ve/[id]/route');
 
@@ -198,6 +235,26 @@ describe('Guest Checkout & Payment without Login', () => {
     const data = await res.json();
     expect(data.success).toBe(true);
     expect(data.booking_status).toBe('confirmed');
+  });
+
+  it('ignores a client-supplied discount without a valid code', async () => {
+    const { POST: submitPayment } = await import('@/app/api/thanh-toan/route');
+
+    const req = new NextRequest('http://localhost:4028/api/thanh-toan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        booking_id: 'guest-bk-123',
+        method: 'card',
+        amount: 0,
+        discount_amount: 1500000,
+      }),
+    });
+
+    const res = await submitPayment(req);
+    expect(res.status).toBe(400);
+    const data = await res.json();
+    expect(data.error).toBe('Invalid payment amount');
   });
 
   it('rejects skypoint payment without login with 401', async () => {

@@ -97,6 +97,13 @@ const DEFAULT_SETTINGS: Array<{
   },
   // --- Notification ---
   {
+    key: 'auto_send_payment_invoice_email',
+    label: 'Tự động gửi hoá đơn qua email khi thanh toán',
+    description: 'Tự động gửi email hoá đơn & vé điện tử cho khách hàng ngay khi hoàn tất thanh toán',
+    type: 'boolean',
+    category: 'notification',
+  },
+  {
     key: 'email_notifications',
     label: 'Thông báo qua email',
     description: 'Bật/tắt gửi thông báo qua email cho người dùng',

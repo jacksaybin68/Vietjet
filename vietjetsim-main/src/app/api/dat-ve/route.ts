@@ -263,7 +263,7 @@ export async function POST(request: NextRequest) {
     }
 
     const booking = await createBooking(
-      { user_id: bookingUserId, flight_id, total_price: totalPrice },
+      { user_id: bookingUserId, flight_id, total_price: totalPrice, seatedCount },
       normalizedPassengers,
       seatRows,
       ancillaryRows,
@@ -275,12 +275,12 @@ export async function POST(request: NextRequest) {
       }
     );
 
-    // Reserve the seats by decrementing available capacity on the flight.
-    await sql`
-      UPDATE flights
-      SET available = available - ${seatedCount}
-      WHERE id = ${flight_id}
-    `;
+    if (!booking) {
+      return NextResponse.json(
+        { error: 'Flight fully booked', message: 'Chuyến bay đã hết ghế trống.' },
+        { status: 409 }
+      );
+    }
 
     // Gửi email thông báo đặt chỗ và hướng dẫn thanh toán cho khách hàng
     const customerEmail =
@@ -288,9 +288,7 @@ export async function POST(request: NextRequest) {
       normalizedPassengers.find((p) => p.email && p.email.includes('@'))?.email ||
       null;
     const customerName =
-      user?.fullName ||
-      normalizedPassengers.find((p) => p.name)?.name ||
-      'Quý khách';
+      user?.fullName || normalizedPassengers.find((p) => p.name)?.name || 'Quý khách';
 
     if (customerEmail && !customerEmail.includes('@khach.vietjetsim.vn')) {
       void sendPaymentInstructionEmail({
@@ -304,6 +302,20 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ booking }, { status: 201 });
   } catch (error) {
+    const dbError = error as { code?: unknown; constraint?: unknown; message?: unknown };
+    if (
+      dbError.code === '23505' &&
+      (dbError.constraint === 'idx_seats_flight_seat_unique' ||
+        String(dbError.message).includes('idx_seats_flight_seat_unique'))
+    ) {
+      return NextResponse.json(
+        {
+          error: 'Seat no longer available',
+          message: 'Ghế bạn chọn vừa được người khác đặt. Vui lòng chọn ghế khác.',
+        },
+        { status: 409 }
+      );
+    }
     console.error('Error creating booking:', error);
     return NextResponse.json({ error: 'Failed to create booking' }, { status: 500 });
   }

@@ -12,14 +12,16 @@ import {
   buildCodingPiMessages,
   buildCodingPiPayload,
   CodingPiValidationError,
+  normalizeCodingPiMessages,
+  parseCodingPiRequest,
+} from '@/lib/coding-pi/protocol';
+import {
   createCodingPiAccumulator,
   createCodingPiSseParser,
   encodeCodingPiSseEvent,
-  normalizeCodingPiMessages,
   parseCodingPiCompletion,
-  parseCodingPiRequest,
   parseCodingPiStreamData,
-} from '@/lib/coding-pi/protocol';
+} from '@/lib/coding-pi/stream';
 import {
   DEFAULT_CODING_PI_MAX_TOKENS,
   DEFAULT_CODING_PI_MODEL,

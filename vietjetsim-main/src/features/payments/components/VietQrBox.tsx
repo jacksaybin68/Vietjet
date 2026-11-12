@@ -129,8 +129,7 @@ export default function VietQrBox({
         const payload = buildVietQrPayload({
           bin,
           accountNumber: fallbackAccount.admin_bank_account_number,
-          amount,
-          addInfo,
+          accountHolder: fallbackAccount.admin_bank_account_holder,
           bankName: fallbackAccount.admin_bank_name,
         });
 
@@ -253,10 +252,6 @@ export default function VietQrBox({
                 <div className="font-black text-white text-sm sm:text-base tracking-wide font-koho truncate">
                   {data?.bank.name ?? 'Ngân hàng thụ hưởng'}
                 </div>
-                <div className="text-2xs sm:text-xs text-white/90 font-mono font-medium truncate">
-                  STK: <span className="font-bold">{data?.bank.accountNumber ?? '—'}</span> (
-                  {data?.bank.accountHolder ?? 'VIETJET'})
-                </div>
               </div>
             </div>
 
@@ -318,77 +313,88 @@ export default function VietQrBox({
               <Icon name="InformationCircleIcon" size={16} />
               Thông tin thanh toán
             </span>
-            <span className="text-3xs font-extrabold uppercase px-2 py-0.5 rounded-full bg-blue-100/70 text-[#005BAA] border border-blue-200">
-              STK Admin chính thức
-            </span>
           </div>
 
           {/* Hàng 1: Số tài khoản thụ hưởng của Admin */}
-          <div className="flex justify-between items-center bg-white p-2.5 sm:p-3 rounded-xl border border-gray-200 shadow-2xs">
-            <div>
-              <span className="block text-3xs sm:text-2xs font-bold text-gray-500 uppercase tracking-wider font-koho">
-                Số tài khoản nhận (STK Admin)
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-blue-100 bg-white p-3 sm:p-4 shadow-2xs">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-[#005BAA]">
+                <Icon name="BuildingLibraryIcon" size={20} />
               </span>
-              <span className="font-mono font-black text-gray-900 text-sm sm:text-base">
-                {data?.bank.accountNumber ?? '—'}
-              </span>
-              <span className="block text-3xs text-gray-500 font-medium">
-                {data?.bank.name} • {data?.bank.accountHolder}
-              </span>
+              <div className="min-w-0">
+                <span className="block text-3xs sm:text-2xs font-bold uppercase tracking-wider text-gray-500 font-koho">
+                  Số tài khoản nhận
+                </span>
+                <span className="block font-mono font-black tracking-tight text-gray-900 text-base sm:text-lg">
+                  {data?.bank.accountNumber ?? '—'}
+                </span>
+                <span className="block truncate text-3xs font-medium text-gray-500">
+                  {data?.bank.name} • {data?.bank.accountHolder}
+                </span>
+              </div>
             </div>
             <button
               type="button"
               onClick={() => copyToClipboard(data?.bank.accountNumber ?? '', 'stk')}
-              className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#005BAA] font-bold text-xs flex items-center gap-1 transition-all active:scale-95 cursor-pointer shrink-0"
+              className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-bold text-[#005BAA] transition-all hover:bg-blue-100 active:scale-95"
             >
-              <Icon name="ClipboardDocumentIcon" size={14} />
-              <span>{copiedField === 'stk' ? 'Đã sao chép!' : 'Sao chép STK'}</span>
+              <Icon
+                name={copiedField === 'stk' ? 'CheckCircleIcon' : 'ClipboardDocumentIcon'}
+                size={14}
+              />
+              <span>{copiedField === 'stk' ? 'Đã sao chép' : 'Sao chép'}</span>
             </button>
           </div>
 
           {/* Hàng 2: Số tiền thanh toán */}
-          <div className="flex justify-between items-center bg-white p-2.5 sm:p-3 rounded-xl border border-gray-200 shadow-2xs">
-            <div>
-              <span className="block text-3xs sm:text-2xs font-bold text-gray-500 uppercase tracking-wider font-koho">
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white p-3 sm:p-4 shadow-2xs">
+            <div className="min-w-0">
+              <span className="block text-3xs sm:text-2xs font-bold uppercase tracking-wider text-gray-500 font-koho">
                 Tổng số tiền cần thanh toán
               </span>
-              <span className="font-koho font-black text-red-600 text-base sm:text-lg">
+              <span className="block font-koho font-black text-red-600 text-base sm:text-lg">
                 {(data?.amount ?? 0).toLocaleString('vi-VN')}₫
               </span>
             </div>
             <button
               type="button"
               onClick={() => copyToClipboard(String(data?.amount ?? 0), 'amount')}
-              className="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs flex items-center gap-1 transition-all active:scale-95 cursor-pointer shrink-0"
+              className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-bold text-gray-700 transition-all hover:bg-gray-100 active:scale-95"
             >
-              <Icon name="ClipboardDocumentIcon" size={14} />
-              <span>{copiedField === 'amount' ? 'Đã sao chép!' : 'Sao chép số tiền'}</span>
+              <Icon
+                name={copiedField === 'amount' ? 'CheckCircleIcon' : 'ClipboardDocumentIcon'}
+                size={14}
+              />
+              <span>{copiedField === 'amount' ? 'Đã sao chép' : 'Sao chép'}</span>
             </button>
           </div>
 
           {/* Hàng 3: Nội dung chuyển khoản (bắt buộc) */}
-          <div className="bg-white p-2.5 sm:p-3 rounded-xl border-2 border-red-200 bg-red-50/20 shadow-2xs">
-            <div className="flex justify-between items-center gap-2">
+          <div className="rounded-xl border-2 border-red-200 bg-red-50/20 bg-white p-3 sm:p-4 shadow-2xs">
+            <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <span className="block text-3xs sm:text-2xs font-black text-red-600 uppercase tracking-wider font-koho flex items-center gap-1">
+                <span className="block text-3xs sm:text-2xs font-black uppercase tracking-wider text-red-600 font-koho flex items-center gap-1">
                   <span>Nội dung chuyển khoản (Bắt buộc giữ nguyên)</span>
                 </span>
-                <span className="font-mono font-black text-gray-900 text-sm sm:text-base break-all select-all">
+                <span className="block font-mono font-black text-gray-900 text-sm sm:text-base break-all select-all">
                   {data?.addInfo ?? '—'}
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => copyToClipboard(data?.addInfo ?? '', 'note')}
-                className="px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs shrink-0"
+                className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-bold text-red-600 transition-all hover:bg-red-100 active:scale-95"
               >
-                <Icon name="ClipboardDocumentIcon" size={14} />
-                <span>{copiedField === 'note' ? 'Đã sao chép!' : 'Sao chép nội dung'}</span>
+                <Icon
+                  name={copiedField === 'note' ? 'CheckCircleIcon' : 'ClipboardDocumentIcon'}
+                  size={14}
+                />
+                <span>{copiedField === 'note' ? 'Đã sao chép' : 'Sao chép'}</span>
               </button>
             </div>
             <p className="text-3xs text-gray-500 mt-1 italic">
-              * Quý khách vui lòng nhập đúng nội dung chuyển khoản để hệ thống VNPAY tự động duyệt
-              vé.
+              * Mã QR không kèm số tiền và nội dung — quý khách tự nhập đúng số tiền và nội dung này
+              trong ứng dụng ngân hàng để hệ thống tự động duyệt vé.
             </p>
           </div>
         </div>

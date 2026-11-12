@@ -1,13 +1,10 @@
 import { getCsrfHeaders } from '@/lib/csrf-client';
-import {
-  createCodingPiSseParser,
-  type CodingPiMessage,
-  type CodingPiResult,
-  type CodingPiToolCall,
-  type CodingPiToolChoice,
-  type CodingPiToolDefinition,
-} from '@/lib/coding-pi/protocol';
+import type { CodingPiToolCall } from '@/lib/coding-pi/protocol';
+import type { CodingPiResult } from '@/lib/coding-pi/stream';
 import { ApiRequestError, apiRequest } from '@/shared/services';
+import { CODING_PI_ENDPOINT } from '../constants';
+import type { CodingPiChatInput, CodingPiStatus, CodingPiStreamHandlers } from '../types';
+import { readCodingPiStream } from './codingPiStream';
 
 /**
  * Client của Coding Pi.
@@ -17,48 +14,19 @@ import { ApiRequestError, apiRequest } from '@/shared/services';
  * CSRF với phần còn lại của app (`apiRequest` hoặc `getCsrfHeaders`).
  */
 
-export interface CodingPiChatInput {
-  prompt?: string;
-  context?: string;
-  history?: Array<{ role: 'user' | 'assistant'; content: string }>;
-  messages?: CodingPiMessage[];
-  images?: Array<string | { url: string } | { type: 'image_url'; image_url: { url: string } }>;
-  tools?: CodingPiToolDefinition[];
-  toolChoice?: CodingPiToolChoice;
-  model?: string;
-  maxTokens?: number;
-  temperature?: number;
-  topP?: number;
-  enableThinking?: boolean;
-  signal?: AbortSignal;
-}
-
-export interface CodingPiStreamHandlers {
-  onReady?: (info: { model: string }) => void;
-  onReasoning?: (text: string) => void;
-  onContent?: (text: string) => void;
-  onToolCall?: (call: CodingPiToolCall) => void;
-  onDone?: (result: CodingPiResult) => void;
-}
-
-export interface CodingPiStatus {
-  provider: 'nvidia';
-  configured: boolean;
-  model: string;
-  baseUrl: string;
-  maxTokens: number;
-  temperature: number;
-  topP: number;
-  thinking: boolean;
-  timeoutMs: number;
-}
-
-function parseJson<T>(data: string): T | null {
-  try {
-    return JSON.parse(data) as T;
-  } catch {
-    return null;
-  }
+function emptyResult(
+  content: string,
+  reasoning: string,
+  toolCalls: CodingPiToolCall[]
+): CodingPiResult {
+  return {
+    content,
+    reasoning,
+    toolCalls,
+    finishReason: null,
+    usage: null,
+    model: null,
+  };
 }
 
 async function readErrorMessage(
@@ -98,7 +66,7 @@ export async function streamCodingPi(
   input: CodingPiChatInput,
   handlers: CodingPiStreamHandlers = {}
 ): Promise<CodingPiResult> {
-  const response = await fetch('/api/coding-pi/chat', {
+  const response = await fetch(CODING_PI_ENDPOINT, {
     method: 'POST',
     credentials: 'include',
     signal: input.signal,
@@ -118,113 +86,56 @@ export async function streamCodingPi(
     throw new Error('Máy chủ không trả về luồng phản hồi.');
   }
 
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  const parser = createCodingPiSseParser();
-
   let content = '';
   let reasoning = '';
   const toolCalls: CodingPiToolCall[] = [];
   let finalResult: CodingPiResult | null = null;
 
-  const consume = (events: ReturnType<typeof parser.push>) => {
-    for (const event of events) {
-      const payload = parseJson<Record<string, unknown>>(event.data);
-
-      if (event.event === 'error') {
-        const message =
-          payload && typeof payload.error === 'string'
-            ? payload.error
-            : 'Coding Pi gặp lỗi khi đang trả lời.';
-        throw new Error(message);
-      }
-
-      if (event.event === 'ready') {
-        handlers.onReady?.({
-          model: payload && typeof payload.model === 'string' ? payload.model : '',
-        });
-        continue;
-      }
-
-      if (event.event === 'reasoning') {
-        const text = payload && typeof payload.text === 'string' ? payload.text : '';
-        if (text) {
-          reasoning += text;
-          handlers.onReasoning?.(text);
-        }
-        continue;
-      }
-
-      if (event.event === 'content') {
-        const text = payload && typeof payload.text === 'string' ? payload.text : '';
-        if (text) {
-          content += text;
-          handlers.onContent?.(text);
-        }
-        continue;
-      }
-
-      if (event.event === 'tool_call' && payload) {
-        const call = payload as unknown as CodingPiToolCall;
-        if (call.function?.name || call.function?.arguments) {
-          toolCalls.push(call);
-          handlers.onToolCall?.(call);
-        }
-        continue;
-      }
-
-      if (event.event === 'done' && payload) {
-        finalResult = payload as unknown as CodingPiResult;
-        handlers.onDone?.(finalResult);
-      }
-    }
-  };
-
   try {
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      consume(parser.push(decoder.decode(value, { stream: true })));
+    for await (const event of readCodingPiStream(response.body)) {
+      if (event.type === 'ready') {
+        handlers.onReady?.({ model: event.model });
+        continue;
+      }
+      if (event.type === 'reasoning') {
+        if (event.text) {
+          reasoning += event.text;
+          handlers.onReasoning?.(event.text);
+        }
+        continue;
+      }
+      if (event.type === 'content') {
+        if (event.text) {
+          content += event.text;
+          handlers.onContent?.(event.text);
+        }
+        continue;
+      }
+      if (event.type === 'tool_call') {
+        toolCalls.push(event.call);
+        handlers.onToolCall?.(event.call);
+        continue;
+      }
+      if (event.type === 'done') {
+        finalResult = event.result;
+        handlers.onDone?.(finalResult);
+        continue;
+      }
+      throw new Error(event.message);
     }
-    consume(parser.push(decoder.decode()));
-    consume(parser.flush());
   } catch (error) {
     if (input.signal?.aborted) {
-      return (
-        finalResult ?? {
-          content,
-          reasoning,
-          toolCalls,
-          finishReason: null,
-          usage: null,
-          model: null,
-        }
-      );
+      return finalResult ?? emptyResult(content, reasoning, toolCalls);
     }
     throw error;
-  } finally {
-    try {
-      reader.releaseLock();
-    } catch {
-      // Đang bị huỷ — không cần trả lock.
-    }
   }
 
-  return (
-    finalResult ?? {
-      content,
-      reasoning,
-      toolCalls,
-      finishReason: null,
-      usage: null,
-      model: null,
-    }
-  );
+  return finalResult ?? emptyResult(content, reasoning, toolCalls);
 }
 
 /** Bản không stream, dùng `apiRequest` để có sẵn CSRF và xử lý lỗi chung. */
 export async function askCodingPi(input: CodingPiChatInput): Promise<CodingPiResult> {
-  return apiRequest<CodingPiResult>('/api/coding-pi/chat', {
+  return apiRequest<CodingPiResult>(CODING_PI_ENDPOINT, {
     method: 'POST',
     body: { ...toRequestBody(input), stream: false },
   });
@@ -232,5 +143,5 @@ export async function askCodingPi(input: CodingPiChatInput): Promise<CodingPiRes
 
 /** Trạng thái backend (đã có khoá chưa, model nào) — admin-only. */
 export async function getCodingPiStatus(): Promise<CodingPiStatus> {
-  return apiRequest<CodingPiStatus>('/api/coding-pi/chat');
+  return apiRequest<CodingPiStatus>(CODING_PI_ENDPOINT);
 }

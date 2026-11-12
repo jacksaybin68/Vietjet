@@ -86,7 +86,9 @@ describe('Vietjet Aircraft Resolution & Fleet Support', () => {
 
     it('respects rawAircraft parameter in resolveAircraft', () => {
       expect(resolveAircraft('VJ121', 'HAN', 'SGN', 'A330')).toBe(AIRCRAFT_MODELS.A330);
-      expect(resolveAircraft('VJ121', 'HAN', 'SGN', 'Boeing 737 MAX')).toBe(AIRCRAFT_MODELS.B737_MAX);
+      expect(resolveAircraft('VJ121', 'HAN', 'SGN', 'Boeing 737 MAX')).toBe(
+        AIRCRAFT_MODELS.B737_MAX
+      );
     });
   });
 

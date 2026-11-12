@@ -165,7 +165,14 @@ async function main() {
       [no, from, to, depart, durationMin, ecoPrice, bizPrice, seats, aircraft],
     ] of ROUTES.entries()) {
       const variants = [
-        { cls: 'economy', price: ecoPrice, available: seats, shift: 0, no, aircraft: aircraft || 'A321' },
+        {
+          cls: 'economy',
+          price: ecoPrice,
+          available: seats,
+          shift: 0,
+          no,
+          aircraft: aircraft || 'A321',
+        },
         {
           cls: 'business',
           price: bizPrice,

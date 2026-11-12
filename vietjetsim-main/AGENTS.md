@@ -1100,14 +1100,26 @@ tương thích OpenAI. Khoá `NVIDIA_API_KEY` là server-only; đừng thêm ti�
   như `done`. Lỗi sau khi stream đã mở đi qua `event: error`, không đổi được
   HTTP status nữa.
 - `GET` cùng route trả trạng thái cấu hình/model cho editor.
-- `protocol.ts` là phần thuần (kiểm tra body, dựng payload, đọc SSE) và không
-  đọc `process.env`; nhờ vậy client import được mà không kéo theo khoá.
-  `createCodingPiSseParser` giữ khối bị chia cắt giữa hai chunk;
-  `createCodingPiAccumulator` nối `tool_calls[].function.arguments` theo
-  `index` thay vì ghi đè.
+- **Ba tầng, đừng gộp.** `src/lib/coding-pi/protocol.ts` (hợp đồng dữ liệu) và
+  `stream.ts` (đọc/ghi SSE, tên event) là phần thuần — không đọc `process.env`
+  nên client import được mà không kéo theo khoá. `provider.ts` (gọi NVIDIA,
+  timeout, dịch lỗi thành HTTP status) và `service.ts` (điều phối một lượt chat)
+  là server-only, cùng với `config.ts` và barrel `src/lib/coding-pi/index.ts`.
+  `src/app/api/coding-pi/chat/route.ts` chỉ làm phần HTTP: xác thực, kiểm tra
+  body, gọi service.
+- **Khoá không được lọt vào bundle trình duyệt.** `src/test/coding-pi-isolation.test.ts`
+  quét `src/features`, `src/shared` và `src/app` (trừ `src/app/api`) để chắc
+  chắn không tệp client nào import `config.ts`/`provider.ts`/`service.ts` hay
+  barrel `@/lib/coding-pi`. Client chỉ được import
+  `@/lib/coding-pi/protocol` và `@/lib/coding-pi/stream`.
+- `createCodingPiSseParser` giữ khối bị chia cắt giữa hai chunk;
+  `createCodingPiAccumulator` nối `tool_calls[].function.arguments` theo `index`
+  thay vì ghi đè.
 - Editor dùng `streamCodingPi` từ `src/features/coding-pi` và hiển thị
   `reasoning_content` trong khối “Suy nghĩ của Coding Pi”.
-- Test: `src/test/coding-pi.test.ts` (không gọi NVIDIA thật).
+- Test: `src/test/coding-pi.test.ts` (protocol + route), `src/test/coding-pi-service.test.ts`
+  (provider/service/client stream), `src/test/coding-pi-isolation.test.ts` — không
+  gọi NVIDIA thật.
 
 ## Testing
 

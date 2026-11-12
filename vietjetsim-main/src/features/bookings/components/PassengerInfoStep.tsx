@@ -300,8 +300,16 @@ export default function PassengerInfoStep({
                 {/* Passenger Accordion Header */}
                 <div className="bg-gray-100 px-4 py-2.5 border-b border-gray-200/80 flex items-center justify-between cursor-pointer">
                   <div className="flex items-center gap-2 text-xs font-bold text-gray-800">
-                    <svg className="w-4 h-4 text-gray-500 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                    <svg
+                      className="w-4 h-4 text-gray-500 shrink-0"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                     <span>
                       {typeLabel} {ordinal}

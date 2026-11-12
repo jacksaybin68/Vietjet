@@ -63,8 +63,7 @@ export async function GET(request: NextRequest) {
     const payload = buildVietQrPayload({
       bin: effectiveBin,
       accountNumber: account.account_number,
-      amount,
-      addInfo,
+      accountHolder: account.account_holder,
       bankName: account.bank_name,
     });
 

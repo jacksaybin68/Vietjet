@@ -4,6 +4,7 @@ import { verifyAdminRequest } from '@/lib/admin-auth';
 import {
   getAllRefunds,
   updateRefundStatus,
+  updateBookingStatus,
   refundWallet,
   setRefundVisibility,
   updateRefundDetails,
@@ -198,10 +199,7 @@ export async function PATCH(request: NextRequest) {
           }
 
           // 3. Mark booking as refunded
-          await sql`
-            UPDATE bookings SET status = 'refunded', updated_at = NOW()
-            WHERE id = ${refundRecord.booking_id}
-          `;
+          await updateBookingStatus(refundRecord.booking_id, 'refunded');
           refundSummary = walletRefunded
             ? ' Seats released, wallet credited and booking marked as refunded'
             : walletAlreadyPaid

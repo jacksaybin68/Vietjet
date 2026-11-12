@@ -5,12 +5,18 @@
  * đặc tả VietQR (NAPAS 232):
  *   00 – Payload Format Indicator   = "01"
  *   01 – Point of Initiation Method = "12" (dynamic QR, một lần dùng)
- *   38 – Merchant Account Info     = 00 NAPAS GUID · 01 BIN · 02 STK · 03 tên NH
+ *   38 – Merchant Account Info     = 00 NAPAS GUID · 01 BIN · 02 STK · 03 tên chủ TK
+ *   41 – Merchant Name             = tên ngân hàng thụ hưởng
  *   53 – Transaction Currency      = "704" (VND)
- *   54 – Transaction Amount        = số nguyên đồng (không dấu phân cách)
  *   58 – Country Code              = "VN"
- *   62 – Additional Data           = 08 reference label (nội dung CK, chứa PNR)
  *   63 – CRC16-CCITT (0x1021, init 0xFFFF) trên toàn bộ chuỗi kèm "6304"
+ *
+ * **QR không mang số tiền (54) và không mang nội dung chuyển khoản (62).**
+ * Khi khách quét, app ngân hàng chỉ hiện người thụ hưởng — tên ngân hàng và
+ * tên chủ tài khoản — còn số tiền và nội dung (mã đặt chỗ 6 ký tự) khách tự
+ * nhập theo hướng dẫn trên màn thanh toán. Nhúng sẵn hai field đó vào QR sẽ
+ * khiến app hiển thị tiền/nội dung, và mã đặt chỗ trong nội dung là thứ
+ * không nên nằm trong mã công khai.
  *
  * Ngân hàng yêu cầu text không dấu, in hoa — sanitize trước khi nhúng.
  */
@@ -132,11 +138,9 @@ export interface VietQrInput {
   bin?: string;
   /** Số tài khoản thụ hưởng, chỉ giữ chữ số. */
   accountNumber: string;
-  /** Số tiền VND (số nguyên). Bỏ qua nếu <= 0. */
-  amount: number;
-  /** Nội dung chuyển khoản (đã render template) — chứa mã PNR. */
-  addInfo: string;
-  /** Tên ngân hàng thụ hưởng hiển thị trong field 38/03. */
+  /** Tên chủ tài khoản thụ hưởng — hiển thị khi khách quét (field 38/03). */
+  accountHolder?: string;
+  /** Tên ngân hàng thụ hưởng — hiển thị khi khách quét (field 41). */
   bankName?: string;
 }
 
@@ -161,26 +165,27 @@ export function buildVietQrPayload(input: VietQrInput): string {
   //       * Sub-sub-tag 00: Acquirer ID / BIN ngân hàng (6 chữ số)
   //       * Sub-sub-tag 01: Consumer / Số tài khoản thụ hưởng
   //   - Sub-tag 02: Service Code = QRIBFTTA (Chuyển khoản nhanh liên ngân hàng tới TK)
+  //   - Sub-tag 03: Merchant Account Name = tên chủ tài khoản thụ hưởng
   const beneficiary = [sub('00', bin), sub('01', accountNumber)].join('');
+
+  const accountHolder = sanitizeVietQrText(input.accountHolder || '', 99);
+  const bankName = sanitizeVietQrText(input.bankName || '', 25);
 
   const merchantAccount = [
     sub('00', VIETQR_GUID),
     sub('01', beneficiary),
     sub('02', 'QRIBFTTA'),
+    ...(accountHolder ? [sub('03', accountHolder)] : []),
   ].join('');
-
-  const additional = sub('08', sanitizeVietQrText(input.addInfo || '', 99));
 
   let payload = [
     tlv('00', '01'), // Payload Format Indicator
     tlv('01', '12'), // Dynamic QR, dùng một lần
     tlv('38', merchantAccount),
+    ...(bankName ? [tlv('41', bankName)] : []), // Tên ngân hàng thụ hưởng
     tlv('53', VIETQR_CURRENCY_VND),
-    ...(Number.isFinite(input.amount) && input.amount > 0
-      ? [tlv('54', String(Math.round(input.amount)))]
-      : []),
     tlv('58', 'VN'),
-    tlv('62', additional),
+    // Không nhúng 54 (số tiền) và 62 (nội dung chuyển khoản): khách tự nhập.
   ].join('');
 
   payload += tlv('63', crc16Ccitt(payload + '6304'));

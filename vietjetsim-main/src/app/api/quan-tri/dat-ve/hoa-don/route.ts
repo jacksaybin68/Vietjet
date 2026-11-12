@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
 import { verifyAdminRequest } from '@/lib/admin-auth';
+import { sendAutomaticPaymentInvoiceEmail } from '@/lib/payment-invoice';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,13 +25,20 @@ export async function POST(request: NextRequest) {
       RETURNING *
     `;
 
-    // If payment is completed, also update booking status
+    // If payment is completed, also update booking status and send invoice email
     if (status === 'completed' || !status) {
       await sql`
         UPDATE bookings 
         SET status = 'confirmed', updated_at = NOW() 
         WHERE id = ${booking_id}
       `;
+
+      await sendAutomaticPaymentInvoiceEmail(booking_id, {
+        paymentMethod: method,
+        customAmount: amount,
+      }).catch((err) => {
+        console.error('Failed to auto-send payment invoice email:', err);
+      });
     }
 
     return NextResponse.json({

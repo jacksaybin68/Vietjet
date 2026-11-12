@@ -143,10 +143,11 @@ export default function MealSelectionDrawer({
           <button
             type="button"
             onClick={() => setActiveLeg('outbound')}
-            className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${activeLeg === 'outbound'
-              ? 'border-primary-dark text-primary-dark'
-              : 'border-transparent text-gray-500 hover:text-gray-800'
-              }`}
+            className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${
+              activeLeg === 'outbound'
+                ? 'border-primary-dark text-primary-dark'
+                : 'border-transparent text-gray-500 hover:text-gray-800'
+            }`}
           >
             Chuyến đi
           </button>
@@ -154,10 +155,11 @@ export default function MealSelectionDrawer({
             <button
               type="button"
               onClick={() => setActiveLeg('inbound')}
-              className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${activeLeg === 'inbound'
-                ? 'border-primary-dark text-primary-dark'
-                : 'border-transparent text-gray-500 hover:text-gray-800'
-                }`}
+              className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${
+                activeLeg === 'inbound'
+                  ? 'border-primary-dark text-primary-dark'
+                  : 'border-transparent text-gray-500 hover:text-gray-800'
+              }`}
             >
               Chuyến về
             </button>
@@ -210,7 +212,11 @@ export default function MealSelectionDrawer({
                     <div>
                       {/* Meal thumbnail container */}
                       <div className="w-full aspect-[4/3] rounded-lg bg-gradient-to-br from-amber-50 to-orange-100 border border-amber-200/80 flex items-center justify-center mb-2 relative overflow-hidden shadow-2xs">
-                        <MealDishIllustration mealId={meal.id} size={64} className="drop-shadow-sm transition-transform hover:scale-105 duration-200" />
+                        <MealDishIllustration
+                          mealId={meal.id}
+                          size={64}
+                          className="drop-shadow-sm transition-transform hover:scale-105 duration-200"
+                        />
                         <div className="absolute top-1 right-1 bg-red-600 text-white text-3xs font-black px-1.5 py-0.5 rounded-full uppercase shadow-xs">
                           Hot
                         </div>
