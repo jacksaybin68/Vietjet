@@ -387,9 +387,22 @@ export default function PaymentClient() {
   useEffect(() => {
     if (!bookingId) return;
     let cancelled = false;
-    apiRequest<{ booking?: { booking_code: string | null } }>(`/api/dat-ve/${bookingId}`)
+    apiRequest<{
+      booking?: {
+        booking_code: string | null;
+        total_price?: number | string;
+      };
+    }>(`/api/dat-ve/${bookingId}`)
       .then((data) => {
-        if (!cancelled) setBookingCode(data.booking?.booking_code ?? null);
+        if (!cancelled && data.booking) {
+          setBookingCode(data.booking.booking_code ?? null);
+          if (data.booking.total_price) {
+            const dbTotal = Number(data.booking.total_price);
+            if (dbTotal > 0) {
+              setBooking((prev) => (prev ? { ...prev, total: dbTotal } : null));
+            }
+          }
+        }
       })
       .catch(() => {
         // A missing PNR must not block payment, and apiRequest already logged it.

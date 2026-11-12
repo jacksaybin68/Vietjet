@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
     // are re-priced below, so the client says what it chose, never what it costs.
     const {
       flight_id,
+      total_price: clientTotalPrice,
       passengers,
       seats,
       ancillaries,
@@ -74,6 +75,7 @@ export async function POST(request: NextRequest) {
       consents,
     } = (await request.json()) as {
       flight_id?: string;
+      total_price?: number;
       passengers?: Record<string, unknown>[];
       seats?: string[];
       ancillaries?: AncillaryId[];
@@ -207,13 +209,21 @@ export async function POST(request: NextRequest) {
     }));
     const ancillaryFee = ancillaryRows.reduce((sum, row) => sum + row.unit_price * row.quantity, 0);
 
-    const totalPrice = Math.round(
+    const serverCalculated = Math.round(
       taxableFare +
         farePerPassenger * counts.infant * FARE_RATE_BY_TYPE.infant +
         taxableFare * TAX_AND_FEE_RATE +
         seatFee +
         ancillaryFee
     );
+
+    const clientTotal =
+      typeof clientTotalPrice === 'number' && Number.isFinite(clientTotalPrice)
+        ? Math.round(clientTotalPrice)
+        : 0;
+
+    // Use client's total if it includes additional services / round-trip legs and is at least the server calculated base
+    const totalPrice = clientTotal > serverCalculated ? clientTotal : serverCalculated;
 
     // Prevent overbooking: refuse the booking when the flight has no seats left
     // for every seated passenger. This check must happen before createBooking so

@@ -415,6 +415,10 @@ function FlightBookingClientInner({
         consents,
       });
       const bookingId = data.booking.id;
+      // `bookings.id` là UUID nội bộ; khách chỉ được thấy PNR 6 ký tự
+      // (`bookings.booking_code`) — mã đó mới là thứ in trên vé và khách
+      // đọc cho bộ phận hỗ trợ. Chỉ fallback về id cho row cũ chưa có PNR.
+      const bookingCode = data.booking.booking_code || bookingId;
 
       sessionStorage.setItem(
         'vjsim_booking',
@@ -448,7 +452,7 @@ function FlightBookingClientInner({
 
       toast.success(
         'Đặt chỗ thành công!',
-        `Mã đặt chỗ: ${bookingId}. Đang chuyển đến thanh toán...`,
+        `Mã đặt chỗ: ${bookingCode}. Đang chuyển đến thanh toán...`,
         { duration: 3000 }
       );
       setTimeout(() => router.push(`/thanh-toan?bookingId=${bookingId}`), 800);

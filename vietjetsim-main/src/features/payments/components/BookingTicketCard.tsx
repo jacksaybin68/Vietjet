@@ -51,15 +51,15 @@ export default function BookingTicketCard({
   return (
     <div className="bg-white rounded-3xl border border-gray-200/90 shadow-md overflow-hidden transition-all duration-200 hover:shadow-lg">
       {/* Header bar: Vietjet brand red */}
-      <div className="bg-gradient-to-r from-[var(--vj-red)] to-rose-600 px-5 py-3.5 text-white flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="h-6 px-2 bg-white rounded-md flex items-center justify-center">
+      <div className="bg-gradient-to-r from-[var(--vj-red)] to-[var(--vj-red-dark)] px-5 py-3.5 text-white flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="h-6 px-2 bg-white rounded-md flex items-center justify-center shrink-0">
             <span className="font-black italic text-xs tracking-tight text-[var(--vj-red)]">
               vietjet<span className="text-[var(--vj-yellow)]">Air</span>
             </span>
           </div>
-          <span className="font-extrabold text-sm tracking-wide">Chuyến bay {flightNo}</span>
-          <span className="text-3xs font-black uppercase px-2 py-0.5 rounded-full bg-white/20 text-white border border-white/30">
+          <span className="font-extrabold text-sm tracking-wide truncate">Chuyến bay {flightNo}</span>
+          <span className="shrink-0 text-3xs font-black uppercase px-2 py-0.5 rounded-full bg-white/20 text-white border border-white/30">
             {fareClass}
           </span>
         </div>
@@ -68,11 +68,17 @@ export default function BookingTicketCard({
           <button
             type="button"
             onClick={copyPnr}
-            className="flex items-center gap-1.5 bg-black/20 hover:bg-black/30 px-2.5 py-1 rounded-lg text-xs font-mono font-bold text-amber-200 transition-colors cursor-pointer border border-white/20"
+            aria-label={`Sao chép mã đặt chỗ ${bookingCode}`}
+            className="flex shrink-0 items-center gap-2 rounded-lg border border-white/25 bg-white/15 px-2.5 py-1.5 text-white transition-colors hover:bg-white/25 active:scale-95 cursor-pointer"
             title="Sao chép mã đặt chỗ"
           >
-            <span>PNR: {bookingCode}</span>
-            <Icon name={copiedPnr ? 'CheckIcon' : 'ClipboardDocumentIcon'} size={13} />
+            <span className="text-3xs font-bold uppercase tracking-wider text-white/70">PNR</span>
+            <span className="font-mono font-black text-sm tracking-widest">{bookingCode}</span>
+            <Icon
+              name={copiedPnr ? 'CheckCircleIcon' : 'ClipboardDocumentIcon'}
+              size={14}
+              className={copiedPnr ? 'text-[var(--vj-yellow)]' : 'text-white/80'}
+            />
           </button>
         )}
       </div>
