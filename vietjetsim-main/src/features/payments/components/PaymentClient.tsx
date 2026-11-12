@@ -835,9 +835,13 @@ export default function PaymentClient() {
 
   const handlePaymentSuccessFromWebhook = useCallback(() => {
     setConfirmed(true);
-    toast.success('Thanh toán thành công!', 'VietQR đã ghi nhận tiền về và tự động kích hoạt vé điện tử.', {
-      duration: 6000,
-    });
+    toast.success(
+      'Thanh toán thành công!',
+      'VietQR đã ghi nhận tiền về và tự động kích hoạt vé điện tử.',
+      {
+        duration: 6000,
+      }
+    );
   }, [toast]);
 
   const handleShareFacebook = useCallback(() => {
@@ -927,7 +931,10 @@ export default function PaymentClient() {
         return;
       }
       if (file.size > 3.5 * 1024 * 1024) {
-        toast.error('File quá lớn', 'Kích thước ảnh tối đa là 3.5MB để đảm bảo tải lên nhanh chóng');
+        toast.error(
+          'File quá lớn',
+          'Kích thước ảnh tối đa là 3.5MB để đảm bảo tải lên nhanh chóng'
+        );
         return;
       }
 
