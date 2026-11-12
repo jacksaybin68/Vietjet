@@ -154,11 +154,19 @@ export function buildVietQrPayload(input: VietQrInput): string {
     throw new Error('VietQR cần BIN ngân hàng và số tài khoản thụ hưởng');
   }
 
+  // Cấu trúc chuẩn VietQR (NAPAS 232 / EMVCo Field 38):
+  // Tag 38 Merchant Account Information:
+  //   - Sub-tag 00: Globally Unique Identifier = A000000727 (NAPAS AID)
+  //   - Sub-tag 01: Beneficiary (Nested TLV):
+  //       * Sub-sub-tag 00: Acquirer ID / BIN ngân hàng (6 chữ số)
+  //       * Sub-sub-tag 01: Consumer / Số tài khoản thụ hưởng
+  //   - Sub-tag 02: Service Code = QRIBFTTA (Chuyển khoản nhanh liên ngân hàng tới TK)
+  const beneficiary = [sub('00', bin), sub('01', accountNumber)].join('');
+
   const merchantAccount = [
     sub('00', VIETQR_GUID),
-    sub('01', bin),
-    sub('02', accountNumber),
-    sub('03', sanitizeVietQrText(input.bankName || 'VIETJET AIR', 30)),
+    sub('01', beneficiary),
+    sub('02', 'QRIBFTTA'),
   ].join('');
 
   const additional = sub('08', sanitizeVietQrText(input.addInfo || '', 99));

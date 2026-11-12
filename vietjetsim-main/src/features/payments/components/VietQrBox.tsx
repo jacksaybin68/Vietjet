@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { apiRequest } from '@/shared/services';
 import { buildVietQrPayload, lookupBankBin } from '@/lib/vietqr';
-import { VnpayLogo } from './PaymentMethodLogos';
+import { VietQrLogo, NapasLogo } from './PaymentMethodLogos';
 
 /**
  * Mã VNPAY-QR / VietQR động cho một đặt chỗ: payload EMVCo do server sinh
@@ -214,7 +214,7 @@ export default function VietQrBox({
     return (
       <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center text-sm text-amber-800">
         <Icon name="InformationCircleIcon" size={24} className="mx-auto mb-2 text-amber-600" />
-        Đang tải thông tin tài khoản thanh toán VNPAY...
+        Đang tải thông tin tài khoản thanh toán VietQR...
       </div>
     );
   }
@@ -230,19 +230,21 @@ export default function VietQrBox({
 
   return (
     <div className="bg-gradient-to-b from-white via-white to-blue-50/20 border-2 border-[#005BAA]/20 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-md">
-      {/* VNPAY Header — Logo VNPAY + Ngân hàng thụ hưởng STK Admin */}
+      {/* VietQR Header — Logo VietQR + Napas 247 + Ngân hàng thụ hưởng STK Admin */}
       {showBankHeader && (
         <div className="p-4 sm:p-5 bg-gradient-to-r from-[#005BAA] via-[#004B8D] to-[#ED1C24] text-white shadow-md">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              {/* White pill with VNPAY Logo */}
-              <div className="h-11 sm:h-12 px-3 bg-white rounded-xl flex items-center justify-center shadow-md shrink-0">
-                <VnpayLogo className="h-6 sm:h-7 w-auto" />
+              {/* White pill with VietQR + NAPAS Logo */}
+              <div className="h-11 sm:h-12 px-3 bg-white rounded-xl flex items-center justify-center gap-2 shadow-md shrink-0">
+                <VietQrLogo className="h-5 sm:h-6 w-auto" />
+                <span className="text-gray-300">|</span>
+                <NapasLogo className="h-4 sm:h-5 w-auto" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-amber-300 font-koho">
-                    CỔNG THANH TOÁN VNPAY-QR
+                    CỔNG THANH TOÁN VIETQR • NAPAS 247
                   </span>
                   <span className="hidden sm:inline-block px-2 py-0.2 text-[9px] font-black uppercase tracking-wide bg-white/20 rounded-full text-white">
                     Tự động 24/7
@@ -263,24 +265,26 @@ export default function VietQrBox({
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 Quét mã tức thì
               </div>
-              <span className="text-3xs text-white/70 mt-1">Hỗ trợ 40+ ngân hàng & Ví VNPAY</span>
+              <span className="text-3xs text-white/70 mt-1">
+                Hỗ trợ 40+ ứng dụng ngân hàng & Ví điện tử
+              </span>
             </div>
           </div>
         </div>
       )}
 
-      {/* QR payload EMVCo / VNPAY-QR render trực tiếp */}
+      {/* QR payload EMVCo / VietQR render trực tiếp */}
       <div className="flex flex-col items-center p-5 sm:p-7">
         <div className="relative group">
           {/* Ambient Glow */}
           <div className="absolute -inset-2 bg-gradient-to-r from-[#005BAA] to-[#ED1C24] rounded-3xl blur-md opacity-25 group-hover:opacity-40 transition duration-300" />
 
           <div className="relative p-4 sm:p-5 bg-white rounded-2xl border-2 border-[#005BAA]/30 shadow-xl flex flex-col items-center">
-            {/* VNPAY-QR Tag */}
-            <div className="flex items-center gap-1.5 mb-2.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200">
-              <VnpayLogo className="h-4 w-auto" />
+            {/* VietQR Tag */}
+            <div className="flex items-center gap-2 mb-2.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200">
+              <VietQrLogo className="h-4 w-auto" />
               <span className="text-3xs font-black text-[#005BAA] uppercase tracking-wider">
-                Mã QR thanh toán VNPAY
+                Mã QR chuẩn VietQR • NAPAS 247
               </span>
             </div>
 
@@ -294,14 +298,14 @@ export default function VietQrBox({
             ) : (
               <div className="w-48 h-48 sm:w-60 sm:h-60 bg-blue-50/50 rounded-2xl animate-pulse flex flex-col items-center justify-center gap-2">
                 <Icon name="QrCodeIcon" size={48} className="text-[#005BAA]" />
-                <span className="text-xs text-gray-500 font-medium">Đang tạo mã QR VNPAY...</span>
+                <span className="text-xs text-gray-500 font-medium">Đang tạo mã VietQR...</span>
               </div>
             )}
 
             {/* Bank name pill */}
             <div className="mt-2 text-center">
               <span className="text-2xs font-bold text-gray-600 bg-gray-100 px-3 py-0.5 rounded-md border border-gray-200">
-                Ngân hàng {data?.bank.name ?? 'VietinBank'} • Chuẩn EMVCo / NAPAS
+                Ngân hàng {data?.bank.name ?? 'VIB'} • Chuẩn VietQR / NAPAS 247
               </span>
             </div>
           </div>

@@ -29,8 +29,9 @@ describe('VietQR EMVCo payload', () => {
 
     expect(payload.startsWith('000201')).toBe(true); // Payload Format Indicator
     expect(payload).toContain(`00${String(VIETQR_GUID.length).padStart(2, '0')}${VIETQR_GUID}`);
-    expect(payload).toContain('0106970422'); // BIN
-    expect(payload).toContain('02100123456789'); // Số tài khoản
+    expect(payload).toContain('0006970422'); // Sub-tag 00: BIN bên trong beneficiary
+    expect(payload).toContain('01100123456789'); // Sub-tag 01: Số tài khoản bên trong beneficiary
+    expect(payload).toContain('0208QRIBFTTA'); // Sub-tag 02: Service Code NAPAS 247
     expect(payload).toContain(`5303${VIETQR_CURRENCY_VND}`); // VND
     expect(payload).toContain('54071500000'); // Số tiền không dấu phân cách
     expect(payload).toContain('5802VN');

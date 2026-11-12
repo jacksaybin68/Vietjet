@@ -1824,7 +1824,11 @@ export default function PaymentClient() {
                       {selectedAdminAccount && (
                         <div className="space-y-4">
                           <label className="block text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-2 font-koho flex items-center gap-1.5">
-                            <Icon name="InformationCircleIcon" size={16} className="text-[#005BAA]" />
+                            <Icon
+                              name="InformationCircleIcon"
+                              size={16}
+                              className="text-[#005BAA]"
+                            />
                             Thông tin thanh toán
                           </label>
 
@@ -1974,7 +1978,7 @@ export default function PaymentClient() {
                       <div className="flex items-center justify-between pb-1">
                         <label className="text-xs font-bold text-gray-800 uppercase tracking-wider font-koho flex items-center gap-1.5">
                           <Icon name="QrCodeIcon" size={16} className="text-[#005BAA]" />
-                          Thông tin thanh toán (Mã QR thanh toán VNPAY)
+                          Thông tin thanh toán (Mã QR thanh toán VietQR)
                         </label>
                         <span className="text-3xs font-extrabold uppercase px-2 py-0.5 rounded-full bg-blue-50 text-[#005BAA] border border-blue-200">
                           Quét mã trực tiếp
