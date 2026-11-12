@@ -558,57 +558,62 @@ function DiscountModal({
     <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[110] flex items-center justify-center p-4 animate-in fade-in duration-300">
       {/* Modal giới hạn theo chiều cao viewport (max-h-90vh): header cố định,
           thân form cuộn riêng — nút "Khởi tạo mã" không bị đẩy khỏi màn hình. */}
-      <div className="w-full max-w-xl flex max-h-[90vh] flex-col bg-slate-900 border border-white/10 rounded-[40px] shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300">
-        <div className="shrink-0 px-8 py-8 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
-          <h3 className="text-lg font-black text-white uppercase tracking-tight">
+      <div className="w-full max-w-xl flex max-h-[90vh] flex-col bg-slate-900 border border-white/10 rounded-3xl shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="shrink-0 px-6 sm:px-8 py-5 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
+          <h3 className="text-base sm:text-lg font-black text-white uppercase tracking-tight">
             {discount ? 'Chỉnh sửa mã' : 'Thêm mã ưu đãi mới'}
           </h3>
           <button
             aria-label="Đóng"
             onClick={onClose}
-            className="w-10 h-10 bg-white/5 hover:bg-white/10 text-slate-400 rounded-2xl flex items-center justify-center transition-all border border-white/5"
+            className="w-9 h-9 bg-white/5 hover:bg-white/10 text-slate-400 rounded-xl flex items-center justify-center transition-all border border-white/5"
           >
-            <Icon name="XMarkIcon" size={20} />
+            <Icon name="XMarkIcon" size={18} />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="min-h-0 flex-1 overflow-y-auto p-8 space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
+        <form onSubmit={handleSubmit} className="min-h-0 flex-1 overflow-y-auto p-6 sm:p-8 space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
             <div className="sm:col-span-2">
-              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">
                 Mã giảm giá
               </label>
               <input
                 required
                 type="text"
                 placeholder="Ví dụ: SUMMERCARE"
-                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-black text-white placeholder-slate-700 uppercase tracking-widest focus:outline-none focus:border-primary/50 transition-all focus:bg-white/10"
+                className="w-full px-4 py-3 sm:py-3.5 bg-white/5 border border-white/10 rounded-xl text-sm font-black text-white placeholder-slate-600 uppercase tracking-widest focus:outline-none focus:border-primary/50 transition-all focus:bg-white/10"
                 value={formData.code}
                 onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
               />
             </div>
             <div>
-              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">
                 Loại ưu đãi
               </label>
-              <select
-                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold text-slate-200 focus:outline-none focus:border-primary/50 appearance-none bg-transparent"
-                value={formData.type}
-                onChange={(e) =>
-                  setFormData({ ...formData, type: e.target.value as 'percentage' | 'fixed' })
-                }
-              >
-                <option value="percentage">Phần trăm (%)</option>
-                <option value="fixed">Cố định (₫)</option>
-              </select>
+              <div className="relative">
+                <select
+                  className="w-full px-4 py-3 sm:py-3.5 pr-10 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-white focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-all appearance-none cursor-pointer [color-scheme:dark]"
+                  value={formData.type}
+                  onChange={(e) =>
+                    setFormData({ ...formData, type: e.target.value as 'percentage' | 'fixed' })
+                  }
+                >
+                  <option value="percentage" className="bg-slate-900 text-white">Phần trăm (%)</option>
+                  <option value="fixed" className="bg-slate-900 text-white">Cố định (₫)</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
+                  <Icon name="ChevronDownIcon" size={16} />
+                </div>
+              </div>
             </div>
             <div>
-              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">
                 Giá trị
               </label>
               <input
                 required
                 type="number"
-                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-black text-white focus:outline-none focus:border-primary/50 focus:bg-white/10"
+                className="w-full px-4 py-3 sm:py-3.5 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-white focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-all"
                 value={formData.value}
                 onChange={(e) => setFormData({ ...formData, value: e.target.value })}
               />
@@ -619,7 +624,7 @@ function DiscountModal({
                       key={pct}
                       type="button"
                       onClick={() => setFormData({ ...formData, value: String(pct) })}
-                      className={`px-3 py-1.5 rounded-xl text-2xs font-black uppercase tracking-widest border transition-all active:scale-95 ${
+                      className={`px-2.5 py-1 rounded-lg text-2xs font-black uppercase tracking-wider border transition-all active:scale-95 ${
                         String(formData.value) === String(pct)
                           ? 'bg-primary text-white border-primary'
                           : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10'
@@ -632,115 +637,124 @@ function DiscountModal({
               )}
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">
                 Phát hành cho đại lý
               </label>
-              <select
-                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold text-slate-200 focus:outline-none focus:border-primary/50 appearance-none bg-transparent"
-                value={formData.agency_id}
-                onChange={(e) => setFormData({ ...formData, agency_id: e.target.value })}
-              >
-                <option value="">— Không gắn đại lý (dùng chung) —</option>
-                {agencies.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name} ({a.code})
-                  </option>
-                ))}
-              </select>
-              <p className="text-2xs font-bold text-slate-600 mt-2 ml-1">
+              <div className="relative">
+                <select
+                  className="w-full px-4 py-3 sm:py-3.5 pr-10 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-white focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-all appearance-none cursor-pointer [color-scheme:dark]"
+                  value={formData.agency_id}
+                  onChange={(e) => setFormData({ ...formData, agency_id: e.target.value })}
+                >
+                  <option value="" className="bg-slate-900 text-white">— Không gắn đại lý (dùng chung) —</option>
+                  {agencies.map((a) => (
+                    <option key={a.id} value={a.id} className="bg-slate-900 text-white">
+                      {a.name} ({a.code})
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
+                  <Icon name="ChevronDownIcon" size={16} />
+                </div>
+              </div>
+              <p className="text-2xs font-medium text-slate-500 mt-1.5 ml-1">
                 Mã gắn đại lý vẫn nhập được ở ô mã giảm giá khi khách đặt vé.
               </p>
             </div>
             <div>
-              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">
                 Đơn hàng từ (vnđ)
               </label>
               <input
                 type="number"
-                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold text-white focus:outline-none focus:border-primary/50 focus:bg-white/10"
+                className="w-full px-4 py-3 sm:py-3.5 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-white focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-all"
                 value={formData.min_booking_amount}
                 onChange={(e) => setFormData({ ...formData, min_booking_amount: e.target.value })}
               />
             </div>
             <div>
-              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">
                 Giảm tối đa (vnđ)
               </label>
               <input
                 disabled={formData.type === 'fixed'}
                 type="number"
-                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold text-white focus:outline-none focus:border-primary/50 disabled:opacity-30 focus:bg-white/10"
+                className="w-full px-4 py-3 sm:py-3.5 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-white focus:outline-none focus:border-primary/50 disabled:opacity-30 focus:bg-white/10 transition-all"
                 value={formData.max_discount_amount}
                 onChange={(e) => setFormData({ ...formData, max_discount_amount: e.target.value })}
               />
             </div>
             <div>
-              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">
                 Ngày bắt đầu
               </label>
-              <input
-                required
-                type="date"
-                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-black text-slate-200 focus:outline-none focus:border-primary/50 appearance-none bg-transparent"
-                value={formData.start_date}
-                onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-              />
+              <div className="relative">
+                <input
+                  required
+                  type="date"
+                  className="w-full px-4 py-3 sm:py-3.5 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-white focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-all [color-scheme:dark] cursor-pointer"
+                  value={formData.start_date}
+                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                />
+              </div>
             </div>
             <div>
-              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">
                 Ngày hết hạn
               </label>
-              <input
-                required
-                type="date"
-                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-black text-slate-200 focus:outline-none focus:border-primary/50 appearance-none bg-transparent"
-                value={formData.end_date}
-                onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-              />
+              <div className="relative">
+                <input
+                  required
+                  type="date"
+                  className="w-full px-4 py-3 sm:py-3.5 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-white focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-all [color-scheme:dark] cursor-pointer"
+                  value={formData.end_date}
+                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                />
+              </div>
             </div>
             <div>
-              <label className="block text-2xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-2xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">
                 Tổng lượt dùng
               </label>
               <input
                 type="number"
                 placeholder="Bỏ trống = ∞"
-                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-black text-white focus:outline-none focus:border-primary/50 placeholder-slate-700 focus:bg-white/10"
+                className="w-full px-4 py-3 sm:py-3.5 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-white focus:outline-none focus:border-primary/50 placeholder-slate-600 focus:bg-white/10 transition-all"
                 value={formData.usage_limit}
                 onChange={(e) => setFormData({ ...formData, usage_limit: e.target.value })}
               />
             </div>
           </div>
 
-          <div className="flex items-center gap-3 p-4 bg-white/5 border border-white/5 rounded-2xl">
+          <div className="flex items-center gap-3 p-3.5 sm:p-4 bg-white/5 border border-white/5 rounded-xl">
             <input
               type="checkbox"
               id="is_active"
               checked={formData.is_active}
               onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-              className="w-5 h-5 accent-emerald-500 rounded border-white/10 bg-transparent cursor-pointer"
+              className="w-4 h-4 accent-emerald-500 rounded border-white/10 bg-transparent cursor-pointer"
             />
             <label
               htmlFor="is_active"
-              className="text-xs font-black text-slate-400 uppercase tracking-widest cursor-pointer"
+              className="text-xs font-bold text-slate-300 uppercase tracking-wider cursor-pointer select-none"
             >
               Kích hoạt mã ngay lập tức
             </label>
           </div>
 
-          <div className="flex gap-4 pt-4">
+          <div className="flex gap-3 sm:gap-4 pt-2">
             <button
               aria-label="Đóng"
               type="button"
               onClick={onClose}
-              className="flex-1 py-5 bg-white/5 hover:bg-white/10 text-white font-black text-2xs uppercase tracking-widest rounded-2xl transition-all border border-white/5"
+              className="flex-1 py-3.5 sm:py-4 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all border border-white/5 active:scale-98"
             >
               Hủy bỏ
             </button>
             <button
               disabled={isSaving}
               type="submit"
-              className="flex-[2] bg-primary hover:bg-primary-dark text-white font-black text-2xs uppercase tracking-widest py-5 rounded-2xl transition-all shadow-lg active:scale-95 shadow-primary/20 disabled:opacity-50"
+              className="flex-[2] bg-primary hover:bg-primary-dark text-white font-black text-xs uppercase tracking-wider py-3.5 sm:py-4 rounded-xl transition-all shadow-lg active:scale-95 shadow-primary/20 disabled:opacity-50"
             >
               {isSaving ? 'Đang khởi tạo...' : discount ? 'Lưu thay đổi' : 'Khởi tạo mã'}
             </button>
