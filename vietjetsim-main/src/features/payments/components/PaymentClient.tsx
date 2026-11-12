@@ -382,6 +382,59 @@ export default function PaymentClient() {
   });
   const [bookingCode, setBookingCode] = useState<string | null>(null);
 
+  // Read booking data from sessionStorage (set by FlightBookingClient)
+  const [booking, setBooking] = useState<{
+    bookingId?: string;
+    contactEmail?: string;
+    contactPhone?: string;
+    flightNo: string;
+    from: string;
+    to: string;
+    fromCity: string;
+    toCity: string;
+    departTime: string;
+    arriveTime: string;
+    date: string;
+    passengers: { name: string; seat: string }[];
+    /** Air fare across all passengers (written by FlightBookingClient). */
+    fareSubtotal: number;
+    tax: number;
+    seatFee: number;
+    ancillaryFee?: number;
+    ancillaries?: AncillaryId[];
+    total: number;
+  } | null>(null);
+
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('vjsim_booking');
+      if (stored) {
+        setBooking(JSON.parse(stored));
+      } else {
+        // Fallback thực tế để đảm bảo trang luôn hiển thị đầy đủ thông tin chuyến bay Vietjet
+        setBooking({
+          flightNo: 'VJ141',
+          from: 'SGN',
+          to: 'HAN',
+          fromCity: 'TP. Hồ Chí Minh',
+          toCity: 'Hà Nội',
+          departTime: '08:30',
+          arriveTime: '10:40',
+          date: new Date().toISOString().split('T')[0],
+          passengers: [{ name: 'NGUYỄN VĂN AN', seat: '12A' }],
+          fareSubtotal: 1250000,
+          tax: 250000,
+          seatFee: 50000,
+          ancillaryFee: 180000,
+          ancillaries: ['baggage_20kg' as AncillaryId],
+          total: 1730000,
+        });
+      }
+    } catch {
+      // Fallback
+    }
+  }, []);
+
   useEffect(() => {
     if (!bookingId) return;
     let cancelled = false;
@@ -469,6 +522,9 @@ export default function PaymentClient() {
   }, [bookingId]);
 
   const bookingCodeLabel = bookingCode ?? '—';
+  const discountAmount = promoApplied && promoData ? promoData.discountAmount : 0;
+  const total = booking ? booking.total - discountAmount : 0;
+
   const [pageLoading, setPageLoading] = useState(true);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -481,6 +537,23 @@ export default function PaymentClient() {
   // trình loyalty — cả client hiển thị lẫn server trừ điểm dùng chung công
   // thức trong `@/lib/skypoint` để số hiển thị và số trừ không lệch nhau.
   const [skypointInfo, setSkypointInfo] = useState<{ points: number; rate: number } | null>(null);
+  const [useCashPlusPoints, setUseCashPlusPoints] = useState(false);
+  const [cashPlusPointsRedeem, setCashPlusPointsRedeem] = useState<number>(0);
+
+  const maxPossiblePointsToRedeem = useMemo(() => {
+    if (!skypointInfo) return 0;
+    const pointsForFullTotal = skypointPointsForAmount(total, skypointInfo.rate);
+    return Math.min(skypointInfo.points, pointsForFullTotal);
+  }, [skypointInfo, total]);
+
+  const cashPlusPointsDiscountVnd = useMemo(() => {
+    if (!useCashPlusPoints || !skypointInfo || cashPlusPointsRedeem <= 0) return 0;
+    return skypointValueOfPoints(cashPlusPointsRedeem, skypointInfo.rate);
+  }, [useCashPlusPoints, skypointInfo, cashPlusPointsRedeem]);
+
+  const payableTotal = useMemo(() => {
+    return Math.max(0, total - cashPlusPointsDiscountVnd);
+  }, [total, cashPlusPointsDiscountVnd]);
 
   useEffect(() => {
     apiRequest<{
@@ -518,62 +591,6 @@ export default function PaymentClient() {
     const timer = setTimeout(() => setPageLoading(false), 50);
     return () => clearTimeout(timer);
   }, []);
-
-  // Read booking data from sessionStorage (set by FlightBookingClient)
-  const [booking, setBooking] = useState<{
-    bookingId?: string;
-    contactEmail?: string;
-    contactPhone?: string;
-    flightNo: string;
-    from: string;
-    to: string;
-    fromCity: string;
-    toCity: string;
-    departTime: string;
-    arriveTime: string;
-    date: string;
-    passengers: { name: string; seat: string }[];
-    /** Air fare across all passengers (written by FlightBookingClient). */
-    fareSubtotal: number;
-    tax: number;
-    seatFee: number;
-    ancillaryFee?: number;
-    ancillaries?: AncillaryId[];
-    total: number;
-  } | null>(null);
-
-  useEffect(() => {
-    try {
-      const stored = sessionStorage.getItem('vjsim_booking');
-      if (stored) {
-        setBooking(JSON.parse(stored));
-      } else {
-        // Fallback thực tế để đảm bảo trang luôn hiển thị đầy đủ thông tin chuyến bay Vietjet
-        setBooking({
-          flightNo: 'VJ141',
-          from: 'SGN',
-          to: 'HAN',
-          fromCity: 'TP. Hồ Chí Minh',
-          toCity: 'Hà Nội',
-          departTime: '08:30',
-          arriveTime: '10:40',
-          date: new Date().toISOString().split('T')[0],
-          passengers: [{ name: 'NGUYỄN VĂN AN', seat: '12A' }],
-          fareSubtotal: 1250000,
-          tax: 250000,
-          seatFee: 50000,
-          ancillaryFee: 180000,
-          ancillaries: ['baggage_20kg' as AncillaryId],
-          total: 1730000,
-        });
-      }
-    } catch {
-      // Fallback
-    }
-  }, []);
-
-  const discountAmount = promoApplied && promoData ? promoData.discountAmount : 0;
-  const total = booking ? booking.total - discountAmount : 0;
 
   // Trạng thái Bay trước trả sau Movi
   const [moviTenure, setMoviTenure] = useState<number>(3); // 1, 3, 6, 12 tháng
@@ -745,9 +762,9 @@ export default function PaymentClient() {
 
     if (paymentMethod === 'skypoint') {
       const pointsNeeded = skypointInfo ? skypointPointsForAmount(total, skypointInfo.rate) : null;
-      if (pointsNeeded === null || skypointInfo!.points < pointsNeeded) {
+      if (!useCashPlusPoints && (pointsNeeded === null || skypointInfo!.points < pointsNeeded)) {
         setPaymentError(
-          `Số dư SkyPoint không đủ (cần ${pointsNeeded?.toLocaleString('vi-VN') ?? '—'} điểm). Hãy đổi thêm điểm hoặc chọn phương thức khác.`
+          `Số dư SkyPoint không đủ (cần ${pointsNeeded?.toLocaleString('vi-VN') ?? '—'} điểm). Bạn có thể bật tính năng "Thanh toán kết hợp Cash + Points" hoặc chọn phương thức khác.`
         );
         setShowErrorModal(true);
         return;
@@ -764,14 +781,16 @@ export default function PaymentClient() {
       await createPayment({
         booking_id: booking.bookingId,
         method: paymentMethod,
-        amount: total,
+        amount: payableTotal,
         discount_code_id: promoData?.id ?? undefined,
         discount_amount: discountAmount,
         discount_code: promoData?.code,
         bank_account_id: selectedAdminAccount?.id,
         transfer_note: transferNoteInput.trim() || transferNote,
-        transfer_amount: transferAmountInput.trim() || String(total),
+        transfer_amount: transferAmountInput.trim() || String(payableTotal),
         receipt_image: receiptImage || undefined,
+        points_to_redeem:
+          useCashPlusPoints && cashPlusPointsRedeem > 0 ? cashPlusPointsRedeem : undefined,
       });
 
       setLoading(false);
@@ -2244,38 +2263,29 @@ export default function PaymentClient() {
                     </div>
                   )}
 
-                  {/* SkyPoint / Ví SkyJoy — thanh toán bằng điểm tích lũy. */}
+                  {/* SkyPoint / Ví SkyJoy — thanh toán bằng điểm tích lũy & Cash + Points */}
                   {paymentMethod === 'skypoint' && (
-                    <div
-                      className={`bg-[var(--background)] border rounded-2xl p-6 flex flex-col items-center gap-4 transition-all ${
-                        skypointInfo &&
-                        skypointInfo.points >= skypointPointsForAmount(total, skypointInfo.rate)
-                          ? 'border-vjbrown/40 bg-vjyellow/10'
-                          : 'border-[var(--border)] '
-                      }`}
-                    >
-                      <div className="w-16 h-16 bg-vjyellow rounded-full flex items-center justify-center shadow-md">
-                        <Icon
-                          name="StarIcon"
-                          size={30}
-                          className="text-yellow-800"
-                          variant="solid"
-                        />
-                      </div>
-                      <div className="text-center">
-                        <h4 className="font-bold text-[var(--foreground)] mb-1">
-                          Thanh toán bằng SkyPoint
-                        </h4>
-                        <p className="text-sm text-[var(--foreground-muted)]">
-                          Dùng điểm SkyJoy tích lũy để trả cho đặt chỗ này
-                        </p>
+                    <div className="bg-[var(--background)] border border-[var(--border)] rounded-2xl p-6 flex flex-col gap-5 transition-all shadow-xs">
+                      <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-amber-500 rounded-2xl flex items-center justify-center shadow-md text-white flex-shrink-0">
+                          <Icon name="StarIcon" size={28} variant="solid" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-[var(--foreground)] text-base">
+                            Ví Điểm Thưởng SkyJoy Rewards
+                          </h4>
+                          <p className="text-xs text-[var(--foreground-muted)]">
+                            Tích hợp cơ chế thanh toán kết hợp Điểm thưởng + Tiền mặt (Cash +
+                            Points)
+                          </p>
+                        </div>
                       </div>
 
-                      <div className="w-full border-t border-[var(--border)] pt-4 mt-2 space-y-2 text-sm">
+                      <div className="w-full bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 space-y-2 text-sm">
                         <div className="flex justify-between items-center">
                           <span className="text-[var(--foreground-muted)]">Số dư SkyPoint:</span>
                           <span
-                            className={`font-black ${skypointInfo === null ? 'animate-pulse text-[var(--foreground-subtle)]' : 'text-vjbrown'}`}
+                            className={`font-black ${skypointInfo === null ? 'animate-pulse text-[var(--foreground-subtle)]' : 'text-amber-600'}`}
                           >
                             {skypointInfo !== null
                               ? `${skypointInfo.points.toLocaleString('vi-VN')} điểm (≈ ${skypointValueOfPoints(skypointInfo.points, skypointInfo.rate).toLocaleString('vi-VN')}₫)`
@@ -2284,7 +2294,7 @@ export default function PaymentClient() {
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-[var(--foreground-muted)]">
-                            Cần cho giao dịch này:
+                            Cần cho 100% hóa đơn này:
                           </span>
                           <span className="font-black text-[var(--foreground)]">
                             {skypointInfo
@@ -2294,15 +2304,115 @@ export default function PaymentClient() {
                         </div>
                       </div>
 
-                      {skypointInfo &&
-                        skypointInfo.points < skypointPointsForAmount(total, skypointInfo.rate) && (
-                          <Link
-                            href="/tai-khoan"
-                            className="text-xs text-primary font-bold hover:underline flex items-center gap-1 mt-1"
+                      {/* Cash + Points Switch & Slider */}
+                      <div className="border border-[var(--border)] rounded-xl p-4 bg-[var(--surface-1)] space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="font-bold text-sm text-[var(--foreground)]">
+                              Thanh toán kết hợp (Cash + Points)
+                            </span>
+                            <p className="text-xs text-[var(--foreground-muted)]">
+                              Dùng một phần điểm để giảm trừ tiền vé
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const nextVal = !useCashPlusPoints;
+                              setUseCashPlusPoints(nextVal);
+                              if (nextVal && skypointInfo) {
+                                setCashPlusPointsRedeem(maxPossiblePointsToRedeem);
+                              } else {
+                                setCashPlusPointsRedeem(0);
+                              }
+                            }}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                              useCashPlusPoints ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-700'
+                            }`}
                           >
-                            <Icon name="ArrowTopRightOnSquareIcon" size={14} />
-                            Xem cách tích lũy thêm SkyPoint
-                          </Link>
+                            <span
+                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                useCashPlusPoints ? 'translate-x-6' : 'translate-x-1'
+                              }`}
+                            />
+                          </button>
+                        </div>
+
+                        {useCashPlusPoints && skypointInfo && (
+                          <div className="pt-3 border-t border-[var(--border)] space-y-3">
+                            <div className="flex justify-between text-xs font-semibold text-[var(--foreground)]">
+                              <span>Số điểm muốn đổi:</span>
+                              <span className="text-primary font-bold">
+                                {cashPlusPointsRedeem.toLocaleString('vi-VN')} SkyPoint
+                              </span>
+                            </div>
+
+                            <input
+                              type="range"
+                              min={0}
+                              max={maxPossiblePointsToRedeem}
+                              step={100}
+                              value={cashPlusPointsRedeem}
+                              onChange={(e) => setCashPlusPointsRedeem(Number(e.target.value))}
+                              className="w-full accent-primary cursor-pointer"
+                            />
+
+                            <div className="grid grid-cols-4 gap-2">
+                              {[0.25, 0.5, 0.75, 1.0].map((pct) => {
+                                const pts = Math.round(maxPossiblePointsToRedeem * pct);
+                                return (
+                                  <button
+                                    type="button"
+                                    key={pct}
+                                    onClick={() => setCashPlusPointsRedeem(pts)}
+                                    className="py-1 px-2 rounded-lg text-xs font-semibold bg-[var(--surface-2)] border border-[var(--border)] hover:border-primary transition-colors text-[var(--foreground)]"
+                                  >
+                                    {pct * 100}%
+                                  </button>
+                                );
+                              })}
+                            </div>
+
+                            <div className="bg-[var(--surface-2)] rounded-lg p-3 text-xs space-y-1.5 border border-[var(--border)]">
+                              <div className="flex justify-between">
+                                <span className="text-[var(--foreground-muted)]">
+                                  Giảm trừ từ điểm thưởng:
+                                </span>
+                                <span className="font-bold text-emerald-600">
+                                  -{cashPlusPointsDiscountVnd.toLocaleString('vi-VN')}₫
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-sm pt-1 border-t border-[var(--border)]">
+                                <span className="font-bold text-[var(--foreground)]">
+                                  Tiền mặt cần thanh toán:
+                                </span>
+                                <span className="font-black text-primary">
+                                  {payableTotal.toLocaleString('vi-VN')}₫
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {skypointInfo &&
+                        !useCashPlusPoints &&
+                        skypointInfo.points < skypointPointsForAmount(total, skypointInfo.rate) && (
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-amber-600 font-medium">
+                              Số dư điểm chưa đủ để thanh toán toàn bộ đơn hàng
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setUseCashPlusPoints(true);
+                                setCashPlusPointsRedeem(maxPossiblePointsToRedeem);
+                              }}
+                              className="text-primary font-bold hover:underline"
+                            >
+                              Dùng Cash + Points
+                            </button>
+                          </div>
                         )}
                     </div>
                   )}

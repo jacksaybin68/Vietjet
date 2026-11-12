@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { confirmVietQrPayment } from '@/lib/db';
+import { confirmVietQrPayment, awardBookingLoyaltyPoints } from '@/lib/db';
 import { sendAutomaticPaymentInvoiceEmail } from '@/lib/payment-invoice';
 import { getApiErrorMessage } from '@/shared/services';
 import { rateLimit } from '@/lib/rate-limit';
@@ -136,6 +136,15 @@ export async function POST(request: NextRequest) {
     }
 
     if (!result.alreadyPaid) {
+      // Tự động tích lũy điểm thưởng SkyJoy theo hệ số hạng thẻ
+      void awardBookingLoyaltyPoints(
+        result.booking.id,
+        result.booking.total_price,
+        result.booking.user_id
+      ).catch((error) => {
+        console.error('VietQR webhook loyalty points award failed:', error);
+      });
+
       // Best-effort invoice/ticket email
       void sendAutomaticPaymentInvoiceEmail(result.booking.id, {
         paymentMethod: 'vietqr',

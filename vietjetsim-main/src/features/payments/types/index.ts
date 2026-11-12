@@ -20,6 +20,8 @@ export interface CreatePaymentInput {
   transfer_amount?: string;
   /** Proof of payment screenshot/receipt image uploaded by customer for admin reconciliation */
   receipt_image?: string;
+  /** SkyPoint points to redeem for Cash + Points hybrid payment */
+  points_to_redeem?: number;
 }
 
 export interface Pagination {

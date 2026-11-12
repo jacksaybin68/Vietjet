@@ -94,6 +94,7 @@ vi.mock('@/lib/db', async () => {
     })),
     getUserLoyaltyWithProgram: vi.fn().mockResolvedValue(null),
     spendLoyaltyPoints: vi.fn().mockResolvedValue(true),
+    awardBookingLoyaltyPoints: vi.fn().mockResolvedValue({ pointsEarned: 100, newTier: 'Red' }),
   };
 });
 

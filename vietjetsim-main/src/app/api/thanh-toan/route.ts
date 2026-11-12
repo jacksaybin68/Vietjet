@@ -6,6 +6,7 @@ import {
   getUserLoyaltyWithProgram,
   spendLoyaltyPoints,
   refundLoyaltyPoints,
+  awardBookingLoyaltyPoints,
   findUserById,
   getDiscountCodeById,
   getDiscountCodeByCode,
@@ -17,7 +18,7 @@ import { renderTransferNote } from '@/lib/transfer-note';
 import { validateBankTransferInput } from '@/lib/bank-transfer';
 import { sendPaymentInstructionEmail } from '@/lib/mail';
 import { sendAutomaticPaymentInvoiceEmail } from '@/lib/payment-invoice';
-import { skypointPointsForAmount } from '@/lib/skypoint';
+import { skypointPointsForAmount, skypointValueOfPoints } from '@/lib/skypoint';
 import { rateLimit } from '@/lib/rate-limit';
 
 /** Methods the payment page may submit. Anything else is rejected up front. */
@@ -28,6 +29,7 @@ const ALLOWED_METHODS = new Set([
   'wallet',
   'e_wallet',
   'skypoint',
+  'cash_plus_points',
   'movi',
 ]);
 
@@ -50,6 +52,8 @@ export async function POST(request: NextRequest) {
       transfer_note,
       transfer_amount,
       receipt_image,
+      points_to_redeem,
+      pointsToRedeem,
     } = body;
 
     // Validation
@@ -199,7 +203,7 @@ export async function POST(request: NextRequest) {
     // display only — trusting it let a client pay one đồng (or ten times the
     // fare) and have the booking marked confirmed. A discount legitimately
     // lowers the charge, so the expected amount is the discounted total.
-    const discountedTotal = Math.max(0, booking.total_price - validatedDiscountAmount);
+    let discountedTotal = Math.max(0, booking.total_price - validatedDiscountAmount);
     if (amount !== discountedTotal) {
       return NextResponse.json(
         {
@@ -261,8 +265,59 @@ export async function POST(request: NextRequest) {
     }
 
     let loyaltyPointsSpent = 0;
+    const requestedPointsToRedeem = Number(points_to_redeem || pointsToRedeem || 0);
 
-    if (method === 'skypoint') {
+    // ─── Cơ chế Cash + Points hoặc Thanh toán 100% bằng SkyPoint ─────────
+    if (requestedPointsToRedeem > 0) {
+      if (!user) {
+        return NextResponse.json(
+          {
+            error: 'Unauthorized',
+            message: 'Vui lòng đăng nhập tài khoản SkyJoy để sử dụng điểm thưởng Cash + Points.',
+          },
+          { status: 401 }
+        );
+      }
+
+      const loyaltyData = await getUserLoyaltyWithProgram(user.userId);
+      if (!loyaltyData) {
+        return NextResponse.json(
+          { error: 'Loyalty unavailable', message: 'Chương trình SkyJoy chưa khả dụng' },
+          { status: 503 }
+        );
+      }
+
+      if (loyaltyData.loyalty.available_points < requestedPointsToRedeem) {
+        return NextResponse.json(
+          {
+            error: 'Insufficient SkyPoint',
+            message: `Số dư điểm không đủ (khả dụng: ${loyaltyData.loyalty.available_points.toLocaleString('vi-VN')} điểm)`,
+          },
+          { status: 400 }
+        );
+      }
+
+      const pointsDiscountVnd = skypointValueOfPoints(
+        requestedPointsToRedeem,
+        loyaltyData.program.points_per_1000_vnd
+      );
+
+      try {
+        await spendLoyaltyPoints(
+          user.userId,
+          requestedPointsToRedeem,
+          `Thanh toán Cash + Points cho đặt chỗ ${booking.booking_code ?? booking_id}`
+        );
+        loyaltyPointsSpent = requestedPointsToRedeem;
+        discountedTotal = Math.max(0, discountedTotal - pointsDiscountVnd);
+      } catch (loyaltyError) {
+        const message = loyaltyError instanceof Error ? loyaltyError.message : '';
+        return NextResponse.json(
+          { error: 'Loyalty spend failed', message: message || 'Không thể trừ điểm SkyJoy' },
+          { status: 400 }
+        );
+      }
+    } else if (method === 'skypoint') {
       if (!user) {
         return NextResponse.json(
           {
@@ -362,6 +417,17 @@ export async function POST(request: NextRequest) {
     }
 
     if (initialStatus === 'completed') {
+      // Tự động tích lũy điểm thưởng SkyJoy theo hệ số hạng thẻ: Red (x1.0), Silver (x1.2), Gold (x1.5), Diamond (x2.0)
+      if (discountedTotal > 0 || loyaltyPointsSpent > 0) {
+        void awardBookingLoyaltyPoints(
+          booking.id,
+          discountedTotal > 0 ? discountedTotal : booking.total_price,
+          user?.userId || booking.user_id
+        ).catch((err) => {
+          console.error('Failed to auto-award loyalty points for booking:', err);
+        });
+      }
+
       // Tự động gửi email hoá đơn thanh toán & vé điện tử cho khách hàng
       await sendAutomaticPaymentInvoiceEmail(booking.id, {
         paymentMethod: method,

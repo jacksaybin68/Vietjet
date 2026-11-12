@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthRequest } from '@/lib/auth';
 import { isAdminRole } from '@/lib/rbac';
 import { getConversationMessages, sendChatMessage, userOwnsConversation } from '@/lib/db';
+import { getVietjetAiPolicyResponse } from '@/lib/chatbot-ai';
 
 // ─── GET: Get messages for a conversation ────────────────────────────────────
 

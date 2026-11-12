@@ -16,6 +16,18 @@ export function calculateEarnedPoints(
   return Math.floor((amountVnd / 1000) * pointsPerThousand);
 }
 
+export function getTierMultiplier(tier: string): number {
+  const multipliers: Record<string, number> = {
+    Red: 1.0,
+    Silver: 1.2,
+    Gold: 1.5,
+    Diamond: 2.0,
+    Bronze: 1.0,
+    Platinum: 2.0,
+  };
+  return multipliers[tier] ?? 1.0;
+}
+
 /**
  * Determine the user's current tier based on lifetime points.
  * Returns the highest qualifying tier.
@@ -23,7 +35,7 @@ export function calculateEarnedPoints(
 export function determineTier(lifetimePoints: number, tiers: LoyaltyTierRecord[]): string {
   const sorted = [...tiers].sort((a, b) => b.min_lifetime_points - a.min_lifetime_points);
   const current = sorted.find((t) => lifetimePoints >= t.min_lifetime_points);
-  return current?.name || 'Bronze';
+  return current?.name || 'Red';
 }
 
 /**
@@ -77,10 +89,13 @@ export function shouldExpirePoints(expiresAt: string | null, _expiryMonths: numb
  */
 export function getTierColor(tier: string): { bg: string; text: string; border: string } {
   const colors: Record<string, { bg: string; text: string; border: string }> = {
-    Bronze: { bg: '#CD7F32', text: '#FFFFFF', border: '#A0522D' },
-    Silver: { bg: '#C0C0C0', text: '#1A2948', border: '#A9A9A9' },
+    Red: { bg: '#E31837', text: '#FFFFFF', border: '#B91C1C' },
+    Silver: { bg: '#E2E8F0', text: '#1E293B', border: '#94A3B8' },
     Gold: { bg: '#FFDD00', text: '#1A2948', border: '#DAA520' },
-    Platinum: { bg: '#E5E4E2', text: '#1A2948', border: '#B0C4DE' },
+    Diamond: { bg: '#06B6D4', text: '#FFFFFF', border: '#0891B2' },
+    // Backwards compatibility for legacy accounts
+    Bronze: { bg: '#CD7F32', text: '#FFFFFF', border: '#A0522D' },
+    Platinum: { bg: '#06B6D4', text: '#FFFFFF', border: '#0891B2' },
   };
-  return colors[tier] || { bg: '#6B7280', text: '#FFFFFF', border: '#4B5563' };
+  return colors[tier] || colors.Red;
 }

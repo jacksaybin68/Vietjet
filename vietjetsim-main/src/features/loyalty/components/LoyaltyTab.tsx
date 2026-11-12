@@ -239,7 +239,7 @@ export default function LoyaltyTab() {
     fetchData();
   }, [fetchData]);
 
-  const tierColors = loyalty ? getTierColor(loyalty.tier) : getTierColor('Bronze');
+  const tierColors = loyalty ? getTierColor(loyalty.tier) : getTierColor('Red');
 
   const currentTierIndex = tiers.findIndex((t) => t.name === loyalty?.tier);
   const nextTier =
@@ -299,7 +299,7 @@ export default function LoyaltyTab() {
               className="px-4 py-1.5 rounded-full text-sm font-bold font-[KoHo,sans-serif]"
               style={{ background: 'rgba(255,255,255,0.3)', color: '#fff' }}
             >
-              {loyalty?.tier || 'Bronze'}
+              {loyalty?.tier || 'Red'}
             </div>
             <span className="text-sm text-white/70 font-[Be Vietnam Pro,sans-serif]">
               Thành viên từ {loyalty?.enrolledAt ? formatDate(loyalty.enrolledAt) : 'N/A'}
@@ -393,6 +393,9 @@ export default function LoyaltyTab() {
                   style={{ color: isCurrentTier ? '#EC2029' : '#1A2948' }}
                 >
                   {tier.name}
+                  <span className="text-xs ml-1 font-bold text-amber-600">
+                    (x{tier.pointsMultiplier || 1})
+                  </span>
                 </div>
                 <div className="text-xs text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
                   {formatPoints(tier.minLifetimePoints)} điểm

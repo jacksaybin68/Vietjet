@@ -3227,7 +3227,7 @@ export async function getOrEnrollLoyalty(userId: string): Promise<UserLoyaltyRec
 
   const result = await sql`
     INSERT INTO user_loyalty (user_id, program_id, tier)
-    VALUES (${userId}, ${program.id}, 'Bronze')
+    VALUES (${userId}, ${program.id}, 'Red')
     RETURNING *
   `;
   return (result as UserLoyaltyRecord[])[0];
@@ -3378,16 +3378,86 @@ export async function awardLoyaltyPoints(
     RETURNING id, user_loyalty_id, points, type, description, created_at
   `;
 
+  const newLifetime = Number(loyalty.lifetime_points || 0) + points;
+  let newTier = loyalty.tier || 'Red';
+  if (newLifetime >= 150000) {
+    newTier = 'Diamond';
+  } else if (newLifetime >= 50000) {
+    newTier = 'Gold';
+  } else if (newLifetime >= 10000) {
+    newTier = 'Silver';
+  } else {
+    newTier = 'Red';
+  }
+
   await sql`
     UPDATE user_loyalty
     SET available_points = available_points + ${points},
         total_points = total_points + ${points},
         lifetime_points = lifetime_points + ${points},
+        tier = ${newTier},
+        tier_qualified_at = CASE WHEN tier <> ${newTier} THEN NOW() ELSE tier_qualified_at END,
         updated_at = NOW()
     WHERE id = ${loyalty.id}
   `;
 
   return (result as LoyaltyTransactionRecord[])[0];
+}
+
+/**
+ * Tích lũy điểm thưởng tự động cho vé máy bay đã thanh toán thành công
+ * theo hệ số hạng thẻ: Red (x1.0), Silver (x1.2), Gold (x1.5), Diamond (x2.0).
+ */
+export async function awardBookingLoyaltyPoints(
+  bookingId: string,
+  amountVnd: number,
+  userId?: string | null
+): Promise<{ pointsEarned: number; newTier: string } | null> {
+  let targetUserId = userId;
+  let bookingCode = bookingId;
+
+  if (!targetUserId) {
+    const booking = asFirstRow<BookingRecord>(
+      await sql`SELECT * FROM bookings WHERE id = ${bookingId} LIMIT 1`
+    );
+    if (!booking) return null;
+    bookingCode = booking.booking_code || booking.id;
+    targetUserId = booking.user_id;
+  } else {
+    const booking = asFirstRow<BookingRecord>(
+      await sql`SELECT booking_code FROM bookings WHERE id = ${bookingId} LIMIT 1`
+    );
+    if (booking?.booking_code) bookingCode = booking.booking_code;
+  }
+
+  if (!targetUserId) return null;
+
+  const loyaltyData = await getUserLoyaltyWithProgram(targetUserId);
+  if (!loyaltyData) return null;
+
+  const tierMultipliers: Record<string, number> = {
+    Red: 1.0,
+    Silver: 1.2,
+    Gold: 1.5,
+    Diamond: 2.0,
+    Bronze: 1.0,
+    Platinum: 2.0,
+  };
+
+  const currentTier = loyaltyData.loyalty.tier || 'Red';
+  const multiplier = tierMultipliers[currentTier] ?? 1.0;
+  const rate = Number(loyaltyData.program.points_per_1000_vnd) || 1.0;
+  const pointsEarned = Math.max(1, Math.floor((amountVnd / 1000) * rate * multiplier));
+
+  await awardLoyaltyPoints(
+    targetUserId,
+    pointsEarned,
+    `Tích lũy điểm chuyến bay ${bookingCode} (Hạng ${currentTier} x${multiplier})`,
+    'earn'
+  );
+
+  const updatedLoyalty = await getOrEnrollLoyalty(targetUserId);
+  return { pointsEarned, newTier: updatedLoyalty.tier };
 }
 
 // ─── Check-in Queries ──────────────────────────────────────────────────────────
