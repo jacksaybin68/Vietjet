@@ -127,7 +127,7 @@ export default function BookingSummaryPanel({
   return (
     <>
       {/* Desktop Panel */}
-      <aside className="hidden lg:flex lg:w-[340px] flex-col rounded-t-lg overflow-hidden shadow-sm border border-gray-200 bg-white h-fit sticky top-16">
+      <aside className="hidden lg:flex lg:w-[340px] flex-col rounded-t-vj overflow-hidden shadow-sm border border-gray-200 bg-white h-fit sticky top-16">
         {/* Panel header — solid brand red */}
         <div className="bg-primary px-4 py-3 text-white text-center shadow-sm">
           <h2 className="text-sm font-black uppercase tracking-wider font-koho">

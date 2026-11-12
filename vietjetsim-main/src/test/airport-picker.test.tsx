@@ -299,7 +299,7 @@ describe('AirportPicker', () => {
     );
     const label = container.querySelector('label')!;
     expect(label.className).not.toContain('rounded');
-    expect(label.className).not.toContain('border-[#e4e4e4]');
+    expect(label.className).not.toContain('border-vj-border');
     expect(container.firstElementChild).toHaveClass('sm:col-span-2');
   });
 });

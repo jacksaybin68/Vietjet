@@ -264,7 +264,7 @@ export default function ProfileTab({ user }: { user: User }) {
   const inputErrorClass = 'border-[var(--primary)] bg-red-50/10';
   const labelClass =
     'block text-sm font-medium mb-1.5 font-[KoHo,sans-serif] text-[var(--foreground)]';
-  const errorTextClass = 'text-xs text-[var(--primary)] mt-1 font-[Be Vietnam Pro,sans-serif]';
+  const errorTextClass = 'text-xs text-[var(--primary)] mt-1 font-[Be_Vietnam_Pro,sans-serif]';
 
   return (
     <div className="space-y-6">
@@ -275,7 +275,7 @@ export default function ProfileTab({ user }: { user: User }) {
         <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[var(--foreground)]">
           Hồ sơ cá nhân
         </h2>
-        <p className="text-sm text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
+        <p className="text-sm text-[var(--foreground-muted)] mt-1 font-[Be_Vietnam_Pro,sans-serif]">
           Quản lý thông tin tài khoản và mật khẩu của bạn
         </p>
       </div>
@@ -323,7 +323,7 @@ export default function ProfileTab({ user }: { user: User }) {
             <h3 className="text-lg font-bold font-[KoHo,sans-serif] text-[var(--foreground)]">
               {user.fullName || 'Người dùng'}
             </h3>
-            <p className="text-sm text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
+            <p className="text-sm text-[var(--foreground-muted)] mt-1 font-[Be_Vietnam_Pro,sans-serif]">
               {user.email}
             </p>
             <span
@@ -337,7 +337,7 @@ export default function ProfileTab({ user }: { user: User }) {
             </span>
 
             {user.createdAt && (
-              <p className="text-xs text-[var(--foreground-subtle)] mt-4 font-[Be Vietnam Pro,sans-serif]">
+              <p className="text-xs text-[var(--foreground-subtle)] mt-4 font-[Be_Vietnam_Pro,sans-serif]">
                 Tham gia từ{' '}
                 {new Date(user.createdAt).toLocaleDateString('vi-VN', {
                   month: 'long',
@@ -387,7 +387,7 @@ export default function ProfileTab({ user }: { user: User }) {
                   className={`${inputBaseClass} ${inputDisabledClass}`}
                   placeholder="email@example.com"
                 />
-                <p className="text-xs text-[var(--foreground-subtle)] mt-1 font-[Be Vietnam Pro,sans-serif]">
+                <p className="text-xs text-[var(--foreground-subtle)] mt-1 font-[Be_Vietnam_Pro,sans-serif]">
                   Email là tên đăng nhập, không thay đổi được.
                 </p>
               </div>

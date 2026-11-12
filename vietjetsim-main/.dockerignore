@@ -8,3 +8,19 @@ npm-debug.log*
 .DS_Store
 coverage
 
+# Production database dumps. `database-backup/neon_dump_latest.sql` contains
+# real customer rows (names, phone numbers, addresses, password hashes). It must
+# never enter the build context: Next.js standalone output tracing copies
+# referenced files into `.next/standalone/`, and the Dockerfile copies that
+# directory into the runner image.
+database-backup
+
+# Local database files and dumps
+*.sql
+*.dump
+pgdata
+
+# ...but the migration files themselves must stay in the context: they are
+# applied by `scripts/test-migrations.cjs` and by the deploy job.
+!migrations/*.sql
+

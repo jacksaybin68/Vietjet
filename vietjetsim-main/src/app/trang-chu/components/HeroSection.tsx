@@ -34,6 +34,30 @@ export const HERO_BANNERS = [
     title: 'Trải nghiệm phong cách Người dẫn đầu',
     focusClass: 'object-cover object-center',
   },
+  {
+    id: 'banner-artwork-beach',
+    image: '/images/hero/hero-artwork-beach-sunset.jpg',
+    title: 'Kỳ nghỉ cùng Vietjet Air - Vietjet Air',
+    focusClass: 'object-cover object-center',
+  },
+  {
+    id: 'banner-bali',
+    image: '/images/hero/hero-bali-terraces.jpg',
+    title: 'Bali trong tầm tay - Vietjet Air',
+    focusClass: 'object-cover object-center',
+  },
+  {
+    id: 'banner-bangkok',
+    image: '/images/hero/hero-bangkok-temple.jpg',
+    title: 'Khám phá Bangkok - Vietjet Air',
+    focusClass: 'object-cover object-center',
+  },
+  {
+    id: 'banner-hongkong',
+    image: '/images/hero/hero-hongkong-skyline.jpg',
+    title: 'Hong Kong đêm rực rỡ - Vietjet Air',
+    focusClass: 'object-cover object-center',
+  },
 ];
 
 export default function HeroSection() {
@@ -48,52 +72,39 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section className="relative w-full overflow-hidden bg-sky-100 lg:-mt-[128px]">
+    // Site thật (đo 13/11/2026): hero cao 950px ở desktop, đặt ngay dưới
+    // thanh thông báo 50px. Dải đặt vé nằm ĐÈ lên mép dưới hero — không có
+    // sóng SVG ở giữa. Trên mobile hero cao 380px và dải đặt vé trôi xuống
+    // bình thường (absolute chỉ từ `lg` trở lên).
+    <section className="relative w-full overflow-hidden bg-sky-100">
       <h1 className="sr-only">Vietjet Air - Thông báo quan trọng Nhà ga T3 Jakarta</h1>
-      {/* Background Hero Banner Slider */}
-      <div className="absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
-        {HERO_BANNERS.map((banner, idx) => (
-          <div
-            key={banner.id}
-            className={`absolute inset-0 transition-opacity duration-700 ${
-              idx === currentBannerIndex ? 'opacity-100 z-0' : 'opacity-0 pointer-events-none'
-            }`}
-          >
-            <img
-              src={banner.image}
-              alt={banner.title}
-              className={`w-full h-full object-cover object-top ${banner.focusClass}`}
-            />
-          </div>
-        ))}
-      </div>
 
-      {/* Nội dung Hero: 2 cột desktop (Trái: Artwork trống / Phải: Form đặt vé) */}
-      <div className="relative z-10 mx-auto w-full max-w-[1320px] px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 lg:pt-[152px] pb-6">
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_356px] gap-8 items-start">
-          {/* Cột trái: Vùng quảng cáo (ảnh banner đã in sẵn chữ và artwork) */}
-          <div className="hidden lg:block min-h-[460px] pointer-events-none" />
-
-          {/* Cột phải: Form đặt vé Vietjet */}
-          <div className="relative w-full max-w-[356px] mx-auto lg:mr-0 lg:ml-auto">
-            <HeroBookingWidget />
-
-            {/* Mascot Amy + Bong bóng lời chào "Xin chào!" theo ảnh tham chiếu */}
-            <div className="hidden xl:flex items-end absolute -bottom-10 -right-28 pointer-events-none z-20">
-              <div className="mb-8 mr-1 rounded-xl bg-white/95 px-3 py-1 shadow-md border border-gray-100/80">
-                <span className="text-xs2 font-black text-[var(--foreground)]">Xin chào!</span>
-              </div>
+      {/* Ảnh nền hero — slider các banner. Khung có chiều cao cụ thể vì ảnh
+          nằm absolute; nếu không section sẽ collapse về 0px. */}
+      <div className="relative h-[380px] sm:h-[560px] lg:h-[950px]">
+        <div className="absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+          {HERO_BANNERS.map((banner, idx) => (
+            <div
+              key={banner.id}
+              className={`absolute inset-0 transition-opacity duration-700 ${
+                idx === currentBannerIndex ? 'opacity-100 z-0' : 'opacity-0 pointer-events-none'
+              }`}
+            >
               <img
-                src="/images/hero/amy-mascot.png"
-                alt="Mascot Amy"
-                className="h-28 w-auto object-contain drop-shadow-md"
+                src={banner.image}
+                alt={banner.title}
+                className={`w-full h-full object-cover object-top ${banner.focusClass}`}
               />
             </div>
-          </div>
+          ))}
         </div>
 
-        {/* Chấm điều hướng slider căn giữa phía dưới banner */}
-        <div className="relative z-20 flex justify-center items-center gap-2 mt-8 mb-2">
+        {/* Chấm điều hướng slider — site thật đặt ngay phía trên dải đặt vé
+            (Y=686 ở mobile, chấm căn giữa banner). Canh theo container 1200px. */}
+        <div
+          data-testid="hero-slider-dots"
+          className="absolute inset-x-0 bottom-[56px] z-20 mx-auto flex max-w-[1200px] items-center justify-center gap-2 px-4 sm:px-6 lg:bottom-[330px] lg:px-0"
+        >
           {HERO_BANNERS.map((_, idx) => (
             <button
               key={idx}
@@ -110,20 +121,10 @@ export default function HeroSection() {
         </div>
       </div>
 
-      {/* Dải mây chân trời chuyển tiếp mềm mại vào phần dưới */}
-      <div className="relative z-10 w-full overflow-hidden leading-none -mb-1">
-        <svg
-          viewBox="0 0 1440 98"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="none"
-          className="w-full h-12 sm:h-16 lg:h-20"
-        >
-          <path
-            d="M0,45 C120,85 240,10 360,40 C480,70 600,15 720,42 C840,68 960,18 1080,45 C1200,72 1320,20 1440,40 L1440,98 L0,98 Z"
-            fill="var(--background, #ffffff)"
-          />
-        </svg>
+      {/* Dải đặt vé — 1200px, nằm ở mép dưới hero (desktop) và trôi xuống
+          ngay sau banner (mobile). */}
+      <div className="relative z-20 -mt-[40px] sm:-mt-[90px] lg:absolute lg:inset-x-0 lg:bottom-0 lg:mt-0">
+        <HeroBookingWidget />
       </div>
     </section>
   );

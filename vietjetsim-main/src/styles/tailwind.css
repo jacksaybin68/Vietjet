@@ -3,6 +3,41 @@
  * tailwind.config.js. Sửa comment này phải đi kèm sửa thật ở layout.tsx. */
 @tailwind base;
 
+/* ─── Font thương hiệu ───────────────────────────────────────────────────
+ * Site thật vietjetair.com dùng HAI họ:
+ *   - KoHo (300–700) cho toàn bộ văn bản, đội 641 phần tử.
+ *   - JambonoMedium cho nút / CTA / nhãn in đậm — đội 16 phần tử, gồm
+ *     nút "TÌM CHUYẾN BAY" 16px/500. KoHo không phải font nút.
+ * `JambonoBlack` và `JambonoLight` cũng được khai báo vì site thật khai
+ * báo cả ba; chúng được dùng cho các biến thể sau này.
+ *
+ * Font tải từ `/fonts/*.ttf` (bản gốc của hãng), không nạp từ CDN để
+ * tránh phụ thuộc mạng và giữ bản dựng offline ổn định.
+ */
+@font-face {
+  font-family: 'JambonoMedium';
+  src: url('/fonts/Jambono-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JambonoBlack';
+  src: url('/fonts/Jambono-Black.ttf') format('truetype');
+  font-weight: 700 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JambonoLight';
+  src: url('/fonts/Jambono-Light.ttf') format('truetype');
+  font-weight: 300 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /*
  * Hide the native calendar glyph inside hero date fields. The form already
  * shows its own MdCalendarMonth at the edge, and the two icons side by side
@@ -85,6 +120,11 @@ input[type='date'].vj-no-native-icon::-moz-calendar-picker-indicator {
   --vj-wine-dark: #5e0000;
   --vj-wine-deep: #560000;
   --vj-wine-hover: #680000;
+  /* RGB channels: Tailwind's `/N` modifier only compiles against
+     `[rgb(var(--x-rgb))]/N`; `[var(--x)]/N` is silently dropped. */
+  --vj-wine-rgb: 120 0 0;
+  --vj-wine-dark-rgb: 94 0 0;
+  --vj-wine-deep-rgb: 86 0 0;
   --brand-wine: #780000;
   --brand-wine-dark: #5e0000;
   --brand-cta: #ffdd00;
@@ -108,14 +148,141 @@ input[type='date'].vj-no-native-icon::-moz-calendar-picker-indicator {
   --vj-text: #333333;
   --vj-text-gray: #6c6c6c;
   --vj-text-muted: #939393;
-  --vj-font: 'KoHo', 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
-  --vj-font-heading: 'Be Vietnam Pro', 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  /* Site thật dùng hai họ font:
+   *   - KoHo (300–700) cho toàn bộ văn bản.
+   *   - JambonoMedium cho nút / CTA / nhãn in đậm (đo được trên DOM sống:
+   *     nút "TÌM CHUYẾN BAY" dùng JambonoMedium 16px/500).
+   * Không có `Be Vietnam Pro` trong bundle production của vietjetair.com. */
+  --vj-font: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  --vj-font-heading: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  --vj-font-cta: 'JambonoMedium', 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  --vj-font-display: 'JambonoBlack', 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  --vj-font-light: 'JambonoLight', 'KoHo', ui-sans-serif, system-ui, sans-serif;
   /* Gradient endpoints shared by the header menu bar and CTA buttons. */
   --vj-grad-red-from: #d91a21;
   --vj-grad-red-to: #6f0000;
   --vj-grad-gold-from: #f9a51a;
   --vj-grad-gold-mid: #fbb612;
   --vj-grad-gold-to: #ffdd00;
+
+  /* ─── Token đo trực tiếp từ vietjetair.com (13/11/2026) ───
+   * Giá trị lấy từ getComputedStyle của DOM sống + đếm tần suất hex trong
+   * main.6165d6fe.chunk.js. Hồ sơ đầy đủ:
+   * docs/qa/VIETJET_THAM_SO_GIAO_DIEN_2026-11-13.md */
+  /* Lớp tối phủ lên ảnh hero — header desktop và mobile đều dùng đúng
+     lớp này thay vì thanh đỏ. */
+  --vj-scrim-from: rgba(0, 0, 0, 0.5);
+  --vj-scrim-to: rgba(0, 0, 0, 0.094);
+  /* Hệ vàng nhiều sắc độ: chữ trên nền vàng, viền khung giá, trạng thái. */
+  --vj-gold-ink: #a17f21;
+  --vj-gold-ink-2: #c99b14;
+  --vj-gold-ink-3: #e9b128;
+  --vj-gold-ink-4: #b78817;
+  --vj-gold-ink-5: #875017;
+  --vj-gold-pale-1: #fdf34f;
+  --vj-gold-pale-2: #f9ea8a;
+  --vj-gold-pale-3: #f8e98a;
+  --vj-gold-pale-4: #ecd56a;
+  --vj-gold-pale-5: #ebd673;
+  --vj-gold-pale-6: #e1c34f;
+  --vj-gold-pale-7: #d8b439;
+  /* Vàng active của dải dịch vụ trên header. */
+  --vj-nav-active: #f7c61a;
+  /* ─── Token đo từ DOM sống của vietjetair.com (13/11/2026, 1440×900) ───
+   * Nhóm dưới đây phục vụ trang chủ: màu chữ, nền card, pill, footer.
+   * Mỗi sắc độ có một kênh `-rgb` đi kèm vì Tailwind 3.4 chỉ resolve được
+   * modifier `/N` khi biến nền là `rgb(var(--x-rgb))`; `[var(--x)]/N` biến mất
+   * âm thầm. */
+  /* Chữ tiêu đề #1F272D (không phải #333 của body). */
+  --vj-ink: #1f272d;
+  --vj-ink-rgb: 31 39 45;
+  /* Chữ phụ / nhãn form: #6B7580. */
+  --vj-muted: #6b7580;
+  --vj-muted-rgb: 107 117 128;
+  /* Placeholder trong ô nhập: #9BA3AC. */
+  --vj-field-placeholder: #9ba3ac;
+  --vj-field-placeholder-rgb: 155 163 172;
+  /* Xanh trời của footer: #0894A3. */
+  --vj-teal: #0894a3;
+  --vj-teal-rgb: 8 148 163;
+  /* Nền card ưu đãi: #F3EFEC. */
+  --vj-card-beige: #f3efec;
+  --vj-card-beige-rgb: 243 239 236;
+  /* Nền pill (Một chiều / Khứ hồi / Nhiều chặng): #F3F1F1. */
+  --vj-pill: #f3f1f1;
+  --vj-pill-rgb: 243 241 241;
+  /* Nền card điểm đến: #DCE0F2. */
+  --vj-sky-card: #dce0f2;
+  --vj-sky-card-rgb: 220 224 242;
+  /* Nền thẻ dịch vụ nhỏ: rgba(161,117,117,0.07). */
+  --vj-service-tint-rgb: 161 117 117;
+  /* Nền panel đặt vé: rgba(255,255,255,0.9). */
+  --vj-hero-panel: rgba(255, 255, 255, 0.9);
+  /* Nút "Đăng nhập" trên header: gradient #FFEB63 → #F5D200, chữ #E31E24. */
+  --vj-login-grad-from: #ffeb63;
+  --vj-login-grad-to: #f5d200;
+  --vj-login-ink: #e31e24;
+  --vj-login-ink-rgb: 227 30 36;
+
+  /* ─── Token dọn nợ hex (ratchet scripts/css-debt.cjs) ───
+   * Các giá trị dưới đây từng nằm rải rác dưới dạng `bg-[#rrggbb]` trong
+   * class Tailwind. Chúng được gom về đây để có một nguồn sắc độ duy nhất và
+   * để đo nợ CSS đếm được. */
+  /* Hệ navy của panel thanh toán / tra cứu / trang lỗi. */
+  --vj-navy-light: #2a3f6f;
+  --vj-navy-mid: #1e325a;
+  --vj-navy-deep: #14203a;
+  --vj-navy-deepest: #0f1e3a;
+  /* Xanh ngân hàng (VietQR, chọn phương thức thanh toán). */
+  --vj-bank-blue: #005baa;
+  --vj-bank-blue-dark: #004b8d;
+  --vj-bank-blue-rgb: 0 91 170;
+  /* Xanh lá của nút thanh toán và trạng thái thành công. */
+  --vj-pay-green: #38b000;
+  --vj-pay-green-rgb: 56 176 0;
+  --vj-pay-green-light: #44bd04;
+  --vj-pay-green-dark: #2b9300;
+  --vj-pay-green-hover: #329e00;
+  --vj-pay-green-bright: #70e000;
+  --vj-green-2: #54b848;
+  /* Trung tính: chữ phụ, placeholder, viền. */
+  --vj-text-soft: #8c8c8c;
+  --vj-text-strong: #4a4a4a;
+  --vj-placeholder: #b0b0b0;
+  /* Vàng ấm của nút phụ và chip. */
+  --vj-amber: #ffa500;
+  --vj-amber-dark: #d97706;
+  --vj-gold-deep: #ffd100;
+  --vj-gold-ink-6: #e6bf00;
+  /* Nền bề mặt phụ. */
+  --vj-surface-warm: #fff9e6;
+  --vj-surface-cream: #fffdf3;
+  --vj-surface-rose: #fff3f3;
+  --vj-surface-cool: #f8f9fb;
+  /* Nền xanh nhạt (khung thông báo, header VietQR). */
+  --vj-blue-tint-2: #dff0fe;
+  --vj-blue-tint-3: #edf6fd;
+  --vj-blue-tint-4: #d6ebf9;
+  --vj-blue-tint-5: #b4ddf5;
+  --vj-blue-tint-6: #e8f1fc;
+  /* Nền hồng nhạt (nền trang chi tiết vé). */
+  --vj-rose-tint-1: #f1e6ee;
+  --vj-rose-tint-2: #fbebee;
+  /* Sắc độ bổ sung của nhóm trên (trang lỗi, editor, viền mảnh). */
+  --vj-border-light: #eeeeee;
+  --vj-line: #e0e0e0;
+  --vj-surface-dark: #2a2d2e;
+  --vj-surface-darker: #444444;
+  --vj-text-dim: #666666;
+  --vj-text-faint: #999999;
+  --vj-text-soft-strong: #555555;
+  --vj-amber-deep: #f59e0b;
+  --vj-amber-hover: #e69500;
+  /* Bo góc chuẩn của site thật (`border-radius:10px!important`). */
+  --vj-radius: 10px;
+  /* Container nội dung chuẩn: 1200px trên viewport 1440px. */
+  --vj-container: 1200px;
+  --vj-container-wide: 1320px;
 }
 
 /* Dark mode tokens removed — Phase 1 mục 2 (2026-10-19).
@@ -151,10 +318,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
   color: var(--foreground);
   background: var(--background);
-  font-size: 15px;
-  line-height: 1.6;
+  /* Site thật: 14px / 500 / 20.02px line-height (≈1.43), letter-spacing
+     normal. Không dùng 15px/1.6 như bản thiết kế cũ. */
+  font-size: 14px;
+  line-height: 20.02px;
   font-weight: 500;
-  letter-spacing: 0.01em;
+  letter-spacing: normal;
 }
 
 /* .dark body rule removed — Phase 1 mục 2 (2026-10-19). Brand is light-only. */
@@ -166,9 +335,10 @@ h4,
 h5,
 h6 {
   font-family: var(--vj-font-heading);
-  font-weight: 800;
-  letter-spacing: -0.025em;
-  line-height: 1.12;
+  /* Site thật dùng KoHo 700 cho mọi heading; không có letter-spacing âm. */
+  font-weight: 700;
+  letter-spacing: normal;
+  line-height: 1.43;
 }
 
 :where(a, button, input, select, textarea) {
@@ -198,7 +368,8 @@ h6 {
 
 .vj-card {
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  /* Bo góc chuẩn site thật: 10px. */
+  border-radius: 10px;
   background: var(--background);
   box-shadow: 0 8px 24px rgba(26, 41, 72, 0.08);
   transition:
@@ -233,39 +404,63 @@ h6 {
   background-image: linear-gradient(180deg, var(--vj-grad-red-from) 34.8%, #ab0303 182.34%);
 }
 
-/* Public page hero — reuses the brand red sweep instead of per-page inline gradients. */
+/* Public page hero — brand-red sweep matching vietjetair.com's measured
+   gradient `linear-gradient(20.12deg, rgba(217,26,33,0.8) 19.6%,
+   rgba(111,0,0,0.8) 93.86%)`. */
 .vj-page-hero {
   background-image: linear-gradient(
     20.12deg,
-    var(--vj-grad-red-from) 19.6%,
-    var(--vj-grad-red-to) 93.86%
+    rgba(217, 26, 33, 0.8) 19.6%,
+    rgba(111, 0, 0, 0.8) 93.86%
   );
 }
 
-/* Gold pill CTA — the primary "Tìm chuyến bay" action across the site. */
-.vj-cta {
-  background-image: linear-gradient(
-    60.29deg,
-    var(--vj-grad-gold-from) -4.93%,
-    var(--vj-grad-gold-mid) 18.27%,
-    var(--vj-grad-gold-to) 71.59%
-  );
-  color: #333333;
-  border-radius: 0.5rem;
-  font-weight: 800;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
+/* Gold pill CTA — the primary "Tìm chuyến bay" action across the site.
+ * Gradient, radius and shadow match the button measured on vietjetair.com:
+ * linear-gradient(26.73deg, …), 10px radius, MUI elevation shadow. */
+@layer components {
+  .vj-cta {
+    background-image: linear-gradient(
+      26.73deg,
+      var(--vj-grad-gold-from) 13.7%,
+      var(--vj-grad-gold-mid) 29.8%,
+      var(--vj-grad-gold-to) 66.81%
+    );
+    color: #000000;
+    border-radius: 10px;
+    /* Site thật: nút MUI dùng JambonoMedium 16px/500, KHÔNG phải KoHo. */
+    font-family: var(--vj-font-cta);
+    font-weight: 500;
+    text-transform: uppercase;
+    min-height: 44px;
+    /* Ba tầng bóng MUI đo được trên nút "TÌM CHUYẾN BAY" của site thật. */
+    box-shadow:
+      rgba(0, 0, 0, 0.2) 0px 3px 1px -2px,
+      rgba(0, 0, 0, 0.14) 0px 2px 2px 0px,
+      rgba(0, 0, 0, 0.12) 0px 1px 5px 0px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-.vj-cta:hover {
-  filter: brightness(1.05);
-}
+  /* Nút "Tìm chuyến bay" trong hero: 39px cao, chữ uppercase — đúng số đo
+   * trên vietjetair.com (MUI button padding 6px 16px, font 16px/500). */
+  .vj-cta--hero {
+    min-height: 39px;
+    text-transform: uppercase;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 6px 16px;
+  }
 
-.vj-cta:disabled {
-  filter: grayscale(0.5);
-  opacity: 0.6;
+  .vj-cta:hover {
+    filter: brightness(1.05);
+  }
+
+  .vj-cta:disabled {
+    filter: grayscale(0.5);
+    opacity: 0.6;
+  }
 }
 
 /* Compact variant of the gold CTA for the small lookup forms
@@ -276,6 +471,218 @@ h6 {
 .vj-cta--compact {
   min-height: 34px;
   border-radius: 10px;
+}
+
+/* Nút "Tìm chuyến bay" của dải đặt vé trên trang chủ: 174×44, bo góc 10px,
+   chữ 16px/500 màu #333 — đo được trên vietjetair.com (MUI button). */
+.vj-cta--search {
+  min-height: 44px;
+  width: 174px;
+  max-width: 174px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: none;
+  padding: 6px 15px;
+}
+
+/* Tiêu đề cấp 2 của các khối nội dung trang chủ: 56px / 76px / 600.
+   Site thật KHÔNG dùng font-black, không italic, không letter-spacing âm. */
+.vj-headline {
+  font-size: 56px;
+  line-height: 76px;
+  font-weight: 600;
+  letter-spacing: normal;
+  color: var(--vj-ink);
+}
+
+/* Tiêu đề phụ dưới tiêu đề 56px: 18px / 400. */
+.vj-headline-sub {
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 400;
+  color: var(--vj-ink);
+}
+
+/* Khối nội dung rộng 1400px (margin 20px mỗi bên trên viewport 1440px). */
+.vj-section-wide {
+  width: 100%;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+/* Dải dịch vụ nhỏ (SkyJoy / Swift 247 / E-Sim / E-Visa): 338×136, bo góc
+   20px, nền rgba(161,117,117,0.07), padding 20px. */
+.vj-service-card {
+  background-color: rgb(var(--vj-service-tint-rgb) / 0.07);
+  border-radius: 20px;
+  padding: 20px;
+  min-height: 136px;
+}
+
+/* Nhóm pill chọn hành trình: nền #F3F1F1, bo tròn 999px, item active trắng
+   + bóng nhẹ — đo được trên vietjetair.com. */
+.vj-pill-track {
+  background-color: var(--vj-pill);
+  border-radius: 999px;
+  padding: 3px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.vj-pill-item {
+  border-radius: 999px;
+  padding: 0 12.5px;
+  font-size: 14px;
+  line-height: 17.25px;
+  font-weight: 500;
+  color: #5e6974;
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.vj-pill-item[data-active='true'] {
+  background-color: #ffffff;
+  color: #1f2a33;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(31, 42, 51, 0.12);
+}
+
+/* Panel đặt vé (site thật, đo 13/11/2026):
+   - Thân panel: gradient 30.3deg, bo góc 0 0 5px 5px, cao 410px, rộng 380px.
+   - Hàng tab phía trên: cao 52px, bo góc 5px 5px 0 0, mỗi tab gradient riêng. */
+.vj-booking-panel {
+  background-image: linear-gradient(
+    30.3deg,
+    rgba(217, 26, 33, 0.73) 33.94%,
+    #6f0000 163.23%
+  );
+  border-radius: 0 0 5px 5px;
+}
+
+/* Thanh tab dịch vụ phía trên panel: cao 52px, bo góc 5px 5px 0 0.
+   Rộng theo số đo site thật: 201px / 103px / 76px (tổng 380px). */
+.vj-booking-tabs {
+  display: flex;
+  align-items: stretch;
+  height: 52px;
+}
+
+.vj-booking-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px;
+  font-size: 14px;
+  line-height: 24.5px;
+  font-weight: 500;
+  color: #ffffff;
+  background-image: linear-gradient(
+    20.12deg,
+    rgba(217, 26, 33, 0.8) 19.6%,
+    rgba(111, 0, 0, 0.8) 93.86%
+  );
+  border: 0;
+  border-radius: 5px 5px 0 0;
+  cursor: pointer;
+  transition: filter 160ms ease;
+}
+
+/* Tab vàng (Đổi thưởng & Mua Skypoint) — chữ đen trên nền vàng. */
+.vj-booking-tab[data-variant='gold'] {
+  background-image: linear-gradient(135deg, #ffdd00 39.58%, #e9a020 100%);
+  color: #000000;
+}
+
+.vj-booking-tab:hover {
+  filter: brightness(1.06);
+}
+
+/* Ô nhập trong dải đặt vé: cao 48px, bo góc 10px, nền trắng.
+   Nhãn 12px/600 #6B7580, giá trị 17px/600 #333 (đo được trên site thật). */
+.vj-field-label {
+  display: block;
+  font-size: 12px;
+  line-height: 12px;
+  font-weight: 600;
+  color: var(--vj-muted);
+  margin-bottom: 2px;
+}
+
+.vj-field-value {
+  display: block;
+  font-size: 17px;
+  line-height: 17.9px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+/* Nút "Đăng nhập" trên header trong suốt: gradient vàng, chữ đỏ, viền trắng. */
+.vj-login-pill {
+  background-image: linear-gradient(var(--vj-login-grad-from) 0%, var(--vj-login-grad-to) 100%);
+  color: var(--vj-login-ink);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  padding: 0 25px;
+  min-height: 36px;
+  font-size: 15px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: filter 160ms ease;
+}
+
+.vj-login-pill:hover {
+  filter: brightness(1.04);
+}
+
+/* Cụm nút tròn trong suốt trên header: nền trắng 16%, viền trắng 45%. */
+.vj-utility-pill {
+  background-color: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+}
+
+/* Nền footer: xanh trời #0894A3 + gradient trắng ở mép trên. */
+.vj-footer-sky {
+  background-color: var(--vj-teal);
+  background-image: linear-gradient(
+    rgb(255, 255, 255) 0%,
+    rgba(255, 255, 255, 0) 240px
+  );
+}
+
+/* Thẻ trắng trong footer: 1328px, bo góc 40px, padding 50px 48px 40px. */
+.vj-footer-card {
+  background-color: #ffffff;
+  border-radius: 40px;
+  padding: 50px 48px 40px;
+}
+
+/* Cột tiêu đề trong footer: 18px/700 màu đỏ thương hiệu. */
+.vj-footer-heading {
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.vj-footer-link {
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--foreground);
+  transition: color 160ms ease;
+}
+
+.vj-footer-link:hover {
+  color: var(--primary-dark);
 }
 
 /* Solid brand-red pill button — the primary submit action on the auth pages.
@@ -614,6 +1021,56 @@ h6 {
   animation: fadeInScale 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* ─── Animation dung chung (vi du: dropdown, modal, toast) ───
+   `animate-fadeIn` / `animate-fade-in` / `animate-scaleUp` duoc nhac toi
+   o nhieu component nhung chua co rule nao -> UI "mo" nhung khong chay
+   animation. Ba utility duoi day thay cho mot loat rule trung lap. */
+.animate-fadeIn {
+  animation: fadeIn 0.25s ease-out both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out both;
+}
+
+.animate-scaleUp {
+  animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Drawer phụ (hành lý, suất ăn, bảo hiểm, thú cưng…) trượt vào từ phải. */
+.animate-slideInRight {
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @keyframes progressBar {
   from {
     width: 0%;
@@ -865,6 +1322,8 @@ h6 {
     transform 0.15s ease;
   font-variant-numeric: tabular-nums;
   line-height: 1;
+  /* Bo góc chuẩn site thật: 10px. */
+  border-radius: 10px;
 }
 .seat:not(:disabled):hover {
   transform: translateY(-1px);
@@ -985,8 +1444,9 @@ h6 {
   white-space: nowrap;
 }
 
-/* Booking-lookup field — the 47px, 7px-radius input on
-   `/chuyen-bay-cua-toi`. The label rests at 17px inside the field and lifts to
+/* Booking-lookup field — the 47px, 10px-radius input on
+   `/chuyen-bay-cua-toi`. Bo góc 10px là chuẩn site thật (không phải 7px).
+   The label rests at 17px inside the field and lifts to
    a 12px caption on focus or once the field has a value. Kept as CSS (like
    `.form-field-float`) because the sibling selector `:not(:placeholder-shown)`
    is what keeps a filled field's label lifted without JS state. */
@@ -998,10 +1458,10 @@ h6 {
   width: 100%;
   height: 47px;
   border: 1px solid #d9dee5;
-  border-radius: 7px;
+  border-radius: 10px;
   background: #ffffff;
   padding: 18px 22px 4px;
-  font-family: 'KoHo', 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
   font-size: 17px;
   line-height: 1.2;
   color: #333333;
@@ -1054,7 +1514,7 @@ h6 {
     border-color 0.2s ease,
     box-shadow 0.2s ease,
     background-color 0.2s ease;
-  font-family: 'KoHo', 'Be Vietnam Pro', sans-serif;
+  font-family: 'KoHo', sans-serif;
   font-weight: 500;
   color: #333333;
 }
@@ -1195,11 +1655,12 @@ select option {
   justify-content: center;
   gap: 6px;
   font-weight: 700;
-  border-radius: 6px;
+  /* Bo góc chuẩn site thật: 10px (main.css khai báo `border-radius:10px!important`). */
+  border-radius: 10px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
-  font-family: 'KoHo', 'Be Vietnam Pro', sans-serif;
-  letter-spacing: 0.02em;
+  font-family: 'KoHo', sans-serif;
+  letter-spacing: normal;
   white-space: nowrap;
 }
 
@@ -1225,8 +1686,9 @@ select option {
     rgb(251, 182, 18) 29.8%,
     rgb(255, 221, 0) 66.81%
   );
-  color: #1a2948;
-  font-weight: 800;
+  color: #000000;
+  font-weight: 500;
+  text-transform: uppercase;
   box-shadow: 0 2px 8px rgba(255, 212, 0, 0.32);
 }
 .vj-btn-accent:hover {
@@ -1358,7 +1820,7 @@ select option {
   padding: 3px 14px 3px 10px;
   clip-path: polygon(0 0, 100% 0, 94% 100%, 0 100%);
   display: inline-block;
-  font-family: 'Be Vietnam Pro', 'KoHo', sans-serif;
+  font-family: 'KoHo', sans-serif;
   letter-spacing: 0.01em;
   font-size: 11px;
   text-transform: uppercase;
@@ -1420,7 +1882,7 @@ select option {
   padding: 4px 16px 4px 10px;
   clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
   z-index: 10;
-  font-family: 'Be Vietnam Pro', 'KoHo', sans-serif;
+  font-family: 'KoHo', sans-serif;
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
@@ -1442,7 +1904,7 @@ select option {
 /* Sidebar link */
 .sidebar-link {
   transition: all 0.15s ease;
-  font-family: 'KoHo', 'Be Vietnam Pro', sans-serif;
+  font-family: 'KoHo', sans-serif;
   font-weight: 600;
 }
 .sidebar-link.active {
@@ -1639,7 +2101,7 @@ select option {
     rgba(0, 0, 0, 0.18) 0px 3px 6px -2px,
     rgba(0, 0, 0, 0.1) 0px 2px 4px 0px;
   border-radius: 8px;
-  font-family: 'KoHo', 'Be Vietnam Pro', sans-serif;
+  font-family: 'KoHo', sans-serif;
   letter-spacing: 0.02em;
 }
 .vj-btn-letsgo:hover {
@@ -1662,7 +2124,7 @@ select option {
   border-radius: 4px;
   background: linear-gradient(90deg, var(--vj-grad-gold-from) 0%, var(--vj-grad-gold-to) 100%);
   color: var(--vj-text);
-  font-family: 'KoHo', 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
   font-weight: 700;
   font-size: 16px;
 }
@@ -1715,14 +2177,14 @@ select option {
 
 /* VietJet Typography helpers */
 .vj-heading {
-  font-family: 'Be Vietnam Pro', 'KoHo', sans-serif;
+  font-family: 'KoHo', sans-serif;
   font-weight: 900;
   color: #333333;
   letter-spacing: -0.01em;
 }
 
 .vj-subheading {
-  font-family: 'KoHo', 'Be Vietnam Pro', sans-serif;
+  font-family: 'KoHo', sans-serif;
   font-weight: 700;
   color: #333333;
 }
@@ -1752,14 +2214,14 @@ select option {
 
 /* Price text — VietJet red bold */
 .vj-price {
-  font-family: 'Be Vietnam Pro', 'KoHo', sans-serif;
+  font-family: 'KoHo', sans-serif;
   font-weight: 900;
   color: var(--primary);
 }
 
 /* VietJet italic brand text */
 .vj-brand-italic {
-  font-family: 'Be Vietnam Pro', 'KoHo', sans-serif;
+  font-family: 'KoHo', sans-serif;
   font-style: italic;
   font-weight: 900;
   color: var(--primary);
@@ -1768,6 +2230,16 @@ select option {
 /* ─── Font utility classes (replace inline fontFamily) ─── */
 .font-koho {
   font-family: 'KoHo', sans-serif;
+}
+/* Jambono — họ font nút của site thật (JambonoMedium 16px/500). */
+.font-jambono {
+  font-family: 'JambonoMedium', 'KoHo', sans-serif;
+}
+.font-jambono-black {
+  font-family: 'JambonoBlack', 'KoHo', sans-serif;
+}
+.font-jambono-light {
+  font-family: 'JambonoLight', 'KoHo', sans-serif;
 }
 .font-koho-medium {
   font-family: 'KoHo', sans-serif;
@@ -1782,19 +2254,19 @@ select option {
   font-weight: 600;
 }
 .font-heading-900 {
-  font-family: 'Be Vietnam Pro', 'KoHo', sans-serif;
+  font-family: 'KoHo', sans-serif;
   font-weight: 900;
 }
 .font-heading-800 {
-  font-family: 'Be Vietnam Pro', sans-serif;
+  font-family: 'KoHo', sans-serif;
   font-weight: 800;
 }
 .font-heading-700 {
-  font-family: 'Be Vietnam Pro', sans-serif;
+  font-family: 'KoHo', sans-serif;
   font-weight: 700;
 }
 .font-body {
-  font-family: 'KoHo', 'Be Vietnam Pro', sans-serif;
+  font-family: 'KoHo', sans-serif;
 }
 .font-body-vj {
   font-family: 'KoHo', sans-serif;

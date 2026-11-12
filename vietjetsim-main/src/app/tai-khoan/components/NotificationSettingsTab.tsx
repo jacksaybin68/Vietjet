@@ -113,7 +113,7 @@ export default function NotificationSettingsTab() {
             <Icon name="BellIcon" className="w-5 h-5" style={{ color: 'var(--primary)' }} />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-[#1A2948]">Cài đặt thông báo</h2>
+            <h2 className="text-lg font-bold text-vj-navy">Cài đặt thông báo</h2>
             <p className="text-sm text-[var(--foreground-muted)]">
               Tuỳ chỉnh loại thông báo và phương thức nhận
             </p>
@@ -127,7 +127,7 @@ export default function NotificationSettingsTab() {
         style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
       >
         <div className="px-6 py-4 border-b border-[var(--border)]">
-          <h3 className="text-base font-bold text-[#1A2948]">Loại thông báo</h3>
+          <h3 className="text-base font-bold text-vj-navy">Loại thông báo</h3>
           <p className="text-sm text-[var(--foreground-muted)] mt-0.5">
             Chọn những loại thông báo bạn muốn nhận
           </p>
@@ -150,7 +150,7 @@ export default function NotificationSettingsTab() {
                 </div>
                 <div>
                   <p
-                    className={`text-sm font-semibold ${alert.enabled ? 'text-[#1A2948]' : 'text-[var(--foreground-subtle)]'}`}
+                    className={`text-sm font-semibold ${alert.enabled ? 'text-vj-navy' : 'text-[var(--foreground-subtle)]'}`}
                   >
                     {alert.label}
                   </p>
@@ -180,7 +180,7 @@ export default function NotificationSettingsTab() {
         style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
       >
         <div className="px-6 py-4 border-b border-[var(--border)]">
-          <h3 className="text-base font-bold text-[#1A2948]">Phương thức nhận thông báo</h3>
+          <h3 className="text-base font-bold text-vj-navy">Phương thức nhận thông báo</h3>
           <p className="text-sm text-[var(--foreground-muted)] mt-0.5">
             Chọn cách bạn muốn nhận thông báo
           </p>
@@ -203,7 +203,7 @@ export default function NotificationSettingsTab() {
                 </div>
                 <div>
                   <p
-                    className={`text-sm font-semibold ${method.enabled ? 'text-[#1A2948]' : 'text-[var(--foreground-subtle)]'}`}
+                    className={`text-sm font-semibold ${method.enabled ? 'text-vj-navy' : 'text-[var(--foreground-subtle)]'}`}
                   >
                     {method.label}
                   </p>
@@ -215,7 +215,7 @@ export default function NotificationSettingsTab() {
               {/* Toggle Switch */}
               <button
                 onClick={() => toggleDelivery(method.id)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none flex-shrink-0 ${method.enabled ? 'bg-[#FFC72C]' : 'bg-[var(--surface-3)]'}`}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none flex-shrink-0 ${method.enabled ? 'bg-vj-gold-ink-3' : 'bg-[var(--surface-3)]'}`}
                 aria-label={`Bật hoặc tắt ${method.label}`}
               >
                 <span
@@ -237,7 +237,7 @@ export default function NotificationSettingsTab() {
             <Icon name="MoonIcon" className="w-4 h-4 text-blue-500" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-[#1A2948]">Giờ yên tĩnh</h3>
+            <h3 className="text-base font-bold text-vj-navy">Giờ yên tĩnh</h3>
             <p className="text-xs text-[var(--foreground-muted)]">
               Tạm dừng thông báo trong khoảng thời gian nhất định
             </p>
@@ -248,7 +248,7 @@ export default function NotificationSettingsTab() {
             <label className="block text-xs font-semibold text-[var(--foreground-muted)] mb-1.5">
               Từ
             </label>
-            <select className="w-full border border-[var(--border)] rounded-xl px-3 py-2.5 text-sm text-[#1A2948] focus:outline-none focus:ring-2 focus:ring-red-200 bg-[var(--surface-2)]">
+            <select className="w-full border border-[var(--border)] rounded-xl px-3 py-2.5 text-sm text-vj-navy focus:outline-none focus:ring-2 focus:ring-red-200 bg-[var(--surface-2)]">
               <option>22:00</option>
               <option>21:00</option>
               <option>23:00</option>
@@ -259,7 +259,7 @@ export default function NotificationSettingsTab() {
             <label className="block text-xs font-semibold text-[var(--foreground-muted)] mb-1.5">
               Đến
             </label>
-            <select className="w-full border border-[var(--border)] rounded-xl px-3 py-2.5 text-sm text-[#1A2948] focus:outline-none focus:ring-2 focus:ring-red-200 bg-[var(--surface-2)]">
+            <select className="w-full border border-[var(--border)] rounded-xl px-3 py-2.5 text-sm text-vj-navy focus:outline-none focus:ring-2 focus:ring-red-200 bg-[var(--surface-2)]">
               <option>07:00</option>
               <option>06:00</option>
               <option>08:00</option>

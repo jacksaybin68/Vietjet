@@ -1,0 +1,117 @@
+# Render Blueprint — Vietjet Air
+#
+# Deploys the Next.js app as a Docker web service. Read
+# `docs/RENDER.md` before applying: this file encodes several decisions that
+# are NOT obvious from the app's own docs, and each of them has a reason.
+#
+# Validate with:  render blueprints validate render.yaml
+
+services:
+  - type: web
+    name: vietjet-air
+    runtime: docker
+    region: singapore
+    plan: 0.5c-512mb
+
+    # The app lives in `vietjetsim-main/`, so every path below is relative to
+    # that directory, not the repository root. Render runs build/start/pre-deploy
+    # commands and resolves the Dockerfile and build context against `rootDir`.
+    rootDir: vietjetsim-main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+
+    # `PORT` is set by Render (default 10000) and the standalone server reads
+    # `process.env.PORT`, so nothing here should hardcode a port. The Dockerfile
+    # sets PORT=4028 for local `docker run`; Render's value wins at runtime.
+    #
+    # `HOSTNAME` is deliberately NOT set here: Render does not define it, and
+    # the Dockerfile pins HOSTNAME=0.0.0.0 so the server binds all interfaces.
+    # The standalone server reads `process.env.HOSTNAME || '0.0.0.0'`.
+
+    # `/trang-chu` is a public route (see `src/lib/route-access.ts`) and returns
+    # 200 without a session. Do NOT use `/` here: `next.config.mjs` redirects it
+    # to `/trang-chu` with a 307, which is not a healthy response.
+    healthCheckPath: /trang-chu
+
+    # Only deploy when CI is green. `commit` would push every commit to
+    # production, and this app's build is slow enough that a broken commit
+    # costs minutes to discover.
+    autoDeployTrigger: checksPass
+
+    # The app has SSE endpoints (`/api/sse/*`) and long-lived connections, so
+    # give in-flight requests time to finish on shutdown.
+    maxShutdownDelaySeconds: 60
+
+    envVars:
+      # --- Database ----------------------------------------------------------
+      # The app talks to Postgres over Neon's HTTP `/sql` protocol
+      # (`@neondatabase/serverless`), NOT the Postgres wire protocol. A Render
+      # Postgres instance cannot serve that protocol, so `fromDatabase` is not
+      # usable here — see docs/RENDER.md, "Why there is no `databases:` block".
+      #
+      # Supplied as a secret. The value is the Neon connection string, and the
+      # build needs *a* value present (not a reachable one) — see
+      # `DATABASE_URL` in docs/RENDER.md, "The build needs DATABASE_URL".
+      - key: DATABASE_URL
+        sync: false
+
+      # --- Auth --------------------------------------------------------------
+      # `generateValue: true` makes Render generate a base64-encoded 256-bit
+      # value, so the secret never lives in the repository. The value must NOT
+      # equal the development default: `src/proxy.ts` throws at module load in
+      # production when it does, and `src/instrumentation.ts` fails fast at
+      # startup.
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      # `CAPTCHA_SECRET` falls back to JWT_SECRET when unset, so it is optional.
+      # Set it explicitly to a different value if the CAPTCHA/HMAC scheme is
+      # ever changed.
+      - key: CAPTCHA_SECRET
+        generateValue: true
+
+      # --- Public site URL ---------------------------------------------------
+      # Used by `sitemap.ts`, `robots.ts`, `layout.tsx` (metadataBase) and the
+      # email links. Must be the public URL of THIS deployment, not
+      # https://vietjet.shop, or the sitemap and the reset-password links point
+      # at the wrong host.
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://vietjet-air.onrender.com
+
+      # --- Mail (optional; booking confirmations and password resets) --------
+      # Left unset, the app logs the reset URL instead of mailing it. Set these
+      # to turn real mail on.
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      # `src/lib/mail.ts` prefers MAIL_SITE_URL over NEXT_PUBLIC_SITE_URL, so
+      # email links can point at the production domain while the preview
+      # deployment uses its own URL.
+      - key: MAIL_SITE_URL
+        sync: false
+
+      # --- Coding Pi / LLM (optional; powers /editor) ----------------------
+      # The app selects the backend from CODING_PI_PROVIDER ('nvidia' or
+      # 'grok'). Both are optional; /editor reports the configuration as
+      # unavailable when no key is present.
+      - key: CODING_PI_PROVIDER
+        value: nvidia
+      - key: NVIDIA_API_KEY
+        sync: false
+      - key: XAI_API_KEY
+        sync: false
+
+      # --- VietQR webhook (optional) ----------------------------------------
+      # HMAC secret that verifies payment callbacks. Without it the webhook
+      # route rejects every callback, so a deployment that takes real payments
+      # must set it to the same value as the existing environment.
+      - key: VIETQR_WEBHOOK_SECRET
+        sync: false

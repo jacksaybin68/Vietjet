@@ -94,7 +94,7 @@ export default function TripLegTabs({ active, outbound, inbound, onChange }: Tri
   return (
     <div className="mt-3 px-1">
       <div
-        className="flex items-stretch overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm"
+        className="flex items-stretch overflow-hidden rounded-vj border border-black/10 bg-white shadow-sm"
         role="tablist"
         aria-label="Chặng bay"
       >
@@ -119,7 +119,7 @@ export default function TripLegTabs({ active, outbound, inbound, onChange }: Tri
         <button
           type="button"
           onClick={() => onChange('return')}
-          className="mt-2 w-full flex items-center justify-center gap-2 rounded-xl bg-vjyellow px-4 py-2.5 text-xs font-black uppercase tracking-wider text-vjdark transition-all hover:brightness-95"
+          className="mt-2 w-full flex items-center justify-center gap-2 rounded-vj bg-vjyellow px-4 py-2.5 text-xs font-black uppercase tracking-wider text-vjdark transition-all hover:brightness-95"
         >
           Tiếp tục chọn chuyến về
           <Icon name="ArrowRightIcon" size={14} />

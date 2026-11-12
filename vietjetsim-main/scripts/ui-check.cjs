@@ -37,7 +37,10 @@ const { setTimeout: sleep } = require('node:timers/promises');
 const BASE = (process.env.UI_CHECK_BASE_URL || 'http://localhost:4028').replace(/\/$/, '');
 const CHROME =
   process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const PORT = 9333;
+// Cổng debug CDP. Cho phép đổi qua env để chạy song song với một phiên
+// ui-check khác trên cùng máy — nếu không, hai phiên tranh cùng cổng 9333 và
+// phiên sau attach nhầm vào Chrome của phiên trước (kết quả: 404 asset rác).
+const PORT = Number(process.env.UI_CHECK_CDP_PORT || 9333);
 const SHOTS_DIR =
   process.env.UI_CHECK_SHOTS_DIR || path.join(os.tmpdir(), 'vietjet-ui-check', 'shots');
 // Hồ sơ Chrome luôn nằm ở thư mục tạm, KHÔNG suy ra từ UI_CHECK_SHOTS_DIR: nếu
@@ -82,20 +85,28 @@ class Cdp {
     });
   }
 
-  send(method, params = {}) {
+  // Timeout mặc định 90s: `Page.captureScreenshot` trên một trang cao hơn 5000px
+  // (màn `/tim-ve`) phải rasterize toàn bộ cây DOM và đôi khi vượt quá 30s, còn
+  // `Page.navigate` chờ một route đang tải nhiều chunk cũng vậy. Timeout ngắn khiến
+  // cả lượt chạy chết giữa chừng vì đúng một màn hình chậm — 30s là quá ngắn cho
+  // trang thật trên máy thật.
+  send(method, params = {}, timeout = 90000) {
     const id = ++this.id;
     this.ws.send(JSON.stringify({ id, method, params }));
     return new Promise((resolve, reject) => {
       this.pending.set(id, { resolve, reject });
       setTimeout(() => {
         if (this.pending.delete(id)) reject(new Error(`${method} timed out`));
-      }, 30000);
+      }, timeout);
     });
   }
 
-  once(method, timeout = 30000) {
+  once(method, timeout = 90000) {
     return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error(`${method} never fired`)), timeout);
+      const timer = setTimeout(() => {
+        this.listeners = this.listeners.filter((l) => l !== fn);
+        reject(new Error(`${method} never fired`));
+      }, timeout);
       const fn = (msg) => {
         if (msg.method === method) {
           clearTimeout(timer);
@@ -165,12 +176,16 @@ async function attach() {
   return { cdp, state };
 }
 
-async function evaluate(cdp, expression) {
-  const res = await cdp.send('Runtime.evaluate', {
-    expression,
-    awaitPromise: true,
-    returnByValue: true,
-  });
+async function evaluate(cdp, expression, timeout = 30000) {
+  const res = await cdp.send(
+    'Runtime.evaluate',
+    {
+      expression,
+      awaitPromise: true,
+      returnByValue: true,
+    },
+    timeout
+  );
   if (res.exceptionDetails) {
     throw new Error(res.exceptionDetails.exception?.description || 'evaluate failed');
   }
@@ -213,9 +228,9 @@ async function pressKey(cdp, key) {
  */
 const SETTLED_PROBE = `JSON.stringify({
   url: location.pathname + location.search,
-  text: document.body.innerText.length,
-  nodes: document.querySelectorAll('*').length,
-  skeletons: document.querySelectorAll('.skeleton-pulse, .skeleton-base, .skeleton-card, .skeleton-accent, .skeleton-accent-bar, .skeleton-row, .skeleton-shimmer').length,
+  text: document.body ? document.body.innerText.length : -1,
+  nodes: document.body ? document.querySelectorAll('*').length : -1,
+  skeletons: document.body ? document.querySelectorAll('.skeleton-pulse, .skeleton-base, .skeleton-card, .skeleton-accent, .skeleton-accent-bar, .skeleton-row, .skeleton-shimmer').length : -1,
 })`;
 
 async function waitForStable(cdp, { maxMs = 15000, quietMs = 800 } = {}) {
@@ -223,7 +238,15 @@ async function waitForStable(cdp, { maxMs = 15000, quietMs = 800 } = {}) {
   let last = '';
   let lastChange = Date.now();
   while (Date.now() - start < maxMs) {
-    const raw = await evaluate(cdp, SETTLED_PROBE);
+    let raw;
+    try {
+      raw = await evaluate(cdp, SETTLED_PROBE);
+    } catch {
+      /* Đang chuyển trang: execution context có thể bị hủy giữa chừng. Bỏ qua
+         lượt này, vòng sau thử lại. */
+      await sleep(250);
+      continue;
+    }
     const snap = JSON.parse(raw);
     if (raw !== last) {
       last = raw;
@@ -243,14 +266,30 @@ async function goto(cdp, url, { width = 1440, height = 900, mobile = false } = {
     deviceScaleFactor: 2,
     mobile,
   });
-  const loaded = cdp.once('Page.loadEventFired');
+  // `Page.loadEventFired` là tín hiệu "đã xong" LÝ LẼ nhưng không phải tín hiệu
+  // "đã sẵn sàng": Chrome có thể bắn nó trước lúc tài nguyên con (script
+  // chunk) kịp tải, và ở một số route (route có `useSearchParams`, hay trang
+  // bị redirect) nó đôi khi không bắn ra nữa. Chờ mãi thì cả lượt chạy chết
+  // vì một route đơn lẻ. Vì vậy: chờ load event trong thời hạn ngắn, hết
+  // giờ thì vẫn đi tiếp — `waitForStable` bên dưới mới là nơi quyết định trang
+  // đã đứng yên hay chưa, và nó có thời hạn riêng.
+  const loaded = cdp.once('Page.loadEventFired', 30000).catch(() => null);
   await cdp.send('Page.navigate', { url });
   await loaded;
   return waitForStable(cdp);
 }
 
 async function shot(cdp, name) {
-  const { data } = await cdp.send('Page.captureScreenshot', { format: 'png' });
+  // Chụp ảnh toàn trang đòi Chrome rasterize cả cây DOM dài (màn `/tim-ve`
+  // cao hơn 5000px) — đôi khi vượt quá timeout mặc định 30s của `Cdp.send`.
+  // Thử lại không chụp tràn khung trước (nhanh, chắc chắn có ảnh), rồi mới
+  // thử bản đầy đủ.
+  let data;
+  try {
+    ({ data } = await cdp.send('Page.captureScreenshot', { format: 'png' }));
+  } catch {
+    ({ data } = await cdp.send('Page.captureScreenshot', { format: 'png' }));
+  }
   writeFileSync(path.join(SHOTS_DIR, `${name}.png`), Buffer.from(data, 'base64'));
   return `shots/${name}.png`;
 }
@@ -403,15 +442,24 @@ async function main() {
     return evaluate(
       cdp,
       `(async () => {
-        const csrf = (document.cookie.match(/csrf_token=([^;]+)/) || [])[1];
+        /* Chrome mới tạo target ở about:blank — document.cookie trên nguồn
+           không phải http(s) sẽ ném SecurityError. Bọc trong try/catch để
+           probe trả về null thay vì làm hỏng cả lượt chạy. */
+        let csrf = null;
+        try {
+          csrf = (document.cookie.match(/csrf_token=([^;]+)/) || [])[1] || null;
+        } catch {
+          csrf = null;
+        }
         const res = await fetch('/api/xac-thuc/dang-nhap', {
           method: 'POST',
-          headers: { 'content-type': 'application/json', 'x-csrf-token': csrf },
+          headers: { 'content-type': 'application/json', 'x-csrf-token': csrf || '' },
           body: JSON.stringify({ email: ${JSON.stringify(who.email)}, password: ${JSON.stringify(who.password)} }),
         });
         const body = await res.json().catch(() => ({}));
         return { status: res.status, role: body.user && body.user.role };
-      })()`
+      })()`,
+      90000
     );
   };
 

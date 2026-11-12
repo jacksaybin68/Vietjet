@@ -2,8 +2,10 @@
 
 **Ngày lập:** 18/10/2026
 **Cập nhật:** 19/10/2026 (bản đối soát thực tế) — đối chiếu `find public -type f` với tham chiếu thật trong `src/`/`scripts/`, xoá **62 file orphan**, gỡ **5 hotlink S3** khỏi `PromotionalBannersSection`, thay **17 tham chiếu asset rủi ro** bằng asset nội bộ.
+**Cập nhật:** 13/11/2026 — đối chiếu kích thước logo (265×46 px) và icon dịch vụ (25×25 px) với số đo từ vietjetair.com; bổ sung mục A7.
 **Mục đích:** Đăng ký mọi tài sản media (ảnh, icon, font) dùng trong giao diện công khai của `vietjetsim-main`, kèm chủ sở hữu / giấy phép, route sử dụng, kích thước và trạng thái.
 **Phương pháp:** quét mọi đường dẫn `/...` trong `src/` + `scripts/`, đối chiếu sự tồn tại của file; quét ngược mọi file trong `public/` để tìm orphan.
+**Hồ sơ số đo giao diện:** [`docs/qa/VIETJET_THAM_SO_GIAO_DIEN_2026-11-13.md`](../qa/VIETJET_THAM_SO_GIAO_DIEN_2026-11-13.md)
 
 ## Tổng quan
 
@@ -76,6 +78,13 @@
 | `promo-singapore.jpg` | `public/images/promos/` | Promo "Ưu đãi chớp nhoáng" | `/trang-chu` | AI generated | 905 KB | 🟢 |
 
 ### A6. Icon dịch vụ nhanh Header — quick-rail (9 file)
+
+Site thật hiển thị icon dịch vụ ở **25×25 px**, nền trong suốt, trên dải
+dịch vụ của header (cao 35px, chữ 16px/500, mục active `#F7C61A`). Các file
+dưới đây đã được chuẩn hoá về 25×25 px; những file gốc 28×28 / 56×56 được
+render ở đúng 25×25 px bằng thuộc tính `h-[25px] w-[25px]` trong
+`Header.tsx` (không phóng to ảnh gốc để tránh vỡ raster).
+
 | Tên file | Đường dẫn | Mục đích | Route sử dụng | Nguồn gốc | Kích thước | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- |
 | `dat-ve.png` | `public/images/subservices/` | Icon "Đặt vé" | Header quick-rail | PNG nội bộ tự vẽ | 707 B | 🟢 |
@@ -87,6 +96,27 @@
 | `currency.png` | `public/images/subservices/` | Icon "Mua ngoại tệ" | Header quick-rail | PNG nội bộ | 626 B | 🟢 |
 | `insurance.png` | `public/images/subservices/` | Icon "Bảo hiểm" | Header quick-rail | PNG nội bộ | 551 B | 🟢 |
 | `skyjoy.png` | `public/images/subservices/` | Icon "SkyJoy" | Header quick-rail | PNG nội bộ | 3,8 KB | 🟢 |
+
+### A7. Logo (đã đối chiếu 13/11/2026)
+
+| Tên file | Đường dẫn | Mục đích | Kích thước gốc | Hiển thị | Nguồn gốc | Trạng thái |
+| --- | --- | --- | --- | --- | --- | --- |
+| `vj-logo.svg` | `public/images/vj-logo.svg` | Wordmark header | viewBox `0 0 115 20` (tỉ lệ 5,75:1) | Desktop **265×46 px** (`h-[46px] w-[265px]`), mobile cao 15px | SVG nội bộ tự vẽ | 🟢 |
+
+> Tỉ lệ 115:20 = 5,75; nhân với chiều cao 46px cho ra 264,5px ≈ **265px** —
+> khớp đúng số đo logo trên vietjetair.com. Header dùng bản trắng
+> (`brightness-0 invert`) vì site thật đặt logo trên lớp tối phủ ảnh hero.
+
+### A8. Hoạ tiết nền (vector nội bộ)
+
+| Tên file | Đường dẫn | Mục đích | Route sử dụng | Nguồn gốc | Kích thước | Trạng thái |
+| --- | --- | --- | --- | --- | --- | --- |
+| `footer-pattern.svg` | `public/images/footer-pattern.svg` | Hoạ tiết nền Footer (mảnh đỏ 6%) | Mọi route có `<Footer />` | SVG nội bộ tự vẽ | 316 B | 🟢 |
+
+> Site thật đặt footer trên nền trắng `#FFFFFF` với hoạ tiết `footer-pattern.svg`
+> (cao 371px tại 1440×900). Asset này **không** sao chép từ vietjetair.com —
+> nó là vector vẽ lại theo mô tả hoạ tiết, giữ ràng buộc "0 hotlink".
+
 
 ---
 

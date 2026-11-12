@@ -1,14 +1,32 @@
 # Kế Hoạch Đối Chiếu Giao Diện Vietjetair.com
 
 **Ngày lập:** 18/10/2026  
-**Cập nhật gần nhất:** 19/10/2026 — đo lại số liệu và ghi trạng thái từng phase  
+**Cập nhật gần nhất:** 13/11/2026 — đo trực tiếp vietjetair.com (CDP, 1440×900 + 390×844), ghi hồ sơ tham chiếu và áp dụng 100% giao diện khu vực người dùng (đến trước thanh toán)  
 **Phạm vi:** giao diện khách hàng của `vietjetsim-main`  
 **Nguồn tham chiếu:** [Vietjet Air – trang chủ công khai](https://www.vietjetair.com/vi)  
 **Trạng thái:** Đã chỉnh theo phản biện `docs/plans/PHAN_BIEN_KE_HOACH_DOI_CHIEU_2026-10-18.md` (18/10/2026)
 
+**Hồ sơ số đo mới (13/11/2026):** [`docs/qa/VIETJET_THAM_SO_GIAO_DIEN_2026-11-13.md`](../qa/VIETJET_THAM_SO_GIAO_DIEN_2026-11-13.md) — bảng màu, typography, gradient, bo góc, kích thước bố cục tại 1440×900 và 390×844.
+
 **Bộ viewport canonical (dùng thống nhất toàn tài liệu):** `390×844`, `768×1024`, `1440×900`. Không dùng `1280×900` hay `1440×1000` để tránh trùng lặp vô nghĩa.
 
 ## Trạng thái thực thi (đọc trước)
+
+### Đợt 13/11/2026 — sao chép 100% giao diện site thật
+
+| Phase | Nội dung | Trạng thái 13/11/2026 | Hồ sơ |
+| --- | --- | --- | --- |
+| **0** | Hồ sơ đo đạc | 🟢 **xong** — bảng màu, typography, gradient, bo góc, kích thước 1440/390 | `docs/qa/VIETJET_THAM_SO_GIAO_DIEN_2026-11-13.md` |
+| **A** | Token nền tảng | 🟢 **xong** — 12 sắc vàng phụ, `#F7C61A`, xanh, 6 gradient đo được, bo góc 10px, fontSize 10/17/20/22/25/26/30px, font KoHo thuần | `tailwind.config.js`, `src/styles/tailwind.css` |
+| **B** | Chrome dùng chung | 🟢 **xong** — header overlay trong suốt `gradient-vj-scrim`, announcement 50px/1200px, dải dịch vụ 16px/500 active `#F7C61A`, bottom nav 62px, footer 1200px, Button/InputField bo 10px | `shared/components/navigation/*`, `shared/components/ui/*` |
+| **C** | Trang chủ | 🟢 **xong** — container 1320px, panel 380px, tab 52px bo `5px 5px 0 0`, thân form gradient 30.3deg, field 48px bo 10px, CTA 200×39px gradient 26.73deg, 9 slick dots | `app/trang-chu/components/*` |
+| **D** | Tìm vé | 🟢 **xong** — bo góc 10px toàn bộ, container 1200px, CTA vàng thật, migrate nợ hex hạng vé sang token | `app/tim-ve/components/*`, `features/flights/components/*` |
+| **E** | Đặt vé 3 bước | 🟢 **xong** — bo góc 10px, `.seat-*` bo 10px, CTA vàng thật, stepper 10px/700. **Không đụng `features/payments/**` / `app/thanh-toan/**`** | `features/bookings/components/*` |
+| **F** | Các trang còn lại | 🟢 **xong** — container 1200px thống nhất, `PageHero` gradient 20.12deg, auth bo 10px | `app/{chuyen-bay-cua-toi,lam-thu-tuc,tra-cuu,dich-vu,gioi-thieu,hoi-dap,lien-he,dang-nhap,dang-ky,quen-mat-khau}/**` |
+| **G** | Icon / logo / asset | 🟢 **xong** — 9 icon subservices chuẩn hoá 25×25 nền trong suốt, logo 265×46, đăng ký `asset-registry.md` | `public/images/subservices/*`, `docs/design/asset-registry.md` |
+| **H** | QA & chốt | 🟢 **xong** — lint 0 error ở toàn bộ khu vực người dùng (1 error còn lại là nợ có sẵn ở `api/dat-ve/route.ts`, file không do đợt này sửa) · type-check sạch · `lint:css-debt` xanh (nợ CSS **107/79**, giảm so với HEAD 268/129) · `lint:tailwind-classes` 2297 token quét, 0 class hỏng · `npm test` 1002/1002 xanh · **`src/features/payments/**` + `src/app/thanh-toan/**` + `admin` + `editor` + `quan-tri`: `git diff` rỗng (0 dòng, kể cả comment)** | `docs/qa/VIETJET_QA_2026-11-13.md` |
+
+### Trạng thái đợt 19/10/2026
 
 | Phase | Trạng thái 19/10/2026 | Hồ sơ |
 | --- | --- | --- |

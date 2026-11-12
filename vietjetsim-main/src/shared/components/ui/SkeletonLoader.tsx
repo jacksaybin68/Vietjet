@@ -9,7 +9,7 @@ export { default as Skeleton } from './Skeleton';
 // ─── Flight Card Skeleton ─────────────────────────────────────────────────────
 export function FlightCardSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden skeleton-card">
+    <div className="bg-white rounded-vj border border-[var(--border)] overflow-hidden skeleton-card">
       {/* Red accent top bar */}
       <div className="h-1 w-full skeleton-accent-bar" />
       <div className="p-5">
@@ -121,7 +121,7 @@ export function BookingsTableSkeleton({ rows = 3 }: BookingsTableSkeletonProps) 
 export function StatCardSkeleton() {
   return (
     <div
-      className="bg-white rounded-2xl border border-[var(--border)] p-5 skeleton-card"
+      className="bg-white rounded-vj border border-[var(--border)] p-5 skeleton-card"
       style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
     >
       {/* Red accent top bar */}
@@ -192,7 +192,7 @@ export function AdminBookingsTableSkeleton({ rows = 5 }: { rows?: number }) {
 // ─── Revenue Tab Skeleton ─────────────────────────────────────────────────────
 export function RevenueKPISkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-[var(--border)] p-5">
+    <div className="bg-white rounded-vj border border-[var(--border)] p-5">
       <div className="flex items-center justify-between mb-3">
         <Skeleton className="w-10 h-10" rounded="xl" />
         <Skeleton className="h-5 w-12" />
@@ -205,7 +205,7 @@ export function RevenueKPISkeleton() {
 
 export function RevenueChartSkeleton({ height = 280 }: { height?: number }) {
   return (
-    <div className="bg-white rounded-2xl border border-[var(--border)] p-5">
+    <div className="bg-white rounded-vj border border-[var(--border)] p-5">
       <Skeleton className="h-5 w-40 mb-5" rounded="lg" />
       <div className="flex items-end gap-3 px-2" style={{ height }}>
         {[65, 78, 92, 55, 88, 72].map((h, i) => (
@@ -248,7 +248,7 @@ export function RevenueTabSkeleton() {
         <RevenueChartSkeleton height={220} />
       </div>
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden">
+      <div className="bg-white rounded-vj border border-[var(--border)] overflow-hidden">
         <div className="p-5 border-b border-[var(--surface-2)]">
           <Skeleton className="h-5 w-48" rounded="lg" />
         </div>
@@ -277,14 +277,14 @@ export function PaymentSkeleton() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Payment form skeleton */}
           <div className="lg:col-span-2 space-y-5">
-            <div className="bg-white rounded-2xl border border-[var(--border)] p-5">
+            <div className="bg-white rounded-vj border border-[var(--border)] p-5">
               <Skeleton className="h-5 w-48 mb-4" rounded="lg" />
               {/* Method tabs */}
               <div className="grid grid-cols-3 gap-3 mb-5">
                 {[0, 1, 2].map((i) => (
                   <div
                     key={i}
-                    className="flex flex-col items-center gap-2 py-4 rounded-xl border border-[var(--border)]"
+                    className="flex flex-col items-center gap-2 py-4 rounded-vj border border-[var(--border)]"
                   >
                     <Skeleton className="w-6 h-6" rounded="lg" />
                     <Skeleton className="h-3 w-16" />
@@ -314,7 +314,7 @@ export function PaymentSkeleton() {
           </div>
           {/* Order summary skeleton */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-[var(--border)] p-5">
+            <div className="bg-white rounded-vj border border-[var(--border)] p-5">
               <Skeleton className="h-5 w-36 mb-4" rounded="lg" />
               <Skeleton className="h-24 w-full mb-4" rounded="xl" />
               {[0, 1, 2].map((i) => (
@@ -352,7 +352,7 @@ export function ProfileSkeleton() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Left: form card */}
       <div
-        className="lg:col-span-2 bg-white rounded-2xl border border-[var(--border)] overflow-hidden"
+        className="lg:col-span-2 bg-white rounded-vj border border-[var(--border)] overflow-hidden"
         style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
       >
         <div className="h-1.5 w-full skeleton-accent-bar" />
@@ -376,7 +376,7 @@ export function ProfileSkeleton() {
       {/* Right: stats + security */}
       <div className="space-y-4">
         <div
-          className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden"
+          className="bg-white rounded-vj border border-[var(--border)] overflow-hidden"
           style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
         >
           <div className="h-1.5 w-full skeleton-accent-bar" />
@@ -399,7 +399,7 @@ export function ProfileSkeleton() {
             ))}
           </div>
         </div>
-        <div className="rounded-2xl overflow-hidden" style={{ background: '#1A2948' }}>
+        <div className="rounded-vj overflow-hidden" style={{ background: '#1A2948' }}>
           <div className="h-1 w-full" style={{ background: '#FFC72C' }} />
           <div className="p-5 space-y-3">
             <div className="flex items-center gap-2">
@@ -420,7 +420,7 @@ export function ProfileSkeleton() {
 export function UpcomingBookingCardSkeleton() {
   return (
     <div
-      className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden skeleton-card"
+      className="bg-white rounded-vj border border-[var(--border)] overflow-hidden skeleton-card"
       style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05)' }}
     >
       <div className="h-1.5 w-full skeleton-accent-bar" />
@@ -593,7 +593,7 @@ export function PopularRoutesSkeleton() {
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className="rounded-xl overflow-hidden"
+                className="rounded-vj overflow-hidden"
                 style={{ animationDelay: `${i * 80}ms` }}
               >
                 <Skeleton className="h-44 w-full" rounded="xl" />
@@ -624,7 +624,7 @@ export function DealsSkeleton() {
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="min-w-[210px] sm:min-w-[230px] flex-shrink-0 rounded-xl overflow-hidden border border-[var(--border)]"
+              className="min-w-[210px] sm:min-w-[230px] flex-shrink-0 rounded-vj overflow-hidden border border-[var(--border)]"
               style={{ animationDelay: `${i * 80}ms` }}
             >
               <Skeleton className="h-32 w-full" rounded="lg" />
@@ -666,7 +666,7 @@ export function PassengerInfoSkeleton({ count = 1 }: { count?: number }) {
           {Array.from({ length: count }).map((_, i) => (
             <div
               key={i}
-              className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden skeleton-card"
+              className="bg-white rounded-vj border border-[var(--border)] overflow-hidden skeleton-card"
               style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
             >
               <div className="h-1 w-full skeleton-accent-bar" />
@@ -716,7 +716,7 @@ export function PassengerInfoSkeleton({ count = 1 }: { count?: number }) {
       {/* Booking summary skeleton */}
       <div className="lg:col-span-1">
         <div
-          className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden sticky top-36"
+          className="bg-white rounded-vj border border-[var(--border)] overflow-hidden sticky top-36"
           style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
         >
           <div className="h-1 w-full bg-gradient-to-r from-accent/40 via-accent/60 to-accent/40" />
@@ -725,7 +725,7 @@ export function PassengerInfoSkeleton({ count = 1 }: { count?: number }) {
               <Skeleton className="w-4 h-4" rounded="sm" />
               <Skeleton className="h-5 w-36" rounded="lg" />
             </div>
-            <div className="rounded-xl border border-[var(--surface-2)] bg-[var(--surface)] p-4 space-y-3">
+            <div className="rounded-vj border border-[var(--surface-2)] bg-[var(--surface)] p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <Skeleton className="w-7 h-7" rounded="lg" accent />
                 <Skeleton className="h-3.5 w-16" rounded="md" accent />
@@ -772,7 +772,7 @@ export function SeatMapSkeleton() {
       {/* Left: Seat Map Panel */}
       <div className="lg:col-span-2 space-y-4">
         <div
-          className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden"
+          className="bg-white rounded-vj border border-[var(--border)] overflow-hidden"
           style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
         >
           <div className="h-1 w-full skeleton-accent-bar" />
@@ -788,7 +788,7 @@ export function SeatMapSkeleton() {
             <Skeleton className="h-3.5 w-52 mb-5" />
 
             {/* Legend skeleton */}
-            <div className="rounded-xl border border-[var(--surface-2)] bg-[var(--surface)] p-3 mb-5">
+            <div className="rounded-vj border border-[var(--surface-2)] bg-[var(--surface)] p-3 mb-5">
               <Skeleton className="h-3 w-28 mb-2" rounded="md" />
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -852,7 +852,7 @@ export function SeatMapSkeleton() {
       {/* Right: Summary Panel */}
       <div className="lg:col-span-1">
         <div
-          className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden sticky top-36"
+          className="bg-white rounded-vj border border-[var(--border)] overflow-hidden sticky top-36"
           style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
         >
           <div className="h-1 w-full bg-gradient-to-r from-accent/40 via-accent/60 to-accent/40" />

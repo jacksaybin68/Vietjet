@@ -165,9 +165,9 @@ function LoginPageInner() {
         className="relative flex flex-1 items-center justify-center px-4 py-8 pb-28 sm:px-6 lg:px-8"
       >
         {/* Khung auth kiểu vietjetair.com: card trắng bo 24px, 2 cột 1.12fr / 0.88fr */}
-        <div className="relative my-auto grid w-full max-w-[1040px] overflow-hidden rounded-3xl border border-white/80 bg-white/98 shadow-[0_25px_60px_-15px_rgba(215,25,32,0.18),0_12px_36px_rgba(0,0,0,0.08)] ring-1 ring-black/5 backdrop-blur-md lg:grid-cols-[1.12fr_0.88fr]">
+        <div className="relative my-auto grid w-full max-w-[1040px] overflow-hidden rounded-vj border border-white/80 bg-[rgba(255,255,255,0.98)] shadow-[0_25px_60px_-15px_rgba(215,25,32,0.18),0_12px_36px_rgba(0,0,0,0.08)] ring-1 ring-black/5 backdrop-blur-md lg:grid-cols-[1.12fr_0.88fr]">
           {/* Top accent red-gold brand ribbon */}
-          <div className="h-1.5 w-full bg-gradient-to-r from-[#D71920] via-[#FFCC00] to-[#D71920] col-span-full" />
+          <div className="h-1.5 w-full bg-gradient-to-r from-primary-dark via-accent to-primary-dark col-span-full" />
 
           {/* 3. Cột trái — khối tiêu đề, tab, form đăng nhập / đăng ký */}
           <section className="flex flex-col justify-start bg-white p-6 sm:p-8 lg:p-10">
@@ -214,9 +214,9 @@ function LoginPageInner() {
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                   <div className="flex items-center gap-2">
                     {/* Country code box (+84) ▾ */}
-                    <div className="flex h-12 w-[78px] shrink-0 items-center justify-between rounded-[4px] border border-gray-300 bg-white px-3 text-[15px] font-bold text-gray-800">
+                    <div className="flex h-12 w-[78px] shrink-0 items-center justify-between rounded-vj border border-gray-300 bg-white px-3 text-base2 font-bold text-gray-800">
                       <span>(+84)</span>
-                      <span className="text-[10px]">▾</span>
+                      <span className="text-2xs">▾</span>
                     </div>
                     {/* Phone number input */}
                     <input
@@ -225,7 +225,7 @@ function LoginPageInner() {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="Số điện thoại"
-                      className="vj-auth-input h-12 w-full rounded-[4px] border border-gray-300 bg-white px-4 text-[15px] text-gray-800 outline-none transition-colors focus:border-[var(--primary)]"
+                      className="vj-auth-input h-12 w-full rounded-vj border border-gray-300 bg-white px-4 text-base2 text-gray-800 outline-none transition-colors focus:border-[var(--primary)]"
                     />
                   </div>
 
@@ -239,7 +239,7 @@ function LoginPageInner() {
                           onChange={(e) => setPassword(e.target.value)}
                           placeholder="Mật khẩu"
                           autoComplete="current-password"
-                          className="vj-auth-input h-12 w-full rounded-[4px] border border-gray-300 bg-white px-4 pr-11 text-sm text-gray-800 outline-none transition-colors focus:border-[var(--primary)]"
+                          className="vj-auth-input h-12 w-full rounded-vj border border-gray-300 bg-white px-4 pr-11 text-sm text-gray-800 outline-none transition-colors focus:border-[var(--primary)]"
                         />
                         <button
                           type="button"
@@ -305,7 +305,7 @@ function LoginPageInner() {
                   </button>
                 </form>
 
-                <p className="mt-4 text-center text-[12.5px] leading-relaxed">
+                <p className="mt-4 text-center text-sm3 leading-relaxed">
                   Bạn chưa có tài khoản?{' '}
                   <Link
                     href="/dang-ky"
@@ -328,7 +328,7 @@ function LoginPageInner() {
                       value={regSurname}
                       onChange={(e) => setRegSurname(e.target.value)}
                       placeholder="Họ *"
-                      className="vj-auth-input h-11 w-full rounded border border-gray-300 bg-white px-3 text-sm text-gray-800 outline-none transition-colors focus:border-primary"
+                      className="vj-auth-input h-11 w-full rounded-vj border border-gray-300 bg-white px-3 text-sm text-gray-800 outline-none transition-colors focus:border-primary"
                       required
                     />
                     <input
@@ -336,7 +336,7 @@ function LoginPageInner() {
                       value={regGivenName}
                       onChange={(e) => setRegGivenName(e.target.value)}
                       placeholder="Tên đệm & Tên *"
-                      className="vj-auth-input h-11 w-full rounded border border-gray-300 bg-white px-3 text-sm text-gray-800 outline-none transition-colors focus:border-primary"
+                      className="vj-auth-input h-11 w-full rounded-vj border border-gray-300 bg-white px-3 text-sm text-gray-800 outline-none transition-colors focus:border-primary"
                       required
                     />
                   </div>
@@ -477,7 +477,7 @@ function LoginPageInner() {
 
             {/* SkyJoy ID footer integration */}
             <div className="mt-10 flex flex-col items-center">
-              <p className="text-center text-[10.5px] text-gray-600">
+              <p className="text-center text-2xs2 text-gray-600">
                 Được cung cấp và xác thực bởi SkyJoy ID
               </p>
               <div className="mt-3 flex items-center gap-[12px]">
@@ -487,7 +487,7 @@ function LoginPageInner() {
                   className="h-[14px] w-auto"
                 />
                 <img src="/images/vj-logo.svg" alt="Vietjet Air" className="h-[16px] w-auto" />
-                <span className="flex h-[14px] items-center text-[13px] font-bold text-blue-600">
+                <span className="flex h-[14px] items-center text-sm2 font-bold text-blue-600">
                   SkyPay
                 </span>
               </div>
@@ -508,12 +508,12 @@ function LoginPageInner() {
               href={PROMO_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative block h-full max-h-[590px] w-full overflow-hidden rounded-2xl border border-sky-100/80 shadow-sm transition-transform duration-300 hover:scale-[1.01]"
+              className="group relative block h-full max-h-[590px] w-full overflow-hidden rounded-vj border border-sky-100/80 shadow-sm transition-transform duration-300 hover:scale-[1.01]"
             >
               <img
                 src={PROMO_BANNER}
                 alt="Ngoại tệ sẵn sàng - Hành trình an tâm - Vietjet Air"
-                className="h-full w-full rounded-2xl object-cover"
+                className="h-full w-full rounded-vj object-cover"
                 loading="lazy"
               />
             </a>

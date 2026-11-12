@@ -33,7 +33,7 @@ export default function DateStrip({ items, selectedValue, onSelect }: DateStripP
 
   return (
     <section className="w-full border-b border-black/10 bg-[var(--background)]">
-      <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
         {/* Thanh cuộn ngang */}
         <div
           data-date-strip-container
@@ -49,7 +49,7 @@ export default function DateStrip({ items, selectedValue, onSelect }: DateStripP
               <button
                 key={item.value}
                 onClick={() => onSelect(item.value)}
-                className={`relative flex flex-col items-center justify-center shrink-0 min-w-[130px] px-3 py-2 rounded-2xl transition-all shadow-sm ${
+                className={`relative flex flex-col items-center justify-center shrink-0 min-w-[130px] px-3 py-2 rounded-vj transition-all shadow-sm ${
                   active
                     ? 'bg-gradient-to-b from-vjyellow to-accent-light text-[var(--foreground)] font-black border-2 border-yellow-500 ring-2 ring-vjyellow/40 scale-105 z-10'
                     : 'border border-gray-200/90 bg-white text-gray-700 font-semibold hover:border-amber-300 hover:bg-amber-50/30'

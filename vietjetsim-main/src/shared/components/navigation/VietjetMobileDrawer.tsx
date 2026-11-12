@@ -140,7 +140,7 @@ export default function VietjetMobileDrawer({ isOpen, onClose }: VietjetMobileDr
                   key={item.label}
                   href={item.href}
                   onClick={onClose}
-                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-[13.5px] font-semibold transition-colors ${
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm4 font-semibold transition-colors ${
                     isActive
                       ? 'bg-white/20 text-white font-bold'
                       : 'text-white/95 hover:bg-white/10 hover:text-white'

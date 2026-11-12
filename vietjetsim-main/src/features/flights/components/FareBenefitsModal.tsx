@@ -159,7 +159,7 @@ export default function FareBenefitsModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="fare-benefits-title"
-        className="bg-[var(--surface)] rounded-2xl shadow-2xl max-w-4xl w-full max-h-[88vh] overflow-hidden flex flex-col"
+        className="bg-[var(--surface)] rounded-vj shadow-2xl max-w-4xl w-full max-h-[88vh] overflow-hidden flex flex-col"
         style={{ animation: 'fadeInUp 0.25s ease-out' }}
       >
         {/* Red accent bar — same treatment as every card header on the site. */}
@@ -200,7 +200,7 @@ export default function FareBenefitsModal({
                   return (
                     <th key={col.id} className="px-1.5 pb-3 align-bottom">
                       <div
-                        className={`rounded-lg overflow-hidden ${
+                        className={`rounded-vj overflow-hidden ${
                           isHighlighted ? 'ring-2 ring-primary' : ''
                         }`}
                       >
@@ -285,7 +285,7 @@ export default function FareBenefitsModal({
             aria-label="Đóng"
             type="button"
             onClick={onClose}
-            className="shrink-0 vj-btn vj-btn-sm vj-btn-accent rounded-xl font-bold font-koho"
+            className="shrink-0 vj-btn vj-btn-sm vj-btn-accent rounded-vj font-bold font-koho"
           >
             Đã hiểu
           </button>

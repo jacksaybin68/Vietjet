@@ -31,7 +31,7 @@ export default function FareClassTabs({ activeClass, onSelect, onCompare }: Fare
         return (
           <div
             key={cls.id}
-            className={`flex shrink-0 items-stretch overflow-hidden rounded-xl border transition-colors duration-200 ${
+            className={`flex shrink-0 items-stretch overflow-hidden rounded-vj border transition-colors duration-200 ${
               active
                 ? 'border-primary bg-[rgb(var(--vj-red-rgb))]/10'
                 : 'border-[var(--border)] bg-white hover:border-primary/40'

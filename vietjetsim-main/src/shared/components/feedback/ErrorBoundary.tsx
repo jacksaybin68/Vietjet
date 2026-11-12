@@ -275,9 +275,9 @@ export function ErrorFallback({
           <h3 className="text-base font-bold text-[var(--vj-navy)] font-['KoHo',sans-serif]">
             {displayTitle}
           </h3>
-          <p className="text-sm text-[#666] mt-1 max-w-xs mx-auto">{displaySubtitle}</p>
+          <p className="text-sm text-vj-text-dim mt-1 max-w-xs mx-auto">{displaySubtitle}</p>
           {error?.message && (
-            <p className="text-xs text-[#999] mt-2 font-mono bg-white/60 px-3 py-1.5 rounded-lg inline-block max-w-xs truncate">
+            <p className="text-xs text-vj-text-faint mt-2 font-mono bg-white/60 px-3 py-1.5 rounded-lg inline-block max-w-xs truncate">
               {error.message}
             </p>
           )}
@@ -302,7 +302,7 @@ export function ErrorFallback({
           {onGoHome && (
             <button
               onClick={onGoHome}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-[var(--vj-navy)] bg-white border border-[#E8E8E8] transition-all duration-200 hover:bg-[var(--vj-sky)] active:scale-95 shadow-sm"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-[var(--vj-navy)] bg-white border border-vj-border transition-all duration-200 hover:bg-[var(--vj-sky)] active:scale-95 shadow-sm"
             >
               <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4" aria-hidden="true">
                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
@@ -324,7 +324,7 @@ export function ErrorFallback({
       aria-live="assertive"
     >
       {/* Vietjet Air brand strip */}
-      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[var(--primary)] via-[#FF4D53] to-[var(--accent)]" />
+      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[var(--primary)] via-primary-light to-[var(--accent)]" />
 
       <div className="max-w-md w-full text-center">
         {/* Illustration */}
@@ -337,15 +337,15 @@ export function ErrorFallback({
         >
           {displayTitle}
         </h1>
-        <p className="text-sm text-[#555] leading-relaxed mb-6">{displaySubtitle}</p>
+        <p className="text-sm text-vj-text-soft-strong leading-relaxed mb-6">{displaySubtitle}</p>
 
         {/* Error detail (dev-friendly, subtle) */}
         {error?.message && (
-          <div className="mb-6 bg-white/70 border border-[#E8E8E8] rounded-xl px-4 py-3 text-left">
-            <p className="text-xs font-semibold text-[#999] uppercase tracking-wide mb-1">
+          <div className="mb-6 bg-white/70 border border-vj-border rounded-xl px-4 py-3 text-left">
+            <p className="text-xs font-semibold text-vj-text-faint uppercase tracking-wide mb-1">
               Chi tiết lỗi
             </p>
-            <p className="text-xs text-[#666] font-mono break-all">{error.message}</p>
+            <p className="text-xs text-vj-text-dim font-mono break-all">{error.message}</p>
           </div>
         )}
 
@@ -370,7 +370,7 @@ export function ErrorFallback({
           {onGoHome && (
             <button
               onClick={onGoHome}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-[var(--vj-navy)] bg-white border border-[#E8E8E8] transition-all duration-200 hover:bg-[var(--vj-sky)] active:scale-95 shadow-sm"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-[var(--vj-navy)] bg-white border border-vj-border transition-all duration-200 hover:bg-[var(--vj-sky)] active:scale-95 shadow-sm"
             >
               <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4" aria-hidden="true">
                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />

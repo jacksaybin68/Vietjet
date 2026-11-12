@@ -111,7 +111,7 @@ export default function MealSelectionDrawer({
       {/* Drawer content */}
       <div className="relative w-full max-w-lg bg-white h-full shadow-2xl flex flex-col z-10 animate-slideInRight">
         {/* Header with Vietjet curve top-right (Screenshot 11) */}
-        <div className="relative bg-[#C4161C] text-white px-4 py-3 flex items-center justify-between shadow-md overflow-hidden">
+        <div className="relative bg-primary-dark text-white px-4 py-3 flex items-center justify-between shadow-md overflow-hidden">
           <div className="w-8 shrink-0" />
           <h2 className="font-sans font-black italic tracking-wide text-base sm:text-lg uppercase text-white text-center">
             CHỌN SUẤT ĂN
@@ -168,8 +168,8 @@ export default function MealSelectionDrawer({
 
         {/* Passenger Card matching Screenshot 11 */}
         <div className="p-4 bg-gray-50 border-b border-gray-200">
-          <div className="max-w-xs mx-auto overflow-hidden rounded-xl border border-red-200 shadow-sm bg-white text-center">
-            <div className="bg-[#C4161C] py-2 px-4 text-white">
+          <div className="max-w-xs mx-auto overflow-hidden rounded-vj border border-red-200 shadow-sm bg-white text-center">
+            <div className="bg-primary-dark py-2 px-4 text-white">
               <div className="text-3xs uppercase tracking-wider text-white/80">Người lớn</div>
               <div className="text-sm font-black uppercase tracking-tight">{passengerName}</div>
             </div>
@@ -184,7 +184,7 @@ export default function MealSelectionDrawer({
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
           {/* Banner matching Screenshot 11 */}
-          <div className="rounded-xl overflow-hidden bg-gradient-to-r from-red-900 via-amber-950 to-red-950 text-white p-4 shadow-sm relative min-h-[90px] flex items-center">
+          <div className="rounded-vj overflow-hidden bg-gradient-to-r from-red-900 via-amber-950 to-red-950 text-white p-4 shadow-sm relative min-h-[90px] flex items-center">
             <div className="relative z-10 max-w-[80%]">
               <h3 className="text-sm sm:text-base font-black italic text-white leading-snug drop-shadow-sm">
                 Mời bạn thưởng thức những món ăn nóng hổi, tươi ngon
@@ -207,11 +207,11 @@ export default function MealSelectionDrawer({
                 return (
                   <div
                     key={meal.id}
-                    className="flex flex-col justify-between p-2.5 sm:p-3 rounded-xl border border-gray-200 hover:border-red-300 hover:shadow-md transition-all bg-white"
+                    className="flex flex-col justify-between p-2.5 sm:p-3 rounded-vj border border-gray-200 hover:border-red-300 hover:shadow-md transition-all bg-white"
                   >
                     <div>
                       {/* Meal thumbnail container */}
-                      <div className="w-full aspect-[4/3] rounded-lg bg-gradient-to-br from-amber-50 to-orange-100 border border-amber-200/80 flex items-center justify-center mb-2 relative overflow-hidden shadow-2xs">
+                      <div className="w-full aspect-[4/3] rounded-vj bg-gradient-to-br from-amber-50 to-orange-100 border border-amber-200/80 flex items-center justify-center mb-2 relative overflow-hidden shadow-2xs">
                         <MealDishIllustration
                           mealId={meal.id}
                           size={64}
@@ -280,9 +280,9 @@ export default function MealSelectionDrawer({
         </div>
 
         {/* Footer Red Bar matching Screenshot 11 */}
-        <div className="bg-[#C4161C] text-white p-3 flex items-center justify-between shadow-lg">
+        <div className="bg-primary-dark text-white p-3 flex items-center justify-between shadow-lg">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#FFCC00] flex items-center justify-center shrink-0 shadow-xs p-1">
+            <div className="w-9 h-9 rounded-vj bg-accent flex items-center justify-center shrink-0 shadow-xs p-1">
               <HotMealIcon size={24} />
             </div>
             <div className="text-xs leading-tight">
@@ -297,7 +297,7 @@ export default function MealSelectionDrawer({
           <button
             type="button"
             onClick={handleConfirm}
-            className="bg-[#FFCC00] hover:bg-[#FFD200] text-gray-950 font-black px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow transition-all active:scale-95 cursor-pointer italic"
+            className="vj-cta font-black px-5 py-2.5 rounded-vj text-xs sm:text-sm shadow transition-all active:scale-95 cursor-pointer italic"
           >
             {totalCount > 0 ? 'Xác nhận' : 'Không, cảm ơn'}
           </button>

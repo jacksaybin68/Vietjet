@@ -319,7 +319,7 @@ export function FlightDatePickerPopover({
   return (
     <div
       ref={popoverRef}
-      className={`absolute right-0 top-[112px] z-50 w-[630px] max-w-[calc(100vw-28px)] bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-gray-100 p-3 sm:p-5 select-none text-gray-800 animate-fadeIn ${className}`}
+      className={`absolute right-0 top-[112px] z-50 w-[630px] max-w-[calc(100vw-28px)] bg-white rounded-vj shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-gray-100 p-3 sm:p-5 select-none text-gray-800 animate-fadeIn ${className}`}
     >
       {/* Top Header: Radio Buttons Khứ hồi / Một chiều */}
       <div className="flex items-center justify-end gap-6 mb-4 px-2">
@@ -423,7 +423,7 @@ export default function DatePicker({
           type="button"
           onClick={() => setOpen((prev) => !prev)}
           aria-label={label}
-          className="w-full flex items-center gap-2.5 bg-white px-3.5 py-2.5 sm:py-2 rounded-xl border border-[var(--border)] shadow-sm hover:border-[var(--accent)] focus:border-[var(--accent)] text-left transition-colors"
+          className="w-full flex items-center gap-2.5 bg-white px-3.5 py-2.5 sm:py-2 rounded-vj border border-[var(--border)] shadow-sm hover:border-[var(--accent)] focus:border-[var(--accent)] text-left transition-colors"
         >
           <Calendar className="shrink-0 text-lg text-[var(--foreground-muted)]" />
           <span className="min-w-0 flex-1">

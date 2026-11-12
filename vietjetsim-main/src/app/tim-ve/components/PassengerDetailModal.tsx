@@ -72,9 +72,9 @@ export default function PassengerDetailModal({
       />
 
       {/* Modal Card matching Screenshot 7 */}
-      <div className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[92vh] animate-scaleUp">
+      <div className="relative w-full max-w-lg bg-white rounded-vj shadow-2xl overflow-hidden z-10 flex flex-col max-h-[92vh] animate-scaleUp">
         {/* Header - Red bar with Vietjet curve top-right (Screenshot 7) */}
-        <div className="relative bg-[#C4161C] text-white px-4 py-3.5 flex items-center justify-between shadow-md overflow-hidden">
+        <div className="relative bg-primary-dark text-white px-4 py-3.5 flex items-center justify-between shadow-md overflow-hidden">
           <div className="w-8 shrink-0" />
           <h2 className="font-sans font-black italic tracking-wide text-base sm:text-lg uppercase text-white text-center flex-1">
             THÔNG TIN ĐẶT CHỖ
@@ -104,13 +104,13 @@ export default function PassengerDetailModal({
         {/* Scrollable Body */}
         <div className="p-4 space-y-3 overflow-y-auto flex-1 text-xs">
           {/* Box 1: Thông tin hành khách */}
-          <div className="rounded-lg bg-gray-100 p-3 text-xs font-bold text-gray-800">
+          <div className="rounded-vj bg-gray-100 p-3 text-xs font-bold text-gray-800">
             Thông tin hành khách: <span className="uppercase text-gray-900">{passengerName}</span>
           </div>
 
           {/* Box 2: Chuyến đi */}
-          <div className="rounded-xl border border-blue-100 overflow-hidden shadow-2xs bg-white">
-            <div className="bg-[#DFF0FE] px-3.5 py-2.5 flex items-center justify-between font-bold text-xs">
+          <div className="rounded-vj border border-blue-100 overflow-hidden shadow-2xs bg-white">
+            <div className="bg-vj-blue-tint-2 px-3.5 py-2.5 flex items-center justify-between font-bold text-xs">
               <span className="text-gray-900 font-extrabold">Chuyến đi</span>
               <div className="flex items-center gap-1.5 text-red-600 font-black">
                 <span>{outTotal.toLocaleString('vi-VN')} VND</span>
@@ -127,7 +127,7 @@ export default function PassengerDetailModal({
               {/* Accordions */}
               <div className="space-y-1.5 pt-1">
                 {/* Giá vé */}
-                <div className="rounded-lg bg-gray-50 border border-gray-200 overflow-hidden">
+                <div className="rounded-vj bg-gray-50 border border-gray-200 overflow-hidden">
                   <div
                     onClick={() => setOpenOutFare(!openOutFare)}
                     className="p-2.5 flex items-center justify-between cursor-pointer font-bold text-gray-800 hover:bg-gray-100"
@@ -156,7 +156,7 @@ export default function PassengerDetailModal({
                 </div>
 
                 {/* Thuế, phí */}
-                <div className="rounded-lg bg-gray-50 border border-gray-200 overflow-hidden">
+                <div className="rounded-vj bg-gray-50 border border-gray-200 overflow-hidden">
                   <div
                     onClick={() => setOpenOutTax(!openOutTax)}
                     className="p-2.5 flex items-center justify-between cursor-pointer font-bold text-gray-800 hover:bg-gray-100"
@@ -190,7 +190,7 @@ export default function PassengerDetailModal({
                 </div>
 
                 {/* Dịch vụ */}
-                <div className="rounded-lg bg-gray-50 border border-gray-200 overflow-hidden">
+                <div className="rounded-vj bg-gray-50 border border-gray-200 overflow-hidden">
                   <div
                     onClick={() => setOpenOutService(!openOutService)}
                     className="p-2.5 flex items-center justify-between cursor-pointer font-bold text-gray-800 hover:bg-gray-100"
@@ -220,8 +220,8 @@ export default function PassengerDetailModal({
 
           {/* Box 3: Chuyến về (if roundtrip) */}
           {isRoundTrip && (
-            <div className="rounded-xl border border-blue-100 overflow-hidden shadow-2xs bg-white">
-              <div className="bg-[#DFF0FE] px-3.5 py-2.5 flex items-center justify-between font-bold text-xs">
+            <div className="rounded-vj border border-blue-100 overflow-hidden shadow-2xs bg-white">
+              <div className="bg-vj-blue-tint-2 px-3.5 py-2.5 flex items-center justify-between font-bold text-xs">
                 <span className="text-gray-900 font-extrabold">Chuyến về</span>
                 <div className="flex items-center gap-1.5 text-red-600 font-black">
                   <span>{inTotal.toLocaleString('vi-VN')} VND</span>
@@ -238,7 +238,7 @@ export default function PassengerDetailModal({
                 {/* Accordions */}
                 <div className="space-y-1.5 pt-1">
                   {/* Giá vé */}
-                  <div className="rounded-lg bg-gray-50 border border-gray-200 overflow-hidden">
+                  <div className="rounded-vj bg-gray-50 border border-gray-200 overflow-hidden">
                     <div
                       onClick={() => setOpenInFare(!openInFare)}
                       className="p-2.5 flex items-center justify-between cursor-pointer font-bold text-gray-800 hover:bg-gray-100"
@@ -267,7 +267,7 @@ export default function PassengerDetailModal({
                   </div>
 
                   {/* Thuế, phí */}
-                  <div className="rounded-lg bg-gray-50 border border-gray-200 overflow-hidden">
+                  <div className="rounded-vj bg-gray-50 border border-gray-200 overflow-hidden">
                     <div
                       onClick={() => setOpenInTax(!openInTax)}
                       className="p-2.5 flex items-center justify-between cursor-pointer font-bold text-gray-800 hover:bg-gray-100"
@@ -297,7 +297,7 @@ export default function PassengerDetailModal({
                   </div>
 
                   {/* Dịch vụ */}
-                  <div className="rounded-lg bg-gray-50 border border-gray-200 overflow-hidden">
+                  <div className="rounded-vj bg-gray-50 border border-gray-200 overflow-hidden">
                     <div
                       onClick={() => setOpenInService(!openInService)}
                       className="p-2.5 flex items-center justify-between cursor-pointer font-bold text-gray-800 hover:bg-gray-100"
@@ -328,7 +328,7 @@ export default function PassengerDetailModal({
         </div>
 
         {/* Fixed Red Bottom Bar (Screenshot 7) */}
-        <div className="bg-[#C4161C] text-white px-5 py-3.5 flex items-center justify-between font-bold text-sm shadow-lg">
+        <div className="bg-primary-dark text-white px-5 py-3.5 flex items-center justify-between font-bold text-sm shadow-lg">
           <span className="font-bold text-white text-sm">Tổng tiền</span>
           <span className="font-black text-white text-base">
             {grandTotal.toLocaleString('vi-VN')} VND

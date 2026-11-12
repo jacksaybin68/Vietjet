@@ -145,9 +145,9 @@ export default function ItineraryModal({ isOpen, onClose, booking }: ItineraryMo
       aria-modal="true"
       aria-label="Thông tin hành trình của bạn"
     >
-      <div className="relative w-full max-w-3xl my-6 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden animate-fadeIn">
+      <div className="relative w-full max-w-3xl my-6 bg-white rounded-vj shadow-2xl border border-gray-200 overflow-hidden animate-fadeIn">
         {/* Thanh tiêu đề Modal màu đỏ */}
-        <div className="bg-[#ED1B24] text-white px-4 py-2.5 sm:py-3 flex items-center justify-between">
+        <div className="bg-primary text-white px-4 py-2.5 sm:py-3 flex items-center justify-between">
           <h3 className="font-bold text-sm sm:text-base tracking-wide flex items-center gap-2">
             <span>Thông tin hành trình của bạn</span>
           </h3>
@@ -166,23 +166,23 @@ export default function ItineraryModal({ isOpen, onClose, booking }: ItineraryMo
           {/* Header tài liệu: Logo Vietjet bên trái + Hotline 1900 1886 bên phải */}
           <div className="flex items-center justify-between pb-3 border-b border-gray-100">
             <div className="flex items-center gap-1.5">
-              <span className="text-xl sm:text-2xl font-black text-[#ED1B24] tracking-tight font-serif italic">
-                vietjet<span className="text-[#FFCC00]">Air</span>.com
+              <span className="text-xl sm:text-2xl font-black text-primary tracking-tight font-serif italic">
+                vietjet<span className="text-accent">Air</span>.com
               </span>
             </div>
-            <div className="bg-[#FFCC00] text-gray-950 font-black px-3.5 py-1 rounded-full text-xs sm:text-sm tracking-wide shadow-2xs">
+            <div className="bg-accent text-gray-950 font-black px-3.5 py-1 rounded-full text-xs sm:text-sm tracking-wide shadow-2xs">
               1900 1886
             </div>
           </div>
 
           {/* Dải băng đỏ: THÔNG TIN HÀNH TRÌNH CỦA BẠN */}
-          <div className="bg-[#ED1B24] text-white font-black text-center py-2 text-sm sm:text-base uppercase tracking-wider rounded-xs">
+          <div className="bg-primary text-white font-black text-center py-2 text-sm sm:text-base uppercase tracking-wider rounded-xs">
             THÔNG TIN HÀNH TRÌNH CỦA BẠN
           </div>
 
           {/* 1. THÔNG TIN ĐẶT CHỖ */}
           <div>
-            <div className="bg-[#ED1B24] text-white font-bold text-xs uppercase px-3 py-1.5">
+            <div className="bg-primary text-white font-bold text-xs uppercase px-3 py-1.5">
               1. THÔNG TIN ĐẶT CHỖ
             </div>
             <div className="border border-gray-200 border-t-0 p-3 sm:p-4 grid grid-cols-1 md:grid-cols-[1fr_200px] gap-4 items-center">
@@ -208,7 +208,7 @@ export default function ItineraryModal({ isOpen, onClose, booking }: ItineraryMo
                       Đã xác nhận
                     </span>
                     {!isPaid && (
-                      <p className="text-3xs text-[#ED1B24] mt-0.5 leading-snug">
+                      <p className="text-3xs text-primary mt-0.5 leading-snug">
                         Vé máy bay đã xác nhận/Mã đặt chỗ này sẽ bị hủy nếu không thanh toán trước
                         TS: <span className="font-semibold">{expireDateStr}</span>
                       </p>
@@ -226,7 +226,7 @@ export default function ItineraryModal({ isOpen, onClose, booking }: ItineraryMo
               </div>
 
               {/* Cột phải: Mã QR và PNR */}
-              <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-gray-50 border border-gray-100">
+              <div className="flex flex-col items-center justify-center p-2 rounded-vj bg-gray-50 border border-gray-100">
                 {qrDataUrl ? (
                   <img
                     src={qrDataUrl}
@@ -239,7 +239,7 @@ export default function ItineraryModal({ isOpen, onClose, booking }: ItineraryMo
                 <span className="text-3xs font-bold text-gray-500 uppercase tracking-widest mt-1.5">
                   MÃ ĐẶT CHỖ
                 </span>
-                <span className="text-xl sm:text-2xl font-black text-[#ED1B24] tracking-wider font-mono">
+                <span className="text-xl sm:text-2xl font-black text-primary tracking-wider font-mono">
                   {bookingCode}
                 </span>
               </div>
@@ -248,7 +248,7 @@ export default function ItineraryModal({ isOpen, onClose, booking }: ItineraryMo
 
           {/* 2. THÔNG TIN HÀNH KHÁCH */}
           <div>
-            <div className="bg-[#ED1B24] text-white font-bold text-xs uppercase px-3 py-1.5">
+            <div className="bg-primary text-white font-bold text-xs uppercase px-3 py-1.5">
               2. THÔNG TIN HÀNH KHÁCH
             </div>
             <div className="border border-gray-200 border-t-0 overflow-x-auto">
@@ -291,7 +291,7 @@ export default function ItineraryModal({ isOpen, onClose, booking }: ItineraryMo
 
           {/* 3. THÔNG TIN CHUYẾN BAY */}
           <div>
-            <div className="bg-[#ED1B24] text-white font-bold text-xs uppercase px-3 py-1.5">
+            <div className="bg-primary text-white font-bold text-xs uppercase px-3 py-1.5">
               3. THÔNG TIN CHUYẾN BAY
             </div>
             <div className="border border-gray-200 border-t-0 overflow-x-auto">
@@ -332,14 +332,14 @@ export default function ItineraryModal({ isOpen, onClose, booking }: ItineraryMo
             <button
               type="button"
               onClick={handlePrint}
-              className="px-6 py-2 bg-[#FFCC00] hover:bg-[#E6B800] text-gray-950 font-bold rounded-md text-xs sm:text-sm tracking-wide shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-6 py-2 vj-cta font-bold rounded-md text-xs sm:text-sm tracking-wide shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
             >
               <span>Print</span>
             </button>
             <button
               type="button"
               onClick={handlePrint}
-              className="px-6 py-2 bg-[#FFCC00] hover:bg-[#E6B800] text-gray-950 font-bold rounded-md text-xs sm:text-sm tracking-wide shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-6 py-2 vj-cta font-bold rounded-md text-xs sm:text-sm tracking-wide shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
             >
               <span>Tải xuống PDF</span>
             </button>

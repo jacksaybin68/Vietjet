@@ -31,8 +31,8 @@ export function PriceBreakdown({
   const grandTotal = Math.max(0, totalBeforeDiscount - discount);
 
   return (
-    <div className={`bg-whiterounded-lg border border-gray-200p-4 ${className}`}>
-      <h3 className="text-lg font-semibold text-gray-900mb-4">Chi tiết giá vé</h3>
+    <div className={`bg-white rounded-vj border border-gray-200 p-4 ${className}`}>
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">Chi tiết giá vé</h3>
 
       <div className="space-y-3">
         {/* Base Fare */}
@@ -41,7 +41,7 @@ export function PriceBreakdown({
             Giá vé cơ bản
             {seatCount > 1 && <span className="text-gray-400"> ({seatCount} ghế)</span>}
           </span>
-          <span className="text-gray-900font-medium">{formatCurrency(subtotal, currency)}</span>
+          <span className="text-gray-900 font-medium">{formatCurrency(subtotal, currency)}</span>
         </div>
 
         {/* Taxes */}
@@ -69,7 +69,7 @@ export function PriceBreakdown({
         )}
 
         {/* Divider */}
-        <div className="border-t border-gray-200my-2" />
+        <div className="border-t border-gray-200 my-2" />
 
         {/* Subtotal */}
         <div className="flex justify-between items-center text-sm font-medium">
@@ -80,7 +80,7 @@ export function PriceBreakdown({
         {/* Discount */}
         {discount > 0 && (
           <div className="flex justify-between items-center text-sm">
-            <span className="text-green-600flex items-center gap-1">
+            <span className="text-green-600 flex items-center gap-1">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
@@ -96,19 +96,19 @@ export function PriceBreakdown({
 
         {/* Loyalty Points Earned */}
         {loyaltyPoints > 0 && (
-          <div className="flex justify-between items-center text-sm bg-blue-50/20 rounded-lg p-2 -mx-2">
-            <span className="text-blue-600flex items-center gap-1">
+          <div className="flex justify-between items-center text-sm bg-blue-50/20 rounded-vj p-2 -mx-2">
+            <span className="text-blue-600 flex items-center gap-1">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
               Điểm tích lũy
             </span>
-            <span className="text-blue-600font-medium">+{formatNumber(loyaltyPoints)} điểm</span>
+            <span className="text-blue-600 font-medium">+{formatNumber(loyaltyPoints)} điểm</span>
           </div>
         )}
 
         {/* Grand Total */}
-        <div className="border-t border-gray-200pt-3 mt-3">
+        <div className="border-t border-gray-200 pt-3 mt-3">
           <div className="flex justify-between items-center">
             <span className="text-lg font-semibold text-gray-900">Tổng cộng</span>
             <span className="text-xl font-bold text-blue-600">

@@ -11,6 +11,7 @@ npm run type-check # tsc --noEmit
 npm test           # vitest run
 npm run lint       # eslint .   (NOT `next lint` ‚Äî that is removed in Next 16)
 npm run lint:fix   # eslint . --fix
+npm run lint:tailwind-classes # asserts every className token exists in the generated CSS
 npm run test:migrations # 4 migration passes on throwaway Docker Postgres (needs Docker)
 npm run test:smoke # post-build HTTP assertions against a running server
 npm run test:ui    # headless Chrome render check of 35 screens + auth-public/post-login (3 viewports; needs build + start + Chrome)
@@ -18,6 +19,32 @@ npm run test:ui    # headless Chrome render check of 35 screens + auth-public/po
 
 Lint/format rules live in `eslint.config.mjs` (flat config, prettier printWidth 100,
 single quotes, `trailingComma: 'es5'`). Run `npx eslint <file> --fix` before finishing.
+
+**A class Tailwind that does not exist fails silently — so `npm run lint:tailwind-classes`
+exists to catch it.** Tailwind emits no rule for a class it cannot resolve, and emits no
+warning either: the element just renders unstyled. Three ways that happens here, all of
+them found in this repo:
+
+- **A glued class.** Bulk-editing `className` strings can weld two utilities together
+  (`bg-white` + `rounded-vj` -> `bg-whiterounded-vj`). The token is a valid-looking
+  string, so nothing complains; it just never matches. This happened in
+  `PriceBreakdown.tsx` and `SeatMap.tsx`, where `bg-whiterounded-lg` was already broken
+  in an earlier form and a `rounded-lg` -> `rounded-vj` sweep made it worse.
+- **A utility Tailwind 3.4 does not have.** `shadow-xs`, `shadow-2xs`,
+  `drop-shadow-2xs`, `backdrop-blur-xs`, `border-b-3`, `py-0.2`, `sm:p-4.5`,
+  `duration-250`, `active:scale-98`, `h-13`, `rounded-t-vj` — none of these are
+  default Tailwind. `font-heading-800` is worse: `font-heading` is a *font-family*,
+  so `font-heading-800` is not a weight either. All of them need a token in
+  `tailwind.config.js`, and the ones added for this are collected there.
+- **A `/opacity` modifier against a plain CSS variable.** `bg-[var(--primary)]/10`
+  compiles to *nothing at all* — Tailwind cannot resolve the opacity of a bare
+  variable. Use the channel form: `bg-[rgb(var(--primary-rgb))]/10`. The channel
+  variables live in `:root` in `tailwind.css`; add one whenever you add a tint.
+
+`scripts/check-tailwind-classes.cjs` generates the real CSS with the Tailwind CLI and
+compares it against every token in every `className`/`class` attribute, so it catches
+all three. It takes about a minute (it runs Tailwind over the whole tree), so it is a
+separate script rather than part of `npm run lint`.
 
 Lint is NOT part of `npm run build`: Next 15/16 removed the `eslint` key from
 `next.config.mjs` (setting it logs "Unrecognized key(s) in object: 'eslint'"), and CI

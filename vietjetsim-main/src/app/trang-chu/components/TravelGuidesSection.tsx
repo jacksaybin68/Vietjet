@@ -64,7 +64,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 export default function TravelGuidesSection() {
   return (
     <section className="bg-white py-12 sm:py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-end justify-between mb-8 sm:mb-10 flex-wrap gap-3">
           <div>
             <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-primary mb-2">
@@ -88,7 +88,7 @@ export default function TravelGuidesSection() {
             <a
               key={i}
               href="#"
-              className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-primary/30 hover:shadow-lg transition-all duration-300"
+              className="group flex flex-col bg-white rounded-vj overflow-hidden border border-gray-100 hover:border-primary/30 hover:shadow-lg transition-all duration-300"
             >
               <div className="relative aspect-[16/10] overflow-hidden">
                 <AppImage
@@ -97,7 +97,7 @@ export default function TravelGuidesSection() {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <span
-                  className={`absolute top-3 left-3 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full ${
+                  className={`absolute top-3 left-3 px-2.5 py-1 text-2xs font-bold uppercase tracking-wider rounded-full ${
                     CATEGORY_COLORS[guide.category] || 'bg-stone-200 text-navy'
                   }`}
                 >

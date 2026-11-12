@@ -711,7 +711,7 @@ export default function UserDashboardClient() {
   const toast = useToast();
   return (
     <div className="pb-8 sm:pb-12 min-h-screen bg-[var(--surface)]">
-      <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6">
+      <div className="mx-auto w-full max-w-[1200px] px-4 sm:px-6 lg:px-0">
         <UserDashboardMobileNav
           tabs={tabs}
           activeTab={activeTab}
@@ -765,15 +765,15 @@ export default function UserDashboardClient() {
                         className="text-[var(--primary)]"
                       />
                     </div>
-                    <p className="font-bold text-[10px] sm:text-sm mb-0.5 sm:mb-1 text-[var(--foreground)]">
+                    <p className="font-bold text-2xs sm:text-sm mb-0.5 sm:mb-1 text-[var(--foreground)]">
                       Không thể tải chuyến bay
                     </p>
-                    <p className="text-[9px] sm:text-xs text-[var(--foreground-subtle)] mb-3 sm:mb-4">
+                    <p className="text-3xs sm:text-xs text-[var(--foreground-subtle)] mb-3 sm:mb-4">
                       Đã xảy ra lỗi khi tải danh sách chuyến bay sắp tới. Vui lòng thử lại.
                     </p>
                     <button
                       onClick={retryUpcoming}
-                      className="inline-flex items-center gap-1.5 sm:gap-2 text-white font-semibold text-[10px] sm:text-xs px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all"
+                      className="inline-flex items-center gap-1.5 sm:gap-2 text-white font-semibold text-2xs sm:text-xs px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all"
                       style={{ background: 'var(--primary)' }}
                     >
                       <Icon name="ArrowPathIcon" size={14} />
@@ -806,14 +806,14 @@ export default function UserDashboardClient() {
                         <p className="font-black text-base sm:text-lg mb-1.5 sm:mb-2 text-[var(--foreground)]">
                           Chưa có chuyến bay nào
                         </p>
-                        <p className="text-[10px] sm:text-sm text-[var(--foreground-muted)] mb-4 sm:mb-5 leading-relaxed">
+                        <p className="text-2xs sm:text-sm text-[var(--foreground-muted)] mb-4 sm:mb-5 leading-relaxed">
                           Bạn chưa có chuyến bay nào sắp tới. Hãy đặt vé ngay để bắt đầu hành trình
                           của bạn!
                         </p>
                         <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center sm:justify-start">
                           <Link
                             href="/tim-ve"
-                            className="inline-flex items-center gap-1.5 sm:gap-2 text-white font-bold px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-sm transition-all hover:opacity-90 active:scale-95 shadow-lg"
+                            className="inline-flex items-center gap-1.5 sm:gap-2 text-white font-bold px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-2xs sm:text-sm transition-all hover:opacity-90 active:scale-95 shadow-lg"
                             style={{
                               background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
                               boxShadow: '0 4px 16px rgba(245, 158, 11, 0.3)',
@@ -824,7 +824,7 @@ export default function UserDashboardClient() {
                           </Link>
                           <button
                             onClick={retryUpcoming}
-                            className="inline-flex items-center gap-1.5 sm:gap-2 text-amber-700 font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-sm border border-[rgb(var(--accent-rgb))]/30hover:bg-amber-50 transition-all bg-[var(--surface)]"
+                            className="inline-flex items-center gap-1.5 sm:gap-2 text-amber-700 font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-2xs sm:text-sm border border-[rgb(var(--accent-rgb))]/30 hover:bg-amber-50 transition-all bg-[var(--surface)]"
                           >
                             <Icon name="ArrowPathIcon" size={14} />
                             Tải lại
@@ -990,7 +990,7 @@ export default function UserDashboardClient() {
                         <>
                           <button
                             onClick={exportCSV}
-                            className="flex items-center gap-1.5 text-xs font-semibold text-green-700hover:text-green-800:text-green-200 bg-green-50/20 hover:bg-green-100:bg-green-900/30 border border-green-200px-3 py-1.5 rounded-lg transition-all"
+                            className="flex items-center gap-1.5 text-xs font-semibold text-green-700 hover:text-green-800 bg-green-50/20 hover:bg-green-100 border border-green-200 px-3 py-1.5 rounded-lg transition-all"
                             title="Xuất CSV"
                           >
                             <Icon name="TableCellsIcon" size={13} />
@@ -1445,7 +1445,7 @@ export default function UserDashboardClient() {
                           <h2 className="font-bold text-base text-[var(--vj-navy)]">
                             Yêu cầu hoàn tiền
                           </h2>
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-100/10 text-emerald-700text-[10px] font-bold">
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-100/10 text-emerald-700 text-2xs font-bold">
                             Giao diện mới
                           </span>
                         </div>
@@ -1792,9 +1792,9 @@ export default function UserDashboardClient() {
                           <Icon
                             name="InformationCircleIcon"
                             size={16}
-                            className="text-amber-600mt-0.5 flex-shrink-0"
+                            className="text-amber-600 mt-0.5 flex-shrink-0"
                           />
-                          <p className="text-xs text-amber-700leading-relaxed">
+                          <p className="text-xs text-amber-700 leading-relaxed">
                             Hoàn tiền sẽ được xử lý trong <strong>3–5 ngày làm việc</strong>. Số
                             tiền hoàn lại phụ thuộc vào chính sách vé và thời điểm huỷ.
                           </p>
@@ -1902,16 +1902,16 @@ export default function UserDashboardClient() {
                       </button>
                     </div>
                     {refundError && (
-                      <div className="px-4 py-3 bg-red-50/10 border-b border-red-100flex items-center gap-2">
+                      <div className="px-4 py-3 bg-red-50/10 border-b border-red-100 flex items-center gap-2">
                         <Icon
                           name="ExclamationTriangleIcon"
                           size={14}
-                          className="text-red-500flex-shrink-0"
+                          className="text-red-500 flex-shrink-0"
                         />
-                        <p className="text-xs text-red-600flex-1">{refundError}</p>
+                        <p className="text-xs text-red-600 flex-1">{refundError}</p>
                         <button
                           onClick={loadRefundRequests}
-                          className="text-xs font-semibold text-red-600underline"
+                          className="text-xs font-semibold text-red-600 underline"
                         >
                           Thử lại
                         </button>

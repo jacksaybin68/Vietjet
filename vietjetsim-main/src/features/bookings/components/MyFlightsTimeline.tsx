@@ -65,7 +65,7 @@ export default function MyFlightsTimeline({ bookings }: TimelineProps) {
           return (
             <div
               key={booking.id}
-              className="relative pl-12 hover:bg-[rgb(var(--background-secondary-rgb))]/50 rounded-lg p-4 transition-colors"
+              className="relative pl-12 hover:bg-[rgb(var(--background-secondary-rgb))]/50 rounded-vj p-4 transition-colors"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               {/* Timeline dot */}

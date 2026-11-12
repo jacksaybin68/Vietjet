@@ -45,16 +45,17 @@ export default function RootLayout({
   return (
     <html lang="vi" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
-        {/* KoHo is VietJet's primary body font; Be Vietnam Pro for headings */}
+        {/* KoHo is VietJet's only font family — the production bundle of
+            vietjetair.com loads KoHo 300–700 and nothing else. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* `@next/next/no-page-custom-font` targets the Pages Router’s
             `pages/_document.js`; this app is App Router only, so the rule fires as
-            a false positive. Switching to `next/font` would change how the KoHo /
-            Be Vietnam Pro CSS variables are wired into tailwind.config.js. */}
+            a false positive. Switching to `next/font` would change how the KoHo
+            CSS variables are wired into tailwind.config.js. */}
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=KoHo:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=KoHo:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
           rel="stylesheet"
         />
 
@@ -62,7 +63,7 @@ export default function RootLayout({
 
         {/* Vietjet Air is a local booking simulator and is intentionally not indexed as the official airline site. */}
       </head>
-      <body className="bg-[var(--background)] pb-[calc(60px+env(safe-area-inset-bottom))] text-[var(--foreground)] lg:pb-0">
+      <body className="bg-[var(--background)] pb-[calc(62px+env(safe-area-inset-bottom))] text-[var(--foreground)] lg:pb-0">
         {/* Skip link — phần tử đầu tiên nhận focus. Đích `#main-content` do từng
             trang tự đặt *sau* `<Header />` của nó; lý do không đặt ở tầng này nằm
             ở ghi chú trên `<div>` bên dưới. */}

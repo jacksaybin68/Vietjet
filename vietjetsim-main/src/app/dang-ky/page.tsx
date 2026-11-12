@@ -592,10 +592,10 @@ function RegisterPageInner() {
                 type="submit"
                 disabled={loading}
                 aria-label="Tiếp tục"
-                className={`w-full sm:w-64 h-12 rounded-xl text-center font-black text-base transition-all ${
+                className={`w-full sm:w-64 h-12 rounded-vj text-center font-black text-base transition-all ${
                   !agreeTerms || !surname.trim() || !givenName.trim() || (!phone && !email)
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none italic'
-                    : 'bg-gradient-to-r from-[#D71920] to-[#B31317] hover:from-[#E51E25] hover:to-[#C4161C] text-white cursor-pointer shadow-[0_4px_14px_rgba(215,25,32,0.35)] hover:shadow-[0_6px_20px_rgba(215,25,32,0.45)] active:scale-95'
+                    : 'bg-gradient-to-r from-primary-dark to-primary-dark hover:from-primary hover:to-primary-dark text-white cursor-pointer shadow-[0_4px_14px_rgba(215,25,32,0.35)] hover:shadow-[0_6px_20px_rgba(215,25,32,0.45)] active:scale-95'
                 }`}
               >
                 {loading ? <Spinner /> : 'Đăng ký'}
@@ -621,7 +621,7 @@ function RegisterPageInner() {
               <div>
                 <Link
                   href="/dang-nhap"
-                  className="inline-flex items-center justify-center rounded-xl bg-vjyellow hover:bg-vjamber px-7 py-2.5 text-xs sm:text-sm font-black text-gray-900 shadow-sm transition-all active:scale-95 cursor-pointer"
+                  className="inline-flex items-center justify-center rounded-vj bg-vjyellow hover:bg-vjamber px-7 py-2.5 text-xs sm:text-sm font-black text-gray-900 shadow-sm transition-all active:scale-95 cursor-pointer"
                 >
                   Đăng nhập bằng SkyJoy
                 </Link>
@@ -709,7 +709,7 @@ function RegisterPageInner() {
           <button
             type="submit"
             disabled={loading}
-            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary hover:bg-red-700 text-white font-bold shadow-md transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-vj bg-primary hover:bg-red-700 text-white font-bold shadow-md transition-all active:scale-95 cursor-pointer disabled:opacity-50"
           >
             {loading ? <Spinner /> : 'Xác nhận & Hoàn tất tạo tài khoản'}
           </button>

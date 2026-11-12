@@ -112,7 +112,7 @@ function RedeemModal({
   };
 
   const inputClass =
-    'w-full px-4 py-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-[Be Vietnam Pro,sans-serif]';
+    'w-full px-4 py-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-[Be_Vietnam_Pro,sans-serif]';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -132,7 +132,7 @@ function RedeemModal({
 
         <form onSubmit={handleRedeem} className="p-6 space-y-5">
           <div className="bg-[rgb(var(--accent-rgb))]/10 rounded-xl p-4 text-center">
-            <div className="text-sm text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
+            <div className="text-sm text-[var(--foreground-muted)] font-[Be_Vietnam_Pro,sans-serif]">
               Điểm khả dụng
             </div>
             <div className="text-3xl font-bold font-[KoHo,sans-serif] text-[var(--foreground)] mt-1">
@@ -160,7 +160,7 @@ function RedeemModal({
                   type="button"
                   onClick={() => setPoints(p.toString())}
                   disabled={p > availablePoints}
-                  className="flex-1 py-1.5 bg-[var(--surface-2)] hover:bg-[var(--surface)] rounded-lg text-xs font-semibold text-[var(--foreground)] transition-colors disabled:opacity-40 font-[Be Vietnam Pro,sans-serif]"
+                  className="flex-1 py-1.5 bg-[var(--surface-2)] hover:bg-[var(--surface)] rounded-lg text-xs font-semibold text-[var(--foreground)] transition-colors disabled:opacity-40 font-[Be_Vietnam_Pro,sans-serif]"
                 >
                   {formatPoints(p)}
                 </button>
@@ -168,7 +168,7 @@ function RedeemModal({
             </div>
           </div>
 
-          <div className="text-xs text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
+          <div className="text-xs text-[var(--foreground-muted)] font-[Be_Vietnam_Pro,sans-serif]">
             Quy đổi: 1,000 điểm = 10,000 VND giảm giá vé máy bay.
           </div>
 
@@ -176,7 +176,7 @@ function RedeemModal({
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-accent text-[#1A2948] rounded-xl font-bold text-sm font-[KoHo,sans-serif] hover:bg-accent-dark transition-all shadow-md active:scale-95 disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-accent text-vj-navy rounded-xl font-bold text-sm font-[KoHo,sans-serif] hover:bg-accent-dark transition-all shadow-md active:scale-95 disabled:opacity-50"
             >
               {loading ? (
                 <Icon name="ArrowPathIcon" size={18} className="animate-spin" />
@@ -269,7 +269,7 @@ export default function LoyaltyTab() {
           <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[var(--foreground)]">
             Điểm thưởng
           </h2>
-          <p className="text-sm text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
+          <p className="text-sm text-[var(--foreground-muted)] mt-1 font-[Be_Vietnam_Pro,sans-serif]">
             Chương trình tích điểm Vietjet Air Rewards
           </p>
         </div>
@@ -301,14 +301,14 @@ export default function LoyaltyTab() {
             >
               {loyalty?.tier || 'Red'}
             </div>
-            <span className="text-sm text-white/70 font-[Be Vietnam Pro,sans-serif]">
+            <span className="text-sm text-white/70 font-[Be_Vietnam_Pro,sans-serif]">
               Thành viên từ {loyalty?.enrolledAt ? formatDate(loyalty.enrolledAt) : 'N/A'}
             </span>
           </div>
 
           {/* Points */}
           <div className="mb-4">
-            <div className="text-sm text-white/70 font-[Be Vietnam Pro,sans-serif] mb-1">
+            <div className="text-sm text-white/70 font-[Be_Vietnam_Pro,sans-serif] mb-1">
               Điểm khả dụng
             </div>
             <div className="text-4xl font-bold font-[KoHo,sans-serif]">
@@ -320,7 +320,7 @@ export default function LoyaltyTab() {
           {/* Stats Row */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white/10 rounded-xl p-3">
-              <div className="text-xs text-white/60 font-[Be Vietnam Pro,sans-serif]">
+              <div className="text-xs text-white/60 font-[Be_Vietnam_Pro,sans-serif]">
                 Tổng điểm
               </div>
               <div className="text-lg font-bold font-[KoHo,sans-serif]">
@@ -328,7 +328,7 @@ export default function LoyaltyTab() {
               </div>
             </div>
             <div className="bg-white/10 rounded-xl p-3">
-              <div className="text-xs text-white/60 font-[Be Vietnam Pro,sans-serif]">
+              <div className="text-xs text-white/60 font-[Be_Vietnam_Pro,sans-serif]">
                 Điểm tích lũy trọn đời
               </div>
               <div className="text-lg font-bold font-[KoHo,sans-serif]">
@@ -341,10 +341,10 @@ export default function LoyaltyTab() {
           {nextTier && (
             <div className="mt-4 bg-white/10 rounded-xl p-4">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-white/80 font-[Be Vietnam Pro,sans-serif]">
+                <span className="text-sm text-white/80 font-[Be_Vietnam_Pro,sans-serif]">
                   {nextTier.name}
                 </span>
-                <span className="text-xs text-white/60 font-[Be Vietnam Pro,sans-serif]">
+                <span className="text-xs text-white/60 font-[Be_Vietnam_Pro,sans-serif]">
                   {formatPoints(loyalty?.lifetimePoints || 0)} /{' '}
                   {formatPoints(nextTier.minLifetimePoints)} điểm
                 </span>
@@ -363,7 +363,7 @@ export default function LoyaltyTab() {
       {/* Tiers Overview */}
       <div className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden shadow-vj-card">
         <div className="p-5 border-b border-[var(--border)]">
-          <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948]">
+          <h3 className="text-base font-bold font-[KoHo,sans-serif] text-vj-navy">
             Hạng thành viên
           </h3>
         </div>
@@ -397,11 +397,11 @@ export default function LoyaltyTab() {
                     (x{tier.pointsMultiplier || 1})
                   </span>
                 </div>
-                <div className="text-xs text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
+                <div className="text-xs text-[var(--foreground-muted)] mt-1 font-[Be_Vietnam_Pro,sans-serif]">
                   {formatPoints(tier.minLifetimePoints)} điểm
                 </div>
                 {isCurrentTier && (
-                  <div className="mt-2 text-xs font-bold text-primary font-[Be Vietnam Pro,sans-serif] flex items-center justify-center gap-1">
+                  <div className="mt-2 text-xs font-bold text-primary font-[Be_Vietnam_Pro,sans-serif] flex items-center justify-center gap-1">
                     <SkyJoyStarIcon size={14} />
                     <span>Hạng hiện tại</span>
                   </div>
@@ -415,9 +415,7 @@ export default function LoyaltyTab() {
       {/* Transaction History */}
       <div className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden shadow-vj-card">
         <div className="p-5 border-b border-[var(--border)]">
-          <h3 className="text-base font-bold font-[KoHo,sans-serif] text-[#1A2948]">
-            Lịch sử điểm
-          </h3>
+          <h3 className="text-base font-bold font-[KoHo,sans-serif] text-vj-navy">Lịch sử điểm</h3>
         </div>
 
         <div className="divide-y divide-[var(--border)]">
@@ -426,7 +424,7 @@ export default function LoyaltyTab() {
               <div className="w-16 h-16 bg-[var(--surface-2)] rounded-full flex items-center justify-center mx-auto mb-3">
                 <Icon name="StarIcon" size={28} className="text-[var(--foreground-subtle)]" />
               </div>
-              <p className="text-[var(--foreground-muted)] text-sm font-[Be Vietnam Pro,sans-serif]">
+              <p className="text-[var(--foreground-muted)] text-sm font-[Be_Vietnam_Pro,sans-serif]">
                 Chưa có lịch sử tích điểm.
               </p>
             </div>
@@ -444,10 +442,10 @@ export default function LoyaltyTab() {
                     <Icon name={config.icon} size={18} style={{ color: config.color }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-sm text-[#1A2948] font-[KoHo,sans-serif]">
+                    <div className="font-semibold text-sm text-vj-navy font-[KoHo,sans-serif]">
                       {label}
                     </div>
-                    <div className="text-xs text-[var(--foreground-muted)] mt-0.5 font-[Be Vietnam Pro,sans-serif]">
+                    <div className="text-xs text-[var(--foreground-muted)] mt-0.5 font-[Be_Vietnam_Pro,sans-serif]">
                       {tx.description || label} · {formatDate(tx.created_at)}
                     </div>
                   </div>

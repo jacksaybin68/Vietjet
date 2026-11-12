@@ -20,6 +20,17 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
+# `src/lib/neon.ts` throws at module scope when NODE_ENV=production and
+# DATABASE_URL is missing, and `next build` imports route modules while
+# collecting page data. Without a value here the build fails with
+# "Failed to collect configuration for /api/checkin".
+#
+# This is a deliberately unreachable placeholder: it only has to exist so the
+# module can be evaluated. It is not inlined into the bundle (only
+# NEXT_PUBLIC_* variables are), and the real value is injected at runtime by
+# the platform.
+ENV DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build
+
 RUN npm run build
 
 # 4. Runner (Optimized standalone < 150MB)

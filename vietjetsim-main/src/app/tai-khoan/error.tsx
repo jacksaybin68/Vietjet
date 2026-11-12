@@ -21,13 +21,13 @@ export default function UserDashboardError({
                 name="ExclamationTriangleIcon"
                 variant="solid"
                 size={48}
-                className="text-[#EC2029]"
+                className="text-primary"
               />
             </div>
           </div>
 
           {/* Title */}
-          <h2 className="text-2xl font-bold text-[#1A2948] font-koho mb-3">Đã xảy ra lỗi</h2>
+          <h2 className="text-2xl font-bold text-vj-navy font-koho mb-3">Đã xảy ra lỗi</h2>
 
           {/* Description */}
           <p className="text-gray-600 mb-4 font-heading-sm">
@@ -46,7 +46,7 @@ export default function UserDashboardError({
           {/* Retry Button */}
           <button
             onClick={reset}
-            className="inline-flex items-center justify-center gap-2 bg-[#EC2029] hover:bg-primary-dark text-white font-semibold px-8 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg active:scale-95 font-koho"
+            className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white font-semibold px-8 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg active:scale-95 font-koho"
           >
             <Icon name="ArrowPathIcon" variant="outline" size={20} />
             Thử lại

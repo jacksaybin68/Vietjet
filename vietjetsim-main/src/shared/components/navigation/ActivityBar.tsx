@@ -28,12 +28,12 @@ export default function ActivityBar() {
       aria-label="Thông tin hành trình"
       className="bg-vjyellow border-b border-black/10 h-[46px] sm:h-[50px]"
     >
-      <div className="mx-auto flex max-w-[1240px] items-center justify-center lg:justify-between gap-4 px-4 sm:px-6">
+      <div className="mx-auto flex max-w-[1200px] items-center justify-center lg:justify-between gap-4 px-4 sm:px-6">
         {/* Thông tin hành khách — chỉ hiển thị từ lg trở lên. */}
         <div className="hidden lg:flex items-center gap-6">
           <Link
             href="/chuyen-bay-cua-toi"
-            className="flex items-center gap-1 text-[12px] font-semibold text-black sm:text-[13px]"
+            className="flex items-center gap-1 text-xs font-semibold text-black sm:text-sm2"
             aria-label="Chuyến bay của tôi"
           >
             <Icon name="TicketIcon" size={13} aria-hidden="true" />
@@ -44,7 +44,7 @@ export default function ActivityBar() {
 
           <span className="w-px h-4 bg-black/20" aria-hidden="true" />
 
-          <div className="text-[12px] font-semibold text-black sm:text-[13px]">
+          <div className="text-xs font-semibold text-black sm:text-sm2">
             <span className="hidden sm:inline">Điểm khởi hành: </span>
             <span className="font-bold">TP. Hồ Chí Minh (SGN)</span>
             <span className="px-1">→</span>
@@ -62,7 +62,7 @@ export default function ActivityBar() {
               aria-label={label}
               className="flex size-6 shrink-0 place-items-center rounded-full bg-white transition-colors hover:bg-black/5 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-vjyellow"
             >
-              <IconComp aria-hidden="true" className="shrink-0 text-[16px] text-vjred" />
+              <IconComp aria-hidden="true" className="shrink-0 text-base text-vjred" />
             </Link>
           ))}
         </div>

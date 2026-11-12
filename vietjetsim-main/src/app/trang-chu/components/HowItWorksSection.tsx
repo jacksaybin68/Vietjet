@@ -108,7 +108,7 @@ export default function HowItWorksSection() {
     <section ref={sectionRef} className="bg-white">
       {/* Attractive Destinations */}
       <div className="py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-5 reveal-left">
             <span className="vj-section-label">Điểm đến hấp dẫn</span>
             <h2
@@ -145,7 +145,7 @@ export default function HowItWorksSection() {
                     >
                       {dest?.name}
                     </h3>
-                    <p className="text-white/60 text-[10px] font-bold tracking-widest uppercase mt-0.5 font-koho-bold">
+                    <p className="text-white/60 text-2xs font-bold tracking-widest uppercase mt-0.5 font-koho-bold">
                       {dest?.code}
                     </p>
                   </div>
@@ -158,7 +158,7 @@ export default function HowItWorksSection() {
 
       {/* How it works - 3 steps */}
       <div className="py-10 border-t border-gray-100" style={{ background: '#F7F7F7' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 reveal-up">
             <span className="vj-section-label">Đơn giản &amp; Nhanh chóng</span>
             <h2
@@ -179,7 +179,7 @@ export default function HowItWorksSection() {
               <div
                 key={step?.num}
                 style={{ transitionDelay: `${i * 150}ms` }}
-                className="relative bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 reveal-up z-10 cursor-default"
+                className="relative bg-white rounded-vj p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 reveal-up z-10 cursor-default"
                 onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(236,32,41,0.2)')}
                 onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'rgb(243,244,246)')}
               >
@@ -193,7 +193,7 @@ export default function HowItWorksSection() {
                   {step?.num}
                 </div>
                 <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm mb-4"
+                  className="w-12 h-12 rounded-vj flex items-center justify-center shadow-sm mb-4"
                   style={{ background: step.color }}
                 >
                   <step.Icon className="w-6 h-6 text-white" />

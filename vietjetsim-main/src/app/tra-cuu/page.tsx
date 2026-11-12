@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { Icon } from '@/shared/components/ui';
-import { Header, Footer } from '@/shared/components/navigation';
+import { Header, Footer, PageHero } from '@/shared/components/navigation';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 import { useAuth } from '@/contexts/AuthContext';
@@ -150,271 +150,263 @@ export default function TrackBookingPage() {
       <Header />
       <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
 
-      {/* Header */}
-      <header className="bg-gradient-red text-white">
-        <div className="max-w-5xl mx-auto px-4 py-8 sm:py-12 text-center">
-          <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
-            <Icon name="MagnifyingGlassIcon" size={28} className="text-white" />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black mb-1 font-heading-sm">Tra Cứu Đặt Chỗ</h1>
-          <p className="text-white/80 text-sm font-koho">
-            Nhập mã đặt chỗ của bạn để xem thông tin chuyến bay
-          </p>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-semibold transition-colors border border-white/20"
-          >
-            <Icon name="ArrowLeftIcon" size={16} />
-            Về trang chủ
-          </Link>
-        </div>
-      </header>
+      {/* Header — PageHero chuẩn (gradient 20.12deg), container 1200px */}
+      <PageHero
+        eyebrow="Tra cứu"
+        iconName="MagnifyingGlassIcon"
+        title="Tra Cứu Đặt Chỗ"
+        description="Nhập mã đặt chỗ của bạn để xem thông tin chuyến bay"
+      />
 
-      <main id="main-content" className="max-w-2xl mx-auto px-4 py-8">
-        {/* Not signed in — a booking code is only 6 characters, so the lookup
+      <main id="main-content" className="mx-auto w-full max-w-[1200px] px-4 py-8">
+        <div className="mx-auto w-full max-w-2xl">
+          {/* Not signed in — a booking code is only 6 characters, so the lookup
             is deliberately restricted to the signed-in customer's own bookings
             rather than exposed as a public search. */}
-        {!user && (
-          <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center shadow-sm">
-            <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Icon name="LockClosedIcon" size={32} className="text-amber-600" />
+          {!user && (
+            <div className="bg-white rounded-vj border border-stone-200 p-8 text-center shadow-sm">
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Icon name="LockClosedIcon" size={32} className="text-amber-600" />
+              </div>
+              <h2 className="text-xl font-bold text-stone-900 mb-2">Cần đăng nhập để tra cứu</h2>
+              <p className="text-stone-500 mb-6 text-sm max-w-md mx-auto">
+                Mã đặt chỗ chỉ gồm 6 ký tự, nên tra cứu công khai sẽ khiến bất kỳ ai cũng có thể dò
+                ra hành trình của người khác. Hãy đăng nhập — tra cứu chỉ hiển thị các chuyến của
+                chính bạn.
+              </p>
+              <Link
+                href="/dang-nhap?redirect=%2Ftra-cuu"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-vj hover:bg-primary-dark transition-colors"
+              >
+                <Icon name="ArrowRightIcon" size={18} />
+                Đăng nhập
+              </Link>
             </div>
-            <h2 className="text-xl font-bold text-stone-900 mb-2">Cần đăng nhập để tra cứu</h2>
-            <p className="text-stone-500 mb-6 text-sm max-w-md mx-auto">
-              Mã đặt chỗ chỉ gồm 6 ký tự, nên tra cứu công khai sẽ khiến bất kỳ ai cũng có thể dò ra
-              hành trình của người khác. Hãy đăng nhập — tra cứu chỉ hiển thị các chuyến của chính
-              bạn.
-            </p>
-            <Link
-              href="/dang-nhap?redirect=%2Ftra-cuu"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition-colors"
-            >
-              <Icon name="ArrowRightIcon" size={18} />
-              Đăng nhập
-            </Link>
-          </div>
-        )}
+          )}
 
-        {/* Search Form */}
-        {user && !result && !notFound && (
-          <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
-            <div className="p-6 space-y-4">
-              <div>
-                {/* `htmlFor`/`id` so the input has an accessible name. A screen
+          {/* Search Form */}
+          {user && !result && !notFound && (
+            <div className="bg-white rounded-vj border border-stone-200 overflow-hidden shadow-sm">
+              <div className="p-6 space-y-4">
+                <div>
+                  {/* `htmlFor`/`id` so the input has an accessible name. A screen
                     reader otherwise announces an unnamed field, and assistive
                     tech and tests have no way to target it. */}
-                <label
-                  htmlFor="pnr"
-                  className="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5"
-                >
-                  Mã đặt chỗ (PNR)
-                </label>
-                <div className="relative">
-                  <Icon
-                    name="TicketIcon"
-                    size={18}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
-                  />
-                  <input
-                    type="text"
-                    id="pnr"
-                    value={pnr}
-                    onChange={(e) => setPnr(e.target.value.toUpperCase())}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    placeholder="VD: FG7KH9"
-                    className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                    // 6 for the codes 034 generates, but legacy `VJ644052`
-                    // rows are 8 and must still resolve, so leave headroom.
-                    maxLength={12}
-                  />
+                  <label
+                    htmlFor="pnr"
+                    className="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5"
+                  >
+                    Mã đặt chỗ (PNR)
+                  </label>
+                  <div className="relative">
+                    <Icon
+                      name="TicketIcon"
+                      size={18}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+                    />
+                    <input
+                      type="text"
+                      id="pnr"
+                      value={pnr}
+                      onChange={(e) => setPnr(e.target.value.toUpperCase())}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                      placeholder="VD: FG7KH9"
+                      className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-vj text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                      // 6 for the codes 034 generates, but legacy `VJ644052`
+                      // rows are 8 and must still resolve, so leave headroom.
+                      maxLength={12}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700">
-                <span className="font-semibold">Đang xem tài khoản:</span>{' '}
-                <code className="font-mono">{user.email}</code> — chỉ các đặt chỗ của tài khoản này
-                được hiển thị.
-              </div>
+                <div className="bg-blue-50 border border-blue-200 rounded-vj p-3 text-xs text-blue-700">
+                  <span className="font-semibold">Đang xem tài khoản:</span>{' '}
+                  <code className="font-mono">{user.email}</code> — chỉ các đặt chỗ của tài khoản
+                  này được hiển thị.
+                </div>
 
-              <button
-                onClick={handleSearch}
-                disabled={loading}
-                className="w-full py-3 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Đang tra cứu...
-                  </>
-                ) : (
-                  <>
-                    <Icon name="MagnifyingGlassIcon" size={18} />
-                    Tra cứu
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Not Found */}
-        {notFound && (
-          <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center shadow-sm">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Icon name="ExclamationCircleIcon" size={32} className="text-red-600" />
-            </div>
-            <h2 className="text-xl font-bold text-stone-900 mb-2">Không tìm thấy đặt chỗ</h2>
-            <p className="text-stone-500 mb-6 text-sm">
-              Không có đặt chỗ nào của tài khoản này khớp với mã bạn đã nhập. Vui lòng kiểm tra lại
-              thông tin.
-            </p>
-            <button
-              onClick={handleReset}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition-colors"
-            >
-              <Icon name="ArrowPathIcon" size={18} />
-              Thử lại
-            </button>
-          </div>
-        )}
-
-        {/* Result Card */}
-        {result && (
-          <div className="space-y-4">
-            {/* Status Banner */}
-            <div
-              className="px-5 py-3 rounded-xl flex items-center justify-between"
-              style={{ backgroundColor: statusBadge(result.status).bg }}
-            >
-              <div className="flex items-center gap-2">
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: statusBadge(result.status).color }}
-                />
-                <span
-                  className="font-bold text-sm"
-                  style={{ color: statusBadge(result.status).color }}
+                <button
+                  onClick={handleSearch}
+                  disabled={loading}
+                  className="w-full py-3 bg-primary hover:bg-primary-dark text-white font-bold rounded-vj transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {statusBadge(result.status).label}
-                </span>
+                  {loading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Đang tra cứu...
+                    </>
+                  ) : (
+                    <>
+                      <Icon name="MagnifyingGlassIcon" size={18} />
+                      Tra cứu
+                    </>
+                  )}
+                </button>
               </div>
+            </div>
+          )}
+
+          {/* Not Found */}
+          {notFound && (
+            <div className="bg-white rounded-vj border border-stone-200 p-8 text-center shadow-sm">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Icon name="ExclamationCircleIcon" size={32} className="text-red-600" />
+              </div>
+              <h2 className="text-xl font-bold text-stone-900 mb-2">Không tìm thấy đặt chỗ</h2>
+              <p className="text-stone-500 mb-6 text-sm">
+                Không có đặt chỗ nào của tài khoản này khớp với mã bạn đã nhập. Vui lòng kiểm tra
+                lại thông tin.
+              </p>
               <button
                 onClick={handleReset}
-                className="text-xs font-semibold text-stone-500 hover:text-primary transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-vj hover:bg-primary-dark transition-colors"
               >
-                Tra cứu khác
+                <Icon name="ArrowPathIcon" size={18} />
+                Thử lại
               </button>
             </div>
+          )}
 
-            {/* Booking Card */}
-            <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
-              {/* Header */}
-              <div className="px-6 py-4 bg-gradient-to-r from-[var(--vj-navy)] to-[#0F1E3A] flex items-center justify-between">
+          {/* Result Card */}
+          {result && (
+            <div className="space-y-4">
+              {/* Status Banner */}
+              <div
+                className="px-5 py-3 rounded-vj flex items-center justify-between"
+                style={{ backgroundColor: statusBadge(result.status).bg }}
+              >
                 <div className="flex items-center gap-2">
-                  <Icon name="PaperAirplaneIcon" size={18} className="text-white" />
-                  <span className="text-white font-bold">{result.flightNo}</span>
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: statusBadge(result.status).color }}
+                  />
+                  <span
+                    className="font-bold text-sm"
+                    style={{ color: statusBadge(result.status).color }}
+                  >
+                    {statusBadge(result.status).label}
+                  </span>
                 </div>
-                <span className="text-white/70 text-sm font-mono">{result.pnr}</span>
+                <button
+                  onClick={handleReset}
+                  className="text-xs font-semibold text-stone-500 hover:text-primary transition-colors"
+                >
+                  Tra cứu khác
+                </button>
               </div>
 
-              {/* Flight Route */}
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-black text-[var(--vj-navy)]">
-                      {result.departTime}
+              {/* Booking Card */}
+              <div className="bg-white rounded-vj border border-stone-200 overflow-hidden shadow-sm">
+                {/* Header */}
+                <div className="px-6 py-4 bg-gradient-to-r from-[var(--vj-navy)] to-vj-navy-deepest flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Icon name="PaperAirplaneIcon" size={18} className="text-white" />
+                    <span className="text-white font-bold">{result.flightNo}</span>
+                  </div>
+                  <span className="text-white/70 text-sm font-mono">{result.pnr}</span>
+                </div>
+
+                {/* Flight Route */}
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-black text-[var(--vj-navy)]">
+                        {result.departTime}
+                      </div>
+                      <div className="text-sm font-bold text-stone-600 mt-1">{result.from}</div>
+                      <div className="text-xs text-stone-400">{result.fromCity}</div>
                     </div>
-                    <div className="text-sm font-bold text-stone-600 mt-1">{result.from}</div>
-                    <div className="text-xs text-stone-400">{result.fromCity}</div>
+
+                    <div className="flex-1 mx-6 flex flex-col items-center">
+                      <div className="text-xs text-stone-400 mb-1">Bay thẳng</div>
+                      <div className="w-full h-px bg-stone-300 relative">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2">
+                          <Icon
+                            name="PaperAirplaneIcon"
+                            size={16}
+                            className="text-primary rotate-90"
+                          />
+                        </div>
+                      </div>
+                      <div className="text-xs text-stone-400 mt-1">{result.date}</div>
+                    </div>
+
+                    <div className="text-center">
+                      <div className="text-2xl font-black text-[var(--vj-navy)]">
+                        {result.arriveTime}
+                      </div>
+                      <div className="text-sm font-bold text-stone-600 mt-1">{result.to}</div>
+                      <div className="text-xs text-stone-400">{result.toCity}</div>
+                    </div>
                   </div>
 
-                  <div className="flex-1 mx-6 flex flex-col items-center">
-                    <div className="text-xs text-stone-400 mb-1">Bay thẳng</div>
-                    <div className="w-full h-px bg-stone-300 relative">
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2">
-                        <Icon
-                          name="PaperAirplaneIcon"
-                          size={16}
-                          className="text-primary rotate-90"
-                        />
+                  {/* Divider */}
+                  <div className="relative border-t-2 border-dashed border-stone-200 my-4">
+                    <div className="absolute -left-3 -top-3 w-6 h-6 bg-stone-50 rounded-full border border-stone-200" />
+                    <div className="absolute -right-3 -top-3 w-6 h-6 bg-stone-50 rounded-full border border-stone-200" />
+                  </div>
+
+                  {/* Passenger Details */}
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <div className="text-xs text-stone-400 uppercase">Hành khách</div>
+                      <div className="font-semibold text-stone-800">{result.passengerName}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-stone-400 uppercase">Ghế ngồi</div>
+                      <div className="font-bold text-primary">{result.seat}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-stone-400 uppercase">Hạng vé</div>
+                      <div className="font-semibold text-stone-800">{result.class}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-stone-400 uppercase">Giá vé</div>
+                      <div className="font-bold text-stone-800">
+                        {result.price.toLocaleString('vi-VN')}₫
                       </div>
                     </div>
-                    <div className="text-xs text-stone-400 mt-1">{result.date}</div>
                   </div>
 
-                  <div className="text-center">
-                    <div className="text-2xl font-black text-[var(--vj-navy)]">
-                      {result.arriveTime}
+                  {/* QR Code Mock */}
+                  <div className="flex flex-col items-center p-4 bg-stone-50 rounded-vj border border-stone-200">
+                    <div className="w-28 h-28 bg-white rounded-vj flex items-center justify-center border-2 border-dashed border-stone-300 mb-2">
+                      <Icon name="QrCodeIcon" size={48} className="text-stone-400" />
                     </div>
-                    <div className="text-sm font-bold text-stone-600 mt-1">{result.to}</div>
-                    <div className="text-xs text-stone-400">{result.toCity}</div>
+                    <p className="text-xs text-stone-500 text-center">
+                      Xuất trình mã QR tại sân bay
+                    </p>
                   </div>
-                </div>
-
-                {/* Divider */}
-                <div className="relative border-t-2 border-dashed border-stone-200 my-4">
-                  <div className="absolute -left-3 -top-3 w-6 h-6 bg-stone-50 rounded-full border border-stone-200" />
-                  <div className="absolute -right-3 -top-3 w-6 h-6 bg-stone-50 rounded-full border border-stone-200" />
-                </div>
-
-                {/* Passenger Details */}
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <div className="text-xs text-stone-400 uppercase">Hành khách</div>
-                    <div className="font-semibold text-stone-800">{result.passengerName}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-stone-400 uppercase">Ghế ngồi</div>
-                    <div className="font-bold text-primary">{result.seat}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-stone-400 uppercase">Hạng vé</div>
-                    <div className="font-semibold text-stone-800">{result.class}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-stone-400 uppercase">Giá vé</div>
-                    <div className="font-bold text-stone-800">
-                      {result.price.toLocaleString('vi-VN')}₫
-                    </div>
-                  </div>
-                </div>
-
-                {/* QR Code Mock */}
-                <div className="flex flex-col items-center p-4 bg-stone-50 rounded-xl border border-stone-200">
-                  <div className="w-28 h-28 bg-white rounded-lg flex items-center justify-center border-2 border-dashed border-stone-300 mb-2">
-                    <Icon name="QrCodeIcon" size={48} className="text-stone-400" />
-                  </div>
-                  <p className="text-xs text-stone-500 text-center">Xuất trình mã QR tại sân bay</p>
                 </div>
               </div>
-            </div>
 
-            {/* Actions */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <Link
-                href={`/dat-ve/${result.pnr}`}
-                className="flex items-center justify-center gap-2 py-3 bg-[#FFCC00] hover:bg-[#E6B800] text-gray-950 font-bold rounded-xl text-xs uppercase tracking-wider transition-all shadow-xs"
-              >
-                <Icon name="DocumentTextIcon" size={18} />
-                Xem hành trình
-              </Link>
-              <Link
-                href={`/lam-thu-tuc?code=${result.pnr}`}
-                className="flex items-center justify-center gap-2 py-3 bg-white border border-stone-200 rounded-xl font-semibold text-stone-700 hover:border-primary hover:text-primary transition-all text-xs"
-              >
-                <Icon name="TicketIcon" size={18} />
-                Check-in
-              </Link>
-              <Link
-                href="/tim-ve"
-                className="flex items-center justify-center gap-2 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition-all text-xs"
-              >
-                <Icon name="PlusIcon" size={18} />
-                Đặt vé mới
-              </Link>
+              {/* Actions */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <Link
+                  href={`/dat-ve/${result.pnr}`}
+                  className="flex items-center justify-center gap-2 py-3 bg-accent hover:bg-accent-light text-gray-950 font-bold rounded-vj text-xs uppercase tracking-wider transition-all shadow-xs"
+                >
+                  <Icon name="DocumentTextIcon" size={18} />
+                  Xem hành trình
+                </Link>
+                <Link
+                  href={`/lam-thu-tuc?code=${result.pnr}`}
+                  className="flex items-center justify-center gap-2 py-3 bg-white border border-stone-200 rounded-vj font-semibold text-stone-700 hover:border-primary hover:text-primary transition-all text-xs"
+                >
+                  <Icon name="TicketIcon" size={18} />
+                  Check-in
+                </Link>
+                <Link
+                  href="/tim-ve"
+                  className="flex items-center justify-center gap-2 py-3 bg-primary text-white rounded-vj font-semibold hover:bg-primary-dark transition-all text-xs"
+                >
+                  <Icon name="PlusIcon" size={18} />
+                  Đặt vé mới
+                </Link>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </main>
       <Footer />
     </div>

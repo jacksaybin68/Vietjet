@@ -28,9 +28,9 @@ export default function AuthShell({
         id="main-content"
         className="flex-1 flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8 pb-28"
       >
-        <div className="w-full max-w-[1040px] rounded-3xl bg-white/98 backdrop-blur-md shadow-[0_25px_60px_-15px_rgba(215,25,32,0.18),0_12px_36px_rgba(0,0,0,0.08)] border border-white/80 ring-1 ring-black/5 overflow-hidden grid lg:grid-cols-[1.12fr_0.88fr] my-auto">
+        <div className="w-full max-w-[1040px] rounded-vj bg-[rgba(255,255,255,0.98)] backdrop-blur-md shadow-[0_25px_60px_-15px_rgba(215,25,32,0.18),0_12px_36px_rgba(0,0,0,0.08)] border border-white/80 ring-1 ring-black/5 overflow-hidden grid lg:grid-cols-[1.12fr_0.88fr] my-auto">
           {/* Accent red-gold top bar */}
-          <div className="h-1.5 w-full bg-gradient-to-r from-[#D71920] via-[#FFCC00] to-[#D71920] col-span-full" />
+          <div className="h-1.5 w-full bg-gradient-to-r from-primary-dark via-accent to-primary-dark col-span-full" />
 
           {/* Cột trái: Form đăng nhập / đăng ký */}
           <section className="p-6 sm:p-8 lg:p-10 flex flex-col justify-start bg-white">
@@ -63,12 +63,12 @@ export default function AuthShell({
                 href="https://vikkibank.vn/mua-ngoai-te-tren-app-vikki/?utm_source=vietjet&utm_medium=referral&utm_campaign=always_on"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group block relative w-full h-full max-h-[590px] rounded-2xl overflow-hidden shadow-sm border border-sky-100/80 transition-transform duration-300 hover:scale-[1.01]"
+                className="group block relative w-full h-full max-h-[590px] rounded-vj overflow-hidden shadow-sm border border-sky-100/80 transition-transform duration-300 hover:scale-[1.01]"
               >
                 <img
                   src="/images/hero/banner-chuyenbay-ngoai-te.jpg"
                   alt="Ngoại tệ sẵn sàng - Hành trình an tâm - Vietjet Air"
-                  className="w-full h-full object-cover rounded-2xl"
+                  className="w-full h-full object-cover rounded-vj"
                   loading="lazy"
                 />
               </a>
@@ -101,7 +101,7 @@ export default function AuthShell({
                 </div>
 
                 {/* Khung viền vàng 3 bước */}
-                <div className="mt-5 rounded-3xl border-2 border-vjyellow bg-white p-5 sm:p-6 shadow-sm space-y-4">
+                <div className="mt-5 rounded-vj border-2 border-vjyellow bg-white p-5 sm:p-6 shadow-sm space-y-4">
                   {/* BƯỚC 1 */}
                   <div className="flex items-center gap-4">
                     <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full border-2 border-vjamber bg-white text-vjamber flex items-center justify-center shrink-0 shadow-sm">
@@ -198,7 +198,7 @@ export default function AuthShell({
       {/* Amy Mascot với tooltip "Xin chào!" khớp ảnh tham chiếu */}
       <div className="fixed right-6 bottom-4 z-40 flex items-end pointer-events-none select-none">
         <div className="relative mb-8 mr-1">
-          <div className="bg-white text-gray-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-md border border-gray-200">
+          <div className="bg-white text-gray-800 text-xs font-bold px-3 py-1.5 rounded-vj shadow-md border border-gray-200">
             Xin chào!
           </div>
           <div className="w-2.5 h-2.5 bg-white border-r border-b border-gray-200 rotate-45 ml-auto mr-3 -mt-1.5" />

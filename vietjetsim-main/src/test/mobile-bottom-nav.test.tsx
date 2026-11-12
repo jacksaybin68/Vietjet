@@ -78,7 +78,11 @@ describe('MobileBottomNav', () => {
     // makes the bottom rows hard to hit on a phone.
     expect(BOTTOM_NAV_HEIGHT).toBeGreaterThanOrEqual(56);
     screen.getAllByRole('link').forEach((link) => {
-      expect(link.className).toContain(`min-h-[56px]`);
+      // Link height tracks the bar height (site thật: 62px), nên ta chỉ chặn
+      // dưới mức tối thiểu 56px thay vì ghim một con số cứng.
+      const minHeight = /min-h-\[(\d+)px\]/.exec(link.className)?.[1];
+      expect(minHeight).toBeDefined();
+      expect(Number(minHeight)).toBeGreaterThanOrEqual(56);
     });
   });
 });

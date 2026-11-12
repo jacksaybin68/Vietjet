@@ -29,6 +29,7 @@ vi.mock('@/hooks/useToast', () => ({
 vi.mock('@/shared/components/navigation', () => ({
   Header: () => null,
   Footer: () => null,
+  PageHero: () => null,
 }));
 
 vi.mock('@/shared/components/feedback', () => ({

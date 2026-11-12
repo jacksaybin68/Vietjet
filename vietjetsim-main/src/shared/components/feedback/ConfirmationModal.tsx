@@ -23,7 +23,7 @@ const variantConfig: Record<ConfirmationModalVariant, { icon: string; iconBg: st
   },
   warning: {
     icon: '!',
-    iconBg: 'bg-yellow-100 text-[#E6BF00]',
+    iconBg: 'bg-yellow-100 text-vj-gold-ink-6',
   },
   info: {
     icon: 'i',

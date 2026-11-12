@@ -22,7 +22,7 @@ export default function Mascot({ greeting = 'Xin chào!', className = 'h-24' }: 
   return (
     <span className={`relative flex items-end ${className}`}>
       {greeting ? (
-        <span className="absolute bottom-[46%] right-[86%] hidden whitespace-nowrap rounded-2xl rounded-br-[5px] bg-white px-3 py-1.5 text-xs font-bold text-navy shadow-[0_6px_18px_rgba(0,0,0,0.16)] ring-1 ring-black/5 sm:block">
+        <span className="absolute bottom-[46%] right-[86%] hidden whitespace-nowrap rounded-vj rounded-br-[5px] bg-white px-3 py-1.5 text-xs font-bold text-navy shadow-[0_6px_18px_rgba(0,0,0,0.16)] ring-1 ring-black/5 sm:block">
           {greeting}
         </span>
       ) : null}

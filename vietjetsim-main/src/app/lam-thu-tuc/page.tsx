@@ -271,7 +271,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
             style={{ width: 'min(1200px, calc(100vw - 24px))' }}
           >
             {/* Tab active + tab inactive matching Screenshot 1 */}
-            <div className="flex w-full items-end bg-white/95 sm:bg-transparent shadow-xs sm:shadow-none rounded-t-lg overflow-hidden border-b border-gray-200 sm:border-b-0">
+            <div className="flex w-full items-end bg-white/95 sm:bg-transparent shadow-xs sm:shadow-none rounded-t-vj overflow-hidden border-b border-gray-200 sm:border-b-0">
               <div
                 className="flex-1 sm:flex-initial sm:w-[199px] flex items-center justify-center gap-2 select-none border-b-2 border-primary sm:border-b-0 px-2 sm:px-4"
                 style={{
@@ -324,7 +324,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                   <form onSubmit={handleSearch} className="mt-5 flex flex-col items-center">
                     <div className="flex w-full flex-col items-center gap-3">
                       {/* Ô nhập 1: Mã đặt chỗ */}
-                      <div className="relative flex h-[46px] w-full max-w-[410px] items-center rounded-lg border border-gray-200 bg-white px-4 shadow-xs">
+                      <div className="relative flex h-[47px] w-full max-w-[410px] items-center rounded-vj border border-gray-200 bg-white px-4 shadow-xs">
                         <input
                           id="booking-code"
                           type="text"
@@ -337,7 +337,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                         {!bookingCode && (
                           <label
                             htmlFor="booking-code"
-                            className="pointer-events-none absolute left-4 flex select-none items-center text-sm sm:text-base font-semibold text-gray-500 transition-opacity peer-focus:opacity-30"
+                            className="pointer-events-none absolute left-4 flex select-none items-center text-lg2 font-semibold text-gray-500 transition-opacity peer-focus:opacity-30"
                           >
                             Mã đặt chỗ<span className="ml-0.5 text-primary">*</span>
                           </label>
@@ -345,7 +345,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                       </div>
 
                       {/* Ô nhập 2: Họ */}
-                      <div className="relative flex h-[46px] w-full max-w-[410px] items-center rounded-lg border border-gray-200 bg-white px-4 shadow-xs">
+                      <div className="relative flex h-[47px] w-full max-w-[410px] items-center rounded-vj border border-gray-200 bg-white px-4 shadow-xs">
                         <input
                           id="last-name"
                           type="text"
@@ -358,7 +358,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                         {!lastName && (
                           <label
                             htmlFor="last-name"
-                            className="pointer-events-none absolute left-4 flex select-none items-center text-sm sm:text-base font-semibold text-gray-500 transition-opacity peer-focus:opacity-30"
+                            className="pointer-events-none absolute left-4 flex select-none items-center text-lg2 font-semibold text-gray-500 transition-opacity peer-focus:opacity-30"
                           >
                             Họ<span className="ml-0.5 text-primary">*</span>
                           </label>
@@ -378,7 +378,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                         background:
                           'linear-gradient(26.73deg, #F9A51A 0%, #FBB612 50%, #FFDD00 100%)',
                         color: '#000000',
-                        fontFamily: 'JambonoMedium, sans-serif',
+                        fontFamily: "'KoHo', ui-sans-serif, system-ui, sans-serif",
                         fontSize: '16px',
                         fontWeight: 700,
                         fontStyle: 'italic',
@@ -412,7 +412,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                   </div>
 
                   {/* Khung vàng: bo 8, nền trắng, viền #EDCE00, trên mobile xếp dọc, desktop xếp 2 cột */}
-                  <div className="overflow-hidden rounded-[8px] border border-vjyellow bg-white divide-y md:divide-y-0 md:divide-x divide-vjyellow grid grid-cols-1 md:grid-cols-2">
+                  <div className="overflow-hidden rounded-vj border border-vjyellow bg-white divide-y md:divide-y-0 md:divide-x divide-vjyellow grid grid-cols-1 md:grid-cols-2">
                     <div className="p-4 sm:p-5 font-koho text-sm sm:text-base font-medium leading-[22px] sm:leading-[24px] text-gray-900">
                       <h3 className="mb-2 sm:mb-3 font-bold text-base leading-[24px] text-gray-900">
                         Lưu ý sau khi Online Check-in:
@@ -587,14 +587,14 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
           {/* ============ BƯỚC 2: XÁC NHẬN ============ */}
           {step === 'confirm' && checkInData && (
             <div className="mx-auto max-w-[700px]">
-              <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] shadow-lg">
+              <div className="overflow-hidden rounded-vj border border-[var(--border)] bg-[var(--background)] shadow-lg">
                 <div className="bg-[var(--vj-red)] px-5 py-3 text-white font-black text-sm uppercase flex items-center gap-2">
                   <MdChair className="h-4 w-4 text-[var(--vj-yellow)]" />
                   Xác nhận và chọn chỗ ngồi
                 </div>
 
                 {/* Récap vol */}
-                <div className="p-5 bg-[var(--vj-sky)] rounded-lg border border-[var(--vj-sky)]">
+                <div className="p-5 bg-[var(--vj-sky)] rounded-vj border border-[var(--vj-sky)]">
                   <div className="flex items-center justify-between text-xs text-[var(--vj-text-gray)] mb-1">
                     <span className="font-bold text-[var(--vj-red)]">{checkInData.flightNo}</span>
                     <span className="font-bold">{checkInData.date}</span>
@@ -649,7 +649,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                         <button
                           type="button"
                           onClick={() => setShowSeatModal(true)}
-                          className="px-2.5 py-1 text-2xs font-bold text-[#005BAA] bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors shadow-2xs cursor-pointer flex items-center gap-1"
+                          className="px-2.5 py-1 text-2xs font-bold text-vj-bank-blue bg-blue-50 hover:bg-blue-100 rounded-vj border border-blue-200 transition-colors shadow-2xs cursor-pointer flex items-center gap-1"
                         >
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                           Đổi chỗ ngồi
@@ -701,7 +701,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                       type="button"
                       onClick={handleCheckIn}
                       disabled={loading}
-                      className="vj-cta w-2/3 rounded-full py-3 text-sm font-black uppercase text-[var(--vj-red)] disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
+                      className="vj-cta w-2/3 rounded-full py-3 text-sm font-medium uppercase disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
                     >
                       {loading ? (
                         <MdAccessTime className="h-4 w-4 animate-spin" />
@@ -744,7 +744,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
               </div>
 
               {/* Boarding pass style Vietjet */}
-              <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] shadow-vj-lg">
+              <div className="overflow-hidden rounded-vj border border-[var(--border)] bg-[var(--background)] shadow-vj-lg">
                 {/* top stamp */}
                 <div className="vj-menubar px-5 py-4">
                   <div className="flex items-center gap-2">
@@ -834,13 +834,13 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
               <div className="flex justify-center gap-3">
                 <button
                   onClick={() => window.print()}
-                  className="rounded-lg border border-[rgb(var(--vj-navy-rgb))]/20 bg-[var(--background)] px-6 py-2.5 text-sm font-bold uppercase text-[var(--vj-text-gray)] hover:bg-[var(--surface-2)]"
+                  className="rounded-vj border border-[rgb(var(--vj-navy-rgb))]/20 bg-[var(--background)] px-6 py-2.5 text-sm font-bold uppercase text-[var(--vj-text-gray)] hover:bg-[var(--surface-2)]"
                 >
                   In thẻ lên máy bay
                 </button>
                 <Link
                   href="/trang-chu"
-                  className="rounded-xl bg-[var(--vj-yellow)] px-6 py-2.5 text-sm font-black uppercase text-[var(--vj-red)] shadow-lg hover:bg-[var(--vj-yellow-2)] transition-colors"
+                  className="vj-cta px-6 py-2.5 text-sm font-medium uppercase shadow-lg transition-colors"
                 >
                   Về trang chủ
                 </Link>

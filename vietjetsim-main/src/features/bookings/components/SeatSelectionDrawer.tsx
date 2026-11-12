@@ -242,7 +242,7 @@ export default function SeatSelectionDrawer({
       {/* Drawer content */}
       <div className="relative w-full max-w-lg bg-white h-full shadow-2xl flex flex-col z-10 animate-slideInRight">
         {/* Header with Vietjet curve top-right (Screenshot 9) */}
-        <div className="relative bg-[#C4161C] text-white px-4 py-3 flex items-center justify-between shadow-md overflow-hidden">
+        <div className="relative bg-primary-dark text-white px-4 py-3 flex items-center justify-between shadow-md overflow-hidden">
           <div className="w-8 shrink-0" />
           <h2 className="font-sans font-black italic tracking-wide text-base sm:text-lg uppercase text-white text-center">
             CHỌN CHỖ NGỒI YÊU THÍCH
@@ -299,8 +299,8 @@ export default function SeatSelectionDrawer({
 
         {/* Passenger Card matching Screenshot 9 */}
         <div className="p-4 bg-gray-50 border-b border-gray-200">
-          <div className="max-w-xs mx-auto overflow-hidden rounded-xl border border-red-200 shadow-sm bg-white text-center">
-            <div className="bg-[#C4161C] py-2 px-4 text-white">
+          <div className="max-w-xs mx-auto overflow-hidden rounded-vj border border-red-200 shadow-sm bg-white text-center">
+            <div className="bg-primary-dark py-2 px-4 text-white">
               <div className="text-3xs uppercase tracking-wider text-white/80">Người lớn</div>
               <div className="text-sm font-black uppercase tracking-tight">{passengerName}</div>
             </div>
@@ -315,7 +315,7 @@ export default function SeatSelectionDrawer({
         {/* Scrollable Cabin Area */}
         <div className="flex-1 overflow-y-auto px-4 py-3 bg-slate-50">
           {/* Banner */}
-          <div className="bg-gradient-to-r from-red-50 to-amber-50 rounded-lg p-3 mb-3 border border-red-100 flex items-center gap-3">
+          <div className="bg-gradient-to-r from-red-50 to-amber-50 rounded-vj p-3 mb-3 border border-red-100 flex items-center gap-3">
             <div className="relative w-14 h-14 shrink-0 rounded-full overflow-hidden bg-white shadow-sm border border-red-200">
               <Image
                 src="/images/hero/vj-flight-attendant.png"
@@ -331,7 +331,7 @@ export default function SeatSelectionDrawer({
 
           {/* Hold Timer */}
           {hasSelection && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5 mb-3 flex items-center justify-between">
+            <div className="bg-amber-50 border border-amber-200 rounded-vj p-2.5 mb-3 flex items-center justify-between">
               <span className="text-2xs font-bold text-amber-800">
                 Ghế được giữ trong:{' '}
                 <span className="font-black text-amber-900">{formatHoldTime(holdSecondsLeft)}</span>
@@ -349,7 +349,7 @@ export default function SeatSelectionDrawer({
           </div>
 
           {/* Seat Legend */}
-          <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm mb-4">
+          <div className="bg-white rounded-vj p-3 border border-gray-200 shadow-sm mb-4">
             <div className="grid grid-cols-2 gap-y-2 gap-x-3 text-xs2 font-medium text-gray-700">
               <div className="flex items-center gap-2">
                 <span className="w-3.5 h-3.5 rounded bg-yellow-500 shrink-0" />
@@ -397,7 +397,7 @@ export default function SeatSelectionDrawer({
           </div>
 
           {/* Seat Grid */}
-          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-inner">
+          <div className="bg-white rounded-vj p-3 border border-gray-200 shadow-inner">
             {/* Header letters */}
             <div className="flex items-center justify-between text-xs font-bold text-gray-600 mb-2 px-1">
               <div className="flex gap-2">

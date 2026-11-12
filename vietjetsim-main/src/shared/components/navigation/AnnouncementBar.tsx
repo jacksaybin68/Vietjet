@@ -84,22 +84,26 @@ export default function AnnouncementBar() {
   const message = messages[index] ?? messages[0];
   const move = (step: number) => setIndex((current) => (current + step + total) % total);
 
+  // Nút điều hướng thông báo: 25×25px (đo được trên site thật), bo tròn.
   const controlClass =
-    'grid h-8 w-8 place-items-center rounded-full text-[var(--foreground-muted)] transition-colors hover:bg-gray-100 hover:text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-gray-300';
+    'grid h-[25px] w-[25px] place-items-center rounded-full text-[var(--foreground-muted)] transition-colors hover:bg-gray-100 hover:text-[var(--foreground)] focus:outline-hidden focus:ring-1 focus:ring-gray-300';
 
   return (
     <div
       role="region"
       aria-label="Thông báo"
-      className="w-full min-h-[49px] bg-white text-[var(--foreground)] border-b border-gray-200 flex items-center"
+      // Site thật: cao 50px trên desktop / 35px trên mobile, nền #FDFDFD,
+      // container nội dung 1200px. Xem docs/qa/VIETJET_THAM_SO_GIAO_DIEN_2026-11-13.md §4.
+      className="w-full min-h-[35px] lg:min-h-[50px] bg-vj-announce-bg text-[var(--foreground)] border-b border-gray-200 flex items-center"
     >
-      <div className="mx-auto flex w-full max-w-[1240px] items-center gap-3.5 px-4 sm:px-6 py-2 text-sm sm:text-base2">
-        <RiNotification3Line aria-hidden="true" className="shrink-0 text-lg text-vjred" />
+      <div className="mx-auto flex w-full max-w-[1200px] items-center gap-3.5 px-4 sm:px-6 py-2 text-lg2 lg:text-lg2">
+        {/* Icon chuông: 24×26px (đo được trên site thật). */}
+        <RiNotification3Line aria-hidden="true" className="h-[26px] w-[24px] shrink-0 text-vjred" />
 
         <div
           aria-live="polite"
           title={message}
-          className="min-w-0 flex-1 truncate text-sm sm:text-base2 font-normal leading-[22px] text-[var(--foreground)] flex items-center gap-2"
+          className="min-w-0 flex-1 truncate text-lg2 font-medium leading-[20px] text-[var(--foreground)] flex items-center gap-2"
         >
           {message.startsWith('TIN MỚI') ? (
             <>

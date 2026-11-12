@@ -86,7 +86,7 @@ export default function CheckInHeader({ title = 'CHECK-IN' }: { title?: string }
             {/* Phải: 2 hàng (tiện ích trên, menu dưới) */}
             <div className="flex flex-col items-end justify-between">
               {/* Hàng trên: Cụm tiện ích */}
-              <div className="flex items-center gap-[10px] text-[12.5px] font-semibold text-white">
+              <div className="flex items-center gap-[10px] text-sm3 font-semibold text-white">
                 <a
                   href="tel:19001166"
                   className="flex items-center gap-1.5 text-white hover:text-vjyellow transition-colors"
@@ -137,7 +137,7 @@ export default function CheckInHeader({ title = 'CHECK-IN' }: { title?: string }
                       key={link.href}
                       href={link.href}
                       aria-current={active ? 'page' : undefined}
-                      className={`relative text-[13px] font-semibold uppercase text-white transition-colors ${
+                      className={`relative text-sm2 font-semibold uppercase text-white transition-colors ${
                         active ? 'font-extrabold' : 'hover:text-vjyellow'
                       }`}
                     >

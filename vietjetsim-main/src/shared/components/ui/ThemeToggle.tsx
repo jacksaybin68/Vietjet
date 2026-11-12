@@ -33,7 +33,7 @@ export function ThemeToggle() {
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 mt-2 w-40 py-2 bg-whiterounded-lg shadow-lg border border-gray-200z-50">
+          <div className="absolute right-0 mt-2 w-40 py-2 bg-white rounded-vj shadow-lg border border-gray-200 z-50">
             {options.map((option) => {
               const OptionIcon = option.icon;
               return (

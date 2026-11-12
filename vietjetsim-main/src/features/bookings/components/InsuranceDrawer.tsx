@@ -57,7 +57,7 @@ export default function InsuranceDrawer({
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs text-gray-700 leading-relaxed">
           {/* Banner */}
-          <div className="rounded-xl overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-600 text-white p-4 shadow-sm relative flex items-center min-h-[90px]">
+          <div className="rounded-vj overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-600 text-white p-4 shadow-sm relative flex items-center min-h-[90px]">
             <div className="relative z-10 max-w-[70%]">
               <h3 className="text-base font-black italic mb-1 text-white">Bảo hiểm du lịch,</h3>
               <p className="text-xs font-bold text-amber-200">
@@ -138,7 +138,7 @@ export default function InsuranceDrawer({
 
           {/* Radio choices matching Screenshot 1 */}
           <div className="space-y-2.5 pt-3 border-t border-gray-200">
-            <label className="flex items-center gap-3 cursor-pointer p-2.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+            <label className="flex items-center gap-3 cursor-pointer p-2.5 rounded-vj border border-gray-200 hover:bg-gray-50 transition-colors">
               <input
                 type="radio"
                 name="insurance_choice"
@@ -152,7 +152,7 @@ export default function InsuranceDrawer({
               </span>
             </label>
 
-            <label className="flex items-center gap-3 cursor-pointer p-2.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+            <label className="flex items-center gap-3 cursor-pointer p-2.5 rounded-vj border border-gray-200 hover:bg-gray-50 transition-colors">
               <input
                 type="radio"
                 name="insurance_choice"
@@ -173,7 +173,7 @@ export default function InsuranceDrawer({
         {/* Footer Red Bar matching Screenshot 1 */}
         <div className="bg-primary-dark text-white p-3 flex items-center justify-between shadow-lg">
           <div className="flex items-center gap-2 max-w-[65%]">
-            <div className="w-9 h-9 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-vj bg-white/20 flex items-center justify-center shrink-0">
               <RiShieldCheckLine size={20} className="text-white" />
             </div>
             <div className="text-xs2 leading-tight">
@@ -188,7 +188,7 @@ export default function InsuranceDrawer({
           <button
             type="button"
             onClick={handleConfirm}
-            className="bg-vjyellow hover:bg-accent-light text-gray-900 font-black px-6 py-2 rounded-lg text-sm shadow transition-all active:scale-95"
+            className="bg-vjyellow hover:bg-accent-light text-gray-900 font-black px-6 py-2 rounded-vj text-sm shadow transition-all active:scale-95"
           >
             Xác nhận
           </button>

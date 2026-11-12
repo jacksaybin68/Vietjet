@@ -58,7 +58,7 @@ export default function BookingBottomBar({
           <button
             type="button"
             onClick={onBack}
-            className="rounded-lg border border-[var(--border)] bg-white px-4 py-1.5 text-xs font-bold text-[var(--foreground-muted)] transition-colors hover:bg-[var(--surface-2)] sm:text-sm"
+            className="rounded-vj border border-[var(--border)] bg-white px-4 py-1.5 text-xs font-bold text-[var(--foreground-muted)] transition-colors hover:bg-[var(--surface-2)] sm:text-sm"
           >
             Quay lại
           </button>
@@ -82,7 +82,7 @@ export default function BookingBottomBar({
           form={formId}
           onClick={isSubmit ? undefined : action}
           disabled={isDisabled}
-          className="rounded-lg bg-[var(--primary)] hover:bg-[var(--primary-dark)] px-6 py-2 font-koho text-xs font-black text-white transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm shadow-sm"
+          className="rounded-vj bg-[var(--primary)] hover:bg-[var(--primary-dark)] px-6 py-2 font-koho text-xs font-black text-white transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm shadow-sm"
         >
           {label}
         </button>

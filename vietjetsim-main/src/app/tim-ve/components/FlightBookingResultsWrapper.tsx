@@ -218,8 +218,8 @@ export default function FlightBookingResultsWrapper({
   return (
     <>
       {/* Trip strip — full-bleed brand-yellow band directly under the red header */}
-      <div className="bg-[#FFCC00] text-gray-950 shadow-sm" data-testid="trip-board">
-        <div className="mx-auto flex max-w-[1368px] items-center justify-between gap-x-3 px-3 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-sm lg:px-8">
+      <div className="bg-accent text-gray-950 shadow-sm" data-testid="trip-board">
+        <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-x-3 px-3 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-sm lg:px-8">
           {/* Mobile "Tổng [X] VND ▾" button matching Screenshot 3 & 4 */}
           <div className="flex sm:hidden items-center">
             <button
@@ -252,7 +252,7 @@ export default function FlightBookingResultsWrapper({
               </button>
 
               {isPaxDropdownOpen && (
-                <div className="absolute left-0 top-full mt-2 z-50 w-72 rounded-xl bg-white p-4 shadow-xl border border-gray-200 text-gray-800 text-xs">
+                <div className="absolute left-0 top-full mt-2 z-50 w-72 rounded-vj bg-white p-4 shadow-xl border border-gray-200 text-gray-800 text-xs">
                   <div className="font-bold text-xs text-gray-900 mb-3 pb-2 border-b border-gray-100 flex justify-between items-center">
                     <span>Chọn số lượng hành khách</span>
                     <button
@@ -389,7 +389,7 @@ export default function FlightBookingResultsWrapper({
                   <button
                     type="button"
                     onClick={() => setIsPaxDropdownOpen(false)}
-                    className="w-full mt-3 py-1.5 bg-primary text-white font-bold rounded-lg hover:bg-red-700 transition-colors cursor-pointer text-center"
+                    className="w-full mt-3 py-1.5 bg-primary text-white font-bold rounded-vj hover:bg-red-700 transition-colors cursor-pointer text-center"
                   >
                     Xác nhận
                   </button>
@@ -421,7 +421,7 @@ export default function FlightBookingResultsWrapper({
           <div className="flex items-center gap-1.5 sm:gap-2">
             <div
               className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shadow-xs text-white font-bold transition-all ${
-                bookingStep === 1 ? 'bg-[#54B848]' : 'bg-[#FFA500]'
+                bookingStep === 1 ? 'bg-vj-step-green' : 'bg-vj-amber'
               }`}
               title="Chọn chuyến bay"
             >
@@ -429,7 +429,7 @@ export default function FlightBookingResultsWrapper({
             </div>
             <div
               className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shadow-xs text-white font-bold transition-all ${
-                bookingStep === 2 ? 'bg-[#54B848]' : 'bg-[#FFA500]'
+                bookingStep === 2 ? 'bg-vj-step-green' : 'bg-vj-amber'
               }`}
               title="Thông tin hành khách"
             >
@@ -437,7 +437,7 @@ export default function FlightBookingResultsWrapper({
             </div>
             <div
               className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shadow-xs text-white font-bold transition-all ${
-                bookingStep === 3 ? 'bg-[#54B848]' : 'bg-[#FFA500]'
+                bookingStep === 3 ? 'bg-vj-step-green' : 'bg-vj-amber'
               }`}
               title="Dịch vụ bổ sung"
             >
@@ -445,7 +445,7 @@ export default function FlightBookingResultsWrapper({
             </div>
             <div
               className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shadow-xs text-white font-bold transition-all ${
-                bookingStep === 4 ? 'bg-[#54B848]' : 'bg-[#FFA500]'
+                bookingStep === 4 ? 'bg-vj-step-green' : 'bg-vj-amber'
               }`}
               title="Thanh toán"
             >
@@ -455,7 +455,7 @@ export default function FlightBookingResultsWrapper({
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-[1368px] px-2 sm:px-6 lg:px-8 pt-3 sm:pt-5 pb-24 sm:pb-28 overflow-x-hidden">
+      <div className="mx-auto w-full max-w-[1200px] px-2 sm:px-6 lg:px-8 pt-3 sm:pt-5 pb-24 sm:pb-28 overflow-x-hidden">
         <div className="flex flex-col lg:flex-row gap-6 items-start w-full">
           {/* Cột trái: danh sách chuyến bay (~68%) */}
           {/* `w-full` là bắt buộc ở mobile: parent dùng `items-start`, nên cột
@@ -514,7 +514,7 @@ export default function FlightBookingResultsWrapper({
         <>
           {/* Desktop Sticky Bottom Bar */}
           <div className="hidden sm:block fixed bottom-0 left-0 right-0 z-[60] bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] py-3 px-4 sm:px-8">
-            <div className="mx-auto max-w-[1368px] flex items-center justify-between">
+            <div className="mx-auto max-w-[1200px] flex items-center justify-between">
               <div className="flex-1 flex flex-col items-center">
                 <span className="text-2xs text-gray-500 font-bold uppercase tracking-wider">
                   Tổng tiền
@@ -527,7 +527,7 @@ export default function FlightBookingResultsWrapper({
                 type="button"
                 onClick={handleContinue}
                 disabled={!bookings.outbound}
-                className="bg-[#FFCC00] hover:bg-[#FFD200] disabled:opacity-50 disabled:cursor-not-allowed text-gray-950 font-black text-sm px-10 py-2.5 rounded-full shadow transition-all active:scale-95 cursor-pointer"
+                className="vj-cta disabled:opacity-50 disabled:cursor-not-allowed text-sm px-10 py-2.5 rounded-full shadow transition-all active:scale-95 cursor-pointer"
               >
                 Đi tiếp
               </button>
@@ -540,14 +540,14 @@ export default function FlightBookingResultsWrapper({
               type="button"
               onClick={handleContinue}
               disabled={!bookings.outbound}
-              className="pointer-events-auto bg-[#FFCC00] hover:bg-[#FFD200] disabled:opacity-50 disabled:cursor-not-allowed text-gray-950 font-black text-base px-16 py-3 rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.2)] border border-yellow-400 active:scale-95 transition-all cursor-pointer"
+              className="vj-cta pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed text-base px-16 py-3 rounded-vj shadow-[0_8px_20px_rgba(0,0,0,0.2)] border border-yellow-400 active:scale-95 transition-all cursor-pointer"
             >
               Đi tiếp
             </button>
           </div>
 
           {/* Red bottom accent stripe matching sample image */}
-          <div className="sm:hidden fixed bottom-0 left-0 right-0 h-2 bg-[#D71920] z-50 pointer-events-none" />
+          <div className="sm:hidden fixed bottom-0 left-0 right-0 h-2 bg-primary-dark z-50 pointer-events-none" />
         </>
       )}
 
