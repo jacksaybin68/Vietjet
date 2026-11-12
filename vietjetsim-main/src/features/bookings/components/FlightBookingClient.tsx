@@ -405,6 +405,7 @@ function FlightBookingClientInner({
       const ancillaries = [...booking.ancillaries];
       if (baggageFee > 0) ancillaries.push('baggage');
       if (booking.hasInsurance) ancillaries.push('insurance');
+      if (mealFee > 0) ancillaries.push('meal');
 
       // Form đặt vé tách "Họ" và "Tên đệm & tên" thành hai ô; vé, check-in và
       // email cần một chuỗi tên đầy đủ, nên ghép lại trước khi gửi.
@@ -454,6 +455,9 @@ function FlightBookingClientInner({
           seatFee: seatFeeTotal,
           baggageFee,
           insuranceFee: insuranceFeeTotal,
+          mealFee,
+          ancillaryFee: baggageFee + insuranceFeeTotal + mealFee,
+          ancillaries,
           total: finalTotal,
         })
       );

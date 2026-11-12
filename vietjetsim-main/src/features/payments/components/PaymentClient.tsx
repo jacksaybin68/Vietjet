@@ -24,6 +24,7 @@ import PaymentModal from './PaymentModal';
 import ReservationCountdown from './ReservationCountdown';
 import BookingTicketCard from './BookingTicketCard';
 import VirtualCreditCard from './VirtualCreditCard';
+import ItineraryModal from '@/features/bookings/components/ItineraryModal';
 import {
   VisaLogo,
   MastercardLogo,
@@ -586,6 +587,42 @@ export default function PaymentClient() {
     if (!total || total <= 0) return 0;
     return Math.round(total / (moviTenure || 1));
   }, [total, moviTenure]);
+
+  const [showItineraryModal, setShowItineraryModal] = useState<boolean>(false);
+
+  const itineraryBookingData = useMemo(() => {
+    if (!booking) return null;
+    return {
+      id: bookingId || booking.bookingId || 'vj-id',
+      booking_code: bookingCodeLabel || bookingCode || 'VJ-PNR',
+      status: 'confirmed',
+      created_at: new Date().toISOString(),
+      total_price: total,
+      contact_name: booking.passengers?.[0]?.name,
+      contact_email: booking.contactEmail || 'khachhang@vietjetair.vn',
+      flight: {
+        flight_no: booking.flightNo,
+        from_code: booking.from,
+        to_code: booking.to,
+        depart_time: booking.departTime,
+        arrive_time: booking.arriveTime,
+        class: 'Eco',
+      },
+      passengers: booking.passengers?.map((p, idx) => ({
+        id: `p-${idx}`,
+        name: p.name,
+        seat_number: p.seat,
+        email: booking.contactEmail || 'khachhang@vietjetair.vn',
+      })),
+      seats: booking.passengers?.map((p) => ({
+        seat_number: p.seat,
+      })),
+      payment: {
+        status: 'completed',
+        method: paymentMethod,
+      },
+    };
+  }, [booking, bookingId, bookingCodeLabel, bookingCode, total, paymentMethod]);
 
   useEffect(() => {
     if (booking?.passengers && booking.passengers.length > 0 && !moviFullName) {
@@ -1363,12 +1400,20 @@ export default function PaymentClient() {
                     <Icon name="ArrowDownTrayIcon" size={16} />
                     Tải vé điện tử (PDF)
                   </button>
-                  <Link
-                    href={`/dat-ve/${bookingCode || bookingId || booking?.bookingId || ''}`}
-                    className="w-full flex items-center justify-center gap-2 bg-[#ED1B24] hover:bg-[#c81018] text-white font-bold py-3.5 rounded-xl transition-all shadow-sm text-sm"
+                  <button
+                    type="button"
+                    onClick={() => setShowItineraryModal(true)}
+                    className="w-full flex items-center justify-center gap-2 bg-[#ED1B24] hover:bg-[#c81018] text-white font-bold py-3.5 rounded-xl transition-all shadow-sm text-sm cursor-pointer"
                   >
                     <Icon name="TicketIcon" size={16} />
-                    Xem chi tiết hành trình
+                    Xem Hành trình & Vé điện tử (Vietjet Itinerary)
+                  </button>
+                  <Link
+                    href={`/dat-ve/${bookingCode || bookingId || booking?.bookingId || ''}`}
+                    className="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 rounded-xl transition-all text-sm"
+                  >
+                    <Icon name="DocumentTextIcon" size={16} />
+                    Trang chi tiết vé #{bookingCodeLabel}
                   </Link>
                   <Link
                     href="/chuyen-bay-cua-toi"
@@ -1388,6 +1433,12 @@ export default function PaymentClient() {
             </div>
           </div>
         </div>
+
+        <ItineraryModal
+          isOpen={showItineraryModal}
+          onClose={() => setShowItineraryModal(false)}
+          booking={itineraryBookingData}
+        />
       </>
     );
   }
