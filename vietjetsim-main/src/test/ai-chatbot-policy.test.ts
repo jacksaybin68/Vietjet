@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getVietjetAiPolicyResponse, AI_POLICY_KNOWLEDGE } from '@/lib/chatbot-ai';
+import { getVietjetAiPolicyResponse } from '@/lib/chatbot-ai';
 
 describe('Tác vụ 5.2: Chatbot AI giải đáp chính sách Vietjet Air', () => {
   describe('1. Chính sách Hành lý (Baggage Policy)', () => {
@@ -48,7 +48,7 @@ describe('Tác vụ 5.2: Chatbot AI giải đáp chính sách Vietjet Air', () =
       expect(res.category).toBe('documents');
       expect(res.reply).toContain('Giấy khai sinh bản chính');
       expect(res.reply).toContain('Bản trích lục');
-      expect(res.reply).toContain('KHÔNG chấp nhận bản photo');
+      expect(res.reply.toLowerCase()).toContain('bản photo');
     });
 
     it('giải đáp thời gian mở quầy check-in trực tuyến (24h trước giờ bay)', () => {

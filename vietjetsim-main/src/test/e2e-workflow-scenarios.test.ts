@@ -1,12 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { NextRequest } from 'next/server';
 import { POST as paymentPost } from '@/app/api/thanh-toan/route';
 import { POST as vietqrWebhookPost } from '@/app/api/thanh-toan/webhook/vietqr/route';
-import { GET as searchCheckInGet } from '@/app/api/checkin/tim-kiem/route';
-import { POST as seatChangePost } from '@/app/api/checkin/doi-ghe/route';
-import { POST as adminFlightStatusPost } from '@/app/api/quan-tri/chuyen-bay/cap-nhat-trang-thai/route';
+import { GET as checkInGet, POST as checkInPost } from '@/app/api/checkin/route';
+import { PATCH as adminFlightPatch } from '@/app/api/quan-tri/chuyen-bay/[id]/route';
 import { generateTokens, type User } from '@/lib/auth';
-import { generateVietQrSignature } from '@/lib/vietqr-webhook';
+import {
+  generateVietQrSignature,
+  resolveVietQrWebhookSecret,
+  DEV_VIETQR_WEBHOOK_SECRET,
+} from '@/lib/vietqr-webhook';
 
 describe('Tác vụ 6.1: Bộ Kịch bản Kiểm thử Tự động E2E & Tích hợp Nghiệp vụ', () => {
   const mockUser: User = {
@@ -28,7 +31,7 @@ describe('Tác vụ 6.1: Bộ Kịch bản Kiểm thử Tự động E2E & Tích
   const csrfToken = 'test-e2e-csrf-token-32-chars-long!';
 
   describe('Kịch bản 1: Luồng Mua vé trọn gói & Thanh toán VietQR thành công', () => {
-    it('khởi tạo giao dịch thanh toán VietQR cho đặt chỗ hợp lệ', async () => {
+    it('khởi tạo giao dịch thanh toán VietQR cho đặt chỗ', async () => {
       const paymentReq = new NextRequest('http://localhost:4028/api/thanh-toan', {
         method: 'POST',
         headers: {
@@ -45,7 +48,6 @@ describe('Tác vụ 6.1: Bộ Kịch bản Kiểm thử Tự động E2E & Tích
       });
 
       const res = await paymentPost(paymentReq);
-      // Endpoint xử lý thành công hoặc validate đúng hợp lệ
       expect([200, 201, 404]).toContain(res.status);
     });
 
@@ -59,7 +61,7 @@ describe('Tác vụ 6.1: Bộ Kịch bản Kiểm thử Tự động E2E & Tích
       };
 
       const rawBody = JSON.stringify(payload);
-      const secret = process.env.VIETQR_WEBHOOK_SECRET || 'vietqr-secret-test';
+      const secret = resolveVietQrWebhookSecret() || DEV_VIETQR_WEBHOOK_SECRET;
       const sig = generateVietQrSignature(rawBody, secret);
 
       const webhookReq = new NextRequest('http://localhost:4028/api/thanh-toan/webhook/vietqr', {
@@ -79,18 +81,17 @@ describe('Tác vụ 6.1: Bộ Kịch bản Kiểm thử Tự động E2E & Tích
 
   describe('Kịch bản 2: Luồng Đổi chỗ ngồi trực tuyến khi Check-in', () => {
     it('tra cứu thông tin đặt chỗ check-in qua mã PNR và họ tên hành khách', async () => {
-      const searchUrl =
-        'http://localhost:4028/api/checkin/tim-kiem?bookingCode=VJE2E1&lastName=NGUYEN';
+      const searchUrl = 'http://localhost:4028/api/checkin?bookingCode=VJE2E1&lastName=NGUYEN';
       const searchReq = new NextRequest(searchUrl, {
         method: 'GET',
       });
 
-      const res = await searchCheckInGet(searchReq);
+      const res = await checkInGet(searchReq);
       expect([200, 404]).toContain(res.status);
     });
 
-    it('xác nhận đổi ghế ngồi mới (từ 12A sang 14F) và cập nhật sơ đồ máy bay', async () => {
-      const changeSeatReq = new NextRequest('http://localhost:4028/api/checkin/doi-ghe', {
+    it('xác nhận chọn hoặc đổi ghế ngồi mới khi check-in', async () => {
+      const changeSeatReq = new NextRequest('http://localhost:4028/api/checkin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -98,60 +99,55 @@ describe('Tác vụ 6.1: Bộ Kịch bản Kiểm thử Tự động E2E & Tích
           cookie: `access_token=${userTokens.accessToken}; csrf_token=${csrfToken}`,
         },
         body: JSON.stringify({
-          booking_id: 'bk-mock-e2e-001',
-          passenger_id: 'pass-mock-001',
-          old_seat_number: '12A',
-          new_seat_number: '14F',
+          bookingId: 'bk-mock-e2e-001',
+          passengerId: 'pass-mock-001',
+          seatNumber: '14F',
         }),
       });
 
-      const res = await seatChangePost(changeSeatReq);
+      const res = await checkInPost(changeSeatReq);
       expect([200, 400, 404]).toContain(res.status);
     });
   });
 
   describe('Kịch bản 3: Luồng Admin cập nhật Delay & Khách nhận thông báo Realtime', () => {
     it('Admin thay đổi trạng thái chuyến bay sang Delayed kèm lý do thời tiết và giờ dự kiến mới', async () => {
-      const updateReq = new NextRequest(
-        'http://localhost:4028/api/quan-tri/chuyen-bay/cap-nhat-trang-thai',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-csrf-token': csrfToken,
-            cookie: `access_token=${adminTokens.accessToken}; csrf_token=${csrfToken}`,
-          },
-          body: JSON.stringify({
-            flight_id: 'VJ123',
-            status: 'delayed',
-            reason: 'Thời tiết xấu tại sân bay Nội Bài (HAN)',
-            new_departure_time: '2026-11-13T10:30:00+07:00',
-          }),
-        }
-      );
+      const updateReq = new NextRequest('http://localhost:4028/api/quan-tri/chuyen-bay/VJ123', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken,
+          cookie: `access_token=${adminTokens.accessToken}; csrf_token=${csrfToken}`,
+        },
+        body: JSON.stringify({
+          status: 'delayed',
+          notes: 'Thời tiết xấu tại sân bay Nội Bài (HAN)',
+        }),
+      });
 
-      const res = await adminFlightStatusPost(updateReq);
+      const params = Promise.resolve({ id: 'VJ123' });
+      const res = await adminFlightPatch(updateReq, { params });
       expect([200, 400, 404]).toContain(res.status);
     });
 
     it('từ chối khách hàng thông thường không có quyền admin can thiệp trạng thái chuyến bay (RBAC)', async () => {
       const unauthorizedReq = new NextRequest(
-        'http://localhost:4028/api/quan-tri/chuyen-bay/cap-nhat-trang-thai',
+        'http://localhost:4028/api/quan-tri/chuyen-bay/VJ123',
         {
-          method: 'POST',
+          method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             'x-csrf-token': csrfToken,
             cookie: `access_token=${userTokens.accessToken}; csrf_token=${csrfToken}`,
           },
           body: JSON.stringify({
-            flight_id: 'VJ123',
             status: 'delayed',
           }),
         }
       );
 
-      const res = await adminFlightStatusPost(unauthorizedReq);
+      const params = Promise.resolve({ id: 'VJ123' });
+      const res = await adminFlightPatch(unauthorizedReq, { params });
       expect([401, 403]).toContain(res.status);
     });
   });

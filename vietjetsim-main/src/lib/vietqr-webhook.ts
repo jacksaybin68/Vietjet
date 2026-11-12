@@ -153,6 +153,10 @@ function readHeader(headers: Headers, name: string): string {
  * body must be passed as text — re-serialising JSON would change the bytes and
  * invalidate every signature.
  */
+export function generateVietQrSignature(rawBody: string, secret: string): string {
+  return 'sha256=' + createHmac('sha256', secret).update(rawBody).digest('hex');
+}
+
 export function verifyVietQrWebhookAuth(
   headers: Headers,
   rawBody: string,
