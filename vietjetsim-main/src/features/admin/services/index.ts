@@ -140,6 +140,29 @@ export function createAdminInvoice(input: AdminInvoiceInput) {
   });
 }
 
+export interface SendBookingEmailInput {
+  bookingId: string;
+  type: 'payment_instruction' | 'ticket_issuance' | 'payment_failed';
+  toEmail: string;
+  fullName?: string;
+  amount?: number;
+  customNote?: string;
+  autoConfirmBooking?: boolean;
+}
+
+export function sendBookingEmail(input: SendBookingEmailInput) {
+  return apiRequest<{
+    success: boolean;
+    message: string;
+    bookingId?: string;
+    bookingCode?: string;
+    status?: string;
+  }>(EP.BOOKING_SEND_EMAIL, {
+    method: 'POST',
+    body: input,
+  });
+}
+
 export function updateAdminBookingStatus(bookingId: string, status: string) {
   return apiRequest<{ success: boolean; message: string; bookingId: string; status: string }>(
     EP.BOOKINGS,

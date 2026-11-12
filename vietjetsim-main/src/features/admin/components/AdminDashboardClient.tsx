@@ -718,7 +718,7 @@ export default function AdminDashboardClient() {
             )}
             {activeTab === 'bookings' && (
               <ErrorBoundary inline variant="api" retryLabel="Tải lại đặt vé">
-                <BookingsTab />
+                <BookingsTab onToast={toast} />
               </ErrorBoundary>
             )}
             {activeTab === 'refunds' && (

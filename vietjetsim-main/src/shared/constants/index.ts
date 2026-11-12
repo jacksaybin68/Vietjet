@@ -51,12 +51,16 @@ export const API_ENDPOINTS = {
     ASSISTANT: '/api/tro-ly-ai/tro-chuyen',
     CALLS: '/api/tro-chuyen/cuoc-goi',
   },
+  CODING_PI: {
+    CHAT: '/api/coding-pi/chat',
+  },
   ADMIN: {
     REVENUE: '/api/quan-tri/doanh-thu',
     USERS: '/api/quan-tri/nguoi-dung',
     USER: '/api/quan-tri/nguoi-dung/:id',
     BOOKINGS: '/api/quan-tri/dat-ve',
     BOOKING_INVOICE: '/api/quan-tri/dat-ve/hoa-don',
+    BOOKING_SEND_EMAIL: '/api/quan-tri/dat-ve/gui-mail',
     FLIGHTS: '/api/quan-tri/chuyen-bay',
     FLIGHT: '/api/quan-tri/chuyen-bay/:id',
     AIRPORTS: '/api/quan-tri/san-bay',

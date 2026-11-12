@@ -21,3 +21,4 @@ export { default as NotificationDropdown } from './NotificationDropdown';
 export { default as UserMenuDropdown } from './UserMenuDropdown';
 export { default as GlobalSearch } from './GlobalSearch';
 export { default as BulkPriceAdjustmentModal } from './BulkPriceAdjustmentModal';
+export { default as SendBookingEmailModal } from './SendBookingEmailModal';

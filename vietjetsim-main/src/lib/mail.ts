@@ -226,6 +226,8 @@ export interface PaymentSuccessInput {
   route?: string;
   departureTime?: string;
   ticketUrl?: string;
+  customNote?: string;
+  passengers?: Array<{ name: string; seat?: string }>;
 }
 
 export interface PaymentInstructionInput {
@@ -239,6 +241,7 @@ export interface PaymentInstructionInput {
   transferNote?: string;
   expiresInMinutes?: number;
   paymentUrl?: string;
+  customNote?: string;
 }
 
 export interface PaymentFailedInput {
@@ -275,6 +278,7 @@ export function buildPaymentInstructionHtml(input: PaymentInstructionInput): {
     transferNote,
     expiresInMinutes = 30,
     paymentUrl,
+    customNote,
   } = input;
 
   const code = bookingCode || '—';
@@ -282,6 +286,10 @@ export function buildPaymentInstructionHtml(input: PaymentInstructionInput): {
   const memo = transferNote || (bookingCode ? `VJ ${bookingCode}` : 'VJ DATVE');
   const targetUrl = paymentUrl || `${siteUrl()}/thanh-toan?bookingId=${bookingId || ''}`;
   const subject = `Thông báo thanh toán đặt chỗ${bookingCode ? ` ${bookingCode}` : ''} — Vietjet Air`;
+
+  const customNoteHtml = customNote
+    ? noticeBox(`<strong>Ghi chú bổ sung từ Quản trị viên:</strong><br>${escapeHtml(customNote)}`)
+    : '';
 
   const inner = `<p style="margin:0 0 16px;">Kính chào <strong>${escapeHtml(fullName)}</strong>,</p>
 <p style="margin:0 0 20px;">Đặt chỗ của Quý khách đã được giữ tạm thời. Vui lòng hoàn tất thanh toán trong vòng <strong>${expiresInMinutes} phút</strong> để đảm bảo giữ chỗ và được phát hành vé điện tử chính thức.</p>
@@ -300,6 +308,7 @@ ${detailRow('Số tài khoản', accountNumber)}
 ${detailRow('Chủ tài khoản', accountHolder)}
 ${detailRow('Nội dung chuyển khoản', memo)}
 </table>
+${customNoteHtml}
 ${noticeBox(`Quý khách vui lòng nhập <strong>chính xác nội dung chuyển khoản</strong> để hệ thống đối soát tự động. Hoặc bấm nút bên dưới để quét mã <strong>VNPAY-QR</strong> được điền sẵn toàn bộ thông tin thanh toán.`)}
 ${actionButton(targetUrl, 'Thanh toán ngay bằng VNPAY-QR')}
 <p style="margin:16px 0 0;color:#6b7280;font-size:13px;">Lưu ý: Nếu quá thời hạn thanh toán, hệ thống sẽ tự động hủy đơn đặt vé để hoàn trả ghế về kho chuyến bay. Mọi thắc mắc vui lòng liên hệ tổng đài hỗ trợ <strong>1900 1886</strong>.</p>`;
@@ -320,7 +329,11 @@ ${actionButton(targetUrl, 'Thanh toán ngay bằng VNPAY-QR')}
     `Tổng đài hỗ trợ 24/7: 1900 1886`,
   ].join('\n');
 
-  return { subject, html: shell(inner, `Thông báo thanh toán đặt chỗ mã ${code}`, 'Chờ thanh toán'), text };
+  return {
+    subject,
+    html: shell(inner, `Thông báo thanh toán đặt chỗ mã ${code}`, 'Chờ thanh toán'),
+    text,
+  };
 }
 
 /** Email xác nhận thanh toán thành công và vé điện tử chính thức */
@@ -339,12 +352,15 @@ export function buildPaymentSuccessHtml(input: PaymentSuccessInput): {
     route,
     departureTime,
     ticketUrl,
+    customNote,
+    passengers,
   } = input;
 
   const code = bookingCode || '—';
   const total = `${formatVnd(amount)} VNĐ`;
   const methodLabel = METHOD_LABELS[method] || METHOD_LABEL_FALLBACK;
-  const viewUrl = ticketUrl || `${siteUrl()}/tai-khoan${bookingId ? `?bookingId=${bookingId}` : ''}`;
+  const viewUrl =
+    ticketUrl || `${siteUrl()}/tai-khoan${bookingId ? `?bookingId=${bookingId}` : ''}`;
   const subject = `Thanh toán thành công & Xác nhận vé${bookingCode ? ` ${bookingCode}` : ''} — Vietjet Air`;
 
   let flightDetailsHtml = '';
@@ -357,6 +373,16 @@ export function buildPaymentSuccessHtml(input: PaymentSuccessInput): {
   if (departureTime) {
     flightDetailsHtml += detailRow('Thời gian khởi hành', departureTime);
   }
+  if (passengers && passengers.length > 0) {
+    const pStr = passengers
+      .map((p) => `${escapeHtml(p.name)}${p.seat ? ` (Ghế: ${escapeHtml(p.seat)})` : ''}`)
+      .join(', ');
+    flightDetailsHtml += detailRow('Hành khách', pStr);
+  }
+
+  const customNoteHtml = customNote
+    ? noticeBox(`<strong>Lời nhắn từ Quản trị viên Vietjet Air:</strong><br>${escapeHtml(customNote)}`)
+    : '';
 
   const inner = `<p style="margin:0 0 16px;">Kính chào <strong>${escapeHtml(fullName)}</strong>,</p>
 <p style="margin:0 0 20px;">Vietjet Air xin trân trọng thông báo giao dịch thanh toán của Quý khách đã <strong>hoàn tất thành công</strong>. Vé điện tử đã được phát hành chính thức với chi tiết dưới đây:</p>
@@ -373,6 +399,7 @@ ${detailRow('Phương thức thanh toán', methodLabel)}
 ${detailRow('Tổng tiền đã trả', total, true)}
 ${flightDetailsHtml}
 </table>
+${customNoteHtml}
 ${actionButton(viewUrl, 'Xem vé điện tử & Quản lý chuyến bay')}
 ${noticeBox(`<strong>Hướng dẫn làm thủ tục chuyến bay:</strong><br>&bull; Làm thủ tục trực tuyến (Web check-in) từ 24 giờ đến 60 phút trước giờ khởi hành tại website.<br>&bull; Có mặt tại sân bay ít nhất 120 phút trước giờ bay đối với chuyến bay nội địa (180 phút với quốc tế).<br>&bull; Mang theo CCCD/Hộ chiếu hợp lệ còn hạn.`)}
 <p style="margin:16px 0 0;color:#6b7280;font-size:13px;">Tra cứu chi tiết và quản lý đặt chỗ bất kỳ lúc nào tại mục <a href="${escapeHtml(siteUrl())}/tai-khoan" style="color:${BRAND_RED};">Chuyến bay của tôi</a> hoặc liên hệ hotline <strong style="color:${BRAND_RED};">1900 1886</strong>.</p>`;
@@ -395,7 +422,11 @@ ${noticeBox(`<strong>Hướng dẫn làm thủ tục chuyến bay:</strong><br>&
     .filter(Boolean)
     .join('\n');
 
-  return { subject, html: shell(inner, `Thanh toán thành công vé mã ${code}`, 'Thanh toán thành công'), text };
+  return {
+    subject,
+    html: shell(inner, `Thanh toán thành công vé mã ${code}`, 'Thanh toán thành công'),
+    text,
+  };
 }
 
 /** Email thông báo thanh toán không thành công / bị từ chối đối soát */
@@ -447,7 +478,11 @@ ${actionButton(payUrl, 'Thử lại thanh toán')}
     `Hotline hỗ trợ 24/7: 1900 1886 / 1900 1166`,
   ].join('\n');
 
-  return { subject, html: shell(inner, `Thanh toán chưa thành công cho mã ${code}`, 'Thanh toán thất bại'), text };
+  return {
+    subject,
+    html: shell(inner, `Thanh toán chưa thành công cho mã ${code}`, 'Thanh toán thất bại'),
+    text,
+  };
 }
 
 /** Email thông báo hoàn tiền */
@@ -498,7 +533,11 @@ ${noticeBox(`Số tiền hoàn trả sẽ được ghi có vào tài khoản ho�
     `Tổng đài hỗ trợ: 1900 1886`,
   ].join('\n');
 
-  return { subject, html: shell(inner, `Hoàn tiền đặt chỗ mã ${code}`, 'Xác nhận hoàn tiền'), text };
+  return {
+    subject,
+    html: shell(inner, `Hoàn tiền đặt chỗ mã ${code}`, 'Xác nhận hoàn tiền'),
+    text,
+  };
 }
 
 export function buildBookingConfirmationHtml(input: BookingConfirmationInput): {
@@ -609,6 +648,8 @@ export async function sendPaymentSuccessEmail(opts: {
   route?: string;
   departureTime?: string;
   ticketUrl?: string;
+  customNote?: string;
+  passengers?: Array<{ name: string; seat?: string }>;
 }): Promise<boolean> {
   const { subject, html, text } = buildPaymentSuccessHtml(opts);
   return sendMail({ to: opts.to, subject, html, text });
@@ -627,6 +668,7 @@ export async function sendPaymentInstructionEmail(opts: {
   transferNote?: string;
   expiresInMinutes?: number;
   paymentUrl?: string;
+  customNote?: string;
 }): Promise<boolean> {
   const { subject, html, text } = buildPaymentInstructionHtml(opts);
   return sendMail({ to: opts.to, subject, html, text });

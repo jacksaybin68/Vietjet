@@ -5,6 +5,7 @@ import { Pagination } from '@/shared/components/ui';
 import { RiImageLine } from 'react-icons/ri';
 import { listTransactions, confirmTransaction } from '@/features/admin';
 import { getApiErrorMessage } from '@/shared/services';
+import SendBookingEmailModal from './SendBookingEmailModal';
 
 interface Transaction {
   id: string;
@@ -37,6 +38,8 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [viewingReceiptImage, setViewingReceiptImage] = useState<string | null>(null);
+  const [emailModalData, setEmailModalData] = useState<Transaction | null>(null);
+  const [emailModalType, setEmailModalType] = useState<'payment_instruction' | 'ticket_issuance'>('payment_instruction');
   const pageSize = 10;
 
   const fetchTransactions = useCallback(async () => {
@@ -268,18 +271,20 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                 setFilterStatus(item.id);
                 setCurrentPage(1);
               }}
-              className={`px-3 py-2 rounded-xl text-2xs font-black uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 ${filterStatus === item.id
-                ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
-                : 'text-slate-400 hover:text-slate-200'
-                }`}
+              className={`px-3 py-2 rounded-xl text-2xs font-black uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                filterStatus === item.id
+                  ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
             >
               <span>{item.label}</span>
               {typeof item.count === 'number' && item.count > 0 && (
                 <span
-                  className={`px-1.5 py-0.2 rounded-full text-3xs font-extrabold ${filterStatus === item.id
-                    ? 'bg-slate-950 text-amber-300'
-                    : 'bg-amber-500/20 text-amber-400'
-                    }`}
+                  className={`px-1.5 py-0.2 rounded-full text-3xs font-extrabold ${
+                    filterStatus === item.id
+                      ? 'bg-slate-950 text-amber-300'
+                      : 'bg-amber-500/20 text-amber-400'
+                  }`}
                 >
                   {item.count}
                 </span>
@@ -406,36 +411,59 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                         </div>
                       </td>
                       <td className="px-6 py-5 text-center" onClick={(e) => e.stopPropagation()}>
-                        {isPending ? (
-                          <div className="flex items-center justify-center gap-2">
-                            <button
-                              onClick={() => handleProcessTransaction(t, 'confirm')}
-                              disabled={isProcessing}
-                              className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-black text-xs rounded-xl shadow-md shadow-emerald-500/20 transition-all flex items-center gap-1"
-                              title="Xác nhận tiền đã về tài khoản và xuất vé"
-                            >
-                              {isProcessing ? (
-                                <Icon name="ArrowPathIcon" size={14} className="animate-spin" />
-                              ) : (
-                                <Icon name="CheckCircleIcon" size={14} />
-                              )}
-                              <span>Xác nhận</span>
-                            </button>
-                            <button
-                              onClick={() => handleProcessTransaction(t, 'reject')}
-                              disabled={isProcessing}
-                              className="px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 active:scale-95 text-rose-400 hover:text-rose-300 font-bold text-xs rounded-xl border border-rose-500/20 transition-all"
-                              title="Từ chối / Hủy giao dịch"
-                            >
-                              <Icon name="XMarkIcon" size={14} />
-                            </button>
-                          </div>
-                        ) : (
-                          <span className="text-2xs font-semibold text-slate-500 flex items-center justify-center gap-1">
-                            <Icon name="CheckBadgeIcon" size={16} className="text-emerald-500" />
-                            Đã duyệt
-                          </span>
-                        )}
+                        <div className="flex items-center justify-center gap-1.5">
+                          {isPending ? (
+                            <>
+                              <button
+                                onClick={() => handleProcessTransaction(t, 'confirm')}
+                                disabled={isProcessing}
+                                className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-black text-xs rounded-xl shadow-md shadow-emerald-500/20 transition-all flex items-center gap-1"
+                                title="Xác nhận tiền đã về tài khoản và xuất vé"
+                              >
+                                {isProcessing ? (
+                                  <Icon name="ArrowPathIcon" size={14} className="animate-spin" />
+                                ) : (
+                                  <Icon name="CheckCircleIcon" size={14} />
+                                )}
+                                <span>Xác nhận</span>
+                              </button>
+                              <button
+                                onClick={() => handleProcessTransaction(t, 'reject')}
+                                disabled={isProcessing}
+                                className="px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 active:scale-95 text-rose-400 hover:text-rose-300 font-bold text-xs rounded-xl border border-rose-500/20 transition-all"
+                                title="Từ chối / Hủy giao dịch"
+                              >
+                                <Icon name="XMarkIcon" size={14} />
+                              </button>
+                            </>
+                          ) : (
+                            <span className="text-2xs font-semibold text-slate-500 flex items-center gap-1 mr-1">
+                              <Icon name="CheckBadgeIcon" size={16} className="text-emerald-500" />
+                              Đã duyệt
+                            </span>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEmailModalData(t);
+                              setEmailModalType(
+                                t.status === 'completed'
+                                  ? 'ticket_issuance'
+                                  : 'payment_instruction'
+                              );
+                            }}
+                            className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-all active:scale-95 border border-white/5"
+                            title="Gửi Gmail thanh toán & xuất vé"
+                          >
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                              <path
+                                fill="#EA4335"
+                                d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"
+                              />
+                            </svg>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -646,6 +674,23 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                     <span>Xác nhận thanh toán ngay</span>
                   </button>
                   <button
+                    type="button"
+                    onClick={() => {
+                      setEmailModalData(selectedTransaction);
+                      setEmailModalType('payment_instruction');
+                    }}
+                    className="px-5 py-3.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 border border-white/10"
+                    title="Gửi email hướng dẫn thanh toán cho khách"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24">
+                      <path
+                        fill="#EA4335"
+                        d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"
+                      />
+                    </svg>
+                    <span>Gửi Gmail</span>
+                  </button>
+                  <button
                     onClick={() => handleProcessTransaction(selectedTransaction, 'reject')}
                     disabled={processingId === selectedTransaction.id}
                     className="px-6 py-3.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all active:scale-95"
@@ -654,12 +699,38 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                   </button>
                 </>
               ) : (
-                <button
-                  onClick={() => setSelectedTransaction(null)}
-                  className="w-full px-6 py-3 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/5 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all"
-                >
-                  Đóng
-                </button>
+                <div className="flex-1 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmailModalData(selectedTransaction);
+                      setEmailModalType(
+                        selectedTransaction.status === 'completed'
+                          ? 'ticket_issuance'
+                          : 'payment_instruction'
+                      );
+                    }}
+                    className="flex-1 px-6 py-3.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-2xl text-xs font-black uppercase tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-red-500/20 border border-red-500/30"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24">
+                      <path
+                        fill="currentColor"
+                        d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"
+                      />
+                    </svg>
+                    <span>
+                      {selectedTransaction.status === 'completed'
+                        ? 'Gửi lại Gmail xuất vé'
+                        : 'Gửi Gmail thanh toán'}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setSelectedTransaction(null)}
+                    className="px-6 py-3.5 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/5 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all"
+                  >
+                    Đóng
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -706,6 +777,49 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
           </div>
         </div>
       )}
+
+      {/* Modal gửi Gmail thanh toán & xuất vé */}
+      <SendBookingEmailModal
+        isOpen={Boolean(emailModalData)}
+        onClose={() => setEmailModalData(null)}
+        booking={
+          emailModalData
+            ? {
+                id: emailModalData.bookingId || emailModalData.id,
+                bookingCode: emailModalData.bookingCode,
+                userName: emailModalData.userName,
+                userEmail: emailModalData.userEmail,
+                amount: emailModalData.amount,
+                status: emailModalData.status,
+              }
+            : null
+        }
+        defaultType={emailModalType}
+        onSuccess={(type, message, newStatus) => {
+          onToast?.success(
+            type === 'payment_instruction'
+              ? 'Đã gửi hướng dẫn thanh toán!'
+              : type === 'ticket_issuance'
+                ? 'Đã gửi Gmail xuất vé!'
+                : 'Đã gửi Gmail thông báo!',
+            message
+          );
+          if (newStatus && emailModalData) {
+            setTransactions((prev) =>
+              prev.map((t) =>
+                t.id === emailModalData.id
+                  ? { ...t, status: newStatus as Transaction['status'] }
+                  : t
+              )
+            );
+            if (selectedTransaction?.id === emailModalData.id) {
+              setSelectedTransaction((prev) =>
+                prev ? { ...prev, status: newStatus as Transaction['status'] } : null
+              );
+            }
+          }
+        }}
+      />
     </div>
   );
 }

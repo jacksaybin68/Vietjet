@@ -5,6 +5,7 @@ import { Pagination } from '@/shared/components/ui';
 import { createAdminInvoice, updateAdminBookingStatus, confirmTransaction } from '@/features/admin';
 import { getApiErrorMessage } from '@/shared/services';
 import { renderInvoiceHtml } from '@/features/admin/invoice';
+import SendBookingEmailModal from './SendBookingEmailModal';
 
 /** Mirrors the `bookings.status` union in `@/lib/db`, including `refunded`. */
 type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded';
@@ -13,6 +14,7 @@ interface Booking {
   id: string;
   userId: string;
   userName: string;
+  userEmail?: string;
   flightNo: string;
   route: string;
   date: string;
@@ -28,6 +30,7 @@ const BOOKINGS: Booking[] = [
     id: 'VJ2B4K9',
     userId: '1',
     userName: 'Nguyễn Văn An',
+    userEmail: 'an.nguyen@gmail.com',
     flightNo: 'VJ 101',
     route: 'HAN → SGN',
     date: '20/03/2026',
@@ -41,6 +44,7 @@ const BOOKINGS: Booking[] = [
     id: 'VJ7M3P1',
     userId: '2',
     userName: 'Trần Thị Bích',
+    userEmail: 'bich.tran@gmail.com',
     flightNo: 'VJ 201',
     route: 'SGN → PQC',
     date: '05/04/2026',
@@ -54,6 +58,7 @@ const BOOKINGS: Booking[] = [
     id: 'VJ9X8Y7',
     userId: '3',
     userName: 'Lê Minh Tuấn',
+    userEmail: 'tuan.le@outlook.com',
     flightNo: 'VJ 301',
     route: 'HAN → DAD',
     date: '21/03/2026',
@@ -67,6 +72,7 @@ const BOOKINGS: Booking[] = [
     id: 'VJ5Z6W4',
     userId: '4',
     userName: 'Phạm Thu Hà',
+    userEmail: 'ha.pham@yahoo.com',
     flightNo: 'VJ 109',
     route: 'SGN → HAN',
     date: '18/03/2026',
@@ -80,6 +86,7 @@ const BOOKINGS: Booking[] = [
     id: 'VJ1A2B3',
     userId: '5',
     userName: 'Hoàng Văn Dũng',
+    userEmail: 'dung.hoang@gmail.com',
     flightNo: 'VJ 103',
     route: 'HAN → SGN',
     date: '22/03/2026',
@@ -93,6 +100,7 @@ const BOOKINGS: Booking[] = [
     id: 'VJ3C5D7',
     userId: '6',
     userName: 'Vũ Thị Lan',
+    userEmail: 'lan.vu@gmail.com',
     flightNo: 'VJ 301',
     route: 'HAN → DAD',
     date: '25/03/2026',
@@ -106,6 +114,7 @@ const BOOKINGS: Booking[] = [
     id: 'VJ8E9F2',
     userId: '1',
     userName: 'Nguyễn Văn An',
+    userEmail: 'an.nguyen@gmail.com',
     flightNo: 'VJ 105',
     route: 'HAN → SGN',
     date: '10/03/2026',
@@ -137,7 +146,15 @@ const bookingBadge = (status: string) =>
 
 const PAGE_SIZE = 5;
 
-export default function BookingsTab() {
+interface BookingsTabProps {
+  onToast?: {
+    success: (title: string, message?: string) => void;
+    error: (title: string, message?: string) => void;
+    info: (title: string, message?: string) => void;
+  };
+}
+
+export default function BookingsTab({ onToast }: BookingsTabProps = {}) {
   const [bookings, setBookings] = useState<Booking[]>(BOOKINGS);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | BookingStatus>('all');
@@ -161,6 +178,8 @@ export default function BookingsTab() {
     amount: 0,
     status: 'completed',
   });
+  const [emailModalBooking, setEmailModalBooking] = useState<Booking | null>(null);
+  const [emailModalType, setEmailModalType] = useState<'payment_instruction' | 'ticket_issuance'>('payment_instruction');
 
   React.useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 50);
@@ -878,36 +897,59 @@ export default function BookingsTab() {
                         {booking.amount.toLocaleString('vi-VN')}₫
                       </span>
                     </td>
-                    <td className="px-6 py-5 text-center">
-                      <select
-                        value={booking.status}
-                        onChange={(e) =>
-                          handleStatusChange(booking.id, e.target.value as BookingStatus)
-                        }
-                        className={`text-2xs font-black px-3 py-1 rounded-lg border-0 cursor-pointer appearance-none text-center uppercase tracking-wider transition-all focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 ${
-                          booking.status === 'confirmed'
-                            ? 'bg-emerald-500/10 text-emerald-400 focus:ring-emerald-500/50'
-                            : booking.status === 'pending'
-                              ? 'bg-amber-500/10 text-amber-400 focus:ring-amber-500/50'
-                              : booking.status === 'cancelled'
-                                ? 'bg-rose-500/10 text-rose-400 focus:ring-rose-500/50'
-                                : 'bg-sky-500/10 text-sky-400 focus:ring-sky-500/50'
-                        }`}
-                        style={{ border: '1px solid currentColor' }}
-                      >
-                        <option value="confirmed" className="bg-slate-800 text-emerald-400">
-                          Xác nhận
-                        </option>
-                        <option value="pending" className="bg-slate-800 text-amber-400">
-                          Chờ duyệt
-                        </option>
-                        <option value="completed" className="bg-slate-800 text-sky-400">
-                          Hoàn thành
-                        </option>
-                        <option value="cancelled" className="bg-slate-800 text-rose-400">
-                          Huỷ
-                        </option>
-                      </select>
+                    <td className="px-6 py-5 text-center" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-center gap-2">
+                        <select
+                          value={booking.status}
+                          onChange={(e) =>
+                            handleStatusChange(booking.id, e.target.value as BookingStatus)
+                          }
+                          className={`text-2xs font-black px-3 py-1.5 rounded-lg border-0 cursor-pointer appearance-none text-center uppercase tracking-wider transition-all focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                            booking.status === 'confirmed'
+                              ? 'bg-emerald-500/10 text-emerald-400 focus:ring-emerald-500/50'
+                              : booking.status === 'pending'
+                                ? 'bg-amber-500/10 text-amber-400 focus:ring-amber-500/50'
+                                : booking.status === 'cancelled'
+                                  ? 'bg-rose-500/10 text-rose-400 focus:ring-rose-500/50'
+                                  : 'bg-sky-500/10 text-sky-400 focus:ring-sky-500/50'
+                          }`}
+                          style={{ border: '1px solid currentColor' }}
+                        >
+                          <option value="confirmed" className="bg-slate-800 text-emerald-400">
+                            Xác nhận
+                          </option>
+                          <option value="pending" className="bg-slate-800 text-amber-400">
+                            Chờ duyệt
+                          </option>
+                          <option value="completed" className="bg-slate-800 text-sky-400">
+                            Hoàn thành
+                          </option>
+                          <option value="cancelled" className="bg-slate-800 text-rose-400">
+                            Huỷ
+                          </option>
+                        </select>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEmailModalBooking(booking);
+                            setEmailModalType(
+                              booking.status === 'confirmed' || booking.status === 'completed'
+                                ? 'ticket_issuance'
+                                : 'payment_instruction'
+                            );
+                          }}
+                          className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-all active:scale-95 border border-white/5"
+                          title="Gửi Gmail thanh toán & xuất vé"
+                        >
+                          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                            <path
+                              fill="#EA4335"
+                              d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                     </td>
                     <td className="px-6 py-5 hidden lg:table-cell text-right">
                       <span className="text-xs font-medium text-slate-500">
@@ -1304,13 +1346,33 @@ export default function BookingsTab() {
 
             {/* Modal Actions */}
             <div className="p-8 bg-white/5 border-t border-white/5 flex flex-col sm:flex-row gap-3">
-              <div className="flex-1 flex gap-3">
+              <div className="flex-1 flex flex-wrap sm:flex-nowrap gap-3">
                 <button
                   onClick={() => printSingleInvoice(selectedBooking)}
-                  className="flex-1 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-2xs font-black uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2 border border-white/10"
+                  className="flex-1 px-5 py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-2xs font-black uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2 border border-white/10"
                 >
                   <Icon name="PrinterIcon" size={16} />
                   In hoá đơn
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmailModalBooking(selectedBooking);
+                    setEmailModalType(
+                      selectedBooking.status === 'confirmed' || selectedBooking.status === 'completed'
+                        ? 'ticket_issuance'
+                        : 'payment_instruction'
+                    );
+                  }}
+                  className="flex-1 px-5 py-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-2xl text-2xs font-black uppercase tracking-widest transition-all shadow-lg shadow-red-500/20 active:scale-95 flex items-center justify-center gap-2 border border-red-500/30"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24">
+                    <path
+                      fill="currentColor"
+                      d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"
+                    />
+                  </svg>
+                  <span>Gửi Gmail</span>
                 </button>
                 {selectedBooking.status === 'pending' && (
                   <button
@@ -1318,7 +1380,7 @@ export default function BookingsTab() {
                       setInvoiceForm({ ...invoiceForm, amount: selectedBooking.amount });
                       setShowInvoiceModal(true);
                     }}
-                    className="flex-1 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-2xs font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-500/20 active:scale-95 flex items-center justify-center gap-2"
+                    className="flex-1 px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-2xs font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-500/20 active:scale-95 flex items-center justify-center gap-2"
                   >
                     <Icon name="CurrencyDollarIcon" size={16} />
                     Tạo hoá đơn thanh toán
@@ -1440,6 +1502,57 @@ export default function BookingsTab() {
           </div>
         </div>
       )}
+
+      {/* Modal gửi Gmail thanh toán & xuất vé */}
+      <SendBookingEmailModal
+        isOpen={Boolean(emailModalBooking)}
+        onClose={() => setEmailModalBooking(null)}
+        booking={
+          emailModalBooking
+            ? {
+                id: emailModalBooking.id,
+                bookingCode: emailModalBooking.id,
+                userName: emailModalBooking.userName,
+                userEmail: emailModalBooking.userEmail,
+                amount: emailModalBooking.amount,
+                flightNo: emailModalBooking.flightNo,
+                route: emailModalBooking.route,
+                date: emailModalBooking.date,
+                status: emailModalBooking.status,
+                seat: emailModalBooking.seat,
+              }
+            : null
+        }
+        defaultType={emailModalType}
+        onSuccess={(type, message, newStatus) => {
+          if (onToast) {
+            onToast.success(
+              type === 'payment_instruction'
+                ? 'Đã gửi hướng dẫn thanh toán!'
+                : type === 'ticket_issuance'
+                  ? 'Đã gửi Gmail xuất vé!'
+                  : 'Đã gửi Gmail thông báo!',
+              message
+            );
+          } else {
+            alert(message);
+          }
+          if (newStatus && emailModalBooking) {
+            setBookings((prev) =>
+              prev.map((b) =>
+                b.id === emailModalBooking.id
+                  ? { ...b, status: newStatus as BookingStatus }
+                  : b
+              )
+            );
+            setSelectedBooking((prev) =>
+              prev && prev.id === emailModalBooking.id
+                ? { ...prev, status: newStatus as BookingStatus }
+                : prev
+            );
+          }
+        }}
+      />
     </div>
   );
 }
