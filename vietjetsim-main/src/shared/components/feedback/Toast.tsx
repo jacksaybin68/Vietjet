@@ -261,6 +261,8 @@ const POSITION_CLASSES: Record<NonNullable<ToastContainerProps['position']>, str
 };
 
 export function ToastContainer({ toasts, onDismiss, position = 'top-right' }: ToastContainerProps) {
+  if (toasts.length === 0) return null;
+
   return (
     <div
       className={`fixed z-[9999] flex flex-col gap-2.5 pointer-events-none ${POSITION_CLASSES[position]}`}
