@@ -1067,14 +1067,11 @@ export default function FlightResultsStep({
           </div>
         )}
 
-        {/* 4 Fare Class Headers — chỉ hiện từ `sm` trở lên. Ở mobile, mỗi ô
-            giá trong card tự mang nhãn hạng của nó (xem `FARE_BADGE`), nên hàng
-            header này không còn đường nào để canh — giữ nó ở mobile sẽ sinh
-            một hàng logo trôi lệch khỏi lưới giá bên dưới. */}
+        {/* 4 Fare Class Headers — hiển thị 4 cột thẳng hàng trên cả mobile và desktop */}
         {!isLoading && filtered.length > 0 && (
-          <div className="hidden sm:flex flex-row items-stretch gap-0 mt-3 mb-1">
+          <div className="flex flex-row items-stretch gap-0 mt-3 mb-1">
             {/* Empty space matching left yellow box */}
-            <div className="w-[28%] lg:w-[240px] shrink-0" />
+            <div className="w-[100px] sm:w-[28%] lg:w-[240px] shrink-0" />
             {/* 4 Fare Headers aligned with flight card columns */}
             <div className="flex-1 min-w-0 grid grid-cols-4 gap-0.5">
               <div
@@ -1229,7 +1226,7 @@ export default function FlightResultsStep({
                 key={flight.id}
                 data-testid="flight-result-card"
                 style={{ transitionDelay: `${Math.min(idx * 50, 300)}ms` }}
-                className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs hover:shadow-md transition-shadow duration-200 relative flex flex-col sm:flex-row flex-wrap mb-2 sm:mb-3"
+                className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs hover:shadow-md transition-shadow duration-200 relative flex flex-row flex-wrap mb-2 sm:mb-3"
               >
                 {/* Left: Flight Info - bright yellow box matching real Vietjet */}
                 <div
@@ -1265,20 +1262,18 @@ export default function FlightResultsStep({
                       setExpandedFlightNo(flight.flightNo);
                     }
                   }}
-                  className="w-full sm:w-[28%] lg:w-[240px] shrink-0 bg-[#FFC700] p-2.5 sm:p-3 lg:p-4 border-b sm:border-b-0 sm:border-r border-yellow-400 lg:border-b-0 flex flex-row sm:flex-col items-center justify-between sm:justify-center gap-x-2.5 gap-y-0.5 sm:gap-y-0 text-center relative select-none cursor-pointer hover:bg-yellow-400 transition-colors focus:outline-none focus:ring-0"
+                  className="w-[105px] sm:w-[28%] lg:w-[240px] shrink-0 bg-[#FFC700] p-1.5 sm:p-3 lg:p-4 border-r border-yellow-400 flex flex-col items-center justify-between sm:justify-center text-center relative select-none cursor-pointer hover:bg-yellow-400 transition-colors focus:outline-none focus:ring-0"
                 >
-                  {/* Mobile: số hiệu + giờ nằm cạnh nhau, máy bay đẩy sang phải thành 1 hàng ngang.
-                      Desktop: các cụm thông tin được canh gọn gàng trên cùng hàng. */}
-                  <div className="flex items-center justify-center gap-2 sm:gap-2.5">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2.5">
                     <span className="text-[9px] sm:text-2xs font-bold text-gray-900 tracking-wider uppercase leading-tight">
                       {flight.flightNo}
                     </span>
 
-                    <div className="flex flex-row items-center justify-center gap-0.5 sm:gap-1.5 sm:my-1 whitespace-nowrap">
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 whitespace-nowrap">
                       <span className="text-xs sm:text-base lg:text-xl font-black text-gray-950 font-koho leading-none">
                         {flight.departTime}
                       </span>
-                      <span className="text-[8px] sm:text-2xs font-bold text-gray-700 leading-none">
+                      <span className="text-[7.5px] sm:text-2xs font-bold text-gray-700 leading-none">
                         Đến
                       </span>
                       <span className="text-xs sm:text-base lg:text-xl font-black text-gray-950 font-koho leading-none">
@@ -1287,8 +1282,8 @@ export default function FlightResultsStep({
                     </div>
                   </div>
 
-                  <div className="text-[7.5px] sm:text-2xs text-gray-800 font-medium leading-tight flex items-center justify-center whitespace-nowrap gap-1">
-                    <span className="inline-flex items-center justify-center gap-1">
+                  <div className="text-[7px] sm:text-2xs text-gray-800 font-medium leading-tight flex items-center justify-center whitespace-nowrap gap-0.5 sm:gap-1 mt-0.5 sm:mt-1">
+                    <span className="inline-flex items-center justify-center gap-0.5 sm:gap-1">
                       <svg
                         className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-gray-800 shrink-0 rotate-45 inline-block"
                         viewBox="0 0 24 24"

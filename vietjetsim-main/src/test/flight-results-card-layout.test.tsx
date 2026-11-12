@@ -55,22 +55,16 @@ describe('FlightResultsStep — card bố cục 1 hàng ngang', () => {
   // Mobile-first: trên điện thoại card xếp dọc (khối thông tin chuyến bay ở
   // trên, lưới giá 2×2 bên dưới) vì bốn cột giá không vừa 390px; từ `sm` trở
   // lên nó trở về hàng ngang như desktop.
-  it('xếp dọc trên mobile, hàng ngang từ sm, không phải xl', async () => {
+  it('hàng ngang trên cả mobile và desktop', async () => {
     const card = await renderResults();
-    expect(card.className).toContain('flex-col');
-    expect(card.className).toContain('sm:flex-row');
-    expect(card.className).not.toContain('xl:flex-row');
+    expect(card.className).toContain('flex-row');
   });
 
-  it('khối thông tin chuyến bay chiếm cột cố định 240px và bỏ đường kẻ ngang từ lg', async () => {
+  it('khối thông tin chuyến bay chiếm cột cố định 240px trên desktop và border-r', async () => {
     const card = await renderResults();
     const info = card.firstElementChild as HTMLElement;
     expect(info.className).toContain('lg:w-[240px]');
-    expect(info.className).toContain('lg:border-b-0');
-    expect(info.className).not.toContain('xl:w-[240px]');
-    // Mobile: khối này chiếm hết một hàng, viền dưới thay cho viền phải.
-    expect(info.className).toContain('w-full');
-    expect(info.className).toContain('border-b');
+    expect(info.className).toContain('border-r');
   });
 
   // Bốn hạng giá nằm trên MỘT hàng 4 cột cả trên mobile và desktop
