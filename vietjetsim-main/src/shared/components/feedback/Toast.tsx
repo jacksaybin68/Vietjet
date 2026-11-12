@@ -32,14 +32,22 @@ const TYPE_CONFIG: Record<
     bg: string;
     iconBg: string;
     iconColor: string;
+    titleColor: string;
+    messageColor: string;
+    closeBtn: string;
+    progressColor: string;
     defaultIcon: React.ReactNode;
   }
 > = {
   success: {
-    bar: 'bg-gradient-to-r from-emerald-600 to-emerald-400',
-    bg: 'bg-white border border-emerald-200 shadow-emerald-500/10',
-    iconBg: 'bg-emerald-600',
+    bar: 'bg-emerald-500',
+    bg: 'bg-emerald-50 border-2 border-emerald-500 shadow-xl shadow-emerald-500/20',
+    iconBg: 'bg-emerald-600 shadow-md shadow-emerald-600/30',
     iconColor: 'text-white',
+    titleColor: 'text-emerald-950 font-bold',
+    messageColor: 'text-emerald-800 font-medium',
+    closeBtn: 'text-emerald-700 hover:text-emerald-950 hover:bg-emerald-100',
+    progressColor: 'bg-emerald-500',
     defaultIcon: (
       <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
         <path
@@ -51,10 +59,14 @@ const TYPE_CONFIG: Record<
     ),
   },
   error: {
-    bar: 'bg-gradient-to-r from-[var(--primary)] to-rose-500',
-    bg: 'bg-white border border-rose-200 shadow-rose-500/10',
-    iconBg: 'bg-[var(--primary)]',
+    bar: 'bg-red-500',
+    bg: 'bg-red-50 border-2 border-red-500 shadow-xl shadow-red-500/20',
+    iconBg: 'bg-red-600 shadow-md shadow-red-600/30',
     iconColor: 'text-white',
+    titleColor: 'text-red-950 font-bold',
+    messageColor: 'text-red-800 font-medium',
+    closeBtn: 'text-red-700 hover:text-red-950 hover:bg-red-100',
+    progressColor: 'bg-red-500',
     defaultIcon: (
       <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
         <path
@@ -66,10 +78,14 @@ const TYPE_CONFIG: Record<
     ),
   },
   warning: {
-    bar: 'bg-gradient-to-r from-[var(--vj-yellow)] to-[#f7c61a]',
-    bg: 'bg-white border border-[var(--border)]',
-    iconBg: 'bg-[var(--accent)]',
-    iconColor: 'text-[var(--vj-navy)]',
+    bar: 'bg-amber-500',
+    bg: 'bg-amber-50 border-2 border-amber-400 shadow-xl shadow-amber-500/20',
+    iconBg: 'bg-amber-500 shadow-md shadow-amber-500/30',
+    iconColor: 'text-white',
+    titleColor: 'text-amber-950 font-bold',
+    messageColor: 'text-amber-800 font-medium',
+    closeBtn: 'text-amber-700 hover:text-amber-950 hover:bg-amber-100',
+    progressColor: 'bg-amber-500',
     defaultIcon: (
       <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
         <path
@@ -81,10 +97,14 @@ const TYPE_CONFIG: Record<
     ),
   },
   info: {
-    bar: 'bg-gradient-to-r from-[var(--vj-navy)] to-[#2A3F6F]',
-    bg: 'bg-white border border-[var(--border)]',
-    iconBg: 'bg-[var(--vj-navy)]',
+    bar: 'bg-blue-500',
+    bg: 'bg-blue-50 border-2 border-blue-400 shadow-xl shadow-blue-500/20',
+    iconBg: 'bg-blue-600 shadow-md shadow-blue-600/30',
     iconColor: 'text-white',
+    titleColor: 'text-blue-950 font-bold',
+    messageColor: 'text-blue-800 font-medium',
+    closeBtn: 'text-blue-700 hover:text-blue-950 hover:bg-blue-100',
+    progressColor: 'bg-blue-500',
     defaultIcon: (
       <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
         <path
@@ -96,10 +116,14 @@ const TYPE_CONFIG: Record<
     ),
   },
   promo: {
-    bar: 'bg-gradient-to-r from-[var(--primary)] via-[#FF4D53] to-[var(--accent)]',
-    bg: 'bg-white border border-[var(--border)]',
-    iconBg: 'bg-gradient-to-br from-[var(--primary)] to-[var(--accent)]',
+    bar: 'bg-gradient-to-r from-red-600 via-pink-500 to-amber-500',
+    bg: 'bg-white border-2 border-red-300 shadow-xl shadow-red-500/10',
+    iconBg: 'bg-gradient-to-br from-red-600 to-amber-500',
     iconColor: 'text-white',
+    titleColor: 'text-gray-950 font-bold',
+    messageColor: 'text-gray-700',
+    closeBtn: 'text-gray-500 hover:text-gray-900 hover:bg-gray-100',
+    progressColor: 'bg-gradient-to-r from-red-600 to-amber-500',
     defaultIcon: (
       <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
         <path
@@ -112,11 +136,19 @@ const TYPE_CONFIG: Record<
   },
 };
 
-function ToastProgressBar({ duration, paused }: { duration: number; paused: boolean }) {
+function ToastProgressBar({
+  duration,
+  paused,
+  color,
+}: {
+  duration: number;
+  paused: boolean;
+  color: string;
+}) {
   return (
-    <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#F0F0F0] overflow-hidden rounded-b-xl">
+    <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-black/5 overflow-hidden rounded-b-xl">
       <div
-        className="h-full bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] origin-left"
+        className={`h-full ${color} origin-left`}
         style={{
           animation: `toast-progress ${duration}ms linear forwards`,
           animationPlayState: paused ? 'paused' : 'running',
@@ -181,11 +213,11 @@ function ToastNotification({ toast, onDismiss }: ToastProps) {
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-[var(--vj-navy)] text-sm leading-tight font-['KoHo',sans-serif]">
+          <p className={`text-sm leading-tight font-['KoHo',sans-serif] ${config.titleColor}`}>
             {toast.title}
           </p>
           {toast.message && (
-            <p className="text-xs text-[var(--foreground-muted)] mt-0.5 leading-relaxed">
+            <p className={`text-xs mt-1 leading-relaxed ${config.messageColor}`}>
               {toast.message}
             </p>
           )}
@@ -224,7 +256,7 @@ function ToastNotification({ toast, onDismiss }: ToastProps) {
             e.stopPropagation();
             dismiss();
           }}
-          className="flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center text-[#999999] hover:text-[var(--foreground)] hover:bg-[var(--vj-sky)] transition-colors duration-150 mt-0.5"
+          className={`flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center transition-colors duration-150 mt-0.5 ${config.closeBtn}`}
           aria-label="Đóng thông báo"
         >
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
@@ -234,7 +266,9 @@ function ToastNotification({ toast, onDismiss }: ToastProps) {
       </div>
 
       {/* Progress bar */}
-      {duration > 0 && <ToastProgressBar duration={duration} paused={paused} />}
+      {duration > 0 && (
+        <ToastProgressBar duration={duration} paused={paused} color={config.progressColor} />
+      )}
     </div>
   );
 }

@@ -11,15 +11,15 @@ interface AlertBannerProps {
 const STYLES = {
   error: {
     icon: 'ExclamationCircleIcon',
-    background: 'rgb(var(--primary-rgb) / 0.08)',
-    borderColor: 'rgb(var(--primary-rgb) / 0.25)',
-    color: 'var(--primary)',
+    background: '#FEF2F2',
+    borderColor: '#EF4444',
+    color: '#991B1B',
   },
   success: {
     icon: 'CheckCircleIcon',
-    background: 'rgb(var(--vj-green-rgb) / 0.10)',
-    borderColor: 'rgb(var(--vj-green-rgb) / 0.30)',
-    color: 'var(--vj-green)',
+    background: '#ECFDF5',
+    borderColor: '#10B981',
+    color: '#065F46',
   },
 } as const;
 
@@ -31,11 +31,11 @@ export default function AlertBanner({ message, variant }: AlertBannerProps) {
   return (
     <div
       role={variant === 'error' ? 'alert' : 'status'}
-      className="mb-4 flex items-center gap-2 rounded-xl border px-4 py-3 text-sm"
+      className="mb-4 flex items-center gap-2.5 rounded-xl border-2 px-4 py-3 text-sm font-bold shadow-sm"
       style={{ background: style.background, borderColor: style.borderColor, color: style.color }}
     >
-      <Icon name={style.icon} size={16} />
-      {message}
+      <Icon name={style.icon} size={18} />
+      <span>{message}</span>
     </div>
   );
 }
