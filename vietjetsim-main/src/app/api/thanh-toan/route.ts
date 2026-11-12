@@ -71,11 +71,11 @@ export async function POST(request: NextRequest) {
     }
 
     if (receipt_image) {
-      if (typeof receipt_image !== 'string' || receipt_image.length > 5_000_000) {
+      if (typeof receipt_image !== 'string' || receipt_image.length > 6_000_000) {
         return NextResponse.json(
           {
             error: 'Invalid receipt image',
-            message: 'Ảnh biên lai không hợp lệ hoặc vượt quá kích thước cho phép (tối đa 5MB)',
+            message: 'Ảnh biên lai không hợp lệ hoặc vượt quá kích thước cho phép (tối đa 4MB)',
           },
           { status: 400 }
         );
