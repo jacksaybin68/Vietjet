@@ -101,6 +101,31 @@ describe('POST /api/dat-ve passenger types', () => {
     expect(res.status).toBe(201);
   });
 
+  it('accepts booking without pre-selected seats (seats: [])', async () => {
+    const res = await POST(
+      post({
+        flight_id: 'f1',
+        total_price: 100,
+        passengers: [adult()],
+        seats: [],
+        consents: CONSENTS,
+      })
+    );
+    expect(res.status).toBe(201);
+  });
+
+  it('accepts booking when seats parameter is omitted', async () => {
+    const res = await POST(
+      post({
+        flight_id: 'f1',
+        total_price: 100,
+        passengers: [adult()],
+        consents: CONSENTS,
+      })
+    );
+    expect(res.status).toBe(201);
+  });
+
   it('rejects a seat count that does not cover every seated passenger', async () => {
     const res = await POST(
       post({

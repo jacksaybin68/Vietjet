@@ -396,7 +396,11 @@ function FlightBookingClientInner({
         return;
       }
 
-      const seats = booking.selectedSeats;
+      const seats = Array.isArray(booking.selectedSeats)
+        ? booking.selectedSeats.filter(
+            (s): s is string => typeof s === 'string' && s.trim().length > 0
+          )
+        : [];
       const ancillaries = [...booking.ancillaries];
       if (baggageFee > 0) ancillaries.push('baggage');
       if (booking.hasInsurance) ancillaries.push('insurance');

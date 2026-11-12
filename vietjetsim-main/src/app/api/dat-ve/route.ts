@@ -135,17 +135,21 @@ export async function POST(request: NextRequest) {
       id_number: passenger.idNumber ? String(passenger.idNumber) : null,
       gender: passenger.gender ? String(passenger.gender) : 'male',
       country_code: passenger.countryCode ? String(passenger.countryCode) : 'VN',
-      phone: String(passenger.phone),
-      email: String(passenger.email),
+      phone: passenger.phone ? String(passenger.phone) : null,
+      email: passenger.email ? String(passenger.email) : null,
       residence: passenger.residence ? String(passenger.residence) : null,
       skyjoy_member_id: passenger.skyJoyMemberId ? String(passenger.skyJoyMemberId) : null,
       passenger_type: String(passenger.type ?? 'adult'),
     }));
 
     // Infants travel on a lap, so a seat is required for every other passenger
-    // only. An all-adult booking still has to match one-to-one as before.
+    // only if seats are selected. Pre-selecting seats is optional — if none are
+    // selected (empty array), seats are assigned later at check-in.
     const seatedPassengers = normalizedPassengers.filter((p) => p.passenger_type !== 'infant');
-    if (seats && Array.isArray(seats) && seats.length !== seatedPassengers.length) {
+    const sanitizedSeats = Array.isArray(seats)
+      ? seats.filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
+      : [];
+    if (sanitizedSeats.length > 0 && sanitizedSeats.length !== seatedPassengers.length) {
       return NextResponse.json(
         { error: 'Number of seats must match number of seated passengers' },
         { status: 400 }
@@ -183,7 +187,7 @@ export async function POST(request: NextRequest) {
     // Seats are sold per passenger, so each carries its own price and its own
     // tax/fee. An unknown seat number prices at 0 rather than being rejected —
     // the adjacency rule is a UX guard, not a money guarantee.
-    const seatRows = (seats || []).map((seat) => ({
+    const seatRows = sanitizedSeats.map((seat) => ({
       seat_number: seat,
       price: getSeatCharge(seat),
     }));
