@@ -417,15 +417,15 @@ export default function PaymentClient() {
           const toCode = (dbFlight?.to_code || 'HAN').toUpperCase();
           const departTimeStr = dbFlight?.depart_time
             ? new Date(dbFlight.depart_time).toLocaleTimeString('vi-VN', {
-                hour: '2-digit',
-                minute: '2-digit',
-              })
+              hour: '2-digit',
+              minute: '2-digit',
+            })
             : '08:30';
           const arriveTimeStr = dbFlight?.arrive_time
             ? new Date(dbFlight.arrive_time).toLocaleTimeString('vi-VN', {
-                hour: '2-digit',
-                minute: '2-digit',
-              })
+              hour: '2-digit',
+              minute: '2-digit',
+            })
             : '10:40';
           const dateStr = dbFlight?.depart_time
             ? new Date(dbFlight.depart_time).toISOString().split('T')[0]
@@ -521,6 +521,8 @@ export default function PaymentClient() {
   // Read booking data from sessionStorage (set by FlightBookingClient)
   const [booking, setBooking] = useState<{
     bookingId?: string;
+    contactEmail?: string;
+    contactPhone?: string;
     flightNo: string;
     from: string;
     to: string;
@@ -571,6 +573,28 @@ export default function PaymentClient() {
 
   const discountAmount = promoApplied && promoData ? promoData.discountAmount : 0;
   const total = booking ? booking.total - discountAmount : 0;
+
+  // Trạng thái Bay trước trả sau Movi
+  const [moviTenure, setMoviTenure] = useState<number>(3); // 1, 3, 6, 12 tháng
+  const [moviCccd, setMoviCccd] = useState<string>('');
+  const [moviFullName, setMoviFullName] = useState<string>('');
+  const [moviPhone, setMoviPhone] = useState<string>('');
+  const [moviEmail, setMoviEmail] = useState<string>('');
+  const [moviAgreed, setMoviAgreed] = useState<boolean>(true);
+
+  const moviMonthlyAmount = useMemo(() => {
+    if (!total || total <= 0) return 0;
+    return Math.round(total / (moviTenure || 1));
+  }, [total, moviTenure]);
+
+  useEffect(() => {
+    if (booking?.passengers && booking.passengers.length > 0 && !moviFullName) {
+      const first = booking.passengers[0];
+      if (first.name && first.name !== 'HÀNH KHÁCH') {
+        setMoviFullName(first.name);
+      }
+    }
+  }, [booking, moviFullName]);
 
   // Transfer content the customer must paste into their bank app. Admins
   // control the template (Admin → Ngân hàng); the amounts are rendered without
@@ -932,11 +956,10 @@ export default function PaymentClient() {
             onDragLeave={() => setIsDraggingReceipt(false)}
             onDrop={handleReceiptDrop}
             onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-2 ${
-              isDraggingReceipt
-                ? 'border-primary bg-primary/5 scale-[1.01]'
-                : 'border-gray-300 hover:border-primary hover:bg-red-50/20 bg-gray-50/60'
-            }`}
+            className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-2 ${isDraggingReceipt
+              ? 'border-primary bg-primary/5 scale-[1.01]'
+              : 'border-gray-300 hover:border-primary hover:bg-red-50/20 bg-gray-50/60'
+              }`}
           >
             <div className="w-12 h-12 rounded-full bg-white shadow-xs border border-gray-200 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
               <Icon name="ArrowUpTrayIcon" size={22} className="text-primary" />
@@ -1125,11 +1148,10 @@ export default function PaymentClient() {
                     <button
                       onClick={handleCopyBookingCode}
                       title="Sao chép mã đặt chỗ"
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
-                        copied
-                          ? 'bg-[rgb(var(--vj-green-rgb))]/15 text-[var(--vj-green)] border border-[rgb(var(--vj-green-rgb))]/40'
-                          : 'bg-[var(--surface-2)] text-[var(--foreground-muted)] border border-[var(--border)] hover:bg-primary-50 hover:text-primary hover:border-primary'
-                      }`}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${copied
+                        ? 'bg-[rgb(var(--vj-green-rgb))]/15 text-[var(--vj-green)] border border-[rgb(var(--vj-green-rgb))]/40'
+                        : 'bg-[var(--surface-2)] text-[var(--foreground-muted)] border border-[var(--border)] hover:bg-primary-50 hover:text-primary hover:border-primary'
+                        }`}
                     >
                       {copied ? (
                         <>
@@ -1554,11 +1576,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('vnpay_qr');
                         setPaymentMethod('vietqr');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] relative overflow-hidden ${
-                        selectedMethodGroup === 'vnpay_qr'
-                          ? 'border-[#005BAA] ring-2 ring-[#005BAA] bg-blue-50/40 shadow-xs'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] relative overflow-hidden ${selectedMethodGroup === 'vnpay_qr'
+                        ? 'border-[#005BAA] ring-2 ring-[#005BAA] bg-blue-50/40 shadow-xs'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                        }`}
                     >
                       <div className="absolute top-0 right-0 bg-[#ED1C24] text-white text-[8px] font-black px-1.5 py-0.5 rounded-bl-md uppercase tracking-wider">
                         Khuyên dùng
@@ -1578,11 +1599,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('vietqr');
                         setPaymentMethod('vietqr');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] relative overflow-hidden ${
-                        selectedMethodGroup === 'vietqr'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/30 shadow-xs'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] relative overflow-hidden ${selectedMethodGroup === 'vietqr'
+                        ? 'border-green-600 ring-2 ring-green-600 bg-green-50/30 shadow-xs'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                        }`}
                     >
                       <div className="flex items-center h-8">
                         <VietQrLogo className="h-5 w-auto max-w-[104px]" />
@@ -1599,11 +1619,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('napas');
                         setPaymentMethod('bank');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
-                        selectedMethodGroup === 'napas'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${selectedMethodGroup === 'napas'
+                        ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                        }`}
                     >
                       <div className="flex items-center h-8">
                         <NapasLogo className="h-4 w-auto max-w-[104px]" />
@@ -1618,11 +1637,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('card');
                         setPaymentMethod('card');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
-                        selectedMethodGroup === 'card'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${selectedMethodGroup === 'card'
+                        ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                        }`}
                     >
                       {/* Bốn logo mạng thẻ xếp 2×2 để không bị chồng lên nhau */}
                       <div className="grid grid-cols-2 gap-x-2 gap-y-1 h-8 items-center">
@@ -1643,11 +1661,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('vnpay_dom');
                         setPaymentMethod('vietqr');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
-                        selectedMethodGroup === 'vnpay_dom'
-                          ? 'border-[#005BAA] ring-2 ring-[#005BAA] bg-blue-50/20 shadow-xs'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${selectedMethodGroup === 'vnpay_dom'
+                        ? 'border-[#005BAA] ring-2 ring-[#005BAA] bg-blue-50/20 shadow-xs'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                        }`}
                     >
                       <div className="flex items-center h-8">
                         <VnpayLogo className="h-4 w-auto max-w-[104px]" />
@@ -1672,11 +1689,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('skypay');
                         setPaymentMethod('skypoint');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
-                        selectedMethodGroup === 'skypay'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${selectedMethodGroup === 'skypay'
+                        ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                        }`}
                     >
                       <div className="flex items-center h-8">
                         <SkyJoyLogo className="h-7 w-auto" />
@@ -1691,11 +1707,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('momo');
                         setPaymentMethod('e_wallet');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
-                        selectedMethodGroup === 'momo'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${selectedMethodGroup === 'momo'
+                        ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                        }`}
                     >
                       <div className="flex items-center h-8">
                         <MomoLogo className="h-7 w-auto" />
@@ -1710,11 +1725,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('zalopay');
                         setPaymentMethod('e_wallet');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
-                        selectedMethodGroup === 'zalopay'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${selectedMethodGroup === 'zalopay'
+                        ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                        }`}
                     >
                       <div className="flex items-center h-8">
                         <ZaloPayLogo className="h-5 w-auto max-w-[104px]" />
@@ -1729,11 +1743,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('applepay');
                         setPaymentMethod('card');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
-                        selectedMethodGroup === 'applepay'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${selectedMethodGroup === 'applepay'
+                        ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                        }`}
                     >
                       <div className="flex items-center h-8">
                         <ApplePayLogo className="h-6 w-auto max-w-[104px]" />
@@ -1748,11 +1761,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('googlepay');
                         setPaymentMethod('card');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
-                        selectedMethodGroup === 'googlepay'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${selectedMethodGroup === 'googlepay'
+                        ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                        }`}
                     >
                       <div className="flex items-center h-8">
                         <GooglePayLogo className="h-5 w-auto max-w-[104px]" />
@@ -1774,11 +1786,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('movi');
                         setPaymentMethod('bank');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
-                        selectedMethodGroup === 'movi'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${selectedMethodGroup === 'movi'
+                        ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                        }`}
                     >
                       <div className="flex items-center h-8">
                         <MoviLogo className="h-6 w-auto max-w-[104px]" />
@@ -1919,11 +1930,10 @@ export default function PaymentClient() {
                                   key={acc.id}
                                   type="button"
                                   onClick={() => setSelectedAdminAccount(acc)}
-                                  className={`px-3 py-1.5 rounded-full text-xs2 font-bold whitespace-nowrap transition-all ${
-                                    selectedAdminAccount.id === acc.id
-                                      ? 'bg-primary text-white shadow-md shadow-primary/20'
-                                      : 'bg-[var(--surface-2)] text-[var(--foreground-muted)] hover:bg-[var(--surface-3)] '
-                                  }`}
+                                  className={`px-3 py-1.5 rounded-full text-xs2 font-bold whitespace-nowrap transition-all ${selectedAdminAccount.id === acc.id
+                                    ? 'bg-primary text-white shadow-md shadow-primary/20'
+                                    : 'bg-[var(--surface-2)] text-[var(--foreground-muted)] hover:bg-[var(--surface-3)] '
+                                    }`}
                                 >
                                   {acc.admin_bank_name}
                                 </button>
@@ -2158,12 +2168,11 @@ export default function PaymentClient() {
                   {/* SkyPoint / Ví SkyJoy — thanh toán bằng điểm tích lũy. */}
                   {paymentMethod === 'skypoint' && (
                     <div
-                      className={`bg-[var(--background)] border rounded-2xl p-6 flex flex-col items-center gap-4 transition-all ${
-                        skypointInfo &&
+                      className={`bg-[var(--background)] border rounded-2xl p-6 flex flex-col items-center gap-4 transition-all ${skypointInfo &&
                         skypointInfo.points >= skypointPointsForAmount(total, skypointInfo.rate)
-                          ? 'border-vjbrown/40 bg-vjyellow/10'
-                          : 'border-[var(--border)] '
-                      }`}
+                        ? 'border-vjbrown/40 bg-vjyellow/10'
+                        : 'border-[var(--border)] '
+                        }`}
                     >
                       <div className="w-16 h-16 bg-vjyellow rounded-full flex items-center justify-center shadow-md">
                         <Icon
@@ -2215,6 +2224,243 @@ export default function PaymentClient() {
                             Xem cách tích lũy thêm SkyPoint
                           </Link>
                         )}
+                    </div>
+                  )}
+
+                  {/* Trả góp Movi - Bay trước, trả sau */}
+                  {paymentMethod === 'movi' && (
+                    <div className="space-y-4 animate-[fadeIn_0.3s_ease-out]">
+                      {/* Header Card Movi */}
+                      <div className="bg-gradient-to-r from-red-600 via-rose-600 to-amber-500 rounded-2xl p-4 sm:p-5 text-white shadow-md">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <div className="bg-white p-2 rounded-xl shadow-xs">
+                              <MoviLogo className="h-6 w-auto" />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-xs sm:text-sm font-black font-koho uppercase tracking-wider text-amber-300">
+                                  BAY TRƯỚC, TRẢ SAU • MOVI
+                                </h4>
+                                <span className="text-[9px] font-black uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full">
+                                  0% Lãi suất
+                                </span>
+                              </div>
+                              <p className="text-3xs sm:text-2xs text-white/90 mt-0.5">
+                                Xét duyệt hạn mức tự động trong 3 phút • Giữ chỗ tức thì không chờ đợi
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Chọn kỳ hạn trả góp */}
+                      <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-gray-800 uppercase tracking-wider font-koho flex items-center gap-1.5">
+                            <Icon name="CalendarDaysIcon" size={16} className="text-primary" />
+                            Chọn kỳ hạn trả góp
+                          </label>
+                          <span className="text-2xs font-extrabold text-[#38B000] bg-lime-50 border border-lime-200 px-2 py-0.5 rounded-full">
+                            Ưu đãi lãi suất 0%
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                          {[
+                            { months: 1, label: '1 tháng', note: 'Thanh toán sau 30 ngày' },
+                            { months: 3, label: '3 tháng', note: '3 kỳ linh hoạt', popular: true },
+                            { months: 6, label: '6 tháng', note: 'Nhẹ gánh chi phí' },
+                            { months: 12, label: '12 tháng', note: 'Tiết kiệm tối đa' },
+                          ].map((plan) => {
+                            const isSelected = moviTenure === plan.months;
+                            const monthly = Math.round(total / plan.months);
+                            return (
+                              <button
+                                key={plan.months}
+                                type="button"
+                                onClick={() => setMoviTenure(plan.months)}
+                                className={`p-3 rounded-xl border text-left transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between min-h-[96px] ${
+                                  isSelected
+                                    ? 'border-[#38B000] ring-2 ring-[#38B000] bg-lime-50/40 shadow-xs'
+                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                }`}
+                              >
+                                {plan.popular && (
+                                  <div className="absolute top-0 right-0 bg-[#38B000] text-white text-[8px] font-black px-1.5 py-0.5 rounded-bl-md uppercase">
+                                    Khuyên dùng
+                                  </div>
+                                )}
+                                <div>
+                                  <span className="block text-xs font-black text-gray-900 font-koho">
+                                    {plan.label}
+                                  </span>
+                                  <span className="block text-3xs text-gray-500 mt-0.5 font-medium">
+                                    {plan.note}
+                                  </span>
+                                </div>
+                                <div className="mt-2 pt-2 border-t border-gray-100">
+                                  <span className="block text-xs font-extrabold text-[#38B000] font-koho">
+                                    {monthly.toLocaleString('vi-VN')}₫
+                                    <span className="text-3xs font-medium text-gray-500">/tháng</span>
+                                  </span>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Bảng tóm tắt khoản trả góp */}
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2 text-xs">
+                          <div className="flex justify-between items-center text-gray-600">
+                            <span>Tổng giá vé thanh toán</span>
+                            <span className="font-bold text-gray-900 font-koho">
+                              {total.toLocaleString('vi-VN')} VND
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center text-gray-600">
+                            <span>Số tiền trả trước (Hôm nay)</span>
+                            <span className="font-bold text-[#38B000] font-koho">0 VND (0%)</span>
+                          </div>
+                          <div className="flex justify-between items-center text-gray-600">
+                            <span>Lãi suất trả góp</span>
+                            <span className="font-bold text-emerald-600">0% / tháng</span>
+                          </div>
+                          <div className="flex justify-between items-center text-gray-600">
+                            <span>Phí chuyển đổi hồ sơ</span>
+                            <span className="font-bold text-emerald-600">Miễn phí (0 VND)</span>
+                          </div>
+                          <div className="pt-2 border-t border-slate-200 flex justify-between items-center">
+                            <span className="font-bold text-gray-900">Ước tính mỗi tháng trả</span>
+                            <span className="font-black text-sm sm:text-base text-red-600 font-koho">
+                              {moviMonthlyAmount.toLocaleString('vi-VN')}₫
+                              <span className="text-xs text-gray-500 font-normal">
+                                {' '}
+                                / kỳ ({moviTenure} kỳ)
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Mẫu thông tin đăng ký xét duyệt nhanh Movi */}
+                      <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
+                        <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wider font-koho flex items-center gap-1.5">
+                          <Icon name="IdentificationIcon" size={16} className="text-primary" />
+                          Thông tin đăng ký xét duyệt hạn mức trả góp
+                        </h4>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                          <div>
+                            <label className="block text-2xs font-bold text-gray-700 uppercase tracking-wider mb-1 font-koho">
+                              Họ và tên người đứng tên <span className="text-red-600">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={moviFullName}
+                              onChange={(e) => setMoviFullName(e.target.value.toUpperCase())}
+                              placeholder="NGUYEN VAN A"
+                              className="w-full px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#38B000] focus:bg-white uppercase transition-all"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-2xs font-bold text-gray-700 uppercase tracking-wider mb-1 font-koho">
+                              Số CCCD / CMND (12 số) <span className="text-red-600">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              maxLength={12}
+                              value={moviCccd}
+                              onChange={(e) => setMoviCccd(e.target.value.replace(/[^0-9]/g, ''))}
+                              placeholder="VD: 001201012345"
+                              className="w-full px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-xl text-xs font-mono font-bold focus:outline-none focus:border-[#38B000] focus:bg-white transition-all tracking-wider"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-2xs font-bold text-gray-700 uppercase tracking-wider mb-1 font-koho">
+                              Số điện thoại nhận OTP xác nhận <span className="text-red-600">*</span>
+                            </label>
+                            <input
+                              type="tel"
+                              value={moviPhone}
+                              onChange={(e) => setMoviPhone(e.target.value)}
+                              placeholder="0912345678"
+                              className="w-full px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-xl text-xs font-mono focus:outline-none focus:border-[#38B000] focus:bg-white transition-all"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-2xs font-bold text-gray-700 uppercase tracking-wider mb-1 font-koho">
+                              Email nhận hợp đồng điện tử <span className="text-red-600">*</span>
+                            </label>
+                            <input
+                              type="email"
+                              value={moviEmail || (booking?.contactEmail ?? (booking?.bookingId ? `${booking.bookingId.toLowerCase()}@khach.vietjetsim.vn` : 'khachhang@vietjetsim.vn'))}
+                              onChange={(e) => setMoviEmail(e.target.value)}
+                              placeholder="email@example.com"
+                              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-xs text-gray-800 font-medium focus:border-[#38B000] focus:ring-1 focus:ring-[#38B000] outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        <label className="flex items-start gap-2.5 pt-2 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={moviAgreed}
+                            onChange={(e) => setMoviAgreed(e.target.checked)}
+                            className="mt-0.5 rounded text-[#38B000] focus:ring-[#38B000] border-gray-300 w-4 h-4 cursor-pointer"
+                          />
+                          <span className="text-3xs sm:text-2xs text-gray-600 leading-relaxed">
+                            Tôi đồng ý với{' '}
+                            <span className="text-[#38B000] font-bold underline">
+                              Điều khoản &amp; Điều kiện trả góp Movi - Bay trước trả sau
+                            </span>{' '}
+                            và ủy quyền đối soát dữ liệu tín dụng điện tử để xuất vé tự động.
+                          </span>
+                        </label>
+
+                        {/* Nút đăng ký MOVI */}
+                        <button
+                          type="button"
+                          onClick={handlePayment}
+                          disabled={loading || !moviAgreed}
+                          className="w-full mt-2 flex items-center justify-center gap-2 bg-gradient-to-r from-[#44BD04] via-[#38B000] to-[#2B9300] hover:from-[#3BB000] hover:to-[#248000] text-white font-koho font-extrabold py-3.5 px-6 rounded-xl shadow-md shadow-[#38B000]/30 hover:shadow-[#38B000]/40 hover:-translate-y-0.5 active:scale-[0.99] transition-all text-sm cursor-pointer disabled:opacity-50"
+                        >
+                          {loading ? (
+                            <>
+                              <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                />
+                              </svg>
+                              <span>Đang gửi hồ sơ xét duyệt Movi...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Icon name="CheckCircleIcon" size={18} className="text-white" />
+                              <span>
+                                Đăng ký trả góp MOVI &amp; Giữ vé ngay (
+                                {moviMonthlyAmount.toLocaleString('vi-VN')}₫/tháng)
+                              </span>
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   )}
 
@@ -2308,6 +2554,15 @@ export default function PaymentClient() {
                                 : `Tôi đã chuyển khoản — Xác nhận (${total.toLocaleString('vi-VN')} VND)`}
                         </span>
                       </>
+                    ) : paymentMethod === 'movi' ? (
+                      <>
+                        <Icon name="CheckCircleIcon" size={20} />
+                        <span>
+                          {loading
+                            ? 'Đang gửi hồ sơ Movi...'
+                            : `Đăng ký Movi — ${moviMonthlyAmount.toLocaleString('vi-VN')}₫/tháng`}
+                        </span>
+                      </>
                     ) : (
                       <>
                         <Icon name="LockClosedIcon" size={18} />
@@ -2368,8 +2623,8 @@ export default function PaymentClient() {
                 ancillaries={
                   booking?.ancillaries?.length
                     ? (booking.ancillaries
-                        .map((id) => ANCILLARY_OPTIONS.find((o) => o.id === id)?.title)
-                        .filter(Boolean) as string[])
+                      .map((id) => ANCILLARY_OPTIONS.find((o) => o.id === id)?.title)
+                      .filter(Boolean) as string[])
                     : ['Hành lý xách tay 7kg']
                 }
                 onOpenDetails={() => setShowSummaryModal(true)}
@@ -2452,9 +2707,9 @@ export default function PaymentClient() {
                         Dịch vụ bổ sung
                         {booking?.ancillaries?.length
                           ? ` (${booking.ancillaries
-                              .map((id) => ANCILLARY_OPTIONS.find((o) => o.id === id)?.title)
-                              .filter(Boolean)
-                              .join(', ')})`
+                            .map((id) => ANCILLARY_OPTIONS.find((o) => o.id === id)?.title)
+                            .filter(Boolean)
+                            .join(', ')})`
                           : ''}
                       </span>
                       <span className="font-semibold">

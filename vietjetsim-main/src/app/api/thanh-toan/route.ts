@@ -20,7 +20,7 @@ import { sendAutomaticPaymentInvoiceEmail } from '@/lib/payment-invoice';
 import { skypointPointsForAmount } from '@/lib/skypoint';
 
 /** Methods the payment page may submit. Anything else is rejected up front. */
-const ALLOWED_METHODS = new Set(['card', 'bank', 'vietqr', 'wallet', 'e_wallet', 'skypoint']);
+const ALLOWED_METHODS = new Set(['card', 'bank', 'vietqr', 'wallet', 'e_wallet', 'skypoint', 'movi']);
 
 export async function POST(request: NextRequest) {
   // Validate CSRF token

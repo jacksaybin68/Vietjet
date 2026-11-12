@@ -138,6 +138,7 @@ const METHOD_LABELS: Record<string, string> = {
   wallet: 'Ví Vietjet SkyJoy',
   e_wallet: 'Ví điện tử',
   skypoint: 'Điểm thưởng SkyPoint',
+  movi: 'Bay trước trả sau (MOVI)',
 };
 
 const METHOD_LABEL_FALLBACK = 'Thanh toán trực tuyếp';
