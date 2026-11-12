@@ -952,10 +952,10 @@ export default function PaymentClient() {
             </div>
           </div>
         ) : (
-          <div className="bg-emerald-50/40 border border-emerald-200 rounded-xl p-3.5 space-y-3">
+          <div className="bg-lime-50/60 border border-lime-300 rounded-xl p-3.5 space-y-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-emerald-700 text-xs font-bold font-koho">
-                <Icon name="CheckCircleIcon" size={16} className="text-emerald-600" />
+              <div className="flex items-center gap-2 text-lime-800 text-xs font-bold font-koho">
+                <Icon name="CheckCircleIcon" size={16} className="text-[#38B000]" />
                 <span>Đã đính kèm ảnh biên lai thành công</span>
               </div>
               <button
@@ -968,7 +968,7 @@ export default function PaymentClient() {
               </button>
             </div>
 
-            <div className="flex items-center gap-3 bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
+            <div className="flex items-center gap-3 bg-white p-2.5 rounded-lg border border-lime-200 shadow-2xs">
               <img
                 src={receiptImage}
                 alt="Ảnh biên lai"
@@ -1020,13 +1020,13 @@ export default function PaymentClient() {
         </div>
       </div> */}
 
-      {/* Nút ĐÃ THANH TOÁN */}
+      {/* Nút ĐÃ THANH TOÁN — Màu xanh nõn chuối Vietjet */}
       <button
         id="btn-da-thanh-toan"
         type="button"
         onClick={handlePayment}
         disabled={loading}
-        className="w-full mt-2 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-koho font-extrabold py-3.5 px-6 rounded-xl shadow-md shadow-emerald-600/25 hover:shadow-emerald-600/35 hover:-translate-y-0.5 active:scale-[0.99] transition-all text-sm cursor-pointer disabled:opacity-50"
+        className="w-full mt-2 flex items-center justify-center gap-2 bg-gradient-to-r from-[#44BD04] via-[#38B000] to-[#2B9300] hover:from-[#3BB000] hover:to-[#248000] text-white font-koho font-extrabold py-3.5 px-6 rounded-xl shadow-md shadow-[#38B000]/30 hover:shadow-[#38B000]/40 hover:-translate-y-0.5 active:scale-[0.99] transition-all text-sm cursor-pointer disabled:opacity-50"
       >
         {loading ? (
           <>

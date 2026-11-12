@@ -18,6 +18,44 @@ export const PASSENGER_TYPE_LABELS: Record<PassengerType, string> = {
   infant: 'Em bé',
 };
 
+export interface CountryDialCode {
+  code: string;
+  dialCode: string;
+  name: string;
+}
+
+export const COUNTRY_DIAL_CODES: readonly CountryDialCode[] = [
+  { code: 'VN', dialCode: '+84', name: 'Việt Nam (+84)' },
+  { code: 'TH', dialCode: '+66', name: 'Thái Lan (+66)' },
+  { code: 'SG', dialCode: '+65', name: 'Singapore (+65)' },
+  { code: 'MY', dialCode: '+60', name: 'Malaysia (+60)' },
+  { code: 'KR', dialCode: '+82', name: 'Hàn Quốc (+82)' },
+  { code: 'JP', dialCode: '+81', name: 'Nhật Bản (+81)' },
+  { code: 'TW', dialCode: '+886', name: 'Đài Loan (+886)' },
+  { code: 'HK', dialCode: '+852', name: 'Hồng Kông (+852)' },
+  { code: 'CN', dialCode: '+86', name: 'Trung Quốc (+86)' },
+  { code: 'IN', dialCode: '+91', name: 'Ấn Độ (+91)' },
+  { code: 'AU', dialCode: '+61', name: 'Úc (+61)' },
+  { code: 'ID', dialCode: '+62', name: 'Indonesia (+62)' },
+  { code: 'PH', dialCode: '+63', name: 'Philippines (+63)' },
+  { code: 'KH', dialCode: '+855', name: 'Campuchia (+855)' },
+  { code: 'LA', dialCode: '+856', name: 'Lào (+856)' },
+  { code: 'MM', dialCode: '+95', name: 'Myanmar (+95)' },
+  { code: 'US', dialCode: '+1', name: 'Hoa Kỳ (+1)' },
+  { code: 'CA', dialCode: '+1', name: 'Canada (+1)' },
+  { code: 'GB', dialCode: '+44', name: 'Vương quốc Anh (+44)' },
+  { code: 'FR', dialCode: '+33', name: 'Pháp (+33)' },
+  { code: 'DE', dialCode: '+49', name: 'Đức (+49)' },
+  { code: 'RU', dialCode: '+7', name: 'Nga (+7)' },
+  { code: 'AE', dialCode: '+971', name: 'UAE / Dubai (+971)' },
+  { code: 'NZ', dialCode: '+64', name: 'New Zealand (+64)' },
+];
+
+export function getCountryDialCode(code: string | undefined): string {
+  const match = COUNTRY_DIAL_CODES.find((c) => c.code === code);
+  return match ? match.dialCode : '+84';
+}
+
 /** A passenger rides free only when they are seated. */
 export function isSeated(type: PassengerType | undefined): boolean {
   return SEATED_PASSENGER_TYPES.includes(type ?? 'adult');

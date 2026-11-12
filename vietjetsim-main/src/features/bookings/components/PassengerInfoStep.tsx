@@ -2,7 +2,9 @@
 import React, { useState } from 'react';
 import {
   BookingConsents,
+  COUNTRY_DIAL_CODES,
   Flight,
+  getCountryDialCode,
   Passenger,
   PassengerType,
   requiresIdNumber,
@@ -438,7 +440,11 @@ export default function PassengerInfoStep({
                           className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-primary"
                           required
                         >
-                          <option value="VN">Việt Nam (+84)</option>
+                          {COUNTRY_DIAL_CODES.map((country) => (
+                            <option key={country.code} value={country.code}>
+                              {country.name}
+                            </option>
+                          ))}
                         </select>
                       </div>
                     )}
@@ -453,7 +459,8 @@ export default function PassengerInfoStep({
                         </label>
                         <div className="flex items-center border-b border-gray-300 focus-within:border-primary">
                           <span className="flex items-center gap-1 pr-2 py-1 text-xs font-semibold text-gray-700 select-none shrink-0">
-                            +84 <span className="text-3xs text-gray-400">▾</span>
+                            {getCountryDialCode(p.countryCode)}{' '}
+                            <span className="text-3xs text-gray-400">▾</span>
                           </span>
                           <input
                             id={`passenger-${i}-phone`}

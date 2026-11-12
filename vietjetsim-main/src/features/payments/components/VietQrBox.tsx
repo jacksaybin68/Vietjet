@@ -255,7 +255,7 @@ export default function VietQrBox({
 
             <div className="hidden md:flex flex-col items-end shrink-0">
               <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-2xs font-bold text-white shadow-inner">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-[#70E000] animate-pulse" />
                 Quét mã tức thì
               </div>
               <span className="text-3xs text-white/70 mt-1">
@@ -409,13 +409,13 @@ export default function VietQrBox({
           data-testid="vietqr-poll-status"
           className={`mt-4 w-full flex items-center justify-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold shadow-xs transition-all ${
             pollState === 'paid'
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-300'
+              ? 'bg-lime-50 text-lime-800 border border-lime-300'
               : 'bg-blue-50 text-blue-800 border border-blue-200'
           }`}
         >
           {pollState === 'paid' ? (
             <>
-              <Icon name="CheckCircleIcon" size={18} className="text-emerald-600 animate-bounce" />
+              <Icon name="CheckCircleIcon" size={18} className="text-[#38B000] animate-bounce" />
               <span>Đã nhận được thanh toán thành công — Đang mở vé điện tử...</span>
             </>
           ) : (
