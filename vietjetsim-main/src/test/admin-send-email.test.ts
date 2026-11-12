@@ -68,9 +68,7 @@ vi.mock('@/lib/neon', () => {
       }
 
       if (query.includes('FROM passengers')) {
-        return [
-          { name: 'Nguyen Van Khach', email: 'khach@gmail.com', seat_code: '12A' },
-        ];
+        return [{ name: 'Nguyen Van Khach', email: 'khach@gmail.com', seat_code: '12A' }];
       }
 
       if (query.includes('FROM bank_accounts')) {
@@ -190,4 +188,3 @@ describe('Admin Send Booking Email API (Giao diện gửi Gmail thanh toán & xu
     expect(res2.status).toBe(400);
   });
 });
-

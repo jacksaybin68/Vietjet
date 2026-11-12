@@ -1361,8 +1361,7 @@ export async function confirmVietQrPayment(input: {
   }
 
   const transferNote =
-    input.transferNote?.trim() ||
-    (booking.booking_code ? `VJ ${booking.booking_code}` : null);
+    input.transferNote?.trim() || (booking.booking_code ? `VJ ${booking.booking_code}` : null);
 
   const batch = (await sql.transaction([
     sql`
@@ -1388,8 +1387,10 @@ export async function confirmVietQrPayment(input: {
     `,
   ])) as unknown[][];
 
-  const confirmedBooking =
-    asFirstRow<BookingRecord>(batch?.[0]) ?? { ...booking, status: 'confirmed' as const };
+  const confirmedBooking = asFirstRow<BookingRecord>(batch?.[0]) ?? {
+    ...booking,
+    status: 'confirmed' as const,
+  };
   const payment =
     asFirstRow<PaymentRecord>(batch?.[1]) ??
     asFirstRow<PaymentRecord>(batch?.[2]) ??
@@ -3417,6 +3418,7 @@ export interface CheckInSearchResult {
     to_code?: string;
     depart_time?: string;
     arrive_time?: string;
+    seat_number?: string | null;
   };
   passengers: Array<{
     id: string;
@@ -3514,6 +3516,10 @@ export async function searchCheckIn(
 
   const checkIn = asFirstRow<CheckInSearchResult['checkIn']>(checkInResult) || null;
 
+  const seatRow = asFirstRow<{ seat_number: string }>(
+    await sql`SELECT seat_number FROM seats WHERE booking_id = ${booking.id} LIMIT 1`
+  );
+
   return {
     booking: {
       id: booking.id,
@@ -3527,6 +3533,7 @@ export async function searchCheckIn(
       to_code: booking.to_code,
       depart_time: booking.depart_time,
       arrive_time: booking.arrive_time,
+      seat_number: seatRow?.seat_number || null,
     },
     passengers,
     checkIn: checkIn

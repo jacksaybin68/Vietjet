@@ -44,4 +44,3 @@ export function useFlightStatusSSE(flightId: string | null) {
 
   return { data, error };
 }
-

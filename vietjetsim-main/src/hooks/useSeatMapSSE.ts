@@ -38,4 +38,3 @@ export function useSeatMapSSE(flightId: string | null) {
 
   return { data };
 }
-

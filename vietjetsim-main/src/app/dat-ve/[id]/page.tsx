@@ -152,7 +152,10 @@ export default function BookingDetailPage() {
     return (
       <div className="relative min-h-screen bg-gray-50 flex flex-col font-sans">
         <Header />
-        <main id="main-content" className="flex-1 flex items-center justify-center p-8 skeleton-pulse">
+        <main
+          id="main-content"
+          className="flex-1 flex items-center justify-center p-8 skeleton-pulse"
+        >
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-[#ED1B24]/20 border-t-[#ED1B24] rounded-full animate-spin mx-auto mb-3" />
             <h1 className="text-gray-600 font-bold text-sm font-koho">
@@ -174,7 +177,9 @@ export default function BookingDetailPage() {
             <div className="w-14 h-14 bg-red-50 text-[#ED1B24] rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
               <Icon name="ExclamationCircleIcon" size={32} />
             </div>
-            <h1 className="text-lg font-black text-gray-900 mb-2 font-koho">Không tìm thấy đặt chỗ</h1>
+            <h1 className="text-lg font-black text-gray-900 mb-2 font-koho">
+              Không tìm thấy đặt chỗ
+            </h1>
             <p className="text-gray-500 mb-6 text-xs">{error || 'Mã đặt chỗ không tồn tại.'}</p>
             <Link
               href="/tim-ve"
@@ -208,9 +213,7 @@ export default function BookingDetailPage() {
 
           <div className="flex items-center gap-1.5">
             <span className="font-semibold text-gray-800">Trạng thái thanh toán :</span>
-            <span
-              className={`font-black ${isPaid ? 'text-emerald-700' : 'text-[#ED1B24]'}`}
-            >
+            <span className={`font-black ${isPaid ? 'text-emerald-700' : 'text-[#ED1B24]'}`}>
               {isPaid ? 'Đã thanh toán' : 'Chưa thanh toán'}
             </span>
           </div>
@@ -232,8 +235,13 @@ export default function BookingDetailPage() {
       </div>
 
       {/* Main Content với nền mây nhẹ nhàng */}
-      <main id="main-content" className="flex-1 py-6 px-3 sm:px-6 max-w-4xl mx-auto w-full space-y-4 z-10">
-        <h1 className="sr-only">Chi tiết đặt chỗ chuyến bay Vietjet Air - Mã đặt chỗ {bookingCode}</h1>
+      <main
+        id="main-content"
+        className="flex-1 py-6 px-3 sm:px-6 max-w-4xl mx-auto w-full space-y-4 z-10"
+      >
+        <h1 className="sr-only">
+          Chi tiết đặt chỗ chuyến bay Vietjet Air - Mã đặt chỗ {bookingCode}
+        </h1>
         {/* 1. Card: Thông tin chuyến bay */}
         <FlightSummaryCard
           flight={flight}
@@ -287,9 +295,15 @@ export default function BookingDetailPage() {
                   <p className="font-extrabold text-[#FFCC00]">
                     Đăng ký Hội viên Vietjet SkyJoy - Tận hưởng X3 ưu đãi độc quyền:
                   </p>
-                  <p className="flex items-center gap-1.5">• Tặng ngay 200 SkyPoint khi hoàn tất liên kết.</p>
-                  <p className="flex items-center gap-1.5">• Nhận SkyPoint cho toàn bộ các chặng bay đã thực hiện.</p>
-                  <p className="flex items-center gap-1.5">• Hưởng trọn đặc quyền ưu tiên thủ tục tại sân bay.</p>
+                  <p className="flex items-center gap-1.5">
+                    • Tặng ngay 200 SkyPoint khi hoàn tất liên kết.
+                  </p>
+                  <p className="flex items-center gap-1.5">
+                    • Nhận SkyPoint cho toàn bộ các chặng bay đã thực hiện.
+                  </p>
+                  <p className="flex items-center gap-1.5">
+                    • Hưởng trọn đặc quyền ưu tiên thủ tục tại sân bay.
+                  </p>
                   <Link
                     href="/dang-ky"
                     className="inline-flex items-center gap-1 mt-1 text-[#FFCC00] hover:underline font-extrabold hover:brightness-110 transition-colors"
@@ -407,9 +421,7 @@ export default function BookingDetailPage() {
                 Chi tiết giá vé
               </span>
             </div>
-            <span className="text-xs font-mono font-bold text-gray-500">
-              {paxCount} hành khách
-            </span>
+            <span className="text-xs font-mono font-bold text-gray-500">{paxCount} hành khách</span>
           </div>
 
           <div className="divide-y divide-gray-100">
@@ -422,9 +434,7 @@ export default function BookingDetailPage() {
                 <div key={passenger.id || idx}>
                   <button
                     type="button"
-                    onClick={() =>
-                      setExpandedPax((prev) => ({ ...prev, [idx]: !prev[idx] }))
-                    }
+                    onClick={() => setExpandedPax((prev) => ({ ...prev, [idx]: !prev[idx] }))}
                     className="w-full px-4 sm:px-5 py-3.5 flex items-center justify-between text-left hover:bg-gray-50/80 transition-colors cursor-pointer"
                   >
                     <div className="flex items-center gap-2">
@@ -437,7 +447,9 @@ export default function BookingDetailPage() {
                       <span className="font-mono font-bold text-xs text-gray-800 tabular-nums">
                         {paxShare.toLocaleString('vi-VN')} VND
                       </span>
-                      <span className={`text-xs text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+                      <span
+                        className={`text-xs text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                      >
                         ▼
                       </span>
                     </div>

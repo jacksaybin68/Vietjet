@@ -74,11 +74,7 @@ export default function ItineraryModal({ isOpen, onClose, booking }: ItineraryMo
   if (!isOpen || !booking) return null;
 
   const firstPassenger = booking.passengers && booking.passengers[0];
-  const primaryName = (
-    booking.contact_name ||
-    firstPassenger?.name ||
-    'QUÝ KHÁCH'
-  ).toUpperCase();
+  const primaryName = (booking.contact_name || firstPassenger?.name || 'QUÝ KHÁCH').toUpperCase();
 
   const rawEmail = booking.contact_email || firstPassenger?.email || '';
   const maskedEmail = rawEmail
@@ -213,14 +209,17 @@ export default function ItineraryModal({ isOpen, onClose, booking }: ItineraryMo
                     </span>
                     {!isPaid && (
                       <p className="text-3xs text-[#ED1B24] mt-0.5 leading-snug">
-                        Vé máy bay đã xác nhận/Mã đặt chỗ này sẽ bị hủy nếu không thanh toán trước TS: <span className="font-semibold">{expireDateStr}</span>
+                        Vé máy bay đã xác nhận/Mã đặt chỗ này sẽ bị hủy nếu không thanh toán trước
+                        TS: <span className="font-semibold">{expireDateStr}</span>
                       </p>
                     )}
                   </div>
                 </div>
                 <div className="grid grid-cols-[130px_1fr] items-start">
                   <span className="text-gray-600 font-medium">Trạng thái thanh toán:</span>
-                  <span className={isPaid ? 'text-emerald-600 font-bold' : 'text-red-600 font-bold'}>
+                  <span
+                    className={isPaid ? 'text-emerald-600 font-bold' : 'text-red-600 font-bold'}
+                  >
                     {isPaid ? 'Đã thanh toán' : 'Chưa thanh toán'}
                   </span>
                 </div>
@@ -316,7 +315,8 @@ export default function ItineraryModal({ isOpen, onClose, booking }: ItineraryMo
                       {fareClassLabel}
                     </td>
                     <td className="py-2.5 px-2.5 sm:px-3 text-gray-900">
-                      <span className="font-bold">{departTimeFormatted}</span> - {fromCity} ({fromCode})
+                      <span className="font-bold">{departTimeFormatted}</span> - {fromCity} (
+                      {fromCode})
                     </td>
                     <td className="py-2.5 px-2.5 sm:px-3 text-gray-900">
                       <span className="font-bold">{arriveTimeFormatted}</span> - {toCity} ({toCode})
@@ -349,4 +349,3 @@ export default function ItineraryModal({ isOpen, onClose, booking }: ItineraryMo
     </div>
   );
 }
-

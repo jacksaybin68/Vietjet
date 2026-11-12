@@ -33,8 +33,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const firstPassengerEmail =
       booking.passengers && booking.passengers[0]?.email ? booking.passengers[0].email : null;
     const contactEmailMasked = maskEmail(firstPassengerEmail);
-    const primaryContactName =
-      (booking.passengers && booking.passengers[0]?.name) || null;
+    const primaryContactName = (booking.passengers && booking.passengers[0]?.name) || null;
 
     if (!canViewFullBooking) {
       return NextResponse.json({

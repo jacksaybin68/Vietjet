@@ -10,10 +10,10 @@ export async function GET(request: NextRequest) {
   const flightNo = searchParams.get('flightNo');
 
   if (!flightId && !flightNo) {
-    return new Response(
-      JSON.stringify({ error: 'flightId hoặc flightNo là bắt buộc' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'flightId hoặc flightNo là bắt buộc' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   const encoder = new TextEncoder();
@@ -22,9 +22,7 @@ export async function GET(request: NextRequest) {
     async start(controller) {
       const send = (event: string, data: object) => {
         try {
-          controller.enqueue(
-            encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
-          );
+          controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
         } catch {
           // connection closed, ignore
         }
@@ -59,7 +57,11 @@ export async function GET(request: NextRequest) {
         if (request.signal.aborted) {
           clearInterval(pollInterval);
           clearInterval(pingInterval);
-          try { controller.close(); } catch { /* already closed */ }
+          try {
+            controller.close();
+          } catch {
+            /* already closed */
+          }
           return;
         }
         await fetchAndSend();
@@ -70,14 +72,20 @@ export async function GET(request: NextRequest) {
         if (request.signal.aborted) return;
         try {
           controller.enqueue(encoder.encode(`event: ping\ndata: {}\n\n`));
-        } catch { /* closed */ }
+        } catch {
+          /* closed */
+        }
       }, 30_000);
 
       // Cleanup on client disconnect
       request.signal.addEventListener('abort', () => {
         clearInterval(pollInterval);
         clearInterval(pingInterval);
-        try { controller.close(); } catch { /* already closed */ }
+        try {
+          controller.close();
+        } catch {
+          /* already closed */
+        }
       });
     },
   });
@@ -86,9 +94,8 @@ export async function GET(request: NextRequest) {
     headers: {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache, no-transform',
-      'Connection': 'keep-alive',
+      Connection: 'keep-alive',
       'X-Accel-Buffering': 'no',
     },
   });
 }
-

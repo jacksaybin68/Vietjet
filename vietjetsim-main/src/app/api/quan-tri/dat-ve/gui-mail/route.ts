@@ -185,7 +185,9 @@ export async function POST(request: NextRequest) {
         bookingCode: booking.booking_code,
         bookingId: booking.id,
         amount: totalAmount,
-        reason: customNote ? String(customNote).trim() : 'Giao dịch chuyển khoản chưa hợp lệ hoặc hết hạn đối soát',
+        reason: customNote
+          ? String(customNote).trim()
+          : 'Giao dịch chuyển khoản chưa hợp lệ hoặc hết hạn đối soát',
         retryUrl: `${siteUrl()}/thanh-toan?bookingId=${booking.id}`,
       });
 

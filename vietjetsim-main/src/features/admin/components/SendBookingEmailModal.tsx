@@ -90,11 +90,7 @@ export default function SendBookingEmailModal({
       });
 
       if (res.success) {
-        onSuccess?.(
-          templateType,
-          res.message || 'Đã gửi Gmail thành công!',
-          res.status
-        );
+        onSuccess?.(templateType, res.message || 'Đã gửi Gmail thành công!', res.status);
         onClose();
       } else {
         setErrorMessage(res.message || 'Gửi Gmail không thành công.');
@@ -206,7 +202,9 @@ export default function SendBookingEmailModal({
                 type="button"
                 onClick={() => setActiveTab('form')}
                 className={`px-2.5 py-1 rounded-md text-3xs font-black uppercase tracking-wider transition-colors ${
-                  activeTab === 'form' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'
+                  activeTab === 'form'
+                    ? 'bg-white/10 text-white'
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
                 Nhập liệu
@@ -215,7 +213,9 @@ export default function SendBookingEmailModal({
                 type="button"
                 onClick={() => setActiveTab('preview')}
                 className={`px-2.5 py-1 rounded-md text-3xs font-black uppercase tracking-wider transition-colors flex items-center gap-1 ${
-                  activeTab === 'preview' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'
+                  activeTab === 'preview'
+                    ? 'bg-white/10 text-white'
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
                 <Icon name="EyeIcon" size={11} />
@@ -424,9 +424,9 @@ export default function SendBookingEmailModal({
                   {templateType === 'payment_instruction' && (
                     <>
                       <p className="text-slate-600">
-                        Đặt chỗ của Quý khách đã được giữ tạm thời. Vui lòng hoàn tất thanh toán trong
-                        vòng <strong>30 phút</strong> để đảm bảo giữ chỗ và được phát hành vé điện
-                        tử chính thức:
+                        Đặt chỗ của Quý khách đã được giữ tạm thời. Vui lòng hoàn tất thanh toán
+                        trong vòng <strong>30 phút</strong> để đảm bảo giữ chỗ và được phát hành vé
+                        điện tử chính thức:
                       </p>
                       <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-center">
                         <div className="text-3xs uppercase tracking-widest text-slate-400 font-bold">
@@ -453,7 +453,8 @@ export default function SendBookingEmailModal({
                           Chủ tài khoản: <strong>DANG THI NGOC HAN</strong>
                         </div>
                         <div>
-                          Nội dung chuyển khoản: <strong className="text-[#EC2029]">VJ {pnr}</strong>
+                          Nội dung chuyển khoản:{' '}
+                          <strong className="text-[#EC2029]">VJ {pnr}</strong>
                         </div>
                       </div>
                     </>
@@ -463,7 +464,8 @@ export default function SendBookingEmailModal({
                     <>
                       <p className="text-slate-600">
                         Vietjet Air xin trân trọng thông báo giao dịch thanh toán của Quý khách đã{' '}
-                        <strong>hoàn tất thành công</strong>. Vé điện tử đã được phát hành chính thức:
+                        <strong>hoàn tất thành công</strong>. Vé điện tử đã được phát hành chính
+                        thức:
                       </p>
                       <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-center">
                         <div className="text-3xs uppercase tracking-widest text-slate-400 font-bold">
@@ -573,4 +575,3 @@ export default function SendBookingEmailModal({
     </div>
   );
 }
-

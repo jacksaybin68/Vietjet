@@ -72,7 +72,10 @@ export function verifyVietQrWebhookAuth(
 
   const signature = readHeader(headers, 'x-vietqr-signature');
   if (signature) {
-    const hex = signature.replace(/^sha256=/i, '').trim().toLowerCase();
+    const hex = signature
+      .replace(/^sha256=/i, '')
+      .trim()
+      .toLowerCase();
     const expected = createHmac('sha256', secret).update(rawBody).digest('hex');
     if (timingSafeEqualText(expected, hex)) return { ok: true, mode: 'signature' };
   }
@@ -110,8 +113,7 @@ function firstString(record: Record<string, unknown>, keys: string[]): string | 
 
 function parseAmount(value: unknown): number | undefined {
   if (value === undefined || value === null || value === '') return undefined;
-  const numeric =
-    typeof value === 'number' ? value : Number(String(value).replace(/[^\d.-]/g, ''));
+  const numeric = typeof value === 'number' ? value : Number(String(value).replace(/[^\d.-]/g, ''));
   return Number.isFinite(numeric) && numeric >= 0 ? numeric : undefined;
 }
 

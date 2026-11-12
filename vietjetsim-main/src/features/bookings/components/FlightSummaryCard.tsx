@@ -221,9 +221,7 @@ function FlightLegSection({
             <span className="block text-sm sm:text-base font-bold text-gray-800 mt-1">
               {departTime}
             </span>
-            <span className="text-2xs text-gray-500 font-medium mt-0.5 block">
-              {fromCity}
-            </span>
+            <span className="text-2xs text-gray-500 font-medium mt-0.5 block">{fromCity}</span>
           </div>
         </div>
 
@@ -261,9 +259,7 @@ function FlightLegSection({
             aria-expanded={isOpen}
           >
             <span>Bay thẳng | Chi tiết</span>
-            <span className="text-3xs transition-transform duration-200">
-              {isOpen ? '▲' : '▼'}
-            </span>
+            <span className="text-3xs transition-transform duration-200">{isOpen ? '▲' : '▼'}</span>
           </button>
         </div>
 
@@ -276,9 +272,7 @@ function FlightLegSection({
             <span className="block text-sm sm:text-base font-bold text-gray-800 mt-1">
               {arriveTime}
             </span>
-            <span className="text-2xs text-gray-500 font-medium mt-0.5 block">
-              {toCity}
-            </span>
+            <span className="text-2xs text-gray-500 font-medium mt-0.5 block">{toCity}</span>
           </div>
         </div>
 
@@ -297,9 +291,7 @@ function FlightLegSection({
           </div>
 
           <div className="flex flex-col items-end sm:mt-1">
-            <span className="text-3xs font-semibold text-gray-500">
-              {paxCount} hành khách
-            </span>
+            <span className="text-3xs font-semibold text-gray-500">{paxCount} hành khách</span>
             {showPrice && totalPrice > 0 && (
               <span className="text-sm sm:text-base font-black text-[#ED1B24] tracking-tight">
                 {totalPrice.toLocaleString('vi-VN')} VND
@@ -319,15 +311,14 @@ function FlightLegSection({
                 <span className="font-extrabold text-gray-900 text-2xs uppercase tracking-wide">
                   Chi tiết hành trình
                 </span>
-                <span className="font-mono font-black text-[#ED1B24] text-xs">
-                  {flightNo}
-                </span>
+                <span className="font-mono font-black text-[#ED1B24] text-xs">{flightNo}</span>
               </div>
               <div className="space-y-1.5 text-2xs text-gray-700">
                 <div className="flex items-start gap-2">
                   <span className="text-emerald-600 font-bold">●</span>
                   <div>
-                    <span className="font-bold text-gray-900">{departTime}</span> — {fromAirport} ({fromCode})
+                    <span className="font-bold text-gray-900">{departTime}</span> — {fromAirport} (
+                    {fromCode})
                   </div>
                 </div>
                 <div className="pl-3.5 text-3xs text-gray-500">
@@ -336,7 +327,8 @@ function FlightLegSection({
                 <div className="flex items-start gap-2">
                   <span className="text-rose-600 font-bold">●</span>
                   <div>
-                    <span className="font-bold text-gray-900">{arriveTime}</span> — {toAirport} ({toCode})
+                    <span className="font-bold text-gray-900">{arriveTime}</span> — {toAirport} (
+                    {toCode})
                   </div>
                 </div>
                 <div className="pt-1 flex items-center justify-between text-3xs text-gray-500 border-t border-gray-100 mt-2">
@@ -408,8 +400,12 @@ export default function FlightSummaryCard({
         </div>
         {bookingCode && (
           <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-xs border border-white/25 text-white shadow-2xs">
-            <span className="text-3xs uppercase tracking-wider text-white/80 font-bold">Mã đặt chỗ:</span>
-            <span className="font-mono font-black text-xs sm:text-sm text-[#FFCC00] tracking-wider">{bookingCode}</span>
+            <span className="text-3xs uppercase tracking-wider text-white/80 font-bold">
+              Mã đặt chỗ:
+            </span>
+            <span className="font-mono font-black text-xs sm:text-sm text-[#FFCC00] tracking-wider">
+              {bookingCode}
+            </span>
           </div>
         )}
       </div>
@@ -438,4 +434,3 @@ export default function FlightSummaryCard({
     </div>
   );
 }
-

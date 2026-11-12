@@ -512,7 +512,8 @@ export default function VietQrBox({
               </span>
             </button>
             <span className="text-[10px] text-gray-500 mt-1">
-              (Tự động chuyển trạng thái vé sang &quot;Đã thanh toán&quot; và mở vé điện tử ngay tức thì)
+              (Tự động chuyển trạng thái vé sang &quot;Đã thanh toán&quot; và mở vé điện tử ngay tức
+              thì)
             </span>
           </div>
         )}

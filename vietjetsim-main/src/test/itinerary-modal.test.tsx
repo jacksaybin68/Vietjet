@@ -33,13 +33,7 @@ describe('ItineraryModal Component', () => {
   };
 
   it('renders modal with correct booking code, passengers, and flight route', () => {
-    render(
-      <ItineraryModal
-        isOpen={true}
-        onClose={vi.fn()}
-        booking={mockBooking}
-      />
-    );
+    render(<ItineraryModal isOpen={true} onClose={vi.fn()} booking={mockBooking} />);
 
     // Header & Title
     expect(screen.getByText('Thông tin hành trình của bạn')).toBeInTheDocument();
@@ -62,13 +56,8 @@ describe('ItineraryModal Component', () => {
 
   it('does not render when isOpen is false', () => {
     const { container } = render(
-      <ItineraryModal
-        isOpen={false}
-        onClose={vi.fn()}
-        booking={mockBooking}
-      />
+      <ItineraryModal isOpen={false} onClose={vi.fn()} booking={mockBooking} />
     );
     expect(container).toBeEmptyDOMElement();
   });
 });
-

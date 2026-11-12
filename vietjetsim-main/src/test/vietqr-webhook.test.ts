@@ -55,24 +55,26 @@ vi.mock('@/lib/neon', () => {
   });
 
   (sqlMock as unknown as { query: unknown; transaction: unknown }).query = async () => [];
-  (sqlMock as unknown as { query: unknown; transaction: unknown }).transaction = vi.fn().mockImplementation(async () => {
-    bookingStatus = 'confirmed';
-    paymentStatus = 'completed';
-    return [
-      [{ id: 'bk-uuid-101', booking_code: 'VJ7788', status: 'confirmed', total_price: 2500000 }],
-      [
-        {
-          id: 'pay-uuid-201',
-          booking_id: 'bk-uuid-101',
-          status: 'completed',
-          amount: 2500000,
-          method: 'vietqr',
-          transfer_note: 'VJ VJ7788',
-        },
-      ],
-      [],
-    ];
-  });
+  (sqlMock as unknown as { query: unknown; transaction: unknown }).transaction = vi
+    .fn()
+    .mockImplementation(async () => {
+      bookingStatus = 'confirmed';
+      paymentStatus = 'completed';
+      return [
+        [{ id: 'bk-uuid-101', booking_code: 'VJ7788', status: 'confirmed', total_price: 2500000 }],
+        [
+          {
+            id: 'pay-uuid-201',
+            booking_id: 'bk-uuid-101',
+            status: 'completed',
+            amount: 2500000,
+            method: 'vietqr',
+            transfer_note: 'VJ VJ7788',
+          },
+        ],
+        [],
+      ];
+    });
 
   return { sql: sqlMock };
 });

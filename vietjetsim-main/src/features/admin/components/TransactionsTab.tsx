@@ -39,7 +39,9 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [viewingReceiptImage, setViewingReceiptImage] = useState<string | null>(null);
   const [emailModalData, setEmailModalData] = useState<Transaction | null>(null);
-  const [emailModalType, setEmailModalType] = useState<'payment_instruction' | 'ticket_issuance'>('payment_instruction');
+  const [emailModalType, setEmailModalType] = useState<'payment_instruction' | 'ticket_issuance'>(
+    'payment_instruction'
+  );
   const pageSize = 10;
 
   const fetchTransactions = useCallback(async () => {
@@ -448,9 +450,7 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                             onClick={() => {
                               setEmailModalData(t);
                               setEmailModalType(
-                                t.status === 'completed'
-                                  ? 'ticket_issuance'
-                                  : 'payment_instruction'
+                                t.status === 'completed' ? 'ticket_issuance' : 'payment_instruction'
                               );
                             }}
                             className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-all active:scale-95 border border-white/5"

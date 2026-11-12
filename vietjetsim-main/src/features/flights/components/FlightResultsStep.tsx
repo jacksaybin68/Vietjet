@@ -412,15 +412,20 @@ const FARE_BENEFITS: Record<
   },
 };
 
-function FlightRowStatusBadge({ flightId, defaultStatus }: { flightId: string; defaultStatus?: string }) {
+function FlightRowStatusBadge({
+  flightId,
+  defaultStatus,
+}: {
+  flightId: string;
+  defaultStatus?: string;
+}) {
   const { data } = useFlightStatusSSE(flightId);
   const status = data?.status || defaultStatus;
 
   if (status === 'delayed') {
     return (
       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] sm:text-2xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
-        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-        ⏱ Trễ chuyến
+        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />⏱ Trễ chuyến
       </span>
     );
   }

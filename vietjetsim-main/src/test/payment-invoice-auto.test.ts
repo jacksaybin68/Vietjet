@@ -78,10 +78,7 @@ vi.mock('@/lib/neon', () => {
   return { sql: sqlMock };
 });
 
-import {
-  isAutoSendInvoiceEnabled,
-  sendAutomaticPaymentInvoiceEmail,
-} from '@/lib/payment-invoice';
+import { isAutoSendInvoiceEnabled, sendAutomaticPaymentInvoiceEmail } from '@/lib/payment-invoice';
 
 describe('Tự động gửi hoá đơn thanh toán qua email cho khách hàng', () => {
   beforeEach(() => {

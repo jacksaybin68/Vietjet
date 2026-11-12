@@ -16,12 +16,14 @@ import {
   MdChair,
 } from 'react-icons/md';
 import { apiRequest, ApiRequestError } from '@/shared/services';
+import CheckInSeatModal from './CheckInSeatModal';
 
 interface CheckInData {
   /** The PNR, shown on the boarding pass. */
   bookingId: string;
   /** The row id. `POST /api/checkin` resolves this one, not the PNR. */
   bookingUuid: string;
+  flightId?: string;
   flightNo: string;
   from: string;
   to: string;
@@ -61,6 +63,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
   const [loading, setLoading] = useState(false);
   const [checkInData, setCheckInData] = useState<CheckInData | null>(null);
   const [agreed, setAgreed] = useState(false);
+  const [showSeatModal, setShowSeatModal] = useState(false);
 
   const handleSearch = useCallback(
     async (e?: React.FormEvent) => {
@@ -121,6 +124,9 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
 
         setCheckInData({
           bookingUuid: b.id,
+          flightId:
+            (b as unknown as { flight_id?: string }).flight_id ||
+            (flight as unknown as { id?: string }).id,
           // The PNR, not the row UUID: this is printed on the boarding pass, and
           // the UUID resolves in neither check-in nor booking lookup.
           bookingId: b.booking_code || b.id,
@@ -133,7 +139,10 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
           arriveTime: fmt(arriveTime),
           date: departTime ? departTime.toLocaleDateString('vi-VN') : '',
           passengerName: data.passengers?.[0]?.name || '',
-          seat: data.checkIn?.seat_number || 'Chọn tại quầy',
+          seat:
+            data.checkIn?.seat_number ||
+            (b as unknown as { seat_number?: string }).seat_number ||
+            'Chọn tại quầy',
           class: 'Phổ thông',
           status: data.hasCheckIn ? 'checked_in' : b.status || 'confirmed',
           gate: data.checkIn?.gate || undefined,
@@ -630,9 +639,23 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                   </div>
                   <div>
                     <p className="text-xs2 font-bold uppercase text-[var(--vj-text-muted)]">
-                      Ghế đã chọn
+                      Chỗ ngồi
                     </p>
-                    <p className="text-2xl font-black text-[var(--vj-red)]">{checkInData.seat}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <p className="text-2xl font-black text-[var(--vj-red)] font-koho">
+                        {checkInData.seat}
+                      </p>
+                      {!checkInData.hasCheckIn && checkInData.flightId && (
+                        <button
+                          type="button"
+                          onClick={() => setShowSeatModal(true)}
+                          className="px-2.5 py-1 text-2xs font-bold text-[#005BAA] bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors shadow-2xs cursor-pointer flex items-center gap-1"
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          Đổi chỗ ngồi
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <p className="text-xs2 font-bold uppercase text-[var(--vj-text-muted)]">
@@ -690,6 +713,20 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                   </div>
                 </div>
               </div>
+
+              {/* Modal chọn ghế trực tuyến đồng bộ realtime SSE */}
+              {showSeatModal && checkInData.flightId && (
+                <CheckInSeatModal
+                  flightId={checkInData.flightId}
+                  flightNo={checkInData.flightNo}
+                  currentSeat={checkInData.seat}
+                  onSelectSeat={(newSeat) => {
+                    setCheckInData((prev) => (prev ? { ...prev, seat: newSeat } : prev));
+                    toast.success('Đã cập nhật chỗ ngồi', `Vị trí ghế mới: ${newSeat}`);
+                  }}
+                  onClose={() => setShowSeatModal(false)}
+                />
+              )}
             </div>
           )}
 

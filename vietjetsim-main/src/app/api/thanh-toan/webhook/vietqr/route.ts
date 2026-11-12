@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { confirmVietQrPayment } from '@/lib/db';
 import { sendAutomaticPaymentInvoiceEmail } from '@/lib/payment-invoice';
 import { getApiErrorMessage } from '@/shared/services';
-import {
-  parseVietQrWebhookPayload,
-  verifyVietQrWebhookAuth,
-} from '@/lib/vietqr-webhook';
+import { parseVietQrWebhookPayload, verifyVietQrWebhookAuth } from '@/lib/vietqr-webhook';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

@@ -18,13 +18,13 @@ async function fetchSeatData(flightId: string): Promise<{
   locked: { seatId: string; expiresAt: string }[];
 }> {
   // Get confirmed/pending booked seats
-  const bookedRows = await sql`
+  const bookedRows = (await sql`
     SELECT DISTINCT s.seat_number
     FROM seats s
     JOIN bookings b ON s.booking_id = b.id
     WHERE b.flight_id = ${flightId}
       AND b.status IN ('confirmed', 'pending')
-  ` as BookedRow[];
+  `) as BookedRow[];
 
   const occupied = bookedRows.map((r) => r.seat_number);
 
@@ -34,12 +34,12 @@ async function fetchSeatData(flightId: string): Promise<{
     // Clean up expired locks first
     await sql`DELETE FROM seat_locks WHERE expires_at <= NOW()`;
 
-    const lockRows = await sql`
+    const lockRows = (await sql`
       SELECT seat_number, expires_at
       FROM seat_locks
       WHERE flight_id = ${flightId}
         AND expires_at > NOW()
-    ` as LockRow[];
+    `) as LockRow[];
 
     locked = lockRows.map((r) => ({
       seatId: r.seat_number,
@@ -61,10 +61,10 @@ export async function GET(request: NextRequest) {
   const flightId = searchParams.get('flightId');
 
   if (!flightId) {
-    return new Response(
-      JSON.stringify({ error: 'flightId là bắt buộc' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'flightId là bắt buộc' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   const encoder = new TextEncoder();
@@ -73,9 +73,7 @@ export async function GET(request: NextRequest) {
     async start(controller) {
       const send = (event: string, data: object) => {
         try {
-          controller.enqueue(
-            encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
-          );
+          controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
         } catch {
           // connection closed, ignore
         }
@@ -102,7 +100,11 @@ export async function GET(request: NextRequest) {
       const pollInterval = setInterval(async () => {
         if (request.signal.aborted) {
           clearInterval(pollInterval);
-          try { controller.close(); } catch { /* already closed */ }
+          try {
+            controller.close();
+          } catch {
+            /* already closed */
+          }
           return;
         }
         await fetchAndSend();
@@ -111,7 +113,11 @@ export async function GET(request: NextRequest) {
       // Cleanup on client disconnect
       request.signal.addEventListener('abort', () => {
         clearInterval(pollInterval);
-        try { controller.close(); } catch { /* already closed */ }
+        try {
+          controller.close();
+        } catch {
+          /* already closed */
+        }
       });
     },
   });
@@ -120,9 +126,8 @@ export async function GET(request: NextRequest) {
     headers: {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache, no-transform',
-      'Connection': 'keep-alive',
+      Connection: 'keep-alive',
       'X-Accel-Buffering': 'no',
     },
   });
 }
-

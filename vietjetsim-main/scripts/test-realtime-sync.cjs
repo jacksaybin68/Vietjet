@@ -16,7 +16,9 @@ async function main() {
     throw new Error('No flights found in database');
   }
   const flight = flights[0];
-  console.log(`✈️  Testing with Flight: ${flight.flight_no} (ID: ${flight.id}, Current Status: ${flight.status})`);
+  console.log(
+    `✈️  Testing with Flight: ${flight.flight_no} (ID: ${flight.id}, Current Status: ${flight.status})`
+  );
 
   // 2. Test Seat Lock Insertion (simulation of POST /api/ghe/khoa)
   const testSeat = '15E';
@@ -78,7 +80,9 @@ async function main() {
   if (flightQuery.length === 0) {
     throw new Error('Flight not retrieved');
   }
-  console.log(`✅ Verified: Flight status query returned status="${flightQuery[0].status}" for ${flightQuery[0].flight_no}`);
+  console.log(
+    `✅ Verified: Flight status query returned status="${flightQuery[0].status}" for ${flightQuery[0].flight_no}`
+  );
 
   console.log('\n🎉 ALL REALTIME SYNC & SEAT LOCK TESTS PASSED SUCCESSFULLY!\n');
 }
@@ -87,4 +91,3 @@ main().catch((err) => {
   console.error('❌ Verification failed:', err);
   process.exit(1);
 });
-

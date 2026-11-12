@@ -184,7 +184,9 @@ export default function BookingsTab({ onToast }: BookingsTabProps = {}) {
     status: 'completed',
   });
   const [emailModalBooking, setEmailModalBooking] = useState<Booking | null>(null);
-  const [emailModalType, setEmailModalType] = useState<'payment_instruction' | 'ticket_issuance'>('payment_instruction');
+  const [emailModalType, setEmailModalType] = useState<'payment_instruction' | 'ticket_issuance'>(
+    'payment_instruction'
+  );
 
   const loadBookings = React.useCallback(async () => {
     setIsLoading(true);
@@ -1398,7 +1400,8 @@ export default function BookingsTab({ onToast }: BookingsTabProps = {}) {
                   onClick={() => {
                     setEmailModalBooking(selectedBooking);
                     setEmailModalType(
-                      selectedBooking.status === 'confirmed' || selectedBooking.status === 'completed'
+                      selectedBooking.status === 'confirmed' ||
+                        selectedBooking.status === 'completed'
                         ? 'ticket_issuance'
                         : 'payment_instruction'
                     );
@@ -1579,9 +1582,7 @@ export default function BookingsTab({ onToast }: BookingsTabProps = {}) {
           if (newStatus && emailModalBooking) {
             setBookings((prev) =>
               prev.map((b) =>
-                b.id === emailModalBooking.id
-                  ? { ...b, status: newStatus as BookingStatus }
-                  : b
+                b.id === emailModalBooking.id ? { ...b, status: newStatus as BookingStatus } : b
               )
             );
             setSelectedBooking((prev) =>

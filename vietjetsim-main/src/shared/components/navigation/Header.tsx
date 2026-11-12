@@ -299,11 +299,11 @@ export default function Header({
               aria-label="Vietjet Air - Trang chủ"
               className="flex shrink-0 items-center transition hover:opacity-95"
             >
-<img
-              src="/images/vj-logo.svg"
-              alt="Vietjet Air"
-              className="h-[24px] w-auto brightness-0 invert lg:h-[32px]"
-            />
+              <img
+                src="/images/vj-logo.svg"
+                alt="Vietjet Air"
+                className="h-[24px] w-auto brightness-0 invert lg:h-[32px]"
+              />
             </Link>
 
             {/* Cụm tiện ích bên phải trên desktop */}
