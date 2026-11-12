@@ -592,7 +592,7 @@ export default function PaymentClient() {
   }, []);
 
   // Trạng thái Bay trước trả sau Movi
-  const [moviTenure, setMoviTenure] = useState<number>(3); // 1, 3, 6, 12 tháng
+  const [moviTenure] = useState<number>(3); // 1, 3, 6, 12 tháng
   const [moviCccd, setMoviCccd] = useState<string>('');
   const [moviFullName, setMoviFullName] = useState<string>('');
   const [moviPhone, setMoviPhone] = useState<string>('');
@@ -2440,97 +2440,6 @@ export default function PaymentClient() {
                                 đợi
                               </p>
                             </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Chọn kỳ hạn trả góp */}
-                      <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
-                        <div className="flex items-center justify-between">
-                          <label className="text-xs font-bold text-gray-800 uppercase tracking-wider font-koho flex items-center gap-1.5">
-                            <Icon name="CalendarDaysIcon" size={16} className="text-primary" />
-                            Chọn kỳ hạn trả góp
-                          </label>
-                          <span className="text-2xs font-extrabold text-[#38B000] bg-lime-50 border border-lime-200 px-2 py-0.5 rounded-full">
-                            Ưu đãi lãi suất 0%
-                          </span>
-                        </div>
-
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                          {[
-                            { months: 1, label: '1 tháng', note: 'Thanh toán sau 30 ngày' },
-                            { months: 3, label: '3 tháng', note: '3 kỳ linh hoạt', popular: true },
-                            { months: 6, label: '6 tháng', note: 'Nhẹ gánh chi phí' },
-                            { months: 12, label: '12 tháng', note: 'Tiết kiệm tối đa' },
-                          ].map((plan) => {
-                            const isSelected = moviTenure === plan.months;
-                            const monthly = Math.round(total / plan.months);
-                            return (
-                              <button
-                                key={plan.months}
-                                type="button"
-                                onClick={() => setMoviTenure(plan.months)}
-                                className={`p-3 rounded-xl border text-left transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between min-h-[96px] ${
-                                  isSelected
-                                    ? 'border-[#38B000] ring-2 ring-[#38B000] bg-lime-50/40 shadow-xs'
-                                    : 'border-gray-200 hover:border-gray-300 bg-white'
-                                }`}
-                              >
-                                {plan.popular && (
-                                  <div className="absolute top-0 right-0 bg-[#38B000] text-white text-[8px] font-black px-1.5 py-0.5 rounded-bl-md uppercase">
-                                    Khuyên dùng
-                                  </div>
-                                )}
-                                <div>
-                                  <span className="block text-xs font-black text-gray-900 font-koho">
-                                    {plan.label}
-                                  </span>
-                                  <span className="block text-3xs text-gray-500 mt-0.5 font-medium">
-                                    {plan.note}
-                                  </span>
-                                </div>
-                                <div className="mt-2 pt-2 border-t border-gray-100">
-                                  <span className="block text-xs font-extrabold text-[#38B000] font-koho">
-                                    {monthly.toLocaleString('vi-VN')}₫
-                                    <span className="text-3xs font-medium text-gray-500">
-                                      /tháng
-                                    </span>
-                                  </span>
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        {/* Bảng tóm tắt khoản trả góp */}
-                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2 text-xs">
-                          <div className="flex justify-between items-center text-gray-600">
-                            <span>Tổng giá vé thanh toán</span>
-                            <span className="font-bold text-gray-900 font-koho">
-                              {total.toLocaleString('vi-VN')} VND
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-center text-gray-600">
-                            <span>Số tiền trả trước (Hôm nay)</span>
-                            <span className="font-bold text-[#38B000] font-koho">0 VND (0%)</span>
-                          </div>
-                          <div className="flex justify-between items-center text-gray-600">
-                            <span>Lãi suất trả góp</span>
-                            <span className="font-bold text-emerald-600">0% / tháng</span>
-                          </div>
-                          <div className="flex justify-between items-center text-gray-600">
-                            <span>Phí chuyển đổi hồ sơ</span>
-                            <span className="font-bold text-emerald-600">Miễn phí (0 VND)</span>
-                          </div>
-                          <div className="pt-2 border-t border-slate-200 flex justify-between items-center">
-                            <span className="font-bold text-gray-900">Ước tính mỗi tháng trả</span>
-                            <span className="font-black text-sm sm:text-base text-red-600 font-koho">
-                              {moviMonthlyAmount.toLocaleString('vi-VN')}₫
-                              <span className="text-xs text-gray-500 font-normal">
-                                {' '}
-                                / kỳ ({moviTenure} kỳ)
-                              </span>
-                            </span>
                           </div>
                         </div>
                       </div>

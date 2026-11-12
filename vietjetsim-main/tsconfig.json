@@ -68,6 +68,9 @@
     ".next-uicheck/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "e2e",
+    "src/test/e2e-workflow-scenarios.test.ts",
+    "playwright.config.ts"
   ]
 }
