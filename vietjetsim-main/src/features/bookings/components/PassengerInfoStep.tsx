@@ -372,7 +372,7 @@ export default function PassengerInfoStep({
                           placeholder="Theo giấy tờ tuỳ thân"
                           value={p.name}
                           onChange={(e) => updatePassenger(i, 'name', e.target.value)}
-                          className="w-full border-0 border-b-2 border-primary bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-primary placeholder:text-gray-400 placeholder:italic placeholder:font-normal placeholder:text-2xs"
+                          className="w-full border-0 border-b-2 border-primary bg-transparent py-2 sm:py-1 text-sm sm:text-xs text-gray-900 focus:outline-none focus:border-primary placeholder:text-gray-400 placeholder:italic placeholder:font-normal placeholder:text-xs sm:placeholder:text-2xs"
                           required
                         />
                       </div>

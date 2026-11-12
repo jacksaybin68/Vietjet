@@ -126,11 +126,8 @@ export default function FlightCard({
                     </div>
                   ) : (
                     <>
-                      <span className="text-xs sm:text-sm font-black text-gray-900 leading-tight font-koho group-hover:text-primary transition-colors">
-                        {priceVal.toLocaleString('vi-VN')}
-                      </span>
-                      <span className="text-4xs text-gray-500 font-bold uppercase tracking-wider mt-0.5">
-                        VND
+                      <span className="text-xs sm:text-sm font-black text-gray-900 leading-tight font-koho group-hover:text-primary transition-colors whitespace-nowrap">
+                        {priceVal.toLocaleString('vi-VN')} VND
                       </span>
                       <svg
                         className="w-2.5 h-2.5 text-gray-400 mt-0.5"

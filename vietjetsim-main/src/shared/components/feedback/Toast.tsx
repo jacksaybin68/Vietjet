@@ -36,10 +36,10 @@ const TYPE_CONFIG: Record<
   }
 > = {
   success: {
-    bar: 'bg-gradient-to-r from-[var(--vj-navy)] to-[#2A3F6F]',
-    bg: 'bg-white border border-[var(--border)]',
-    iconBg: 'bg-[var(--vj-navy)]',
-    iconColor: 'text-[var(--accent)]',
+    bar: 'bg-gradient-to-r from-emerald-600 to-emerald-400',
+    bg: 'bg-white border border-emerald-200 shadow-emerald-500/10',
+    iconBg: 'bg-emerald-600',
+    iconColor: 'text-white',
     defaultIcon: (
       <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
         <path
@@ -51,8 +51,8 @@ const TYPE_CONFIG: Record<
     ),
   },
   error: {
-    bar: 'bg-gradient-to-r from-[var(--primary)] to-[#FF4D53]',
-    bg: 'bg-white border border-[var(--border)]',
+    bar: 'bg-gradient-to-r from-[var(--primary)] to-rose-500',
+    bg: 'bg-white border border-rose-200 shadow-rose-500/10',
     iconBg: 'bg-[var(--primary)]',
     iconColor: 'text-white',
     defaultIcon: (

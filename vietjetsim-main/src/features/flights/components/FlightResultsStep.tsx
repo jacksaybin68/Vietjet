@@ -1267,27 +1267,27 @@ export default function FlightResultsStep({
                   }}
                   className="w-full sm:w-[28%] lg:w-[240px] shrink-0 bg-[#FFC700] p-2.5 sm:p-3 lg:p-4 border-b sm:border-b-0 sm:border-r border-yellow-400 lg:border-b-0 flex flex-row sm:flex-col items-center justify-between sm:justify-center gap-x-2.5 gap-y-0.5 sm:gap-y-0 text-center relative select-none cursor-pointer hover:bg-yellow-400 transition-colors focus:outline-none focus:ring-0"
                 >
-                  {/* Mobile: số hiệu + giờ nằm cạnh nhau, máy bay đẩy sang phải.
-                      Desktop: trở về khối dọc như trước. */}
-                  <div className="flex items-center justify-center gap-2.5 sm:flex-col sm:gap-0">
+                  {/* Mobile: số hiệu + giờ nằm cạnh nhau, máy bay đẩy sang phải thành 1 hàng ngang.
+                      Desktop: các cụm thông tin được canh gọn gàng trên cùng hàng. */}
+                  <div className="flex items-center justify-center gap-2 sm:gap-2.5">
                     <span className="text-[9px] sm:text-2xs font-bold text-gray-900 tracking-wider uppercase leading-tight">
                       {flight.flightNo}
                     </span>
 
-                    <div className="flex flex-row items-center justify-center gap-0.5 sm:gap-1.5 sm:my-1">
-                      <span className="text-xs sm:text-base lg:text-2xl font-black text-gray-950 font-koho leading-none">
+                    <div className="flex flex-row items-center justify-center gap-0.5 sm:gap-1.5 sm:my-1 whitespace-nowrap">
+                      <span className="text-xs sm:text-base lg:text-xl font-black text-gray-950 font-koho leading-none">
                         {flight.departTime}
                       </span>
                       <span className="text-[8px] sm:text-2xs font-bold text-gray-700 leading-none">
                         Đến
                       </span>
-                      <span className="text-xs sm:text-base lg:text-2xl font-black text-gray-950 font-koho leading-none">
+                      <span className="text-xs sm:text-base lg:text-xl font-black text-gray-950 font-koho leading-none">
                         {flight.arriveTime}
                       </span>
                     </div>
                   </div>
 
-                  <div className="text-[7.5px] sm:text-2xs text-gray-800 font-medium leading-tight flex items-center justify-center flex-wrap gap-x-1 gap-y-0.5">
+                  <div className="text-[7.5px] sm:text-2xs text-gray-800 font-medium leading-tight flex items-center justify-center whitespace-nowrap gap-1">
                     <span className="inline-flex items-center justify-center gap-1">
                       <svg
                         className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-gray-800 shrink-0 rotate-45 inline-block"
@@ -1297,10 +1297,10 @@ export default function FlightResultsStep({
                       >
                         <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
                       </svg>
-                      <span className="block sm:inline">{flight.aircraft ?? 'Airbus A321'}</span>
+                      <span className="inline">{flight.aircraft ?? 'Airbus A321'}</span>
                     </span>
-                    <span className="hidden sm:inline text-gray-500"> - </span>
-                    <span className="text-red-700 font-bold block sm:inline">Bay thẳng</span>
+                    <span className="text-gray-500"> - </span>
+                    <span className="text-red-700 font-bold inline">Bay thẳng</span>
                   </div>
 
                   <span className="hidden sm:block text-[9px] sm:text-xs text-gray-700 mt-0.5 leading-none">
@@ -1433,16 +1433,13 @@ export default function FlightResultsStep({
                               {fc.name}
                             </span>
                             <span
-                              className={`text-xs sm:text-base lg:text-xl font-black font-koho leading-none tracking-tight transition-colors ${
+                              className={`text-xs sm:text-sm lg:text-base xl:text-lg font-black font-koho leading-none tracking-tight transition-colors whitespace-nowrap ${
                                 isSelected
                                   ? 'text-primary'
                                   : 'text-gray-950 group-hover:text-primary'
                               }`}
                             >
-                              {fc.price.toLocaleString('vi-VN')}
-                            </span>
-                            <span className="text-[8px] sm:text-2xs font-bold text-gray-500 uppercase tracking-widest mt-0.5 sm:mt-1 leading-none">
-                              VND
+                              {fc.price.toLocaleString('vi-VN')} VND
                             </span>
                             <svg
                               className={`w-2.5 h-2.5 sm:w-3 sm:h-3 text-gray-400 mt-0.5 sm:mt-1 transition-transform duration-200 ${
