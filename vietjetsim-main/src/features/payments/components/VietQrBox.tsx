@@ -249,9 +249,6 @@ export default function VietQrBox({
                     Tự động 24/7
                   </span>
                 </div>
-                <div className="font-black text-white text-sm sm:text-base tracking-wide font-koho truncate">
-                  {data?.bank.name ?? 'Ngân hàng thụ hưởng'}
-                </div>
               </div>
             </div>
 
@@ -276,9 +273,9 @@ export default function VietQrBox({
 
           <div className="relative p-4 sm:p-5 bg-white rounded-2xl border-2 border-[#005BAA]/30 shadow-xl flex flex-col items-center">
             {/* VietQR Tag */}
-            <div className="flex items-center gap-2 mb-2.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200">
-              <VietQrLogo className="h-4 w-auto" />
-              <span className="text-3xs font-black text-[#005BAA] uppercase tracking-wider">
+            <div className="flex items-center gap-2 mb-2.5 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200">
+              <VietQrLogo className="h-5 w-auto" />
+              <span className="text-2xs sm:text-xs font-black text-[#005BAA] uppercase tracking-wider">
                 Mã QR chuẩn VietQR • NAPAS 247
               </span>
             </div>
@@ -356,17 +353,6 @@ export default function VietQrBox({
                 {(data?.amount ?? 0).toLocaleString('vi-VN')}₫
               </span>
             </div>
-            <button
-              type="button"
-              onClick={() => copyToClipboard(String(data?.amount ?? 0), 'amount')}
-              className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-bold text-gray-700 transition-all hover:bg-gray-100 active:scale-95"
-            >
-              <Icon
-                name={copiedField === 'amount' ? 'CheckCircleIcon' : 'ClipboardDocumentIcon'}
-                size={14}
-              />
-              <span>{copiedField === 'amount' ? 'Đã sao chép' : 'Sao chép'}</span>
-            </button>
           </div>
 
           {/* Hàng 3: Nội dung chuyển khoản (bắt buộc) */}
