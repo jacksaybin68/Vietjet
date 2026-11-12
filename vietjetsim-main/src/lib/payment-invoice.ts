@@ -125,10 +125,7 @@ export async function sendAutomaticPaymentInvoiceEmail(
     // 5. Xác định email và tên người nhận chính xác (hỗ trợ cả DB thật và test mocks)
     let recipientEmail: string | null = null;
     let recipientName: string =
-      booking.account_name ||
-      booking.userName ||
-      booking.user_name ||
-      'Quý khách';
+      booking.account_name || booking.userName || booking.user_name || 'Quý khách';
 
     // Tìm email thực tế từ danh sách hành khách trước
     const realPassenger = passengersList.find(
@@ -140,12 +137,13 @@ export async function sendAutomaticPaymentInvoiceEmail(
     }
 
     // Kiểm tra email tài khoản hoặc userEmail
-    const accountEmailCandidate =
-      booking.account_email ||
-      booking.userEmail ||
-      booking.user_email;
+    const accountEmailCandidate = booking.account_email || booking.userEmail || booking.user_email;
 
-    if (!recipientEmail && accountEmailCandidate && !accountEmailCandidate.includes('@khach.vietjetsim.vn')) {
+    if (
+      !recipientEmail &&
+      accountEmailCandidate &&
+      !accountEmailCandidate.includes('@khach.vietjetsim.vn')
+    ) {
       recipientEmail = accountEmailCandidate;
     }
 
@@ -165,7 +163,8 @@ export async function sendAutomaticPaymentInvoiceEmail(
       );
       return {
         sent: false,
-        reason: 'Không tìm thấy địa chỉ email khách hàng hợp lệ (khách đặt bằng SĐT mà không để lại email)',
+        reason:
+          'Không tìm thấy địa chỉ email khách hàng hợp lệ (khách đặt bằng SĐT mà không để lại email)',
       };
     }
 

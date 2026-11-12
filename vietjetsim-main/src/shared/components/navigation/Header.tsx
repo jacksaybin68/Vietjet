@@ -264,7 +264,7 @@ export default function Header({
                 <img
                   src="/images/vj-logo.svg"
                   alt="Vietjet Air"
-                  className="h-[22px] w-auto brightness-0 invert"
+                  className="h-[26px] w-auto brightness-0 invert"
                 />
               </Link>
             )}
@@ -304,8 +304,8 @@ export default function Header({
                 alt="Vietjet Air"
                 className={
                   compactMode
-                    ? 'h-[25px] w-auto brightness-0 invert lg:h-[26px]'
-                    : 'h-7 sm:h-8 w-auto'
+                    ? 'h-[28px] w-auto brightness-0 invert lg:h-[30px]'
+                    : 'h-8 sm:h-9 w-auto'
                 }
               />
             </Link>

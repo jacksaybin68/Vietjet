@@ -486,7 +486,7 @@ function LoginPageInner() {
                   alt="SkyJoy"
                   className="h-[14px] w-auto"
                 />
-                <img src="/images/vj-logo.svg" alt="Vietjet Air" className="h-[14px] w-auto" />
+                <img src="/images/vj-logo.svg" alt="Vietjet Air" className="h-[16px] w-auto" />
                 <span className="flex h-[14px] items-center text-[13px] font-bold text-blue-600">
                   SkyPay
                 </span>

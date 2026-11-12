@@ -399,7 +399,7 @@ export default function TrackBookingPage() {
                 Xem hành trình
               </Link>
               <Link
-                href="/lam-thu-tuc"
+                href={`/lam-thu-tuc?code=${result.pnr}`}
                 className="flex items-center justify-center gap-2 py-3 bg-white border border-stone-200 rounded-xl font-semibold text-stone-700 hover:border-primary hover:text-primary transition-all text-xs"
               >
                 <Icon name="TicketIcon" size={18} />

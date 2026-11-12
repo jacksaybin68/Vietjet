@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 import { createPayment, getWalletOverview } from '@/features/payments/services';
 import { getMembership } from '@/features/loyalty/services';
+import { getAirportCity } from '@/features/flights';
 import { TAX_AND_FEE_RATE, ANCILLARY_OPTIONS, type AncillaryId } from '@/features/bookings/pricing';
 
 import type { PaymentMethod } from '@/features/payments/types';
@@ -372,15 +373,11 @@ export default function PaymentClient() {
   const [receiptFileSize, setReceiptFileSize] = useState<string | null>(null);
   const [isDraggingReceipt, setIsDraggingReceipt] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  // The PNR is assigned by the database when the booking is created. It used to
-  // be invented here — a random string when the URL carried no bookingId, or the
-  // raw booking UUID otherwise — and then shown to the customer as "Mã đặt chỗ",
-  // copied into bank transfer memos and pasted into chat. None of those values
-  // resolved in check-in or tra cứu, so the customer was handed a reference that
-  // did not exist. Read the real one instead, and render a dash until it loads.
+  // The PNR is assigned by the database when the booking is created.
   const [bookingId] = useState<string | null>(() => {
     if (typeof window === 'undefined') return null;
-    return new URLSearchParams(window.location.search).get('bookingId');
+    const params = new URLSearchParams(window.location.search);
+    return params.get('bookingId') || params.get('code') || params.get('id');
   });
   const [bookingCode, setBookingCode] = useState<string | null>(null);
 
@@ -389,19 +386,76 @@ export default function PaymentClient() {
     let cancelled = false;
     apiRequest<{
       booking?: {
+        id: string;
         booking_code: string | null;
         total_price?: number | string;
+        flight?: {
+          flight_no: string;
+          from_code: string;
+          to_code: string;
+          depart_time: string;
+          arrive_time: string;
+          price: number;
+          class: string;
+        } | null;
+        passengers?: Array<{
+          name: string;
+          seat_number?: string;
+        }>;
+        seats?: Array<{
+          seat_number: string;
+        }>;
       };
     }>(`/api/dat-ve/${bookingId}`)
       .then((data) => {
         if (!cancelled && data.booking) {
-          setBookingCode(data.booking.booking_code ?? null);
-          if (data.booking.total_price) {
-            const dbTotal = Number(data.booking.total_price);
-            if (dbTotal > 0) {
-              setBooking((prev) => (prev ? { ...prev, total: dbTotal } : null));
-            }
-          }
+          const b = data.booking;
+          setBookingCode(b.booking_code ?? null);
+          const dbTotal = Number(b.total_price || 0);
+          const dbFlight = b.flight;
+          const fromCode = (dbFlight?.from_code || 'SGN').toUpperCase();
+          const toCode = (dbFlight?.to_code || 'HAN').toUpperCase();
+          const departTimeStr = dbFlight?.depart_time
+            ? new Date(dbFlight.depart_time).toLocaleTimeString('vi-VN', {
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+            : '08:30';
+          const arriveTimeStr = dbFlight?.arrive_time
+            ? new Date(dbFlight.arrive_time).toLocaleTimeString('vi-VN', {
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+            : '10:40';
+          const dateStr = dbFlight?.depart_time
+            ? new Date(dbFlight.depart_time).toISOString().split('T')[0]
+            : new Date().toISOString().split('T')[0];
+          const paxList = (b.passengers || []).map((p, idx) => ({
+            name: p.name || `HÀNH KHÁCH ${idx + 1}`,
+            seat: p.seat_number || b.seats?.[idx]?.seat_number || 'Chưa chọn',
+          }));
+
+          setBooking((prev) => ({
+            bookingId: b.id,
+            flightNo: dbFlight?.flight_no || prev?.flightNo || 'VJ141',
+            from: fromCode,
+            to: toCode,
+            fromCity: getAirportCity(fromCode),
+            toCity: getAirportCity(toCode),
+            departTime: departTimeStr,
+            arriveTime: arriveTimeStr,
+            date: dateStr,
+            passengers:
+              paxList.length > 0
+                ? paxList
+                : prev?.passengers || [{ name: 'HÀNH KHÁCH', seat: 'Chưa chọn' }],
+            fareSubtotal: Math.round(dbTotal * 0.65),
+            tax: Math.round(dbTotal * 0.25),
+            seatFee: prev?.seatFee ?? 0,
+            ancillaryFee: Math.round(dbTotal * 0.1),
+            ancillaries: prev?.ancillaries || [],
+            total: dbTotal > 0 ? dbTotal : (prev?.total ?? 0),
+          }));
         }
       })
       .catch(() => {
@@ -878,11 +932,10 @@ export default function PaymentClient() {
             onDragLeave={() => setIsDraggingReceipt(false)}
             onDrop={handleReceiptDrop}
             onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-2 ${
-              isDraggingReceipt
+            className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-2 ${isDraggingReceipt
                 ? 'border-primary bg-primary/5 scale-[1.01]'
                 : 'border-gray-300 hover:border-primary hover:bg-red-50/20 bg-gray-50/60'
-            }`}
+              }`}
           >
             <div className="w-12 h-12 rounded-full bg-white shadow-xs border border-gray-200 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
               <Icon name="ArrowUpTrayIcon" size={22} className="text-primary" />
@@ -1063,11 +1116,10 @@ export default function PaymentClient() {
                     <button
                       onClick={handleCopyBookingCode}
                       title="Sao chép mã đặt chỗ"
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
-                        copied
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${copied
                           ? 'bg-[rgb(var(--vj-green-rgb))]/15 text-[var(--vj-green)] border border-[rgb(var(--vj-green-rgb))]/40'
                           : 'bg-[var(--surface-2)] text-[var(--foreground-muted)] border border-[var(--border)] hover:bg-primary-50 hover:text-primary hover:border-primary'
-                      }`}
+                        }`}
                     >
                       {copied ? (
                         <>
@@ -1278,11 +1330,18 @@ export default function PaymentClient() {
                     Tải vé điện tử (PDF)
                   </button>
                   <Link
-                    href="/tai-khoan"
+                    href={`/dat-ve/${bookingCode || bookingId || booking?.bookingId || ''}`}
+                    className="w-full flex items-center justify-center gap-2 bg-[#ED1B24] hover:bg-[#c81018] text-white font-bold py-3.5 rounded-xl transition-all shadow-sm text-sm"
+                  >
+                    <Icon name="TicketIcon" size={16} />
+                    Xem chi tiết hành trình
+                  </Link>
+                  <Link
+                    href="/chuyen-bay-cua-toi"
                     className="vj-btn vj-btn-primary w-full py-3 rounded-xl text-sm"
                   >
                     <Icon name="HomeIcon" size={16} />
-                    Xem lịch sử đặt vé
+                    Chuyến bay của tôi
                   </Link>
                   <Link
                     href="/trang-chu"
@@ -1485,11 +1544,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('vnpay_qr');
                         setPaymentMethod('vietqr');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] relative overflow-hidden ${
-                        selectedMethodGroup === 'vnpay_qr'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] relative overflow-hidden ${selectedMethodGroup === 'vnpay_qr'
                           ? 'border-[#005BAA] ring-2 ring-[#005BAA] bg-blue-50/40 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                        }`}
                     >
                       <div className="absolute top-0 right-0 bg-[#ED1C24] text-white text-[8px] font-black px-1.5 py-0.5 rounded-bl-md uppercase tracking-wider">
                         Khuyên dùng
@@ -1509,11 +1567,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('vietqr');
                         setPaymentMethod('vietqr');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] relative overflow-hidden ${
-                        selectedMethodGroup === 'vietqr'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] relative overflow-hidden ${selectedMethodGroup === 'vietqr'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/30 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center h-8">
                         <VietQrLogo className="h-5 w-auto max-w-[104px]" />
@@ -1530,11 +1587,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('napas');
                         setPaymentMethod('bank');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
-                        selectedMethodGroup === 'napas'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${selectedMethodGroup === 'napas'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center h-8">
                         <NapasLogo className="h-4 w-auto max-w-[104px]" />
@@ -1549,11 +1605,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('card');
                         setPaymentMethod('card');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
-                        selectedMethodGroup === 'card'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${selectedMethodGroup === 'card'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                        }`}
                     >
                       {/* Bốn logo mạng thẻ xếp 2×2 để không bị chồng lên nhau */}
                       <div className="grid grid-cols-2 gap-x-2 gap-y-1 h-8 items-center">
@@ -1574,11 +1629,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('vnpay_dom');
                         setPaymentMethod('vietqr');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
-                        selectedMethodGroup === 'vnpay_dom'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${selectedMethodGroup === 'vnpay_dom'
                           ? 'border-[#005BAA] ring-2 ring-[#005BAA] bg-blue-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center h-8">
                         <VnpayLogo className="h-4 w-auto max-w-[104px]" />
@@ -1603,11 +1657,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('skypay');
                         setPaymentMethod('skypoint');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
-                        selectedMethodGroup === 'skypay'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${selectedMethodGroup === 'skypay'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center h-8">
                         <SkyJoyLogo className="h-7 w-auto" />
@@ -1622,11 +1675,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('momo');
                         setPaymentMethod('e_wallet');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
-                        selectedMethodGroup === 'momo'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${selectedMethodGroup === 'momo'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center h-8">
                         <MomoLogo className="h-7 w-auto" />
@@ -1641,11 +1693,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('zalopay');
                         setPaymentMethod('e_wallet');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
-                        selectedMethodGroup === 'zalopay'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${selectedMethodGroup === 'zalopay'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center h-8">
                         <ZaloPayLogo className="h-5 w-auto max-w-[104px]" />
@@ -1660,11 +1711,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('applepay');
                         setPaymentMethod('card');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
-                        selectedMethodGroup === 'applepay'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${selectedMethodGroup === 'applepay'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center h-8">
                         <ApplePayLogo className="h-6 w-auto max-w-[104px]" />
@@ -1679,11 +1729,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('googlepay');
                         setPaymentMethod('card');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
-                        selectedMethodGroup === 'googlepay'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${selectedMethodGroup === 'googlepay'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center h-8">
                         <GooglePayLogo className="h-5 w-auto max-w-[104px]" />
@@ -1705,11 +1754,10 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('movi');
                         setPaymentMethod('bank');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
-                        selectedMethodGroup === 'movi'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${selectedMethodGroup === 'movi'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center h-8">
                         <MoviLogo className="h-6 w-auto max-w-[104px]" />
@@ -1850,11 +1898,10 @@ export default function PaymentClient() {
                                   key={acc.id}
                                   type="button"
                                   onClick={() => setSelectedAdminAccount(acc)}
-                                  className={`px-3 py-1.5 rounded-full text-xs2 font-bold whitespace-nowrap transition-all ${
-                                    selectedAdminAccount.id === acc.id
+                                  className={`px-3 py-1.5 rounded-full text-xs2 font-bold whitespace-nowrap transition-all ${selectedAdminAccount.id === acc.id
                                       ? 'bg-primary text-white shadow-md shadow-primary/20'
                                       : 'bg-[var(--surface-2)] text-[var(--foreground-muted)] hover:bg-[var(--surface-3)] '
-                                  }`}
+                                    }`}
                                 >
                                   {acc.admin_bank_name}
                                 </button>
@@ -2083,12 +2130,11 @@ export default function PaymentClient() {
                   {/* SkyPoint / Ví SkyJoy — thanh toán bằng điểm tích lũy. */}
                   {paymentMethod === 'skypoint' && (
                     <div
-                      className={`bg-[var(--background)] border rounded-2xl p-6 flex flex-col items-center gap-4 transition-all ${
-                        skypointInfo &&
-                        skypointInfo.points >= skypointPointsForAmount(total, skypointInfo.rate)
+                      className={`bg-[var(--background)] border rounded-2xl p-6 flex flex-col items-center gap-4 transition-all ${skypointInfo &&
+                          skypointInfo.points >= skypointPointsForAmount(total, skypointInfo.rate)
                           ? 'border-vjbrown/40 bg-vjyellow/10'
                           : 'border-[var(--border)] '
-                      }`}
+                        }`}
                     >
                       <div className="w-16 h-16 bg-vjyellow rounded-full flex items-center justify-center shadow-md">
                         <Icon
@@ -2289,8 +2335,8 @@ export default function PaymentClient() {
                 ancillaries={
                   booking?.ancillaries?.length
                     ? (booking.ancillaries
-                        .map((id) => ANCILLARY_OPTIONS.find((o) => o.id === id)?.title)
-                        .filter(Boolean) as string[])
+                      .map((id) => ANCILLARY_OPTIONS.find((o) => o.id === id)?.title)
+                      .filter(Boolean) as string[])
                     : ['Hành lý xách tay 7kg']
                 }
                 onOpenDetails={() => setShowSummaryModal(true)}
@@ -2373,9 +2419,9 @@ export default function PaymentClient() {
                         Dịch vụ bổ sung
                         {booking?.ancillaries?.length
                           ? ` (${booking.ancillaries
-                              .map((id) => ANCILLARY_OPTIONS.find((o) => o.id === id)?.title)
-                              .filter(Boolean)
-                              .join(', ')})`
+                            .map((id) => ANCILLARY_OPTIONS.find((o) => o.id === id)?.title)
+                            .filter(Boolean)
+                            .join(', ')})`
                           : ''}
                       </span>
                       <span className="font-semibold">

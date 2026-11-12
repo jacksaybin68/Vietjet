@@ -101,7 +101,10 @@ export default function VSCodeWebEditorPage() {
           initialContent: data.content,
           isDirty: false,
         };
-        setOpenTabs((prev) => [...prev, newTab]);
+        setOpenTabs((prev) => {
+          if (prev.some((t) => t.path === filePath)) return prev;
+          return [...prev, newTab];
+        });
         setActiveTabPath(filePath);
       }
     } catch (err) {
@@ -364,6 +367,7 @@ export default function VSCodeWebEditorPage() {
       }}
     >
       {/* Top Titlebar */}
+      <h1 className="sr-only">Trình soạn thảo mã và xem trước giao diện</h1>
       <div
         style={{
           height: '36px',

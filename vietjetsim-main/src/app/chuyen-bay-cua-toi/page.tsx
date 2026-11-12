@@ -41,6 +41,7 @@ interface FlightInfo {
 
 interface RecentBooking {
   id: string;
+  booking_code?: string | null;
   flight_no?: string;
   from_code?: string;
   to_code?: string;
@@ -822,7 +823,7 @@ export default function MyFlightsPage() {
                             <div className="flex gap-2">
                               {!b.has_check_in && b.status === 'confirmed' && (
                                 <Link
-                                  href={`/lam-thu-tuc?code=${b.id}`}
+                                  href={`/lam-thu-tuc?code=${b.booking_code || b.id}`}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl bg-[var(--vj-yellow)] text-[var(--vj-red)] font-black hover:bg-[var(--vj-yellow-2)] transition-colors"
                                 >
                                   <MdAirlineSeatReclineNormal className="h-3.5 w-3.5" /> Check-in
@@ -830,21 +831,21 @@ export default function MyFlightsPage() {
                               )}
                               {b.has_check_in && (
                                 <Link
-                                  href={`/lam-thu-tuc?code=${b.id}`}
+                                  href={`/lam-thu-tuc?code=${b.booking_code || b.id}`}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-[rgb(var(--vj-yellow-rgb))]/25 text-[var(--vj-red)] font-bold hover:bg-[rgb(var(--vj-yellow-rgb))]/40 transition-colors"
                                 >
                                   <MdCheckCircle className="h-3.5 w-3.5" /> Thẻ lên tàu
                                 </Link>
                               )}
                               <Link
-                                href={`/lam-thu-tuc?code=${b.id}`}
+                                href={`/dat-ve/${b.booking_code || b.id}`}
                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-[var(--border)] font-semibold hover:bg-[rgb(var(--vj-yellow-rgb))]/10 transition-colors"
                               >
                                 <MdPrint className="h-3.5 w-3.5" /> In vé / Đổi
                               </Link>
                             </div>
                             <Link
-                              href={`/lam-thu-tuc?code=${b.id}`}
+                              href={`/dat-ve/${b.booking_code || b.id}`}
                               className="text-xs text-[var(--vj-red)] font-bold hover:underline"
                             >
                               Xem chi tiết →
@@ -923,7 +924,7 @@ export default function MyFlightsPage() {
                               <MdPrint className="h-3.5 w-3.5" /> In vé
                             </button>
                             <Link
-                              href={`/lam-thu-tuc?code=${b.id}`}
+                              href={`/dat-ve/${b.booking_code || b.id}`}
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-[var(--border)] font-semibold hover:bg-[rgb(var(--vj-yellow-rgb))]/10 transition-colors"
                             >
                               <MdQrCodeScanner className="h-3.5 w-3.5" /> Xem chi tiết

@@ -487,6 +487,7 @@ export default function DiscountsTab({ onToast }: { onToast?: ToastAPI }) {
 }
 
 // ─── Modal Component ────────────────────────────────────────────────────────
+
 function DiscountModal({
   discount,
   onClose,
@@ -498,6 +499,16 @@ function DiscountModal({
   onSuccess: () => void;
   onToast?: ToastAPI;
 }) {
+  const generateRandomCode: () => void = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    const length = 6 + Math.floor(Math.random() * 3); // 6-8 characters
+    for (let i = 0; i < length; i++) {
+      result += chars[Math.floor(Math.random() * chars.length)];
+    }
+    setFormData({ ...formData, code: result });
+  };
+
   const [formData, setFormData] = useState({
     code: discount?.code || '',
     type: discount?.type || 'percentage',
@@ -580,14 +591,27 @@ function DiscountModal({
               <label className="block text-2xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">
                 Mã giảm giá
               </label>
-              <input
-                required
-                type="text"
-                placeholder="Ví dụ: SUMMERCARE"
-                className="w-full px-4 py-3 sm:py-3.5 bg-white/5 border border-white/10 rounded-xl text-sm font-black text-white placeholder-slate-600 uppercase tracking-widest focus:outline-none focus:border-primary/50 transition-all focus:bg-white/10"
-                value={formData.code}
-                onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-              />
+              <div className="relative">
+                <input
+                  required
+                  type="text"
+                  placeholder="Ví dụ: SUMMERCARE"
+                  className="w-full px-4 py-3 sm:py-3.5 bg-white/5 border border-white/10 rounded-xl text-sm font-black text-white placeholder-slate-600 uppercase tracking-widest focus:outline-none focus:border-primary/50 transition-all focus:bg-white/10"
+                  value={formData.code}
+                  onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                />
+                <button
+                  type="button"
+                  onClick={generateRandomCode}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-primary transition-colors text-xs font-bold"
+                  title="Tạo mã ngẫu nhiên"
+                >
+                  <Icon name="MagicWandIcon" size={14} />
+                </button>
+              </div>
+              <p className="text-2xs font-medium text-slate-500 mt-1.5 ml-1">
+                Mã gắn đại lý vẫn nhập được ở ô mã giảm giá khi khách đặt vé.
+              </p>
             </div>
             <div>
               <label className="block text-2xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">

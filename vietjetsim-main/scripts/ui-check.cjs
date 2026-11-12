@@ -435,6 +435,10 @@ async function main() {
   // /editor là standalone route, admin-only (giống /quan-tri).
   await captureAll('20-editor', `${BASE}/editor`);
 
+  // Trở lại bảng quản trị để kiểm tra widget OpenClaw
+  await goto(cdp, `${BASE}/quan-tri`);
+  await sleep(1000);
+
   // ── Widget OpenClaw: mở panel, đọc nhãn backend và thử gửi một câu ─────────
   const widgetLauncher = `[...document.querySelectorAll('button')].find((b) => (b.getAttribute('aria-label') || '').includes('OpenClaw'))`;
   const widget = { launcherFound: await evaluate(cdp, `!!${widgetLauncher}`) };

@@ -16,7 +16,7 @@ interface Message {
 export default function OpenClawAssistant() {
   const { isAdmin, user } = useAuth();
   const pathname = usePathname();
-  const isInsideAdmin = pathname?.startsWith('/quan-tri');
+  const isInsideAdmin = pathname?.startsWith('/quan-tri') || pathname?.startsWith('/editor');
 
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);

@@ -2,7 +2,12 @@
 import React, { useState } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { Pagination } from '@/shared/components/ui';
-import { createAdminInvoice, updateAdminBookingStatus, confirmTransaction } from '@/features/admin';
+import {
+  createAdminInvoice,
+  updateAdminBookingStatus,
+  confirmTransaction,
+  listAdminBookings,
+} from '@/features/admin';
 import { getApiErrorMessage } from '@/shared/services';
 import { renderInvoiceHtml } from '@/features/admin/invoice';
 import SendBookingEmailModal from './SendBookingEmailModal';
@@ -181,15 +186,49 @@ export default function BookingsTab({ onToast }: BookingsTabProps = {}) {
   const [emailModalBooking, setEmailModalBooking] = useState<Booking | null>(null);
   const [emailModalType, setEmailModalType] = useState<'payment_instruction' | 'ticket_issuance'>('payment_instruction');
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 50);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const retryLoad = () => {
+  const loadBookings = React.useCallback(async () => {
     setIsLoading(true);
     setHasError(false);
-    setTimeout(() => setIsLoading(false), 50);
+    try {
+      const res = await listAdminBookings({ limit: 100 });
+      if (res && res.bookings && res.bookings.length > 0) {
+        const mapped: Booking[] = res.bookings.map((b) => {
+          const raw = b as unknown as Record<string, unknown>;
+          return {
+            id: b.booking_code || b.id.slice(0, 8).toUpperCase(),
+            userId: b.user_id || '0',
+            userName: (raw.user_name as string) || (raw.contact_name as string) || 'Khách hàng',
+            userEmail: (raw.user_email as string) || undefined,
+            flightNo: (raw.flight_no as string) || 'VJ 101',
+            route:
+              (raw.from_code && raw.to_code
+                ? `${raw.from_code} → ${raw.to_code}`
+                : (raw.route as string)) || 'HAN → SGN',
+            date: b.created_at ? new Date(b.created_at).toLocaleDateString('vi-VN') : '—',
+            seat: (raw.seat as string) || '—',
+            amount: Number(b.total_price) || 0,
+            status: (b.status as BookingStatus) || 'confirmed',
+            payMethod: (raw.payment_method as string) || 'Chuyển khoản',
+            createdAt: b.created_at ? new Date(b.created_at).toLocaleString('vi-VN') : '—',
+          };
+        });
+        setBookings(mapped);
+      } else {
+        setBookings(BOOKINGS);
+      }
+    } catch {
+      setBookings(BOOKINGS);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    loadBookings();
+  }, [loadBookings]);
+
+  const retryLoad = () => {
+    loadBookings();
   };
 
   const filtered = bookings.filter((b) => {
