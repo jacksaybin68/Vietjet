@@ -13,17 +13,21 @@ import {
 
 describe('Tác vụ 6.1: Bộ Kịch bản Kiểm thử Tự động E2E & Tích hợp Nghiệp vụ', () => {
   const mockUser: User = {
-    userId: 'user-e2e-test-1',
+    id: 'user-e2e-test-1',
     email: 'khachhang.e2e@vietjetsim.vn',
-    fullName: 'Nguyễn Văn Kiểm Thử',
-    role: 'customer',
+    full_name: 'Nguyễn Văn Kiểm Thử',
+    role: 'user',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   };
 
   const mockAdmin: User = {
-    userId: 'admin-e2e-1',
+    id: 'admin-e2e-1',
     email: 'admin.operator@vietjetsim.vn',
-    fullName: 'Điều Phối Viên Vietjet',
+    full_name: 'Điều Phối Viên Vietjet',
     role: 'admin',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   };
 
   const userTokens = generateTokens(mockUser);
