@@ -274,7 +274,11 @@ async function goto(cdp, url, { width = 1440, height = 900, mobile = false } = {
   // giờ thì vẫn đi tiếp — `waitForStable` bên dưới mới là nơi quyết định trang
   // đã đứng yên hay chưa, và nó có thời hạn riêng.
   const loaded = cdp.once('Page.loadEventFired', 30000).catch(() => null);
-  await cdp.send('Page.navigate', { url });
+  // `Page.navigate` có thể mất hơn 30s khi route tự chuyển hướng (sau khi đăng
+  // nhập, `/tai-khoan` và `/thanh-toan` đều qua server redirect). Không nên để
+  // lỗi này giết cả lượt chạy: navigate lỗi vẫn để lại trang đang tải, và
+  // `waitForStable` bên dưới sẽ tự kiểm tra trạng thái thật.
+  await cdp.send('Page.navigate', { url }, 60000).catch(() => null);
   await loaded;
   return waitForStable(cdp);
 }

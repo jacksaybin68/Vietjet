@@ -650,20 +650,66 @@ h6 {
   border-radius: 999px;
 }
 
-/* Nền footer: xanh trời #0894A3 + gradient trắng ở mép trên. */
-.vj-footer-sky {
-  background-color: var(--vj-teal);
-  background-image: linear-gradient(
-    rgb(255, 255, 255) 0%,
-    rgba(255, 255, 255, 0) 240px
-  );
+/* ─── Header: dải dịch vụ phụ (quick-rail) ───────────────────────────────
+ * Site thật (đo 13/11/2026, 1440×900):
+ *   - Dải nằm ngay dưới hàng menu chính, cao 35px, nền trong suốt phủ
+ *     lên lớp tối của hero.
+ *   - Mục: icon 25×25 + chữ 16px/500, active màu #F7C61A.
+ *   - Cách mép trái container 1200px: 40px (padding-left của <ul>).
+ *   - Khoảng cách giữa các mục: 24px.
+ */
+.vj-quick-rail {
+  display: flex;
+  align-items: center;
+  height: 35px;
+  gap: 24px;
+  padding-left: 40px;
+  font-size: 16px;
+  line-height: 35px;
+  font-weight: 500;
 }
 
-/* Thẻ trắng trong footer: 1328px, bo góc 40px, padding 50px 48px 40px. */
-.vj-footer-card {
+/* Header: hàng menu chính (nav trên cùng) — chữ 16px/600 uppercase. */
+.vj-nav-bar {
+  display: flex;
+  align-items: center;
+  height: 33px;
+  gap: 5px;
+}
+
+.vj-nav-bar-item {
+  display: flex;
+  align-items: center;
+  height: 33px;
+  padding: 5px 10px;
+  font-size: 16px;
+  line-height: 22.88px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #ffffff;
+  white-space: nowrap;
+  transition: color 160ms ease;
+}
+
+.vj-nav-bar-item:hover {
+  color: var(--vj-nav-active);
+}
+
+/* Footer — site thật dùng nền TRẮNG phủ pattern, KHÔNG phải nền xanh trời.
+   (Đo 13/11/2026: `.jss94` background-color #fff + footer-pattern.svg, cao 371px.) */
+.vj-footer-sky {
   background-color: #ffffff;
-  border-radius: 40px;
-  padding: 50px 48px 40px;
+  background-image: url('/images/footer-pattern.svg');
+  background-repeat: repeat;
+  background-position: top left;
+  background-size: 120px 24px;
+}
+
+/* Khối nội dung footer: container 1200px, không thẻ trắng bo góc 40px. */
+.vj-footer-card {
+  background-color: transparent;
+  border-radius: 0;
+  padding: 0;
 }
 
 /* Cột tiêu đề trong footer: 18px/700 màu đỏ thương hiệu. */
@@ -674,9 +720,11 @@ h6 {
   color: var(--primary);
 }
 
+/* Liên kết footer: 16px/500 màu #333 (đo được trên site thật). */
 .vj-footer-link {
   font-size: 16px;
   line-height: 24px;
+  font-weight: 500;
   color: var(--foreground);
   transition: color 160ms ease;
 }
