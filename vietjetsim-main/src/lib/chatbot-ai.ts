@@ -88,7 +88,8 @@ export function getVietjetAiPolicyResponse(query: string): AiSupportResponse {
   if (!query || typeof query !== 'string') {
     return {
       matched: false,
-      reply: 'Dạ xin lỗi, em chưa hiểu rõ yêu cầu của Quý khách. Quý khách vui lòng nhập lại câu hỏi ạ!',
+      reply:
+        'Dạ xin lỗi, em chưa hiểu rõ yêu cầu của Quý khách. Quý khách vui lòng nhập lại câu hỏi ạ!',
     };
   }
 
@@ -108,7 +109,12 @@ export function getVietjetAiPolicyResponse(query: string): AiSupportResponse {
     q.includes('bao nhiêu kg') ||
     q.includes('mấy kg')
   ) {
-    if (q.includes('chất lỏng') || q.includes('chat long') || q.includes('nước hoa') || q.includes('mỹ phẩm')) {
+    if (
+      q.includes('chất lỏng') ||
+      q.includes('chat long') ||
+      q.includes('nước hoa') ||
+      q.includes('mỹ phẩm')
+    ) {
       return {
         matched: true,
         category: 'baggage',
@@ -162,11 +168,20 @@ export function getVietjetAiPolicyResponse(query: string): AiSupportResponse {
           '• Không chấp nhận ảnh chụp điện thoại, bản scan không công chứng hay bản photo thường.\n' +
           '• Trẻ sơ sinh từ 07 ngày tuổi đến dưới 01 tháng tuổi có thể dùng Giấy chứng sinh.\n\n' +
           'Quý khách vui lòng chuẩn bị sẵn sàng bản gốc khi đến quầy thủ tục sân bay.',
-        quickReplies: ['Check-in online khi nào mở?', 'Quy định hành lý cho trẻ em', 'Thủ tục bay quốc tế'],
+        quickReplies: [
+          'Check-in online khi nào mở?',
+          'Quy định hành lý cho trẻ em',
+          'Thủ tục bay quốc tế',
+        ],
       };
     }
 
-    if (q.includes('checkin') || q.includes('check-in') || q.includes('mấy giờ') || q.includes('thời gian')) {
+    if (
+      q.includes('checkin') ||
+      q.includes('check-in') ||
+      q.includes('mấy giờ') ||
+      q.includes('thời gian')
+    ) {
       return {
         matched: true,
         category: 'documents',

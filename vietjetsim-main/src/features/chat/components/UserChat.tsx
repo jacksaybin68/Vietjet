@@ -590,22 +590,28 @@ export default function UserChat() {
         if (!conv) return;
       }
 
-      await sendChatMessageRequest(conv.id, text);
+      const result = await sendChatMessageRequest(conv.id, text);
 
       // Optimistically update messages
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `temp-${Date.now()}`,
-          conversation_id: conv!.id,
-          sender_id: activeUser.id,
-          sender_role: 'user',
-          content: text,
-          created_at: new Date().toISOString(),
-          read_at: null,
-        },
-      ]);
-      lastMessageCountRef.current += 1;
+      setMessages((prev) => {
+        const next = [
+          ...prev,
+          {
+            id: `temp-${Date.now()}`,
+            conversation_id: conv!.id,
+            sender_id: activeUser.id,
+            sender_role: 'user',
+            content: text,
+            created_at: new Date().toISOString(),
+            read_at: null,
+          },
+        ];
+        if (result?.bot_reply) {
+          next.push(result.bot_reply);
+        }
+        return next;
+      });
+      lastMessageCountRef.current += result?.bot_reply ? 2 : 1;
     } catch (err) {
       console.error('Send error:', err);
       setInputText(text);
@@ -1030,6 +1036,27 @@ export default function UserChat() {
           {/* Composer — khi đã đăng nhập hoặc khách đã bấm Bắt đầu trò chuyện */}
           {(!isGuest || isGuestChatStarted) && (
             <div className="relative px-3 pt-2 pb-2 bg-white border-t border-gray-100 flex-shrink-0">
+              {/* Quick AI Policy Suggestions */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 mb-1 no-scrollbar scrollbar-none">
+                {[
+                  { label: '🧳 Hành lý', q: 'Quy định hành lý xách tay và ký gửi như thế nào?' },
+                  { label: '📋 Giấy tờ bay', q: 'Thủ tục giấy tờ bay và thời gian check-in?' },
+                  { label: '🔄 Hoàn/Hủy vé', q: 'Chính sách hoàn vé và đổi ngày bay?' },
+                  { label: '⭐ SkyJoy', q: 'Hệ thống tích điểm SkyJoy và Cash + Points?' },
+                ].map((item) => (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={() => {
+                      setInputText(item.q);
+                      inputRef.current?.focus();
+                    }}
+                    className="whitespace-nowrap px-2.5 py-0.5 rounded-full text-3xs font-semibold bg-gray-100 hover:bg-red-50 text-gray-700 hover:text-primary border border-gray-200 transition-colors flex-shrink-0"
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
               <div className="flex items-center gap-2 bg-gray-100 rounded-full px-3 py-1.5 border border-gray-200 focus-within:border-red-400 focus-within:bg-white transition-all shadow-xs">
                 <button
                   type="button"

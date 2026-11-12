@@ -45,7 +45,7 @@ export function getConversationMessages(
 export function sendChatMessage(
   conversationId: string,
   content: string
-): Promise<{ success: boolean; message: ChatMessage }> {
+): Promise<{ success: boolean; message: ChatMessage; bot_reply?: ChatMessage | null }> {
   return apiRequest(CHAT.MESSAGES, {
     method: 'POST',
     body: { conversation_id: conversationId, content },

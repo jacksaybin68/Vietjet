@@ -7,6 +7,8 @@ const projectRoot = dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
+  compress: true,
   productionBrowserSourceMaps: false,
   distDir: process.env.DIST_DIR || '.next',
 
@@ -50,6 +52,24 @@ const nextConfig = {
             value: 'max-age=31536000; includeSubDomains; preload',
           },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(self), geolocation=()' },
+        ],
+      },
+      {
+        source: '/_next/static/:path*',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
+      {
+        source: '/images/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' },
+        ],
+      },
+      {
+        source: '/api/sse/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-cache, no-transform' },
+          { key: 'Connection', value: 'keep-alive' },
+          { key: 'X-Accel-Buffering', value: 'no' },
         ],
       },
     ];

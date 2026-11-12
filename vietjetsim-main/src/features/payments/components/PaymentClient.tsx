@@ -524,7 +524,6 @@ export default function PaymentClient() {
   const bookingCodeLabel = bookingCode ?? '—';
   const discountAmount = promoApplied && promoData ? promoData.discountAmount : 0;
   const total = booking ? booking.total - discountAmount : 0;
-
   const [pageLoading, setPageLoading] = useState(true);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [showErrorModal, setShowErrorModal] = useState(false);

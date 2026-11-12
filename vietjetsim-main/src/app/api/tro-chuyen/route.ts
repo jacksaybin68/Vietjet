@@ -88,12 +88,31 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const userRole = isAdminRole(payload.role) ? 'admin' : 'user';
+
     const message = await sendChatMessage({
       conversation_id,
       sender_id: payload.userId,
-      sender_role: isAdminRole(payload.role) ? 'admin' : 'user',
+      sender_role: userRole,
       content: content.trim(),
     });
+
+    let botMessage = null;
+    if (userRole === 'user') {
+      const aiResponse = getVietjetAiPolicyResponse(content.trim());
+      if (aiResponse.matched) {
+        // Tự động giải đáp chính sách qua Trợ lý AI Vietjet
+        botMessage = await sendChatMessage({
+          conversation_id,
+          sender_id: 'vietjet-ai-bot',
+          sender_role: 'admin',
+          content: `🤖 **[Trợ lý AI Vietjet]**\n\n${aiResponse.reply}`,
+        }).catch((err) => {
+          console.error('Failed to send AI bot auto-reply:', err);
+          return null;
+        });
+      }
+    }
 
     return NextResponse.json(
       {
@@ -106,6 +125,16 @@ export async function POST(request: NextRequest) {
           content: message.content,
           created_at: message.created_at,
         },
+        bot_reply: botMessage
+          ? {
+              id: botMessage.id,
+              conversation_id: botMessage.conversation_id,
+              sender_id: botMessage.sender_id,
+              sender_role: botMessage.sender_role,
+              content: botMessage.content,
+              created_at: botMessage.created_at,
+            }
+          : null,
       },
       { status: 201 }
     );

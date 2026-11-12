@@ -373,7 +373,7 @@ export default function VietQrBox({
               </span>
               <div className="min-w-0">
                 <span className="block text-3xs sm:text-2xs font-bold uppercase tracking-wider text-gray-500 font-koho">
-                  Số tài khoản nhận
+                  Số tài khoản{' '}
                 </span>
                 <span className="block font-mono font-black tracking-tight text-gray-900 text-base sm:text-lg">
                   {data?.bank.accountNumber ?? '—'}
@@ -400,7 +400,7 @@ export default function VietQrBox({
           <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white p-3 sm:p-4 shadow-2xs">
             <div className="min-w-0">
               <span className="block text-3xs sm:text-2xs font-bold uppercase tracking-wider text-gray-500 font-koho">
-                Tổng số tiền cần thanh toán
+                Số tiền{' '}
               </span>
               <span className="block font-koho font-black text-red-600 text-base sm:text-lg">
                 {(data?.amount ?? 0).toLocaleString('vi-VN')}₫
@@ -413,7 +413,7 @@ export default function VietQrBox({
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <span className="block text-3xs sm:text-2xs font-black uppercase tracking-wider text-red-600 font-koho flex items-center gap-1">
-                  <span>Nội dung chuyển khoản (Bắt buộc giữ nguyên)</span>
+                  <span>Nội dung </span>
                 </span>
                 <span className="block font-mono font-black text-gray-900 text-sm sm:text-base break-all select-all">
                   {data?.addInfo ?? '—'}

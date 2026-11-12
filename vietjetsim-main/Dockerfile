@@ -22,7 +22,7 @@ ENV NODE_ENV=production
 
 RUN npm run build
 
-# 4. Runner
+# 4. Runner (Optimized standalone < 150MB)
 FROM base AS runner
 WORKDIR /app
 
@@ -34,14 +34,14 @@ ENV HOSTNAME="0.0.0.0"
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# Automatically leverage output traces to reduce image size (<150MB)
 COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
 EXPOSE 4028
 
-CMD ["npm", "start", "--", "-p", "4028"]
+CMD ["node", "server.js"]
 
