@@ -1796,7 +1796,7 @@ export default function PaymentClient() {
                       type="button"
                       onClick={() => {
                         setSelectedMethodGroup('movi');
-                        setPaymentMethod('bank');
+                        setPaymentMethod('movi');
                       }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
                         selectedMethodGroup === 'movi'

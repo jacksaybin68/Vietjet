@@ -6,7 +6,6 @@ import { getSeatCharge } from '@/features/bookings/pricing';
 import { RiCloseLine } from 'react-icons/ri';
 import Image from 'next/image';
 import { useSeatMapSSE } from '@/hooks/useSeatMapSSE';
-import { canSelectSeat, canDeselectSeat } from '@/features/bookings/seat-adjacency';
 
 interface SeatSelectionDrawerProps {
   isOpen: boolean;
@@ -83,6 +82,26 @@ export default function SeatSelectionDrawer({
     return set;
   }, [sseOccupied, lockedSeats]);
 
+  const releaseAllLocks = useCallback(async () => {
+    if (lockedSeats.size === 0) return;
+    const seatsToRelease = Array.from(lockedSeats);
+    try {
+      await fetch('/api/ghe/khoa', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          flightId: currentFlightId,
+          seatIds: seatsToRelease,
+          sessionId: sessionIdRef.current,
+        }),
+        keepalive: true,
+      });
+    } catch {
+      // silent
+    }
+    setLockedSeats(new Set());
+  }, [lockedSeats, currentFlightId]);
+
   // Hold timer: starts when first seat is selected
   useEffect(() => {
     const hasSelection = outboundSeats.length > 0 || inboundSeats.length > 0;
@@ -103,7 +122,7 @@ export default function SeatSelectionDrawer({
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [outboundSeats, inboundSeats, isOpen]);
+  }, [outboundSeats, inboundSeats, isOpen, releaseAllLocks]);
 
   // Release all locks on unmount
   useEffect(() => {
@@ -112,27 +131,7 @@ export default function SeatSelectionDrawer({
         releaseAllLocks();
       }
     };
-  }, []);
-
-  const releaseAllLocks = useCallback(async () => {
-    if (lockedSeats.size === 0) return;
-    const seatsToRelease = Array.from(lockedSeats);
-    try {
-      await fetch('/api/ghe/khoa', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          flightId: currentFlightId,
-          seatIds: seatsToRelease,
-          sessionId: sessionIdRef.current,
-        }),
-        keepalive: true,
-      });
-    } catch {
-      // silent
-    }
-    setLockedSeats(new Set());
-  }, [lockedSeats, currentFlightId]);
+  }, [lockedSeats.size, releaseAllLocks]);
 
   const lockSeat = useCallback(
     async (seatId: string) => {

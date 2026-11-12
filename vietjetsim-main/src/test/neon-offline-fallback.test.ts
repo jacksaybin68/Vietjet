@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 describe('Neon Resilient Connection & Offline Fallback', () => {
   it('detects network errors and recovers via in-memory mock', async () => {
@@ -14,10 +14,10 @@ describe('Neon Resilient Connection & Offline Fallback', () => {
     for (const err of networkErrors) {
       expect(
         err.message.includes('fetch failed') ||
-        err.message.includes('ENOTFOUND') ||
-        err.message.includes('ECONNREFUSED') ||
-        err.message.includes('ETIMEDOUT') ||
-        err.message.includes('socket hang up')
+          err.message.includes('ENOTFOUND') ||
+          err.message.includes('ECONNREFUSED') ||
+          err.message.includes('ETIMEDOUT') ||
+          err.message.includes('socket hang up')
       ).toBe(true);
     }
   });
@@ -30,4 +30,3 @@ describe('Neon Resilient Connection & Offline Fallback', () => {
     expect(typeof sql.transaction).toBe('function');
   });
 });
-

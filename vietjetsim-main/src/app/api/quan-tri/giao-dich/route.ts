@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
 import { verifyAdminRequest } from '@/lib/admin-auth';
-import {
-  sendPaymentFailedEmail,
-} from '@/lib/mail';
+import { sendPaymentFailedEmail } from '@/lib/mail';
 import { sendAutomaticPaymentInvoiceEmail } from '@/lib/payment-invoice';
 import { writeAuditLog } from '@/lib/db';
 
