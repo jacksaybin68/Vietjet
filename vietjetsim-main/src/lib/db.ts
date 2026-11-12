@@ -875,18 +875,14 @@ export async function getBookingsByUserId(
  */
 export async function getBookingByCodeOrId(codeOrId: string): Promise<BookingDetail | null> {
   const results = await sql`
-    SELECT b.*,
-           f.flight_no, f.from_code, f.to_code, f.depart_time, f.arrive_time, f.price, f.class
+    SELECT b.id
     FROM bookings b
-    JOIN flights f ON b.flight_id = f.id
-    -- Case-insensitive, like searchCheckIn: the PNR mixes letters and digits,
-    -- and a lower-case entry would otherwise miss the booking entirely.
     WHERE UPPER(b.booking_code) = UPPER(${codeOrId}) OR b.id::text = ${codeOrId}
     LIMIT 1
   `;
 
-  if ((results as BookingDetail[]).length === 0) return null;
-  return (results as Record<string, unknown>[])[0] as unknown as BookingDetail;
+  if ((results as any[]).length === 0) return null;
+  return getBookingById(String((results as any[])[0].id));
 }
 
 export async function getBookingById(bookingId: string): Promise<BookingDetail | null> {

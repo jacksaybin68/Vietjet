@@ -390,17 +390,24 @@ export default function TrackBookingPage() {
             </div>
 
             {/* Actions */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <Link
+                href={`/dat-ve/${result.pnr}`}
+                className="flex items-center justify-center gap-2 py-3 bg-[#FFCC00] hover:bg-[#E6B800] text-gray-950 font-bold rounded-xl text-xs uppercase tracking-wider transition-all shadow-xs"
+              >
+                <Icon name="DocumentTextIcon" size={18} />
+                Xem hành trình
+              </Link>
               <Link
                 href="/lam-thu-tuc"
-                className="flex items-center justify-center gap-2 py-3 bg-white border border-stone-200 rounded-xl font-semibold text-stone-700 hover:border-primary hover:text-primary transition-all"
+                className="flex items-center justify-center gap-2 py-3 bg-white border border-stone-200 rounded-xl font-semibold text-stone-700 hover:border-primary hover:text-primary transition-all text-xs"
               >
                 <Icon name="TicketIcon" size={18} />
                 Check-in
               </Link>
               <Link
                 href="/tim-ve"
-                className="flex items-center justify-center gap-2 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition-all"
+                className="flex items-center justify-center gap-2 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition-all text-xs"
               >
                 <Icon name="PlusIcon" size={18} />
                 Đặt vé mới

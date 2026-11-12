@@ -16,6 +16,7 @@ export {
   PASSENGER_TYPE_LABELS,
   SEATED_PASSENGER_TYPES,
   countPassengerTypes,
+  fullPassengerName,
   isSeated,
   requiresIdNumber,
 } from './booking-flow';

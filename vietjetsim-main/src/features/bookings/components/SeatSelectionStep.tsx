@@ -4,6 +4,7 @@ import {
   Flight,
   Passenger,
   countPassengerTypes,
+  fullPassengerName,
   isSeated,
 } from '@/features/bookings/types/booking-flow';
 import { Icon } from '@/shared/components/ui';
@@ -906,7 +907,9 @@ export default function SeatSelectionStep({
                                   Ghế {seat}
                                 </div>
                                 <div className="text-3xs sm:text-xs text-[var(--foreground-muted)]">
-                                  {seatedPassengers[i]?.name || `Hành khách ${i + 1}`}
+                                  {seatedPassengers[i]
+                                    ? fullPassengerName(seatedPassengers[i])
+                                    : `Hành khách ${i + 1}`}
                                 </div>
                                 <div className="text-3xs sm:text-xs text-primary font-bold">
                                   {info.price.toLocaleString('vi-VN')}₫

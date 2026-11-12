@@ -137,7 +137,8 @@ describe('PassengerInfoStep extended contact and consent fields', () => {
     expect(screen.getByText('Vui lòng nhập số điện thoại.')).toBeInTheDocument();
     expect(screen.getByText('Vui lòng nhập địa chỉ email của bạn.')).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText(/Họ và tên/), { target: { value: 'NGUYEN VAN A' } });
+    fireEvent.change(screen.getByLabelText(/Họ và tên/), { target: { value: 'NGUYEN' } });
+    fireEvent.change(screen.getByLabelText(/Tên đệm & tên/), { target: { value: 'VAN A' } });
     fireEvent.change(screen.getByLabelText(/Ngày sinh/), { target: { value: '1990-01-01' } });
     fireEvent.change(screen.getByLabelText(/CCCD \/ Hộ chiếu/), {
       target: { value: '012345678' },
@@ -151,7 +152,8 @@ describe('PassengerInfoStep extended contact and consent fields', () => {
       expect(onSubmit).toHaveBeenCalledWith(
         [
           expect.objectContaining({
-            name: 'NGUYEN VAN A',
+            name: 'NGUYEN',
+            firstName: 'VAN A',
             phone: '0123456789',
             email: 'nguyen@example.com',
             countryCode: 'VN',

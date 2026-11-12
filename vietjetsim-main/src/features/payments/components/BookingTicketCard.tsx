@@ -49,16 +49,18 @@ export default function BookingTicketCard({
   };
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-200/90 shadow-md overflow-hidden transition-all duration-200 hover:shadow-lg">
+    <div className="bg-[var(--background)] rounded-3xl border border-[var(--border)] shadow-md overflow-hidden transition-all duration-200 hover:shadow-lg">
       {/* Header bar: Vietjet brand red */}
       <div className="bg-gradient-to-r from-[var(--vj-red)] to-[var(--vj-red-dark)] px-5 py-3.5 text-white flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="h-6 px-2 bg-white rounded-md flex items-center justify-center shrink-0">
+          <div className="h-6 px-2 bg-[var(--background)] rounded-md flex items-center justify-center shrink-0">
             <span className="font-black italic text-xs tracking-tight text-[var(--vj-red)]">
               vietjet<span className="text-[var(--vj-yellow)]">Air</span>
             </span>
           </div>
-          <span className="font-extrabold text-sm tracking-wide truncate">Chuyến bay {flightNo}</span>
+          <span className="font-extrabold text-sm tracking-wide truncate">
+            Chuyến bay {flightNo}
+          </span>
           <span className="shrink-0 text-3xs font-black uppercase px-2 py-0.5 rounded-full bg-white/20 text-white border border-white/30">
             {fareClass}
           </span>
@@ -84,94 +86,144 @@ export default function BookingTicketCard({
       </div>
 
       {/* Main ticket content */}
-      <div className="p-5">
-        {/* Route info */}
-        <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-          <div className="text-left">
-            <span className="text-2xl sm:text-3xl font-black font-koho text-gray-900 block leading-none">
-              {from}
+      <div className="p-5 space-y-4">
+        {/* Hành trình */}
+        <section>
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <span className="text-3xs font-bold uppercase tracking-wider text-[var(--foreground-subtle)]">
+              Hành trình
             </span>
-            <span className="text-xs font-semibold text-gray-500 mt-1 block">{fromCity}</span>
-            <span className="text-sm font-bold text-primary mt-1 block">{departTime}</span>
+            {date && (
+              <span className="text-3xs font-medium text-[var(--foreground-muted)]">{date}</span>
+            )}
           </div>
 
-          {/* Plane flight path */}
-          <div className="flex-1 px-4 flex flex-col items-center">
-            <span className="text-4xs font-bold uppercase tracking-wider text-gray-400 mb-1">
-              Bay thẳng
-            </span>
-            <div className="w-full flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-[var(--vj-red)] shrink-0" />
-              <div className="h-0.5 flex-1 bg-gradient-to-r from-[var(--vj-red)] via-amber-400 to-[var(--vj-red)] relative">
-                <Icon
-                  name="PaperAirplaneIcon"
-                  size={14}
-                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rotate-45 text-[var(--vj-red)] bg-white px-0.5"
-                />
-              </div>
-              <div className="w-2 h-2 rounded-full bg-[var(--vj-red)] shrink-0" />
-            </div>
-            {date && <span className="text-3xs font-medium text-gray-500 mt-1.5">{date}</span>}
-          </div>
-
-          <div className="text-right">
-            <span className="text-2xl sm:text-3xl font-black font-koho text-gray-900 block leading-none">
-              {to}
-            </span>
-            <span className="text-xs font-semibold text-gray-500 mt-1 block">{toCity}</span>
-            <span className="text-sm font-bold text-primary mt-1 block">{arriveTime}</span>
-          </div>
-        </div>
-
-        {/* Passengers section */}
-        <div className="pt-3 pb-2">
-          <span className="text-3xs font-bold uppercase tracking-wider text-gray-400 block mb-2">
-            Hành khách ({passengers.length})
-          </span>
-          <div className="space-y-1.5">
-            {passengers.map((p, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-between text-xs bg-gray-50 rounded-xl px-3 py-2 border border-gray-100"
-              >
-                <div className="flex items-center gap-2">
-                  <Icon name="UserIcon" size={14} className="text-gray-400" />
-                  <span className="font-bold text-gray-800">{p.name}</span>
-                </div>
-                <div className="flex items-center gap-1 font-semibold text-primary">
-                  <span className="text-3xs text-gray-500">Ghế:</span>
-                  <span className="bg-red-50 text-red-600 px-1.5 py-0.5 rounded-md font-mono text-2xs font-extrabold border border-red-100">
-                    {p.seat || 'Chưa chọn'}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Ancillaries / Services */}
-        {ancillaries.length > 0 && (
-          <div className="pt-2 flex flex-wrap gap-1.5">
-            {ancillaries.map((service, idx) => (
-              <span
-                key={idx}
-                className="inline-flex items-center gap-1 text-3xs font-semibold px-2 py-1 rounded-lg bg-green-50 text-green-700 border border-green-200/60"
-              >
-                <span>✓</span> {service}
+          <div className="flex items-center justify-between gap-2 pb-4 border-b border-[var(--border)]">
+            <div className="text-left min-w-0">
+              <span className="text-2xl sm:text-3xl font-black font-koho text-[var(--foreground)] block leading-none">
+                {from}
               </span>
-            ))}
+              <span className="text-xs font-semibold text-[var(--foreground-muted)] mt-1 block truncate">
+                {fromCity}
+              </span>
+              <span className="text-sm font-bold text-primary mt-1 block">{departTime}</span>
+            </div>
+
+            {/* Đường bay */}
+            <div className="flex-1 px-2 sm:px-4 flex flex-col items-center">
+              <span className="text-3xs font-bold uppercase tracking-wider text-[var(--foreground-subtle)] mb-1.5">
+                Bay thẳng
+              </span>
+              <div className="w-full flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-[var(--vj-red)] shrink-0" />
+                <div className="h-0.5 flex-1 bg-gradient-to-r from-[var(--vj-red)] via-[var(--vj-yellow)] to-[var(--vj-red)] relative">
+                  <Icon
+                    name="PaperAirplaneIcon"
+                    size={14}
+                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rotate-45 text-[var(--vj-red)] bg-[var(--background)] px-0.5"
+                  />
+                </div>
+                <div className="w-2 h-2 rounded-full bg-[var(--vj-red)] shrink-0" />
+              </div>
+            </div>
+
+            <div className="text-right min-w-0">
+              <span className="text-2xl sm:text-3xl font-black font-koho text-[var(--foreground)] block leading-none">
+                {to}
+              </span>
+              <span className="text-xs font-semibold text-[var(--foreground-muted)] mt-1 block truncate">
+                {toCity}
+              </span>
+              <span className="text-sm font-bold text-primary mt-1 block">{arriveTime}</span>
+            </div>
           </div>
+        </section>
+
+        {/* Hành khách */}
+        <section>
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span className="text-3xs font-bold uppercase tracking-wider text-[var(--foreground-subtle)]">
+              Hành khách
+            </span>
+            <span className="rounded-full bg-[var(--surface-2)] px-2 py-0.5 text-3xs font-bold text-[var(--foreground-muted)]">
+              {passengers.length}
+            </span>
+          </div>
+
+          <ul className="space-y-1.5">
+            {passengers.map((p, i) => {
+              const seat = p.seat?.trim();
+              const name = p.name?.trim();
+              return (
+                <li
+                  key={i}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2.5"
+                >
+                  <span className="flex min-w-0 items-center gap-2">
+                    <Icon
+                      name="UserIcon"
+                      size={14}
+                      className="shrink-0 text-[var(--foreground-subtle)]"
+                    />
+                    <span className="truncate text-xs font-bold text-[var(--foreground)]">
+                      {name || '—'}
+                    </span>
+                  </span>
+                  <span className="flex shrink-0 items-center gap-1.5">
+                    <span className="text-3xs text-[var(--foreground-muted)]">Ghế</span>
+                    {seat ? (
+                      <span className="rounded-md border border-[rgb(var(--vj-red-rgb))]/25 bg-[rgb(var(--vj-red-rgb))]/10 px-1.5 py-0.5 font-mono text-2xs font-extrabold text-[var(--vj-red)]">
+                        {seat}
+                      </span>
+                    ) : (
+                      <span className="rounded-md border border-[var(--border)] bg-[var(--background)] px-1.5 py-0.5 font-mono text-2xs font-extrabold text-[var(--foreground-subtle)]">
+                        Chưa chọn
+                      </span>
+                    )}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+
+        {/* Dịch vụ đã chọn */}
+        {ancillaries.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <span className="text-3xs font-bold uppercase tracking-wider text-[var(--foreground-subtle)]">
+                Dịch vụ đã chọn
+              </span>
+              <span className="rounded-full bg-[var(--surface-2)] px-2 py-0.5 text-3xs font-bold text-[var(--foreground-muted)]">
+                {ancillaries.length}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap gap-1.5">
+              {ancillaries.map((service, idx) => (
+                <span
+                  key={idx}
+                  className="inline-flex items-center gap-1 rounded-lg border border-[rgb(var(--vj-green-rgb))]/25 bg-[rgb(var(--vj-green-rgb))]/10 px-2 py-1 text-3xs font-semibold text-[var(--vj-green)]"
+                >
+                  <Icon name="CheckIcon" size={12} />
+                  {service}
+                </span>
+              ))}
+            </div>
+          </section>
         )}
 
-        {/* Button: Xem chi tiết đặt chỗ */}
+        {/* Xem chi tiết điều kiện vé & đặt chỗ */}
         {onOpenDetails && (
           <button
             type="button"
             onClick={onOpenDetails}
-            className="w-full mt-3 py-2 text-center text-xs font-bold text-primary hover:text-primary-dark hover:underline flex items-center justify-center gap-1 cursor-pointer"
+            className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] py-2.5 text-xs font-bold text-primary transition-colors hover:border-[rgb(var(--vj-red-rgb))]/30 hover:bg-[rgb(var(--vj-red-rgb))]/10 cursor-pointer"
           >
-            <Icon name="InformationCircleIcon" size={14} />
-            Xem chi tiết điều kiện vé & đặt chỗ
+            <span className="flex items-center justify-center gap-1.5">
+              <Icon name="InformationCircleIcon" size={14} />
+              Xem chi tiết điều kiện vé & đặt chỗ
+            </span>
           </button>
         )}
       </div>

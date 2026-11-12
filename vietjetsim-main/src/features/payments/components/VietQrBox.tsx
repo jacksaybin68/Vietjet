@@ -234,15 +234,9 @@ export default function VietQrBox({
         <div className="p-4 sm:p-5 bg-gradient-to-r from-[#005BAA] via-[#004B8D] to-[#ED1C24] text-white shadow-md">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              {/* White pill with VietQR + NAPAS Logo */}
-              <div className="h-11 sm:h-12 px-3 bg-white rounded-xl flex items-center justify-center gap-2 shadow-md shrink-0">
-                <VietQrLogo className="h-5 sm:h-6 w-auto" />
-                <span className="text-gray-300">|</span>
-                <NapasLogo className="h-4 sm:h-5 w-auto" />
-              </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-amber-300 font-koho">
+                  <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-amber-300 font-koho">
                     CỔNG THANH TOÁN VIETQR • NAPAS 247
                   </span>
                   <span className="hidden sm:inline-block px-2 py-0.2 text-[9px] font-black uppercase tracking-wide bg-white/20 rounded-full text-white">
@@ -301,6 +295,13 @@ export default function VietQrBox({
               </span>
             </div>
           </div>
+        </div>
+
+        {/* Logo VietQR + NAPAS 247 — đặt dưới mã quét */}
+        <div className="mt-4 flex items-center justify-center gap-3 rounded-xl border border-[#005BAA]/15 bg-white px-4 py-2.5 shadow-sm">
+          <VietQrLogo className="h-6 sm:h-7 w-auto" />
+          <span className="h-4 w-px bg-[#005BAA]/20" />
+          <NapasLogo className="h-5 sm:h-6 w-auto" />
         </div>
 
         {/* Thông tin thanh toán chi tiết (STK Admin, Tên, Số tiền, Nội dung) */}

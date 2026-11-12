@@ -42,7 +42,9 @@ export function countPassengerTypes(
 export interface Passenger {
   /** Absent only on objects built before passenger types existed; read as 'adult'. */
   type?: PassengerType;
+  /** Họ theo giấy tờ tùy thân. */
   name: string;
+  /** Tên đệm và tên theo giấy tờ tùy thân. */
   firstName?: string;
   dob: string;
   idNumber: string;
@@ -52,6 +54,21 @@ export interface Passenger {
   email: string;
   residence: string;
   skyJoyMemberId: string;
+}
+
+/**
+ * Tên đầy đủ của hành khách: họ + tên đệm & tên, viết liền bằng một dấu cách.
+ *
+ * Form đặt vé tách hai ô theo giấy tờ tùy thân ("Họ" và "Tên đệm & tên"), còn vé,
+ * thẻ lên máy bay, check-in và email đều cần đúng một chuỗi tên. Gửi riêng phần
+ * họ làm vé in ra một tên cụt ("Hoàng "), lệch với giấy tờ và không khớp với tên
+ * mà quầy check-in đối chiếu.
+ */
+export function fullPassengerName(p: Pick<Passenger, 'name' | 'firstName'>): string {
+  return [p.name, p.firstName]
+    .map((part) => (part ?? '').trim())
+    .filter(Boolean)
+    .join(' ');
 }
 
 export interface BookingConsents {

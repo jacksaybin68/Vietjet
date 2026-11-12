@@ -13,5 +13,6 @@ export { default as TaxiServiceDrawer } from './TaxiServiceDrawer';
 export { default as SeatSelectionStep } from './SeatSelectionStep';
 export { default as MyFlightsStats } from './MyFlightsStats';
 export { default as MyFlightsTimeline } from './MyFlightsTimeline';
+export { default as ItineraryModal } from './ItineraryModal';
 export { generateSeatsForFlight, SeatMap } from './SeatMap';
 export type { Seat } from './SeatMap';

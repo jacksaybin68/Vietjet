@@ -390,16 +390,22 @@ export default function PassengerInfoStep({
                         </span>
                         <input
                           id={`passenger-${i}-firstName`}
+                          name={`passenger-${i}-firstName`}
                           type="text"
+                          aria-label="Tên đệm & tên"
+                          placeholder="Tên đệm và tên theo giấy tờ tuỳ thân"
                           value={p.firstName || ''}
                           onChange={(e) => updatePassenger(i, 'firstName', e.target.value)}
-                          className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-primary"
+                          className="w-full border-0 border-b-2 border-primary bg-transparent py-2 sm:py-1 text-sm sm:text-xs text-gray-900 focus:outline-none focus:border-primary placeholder:text-gray-400 placeholder:italic placeholder:font-normal placeholder:text-xs sm:placeholder:text-2xs"
+                          required
                         />
                       </div>
                     </div>
-                    <div className="mt-1.5 text-2xs text-blue-600 flex items-center gap-1 cursor-pointer hover:underline">
+                    <div className="mt-1.5 text-2xs text-blue-600 flex items-center gap-1">
                       <span className="font-bold">ℹ</span>
-                      <span>Hướng dẫn nhập họ, tên đệm và tên.</span>
+                      <span>
+                        Vé in tên đầy đủ theo thứ tự: họ, tên đệm, tên — ví dụ “Nguyễn Văn An”.
+                      </span>
                     </div>
                   </div>
 

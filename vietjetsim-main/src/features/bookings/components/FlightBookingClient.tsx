@@ -19,6 +19,7 @@ import { createBooking } from '@/features/bookings/services';
 import { ApiRequestError } from '@/shared/services';
 import {
   getBookingTotals,
+  fullPassengerName,
   TRAVEL_SAFE_INSURANCE_PRICE,
   type BookingConsents,
   type Flight,
@@ -405,10 +406,17 @@ function FlightBookingClientInner({
       if (baggageFee > 0) ancillaries.push('baggage');
       if (booking.hasInsurance) ancillaries.push('insurance');
 
+      // Form đặt vé tách "Họ" và "Tên đệm & tên" thành hai ô; vé, check-in và
+      // email cần một chuỗi tên đầy đủ, nên ghép lại trước khi gửi.
+      const passengers = booking.passengers.map((passenger) => ({
+        ...passenger,
+        name: fullPassengerName(passenger),
+      }));
+
       const data = await createBooking({
         flight_id: flightId,
         total_price: finalTotal,
-        passengers: booking.passengers,
+        passengers,
         seats,
         fareClass: selectedFlight.fareClass ?? 'eco',
         ancillaries,
@@ -436,7 +444,7 @@ function FlightBookingClientInner({
           returnArriveTime: returnFlight?.arriveTime,
           date: selectedFlight.departDate,
           returnDate: returnFlight?.departDate,
-          passengers: booking.passengers.map((passenger, index) => ({
+          passengers: passengers.map((passenger, index) => ({
             name: passenger.name,
             seat: seats[index],
             returnSeat: booking.returnSeats?.[index],
@@ -483,7 +491,8 @@ function FlightBookingClientInner({
     router.replace(`/tim-ve?${next.toString()}`, { scroll: false });
   };
 
-  const leadPassengerName = booking.passengers[0]?.name?.trim() || 'LONG CHIN';
+  const leadPassenger = booking.passengers[0];
+  const leadPassengerName = (leadPassenger ? fullPassengerName(leadPassenger) : '') || 'LONG CHIN';
 
   return (
     <div className="font-body">
