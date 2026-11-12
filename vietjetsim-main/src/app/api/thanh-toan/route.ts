@@ -355,6 +355,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    if (!toEmail && Array.isArray(booking.passengers) && booking.passengers.length > 0) {
+      const firstPass = booking.passengers[0] as { email?: string; name?: string };
+      if (firstPass?.email) toEmail = firstPass.email;
+      if (!recipientName && firstPass?.name) recipientName = firstPass.name;
+    }
+
     if (initialStatus === 'completed') {
       // Tự động gửi email hoá đơn thanh toán & vé điện tử cho khách hàng
       await sendAutomaticPaymentInvoiceEmail(booking.id, {
