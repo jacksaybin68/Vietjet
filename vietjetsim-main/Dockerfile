@@ -44,3 +44,4 @@ USER nextjs
 EXPOSE 4028
 
 CMD ["npm", "start", "--", "-p", "4028"]
+

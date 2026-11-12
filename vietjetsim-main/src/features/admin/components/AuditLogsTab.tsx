@@ -149,6 +149,73 @@ export default function AuditLogsTab({ onToast }: { onToast?: ToastAPI }) {
         }
       />
 
+      {/* Security & Threat Telemetry Monitor */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0">
+            <Icon name="ShieldCheckIcon" size={22} />
+          </div>
+          <div>
+            <div className="text-2xs text-slate-400 font-bold uppercase tracking-wider">
+              Webhook VietQR
+            </div>
+            <div className="text-sm font-black text-white flex items-center gap-1.5 mt-0.5">
+              <span>Bảo vệ Anti-Replay</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            </div>
+            <div className="text-3xs text-emerald-400 font-medium">HMAC-SHA256 • TTL 24h</div>
+          </div>
+        </div>
+
+        <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center shrink-0">
+            <Icon name="ServerIcon" size={22} />
+          </div>
+          <div>
+            <div className="text-2xs text-slate-400 font-bold uppercase tracking-wider">
+              Cơ sở dữ liệu Neon
+            </div>
+            <div className="text-sm font-black text-white flex items-center gap-1.5 mt-0.5">
+              <span>Resilient SQL</span>
+              <span className="w-2 h-2 rounded-full bg-blue-400" />
+            </div>
+            <div className="text-3xs text-blue-400 font-medium">Auto Mock Offline Fallback</div>
+          </div>
+        </div>
+
+        <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0">
+            <Icon name="BoltIcon" size={22} />
+          </div>
+          <div>
+            <div className="text-2xs text-slate-400 font-bold uppercase tracking-wider">
+              Kiểm soát lưu lượng
+            </div>
+            <div className="text-sm font-black text-white flex items-center gap-1.5 mt-0.5">
+              <span>Rate Limiting</span>
+              <span className="w-2 h-2 rounded-full bg-amber-400" />
+            </div>
+            <div className="text-3xs text-amber-400 font-medium">120/m Seats • 30/m Booking</div>
+          </div>
+        </div>
+
+        <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-purple-500/15 text-purple-400 flex items-center justify-center shrink-0">
+            <Icon name="RadioIcon" size={22} />
+          </div>
+          <div>
+            <div className="text-2xs text-slate-400 font-bold uppercase tracking-wider">
+              Realtime SSE Hub
+            </div>
+            <div className="text-sm font-black text-white flex items-center gap-1.5 mt-0.5">
+              <span>Active Streams</span>
+              <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+            </div>
+            <div className="text-3xs text-purple-400 font-medium">Ghế ngồi 5s • Chuyến bay 10s</div>
+          </div>
+        </div>
+      </div>
+
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px]">
