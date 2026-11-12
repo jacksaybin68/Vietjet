@@ -35,6 +35,103 @@ export function resolveVietQrWebhookSecret(env: EnvLike = process.env): string |
   return null;
 }
 
+/** Maximum clock drift tolerance for webhook requests: 5 minutes (Anti-Replay Attack) */
+export const WEBHOOK_TIMESTAMP_TOLERANCE_MS = 5 * 60 * 1000;
+
+/**
+ * Validate webhook timestamp to prevent replay attacks.
+ * Rejects requests older than maxToleranceMs (default 5 minutes) or too far in the future.
+ */
+export function verifyWebhookTimestamp(
+  headers: Headers,
+  bodyTimestamp?: unknown,
+  maxToleranceMs = WEBHOOK_TIMESTAMP_TOLERANCE_MS,
+  now = Date.now()
+): { ok: true; timestamp: number } | { ok: false; status: 400 | 401; message: string } {
+  const headerTs =
+    readHeader(headers, 'x-vietqr-timestamp') ||
+    readHeader(headers, 'x-timestamp') ||
+    readHeader(headers, 'x-request-timestamp');
+
+  const rawTs =
+    headerTs ||
+    (typeof bodyTimestamp === 'string' || typeof bodyTimestamp === 'number'
+      ? String(bodyTimestamp)
+      : '');
+
+  if (!rawTs) {
+    // If no timestamp is provided, return server time (opt-in header for backward compatibility)
+    return { ok: true, timestamp: now };
+  }
+
+  let tsMs = Number(rawTs);
+  if (isNaN(tsMs)) {
+    tsMs = new Date(rawTs).getTime();
+  } else if (tsMs < 10_000_000_000) {
+    // Unix epoch in seconds -> convert to ms
+    tsMs = tsMs * 1000;
+  }
+
+  if (!Number.isFinite(tsMs) || tsMs <= 0) {
+    return { ok: false, status: 400, message: 'Timestamp webhook không hợp lệ' };
+  }
+
+  const drift = Math.abs(now - tsMs);
+  if (drift > maxToleranceMs) {
+    return {
+      ok: false,
+      status: 401,
+      message: `Webhook timestamp quá cũ hoặc không hợp lệ (lệch ${Math.round(drift / 1000)}s > tối đa ${Math.round(maxToleranceMs / 1000)}s)`,
+    };
+  }
+
+  return { ok: true, timestamp: tsMs };
+}
+
+// ─── Idempotency Cache (In-Memory Anti-Replay Store) ──────────────────────────
+
+export interface IdempotentWebhookRecord {
+  bookingId: string;
+  bookingCode?: string;
+  amount?: number;
+  processedAt: number;
+  response: unknown;
+}
+
+const IDEMPOTENT_TRANSACTION_CACHE = new Map<string, IdempotentWebhookRecord>();
+const IDEMPOTENCY_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+export function getIdempotentWebhook(transactionId: string): IdempotentWebhookRecord | null {
+  if (!transactionId) return null;
+  const entry = IDEMPOTENT_TRANSACTION_CACHE.get(transactionId);
+  if (!entry) return null;
+  if (Date.now() - entry.processedAt > IDEMPOTENCY_TTL_MS) {
+    IDEMPOTENT_TRANSACTION_CACHE.delete(transactionId);
+    return null;
+  }
+  return entry;
+}
+
+export function setIdempotentWebhook(
+  transactionId: string,
+  record: Omit<IdempotentWebhookRecord, 'processedAt'>
+): void {
+  if (!transactionId) return;
+  // Prevent memory leaks: prune oldest entries when exceeding 5,000 transactions
+  if (IDEMPOTENT_TRANSACTION_CACHE.size > 5000) {
+    const oldest = Array.from(IDEMPOTENT_TRANSACTION_CACHE.keys()).slice(0, 1000);
+    for (const key of oldest) IDEMPOTENT_TRANSACTION_CACHE.delete(key);
+  }
+  IDEMPOTENT_TRANSACTION_CACHE.set(transactionId, {
+    ...record,
+    processedAt: Date.now(),
+  });
+}
+
+export function clearIdempotentWebhookCache(): void {
+  IDEMPOTENT_TRANSACTION_CACHE.clear();
+}
+
 export type WebhookAuthResult =
   | { ok: true; mode: 'secret' | 'signature' }
   | { ok: false; status: 401 | 503; message: string };

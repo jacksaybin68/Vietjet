@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { confirmVietQrPayment } from '@/lib/db';
 import { sendAutomaticPaymentInvoiceEmail } from '@/lib/payment-invoice';
 import { getApiErrorMessage } from '@/shared/services';
-import { parseVietQrWebhookPayload, verifyVietQrWebhookAuth } from '@/lib/vietqr-webhook';
+import { rateLimit } from '@/lib/rate-limit';
+import {
+  parseVietQrWebhookPayload,
+  verifyVietQrWebhookAuth,
+  verifyWebhookTimestamp,
+  getIdempotentWebhook,
+  setIdempotentWebhook,
+} from '@/lib/vietqr-webhook';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -19,13 +26,20 @@ const MAX_BODY_BYTES = 16 * 1024;
  * (`VIETQR_WEBHOOK_SECRET`) or an HMAC-SHA256 signature of the raw body —
  * never a session, because the caller is a gateway rather than a browser.
  *
- * The route is idempotent: replaying the same notification returns
- * `alreadyPaid: true` and does not write a second payment row. The public
- * prefix `/api/thanh-toan` already classifies it as a public API route in
- * `route-access.ts`; access is enforced here.
+ * Security:
+ *   - Rate limited to 60 requests/min to mitigate DDoS/brute force.
+ *   - Timing-safe HMAC-SHA256 / Shared Secret auth.
+ *   - Timestamp drift verification (5-minute tolerance) against replay attacks.
+ *   - Idempotent transaction cache: repeated transactionIds return cached success
+ *     without double-processing, duplicate rows, or duplicate email notifications.
  */
 export async function POST(request: NextRequest) {
   try {
+    // 1. IP Rate Limiting
+    const rateLimitResponse = rateLimit(request, { windowMs: 60_000, maxRequests: 60 });
+    if (rateLimitResponse) return rateLimitResponse;
+
+    // 2. Body size guard
     const declaredLength = Number(request.headers.get('content-length') || 0);
     if (declaredLength > MAX_BODY_BYTES) {
       return NextResponse.json(
@@ -42,6 +56,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 3. Signature & Secret Auth
     const auth = verifyVietQrWebhookAuth(request.headers, rawBody);
     if (!auth.ok) {
       return NextResponse.json(
@@ -50,6 +65,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 4. JSON Body parsing
     let body: unknown;
     try {
       body = rawBody ? JSON.parse(rawBody) : null;
@@ -60,11 +76,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 5. Timestamp Freshness Verification (Anti-Replay)
+    const timestampCheck = verifyWebhookTimestamp(
+      request.headers,
+      body && typeof body === 'object' ? (body as Record<string, unknown>).timestamp : undefined
+    );
+    if (!timestampCheck.ok) {
+      return NextResponse.json(
+        { error: 'Unauthorized', message: timestampCheck.message },
+        { status: timestampCheck.status }
+      );
+    }
+
+    // 6. Payload structure parsing
     const parsed = parseVietQrWebhookPayload(body);
     if (!parsed.ok) {
       return NextResponse.json({ error: 'Bad Request', message: parsed.message }, { status: 400 });
     }
 
+    // 7. Check In-Memory Idempotency Cache (Fast replay rejection)
+    if (parsed.payload.transactionId) {
+      const cached = getIdempotentWebhook(parsed.payload.transactionId);
+      if (cached) {
+        return NextResponse.json({
+          ...(cached.response as Record<string, unknown>),
+          idempotentReplay: true,
+          alreadyPaid: true,
+        });
+      }
+    }
+
+    // 8. Confirm payment in DB
     const result = await confirmVietQrPayment(parsed.payload);
     if (!result.ok) {
       if (result.reason === 'not_found') {
@@ -94,9 +136,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!result.alreadyPaid) {
-      // Same best-effort invoice/ticket email the admin confirmation and the
-      // real payment route send. A mail failure must not turn a settled
-      // payment into a 5xx the gateway would retry forever.
+      // Best-effort invoice/ticket email
       void sendAutomaticPaymentInvoiceEmail(result.booking.id, {
         paymentMethod: 'vietqr',
       }).catch((error) => {
@@ -104,7 +144,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({
+    const responseData = {
       success: true,
       simulated: true,
       alreadyPaid: result.alreadyPaid,
@@ -123,7 +163,19 @@ export async function POST(request: NextRequest) {
             amount: result.payment.amount,
           }
         : null,
-    });
+    };
+
+    // Cache successful transaction to prevent replay
+    if (parsed.payload.transactionId) {
+      setIdempotentWebhook(parsed.payload.transactionId, {
+        bookingId: result.booking.id,
+        bookingCode: result.booking.booking_code ?? undefined,
+        amount: parsed.payload.amount,
+        response: responseData,
+      });
+    }
+
+    return NextResponse.json(responseData);
   } catch (error) {
     console.error('VietQR webhook error:', error);
     return NextResponse.json(

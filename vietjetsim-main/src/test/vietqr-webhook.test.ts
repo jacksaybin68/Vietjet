@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { NextRequest } from 'next/server';
+import { createHmac } from 'crypto';
+import { clearIdempotentWebhookCache } from '@/lib/vietqr-webhook';
 
 let bookingStatus = 'pending';
 let paymentStatus = 'pending';
@@ -229,5 +231,108 @@ describe('VietQR simulated webhook', () => {
     expect(data.success).toBe(true);
     expect(data.alreadyPaid).toBe(false);
     expect(data.payment?.status).toBe('completed');
+  });
+
+  it('should verify authentication via HMAC-SHA256 signature in x-vietqr-signature', async () => {
+    const payload = JSON.stringify({
+      bookingCode: 'VJ7788',
+      amount: 2500000,
+    });
+    const signature = createHmac('sha256', 'test-secret').update(payload).digest('hex');
+
+    const req = new NextRequest('http://localhost:4028/api/thanh-toan/webhook/vietqr', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-vietqr-signature': `sha256=${signature}`,
+      },
+      body: payload,
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.success).toBe(true);
+    expect(data.authMode).toBe('signature');
+  });
+
+  it('should reject replayed request when timestamp is older than 5 minutes', async () => {
+    const oldTimestamp = Date.now() - 6 * 60 * 1000; // 6 minutes ago
+    const req = new NextRequest('http://localhost:4028/api/thanh-toan/webhook/vietqr', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-vietqr-webhook-secret': 'test-secret',
+        'x-vietqr-timestamp': String(oldTimestamp),
+      },
+      body: JSON.stringify({
+        bookingCode: 'VJ7788',
+        amount: 2500000,
+      }),
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(401);
+    const data = await res.json();
+    expect(data.message).toContain('quá cũ');
+  });
+
+  it('should accept request when timestamp is fresh (within 5 minutes)', async () => {
+    const freshTimestamp = Date.now() - 30 * 1000; // 30s ago
+    const req = new NextRequest('http://localhost:4028/api/thanh-toan/webhook/vietqr', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-vietqr-webhook-secret': 'test-secret',
+        'x-vietqr-timestamp': String(freshTimestamp),
+      },
+      body: JSON.stringify({
+        bookingCode: 'VJ7788',
+        amount: 2500000,
+      }),
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.success).toBe(true);
+  });
+
+  it('should use idempotency cache to short-circuit repeated transactionId requests', async () => {
+    clearIdempotentWebhookCache();
+    const txnId = 'TXN-UNIQUE-999';
+
+    const req1 = new NextRequest('http://localhost:4028/api/thanh-toan/webhook/vietqr', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-vietqr-webhook-secret': 'test-secret',
+      },
+      body: JSON.stringify({
+        bookingCode: 'VJ7788',
+        amount: 2500000,
+        transactionId: txnId,
+      }),
+    });
+    const res1 = await POST(req1);
+    expect(res1.status).toBe(200);
+    const data1 = await res1.json();
+    expect(data1.alreadyPaid).toBe(false);
+
+    // Second request with same transactionId
+    const req2 = new NextRequest('http://localhost:4028/api/thanh-toan/webhook/vietqr', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-vietqr-webhook-secret': 'test-secret',
+      },
+      body: JSON.stringify({
+        bookingCode: 'VJ7788',
+        amount: 2500000,
+        transactionId: txnId,
+      }),
+    });
+    const res2 = await POST(req2);
+    expect(res2.status).toBe(200);
+    const data2 = await res2.json();
+    expect(data2.idempotentReplay).toBe(true);
+    expect(data2.alreadyPaid).toBe(true);
   });
 });

@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { Icon } from '@/shared/components/ui';
+import React, { useState } from 'react';
 import { getAirportCity } from '@/features/flights';
 import { resolveAircraft } from '@/features/flights/services';
 

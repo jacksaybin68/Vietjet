@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Flight } from '@/features/bookings/types/booking-flow';
 import { getSeatCharge } from '@/features/bookings/pricing';
 import { RiCloseLine } from 'react-icons/ri';
 import Image from 'next/image';
+import { useSeatMapSSE } from '@/hooks/useSeatMapSSE';
+import { canSelectSeat, canDeselectSeat } from '@/features/bookings/seat-adjacency';
 
 interface SeatSelectionDrawerProps {
   isOpen: boolean;
@@ -21,26 +23,7 @@ interface SeatSelectionDrawerProps {
 const COLS_LEFT = ['A', 'B', 'C'] as const;
 const COLS_RIGHT = ['D', 'E', 'F'] as const;
 const TOTAL_ROWS = 22;
-
-const OCCUPIED_SEATS = new Set([
-  '1A',
-  '1C',
-  '2B',
-  '4A',
-  '4B',
-  '7C',
-  '8D',
-  '9E',
-  '10F',
-  '11A',
-  '12B',
-  '14D',
-  '15F',
-  '17B',
-  '18E',
-  '20C',
-  '21A',
-]);
+const HOLD_TIMEOUT_SECONDS = 10 * 60;
 
 export default function SeatSelectionDrawer({
   isOpen,
@@ -56,6 +39,149 @@ export default function SeatSelectionDrawer({
   const [activeLeg, setActiveLeg] = useState<'outbound' | 'inbound'>('outbound');
   const [outboundSeats, setOutboundSeats] = useState<string[]>(initialSeats);
   const [inboundSeats, setInboundSeats] = useState<string[]>(initialReturnSeats);
+  const [lockedSeats, setLockedSeats] = useState<Set<string>>(new Set());
+  const [holdSecondsLeft, setHoldSecondsLeft] = useState(HOLD_TIMEOUT_SECONDS);
+  const [isLocking, setIsLocking] = useState(false);
+  const sessionIdRef = useRef<string>('');
+
+  // Get or create session ID for seat locking
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let sid = sessionStorage.getItem('vietjet_seat_session');
+    if (!sid) {
+      sid = `seat_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+      sessionStorage.setItem('vietjet_seat_session', sid);
+    }
+    sessionIdRef.current = sid;
+  }, []);
+
+  // SSE for real-time seat data
+  const currentFlightId = activeLeg === 'outbound' ? flight.id : (returnFlight?.id ?? flight.id);
+  const { data: seatMapData } = useSeatMapSSE(currentFlightId);
+
+  // Merge SSE data: occupied from DB + locked from SSE
+  const sseOccupied = useMemo(() => {
+    const set = new Set<string>();
+    if (seatMapData?.occupied) {
+      seatMapData.occupied.forEach((s) => set.add(s));
+    }
+    return set;
+  }, [seatMapData]);
+
+  const sseLocked = useMemo(() => {
+    const set = new Set<string>();
+    if (seatMapData?.locked) {
+      seatMapData.locked.forEach((l) => set.add(l.seatId));
+    }
+    return set;
+  }, [seatMapData]);
+
+  // Combined occupied set (SSE + locally locked)
+  const occupiedSeats = useMemo(() => {
+    const set = new Set(sseOccupied);
+    lockedSeats.forEach((s) => set.add(s));
+    return set;
+  }, [sseOccupied, lockedSeats]);
+
+  // Hold timer: starts when first seat is selected
+  useEffect(() => {
+    const hasSelection = outboundSeats.length > 0 || inboundSeats.length > 0;
+    if (!hasSelection || !isOpen) {
+      setHoldSecondsLeft(HOLD_TIMEOUT_SECONDS);
+      return;
+    }
+    const timer = setInterval(() => {
+      setHoldSecondsLeft((prev) => {
+        if (prev <= 1) {
+          // Time expired: release locks and clear selection
+          releaseAllLocks();
+          setOutboundSeats([]);
+          setInboundSeats([]);
+          return HOLD_TIMEOUT_SECONDS;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [outboundSeats, inboundSeats, isOpen]);
+
+  // Release all locks on unmount
+  useEffect(() => {
+    return () => {
+      if (lockedSeats.size > 0) {
+        releaseAllLocks();
+      }
+    };
+  }, []);
+
+  const releaseAllLocks = useCallback(async () => {
+    if (lockedSeats.size === 0) return;
+    const seatsToRelease = Array.from(lockedSeats);
+    try {
+      await fetch('/api/ghe/khoa', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          flightId: currentFlightId,
+          seatIds: seatsToRelease,
+          sessionId: sessionIdRef.current,
+        }),
+        keepalive: true,
+      });
+    } catch {
+      // silent
+    }
+    setLockedSeats(new Set());
+  }, [lockedSeats, currentFlightId]);
+
+  const lockSeat = useCallback(
+    async (seatId: string) => {
+      setIsLocking(true);
+      try {
+        const res = await fetch('/api/ghe/khoa', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            flightId: currentFlightId,
+            seatIds: [seatId],
+            sessionId: sessionIdRef.current,
+          }),
+        });
+        if (res.ok) {
+          setLockedSeats((prev) => new Set(prev).add(seatId));
+        }
+      } catch {
+        // silent
+      } finally {
+        setIsLocking(false);
+      }
+    },
+    [currentFlightId]
+  );
+
+  const unlockSeat = useCallback(
+    async (seatId: string) => {
+      try {
+        await fetch('/api/ghe/khoa', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            flightId: currentFlightId,
+            seatIds: [seatId],
+            sessionId: sessionIdRef.current,
+          }),
+        });
+      } catch {
+        // silent
+      }
+      setLockedSeats((prev) => {
+        const next = new Set(prev);
+        next.delete(seatId);
+        return next;
+      });
+    },
+    [currentFlightId]
+  );
 
   useEffect(() => {
     setOutboundSeats(initialSeats);
@@ -68,10 +194,15 @@ export default function SeatSelectionDrawer({
   const setCurrentSeats = activeLeg === 'outbound' ? setOutboundSeats : setInboundSeats;
 
   const handleToggleSeat = (seatId: string) => {
-    if (OCCUPIED_SEATS.has(seatId)) return;
+    if (occupiedSeats.has(seatId)) return;
+
     if (currentSeats.includes(seatId)) {
+      // Deselect: unlock seat
+      unlockSeat(seatId);
       setCurrentSeats(currentSeats.filter((s) => s !== seatId));
     } else {
+      // Select: lock seat
+      lockSeat(seatId);
       setCurrentSeats([seatId]); // 1 passenger selects 1 seat
     }
   };
@@ -88,9 +219,18 @@ export default function SeatSelectionDrawer({
   };
 
   const handleSkip = () => {
+    releaseAllLocks();
     onConfirmSeats([], 0, []);
     onClose();
   };
+
+  const formatHoldTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const hasSelection = outboundSeats.length > 0 || inboundSeats.length > 0;
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden flex justify-end">
@@ -190,6 +330,25 @@ export default function SeatSelectionDrawer({
             </p>
           </div>
 
+          {/* Hold Timer */}
+          {hasSelection && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5 mb-3 flex items-center justify-between">
+              <span className="text-2xs font-bold text-amber-800">
+                Ghế được giữ trong:{' '}
+                <span className="font-black text-amber-900">{formatHoldTime(holdSecondsLeft)}</span>
+              </span>
+              <span className="text-3xs text-amber-600">Giữ ghế tối đa 10 phút</span>
+            </div>
+          )}
+
+          {/* SSE Live indicator */}
+          <div className="flex items-center gap-1.5 mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-3xs font-medium text-emerald-700">
+              Cập nhật chỗ ngồi thời gian thực
+            </span>
+          </div>
+
           {/* Seat Legend */}
           <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm mb-4">
             <div className="grid grid-cols-2 gap-y-2 gap-x-3 text-xs2 font-medium text-gray-700">
@@ -217,11 +376,17 @@ export default function SeatSelectionDrawer({
                 <span className="w-3.5 h-3.5 rounded bg-orange-600 shrink-0 ring-2 ring-orange-600/40" />
                 <span className="font-bold text-orange-600">Ghế đang chọn</span>
               </div>
-              <div className="flex items-center gap-2 col-span-2">
+              <div className="flex items-center gap-2">
                 <span className="w-3.5 h-3.5 rounded bg-gray-200 text-gray-500 flex items-center justify-center text-3xs font-bold shrink-0">
                   ✕
                 </span>
                 <span>Đã có người</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3.5 h-3.5 rounded bg-gray-300 text-gray-500 flex items-center justify-center text-3xs font-bold shrink-0">
+                  🔒
+                </span>
+                <span>Đang giữ</span>
               </div>
             </div>
           </div>
@@ -269,7 +434,8 @@ export default function SeatSelectionDrawer({
                       <div className="flex gap-2">
                         {COLS_LEFT.map((col) => {
                           const seatId = `${row}${col}`;
-                          const isOccupied = OCCUPIED_SEATS.has(seatId);
+                          const isOccupied = occupiedSeats.has(seatId);
+                          const isLocked = sseLocked.has(seatId) && !lockedSeats.has(seatId);
                           const isSelected = currentSeats.includes(seatId);
 
                           let bgColor = 'bg-green-500 text-white hover:opacity-90'; // standard
@@ -281,16 +447,19 @@ export default function SeatSelectionDrawer({
                           if (isSelected)
                             bgColor = 'bg-orange-600 text-white ring-2 ring-orange-300';
                           if (isOccupied) bgColor = 'bg-gray-200 text-gray-400 cursor-not-allowed';
+                          if (isLocked) bgColor = 'bg-gray-300 text-gray-500 cursor-not-allowed';
 
                           return (
                             <button
                               key={seatId}
-                              disabled={isOccupied}
+                              disabled={isOccupied || isLocked || isLocking}
                               onClick={() => handleToggleSeat(seatId)}
                               className={`w-7 h-7 rounded text-2xs font-black flex items-center justify-center transition-all ${bgColor}`}
-                              title={`Ghế ${seatId} - ${getSeatCharge(seatId).toLocaleString('vi-VN')}₫`}
+                              title={`Ghế ${seatId} - ${getSeatCharge(seatId).toLocaleString('vi-VN')}₫${
+                                isLocked ? ' (Đang giữ bởi người khác)' : ''
+                              }`}
                             >
-                              {isOccupied ? '✕' : seatId}
+                              {isOccupied ? '✕' : isLocked ? '🔒' : seatId}
                             </button>
                           );
                         })}
@@ -305,7 +474,8 @@ export default function SeatSelectionDrawer({
                       <div className="flex gap-2">
                         {COLS_RIGHT.map((col) => {
                           const seatId = `${row}${col}`;
-                          const isOccupied = OCCUPIED_SEATS.has(seatId);
+                          const isOccupied = occupiedSeats.has(seatId);
+                          const isLocked = sseLocked.has(seatId) && !lockedSeats.has(seatId);
                           const isSelected = currentSeats.includes(seatId);
 
                           let bgColor = 'bg-green-500 text-white hover:opacity-90';
@@ -315,16 +485,19 @@ export default function SeatSelectionDrawer({
                           if (isSelected)
                             bgColor = 'bg-orange-600 text-white ring-2 ring-orange-300';
                           if (isOccupied) bgColor = 'bg-gray-200 text-gray-400 cursor-not-allowed';
+                          if (isLocked) bgColor = 'bg-gray-300 text-gray-500 cursor-not-allowed';
 
                           return (
                             <button
                               key={seatId}
-                              disabled={isOccupied}
+                              disabled={isOccupied || isLocked || isLocking}
                               onClick={() => handleToggleSeat(seatId)}
                               className={`w-7 h-7 rounded text-2xs font-black flex items-center justify-center transition-all ${bgColor}`}
-                              title={`Ghế ${seatId} - ${getSeatCharge(seatId).toLocaleString('vi-VN')}₫`}
+                              title={`Ghế ${seatId} - ${getSeatCharge(seatId).toLocaleString('vi-VN')}₫${
+                                isLocked ? ' (Đang giữ bởi người khác)' : ''
+                              }`}
                             >
-                              {isOccupied ? '✕' : seatId}
+                              {isOccupied ? '✕' : isLocked ? '🔒' : seatId}
                             </button>
                           );
                         })}

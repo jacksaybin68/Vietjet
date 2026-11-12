@@ -203,6 +203,7 @@ export default function VietQrBox({
     fallbackAddInfo,
     fallbackPnr,
     generateQrFromPayload,
+    methodLabel,
   ]);
 
   // Polling tự thăm dò giao dịch (giới hạn ~15 phút với nhịp 5s).

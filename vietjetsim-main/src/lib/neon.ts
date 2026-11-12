@@ -13,18 +13,87 @@ import { SYSTEM_ROLES } from '@/lib/rbac';
 // Check if we have a real database connection
 const hasRealDb = !!process.env.DATABASE_URL;
 
+function isNetworkOfflineError(err: unknown): boolean {
+  if (!err) return false;
+  const msg = err instanceof Error ? err.message : String(err);
+  const code = (err as { code?: string })?.code;
+  return (
+    msg.includes('fetch failed') ||
+    msg.includes('network') ||
+    msg.includes('ENOTFOUND') ||
+    msg.includes('ECONNREFUSED') ||
+    msg.includes('ETIMEDOUT') ||
+    msg.includes('socket hang up') ||
+    code === 'ENOTFOUND' ||
+    code === 'ECONNREFUSED' ||
+    code === 'ETIMEDOUT'
+  );
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function createResilientSql(rawNeon: any, mock: any) {
+  const resilientFn = async (strings: TemplateStringsArray, ...values: unknown[]) => {
+    if (!hasRealDb || !rawNeon) {
+      return mock(strings, ...values);
+    }
+    try {
+      return await rawNeon(strings, ...values);
+    } catch (err) {
+      if (isNetworkOfflineError(err) && process.env.NODE_ENV !== 'production') {
+        console.warn(
+          '⚠️ [NEON NETWORK OFFLINE] Mất kết nối tới Neon Serverless DB (' +
+            (err instanceof Error ? err.message : String(err)) +
+            '). Tự động chuyển sang fallback mock in-memory thông minh.'
+        );
+        return mock(strings, ...values);
+      }
+      throw err;
+    }
+  };
+
+  resilientFn.query = async (text: string, values: unknown[] = []) => {
+    if (!hasRealDb || !rawNeon) return mock.query(text, values);
+    try {
+      if (rawNeon.query) return await rawNeon.query(text, values);
+      return await rawNeon(text as any, ...values);
+    } catch (err) {
+      if (isNetworkOfflineError(err) && process.env.NODE_ENV !== 'production') {
+        console.warn('⚠️ [NEON QUERY OFFLINE] Fallback mock in-memory.');
+        return mock.query(text, values);
+      }
+      throw err;
+    }
+  };
+
+  resilientFn.transaction = async (queries: any) => {
+    if (!hasRealDb || !rawNeon) return mock.transaction(queries);
+    try {
+      if (rawNeon.transaction) return await rawNeon.transaction(queries);
+      return await mock.transaction(queries);
+    } catch (err) {
+      if (isNetworkOfflineError(err) && process.env.NODE_ENV !== 'production') {
+        console.warn('⚠️ [NEON TRANSACTION OFFLINE] Fallback mock transaction in-memory.');
+        return mock.transaction(queries);
+      }
+      throw err;
+    }
+  };
+
+  return resilientFn;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let sqlFn: any;
 
 if (hasRealDb) {
   // Real Neon connection
-  sqlFn = neon(process.env.DATABASE_URL!);
+  const rawNeon = neon(process.env.DATABASE_URL!);
   // Local dev/database-behind-proxy setups (NEON_FETCH_ENDPOINT in .env.local):
-  // the driver otherwise derives `https://<host>/sql` from the connection
-  // string, which neither resolves nor speaks plain HTTP for local hosts.
   if (process.env.NEON_FETCH_ENDPOINT) {
     neonConfig.fetchEndpoint = process.env.NEON_FETCH_ENDPOINT;
   }
+  const mock = createMockSql();
+  sqlFn = createResilientSql(rawNeon, mock);
 } else if (process.env.NODE_ENV === 'production') {
   // Never fall back to the mock database in production: that would silently
   // serve in-memory data instead of the real store.
@@ -32,7 +101,8 @@ if (hasRealDb) {
 } else {
   // Mock implementation for development without DB
   console.warn('⚠️  DATABASE_URL not set. Using mock database. Do not use in production.');
-  sqlFn = createMockSql();
+  const mock = createMockSql();
+  sqlFn = createResilientSql(null, mock);
 }
 
 export { sqlFn as sql };
@@ -410,6 +480,125 @@ function createMockSql() {
     return null;
   }
 
+  // ─── Flights & Seats & System Mock Store ─────────────────────────────────────
+  const mockFlights: MockResult[] = [
+    {
+      id: '8865cc0c-d4a6-4a1e-8c4d-165e627a726e',
+      flight_no: 'VJ121',
+      from_code: 'HAN',
+      to_code: 'SGN',
+      depart_time: new Date(Date.now() + 86400000).toISOString(),
+      arrive_time: new Date(Date.now() + 86400000 + 7200000).toISOString(),
+      price: 899000,
+      economy_price: 899000,
+      business_price: 2490000,
+      status: 'active',
+      aircraft: 'Airbus A321',
+      available: 150,
+      class: 'economy',
+      created_at: nowIso(),
+      updated_at: nowIso(),
+    },
+    {
+      id: '9fffaa9c-928f-4f52-b865-bd3833eee833',
+      flight_no: 'VJ141',
+      from_code: 'HAN',
+      to_code: 'SGN',
+      depart_time: new Date(Date.now() + 172800000).toISOString(),
+      arrive_time: new Date(Date.now() + 172800000 + 7200000).toISOString(),
+      price: 1199000,
+      economy_price: 1199000,
+      business_price: 2990000,
+      status: 'active',
+      aircraft: 'Airbus A321',
+      available: 180,
+      class: 'economy',
+      created_at: nowIso(),
+      updated_at: nowIso(),
+    },
+  ];
+
+  const mockSeatLocks: MockResult[] = [];
+
+  const runFlightAndSeatQuery = (query: string, values: unknown[]): MockResult[] | null => {
+    const q = query.toLowerCase();
+
+    if (q.includes('from flights')) {
+      if (q.includes('where id =')) {
+        const id = values[0];
+        const match = mockFlights.find((f) => f.id === id);
+        return match ? [match] : [];
+      }
+      if (q.includes('where upper(flight_no) =') || q.includes('where flight_no =')) {
+        const no = String(values[0] || '').toUpperCase();
+        const match = mockFlights.find((f) => String(f.flight_no).toUpperCase() === no);
+        return match ? [match] : [];
+      }
+      return mockFlights;
+    }
+
+    if (q.includes('from seat_locks')) {
+      const flightId = values[0];
+      const valid = mockSeatLocks.filter((l) => l.flight_id === flightId);
+      return valid;
+    }
+
+    if (q.includes('insert into seat_locks')) {
+      const [flightId, seatNumber, sessionId, expiresAt] = values as [
+        string,
+        string,
+        string,
+        string,
+      ];
+      const existing = mockSeatLocks.findIndex(
+        (l) => l.flight_id === flightId && l.seat_number === seatNumber
+      );
+      const row = {
+        id: nextChatId('lock'),
+        flight_id: flightId,
+        seat_number: seatNumber,
+        session_id: sessionId,
+        expires_at: expiresAt || new Date(Date.now() + 600000).toISOString(),
+        created_at: nowIso(),
+      };
+      if (existing >= 0) {
+        mockSeatLocks[existing] = row;
+      } else {
+        mockSeatLocks.push(row);
+      }
+      return [row];
+    }
+
+    if (q.includes('delete from seat_locks')) {
+      return [];
+    }
+
+    if (q.includes('from bank_accounts')) {
+      return [
+        {
+          id: 'bank-default-1',
+          admin_bank_name: 'VIB',
+          admin_bank_account_number: '002704060049968',
+          admin_bank_account_holder: 'CONG TY CP HANG KHONG VIETJET',
+          bank_bin: '970406',
+          is_active: true,
+          is_default: true,
+          transfer_note_template: 'VJ {code}',
+          created_at: nowIso(),
+        },
+      ];
+    }
+
+    if (q.includes('from system_config')) {
+      return [
+        { key: 'auto_send_invoice_email', value: 'true' },
+        { key: 'refund_feature_enabled', value: 'true' },
+      ];
+    }
+
+    return null;
+  };
+
   return Object.assign(
     async (strings: TemplateStringsArray, ...values: unknown[]) => {
       // Mirror the real Neon client, which rejects a non-template invocation:
@@ -437,6 +626,9 @@ function createMockSql() {
       const rolePermissionResult = runRolePermissionQuery(query, values);
       if (rolePermissionResult) return rolePermissionResult;
 
+      const flightSeatResult = runFlightAndSeatQuery(query, values);
+      if (flightSeatResult) return flightSeatResult;
+
       // Find matching mock data
       for (const [key, data] of Object.entries(mockData)) {
         if (query.toLowerCase().includes(key.toLowerCase().split('?')[0].trim())) {
@@ -454,6 +646,20 @@ function createMockSql() {
       query: async (text: string, values: unknown[] = []) => {
         console.info('[MOCK SQL:query]', text, values);
         return runChatQuery(text, values) ?? ([] as MockResult[]);
+      },
+      transaction: async (queries: unknown) => {
+        if (Array.isArray(queries)) {
+          const results = [];
+          for (const q of queries) {
+            if (typeof q === 'function') {
+              results.push(await q());
+            } else {
+              results.push([]);
+            }
+          }
+          return results;
+        }
+        return [];
       },
     }
   );

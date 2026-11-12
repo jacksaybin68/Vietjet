@@ -8,8 +8,6 @@ import {
   HotMealIcon,
   SeatArmchairIcon,
   SkyCareInsuranceIcon,
-  OnlineCheckinIcon,
-  SkyJoyStarIcon,
   DutyFreeBagIcon,
   AirportTaxiIcon,
   EvoucherGiftIcon,

@@ -8,7 +8,6 @@ import { Header, Footer } from '@/shared/components/navigation';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 import { apiRequest, ApiRequestError, getApiErrorMessage } from '@/shared/services';
-import { getAirportCity } from '@/features/flights';
 import ItineraryModal from '@/features/bookings/components/ItineraryModal';
 import FlightSummaryCard from '@/features/bookings/components/FlightSummaryCard';
 

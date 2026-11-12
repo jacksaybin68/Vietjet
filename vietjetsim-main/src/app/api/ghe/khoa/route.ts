@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
+import { rateLimit } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -10,8 +11,61 @@ interface LockBody {
   sessionId: string;
 }
 
+const SEAT_REGEX = /^[0-9]{1,3}[A-K]$/i;
+
+interface SeatLockRow {
+  seat_number: string;
+  session_id: string;
+  expires_at: string;
+}
+
+/**
+ * GET /api/ghe/khoa?flightId=...
+ * Returns currently active temporary seat locks for a flight
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const flightId = request.nextUrl.searchParams.get('flightId');
+    if (!flightId) {
+      return NextResponse.json({ error: 'flightId là bắt buộc' }, { status: 400 });
+    }
+
+    // Clean up expired locks first
+    try {
+      await sql`DELETE FROM seat_locks WHERE expires_at <= NOW()`;
+    } catch {
+      // Table may not exist yet or connection issue
+    }
+
+    try {
+      const rows = (await sql`
+        SELECT seat_number, session_id, expires_at
+        FROM seat_locks
+        WHERE flight_id = ${flightId} AND expires_at > NOW()
+      `) as SeatLockRow[];
+
+      return NextResponse.json({
+        flightId,
+        locked: rows.map((r) => ({
+          seatNumber: r.seat_number,
+          expiresAt: r.expires_at,
+          sessionId: r.session_id,
+        })),
+      });
+    } catch {
+      return NextResponse.json({ flightId, locked: [] });
+    }
+  } catch (err) {
+    console.error('[ghe/khoa GET] error:', err);
+    return NextResponse.json({ error: 'Lỗi server' }, { status: 500 });
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
+    const limited = rateLimit(request, { windowMs: 60_000, maxRequests: 120 });
+    if (limited) return limited;
+
     const body: LockBody = await request.json();
     const { flightId, seatIds, sessionId } = body;
 
@@ -22,9 +76,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (typeof sessionId !== 'string' || sessionId.length > 128) {
+      return NextResponse.json({ error: 'sessionId không hợp lệ' }, { status: 400 });
+    }
+
+    // Validate seat formats
+    const validSeats = seatIds
+      .map((s) => String(s).trim().toUpperCase())
+      .filter((s) => SEAT_REGEX.test(s));
+
+    if (validSeats.length === 0) {
+      return NextResponse.json({ error: 'Danh sách số ghế không hợp lệ' }, { status: 400 });
+    }
+
     const lockedUntil = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
-    for (const seatNumber of seatIds) {
+    for (const seatNumber of validSeats) {
       await sql`
         INSERT INTO seat_locks (flight_id, seat_number, session_id, expires_at)
         VALUES (
@@ -40,7 +107,7 @@ export async function POST(request: NextRequest) {
       `;
     }
 
-    return NextResponse.json({ success: true, lockedUntil });
+    return NextResponse.json({ success: true, lockedUntil, seats: validSeats });
   } catch (err) {
     console.error('[ghe/khoa POST] error:', err);
     const msg = err instanceof Error ? err.message : 'Lỗi server';
@@ -50,6 +117,9 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const limited = rateLimit(request, { windowMs: 60_000, maxRequests: 120 });
+    if (limited) return limited;
+
     const body: LockBody = await request.json();
     const { flightId, seatIds, sessionId } = body;
 
@@ -60,7 +130,11 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    for (const seatNumber of seatIds) {
+    const validSeats = seatIds
+      .map((s) => String(s).trim().toUpperCase())
+      .filter((s) => SEAT_REGEX.test(s));
+
+    for (const seatNumber of validSeats) {
       await sql`
         DELETE FROM seat_locks
         WHERE flight_id = ${flightId}

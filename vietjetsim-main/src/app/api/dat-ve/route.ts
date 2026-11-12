@@ -23,6 +23,7 @@ import {
 } from '@/features/bookings/pricing';
 import type { PassengerType } from '@/features/bookings/types/booking-flow';
 import { sendPaymentInstructionEmail } from '@/lib/mail';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function GET(request: NextRequest) {
   try {
@@ -59,6 +60,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const limited = rateLimit(request, { windowMs: 60_000, maxRequests: 30 });
+    if (limited) return limited;
+
     const { user, error, response } = await verifyAuthRequest(request);
     if (error === 'CSRF validation failed') return response!;
 

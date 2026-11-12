@@ -15,9 +15,10 @@ import { verifyAuthRequest } from '@/lib/auth';
 import { isAdminRole } from '@/lib/rbac';
 import { renderTransferNote } from '@/lib/transfer-note';
 import { validateBankTransferInput } from '@/lib/bank-transfer';
-import { sendBookingConfirmationEmail, sendPaymentInstructionEmail } from '@/lib/mail';
+import { sendPaymentInstructionEmail } from '@/lib/mail';
 import { sendAutomaticPaymentInvoiceEmail } from '@/lib/payment-invoice';
 import { skypointPointsForAmount } from '@/lib/skypoint';
+import { rateLimit } from '@/lib/rate-limit';
 
 /** Methods the payment page may submit. Anything else is rejected up front. */
 const ALLOWED_METHODS = new Set([
@@ -31,8 +32,10 @@ const ALLOWED_METHODS = new Set([
 ]);
 
 export async function POST(request: NextRequest) {
-  // Validate CSRF token
   try {
+    const limited = rateLimit(request, { windowMs: 60_000, maxRequests: 30 });
+    if (limited) return limited;
+
     const { user, error, response } = await verifyAuthRequest(request);
     if (error === 'CSRF validation failed') return response!;
 

@@ -284,6 +284,21 @@ export default function SeatSelectionStep({
     }
   }, [selected.length, holdTimer]);
 
+  const selectedRef = useRef(selected);
+  useEffect(() => {
+    selectedRef.current = selected;
+  }, [selected]);
+
+  const getSessionId = useCallback(() => {
+    if (typeof window === 'undefined') return '';
+    let sid = sessionStorage.getItem('vietjet_seat_session');
+    if (!sid) {
+      sid = 'sess_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+      sessionStorage.setItem('vietjet_seat_session', sid);
+    }
+    return sid;
+  }, []);
+
   useEffect(() => {
     if (holdTimer !== null) {
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -314,7 +329,7 @@ export default function SeatSelectionStep({
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [holdTimer]);
+  }, [holdTimer, flight.id, getSessionId]);
 
   const [exitRowCandidate, setExitRowCandidate] = useState<string | null>(null);
 
@@ -350,21 +365,6 @@ export default function SeatSelectionStep({
     const rowMatch = seat.match(/^(\d+)/);
     if (!rowMatch) return false;
     return EXIT_ROWS.has(Number(rowMatch[1]));
-  }, []);
-
-  const selectedRef = useRef(selected);
-  useEffect(() => {
-    selectedRef.current = selected;
-  }, [selected]);
-
-  const getSessionId = useCallback(() => {
-    if (typeof window === 'undefined') return '';
-    let sid = sessionStorage.getItem('vietjet_seat_session');
-    if (!sid) {
-      sid = 'sess_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
-      sessionStorage.setItem('vietjet_seat_session', sid);
-    }
-    return sid;
   }, []);
 
   const lockSeatRemote = useCallback(
