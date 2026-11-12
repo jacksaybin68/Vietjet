@@ -7,6 +7,7 @@ import {
   getFlightById,
   createUser,
   findUserByEmail,
+  getActiveBankAccounts,
   type UserRecord,
 } from '@/lib/db';
 import { sql } from '@/lib/neon';
@@ -305,12 +306,49 @@ export async function POST(request: NextRequest) {
       user?.fullName || normalizedPassengers.find((p) => p.name)?.name || 'Quý khách';
 
     if (customerEmail && !customerEmail.includes('@khach.vietjetsim.vn')) {
+      const departureFormatted = flight.depart_time
+        ? new Date(flight.depart_time).toLocaleString('vi-VN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          })
+        : undefined;
+
+      const routeStr = `${flight.from_code} → ${flight.to_code}`;
+
+      let bankName: string | undefined;
+      let accountNumber: string | undefined;
+      let accountHolder: string | undefined;
+      let bankBin: string | undefined;
+      try {
+        const banks = await getActiveBankAccounts();
+        if (banks && banks.length > 0) {
+          bankName = banks[0].bank_name;
+          accountNumber = banks[0].account_number;
+          accountHolder = banks[0].account_holder;
+          bankBin = banks[0].bank_bin || undefined;
+        }
+      } catch {}
+
       void sendPaymentInstructionEmail({
         to: customerEmail,
         fullName: customerName,
         bookingCode: booking.booking_code ?? null,
         bookingId: booking.id,
         amount: totalPrice,
+        flightNumber: flight.flight_no,
+        route: routeStr,
+        departureTime: departureFormatted,
+        passengers: normalizedPassengers.map((p, idx) => ({
+          name: p.name,
+          seat: sanitizedSeats[idx] || undefined,
+        })),
+        bankName,
+        accountNumber,
+        accountHolder,
+        bankBin,
       });
     }
 

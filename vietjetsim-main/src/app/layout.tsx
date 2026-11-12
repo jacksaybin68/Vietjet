@@ -18,35 +18,17 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:4028'),
   title: {
-    default: 'Vietjet - Đặt Vé Máy Bay',
+    default: 'Vietjet Air | Bay là thích ngay! | Website chính thức',
     template: '%s | Vietjet Air',
   },
-  description:
-    'Vietjet Air — đặt vé máy bay trực tuyến: tìm kiếm, đặt chỗ, chọn ghế và thanh toán chuyến bay.',
+  description: 'Bay cùng Vietjet với hàng ngàn ưu đãi hấp dẫn, giá vé ưu đãi',
   robots: {
     index: false,
     follow: false,
   },
   openGraph: {
-    title: 'Vietjet - Đặt Vé Máy Bay',
-    description: 'Tìm kiếm, đặt chỗ, chọn ghế và thanh toán chuyến bay Vietjet Air.',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:4028',
-    siteName: 'Vietjet Air',
-    images: [
-      {
-        url: '/logo-internal.png',
-        width: 1200,
-        height: 630,
-        alt: 'Vietjet Air giao diện đặt vé',
-      },
-    ],
-    locale: 'vi_VN',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Vietjet - Đặt Vé Máy Bay',
-    description: 'Tìm kiếm, đặt chỗ, chọn ghế và thanh toán chuyến bay Vietjet Air.',
+    title: 'Vietjet Air | Bay là thích ngay! | Website chính thức',
+    description: 'Bay cùng Vietjet với hàng ngàn ưu đãi hấp dẫn, giá vé ưu đãi',
     images: ['/logo-internal.png'],
   },
   icons: {

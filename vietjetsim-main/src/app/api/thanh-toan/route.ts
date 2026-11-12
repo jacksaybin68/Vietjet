@@ -16,7 +16,7 @@ import { verifyAuthRequest } from '@/lib/auth';
 import { isAdminRole } from '@/lib/rbac';
 import { renderTransferNote } from '@/lib/transfer-note';
 import { validateBankTransferInput } from '@/lib/bank-transfer';
-import { sendPaymentInstructionEmail } from '@/lib/mail';
+import { sendPaymentInstructionEmail, sendPaymentFailedEmail } from '@/lib/mail';
 import { sendAutomaticPaymentInvoiceEmail } from '@/lib/payment-invoice';
 import { skypointPointsForAmount, skypointValueOfPoints } from '@/lib/skypoint';
 import { rateLimit } from '@/lib/rate-limit';
@@ -367,6 +367,24 @@ export async function POST(request: NextRequest) {
     // giao dịch được đưa vào trạng thái 'pending' để admin kiểm tra tài khoản và xác nhận.
     const initialStatus = receipt_image ? 'pending' : 'completed';
 
+    // Tìm thông tin người nhận email
+    let toEmail = user?.email;
+    let recipientName = user?.fullName;
+
+    if (!toEmail && booking.user_id) {
+      const bookingUser = await findUserById(booking.user_id);
+      if (bookingUser) {
+        toEmail = bookingUser.email;
+        recipientName = bookingUser.full_name;
+      }
+    }
+
+    if (!toEmail && Array.isArray(booking.passengers) && booking.passengers.length > 0) {
+      const firstPass = booking.passengers[0] as { email?: string; name?: string };
+      if (firstPass?.email) toEmail = firstPass.email;
+      if (!recipientName && firstPass?.name) recipientName = firstPass.name;
+    }
+
     // Create payment + confirm booking atomically (single transaction)
     const paymentUserId = user?.userId || booking.user_id;
     const result = await createPaymentAndConfirmBooking({
@@ -395,26 +413,24 @@ export async function POST(request: NextRequest) {
           );
         }
       }
+
+      // Tự động gửi email thông báo thanh toán thất bại / báo lỗi cho khách hàng
+      if (toEmail && !toEmail.includes('@khach.vietjetsim.vn')) {
+        void sendPaymentFailedEmail({
+          to: toEmail,
+          fullName: recipientName || 'Quý khách',
+          bookingCode: booking.booking_code ?? null,
+          bookingId: booking.id,
+          amount: discountedTotal,
+          reason:
+            paymentError instanceof Error
+              ? paymentError.message
+              : 'Giao dịch bị gián đoạn trong quá trình xử lý thanh toán',
+        });
+      }
+
       throw paymentError;
     });
-
-    // Tìm thông tin người nhận email
-    let toEmail = user?.email;
-    let recipientName = user?.fullName;
-
-    if (!toEmail && booking.user_id) {
-      const bookingUser = await findUserById(booking.user_id);
-      if (bookingUser) {
-        toEmail = bookingUser.email;
-        recipientName = bookingUser.full_name;
-      }
-    }
-
-    if (!toEmail && Array.isArray(booking.passengers) && booking.passengers.length > 0) {
-      const firstPass = booking.passengers[0] as { email?: string; name?: string };
-      if (firstPass?.email) toEmail = firstPass.email;
-      if (!recipientName && firstPass?.name) recipientName = firstPass.name;
-    }
 
     if (initialStatus === 'completed') {
       // Tự động tích lũy điểm thưởng SkyJoy theo hệ số hạng thẻ: Red (x1.0), Silver (x1.2), Gold (x1.5), Diamond (x2.0)
@@ -437,7 +453,22 @@ export async function POST(request: NextRequest) {
       });
     } else if (initialStatus === 'pending') {
       // Đơn hàng thanh toán chuyển khoản / VNPAY-QR đang chờ đối soát: gửi email thông báo và hướng dẫn thanh toán
-      if (toEmail) {
+      if (toEmail && !toEmail.includes('@khach.vietjetsim.vn')) {
+        let bankName: string | undefined;
+        let accountNumber: string | undefined;
+        let accountHolder: string | undefined;
+        let bankBin: string | undefined;
+        try {
+          const banks = await getActiveBankAccounts();
+          if (banks && banks.length > 0) {
+            const chosen = banks.find((a) => String(a.id) === String(bank_account_id)) ?? banks[0];
+            bankName = chosen.bank_name;
+            accountNumber = chosen.account_number;
+            accountHolder = chosen.account_holder;
+            bankBin = chosen.bank_bin || undefined;
+          }
+        } catch {}
+
         void sendPaymentInstructionEmail({
           to: toEmail,
           fullName: recipientName || 'Quý khách',
@@ -447,6 +478,10 @@ export async function POST(request: NextRequest) {
           transferNote:
             transfer_note ||
             (result.booking.booking_code ? `VJ ${result.booking.booking_code}` : undefined),
+          bankName,
+          accountNumber,
+          accountHolder,
+          bankBin,
         });
       }
     }
