@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/shared/components/ui';
 import { apiRequest } from '@/shared/services';
 import { buildVietQrPayload, lookupBankBin } from '@/lib/vietqr';
-import { VietQrLogo, NapasLogo } from './PaymentMethodLogos';
+import { VietQrLogo, NapasLogo, VnpayLogo } from './PaymentMethodLogos';
 
 /**
  * Mã VNPAY-QR / VietQR động cho một đặt chỗ: payload EMVCo do server sinh
@@ -51,6 +51,8 @@ interface VietQrBoxProps {
   fallbackAmount?: number;
   fallbackAddInfo?: string;
   fallbackPnr?: string | null;
+  /** Loại phương thức thanh toán đang chọn: 'vnpay_qr' | 'vietqr' | 'napas' | 'bank' */
+  methodType?: string;
 }
 
 type PollState = 'waiting' | 'checking' | 'paid';
@@ -64,7 +66,10 @@ export default function VietQrBox({
   fallbackAmount = 0,
   fallbackAddInfo = '',
   fallbackPnr = null,
+  methodType = 'vietqr',
 }: VietQrBoxProps) {
+  const isVnpay = methodType === 'vnpay_qr' || methodType === 'vnpay_dom';
+  const methodLabel = isVnpay ? 'VNPAY-QR' : 'VietQR';
   const [data, setData] = useState<VietQrData | null>(null);
   const [qrSvg, setQrSvg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -110,7 +115,7 @@ export default function VietQrBox({
           if (fallbackAccount) {
             applyLocalFallback();
           } else {
-            setError(err instanceof Error ? err.message : 'Không tạo được mã VNPAY-QR');
+            setError(err instanceof Error ? err.message : `Không tạo được mã ${methodLabel}`);
           }
         }
       })();
@@ -237,7 +242,9 @@ export default function VietQrBox({
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-amber-300 font-koho">
-                    CỔNG THANH TOÁN VIETQR • NAPAS 247
+                    {isVnpay
+                      ? 'CỔNG THANH TOÁN VNPAY-QR • NAPAS 247'
+                      : 'CỔNG THANH TOÁN VIETQR • NAPAS 247'}
                   </span>
                   <span className="hidden sm:inline-block px-2 py-0.2 text-[9px] font-black uppercase tracking-wide bg-white/20 rounded-full text-white">
                     Tự động 24/7
@@ -266,11 +273,15 @@ export default function VietQrBox({
           <div className="absolute -inset-2 bg-gradient-to-r from-[#005BAA] to-[#ED1C24] rounded-3xl blur-md opacity-25 group-hover:opacity-40 transition duration-300" />
 
           <div className="relative p-4 sm:p-5 bg-white rounded-2xl border-2 border-[#005BAA]/30 shadow-xl flex flex-col items-center">
-            {/* VietQR Tag */}
+            {/* Tag chuẩn */}
             <div className="flex items-center gap-2 mb-2.5 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200">
-              <VietQrLogo className="h-5 w-auto" />
+              {isVnpay ? (
+                <VnpayLogo className="h-4.5 w-auto" />
+              ) : (
+                <VietQrLogo className="h-5 w-auto" />
+              )}
               <span className="text-2xs sm:text-xs font-black text-[#005BAA] uppercase tracking-wider">
-                Mã QR chuẩn VietQR • NAPAS 247
+                {isVnpay ? 'Mã QR chuẩn VNPAY-QR • NAPAS 247' : 'Mã QR chuẩn VietQR • NAPAS 247'}
               </span>
             </div>
 
@@ -284,22 +295,28 @@ export default function VietQrBox({
             ) : (
               <div className="w-48 h-48 sm:w-60 sm:h-60 bg-blue-50/50 rounded-2xl animate-pulse flex flex-col items-center justify-center gap-2">
                 <Icon name="QrCodeIcon" size={48} className="text-[#005BAA]" />
-                <span className="text-xs text-gray-500 font-medium">Đang tạo mã VietQR...</span>
+                <span className="text-xs text-gray-500 font-medium">
+                  Đang tạo mã {methodLabel}...
+                </span>
               </div>
             )}
 
             {/* Bank name pill */}
             <div className="mt-2 text-center">
               <span className="text-2xs font-bold text-gray-600 bg-gray-100 px-3 py-0.5 rounded-md border border-gray-200">
-                Ngân hàng {data?.bank.name ?? 'VIB'} • Chuẩn VietQR / NAPAS 247
+                Ngân hàng {data?.bank.name ?? 'VIB'} • Chuẩn {methodLabel} / NAPAS 247
               </span>
             </div>
           </div>
         </div>
 
-        {/* Logo VietQR + NAPAS 247 — đặt dưới mã quét */}
+        {/* Logo VNPAY / VietQR + NAPAS 247 — đặt dưới mã quét */}
         <div className="mt-4 flex items-center justify-center gap-3 rounded-xl border border-[#005BAA]/15 bg-white px-4 py-2.5 shadow-sm">
-          <VietQrLogo className="h-6 sm:h-7 w-auto" />
+          {isVnpay ? (
+            <VnpayLogo className="h-5 sm:h-6 w-auto" />
+          ) : (
+            <VietQrLogo className="h-6 sm:h-7 w-auto" />
+          )}
           <span className="h-4 w-px bg-[#005BAA]/20" />
           <NapasLogo className="h-5 sm:h-6 w-auto" />
         </div>
@@ -380,8 +397,9 @@ export default function VietQrBox({
               </button>
             </div>
             <p className="text-3xs text-gray-500 mt-1 italic">
-              * Mã QR không kèm số tiền và nội dung — quý khách tự nhập đúng số tiền và nội dung này
-              trong ứng dụng ngân hàng để hệ thống tự động duyệt vé.
+              * Mã QR chuẩn bảo mật NAPAS 247 tự động nhận diện STK và tên thụ hưởng. Quý khách vui
+              lòng nhập đúng Số tiền và Nội dung chuyển khoản để hệ thống tự động xuất vé ngay lập
+              tức.
             </p>
           </div>
         </div>
@@ -398,7 +416,7 @@ export default function VietQrBox({
           {pollState === 'paid' ? (
             <>
               <Icon name="CheckCircleIcon" size={18} className="text-emerald-600 animate-bounce" />
-              <span>Đã nhận được thanh toán VNPAY thành công — Đang mở vé điện tử...</span>
+              <span>Đã nhận được thanh toán thành công — Đang mở vé điện tử...</span>
             </>
           ) : (
             <>
@@ -408,20 +426,28 @@ export default function VietQrBox({
                 }`}
               />
               <span>
-                Đang tự động kiểm tra giao dịch qua VNPAY (mỗi {Math.round(pollIntervalMs / 1000)}{' '}
-                giây)...
+                {isVnpay
+                  ? `Đang tự động kiểm tra giao dịch qua VNPAY-QR (mỗi ${Math.round(pollIntervalMs / 1000)} giây)...`
+                  : `Đang tự động kiểm tra giao dịch chuyển khoản VietQR (mỗi ${Math.round(pollIntervalMs / 1000)} giây)...`}
               </span>
             </>
           )}
         </div>
 
-        {/* Hướng dẫn quét mã qua ứng dụng ngân hàng & Ví VNPAY */}
+        {/* Hướng dẫn quét mã qua ứng dụng ngân hàng & Ví */}
         <div className="mt-4 pt-3 border-t border-gray-100 text-center max-w-md">
           <p className="text-xs text-gray-600 leading-relaxed font-medium">
             Mở ứng dụng <span className="font-bold text-[#005BAA]">Mobile Banking</span> của bất kỳ
             ngân hàng nào (Vietcombank, BIDV, Agribank, VietinBank, MBBank, Techcombank, VPBank,
-            ACB...) hoặc ứng dụng <span className="font-bold text-red-600">Ví VNPAY</span> để quét
-            mã thanh toán.
+            ACB...){' '}
+            {isVnpay ? (
+              <>
+                hoặc ứng dụng <span className="font-bold text-red-600">Ví VNPAY</span>{' '}
+              </>
+            ) : (
+              'hoặc ví điện tử '
+            )}
+            để quét mã thanh toán.
           </p>
         </div>
       </div>

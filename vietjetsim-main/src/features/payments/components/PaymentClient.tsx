@@ -417,15 +417,15 @@ export default function PaymentClient() {
           const toCode = (dbFlight?.to_code || 'HAN').toUpperCase();
           const departTimeStr = dbFlight?.depart_time
             ? new Date(dbFlight.depart_time).toLocaleTimeString('vi-VN', {
-              hour: '2-digit',
-              minute: '2-digit',
-            })
+                hour: '2-digit',
+                minute: '2-digit',
+              })
             : '08:30';
           const arriveTimeStr = dbFlight?.arrive_time
             ? new Date(dbFlight.arrive_time).toLocaleTimeString('vi-VN', {
-              hour: '2-digit',
-              minute: '2-digit',
-            })
+                hour: '2-digit',
+                minute: '2-digit',
+              })
             : '10:40';
           const dateStr = dbFlight?.depart_time
             ? new Date(dbFlight.depart_time).toISOString().split('T')[0]
@@ -899,19 +899,19 @@ export default function PaymentClient() {
       <div className="flex items-center justify-between pb-3 border-b border-gray-100">
         <h4 className="text-sm font-bold font-koho text-[var(--foreground)] flex items-center gap-2">
           <Icon name="CheckCircleIcon" size={18} className="text-primary" />
-          Xác nhận chuyển khoản & Tải ảnh biên lai
+          Xác nhận thanh toán & Tải ảnh biên lai
         </h4>
       </div>
 
       <p className="text-xs text-[var(--foreground-muted)] leading-relaxed">
-        Sau khi chuyển khoản thành công từ ứng dụng ngân hàng của bạn, quý khách vui lòng đính kèm
-        ảnh chụp màn hình biên lai hoặc xác nhận bên dưới để Admin đối chiếu xuất vé ngay lập tức.
+        Sau khi chuyển khoản hoặc quét mã thành công từ ứng dụng ngân hàng, quý khách vui lòng đính
+        kèm ảnh chụp màn hình biên lai hoặc xác nhận bên dưới để hệ thống đối chiếu xuất vé tức thì.
       </p>
 
       {/* Vị trí tải ảnh lên để admin đối chiếu */}
       <div className="space-y-2">
         <label className="block text-xs font-bold font-koho text-gray-800">
-          Ảnh chụp biên lai chuyển khoản (Khuyên dùng để duyệt vé nhanh)
+          Ảnh chụp biên lai thanh toán (Khuyên dùng để duyệt vé tức thì)
         </label>
 
         <input
@@ -932,10 +932,11 @@ export default function PaymentClient() {
             onDragLeave={() => setIsDraggingReceipt(false)}
             onDrop={handleReceiptDrop}
             onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-2 ${isDraggingReceipt
+            className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-2 ${
+              isDraggingReceipt
                 ? 'border-primary bg-primary/5 scale-[1.01]'
                 : 'border-gray-300 hover:border-primary hover:bg-red-50/20 bg-gray-50/60'
-              }`}
+            }`}
           >
             <div className="w-12 h-12 rounded-full bg-white shadow-xs border border-gray-200 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
               <Icon name="ArrowUpTrayIcon" size={22} className="text-primary" />
@@ -1051,8 +1052,16 @@ export default function PaymentClient() {
             <Icon name="CheckCircleIcon" size={18} className="text-white" />
             <span>
               {receiptImage
-                ? 'Tôi đã thanh toán VNPAY (Đã đính kèm ảnh biên lai)'
-                : 'Tôi đã quét mã VNPAY — Đã thanh toán'}
+                ? selectedMethodGroup === 'vnpay_qr'
+                  ? 'Tôi đã thanh toán VNPAY-QR (Đã đính kèm ảnh biên lai)'
+                  : selectedMethodGroup === 'vietqr'
+                    ? 'Tôi đã thanh toán VietQR (Đã đính kèm ảnh biên lai)'
+                    : 'Xác nhận đã thanh toán (Đã đính kèm ảnh biên lai)'
+                : selectedMethodGroup === 'vnpay_qr'
+                  ? 'Tôi đã quét mã VNPAY-QR — Đã thanh toán'
+                  : selectedMethodGroup === 'vietqr'
+                    ? 'Tôi đã quét mã VietQR — Đã thanh toán'
+                    : 'Tôi đã chuyển khoản — Đã thanh toán'}
             </span>
           </>
         )}
@@ -1116,10 +1125,11 @@ export default function PaymentClient() {
                     <button
                       onClick={handleCopyBookingCode}
                       title="Sao chép mã đặt chỗ"
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${copied
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                        copied
                           ? 'bg-[rgb(var(--vj-green-rgb))]/15 text-[var(--vj-green)] border border-[rgb(var(--vj-green-rgb))]/40'
                           : 'bg-[var(--surface-2)] text-[var(--foreground-muted)] border border-[var(--border)] hover:bg-primary-50 hover:text-primary hover:border-primary'
-                        }`}
+                      }`}
                     >
                       {copied ? (
                         <>
@@ -1544,10 +1554,11 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('vnpay_qr');
                         setPaymentMethod('vietqr');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] relative overflow-hidden ${selectedMethodGroup === 'vnpay_qr'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] relative overflow-hidden ${
+                        selectedMethodGroup === 'vnpay_qr'
                           ? 'border-[#005BAA] ring-2 ring-[#005BAA] bg-blue-50/40 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                        }`}
+                      }`}
                     >
                       <div className="absolute top-0 right-0 bg-[#ED1C24] text-white text-[8px] font-black px-1.5 py-0.5 rounded-bl-md uppercase tracking-wider">
                         Khuyên dùng
@@ -1567,10 +1578,11 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('vietqr');
                         setPaymentMethod('vietqr');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] relative overflow-hidden ${selectedMethodGroup === 'vietqr'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] relative overflow-hidden ${
+                        selectedMethodGroup === 'vietqr'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/30 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                        }`}
+                      }`}
                     >
                       <div className="flex items-center h-8">
                         <VietQrLogo className="h-5 w-auto max-w-[104px]" />
@@ -1587,10 +1599,11 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('napas');
                         setPaymentMethod('bank');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${selectedMethodGroup === 'napas'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
+                        selectedMethodGroup === 'napas'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                        }`}
+                      }`}
                     >
                       <div className="flex items-center h-8">
                         <NapasLogo className="h-4 w-auto max-w-[104px]" />
@@ -1605,10 +1618,11 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('card');
                         setPaymentMethod('card');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${selectedMethodGroup === 'card'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
+                        selectedMethodGroup === 'card'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                        }`}
+                      }`}
                     >
                       {/* Bốn logo mạng thẻ xếp 2×2 để không bị chồng lên nhau */}
                       <div className="grid grid-cols-2 gap-x-2 gap-y-1 h-8 items-center">
@@ -1629,10 +1643,11 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('vnpay_dom');
                         setPaymentMethod('vietqr');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${selectedMethodGroup === 'vnpay_dom'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
+                        selectedMethodGroup === 'vnpay_dom'
                           ? 'border-[#005BAA] ring-2 ring-[#005BAA] bg-blue-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                        }`}
+                      }`}
                     >
                       <div className="flex items-center h-8">
                         <VnpayLogo className="h-4 w-auto max-w-[104px]" />
@@ -1657,10 +1672,11 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('skypay');
                         setPaymentMethod('skypoint');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${selectedMethodGroup === 'skypay'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
+                        selectedMethodGroup === 'skypay'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                        }`}
+                      }`}
                     >
                       <div className="flex items-center h-8">
                         <SkyJoyLogo className="h-7 w-auto" />
@@ -1675,10 +1691,11 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('momo');
                         setPaymentMethod('e_wallet');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${selectedMethodGroup === 'momo'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
+                        selectedMethodGroup === 'momo'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                        }`}
+                      }`}
                     >
                       <div className="flex items-center h-8">
                         <MomoLogo className="h-7 w-auto" />
@@ -1693,10 +1710,11 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('zalopay');
                         setPaymentMethod('e_wallet');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${selectedMethodGroup === 'zalopay'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
+                        selectedMethodGroup === 'zalopay'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                        }`}
+                      }`}
                     >
                       <div className="flex items-center h-8">
                         <ZaloPayLogo className="h-5 w-auto max-w-[104px]" />
@@ -1711,10 +1729,11 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('applepay');
                         setPaymentMethod('card');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${selectedMethodGroup === 'applepay'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
+                        selectedMethodGroup === 'applepay'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                        }`}
+                      }`}
                     >
                       <div className="flex items-center h-8">
                         <ApplePayLogo className="h-6 w-auto max-w-[104px]" />
@@ -1729,10 +1748,11 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('googlepay');
                         setPaymentMethod('card');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${selectedMethodGroup === 'googlepay'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
+                        selectedMethodGroup === 'googlepay'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                        }`}
+                      }`}
                     >
                       <div className="flex items-center h-8">
                         <GooglePayLogo className="h-5 w-auto max-w-[104px]" />
@@ -1754,10 +1774,11 @@ export default function PaymentClient() {
                         setSelectedMethodGroup('movi');
                         setPaymentMethod('bank');
                       }}
-                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${selectedMethodGroup === 'movi'
+                      className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
+                        selectedMethodGroup === 'movi'
                           ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
-                        }`}
+                      }`}
                     >
                       <div className="flex items-center h-8">
                         <MoviLogo className="h-6 w-auto max-w-[104px]" />
@@ -1898,10 +1919,11 @@ export default function PaymentClient() {
                                   key={acc.id}
                                   type="button"
                                   onClick={() => setSelectedAdminAccount(acc)}
-                                  className={`px-3 py-1.5 rounded-full text-xs2 font-bold whitespace-nowrap transition-all ${selectedAdminAccount.id === acc.id
+                                  className={`px-3 py-1.5 rounded-full text-xs2 font-bold whitespace-nowrap transition-all ${
+                                    selectedAdminAccount.id === acc.id
                                       ? 'bg-primary text-white shadow-md shadow-primary/20'
                                       : 'bg-[var(--surface-2)] text-[var(--foreground-muted)] hover:bg-[var(--surface-3)] '
-                                    }`}
+                                  }`}
                                 >
                                   {acc.admin_bank_name}
                                 </button>
@@ -2007,6 +2029,7 @@ export default function PaymentClient() {
                                 }
                                 fallbackAddInfo={transferNote}
                                 showBankHeader={false}
+                                methodType={selectedMethodGroup}
                               />
                             </div>
 
@@ -2035,10 +2058,14 @@ export default function PaymentClient() {
                       <div className="flex items-center justify-between pb-1">
                         <label className="text-xs font-bold text-gray-800 uppercase tracking-wider font-koho flex items-center gap-1.5">
                           <Icon name="QrCodeIcon" size={16} className="text-[#005BAA]" />
-                          Thông tin thanh toán (Mã QR thanh toán VietQR)
+                          {selectedMethodGroup === 'vnpay_qr'
+                            ? 'Thông tin thanh toán (Mã QR VNPAY-QR)'
+                            : 'Thông tin thanh toán (Mã QR thanh toán VietQR)'}
                         </label>
                         <span className="text-3xs font-extrabold uppercase px-2 py-0.5 rounded-full bg-blue-50 text-[#005BAA] border border-blue-200">
-                          Quét mã trực tiếp
+                          {selectedMethodGroup === 'vnpay_qr'
+                            ? 'Quét mã VNPAY-QR'
+                            : 'Quét mã trực tiếp'}
                         </span>
                       </div>
                       <VietQrBox
@@ -2052,6 +2079,7 @@ export default function PaymentClient() {
                             : (booking?.flightNo ?? 'VJ141')
                         }
                         fallbackAddInfo={transferNote}
+                        methodType={selectedMethodGroup}
                       />
                       {transferConfirmBlock}
                     </div>
@@ -2130,11 +2158,12 @@ export default function PaymentClient() {
                   {/* SkyPoint / Ví SkyJoy — thanh toán bằng điểm tích lũy. */}
                   {paymentMethod === 'skypoint' && (
                     <div
-                      className={`bg-[var(--background)] border rounded-2xl p-6 flex flex-col items-center gap-4 transition-all ${skypointInfo &&
-                          skypointInfo.points >= skypointPointsForAmount(total, skypointInfo.rate)
+                      className={`bg-[var(--background)] border rounded-2xl p-6 flex flex-col items-center gap-4 transition-all ${
+                        skypointInfo &&
+                        skypointInfo.points >= skypointPointsForAmount(total, skypointInfo.rate)
                           ? 'border-vjbrown/40 bg-vjyellow/10'
                           : 'border-[var(--border)] '
-                        }`}
+                      }`}
                     >
                       <div className="w-16 h-16 bg-vjyellow rounded-full flex items-center justify-center shadow-md">
                         <Icon
@@ -2272,7 +2301,11 @@ export default function PaymentClient() {
                         <span>
                           {receiptImage
                             ? `✓ Xác nhận đã thanh toán (${total.toLocaleString('vi-VN')} VND)`
-                            : `Tôi đã quét mã VNPAY — Xác nhận (${total.toLocaleString('vi-VN')} VND)`}
+                            : selectedMethodGroup === 'vnpay_qr'
+                              ? `Tôi đã quét mã VNPAY-QR — Xác nhận (${total.toLocaleString('vi-VN')} VND)`
+                              : selectedMethodGroup === 'vietqr'
+                                ? `Tôi đã quét mã VietQR — Xác nhận (${total.toLocaleString('vi-VN')} VND)`
+                                : `Tôi đã chuyển khoản — Xác nhận (${total.toLocaleString('vi-VN')} VND)`}
                         </span>
                       </>
                     ) : (
@@ -2335,8 +2368,8 @@ export default function PaymentClient() {
                 ancillaries={
                   booking?.ancillaries?.length
                     ? (booking.ancillaries
-                      .map((id) => ANCILLARY_OPTIONS.find((o) => o.id === id)?.title)
-                      .filter(Boolean) as string[])
+                        .map((id) => ANCILLARY_OPTIONS.find((o) => o.id === id)?.title)
+                        .filter(Boolean) as string[])
                     : ['Hành lý xách tay 7kg']
                 }
                 onOpenDetails={() => setShowSummaryModal(true)}
@@ -2419,9 +2452,9 @@ export default function PaymentClient() {
                         Dịch vụ bổ sung
                         {booking?.ancillaries?.length
                           ? ` (${booking.ancillaries
-                            .map((id) => ANCILLARY_OPTIONS.find((o) => o.id === id)?.title)
-                            .filter(Boolean)
-                            .join(', ')})`
+                              .map((id) => ANCILLARY_OPTIONS.find((o) => o.id === id)?.title)
+                              .filter(Boolean)
+                              .join(', ')})`
                           : ''}
                       </span>
                       <span className="font-semibold">
