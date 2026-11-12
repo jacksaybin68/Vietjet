@@ -18,8 +18,8 @@ export async function GET(request: NextRequest) {
     if (status && status !== 'all') {
       result = await sql`
         SELECT 
-          COALESCE(p.id, 'bk-' || b.id) as id,
-          COALESCE(p.id, '') as "paymentId",
+          COALESCE(p.id::text, 'bk-' || b.id::text) as id,
+          COALESCE(p.id::text, '') as "paymentId",
           b.id as "bookingId",
           b.booking_code as "bookingCode",
           COALESCE(p.amount, b.total_price) as amount,
@@ -45,8 +45,8 @@ export async function GET(request: NextRequest) {
     } else {
       result = await sql`
         SELECT 
-          COALESCE(p.id, 'bk-' || b.id) as id,
-          COALESCE(p.id, '') as "paymentId",
+          COALESCE(p.id::text, 'bk-' || b.id::text) as id,
+          COALESCE(p.id::text, '') as "paymentId",
           b.id as "bookingId",
           b.booking_code as "bookingCode",
           COALESCE(p.amount, b.total_price) as amount,
