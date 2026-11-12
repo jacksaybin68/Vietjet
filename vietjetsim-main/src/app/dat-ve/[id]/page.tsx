@@ -63,6 +63,7 @@ export default function BookingDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showItineraryModal, setShowItineraryModal] = useState(false);
+  const [showPaxCard, setShowPaxCard] = useState(true);
   const [showFlightDetail, setShowFlightDetail] = useState(false);
   const [expandedPax, setExpandedPax] = useState<Record<number, boolean>>({ 0: true });
   const [isSendingMail, setIsSendingMail] = useState(false);
@@ -219,21 +220,46 @@ export default function BookingDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F7FC] flex flex-col font-sans">
-      <Header />
+    <div className="relative min-h-screen bg-gradient-to-b from-[#e8f1fc] via-[#f1e6ee] to-[#fbebee] flex flex-col font-sans overflow-x-hidden">
+      {/* Top Vietjet Red Bar theo Screenshot 1 */}
+      <header className="bg-[#ED1B24] text-white z-10">
+        <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-1">
+            <span className="text-2xl sm:text-3xl font-black italic tracking-tighter font-serif text-white">
+              vietjet<span className="text-[#FFCC00]">Air</span>.com
+            </span>
+          </Link>
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex items-center gap-2 sm:gap-3 text-3xs sm:text-2xs text-white/90">
+              <span className="hover:text-white cursor-pointer flex items-center gap-1">🎧 Hỗ trợ</span>
+              <span>|</span>
+              <Link href="/dang-nhap" className="hover:text-white flex items-center gap-1">👤 Đăng ký | Đăng nhập</Link>
+              <span>|</span>
+              <span className="hover:text-white cursor-pointer">Tiếng Việt ▾</span>
+            </div>
+            <div className="hidden md:flex items-center gap-4 text-3xs font-extrabold uppercase tracking-wide text-white/95 pt-0.5">
+              <Link href="/chuyen-bay-cua-toi" className="hover:text-[#FFCC00] transition-colors">CHUYẾN BAY CỦA TÔI</Link>
+              <Link href="/lam-thu-tuc" className="hover:text-[#FFCC00] transition-colors">ONLINE CHECK-IN</Link>
+              <Link href="/dich-vu" className="hover:text-[#FFCC00] transition-colors">DỊCH VỤ CHUYẾN BAY</Link>
+              <Link href="/dich-vu" className="hover:text-[#FFCC00] transition-colors">DỊCH VỤ KHÁC</Link>
+            </div>
+          </div>
+        </div>
+      </header>
+
       <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
 
       {/* Dải băng vàng thông báo trên cùng - chuẩn Screenshot 1 */}
-      <div className="w-full bg-[#FFD100] text-gray-950 border-b border-[#ECC000] shadow-2xs py-2 px-3 sm:px-6">
-        <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-y-1 text-2xs sm:text-xs">
-          <div className="flex items-center gap-2">
+      <div className="w-full bg-[#FFD100] text-gray-950 border-b border-[#ECC000] shadow-xs py-2 px-3 sm:px-6 z-10">
+        <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-y-1 text-2xs sm:text-xs">
+          <div className="flex items-center gap-1.5">
             <span className="font-semibold text-gray-800">Mã đặt chỗ :</span>
             <span className="font-black text-[#ED1B24] tracking-wider text-xs sm:text-sm">
               {bookingCode}
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <span className="font-semibold text-gray-800">Trạng thái thanh toán :</span>
             <span
               className={`font-black ${isPaid ? 'text-emerald-700' : 'text-[#ED1B24]'}`}
@@ -242,11 +268,13 @@ export default function BookingDetailPage() {
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 w-full sm:w-auto justify-end">
-            <span className="font-semibold text-gray-800">Yêu cầu thanh toán :</span>
-            <span className="font-black text-[#ED1B24]">
-              {totalPriceNumber.toLocaleString('vi-VN')} VND
-            </span>
+          <div className="flex flex-col sm:items-end w-full sm:w-auto text-left sm:text-right">
+            <div className="flex items-center gap-1">
+              <span className="font-semibold text-gray-800">Yêu cầu thanh toán :</span>
+              <span className="font-black text-[#ED1B24] text-xs sm:text-sm">
+                {totalPriceNumber.toLocaleString('vi-VN')} VND
+              </span>
+            </div>
             {!isPaid && (
               <span className="text-gray-700 text-3xs sm:text-2xs">
                 trước {expireDateStr} (Theo giờ địa phương)
@@ -257,7 +285,7 @@ export default function BookingDetailPage() {
       </div>
 
       {/* Main Content với nền mây nhẹ nhàng */}
-      <main className="flex-1 py-6 px-3 sm:px-6 max-w-4xl mx-auto w-full space-y-4">
+      <main className="flex-1 py-6 px-3 sm:px-6 max-w-4xl mx-auto w-full space-y-4 z-10">
         {/* 1. Card: Thông tin chuyến bay */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-2xs overflow-hidden">
           <div className="px-4 py-2.5 bg-gray-50/80 border-b border-gray-100 flex items-center justify-between">
@@ -366,114 +394,124 @@ export default function BookingDetailPage() {
             <span className="text-xs font-bold text-gray-800 uppercase tracking-wider font-koho">
               Thông tin hành khách
             </span>
+            <button
+              type="button"
+              onClick={() => setShowPaxCard(!showPaxCard)}
+              className="text-gray-500 hover:text-gray-800 font-bold text-sm px-2 cursor-pointer"
+              aria-label="Thu gọn hoặc mở rộng"
+            >
+              {showPaxCard ? '−' : '+'}
+            </button>
           </div>
 
-          <div className="p-4 sm:p-5 space-y-4">
-            {/* Banner tích điểm SkyJoy chuẩn Screenshot 1 */}
-            <div className="bg-[#ED1B24] text-white rounded-lg p-3 sm:p-3.5 relative overflow-hidden shadow-xs">
-              <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-white/20">
-                <span className="text-xs sm:text-sm font-black uppercase tracking-wide">
-                  Bổ sung mã hội viên để tích điểm
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setShowSkyJoyPrompt(true)}
-                  className="bg-[#FFCC00] hover:bg-[#E6B800] text-gray-950 font-black px-3 py-1 rounded-sm text-2xs uppercase tracking-wider shadow-2xs active:scale-95 transition-all cursor-pointer"
-                >
-                  Bổ sung
-                </button>
-              </div>
-              <div className="text-2xs text-white/95 space-y-0.5">
-                <p className="font-bold text-amber-200">
-                  Đăng ký Hội viên Vietjet SkyJoy - Tận hưởng X3 ưu đãi:
-                </p>
-                <p>• Tặng ngay 200 SkyPoint.</p>
-                <p>• Nhận SkyPoint cho các chuyến đã bay.</p>
-                <p>• Hưởng đặc quyền ưu tiên tại sân bay.</p>
-                <Link
-                  href="/dang-ky"
-                  className="inline-block mt-1 text-[#FFCC00] hover:underline font-bold"
-                >
-                  Đăng ký ngay!
-                </Link>
-              </div>
-            </div>
-
-            {/* Modal bổ sung SkyJoy ID nhanh */}
-            {showSkyJoyPrompt && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex flex-col sm:flex-row gap-2 items-center justify-between">
-                <input
-                  type="text"
-                  placeholder="Nhập mã hội viên SkyJoy (VD: SJ889922)"
-                  className="w-full sm:w-80 px-3 py-1.5 bg-white border border-gray-300 rounded text-xs font-mono"
-                />
-                <div className="flex gap-2">
+          {showPaxCard && (
+            <div className="p-4 sm:p-5 space-y-4">
+              {/* Banner tích điểm SkyJoy chuẩn Screenshot 1 */}
+              <div className="bg-[#ED1B24] text-white rounded-lg p-3 sm:p-3.5 relative overflow-hidden shadow-xs">
+                <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-white/20">
+                  <span className="text-xs sm:text-sm font-black uppercase tracking-wide">
+                    Bổ sung mã hội viên để tích điểm
+                  </span>
                   <button
                     type="button"
-                    onClick={() => {
-                      toast.success('Đã lưu mã hội viên SkyJoy!');
-                      setShowSkyJoyPrompt(false);
-                    }}
-                    className="px-3 py-1.5 bg-[#ED1B24] text-white text-xs font-bold rounded"
+                    onClick={() => setShowSkyJoyPrompt(true)}
+                    className="bg-[#FFCC00] hover:bg-[#E6B800] text-gray-950 font-black px-3 py-1 rounded-sm text-2xs uppercase tracking-wider shadow-2xs active:scale-95 transition-all cursor-pointer"
                   >
-                    Lưu
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowSkyJoyPrompt(false)}
-                    className="px-3 py-1.5 bg-gray-200 text-gray-800 text-xs font-bold rounded"
-                  >
-                    Hủy
+                    Bổ sung
                   </button>
                 </div>
-              </div>
-            )}
-
-            {/* Danh sách thẻ hành khách (grid 2 cột) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-              {passengersList.map((passenger, idx) => {
-                const title = passenger.gender === 'female' ? 'Mrs' : 'Mr';
-                const seatCode =
-                  passenger.seat_number || booking.seats?.[idx]?.seat_number || 'Chưa chọn';
-
-                return (
-                  <div
-                    key={passenger.id || idx}
-                    className="border border-gray-200 rounded-lg p-3 bg-gray-50/40 space-y-2 text-2xs"
+                <div className="text-2xs text-white/95 space-y-0.5">
+                  <p className="font-bold text-amber-200">
+                    Đăng ký Hội viên Vietjet SkyJoy - Tận hưởng X3 ưu đãi:
+                  </p>
+                  <p>• Tặng ngay 200 SkyPoint.</p>
+                  <p>• Nhận SkyPoint cho các chuyến đã bay.</p>
+                  <p>• Hưởng đặc quyền ưu tiên tại sân bay.</p>
+                  <Link
+                    href="/dang-ky"
+                    className="inline-block mt-1 text-[#FFCC00] hover:underline font-bold"
                   >
-                    <div className="flex items-center gap-1.5 font-bold text-gray-900 border-b border-gray-100 pb-1.5">
-                      <span className="text-gray-500">👤</span>
-                      <span>
-                        Người lớn: {title} {passenger.name?.toUpperCase() || 'HÀNH KHÁCH'}
-                      </span>
-                    </div>
+                    Đăng ký ngay!
+                  </Link>
+                </div>
+              </div>
 
-                    <div className="space-y-1 text-gray-600">
-                      <div className="font-semibold text-gray-800">
-                        {flight?.from_code || 'SGN'} ➔ {flight?.to_code || 'WSI'}
+              {/* Modal bổ sung SkyJoy ID nhanh */}
+              {showSkyJoyPrompt && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex flex-col sm:flex-row gap-2 items-center justify-between">
+                  <input
+                    type="text"
+                    placeholder="Nhập mã hội viên SkyJoy (VD: SJ889922)"
+                    className="w-full sm:w-80 px-3 py-1.5 bg-white border border-gray-300 rounded text-xs font-mono"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        toast.success('Đã lưu mã hội viên SkyJoy!');
+                        setShowSkyJoyPrompt(false);
+                      }}
+                      className="px-3 py-1.5 bg-[#ED1B24] text-white text-xs font-bold rounded"
+                    >
+                      Lưu
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowSkyJoyPrompt(false)}
+                      className="px-3 py-1.5 bg-gray-200 text-gray-800 text-xs font-bold rounded"
+                    >
+                      Hủy
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Danh sách thẻ hành khách (grid 2 cột) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                {passengersList.map((passenger, idx) => {
+                  const title = passenger.gender === 'female' ? 'Mrs' : 'Mr';
+                  const seatCode =
+                    passenger.seat_number || booking.seats?.[idx]?.seat_number || 'Chưa chọn';
+
+                  return (
+                    <div
+                      key={passenger.id || idx}
+                      className="border border-gray-200 rounded-lg p-3 bg-gray-50/40 space-y-2 text-2xs"
+                    >
+                      <div className="flex items-center gap-1.5 font-bold text-gray-900 border-b border-gray-100 pb-1.5">
+                        <span className="text-gray-500">👤</span>
+                        <span>
+                          Người lớn: {title} {passenger.name?.toUpperCase() || 'HÀNH KHÁCH'}
+                        </span>
                       </div>
-                      <div>
-                        <span className="text-gray-500">Deluxe ancillary:</span>{' '}
-                        <span className="font-medium text-gray-800">Gói 20kg</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Dịch vụ miễn phí:</span>{' '}
-                        <span className="font-medium text-gray-800">Combo Meal (LR)</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Chỗ ngồi:</span>{' '}
-                        <span className="font-bold text-[#ED1B24]">{seatCode}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Special change:</span>{' '}
-                        <span className="font-medium text-gray-800">Special Change</span>
+
+                      <div className="space-y-1 text-gray-600">
+                        <div className="font-semibold text-gray-800">
+                          {flight?.from_code || 'SGN'} ➔ {flight?.to_code || 'WSI'}
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Deluxe ancillary:</span>{' '}
+                          <span className="font-medium text-gray-800">Gói 20kg</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Dịch vụ miễn phí:</span>{' '}
+                          <span className="font-medium text-gray-800">Combo Meal (LR)</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Chỗ ngồi:</span>{' '}
+                          <span className="font-bold text-[#ED1B24]">{seatCode}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Special change:</span>{' '}
+                          <span className="font-medium text-gray-800">Special Change</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* 3. Card: Chi tiết giá vé */}
@@ -564,7 +602,7 @@ export default function BookingDetailPage() {
               onClick={() => router.push('/dich-vu')}
               className="py-3 px-3 bg-[#FFCC00] hover:bg-[#E6B800] text-gray-950 font-bold rounded-lg text-2xs uppercase tracking-wider shadow-xs active:scale-95 transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer"
             >
-              <span>Mua hành lý, chỗ ngồi...</span>
+              <span>Mua hành lý, chỗ ngồi, suất ăn và hơn thế nữa...</span>
             </button>
 
             <button
@@ -603,13 +641,22 @@ export default function BookingDetailPage() {
                   'Quý khách có thể đổi ngoại tệ tại quầy giao dịch sân bay trước giờ khởi hành.'
                 )
               }
-              className="w-full sm:w-auto px-8 py-3 bg-[#ED1B24] hover:bg-[#c81018] text-white font-black rounded-lg text-xs uppercase tracking-wider shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-[#FF5E5E] to-[#ED1B24] hover:from-[#ED1B24] hover:to-[#c81018] text-white font-black rounded-lg text-xs uppercase tracking-wider shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Đăng ký mua ngoại tệ</span>
             </button>
           </div>
         </div>
       </main>
+
+      {/* Vệt đuôi máy bay Vietjet góc dưới bên phải - chuẩn Screenshot 1 */}
+      <div className="fixed -bottom-6 -right-6 pointer-events-none z-0 opacity-95 hidden sm:block">
+        <svg width="220" height="120" viewBox="0 0 220 120" fill="none">
+          <path d="M0 120 C 100 120, 150 70, 220 0 L 220 120 Z" fill="#ED1B24" />
+          <path d="M35 120 C 120 120, 170 80, 220 20 L 220 120 Z" fill="#78BE20" />
+          <path d="M75 120 C 145 120, 190 95, 220 45 L 220 120 Z" fill="#FFD100" />
+        </svg>
+      </div>
 
       {/* Modal Thông tin hành trình chuẩn Screenshot 2 */}
       <ItineraryModal

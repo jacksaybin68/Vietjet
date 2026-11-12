@@ -212,9 +212,8 @@ export default function ItineraryModal({ isOpen, onClose, booking }: ItineraryMo
                       Đã xác nhận
                     </span>
                     {!isPaid && (
-                      <p className="text-3xs text-gray-600 mt-0.5 leading-snug">
-                        Vé máy bay đã xác nhận. Mã đặt chỗ này sẽ bị hủy nếu không thanh toán trước
-                        TS: <span className="font-semibold text-gray-800">{expireDateStr}</span>
+                      <p className="text-3xs text-[#ED1B24] mt-0.5 leading-snug">
+                        Vé máy bay đã xác nhận/Mã đặt chỗ này sẽ bị hủy nếu không thanh toán trước TS: <span className="font-semibold">{expireDateStr}</span>
                       </p>
                     )}
                   </div>
