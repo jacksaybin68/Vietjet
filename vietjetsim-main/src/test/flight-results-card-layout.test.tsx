@@ -73,14 +73,11 @@ describe('FlightResultsStep — card bố cục 1 hàng ngang', () => {
     expect(info.className).toContain('border-b');
   });
 
-  // Bốn hạng giá phải nằm trên MỘT hàng từ `sm` trở lên — lưới 2×2 như bản cũ
-  // chỉ là bố cục riêng cho mobile, không được áp lên desktop.
-  it('hiển thị 4 hạng giá trong một hàng từ sm trở lên', async () => {
+  // Bốn hạng giá nằm trên MỘT hàng 4 cột cả trên mobile và desktop
+  it('hiển thị 4 hạng giá trong một hàng 4 cột', async () => {
     const card = await renderResults();
-    const fareGrid = (card.querySelector('.sm\\:grid-cols-4') || card.children[1]) as HTMLElement;
-    expect(fareGrid.className).toContain('sm:grid-cols-4');
-    // Mobile: 2×2 — bốn cột giá không vừa bề ngang 390px.
-    expect(fareGrid.className).toContain('grid-cols-2');
+    const fareGrid = (card.querySelector('.grid-cols-4') || card.children[1]) as HTMLElement;
+    expect(fareGrid.className).toContain('grid-cols-4');
     expect(fareGrid.children).toHaveLength(4);
   });
 });

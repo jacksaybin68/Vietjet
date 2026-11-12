@@ -1308,9 +1308,8 @@ export default function FlightResultsStep({
                   </span>
                 </div>
 
-                {/* Right: Fare Classes — 4 hàng cột trên desktop, 2×2 trên mobile
-                    (mỗi ô tự mang nhãn hạng nên không cần hàng header riêng). */}
-                <div className="flex-1 min-w-0 grid grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-0.5 p-1.5 sm:p-0 bg-gray-100/60">
+                {/* Right: Fare Classes — 4 cột 1 hàng ngang trên cả mobile và desktop */}
+                <div className="flex-1 min-w-0 grid grid-cols-4 gap-0.5 p-0.5 sm:p-0 bg-gray-100/60">
                   {fareClasses.map((fc) => {
                     const fares = Object.fromEntries(
                       fareClasses.map((item) => [item.id, item.price])
@@ -1340,9 +1339,9 @@ export default function FlightResultsStep({
 
                         {isSelected && !isSoldOut && (
                           <div className="absolute top-1 inset-x-0 flex justify-center pointer-events-none z-10">
-                            <span className="inline-flex items-center gap-0.5 text-[7px] sm:text-[8px] font-black text-emerald-800 bg-emerald-100/90 px-1.5 py-0.5 rounded-full shadow-2xs leading-none uppercase tracking-wider">
+                            <span className="inline-flex items-center gap-0.5 text-[6.5px] sm:text-[8px] font-black text-emerald-800 bg-emerald-100/90 px-1 sm:px-1.5 py-0.5 rounded-full shadow-2xs leading-none uppercase tracking-wider">
                               <svg
-                                className="w-2 h-2"
+                                className="w-1.5 h-1.5 sm:w-2 sm:h-2"
                                 viewBox="0 0 12 12"
                                 fill="none"
                                 stroke="currentColor"
@@ -1358,24 +1357,23 @@ export default function FlightResultsStep({
                         )}
 
                         {isSoldOut ? (
-                          <div className="flex-1 flex flex-col items-center justify-center p-1 sm:p-2 text-center select-none min-h-[64px] sm:min-h-[78px]">
-                            {/* Mobile: vẫn phải ghi tên hạng — ô "Hết chỗ" không
-                                nói rõ đó là hạng nào. */}
+                          <div className="flex-1 flex flex-col items-center justify-center p-1 sm:p-2 text-center select-none min-h-[56px] sm:min-h-[78px]">
+                            {/* Mobile: vẫn phải ghi tên hạng */}
                             <span
-                              className={`sm:hidden mb-1 inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider leading-none text-white opacity-70 ${
+                              className={`sm:hidden mb-0.5 inline-flex items-center rounded-full px-1 py-0.5 text-[7px] font-black uppercase tracking-wider leading-none text-white opacity-70 ${
                                 FARE_BADGE_CLASS[fc.id] ?? 'bg-gray-500'
                               }`}
                             >
                               {fc.name}
                             </span>
-                            <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-full border border-gray-400/50 flex items-center justify-center text-gray-400 mb-0.5 sm:mb-1">
+                            <div className="w-4 h-4 sm:w-7 sm:h-7 rounded-full border border-gray-400/50 flex items-center justify-center text-gray-400 mb-0.5 sm:mb-1">
                               <Icon
                                 name="PaperAirplaneIcon"
-                                size={11}
+                                size={10}
                                 className="rotate-45 opacity-60"
                               />
                             </div>
-                            <span className="text-[9px] sm:text-xs font-bold text-gray-500 leading-tight">
+                            <span className="text-[7.5px] sm:text-xs font-bold text-gray-500 leading-tight">
                               Hết chỗ
                             </span>
                             <button
@@ -1418,22 +1416,20 @@ export default function FlightResultsStep({
                               });
                               onFlightSelect?.(flight.flightNo, fc.id, fc.price, fares, flight);
                             }}
-                            className={`group w-full h-full py-1.5 sm:py-2.5 px-0.5 sm:px-1 flex flex-col items-center justify-center text-center cursor-pointer transition-transform active:scale-[0.98] min-h-[64px] sm:min-h-[78px] focus:outline-none focus:ring-0 ${
-                              isSelected ? 'pt-6 sm:pt-4' : ''
+                            className={`group w-full h-full py-1 sm:py-2.5 px-0.5 sm:px-1 flex flex-col items-center justify-center text-center cursor-pointer transition-transform active:scale-[0.98] min-h-[56px] sm:min-h-[78px] focus:outline-none focus:ring-0 ${
+                              isSelected ? 'pt-5 sm:pt-4' : ''
                             }`}
                           >
-                            {/* Mobile: hàng header hạng vé đã bị ẩn, nên mỗi ô
-                                phải tự nói hạng của nó — nếu không, bốn giá trên
-                                màn hình không phân biệt được hạng nào. */}
+                            {/* Mobile: nhãn hạng vé */}
                             <span
-                              className={`sm:hidden mb-1 inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider leading-none text-white ${
+                              className={`sm:hidden mb-0.5 inline-flex items-center rounded-full px-1 py-0.5 text-[7px] font-black uppercase tracking-wider leading-none text-white ${
                                 FARE_BADGE_CLASS[fc.id] ?? 'bg-gray-500'
                               }`}
                             >
                               {fc.name}
                             </span>
                             <span
-                              className={`text-xs sm:text-sm lg:text-base xl:text-lg font-black font-koho leading-none tracking-tight transition-colors whitespace-nowrap ${
+                              className={`text-[9.5px] xs:text-xs sm:text-sm lg:text-base xl:text-lg font-black font-koho leading-none tracking-tight transition-colors whitespace-nowrap ${
                                 isSelected
                                   ? 'text-primary'
                                   : 'text-gray-950 group-hover:text-primary'
@@ -1442,7 +1438,7 @@ export default function FlightResultsStep({
                               {fc.price.toLocaleString('vi-VN')} VND
                             </span>
                             <svg
-                              className={`w-2.5 h-2.5 sm:w-3 sm:h-3 text-gray-400 mt-0.5 sm:mt-1 transition-transform duration-200 ${
+                              className={`w-2 h-2 sm:w-3 sm:h-3 text-gray-400 mt-0.5 sm:mt-1 transition-transform duration-200 ${
                                 isSelected ? 'rotate-180 text-primary' : 'group-hover:text-gray-600'
                               }`}
                               viewBox="0 0 20 20"

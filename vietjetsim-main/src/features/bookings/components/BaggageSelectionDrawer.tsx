@@ -174,7 +174,7 @@ export default function BaggageSelectionDrawer({
           <div className="max-w-xs mx-auto overflow-hidden rounded-xl border border-red-200 shadow-sm bg-white text-center">
             <div className="bg-[#C4161C] py-2 px-4 text-white">
               <div className="text-3xs uppercase tracking-wider text-white/80">Người lớn</div>
-              <div className="text-sm font-black uppercase tracking-tight">{passengerName}</div>
+              <div className="text-sm font-black tracking-tight">{passengerName}</div>
             </div>
             <div className="py-2 px-4 text-xs font-bold text-gray-900 font-koho">
               <div>
