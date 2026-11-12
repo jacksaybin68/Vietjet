@@ -2118,13 +2118,18 @@ export interface SstkToolLogRecord {
 }
 
 export async function getSstkLogs(limit = 50): Promise<SstkToolLogRecord[]> {
-  const rows = await sql`
-    SELECT id, tool_key, tool_label, executed_by, params_json, result_summary, status, created_at
-    FROM sstk_tool_logs
-    ORDER BY created_at DESC
-    LIMIT ${limit}
-  `;
-  return rows as SstkToolLogRecord[];
+  try {
+    const rows = await sql`
+      SELECT id, tool_key, tool_label, executed_by, params_json, result_summary, status, created_at
+      FROM sstk_tool_logs
+      ORDER BY created_at DESC
+      LIMIT ${limit}
+    `;
+    return rows as SstkToolLogRecord[];
+  } catch (error) {
+    console.warn('[DB] getSstkLogs fallback:', error);
+    return [];
+  }
 }
 
 export async function insertSstkLog(
@@ -2135,10 +2140,14 @@ export async function insertSstkLog(
   resultSummary: string,
   status: 'success' | 'error' | 'partial' = 'success'
 ): Promise<void> {
-  await sql`
-    INSERT INTO sstk_tool_logs (tool_key, tool_label, executed_by, params_json, result_summary, status)
-    VALUES (${toolKey}, ${toolLabel}, ${executedBy}, ${paramsJson}, ${resultSummary}, ${status})
-  `;
+  try {
+    await sql`
+      INSERT INTO sstk_tool_logs (tool_key, tool_label, executed_by, params_json, result_summary, status)
+      VALUES (${toolKey}, ${toolLabel}, ${executedBy}, ${paramsJson}, ${resultSummary}, ${status})
+    `;
+  } catch (error) {
+    console.warn('[DB] insertSstkLog fallback:', error);
+  }
 }
 
 // ─── Bank Account (receiving account for bank transfers) ───────────────────
