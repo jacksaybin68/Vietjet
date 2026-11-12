@@ -47,7 +47,7 @@ test.describe('E2E Flow 3: Admin Flight Delay Status & Realtime SSE Alert', () =
     }
 
     // 3. Phía khách hàng: kiểm tra kết nối SSE nhận broadcast cập nhật delay tức thì
-    const delayNotice = passengerPage
+    const _delayNotice = passengerPage
       .locator('text=Hoãn chuyến, text=Delayed, text=thay đổi giờ bay')
       .first();
     // Verify passenger page responds or renders status correctly

@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     const payload = user;
 
     const body = await request.json();
-    const { conversation_id, content } = body;
+    const { conversation_id, content, ask_ai } = body;
 
     if (!conversation_id || !content) {
       return NextResponse.json(
@@ -98,9 +98,16 @@ export async function POST(request: NextRequest) {
     });
 
     let botMessage = null;
-    if (userRole === 'user') {
-      const aiResponse = getVietjetAiPolicyResponse(content.trim());
-      if (aiResponse.matched) {
+    const shouldAskAi =
+      ask_ai === true ||
+      content.includes('[Trợ lý AI]') ||
+      content.toLowerCase().startsWith('@ai') ||
+      content.toLowerCase().startsWith('@bot');
+
+    if (userRole === 'user' && shouldAskAi) {
+      const cleanContent = content.replace(/\[Trợ lý AI\]|@ai|@bot/gi, '').trim();
+      const aiResponse = getVietjetAiPolicyResponse(cleanContent || content.trim());
+      if (aiResponse.matched || aiResponse.category === 'general') {
         // Tự động giải đáp chính sách qua Trợ lý AI Vietjet
         botMessage = await sendChatMessage({
           conversation_id,

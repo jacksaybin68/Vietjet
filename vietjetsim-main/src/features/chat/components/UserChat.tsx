@@ -1039,10 +1039,10 @@ export default function UserChat() {
               {/* Quick AI Policy Suggestions */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 mb-1 no-scrollbar scrollbar-none">
                 {[
-                  { label: '🧳 Hành lý', q: 'Quy định hành lý xách tay và ký gửi như thế nào?' },
-                  { label: '📋 Giấy tờ bay', q: 'Thủ tục giấy tờ bay và thời gian check-in?' },
-                  { label: '🔄 Hoàn/Hủy vé', q: 'Chính sách hoàn vé và đổi ngày bay?' },
-                  { label: '⭐ SkyJoy', q: 'Hệ thống tích điểm SkyJoy và Cash + Points?' },
+                  { label: '🧳 Hành lý', q: '[Trợ lý AI] Quy định hành lý xách tay và ký gửi như thế nào?' },
+                  { label: '📋 Giấy tờ bay', q: '[Trợ lý AI] Thủ tục giấy tờ bay và thời gian check-in?' },
+                  { label: '🔄 Hoàn/Hủy vé', q: '[Trợ lý AI] Chính sách hoàn vé và đổi ngày bay?' },
+                  { label: '⭐ SkyJoy', q: '[Trợ lý AI] Hệ thống tích điểm SkyJoy và Cash + Points?' },
                 ].map((item) => (
                   <button
                     key={item.label}
