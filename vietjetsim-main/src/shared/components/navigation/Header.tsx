@@ -275,9 +275,9 @@ export default function Header({
               type="button"
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Mở menu"
-              className="flex h-8 w-8 items-center justify-center text-white cursor-pointer"
+              className="flex h-10 w-10 -mr-2 items-center justify-center rounded-full text-white cursor-pointer active:bg-white/10 transition-colors"
             >
-              <HiOutlineMenu className="h-7 w-7 text-white" />
+              <HiOutlineMenu className="h-8 w-8" />
             </button>
           </div>
         )}
@@ -299,15 +299,11 @@ export default function Header({
               aria-label="Vietjet Air - Trang chủ"
               className="flex shrink-0 items-center transition hover:opacity-95"
             >
-              <img
-                src="/images/vj-logo.svg"
-                alt="Vietjet Air"
-                className={
-                  compactMode
-                    ? 'h-[28px] w-auto brightness-0 invert lg:h-[30px]'
-                    : 'h-8 sm:h-9 w-auto'
-                }
-              />
+<img
+              src="/images/vj-logo.svg"
+              alt="Vietjet Air"
+              className="h-[24px] w-auto brightness-0 invert lg:h-[32px]"
+            />
             </Link>
 
             {/* Cụm tiện ích bên phải trên desktop */}

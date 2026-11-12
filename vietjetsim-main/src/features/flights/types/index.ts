@@ -30,6 +30,7 @@ export type Flight = {
   aircraft?: string;
   available: number;
   stops: number;
+  status?: string;
 };
 
 export interface FlightSearchParams {

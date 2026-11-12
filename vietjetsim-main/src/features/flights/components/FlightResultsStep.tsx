@@ -8,6 +8,7 @@ import { Icon, AppImage } from '@/shared/components/ui';
 import { FlightResultsSkeleton } from '@/shared/components/ui';
 import { getErrorMessage } from '@/lib/utils';
 import { searchFlightsWithDates, getAirportCity } from '@/features/flights/services';
+import { useFlightStatusSSE } from '@/hooks/useFlightStatusSSE';
 import FareBenefitsModal from './FareBenefitsModal';
 import {
   RiTimeLine,
@@ -410,6 +411,28 @@ const FARE_BENEFITS: Record<
     notIncluded: [],
   },
 };
+
+function FlightRowStatusBadge({ flightId, defaultStatus }: { flightId: string; defaultStatus?: string }) {
+  const { data } = useFlightStatusSSE(flightId);
+  const status = data?.status || defaultStatus;
+
+  if (status === 'delayed') {
+    return (
+      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] sm:text-2xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
+        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+        ⏱ Trễ chuyến
+      </span>
+    );
+  }
+  if (status === 'cancelled') {
+    return (
+      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] sm:text-2xs font-bold bg-red-100 text-red-800 border border-red-300">
+        ✕ Đã hủy
+      </span>
+    );
+  }
+  return null;
+}
 
 export default function FlightResultsStep({
   onSelect,
@@ -1286,9 +1309,12 @@ export default function FlightResultsStep({
                   className="w-[105px] sm:w-[28%] lg:w-[240px] shrink-0 bg-[#FFC700] p-1.5 sm:p-3 lg:p-4 border-r border-yellow-400 flex flex-col items-center justify-between sm:justify-center text-center relative select-none cursor-pointer hover:bg-yellow-400 transition-colors focus:outline-none focus:ring-0"
                 >
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2.5">
-                    <span className="text-[9px] sm:text-2xs font-bold text-gray-900 tracking-wider uppercase leading-tight">
-                      {flight.flightNo}
-                    </span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-[9px] sm:text-2xs font-bold text-gray-900 tracking-wider uppercase leading-tight">
+                        {flight.flightNo}
+                      </span>
+                      <FlightRowStatusBadge flightId={flight.id} defaultStatus={flight.status} />
+                    </div>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 whitespace-nowrap">
                       <span className="text-xs sm:text-base lg:text-xl font-black text-gray-950 font-koho leading-none">

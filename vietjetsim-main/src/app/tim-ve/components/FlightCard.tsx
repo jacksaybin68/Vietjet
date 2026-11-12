@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useFlightStatusSSE } from '@/hooks/useFlightStatusSSE';
 
 export interface FlightPrice {
   business: number;
@@ -11,6 +12,7 @@ export interface FlightPrice {
 
 export interface FlightCardProps {
   flight: {
+    id?: string;
     no: string;
     depart: string;
     arrive: string;
@@ -63,6 +65,7 @@ export default function FlightCard({
   onOpenBenefits,
 }: FlightCardProps) {
   const isSelected = Boolean(selectedClass);
+  const { data: liveStatus } = useFlightStatusSSE(flight.id ?? null);
 
   return (
     <div className="rounded-xl border border-black/10 bg-white overflow-hidden shadow-xs transition-all mb-3">
@@ -86,6 +89,17 @@ export default function FlightCard({
               <span>{flight.aircraft || 'Airbus A321'} - Bay thẳng</span>
             </div>
           </div>
+          {/* Realtime status badges */}
+          {liveStatus?.status === 'delayed' && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700">
+              ⏱ Trễ chuyến
+            </span>
+          )}
+          {liveStatus?.status === 'cancelled' && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">
+              ✕ Đã hủy
+            </span>
+          )}
           <span className="text-3xs text-gray-600 leading-none">˅</span>
         </div>
 

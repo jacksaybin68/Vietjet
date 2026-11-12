@@ -62,6 +62,7 @@ export function mapFlightRecordToFlight(row: FlightRecord): Flight {
       row.to_code,
       (row as unknown as { aircraft?: string }).aircraft
     ),
+    status: row.status,
   };
 }
 

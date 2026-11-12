@@ -21,6 +21,7 @@ import {
   type AncillaryId,
 } from '@/features/bookings/pricing';
 import { canDeselectSeat, canSelectSeat } from '@/features/bookings/seat-adjacency';
+import { useSeatMapSSE } from '@/hooks/useSeatMapSSE';
 import BookingBottomBar from './BookingBottomBar';
 
 interface Props {
@@ -252,6 +253,8 @@ export default function SeatSelectionStep({
   const [timeLeft, setTimeLeft] = useState(HOLD_TIMEOUT_SECONDS);
   const [seatsLoading, setSeatsLoading] = useState(true);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [dynamicSeats, setDynamicSeats] = useState<Record<string, SeatInfo>>(() => ({ ...SEATS }));
+  const { data: liveSeatData } = useSeatMapSSE(flight.id ?? null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   // Infants travel on a lap, so the picker only has to seat the others; the
@@ -289,6 +292,17 @@ export default function SeatSelectionStep({
           if (prev <= 1) {
             clearInterval(intervalRef.current!);
             intervalRef.current = null;
+            if (flight.id && selectedRef.current.length > 0) {
+              fetch('/api/ghe/khoa', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  flightId: flight.id,
+                  seatIds: selectedRef.current,
+                  sessionId: getSessionId(),
+                }),
+              }).catch(() => {});
+            }
             setSelected([]);
             setHoldTimer(null);
             return HOLD_TIMEOUT_SECONDS;
@@ -304,6 +318,27 @@ export default function SeatSelectionStep({
 
   const [exitRowCandidate, setExitRowCandidate] = useState<string | null>(null);
 
+  // Merge live SSE seat data into local dynamicSeats state
+  useEffect(() => {
+    if (!liveSeatData) return;
+    setDynamicSeats((prev) => {
+      const next = { ...prev };
+      for (const seatId of liveSeatData.occupied) {
+        if (next[seatId] && next[seatId].status !== 'occupied') {
+          next[seatId] = { ...next[seatId], status: 'occupied' };
+        }
+      }
+      for (const lock of liveSeatData.locked) {
+        if (next[lock.seatId] && next[lock.seatId].status !== 'occupied') {
+          next[lock.seatId] = { ...next[lock.seatId], status: 'occupied' };
+        }
+      }
+      return next;
+    });
+    // Deselect any seat that became occupied remotely
+    setSelected((prev) => prev.filter((id) => !liveSeatData.occupied.includes(id)));
+  }, [liveSeatData]);
+
   // A child must sit beside an adult; an infant is absent here because it
   // rides on a lap and is filtered out of `seatedPassengers`.
   const paxCounts = React.useMemo(() => {
@@ -317,16 +352,80 @@ export default function SeatSelectionStep({
     return EXIT_ROWS.has(Number(rowMatch[1]));
   }, []);
 
+  const selectedRef = useRef(selected);
+  useEffect(() => {
+    selectedRef.current = selected;
+  }, [selected]);
+
+  const getSessionId = useCallback(() => {
+    if (typeof window === 'undefined') return '';
+    let sid = sessionStorage.getItem('vietjet_seat_session');
+    if (!sid) {
+      sid = 'sess_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+      sessionStorage.setItem('vietjet_seat_session', sid);
+    }
+    return sid;
+  }, []);
+
+  const lockSeatRemote = useCallback(
+    (seatId: string) => {
+      if (!flight.id) return;
+      fetch('/api/ghe/khoa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          flightId: flight.id,
+          seatIds: [seatId],
+          sessionId: getSessionId(),
+        }),
+      }).catch(() => {});
+    },
+    [flight.id, getSessionId]
+  );
+
+  const unlockSeatRemote = useCallback(
+    (seatId: string) => {
+      if (!flight.id) return;
+      fetch('/api/ghe/khoa', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          flightId: flight.id,
+          seatIds: [seatId],
+          sessionId: getSessionId(),
+        }),
+      }).catch(() => {});
+    },
+    [flight.id, getSessionId]
+  );
+
+  // Release locks on unmount
+  useEffect(() => {
+    return () => {
+      if (flight.id && selectedRef.current.length > 0) {
+        fetch('/api/ghe/khoa', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            flightId: flight.id,
+            seatIds: selectedRef.current,
+            sessionId: getSessionId(),
+          }),
+          keepalive: true,
+        }).catch(() => {});
+      }
+    };
+  }, [flight.id, getSessionId]);
+
   const toggleSeat = useCallback(
     (seatId: string) => {
-      const info = SEATS[seatId];
-      if (info.status === 'occupied') return;
+      const info = dynamicSeats[seatId];
+      if (!info || info.status === 'occupied') return;
       if (selected.includes(seatId)) {
-        setSelected((prev) =>
-          canDeselectSeat({ seatId, selected: prev, paxCounts })
-            ? prev.filter((s) => s !== seatId)
-            : prev
-        );
+        if (canDeselectSeat({ seatId, selected, paxCounts })) {
+          setSelected((prev) => prev.filter((s) => s !== seatId));
+          unlockSeatRemote(seatId);
+        }
         return;
       }
       if (isExitRow(seatId)) {
@@ -335,19 +434,21 @@ export default function SeatSelectionStep({
       }
       if (canSelectSeat({ seatId, selected, paxCounts })) {
         setSelected((prev) => [...prev, seatId]);
+        lockSeatRemote(seatId);
       }
     },
-    [selected, paxCounts, isExitRow]
+    [selected, paxCounts, isExitRow, dynamicSeats, lockSeatRemote, unlockSeatRemote]
   );
 
   const confirmExitRowSeat = useCallback(() => {
     if (exitRowCandidate) {
       if (canSelectSeat({ seatId: exitRowCandidate, selected, paxCounts })) {
         setSelected((prev) => [...prev, exitRowCandidate]);
+        lockSeatRemote(exitRowCandidate);
       }
       setExitRowCandidate(null);
     }
-  }, [exitRowCandidate, selected, paxCounts]);
+  }, [exitRowCandidate, selected, paxCounts, lockSeatRemote]);
 
   const handleSeatEnter = useCallback((target: HTMLElement, seatId: string) => {
     const rect = target.getBoundingClientRect();
@@ -372,13 +473,13 @@ export default function SeatSelectionStep({
   const timerUrgent = timeLeft <= 120; // last 2 minutes
   const timerWarning = timeLeft <= 300; // last 5 minutes
 
-  const tooltipSeat = tooltip ? SEATS[tooltip.seatId] : null;
+  const tooltipSeat = tooltip ? dynamicSeats[tooltip.seatId] : null;
 
   const handleConfirm = async () => {
     if (selected.length < passengerCount || isConfirming) return;
     setIsConfirming(true);
     try {
-      const seatPrices = selected.map((seatId) => SEATS[seatId]?.price || 0);
+      const seatPrices = selected.map((seatId) => dynamicSeats[seatId]?.price || 0);
       const advanced = await onConfirm(selected, seatPrices, ancillaries);
       if (!advanced) setIsConfirming(false);
     } catch {
@@ -394,7 +495,7 @@ export default function SeatSelectionStep({
     farePerPassenger: flight.price,
     passengerCount: passengers.length,
     paxCounts: countPassengerTypes(passengers),
-    seatFee: selected.reduce((sum, s) => sum + SEATS[s].price, 0),
+    seatFee: selected.reduce((sum, s) => sum + (dynamicSeats[s]?.price || 0), 0),
     ancillaries,
   });
 
@@ -528,11 +629,19 @@ export default function SeatSelectionStep({
                 {/* Red accent top bar */}
                 <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
                 <div className="p-4 sm:p-5">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1.5 sm:mb-2">
-                    <h2 className="font-black text-[var(--foreground)] flex items-center gap-1.5 sm:gap-2 font-koho">
-                      <span className="inline-block w-1 h-4 sm:h-5 bg-primary rounded-full" />
-                      Chọn chỗ ngồi
-                    </h2>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1.5 sm:mb-2 gap-2">
+                    <div className="flex items-center gap-2">
+                      <h2 className="font-black text-[var(--foreground)] flex items-center gap-1.5 sm:gap-2 font-koho">
+                        <span className="inline-block w-1 h-4 sm:h-5 bg-primary rounded-full" />
+                        Chọn chỗ ngồi
+                      </h2>
+                      {liveSeatData && (
+                        <span className="inline-flex items-center gap-1 text-3xs sm:text-2xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          Trực tuyến
+                        </span>
+                      )}
+                    </div>
                     {/* Heatmap toggle */}
                     <button
                       onClick={() => setShowHeatmap((v) => !v)}
@@ -652,7 +761,7 @@ export default function SeatSelectionStep({
                                 </span>
                                 {COLS.map((col, i) => {
                                   const seatId = `${row}${col}`;
-                                  const info = SEATS[seatId];
+                                  const info = dynamicSeats[seatId] || SEATS[seatId];
                                   const isSelected = selected.includes(seatId);
                                   return (
                                     <React.Fragment key={col}>
@@ -892,7 +1001,7 @@ export default function SeatSelectionStep({
                   ) : (
                     <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
                       {selected.map((seat, i) => {
-                        const info = SEATS[seat];
+                        const info = dynamicSeats[seat] || SEATS[seat];
                         return (
                           <div
                             key={seat}

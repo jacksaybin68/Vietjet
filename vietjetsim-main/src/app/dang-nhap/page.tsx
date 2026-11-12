@@ -187,7 +187,7 @@ function LoginPageInner() {
             </div>
 
             {/* Tab Đăng ký / Đăng nhập — gạch chân đỏ cho tab đang chọn */}
-            <div className="mb-6 flex items-center justify-center gap-12 border-b border-gray-200">
+            <div className="mb-6 flex items-center justify-center gap-8 sm:gap-12 border-b border-gray-200">
               {TABS.map((tab) => {
                 const active = activeKey === tab.key;
                 return (

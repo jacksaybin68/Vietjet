@@ -69,6 +69,9 @@ export const PUBLIC_API_ROUTES = [
   '/api/xac-thuc/lam-moi',
   // Guest chat registration: anonymous by design — creates guest session for Amy chat
   '/api/tro-chuyen/khach',
+  // Realtime SSE streams (flight status & seat map) and anonymous seat holding
+  '/api/sse',
+  '/api/ghe',
 ] as const;
 
 function matchesRoute(pathname: string, route: string): boolean {

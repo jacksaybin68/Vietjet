@@ -307,6 +307,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     const updatedFlight = await updateFlight(flightId, updates);
 
+    // SSE clients at /api/sse/trang-thai-chuyen-bay poll this row every 10 s —
+    // no explicit push needed; the next poll delivers the new status automatically.
+
     // ─── 7. Write audit log ──────────────────────────────────────────────
     try {
       // Extract client info

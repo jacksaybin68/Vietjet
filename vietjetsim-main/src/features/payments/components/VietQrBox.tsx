@@ -75,8 +75,42 @@ export default function VietQrBox({
   const [error, setError] = useState<string | null>(null);
   const [pollState, setPollState] = useState<PollState>('waiting');
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [simulatingWebhook, setSimulatingWebhook] = useState(false);
   const onPaidRef = useRef(onPaid);
   onPaidRef.current = onPaid;
+
+  const handleSimulateBankWebhook = useCallback(async () => {
+    if (!bookingId || simulatingWebhook) return;
+    setSimulatingWebhook(true);
+    try {
+      const res = await fetch('/api/thanh-toan/webhook/vietqr', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-webhook-secret': 'vietqr-dev-webhook-secret',
+        },
+        body: JSON.stringify({
+          bookingId,
+          bookingCode: data?.pnr || undefined,
+          amount: data?.amount,
+          transferNote: data?.addInfo,
+          transactionId: 'TXN-' + Math.random().toString(36).substring(2, 9).toUpperCase(),
+        }),
+      });
+
+      const json = await res.json();
+      if (res.ok && json.success) {
+        setPollState('paid');
+        onPaidRef.current?.();
+      } else {
+        console.warn('Webhook simulation error:', json);
+      }
+    } catch (err) {
+      console.error('Webhook simulation failed:', err);
+    } finally {
+      setSimulatingWebhook(false);
+    }
+  }, [bookingId, data, simulatingWebhook]);
 
   // Render QR SVG từ payload EMVCo
   const generateQrFromPayload = useCallback(async (payloadString: string) => {
@@ -450,6 +484,38 @@ export default function VietQrBox({
             để quét mã thanh toán.
           </p>
         </div>
+
+        {/* Giả lập Webhook ngân hàng (Sandbox / Testing helper) */}
+        {bookingId && (
+          <div className="mt-4 w-full pt-3 border-t border-dashed border-gray-200 flex flex-col items-center">
+            <button
+              type="button"
+              disabled={simulatingWebhook || pollState === 'paid'}
+              onClick={handleSimulateBankWebhook}
+              className="group inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 transition-all shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Icon
+                name="BoltIcon"
+                size={15}
+                className={
+                  simulatingWebhook
+                    ? 'animate-spin text-emerald-600'
+                    : 'text-emerald-600 group-hover:scale-110 transition-transform'
+                }
+              />
+              <span>
+                {simulatingWebhook
+                  ? 'Đang gửi Webhook ngân hàng...'
+                  : pollState === 'paid'
+                    ? 'Đã xác nhận thanh toán thành công'
+                    : 'Giả lập ngân hàng thanh toán thành công (Webhook VietQR)'}
+              </span>
+            </button>
+            <span className="text-[10px] text-gray-500 mt-1">
+              (Tự động chuyển trạng thái vé sang &quot;Đã thanh toán&quot; và mở vé điện tử ngay tức thì)
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

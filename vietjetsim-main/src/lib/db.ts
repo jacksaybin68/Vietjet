@@ -1289,6 +1289,118 @@ export async function getPaymentsByBookingId(bookingId: string): Promise<Payment
   `) as PaymentRecord[];
 }
 
+export type ConfirmVietQrPaymentResult =
+  | {
+      ok: true;
+      booking: BookingRecord;
+      payment: PaymentRecord | null;
+      alreadyPaid: boolean;
+    }
+  | {
+      ok: false;
+      reason: 'not_found' | 'invalid_status' | 'amount_mismatch';
+      booking?: BookingRecord;
+      expectedAmount?: number;
+    };
+
+/**
+ * Settle a booking from a bank/VietQR webhook.
+ *
+ * This is the server-side half of the simulated gateway: it accepts the PNR or
+ * booking id, verifies the transferred amount against what the booking is
+ * worth, and atomically marks the booking confirmed plus its payment
+ * completed. It is idempotent — a repeated delivery reports `alreadyPaid`
+ * instead of inserting a second payment — and it never touches a cancelled or
+ * refunded booking.
+ *
+ * The statements in the batch deliberately all target the booking row (or rows
+ * derived from it) rather than each other's results, because the Neon batch API
+ * runs them independently. The booking `UPDATE` is first so two concurrent
+ * deliveries serialise on its row lock; the second one re-evaluates
+ * `status = 'pending'`, matches nothing, and then sees the payment already
+ * completed in its `NOT EXISTS` check.
+ */
+export async function confirmVietQrPayment(input: {
+  bookingId?: string;
+  bookingCode?: string;
+  amount?: number;
+  transferNote?: string;
+}): Promise<ConfirmVietQrPaymentResult> {
+  const booking =
+    input.bookingId !== undefined
+      ? asFirstRow<BookingRecord>(
+          await sql`SELECT * FROM bookings WHERE id = ${input.bookingId} LIMIT 1`
+        )
+      : asFirstRow<BookingRecord>(
+          await sql`SELECT * FROM bookings WHERE UPPER(booking_code) = UPPER(${input.bookingCode}) LIMIT 1`
+        );
+
+  if (!booking) return { ok: false, reason: 'not_found' };
+
+  if (booking.status === 'cancelled' || booking.status === 'refunded') {
+    return { ok: false, reason: 'invalid_status', booking };
+  }
+
+  const expectedAmount = Math.max(
+    0,
+    Number(booking.total_price || 0) - Number(booking.discount_amount || 0)
+  );
+
+  if (
+    input.amount !== undefined &&
+    Math.round(Number(input.amount)) !== Math.round(expectedAmount)
+  ) {
+    return { ok: false, reason: 'amount_mismatch', booking, expectedAmount };
+  }
+
+  if (booking.status === 'confirmed' || booking.status === 'completed') {
+    const payment = asFirstRow<PaymentRecord>(
+      await sql`SELECT * FROM payments WHERE booking_id = ${booking.id} ORDER BY created_at DESC LIMIT 1`
+    );
+    return { ok: true, booking, payment: payment ?? null, alreadyPaid: true };
+  }
+
+  const transferNote =
+    input.transferNote?.trim() ||
+    (booking.booking_code ? `VJ ${booking.booking_code}` : null);
+
+  const batch = (await sql.transaction([
+    sql`
+      UPDATE bookings
+      SET status = 'confirmed', updated_at = NOW()
+      WHERE id = ${booking.id} AND status = 'pending'
+      RETURNING *
+    `,
+    sql`
+      UPDATE payments
+      SET status = 'completed'
+      WHERE booking_id = ${booking.id} AND status = 'pending'
+      RETURNING *
+    `,
+    sql`
+      INSERT INTO payments (booking_id, method, status, amount, transfer_note)
+      SELECT ${booking.id}, 'vietqr', 'completed', ${expectedAmount}, ${transferNote}
+      WHERE NOT EXISTS (
+        SELECT 1 FROM payments
+        WHERE booking_id = ${booking.id} AND status IN ('pending', 'completed')
+      )
+      RETURNING *
+    `,
+  ])) as unknown[][];
+
+  const confirmedBooking =
+    asFirstRow<BookingRecord>(batch?.[0]) ?? { ...booking, status: 'confirmed' as const };
+  const payment =
+    asFirstRow<PaymentRecord>(batch?.[1]) ??
+    asFirstRow<PaymentRecord>(batch?.[2]) ??
+    asFirstRow<PaymentRecord>(
+      await sql`SELECT * FROM payments WHERE booking_id = ${booking.id} ORDER BY created_at DESC LIMIT 1`
+    ) ??
+    null;
+
+  return { ok: true, booking: confirmedBooking, payment, alreadyPaid: false };
+}
+
 /**
  * Get payment history for a user with pagination.
  */

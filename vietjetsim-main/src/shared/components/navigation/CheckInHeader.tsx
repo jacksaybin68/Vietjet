@@ -61,9 +61,9 @@ export default function CheckInHeader({ title = 'CHECK-IN' }: { title?: string }
             type="button"
             onClick={() => setMobileOpen(true)}
             aria-label="Mở menu"
-            className="flex h-8 w-8 items-center justify-center text-white"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 border border-slate-700 text-white"
           >
-            <HiOutlineMenu className="h-7 w-7 text-white" />
+            <HiOutlineMenu className="h-8 w-8" />
           </button>
         </div>
 
