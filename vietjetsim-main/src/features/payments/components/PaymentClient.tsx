@@ -847,9 +847,6 @@ export default function PaymentClient() {
           <Icon name="CheckCircleIcon" size={18} className="text-primary" />
           Xác nhận chuyển khoản & Tải ảnh biên lai
         </h4>
-        <span className="text-3xs font-extrabold font-koho uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-          Đối chiếu Admin
-        </span>
       </div>
 
       <p className="text-xs text-[var(--foreground-muted)] leading-relaxed">
@@ -941,7 +938,7 @@ export default function PaymentClient() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+      {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
         <div>
           <label className="block text-xs font-semibold font-koho text-[var(--foreground-muted)] mb-1">
             Nội dung chuyển khoản
@@ -967,7 +964,7 @@ export default function PaymentClient() {
             className="w-full px-3 py-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-xs font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
           />
         </div>
-      </div>
+      </div> */}
 
       {/* Nút ĐÃ THANH TOÁN */}
       <button
