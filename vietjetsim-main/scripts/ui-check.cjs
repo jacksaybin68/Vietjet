@@ -400,8 +400,16 @@ async function main() {
 
   const capture = async (name, url, { viewport = VIEWPORTS[0], interact } = {}) => {
     reset();
+    console.log(`  → ${name}-${viewport.label}`);
     const stability = await goto(cdp, url, viewport);
-    const probe = await evaluate(cdp, PROBE);
+    let probe = { error: 'probe failed' };
+    try {
+      probe = await evaluate(cdp, PROBE, 60000);
+    } catch (e) {
+      /* Probe hỏng không được phép giết cả lượt chạy — vẫn chụp ảnh và ghi
+         lỗi vào báo cáo để biết màn nào không đo được. */
+      probe = { error: String(e && e.message ? e.message : e) };
+    }
     const screen = `${name}-${viewport.label}`;
     const file = await shot(cdp, screen);
     results.push({
