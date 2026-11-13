@@ -24,12 +24,13 @@ vi.mock('@/hooks/useToast', () => ({
   })),
 }));
 
-// `SkyJoyIdModal` dùng `useAuth()` để gọi `/api/xac-thuc/*`. Ở test này ta
-// chỉ kiểm tra hình dạng modal và luồng bấm, nên context được stub.
+// `SkyIdAuthFlow` dùng `useAuth()` để gọi `/api/xac-thuc/*`. Ở test này ta
+// chỉ kiểm tra hình dạng form và luồng bấm, nên context được stub.
 const mockAuth = vi.hoisted(() => ({
   signIn: vi.fn(),
   signUp: vi.fn(),
   requestOtp: vi.fn(),
+  signInWithOtp: vi.fn(),
   getCaptcha: vi.fn(),
   getSocialProviders: vi.fn(),
 }));
@@ -43,20 +44,22 @@ beforeEach(() => {
   mockAuth.signIn.mockResolvedValue({ user: { fullName: 'Nguyễn Văn A' } });
   mockAuth.signUp.mockResolvedValue({});
   mockAuth.requestOtp.mockResolvedValue({ success: true });
+  mockAuth.signInWithOtp.mockResolvedValue({ user: { fullName: 'Nguyễn Văn A' } });
   mockAuth.getCaptcha.mockResolvedValue({ token: 'x.y', question: '1 + 1 = ?' });
   mockAuth.getSocialProviders.mockResolvedValue([]);
 });
 
-describe('LoginPage — modal SkyJoy ID 2 cột', () => {
-  it('render header đỏ, modal 2 cột và form đăng nhập SkyJoy ID', () => {
+describe('LoginPage — form SkyID 1 cột', () => {
+  it('render khối form trắng, tiêu đề và chân trang logo SkyJoy ID', () => {
     render(<LoginPage />);
 
-    expect(screen.getByTestId('checkin-header')).toBeInTheDocument();
+    // Bản SkyID 1 cột: KHÔNG còn header đỏ `CheckInHeader` (site thật không có
+    // subheader ở màn này) và KHÔNG còn modal 2 cột + hero ảnh 600×600.
+    expect(screen.queryByTestId('checkin-header')).not.toBeInTheDocument();
+    expect(screen.queryByAltText('Khoang cabin Vietjet Air')).not.toBeInTheDocument();
 
-    // Modal 2 cột: cột trái form + cột phải hero ảnh.
     expect(screen.getByRole('heading', { name: 'Đăng nhập' })).toBeInTheDocument();
     expect(screen.getByText('Được cung cấp và xác thực bởi SkyJoy ID')).toBeInTheDocument();
-    expect(screen.getByAltText('Khoang cabin Vietjet Air')).toBeInTheDocument();
 
     // Ô điện thoại có nhãn "Số điện thoại" và placeholder đúng site thật.
     expect(screen.getByLabelText('Số điện thoại')).toBeInTheDocument();

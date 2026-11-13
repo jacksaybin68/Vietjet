@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import SkyJoyIdModal, { type SkyJoyIdMode } from './SkyJoyIdModal';
+import SkyIdAuthFlow, { type SkyIdMode } from './skyid/SkyIdAuthFlow';
 
 /**
  * Điều phối modal SkyJoy ID cho toàn site.
@@ -22,8 +22,8 @@ export interface OpenAuthModalOptions {
 
 interface AuthModalContextValue {
   isOpen: boolean;
-  mode: SkyJoyIdMode;
-  openAuthModal: (mode: SkyJoyIdMode, options?: OpenAuthModalOptions) => void;
+  mode: SkyIdMode;
+  openAuthModal: (mode: SkyIdMode, options?: OpenAuthModalOptions) => void;
   closeAuthModal: () => void;
 }
 
@@ -31,10 +31,10 @@ const AuthModalContext = createContext<AuthModalContextValue | null>(null);
 
 export function AuthModalProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [mode, setMode] = useState<SkyJoyIdMode>('login');
+  const [mode, setMode] = useState<SkyIdMode>('login');
   const [redirectTo, setRedirectTo] = useState<string | undefined>(undefined);
 
-  const openAuthModal = useCallback((nextMode: SkyJoyIdMode, options?: OpenAuthModalOptions) => {
+  const openAuthModal = useCallback((nextMode: SkyIdMode, options?: OpenAuthModalOptions) => {
     setMode(nextMode);
     setRedirectTo(options?.redirectTo);
     setIsOpen(true);
@@ -53,7 +53,7 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
     <AuthModalContext.Provider value={value}>
       {children}
       {isOpen ? (
-        <SkyJoyIdModal
+        <SkyIdAuthFlow
           variant="overlay"
           mode={mode}
           redirectTo={redirectTo}

@@ -142,14 +142,15 @@ async function main() {
     if (data.row1Icon !== 14) problems.push(`icon sân bay lệch ${data.row1Icon}px (cần 14)`);
     if (data.row1Label !== 48) problems.push(`nhãn sân bay lệch ${data.row1Label}px (cần 48)`);
     if (data.row2Label !== 48) problems.push(`nhãn điểm đến lệch ${data.row2Label}px (cần 48)`);
-    if (data.gapLabelToDate < 4)
-      problems.push(`nhãn chạm cột ngày (hở ${data.gapLabelToDate}px)`);
+    if (data.gapLabelToDate < 4) problems.push(`nhãn chạm cột ngày (hở ${data.gapLabelToDate}px)`);
     if (data.paxBg !== 'rgb(255, 255, 255)')
       problems.push(`hàng Hành khách nền ${data.paxBg} (cần trắng)`);
     if (data.paxIcon !== data.promoIcon)
       problems.push(`icon Hành khách lệch ${data.paxIcon}px vs Mã khuyến mại ${data.promoIcon}px`);
     if (data.paxLabel !== data.promoLabel)
-      problems.push(`nhãn Hành khách lệch ${data.paxLabel}px vs Mã khuyến mại ${data.promoLabel}px`);
+      problems.push(
+        `nhãn Hành khách lệch ${data.paxLabel}px vs Mã khuyến mại ${data.promoLabel}px`
+      );
 
     if (problems.length) {
       console.error('\nSAI LỆCH:\n- ' + problems.join('\n- '));

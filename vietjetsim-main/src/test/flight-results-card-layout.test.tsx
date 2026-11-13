@@ -45,10 +45,9 @@ describe('FlightResultsStep — card bố cục 1 hàng ngang', () => {
         pax="1"
       />
     );
-    await waitFor(
-      () => expect(screen.getByTestId('flight-result-card')).toBeInTheDocument(),
-      { timeout: 4000 }
-    );
+    await waitFor(() => expect(screen.getByTestId('flight-result-card')).toBeInTheDocument(), {
+      timeout: 4000,
+    });
     return screen.getByTestId('flight-result-card');
   };
 
