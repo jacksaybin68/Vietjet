@@ -1,0 +1,33 @@
+{
+  "route": "home",
+  "viewport": "desktop-1440",
+  "header": {
+    "x": 0,
+    "y": 50,
+    "w": 1440,
+    "h": 72,
+    "fs": "14px",
+    "fw": "500",
+    "color": "rgb(255, 255, 255)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "shadow": "none"
+  },
+  "headerBg": "rgba(0, 0, 0, 0)",
+  "headerRadius": "0px",
+  "h1": null,
+  "h2": {
+    "x": 20,
+    "y": 1717,
+    "w": 1400,
+    "h": 76,
+    "fs": "56px",
+    "fw": "600",
+    "color": "rgb(31, 39, 45)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "shadow": "none"
+  },
+  "inputs": [],
+  "submit": null
+}

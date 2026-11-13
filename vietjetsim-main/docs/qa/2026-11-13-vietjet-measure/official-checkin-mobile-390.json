@@ -1,0 +1,58 @@
+{
+  "route": "checkin",
+  "viewport": "mobile-390",
+  "header": null,
+  "headerBg": null,
+  "headerRadius": null,
+  "h1": {
+    "x": 17,
+    "y": 15,
+    "w": 320,
+    "h": 19,
+    "fs": "16px",
+    "fw": "700",
+    "color": "rgb(255, 255, 255)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "shadow": "none"
+  },
+  "h2": null,
+  "inputs": [
+    {
+      "x": 35,
+      "y": 165,
+      "w": 320,
+      "h": 40,
+      "fs": "16px",
+      "fw": "500",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    },
+    {
+      "x": 35,
+      "y": 215,
+      "w": 320,
+      "h": 40,
+      "fs": "16px",
+      "fw": "500",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    }
+  ],
+  "submit": {
+    "x": 132,
+    "y": 1972,
+    "w": 127,
+    "h": 39,
+    "fs": "14px",
+    "fw": "500",
+    "color": "rgb(117, 118, 122)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "10px",
+    "shadow": "none"
+  }
+}

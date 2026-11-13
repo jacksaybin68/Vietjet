@@ -66,7 +66,9 @@ function chromePath() {
     // Header: 4 tầng
     out.announce = box(document.querySelector('header')?.previousElementSibling);
     out.header = box(document.querySelector('header'));
-    out.logo = box(document.querySelector('header img[alt*="Vietjet"], header svg[aria-label*="Vietjet"]'));
+    out.logo = box(
+      document.querySelector('header img[alt*="Vietjet"], header svg[aria-label*="Vietjet"]')
+    );
     out.nav = box(document.querySelector('header nav'));
     out.loginBtn = box(byText('header button, header a', 'Đăng nhập'));
 

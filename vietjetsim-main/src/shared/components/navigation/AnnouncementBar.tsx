@@ -52,6 +52,22 @@ export default function AnnouncementBar() {
   const [index, setIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
 
+  /**
+   * Chiều cao thanh thông báo được công bố ra ngoài qua biến CSS để lớp phủ
+   * header của trang chủ neo ĐÚNG dưới thanh này — kể cả khi người dùng đóng
+   * thanh (khi đó biến = 0px và header dịch lên đúng bằng phần đã đóng).
+   */
+  useEffect(() => {
+    const root = document.documentElement;
+    const visible = !dismissed && messages.length > 0;
+    root.style.setProperty('--vj-announce-h', visible ? '35px' : '0px');
+    root.style.setProperty('--vj-announce-h-lg', visible ? '50px' : '0px');
+    return () => {
+      root.style.removeProperty('--vj-announce-h');
+      root.style.removeProperty('--vj-announce-h-lg');
+    };
+  }, [dismissed, messages.length]);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -94,9 +110,11 @@ export default function AnnouncementBar() {
       aria-label="Thông báo"
       // Site thật: cao 50px trên desktop / 35px trên mobile, nền #FDFDFD,
       // container nội dung 1200px. Xem docs/qa/VIETJET_THAM_SO_GIAO_DIEN_2026-11-13.md §4.
+      // Mobile: đo được 35px (đo lại trực tiếp site thật 13/11/2026, 390×844) —
+      // hàng nội dung cao 26px, nên thanh không được cộng thêm `py-2` như desktop.
       className="w-full min-h-[35px] lg:min-h-[50px] bg-vj-announce-bg text-[var(--foreground)] border-b border-gray-200 flex items-center"
     >
-      <div className="mx-auto flex w-full max-w-[1200px] items-center gap-3.5 px-4 sm:px-6 py-2 text-lg2 lg:text-lg2">
+      <div className="mx-auto flex w-full max-w-[1200px] items-center gap-3.5 px-4 sm:px-6 py-0 lg:py-2 text-lg2 lg:text-lg2">
         {/* Icon chuông: 24×26px (đo được trên site thật). */}
         <RiNotification3Line aria-hidden="true" className="h-[26px] w-[24px] shrink-0 text-vjred" />
 

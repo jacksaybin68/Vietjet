@@ -12,8 +12,10 @@ import {
 } from 'react-icons/hi';
 import { RiHeadphoneLine } from 'react-icons/ri';
 import AnnouncementBar from './AnnouncementBar';
+import SubpageHeader from './SubpageHeader';
 import VietjetMobileDrawer from './VietjetMobileDrawer';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAuthModal } from '@/features/auth/components';
 
 // Nav theo đúng bốn mục của vietjetair.com (site thật render uppercase qua CSS);
 // "Trang chủ" đi qua logo; thao tác đặt vé luôn dẫn về form booking trên trang chủ.
@@ -155,19 +157,35 @@ export default function Header({
   variant = 'default',
   mobileTitle,
   hideMobileLogo = false,
+  mobileRed = false,
 }: {
-  variant?: 'default' | 'compact';
+  variant?: 'default' | 'compact' | 'subpage';
   mobileTitle?: string;
   hideMobileLogo?: boolean;
+  /** Băng đỏ ở mobile (biến thể `subpage`). */
+  mobileRed?: boolean;
 }) {
   const { user, signOut } = useAuth();
   const pathname = usePathname();
+  const { openAuthModal } = useAuthModal();
   const isHomepage = pathname === '/trang-chu';
   // The booking-lookup page mirrors vietjetair.com's single 94px red band:
   // logo + utility row on top, right-aligned primary nav underneath. It shares
   // every dropdown and auth behaviour with the default header, so this is a
   // presentation variant rather than a second component.
   const compactMode = variant === 'compact';
+
+  // `?redirect=` được đọc lúc bấm chứ không qua `useSearchParams`: hook đó bắt
+  // buộc toàn bộ cây phía trên phải nằm trong Suspense khi render tĩnh.
+  const readRedirect = () => {
+    if (typeof window === 'undefined') return undefined;
+    const value = new URLSearchParams(window.location.search).get('redirect');
+    return value && value.startsWith('/') ? value : undefined;
+  };
+
+  const openLogin = () => openAuthModal('login', { redirectTo: readRedirect() });
+  const openRegister = () => openAuthModal('register', { redirectTo: readRedirect() });
+
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState('Tiếng Việt');
@@ -237,6 +255,15 @@ export default function Header({
   // utility controls share one white treatment.
   const lightChrome = transparentMode || compactMode;
 
+  // Biến thể "subpage": header TRẮNG 74px của các trang con (tra cứu
+  // chuyến bay, check-in) — nền #FFFFFF, viền dưới 2px đỏ, bo góc dưới
+  // 16px. Khác hẳn header 4 tầng của trang chủ (lớp phủ hero) và thanh
+  // đỏ của luồng đặt vé.
+  // Hooks đã được gọi hết ở trên nên nhánh sớm này vẫn hợp lệ với rules-of-hooks.
+  if (variant === 'subpage') {
+    return <SubpageHeader title={mobileTitle} mobileRed={mobileRed} />;
+  }
+
   return (
     <>
       {/* Tầng 1: Thanh thông báo tin tức */}
@@ -248,13 +275,133 @@ export default function Header({
             ? 'sticky top-0 z-40 bg-primary-dark text-white shadow-[0_2px_10px_rgba(0,0,0,0.18)]'
             : isHomepage
               ? // Trang chủ: header là lớp PHỦ (absolute) nằm trên ảnh hero —
-                // đúng như site thật, nơi `jss108` có `position:absolute;
-                // top:50px; height:118px; z-index:1300`. Nhờ vậy hero bắt đầu
-                // ngay dưới thanh thông báo 50px, đúng toạ độ site thật.
-                'sticky top-0 z-40 lg:absolute lg:inset-x-0 lg:top-0 lg:z-[1300] lg:h-0 lg:shadow-none'
+                // đúng như site thật, nơi `jss120` có `position:absolute;
+                // top:50px; height:118px; z-index:1300` — tức lớp phủ bắt đầu
+                // NGAY DƯỚI thanh thông báo 50px. Hero cũng bắt đầu ở y=50,
+                // nên header neo ở `top:50px` để cả hai trùng khớp.
+                //
+                // MOBILE: site thật đặt một hàng điều hướng 56px PHỦ lên ảnh
+                // hero (header `position:relative`, y=35..91) — logo trắng 84×15px
+                // tại (13, 51), "Hỗ trợ", "Đăng ký | Đăng nhập", nút "vi" 38×20px
+                // và nút menu. Hàng này neo ngay dưới thanh thông báo nên dùng
+                // biến `--vj-announce-h` (35px, 0px khi đóng thanh).
+                'absolute inset-x-0 top-[var(--vj-announce-h,35px)] z-40 h-[56px] lg:inset-x-0 lg:top-[50px] lg:z-[1300] lg:h-0 lg:shadow-none'
               : 'sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.08)]'
         }`}
       >
+        {/* Hàng điều hướng MOBILE của trang chủ — lớp phủ 56px trên ảnh hero.
+            Số đo site thật (390×844, đo 13/11/2026):
+              - Hàng nằm ở y=35..91 (ngay dưới thanh thông báo 35px).
+              - Nội dung cao 20px, top ở y=48 → padding trên 13px.
+              - Logo trắng 84×15px tại x=13.
+              - "Hỗ trợ": icon tai nghe 12×12px + chữ 10px/700 trắng.
+              - Icon quả địa 14×14px, "Đăng ký | Đăng nhập" 10px/700 trắng.
+              - Nút "vi" 38×20px, viền trắng 1px, bo góc 3px, chữ 14px/500.
+              - Nút menu 12×14px sát mép phải (x=365). */}
+        {!compactMode && isHomepage && (
+          <div className="flex h-full items-start px-[13px] pt-[13px] lg:hidden">
+            {/* Hàng nội dung cao 20px — logo (15px) canh giữa trong hàng nên
+                nằm ở y=51, đúng như site thật. */}
+            <div className="flex h-[20px] w-full items-center">
+              <Link
+                href="/trang-chu"
+                aria-label="Vietjet Air - Trang chủ"
+                className="flex shrink-0 items-center transition hover:opacity-90"
+              >
+                <img
+                  src="/images/vj-logo.svg"
+                  alt="Vietjet Air"
+                  className="h-[15px] w-[84px] object-contain brightness-0 invert"
+                />
+              </Link>
+
+              <div className="ml-auto flex items-center text-white">
+                <a
+                  href="tel:19001166"
+                  aria-label="Gọi hỗ trợ 1900 1166"
+                  className="flex items-center gap-1 text-2xs font-bold text-white transition hover:text-vjgold"
+                >
+                  <RiHeadphoneLine aria-hidden="true" className="h-[12px] w-[12px] shrink-0" />
+                  <span>Hỗ trợ</span>
+                </a>
+
+                <HiOutlineGlobeAlt aria-hidden="true" className="ml-1 h-[14px] w-[14px] shrink-0" />
+
+                <span className="ml-1 text-2xs font-bold text-white">
+                  {user ? (
+                    <span className="max-w-[90px] truncate">
+                      {(user.fullName || user.email)?.replace(/\s*\(CCCD:.*?\)/gi, '')}
+                    </span>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => openRegister()}
+                        className="transition hover:text-vjgold"
+                      >
+                        Đăng ký
+                      </button>
+                      <span className="px-1 text-white/40">|</span>
+                      <button
+                        type="button"
+                        onClick={() => openLogin()}
+                        className="transition hover:text-vjgold"
+                      >
+                        Đăng nhập
+                      </button>
+                    </>
+                  )}
+                </span>
+
+                {/* Nút ngôn ngữ "vi" — 38×20px, viền trắng 1px, bo góc 3px. */}
+                <div ref={langMenuRef} className="relative ml-1">
+                  <button
+                    type="button"
+                    onClick={() => setLangMenuOpen((open) => !open)}
+                    aria-expanded={langMenuOpen}
+                    aria-label="Đổi ngôn ngữ"
+                    className="flex h-[20px] w-[38px] items-center justify-center rounded-[3px] border border-white bg-transparent text-sm font-medium text-white transition hover:bg-white/15"
+                  >
+                    vi
+                  </button>
+
+                  {langMenuOpen && (
+                    <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-36 overflow-hidden rounded-xl border border-gray-200 bg-white py-1 text-gray-800 shadow-lg">
+                      {['Tiếng Việt', 'English'].map((lang) => (
+                        <button
+                          key={lang}
+                          type="button"
+                          onClick={() => {
+                            setCurrentLang(lang);
+                            setLangMenuOpen(false);
+                          }}
+                          className={`flex w-full items-center justify-between px-3 py-2 text-left text-xs font-semibold ${
+                            currentLang === lang
+                              ? 'bg-red-50 font-bold text-vjred'
+                              : 'text-gray-700'
+                          }`}
+                        >
+                          <span>{lang}</span>
+                          {currentLang === lang ? '✓' : null}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(true)}
+                  aria-label="Mở menu"
+                  className="ml-2 flex h-[14px] w-[12px] items-center justify-center text-white transition hover:opacity-80"
+                >
+                  <HiOutlineMenu aria-hidden="true" className="h-[14px] w-[12px]" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Mobile Header for compactMode (< lg) matching Screenshot 3 & 4 */}
         {compactMode && (
           <div className="flex lg:hidden h-14 items-center justify-between px-4 bg-primary-dark text-white shadow-md">
@@ -320,8 +467,10 @@ export default function Header({
                   />
                 </Link>
 
-                {/* Cột phải — rộng 935px (1200 − 265), hai hàng dồn xuống mép phải. */}
-                <div className="ml-auto flex w-[935px] flex-col items-end">
+                {/* Cột phải — rộng 935px (1200 − 265), hai hàng dồn xuống mép phải.
+                    Site thật: hàng tiện ích BẮT ĐẦU ngay dưới padding-top 10px
+                    của lớp phủ (y=60 tuyệt đối), cách hàng menu 15px. */}
+                <div className="ml-auto flex w-[935px] flex-col items-end self-start gap-[15px]">
                   {/* Hàng tiện ích — cao 20px. */}
                   <div className="flex h-[20px] items-center justify-end gap-3 pr-2.5 text-white">
                     {/* 🎧 Hỗ trợ */}
@@ -336,13 +485,21 @@ export default function Header({
                     {/* Globe + Đăng ký | Đăng nhập */}
                     <HiOutlineGlobeAlt aria-hidden="true" className="h-5 w-5 shrink-0" />
                     <span className="text-base font-bold text-white">
-                      <Link href="/dang-ky" className="transition hover:text-vjgold">
+                      <button
+                        type="button"
+                        onClick={() => openRegister()}
+                        className="transition hover:text-vjgold"
+                      >
                         Đăng ký
-                      </Link>
+                      </button>
                       <span className="px-1.5 text-white">|</span>
-                      <Link href="/dang-nhap" className="transition hover:text-vjgold">
+                      <button
+                        type="button"
+                        onClick={() => openLogin()}
+                        className="transition hover:text-vjgold"
+                      >
                         Đăng nhập
-                      </Link>
+                      </button>
                     </span>
 
                     {/* Nút ngôn ngữ — viền trắng 1px, bo góc 3px, cao 20px. */}
@@ -506,8 +663,10 @@ export default function Header({
                 </div>
               </div>
 
-              {/* Tầng 3 — Dải dịch vụ phụ, cao 35px, nền gradient đen → trong suốt. */}
-              <div className="vj-quick-rail-wrap">
+              {/* Tầng 3 — Dải dịch vụ phụ, cao 35px, nền gradient đen → trong suốt.
+                  Site thật: dải bắt đầu 5px dưới hàng menu (y=133 tuyệt đối)
+                  và căn PHẢI trong container 1200px (mục cuối kết thúc ở x=1320). */}
+              <div className="vj-quick-rail-wrap mt-[5px]">
                 <ul className="vj-quick-rail mx-auto max-w-[1200px]">
                   {QUICK_SERVICES.map((item) => (
                     <li key={item.label} className={item.highlight ? 'active' : undefined}>
@@ -659,23 +818,25 @@ export default function Header({
                         lightChrome ? 'text-white' : 'text-vjred'
                       }`}
                     />
-                    <Link
-                      href="/dang-ky"
+                    <button
+                      type="button"
+                      onClick={() => openRegister()}
                       className={`transition hover:underline ${
                         lightChrome ? 'hover:text-vjgold' : 'hover:text-vjred'
                       }`}
                     >
                       Đăng ký
-                    </Link>
+                    </button>
                     <span className={lightChrome ? 'text-white/40' : 'text-gray-400'}>|</span>
-                    <Link
-                      href="/dang-nhap"
+                    <button
+                      type="button"
+                      onClick={() => openLogin()}
                       className={`transition hover:underline ${
                         lightChrome ? 'hover:text-vjgold' : 'hover:text-vjred'
                       }`}
                     >
                       Đăng nhập
-                    </Link>
+                    </button>
                   </div>
                 )}
 
@@ -757,19 +918,21 @@ export default function Header({
                         : 'border-gray-200 bg-gray-100 text-gray-800'
                     }`}
                   >
-                    <Link
-                      href="/dang-ky"
+                    <button
+                      type="button"
+                      onClick={() => openRegister()}
                       className="hover:text-vjyellow transition hover:underline"
                     >
                       Đăng ký
-                    </Link>
+                    </button>
                     <span className={lightChrome ? 'text-white/40' : 'text-gray-400'}>|</span>
-                    <Link
-                      href="/dang-nhap"
+                    <button
+                      type="button"
+                      onClick={() => openLogin()}
                       className="hover:text-vjyellow transition hover:underline"
                     >
                       Đăng nhập
-                    </Link>
+                    </button>
                   </div>
                 )}
 

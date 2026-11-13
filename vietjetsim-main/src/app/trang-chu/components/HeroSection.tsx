@@ -79,13 +79,21 @@ export default function HeroSection() {
     //     y=214 (164px tính từ đỉnh hero).
     //   - Chấm điều hướng slider: `ul` absolute tại top 589.016px (hero-relative),
     //     canh giữa toàn bề ngang, mỗi chấm 20×20px.
+    //
+    // MOBILE (390×844, đo trực tiếp site thật):
+    //   - Ảnh slider cao 422px, bắt đầu ngay dưới thanh thông báo 35px
+    //     (y=35..457) — hàng header 56px PHỦ lên trên ảnh.
+    //   - Chấm điều hướng: `ul` absolute tại top 297px (hero-relative) →
+    //     y=332 tuyệt đối, mỗi chấm 20×20px nằm ở y=338.
+    //   - Dải đặt vé PHỦ xuống banner: hàng tab bắt đầu ở y=368, thân panel
+    //     ở y=420 (cao 305px) → tổng khối đặt vé tràn xuống dưới banner.
     // Lưu ý: `section` KHÔNG dùng `overflow-hidden` — popover lịch 630px mở ra
     // ngoài khung panel và sẽ bị cắt mất nếu khối cha cắt tràn. Ảnh nền vẫn
     // được cắt riêng trong lớp bọc của nó.
-    <section className="relative w-full bg-sky-100">
+    <section className="relative w-full bg-sky-100 pb-[268px] lg:pb-0">
       <h1 className="sr-only">Vietjet Air - Thông báo quan trọng Nhà ga T3 Jakarta</h1>
 
-      <div className="relative h-[380px] sm:h-[560px] lg:h-[725px]">
+      <div className="relative h-[422px] sm:h-[560px] lg:h-[725px]">
         {/* Ảnh nền hero — slider các banner. */}
         <div className="absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
           {HERO_BANNERS.map((banner, idx) => (
@@ -105,11 +113,12 @@ export default function HeroSection() {
         </div>
 
         {/* Chấm điều hướng slider — site thật: absolute tại top 589.016px tính từ
-            đỉnh hero, `text-align:center`, mỗi chấm là nút 20×20px với nội dung
-            "•" 12px (trắng khi không active, đỏ #EC2029 khi active). */}
+            đỉnh hero (desktop) / top 297px (mobile 390×844), `text-align:center`,
+            mỗi chấm là nút 20×20px với nội dung "•" 12px (trắng khi không active,
+            đỏ #EC2029 khi active). */}
         <ul
           data-testid="hero-slider-dots"
-          className="pointer-events-none absolute inset-x-0 top-[589px] z-20 flex justify-center"
+          className="pointer-events-none absolute inset-x-0 top-[297px] z-20 flex justify-center pt-[6px] lg:top-[589px] lg:pt-0"
         >
           {HERO_BANNERS.map((_, idx) => (
             <li key={idx} className="relative inline-block h-5 w-5">
@@ -132,7 +141,7 @@ export default function HeroSection() {
           dưới banner. Nếu render hai bản (một cho desktop, một cho mobile)
           thì form bị trùng `id` và mọi test truy vấn theo vai trò đều gặp
           "nhiều phần tử khớp" — nên chỉ có một bản, đổi cách đặt theo breakpoint. */}
-      <div className="relative z-20 mx-auto w-full max-w-[1200px] lg:absolute lg:left-1/2 lg:top-[164px] lg:-translate-x-1/2 lg:flex lg:justify-end lg:px-0">
+      <div className="absolute inset-x-0 top-[333px] z-20 mx-auto w-full max-w-[1200px] lg:inset-x-auto lg:left-1/2 lg:top-[164px] lg:-translate-x-1/2 lg:flex lg:justify-end lg:px-0">
         <div className="w-full lg:w-[380px] lg:max-w-[380px]">
           <HeroBookingWidget />
         </div>

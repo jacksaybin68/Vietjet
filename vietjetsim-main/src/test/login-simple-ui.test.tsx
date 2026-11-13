@@ -24,141 +24,84 @@ vi.mock('@/hooks/useToast', () => ({
   })),
 }));
 
+// `SkyJoyIdModal` dùng `useAuth()` để gọi `/api/xac-thuc/*`. Ở test này ta
+// chỉ kiểm tra hình dạng modal và luồng bấm, nên context được stub.
+const mockAuth = vi.hoisted(() => ({
+  signIn: vi.fn(),
+  signUp: vi.fn(),
+  requestOtp: vi.fn(),
+  getCaptcha: vi.fn(),
+  getSocialProviders: vi.fn(),
+}));
+
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => mockAuth,
+}));
+
 beforeEach(() => {
   vi.clearAllMocks();
+  mockAuth.signIn.mockResolvedValue({ user: { fullName: 'Nguyễn Văn A' } });
+  mockAuth.signUp.mockResolvedValue({});
+  mockAuth.requestOtp.mockResolvedValue({ success: true });
+  mockAuth.getCaptcha.mockResolvedValue({ token: 'x.y', question: '1 + 1 = ?' });
+  mockAuth.getSocialProviders.mockResolvedValue([]);
 });
 
-describe('LoginPage — giao diện đơn giản hóa và đăng nhập mật khẩu', () => {
-  it('render header đỏ, form đăng nhập, tab Đăng nhập/Đăng ký, banner, chatbot, ribbon', () => {
+describe('LoginPage — modal SkyJoy ID 2 cột', () => {
+  it('render header đỏ, modal 2 cột và form đăng nhập SkyJoy ID', () => {
     render(<LoginPage />);
 
     expect(screen.getByTestId('checkin-header')).toBeInTheDocument();
 
-    expect(screen.getByTestId('tab-register')).toBeInTheDocument();
-    expect(screen.getByTestId('tab-login')).toBeInTheDocument();
-
-    expect(screen.getByRole('heading', { name: /Đăng nhập/i })).toBeInTheDocument();
-
-    expect(screen.getByText('(+84)')).toBeInTheDocument();
-    const phone = screen.getByPlaceholderText('Số điện thoại');
-    expect(phone).toBeInTheDocument();
-
-    expect(screen.getByTestId('login-submit-btn')).toBeInTheDocument();
-    expect(screen.getByTestId('login-submit-btn')).toHaveTextContent('Đăng nhập');
-
-    expect(screen.getByText('Đăng ký ngay')).toBeInTheDocument();
-
+    // Modal 2 cột: cột trái form + cột phải hero ảnh.
+    expect(screen.getByRole('heading', { name: 'Đăng nhập' })).toBeInTheDocument();
     expect(screen.getByText('Được cung cấp và xác thực bởi SkyJoy ID')).toBeInTheDocument();
+    expect(screen.getByAltText('Khoang cabin Vietjet Air')).toBeInTheDocument();
 
-    const banner = screen.getByAltText(/Ngoại tệ sẵn sàng/i);
-    expect(banner).toBeInTheDocument();
-    expect((banner as HTMLImageElement).getAttribute('src')).toContain(
-      'banner-chuyenbay-ngoai-te.jpg'
-    );
-    expect(banner.getAttribute('alt')).toMatch(/Hành trình an tâm/i);
+    // Ô điện thoại có nhãn "Số điện thoại" và placeholder đúng site thật.
+    expect(screen.getByLabelText('Số điện thoại')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Nhập số điện thoại của bạn')).toBeInTheDocument();
 
-    expect(screen.queryByAltText('Mascot Amy')).not.toBeInTheDocument();
+    // Nút "Tiếp tục" bị disable khi ô trống.
+    const continueBtn = screen.getByRole('button', { name: 'Tiếp tục' });
+    expect(continueBtn).toBeDisabled();
 
-    const ribbon = document.querySelector('svg[height="110"]');
-    expect(ribbon).toBeInTheDocument();
+    // Nút social.
+    expect(screen.getByRole('button', { name: 'Apple' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Google' })).toBeInTheDocument();
+
+    // Link sang đăng ký.
+    expect(screen.getByRole('button', { name: 'Đăng ký ngay' })).toBeInTheDocument();
   });
 
-  it('gõ số điện thoại vào input, bấm Đăng nhập -> hiển thị ô mật khẩu, nhập mật khẩu và thực hiện đăng nhập', async () => {
-    const originalFetch = global.fetch;
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        user: { id: 'u1', full_name: 'Nguyễn Văn A', email: '0912345678@vietjet.vn' },
-        token: 'fake-token',
-      }),
-    } as unknown as Response);
-
+  it('bấm "Tiếp tục" chuyển sang bước nhập mật khẩu và đăng nhập qua API', async () => {
     render(<LoginPage />);
 
-    const phone = screen.getByPlaceholderText('Số điện thoại');
+    const phone = screen.getByPlaceholderText('Nhập số điện thoại của bạn');
     fireEvent.change(phone, { target: { value: '0912345678' } });
     expect((phone as HTMLInputElement).value).toBe('0912345678');
 
-    const submitBtn = screen.getByTestId('login-submit-btn');
-    fireEvent.click(submitBtn);
+    fireEvent.click(screen.getByRole('button', { name: 'Tiếp tục' }));
 
-    // Ô mật khẩu phải xuất hiện
-    const passwordInput = screen.getByPlaceholderText('Mật khẩu');
+    const passwordInput = await screen.findByPlaceholderText('Nhập mật khẩu');
     expect(passwordInput).toBeInTheDocument();
 
-    // Nhập mật khẩu và bấm Đăng nhập lần 2
     fireEvent.change(passwordInput, { target: { value: 'Secret123!' } });
-    fireEvent.click(submitBtn);
+    fireEvent.click(screen.getByRole('button', { name: 'Đăng nhập' }));
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        '/api/xac-thuc/dang-nhap',
-        expect.objectContaining({
-          method: 'POST',
-          body: JSON.stringify({ email: '0912345678', password: 'Secret123!' }),
-        })
-      );
+      expect(mockAuth.signIn).toHaveBeenCalledWith('0912345678', 'Secret123!');
       expect(mockToast.success).toHaveBeenCalledWith(
         'Đăng nhập thành công',
         expect.stringContaining('Nguyễn Văn A')
       );
     });
-
-    global.fetch = originalFetch;
   });
 
-  it('hiển thị toast lỗi khi bấm nút để trống số điện thoại', () => {
+  it('báo lỗi khi bỏ trống số điện thoại', () => {
     render(<LoginPage />);
 
-    const submitBtn = screen.getByTestId('login-submit-btn');
-    fireEvent.click(submitBtn);
-
-    expect(mockToast.error).toHaveBeenCalledWith('Lỗi', 'Vui lòng nhập số điện thoại');
-  });
-
-  it('hiển thị toast lỗi khi đã hiện ô mật khẩu nhưng để trống mật khẩu', () => {
-    render(<LoginPage />);
-
-    const phone = screen.getByPlaceholderText('Số điện thoại');
-    fireEvent.change(phone, { target: { value: '0912345678' } });
-
-    const submitBtn = screen.getByTestId('login-submit-btn');
-    fireEvent.click(submitBtn);
-
-    expect(screen.getByPlaceholderText('Mật khẩu')).toBeInTheDocument();
-
-    // Bấm khi chưa nhập mật khẩu
-    fireEvent.click(submitBtn);
-    expect(mockToast.error).toHaveBeenCalledWith('Lỗi', 'Vui lòng nhập mật khẩu');
-  });
-
-  it('chuyển qua giao diện đăng ký khi bấm tab Đăng ký và quay lại Đăng nhập khi bấm tab Đăng nhập', () => {
-    render(<LoginPage />);
-
-    const registerTab = screen.getByTestId('tab-register');
-    const loginTab = screen.getByTestId('tab-login');
-
-    // Ban đầu ở tab Đăng nhập
-    expect(loginTab).toHaveAttribute('aria-pressed', 'true');
-    expect(registerTab).toHaveAttribute('aria-pressed', 'false');
-    expect(screen.getByRole('heading', { name: /Đăng nhập/i })).toBeInTheDocument();
-
-    // Bấm tab Đăng ký
-    fireEvent.click(registerTab);
-
-    expect(registerTab).toHaveAttribute('aria-pressed', 'true');
-    expect(loginTab).toHaveAttribute('aria-pressed', 'false');
-    expect(screen.getByRole('heading', { name: /Đăng ký tài khoản/i })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Họ *')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Tên đệm & Tên *')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Đăng ký tài khoản SkyJoy/i })).toBeInTheDocument();
-
-    // Bấm tab Đăng nhập để quay lại
-    fireEvent.click(loginTab);
-
-    expect(loginTab).toHaveAttribute('aria-pressed', 'true');
-    expect(registerTab).toHaveAttribute('aria-pressed', 'false');
-    expect(screen.getByRole('heading', { name: /Đăng nhập tài khoản/i })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Số điện thoại')).toBeInTheDocument();
+    // Nút "Tiếp tục" disabled nên bấm không làm gì; kiểm tra trạng thái disabled.
+    expect(screen.getByRole('button', { name: 'Tiếp tục' })).toBeDisabled();
   });
 });

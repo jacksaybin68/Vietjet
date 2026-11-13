@@ -20,9 +20,9 @@ vi.mock('next/link', () => ({
 import MobileBottomNav, { BOTTOM_NAV_HEIGHT } from '@/shared/components/navigation/MobileBottomNav';
 
 const TABS = [
-  ['Đặt vé', '/trang-chu#hero-booking-form'],
-  ['Chuyến của tôi', '/chuyen-bay-cua-toi'],
-  ['Hành lý & chỗ', '/dich-vu?service=baggage'],
+  ['Đặt chuyến bay', '/trang-chu#hero-booking-form'],
+  ['Chuyến bay của tôi', '/chuyen-bay-cua-toi'],
+  ['Mua hành lý, chỗ ngồi...', '/dich-vu?service=baggage'],
   ['Check-in', '/lam-thu-tuc'],
 ] as const;
 
@@ -59,7 +59,7 @@ describe('MobileBottomNav', () => {
       .getAllByRole('link')
       .filter((a) => a.getAttribute('aria-current') === 'page');
     expect(current).toHaveLength(1);
-    expect(current[0]).toHaveTextContent('Hành lý & chỗ');
+    expect(current[0]).toHaveTextContent('Mua hành lý, chỗ ngồi...');
   });
 
   // The sign-in and admin screens have their own fixed furniture, and a

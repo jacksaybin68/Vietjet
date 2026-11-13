@@ -43,11 +43,13 @@ export default function AuthShell({
                       {eyebrow}
                     </div>
                   )}
-                  <h2 className="font-black text-xl sm:text-2xl uppercase tracking-tight text-gray-900 font-koho">
+                  <h2 className="font-koho text-xl font-semibold uppercase leading-[26px] tracking-tight text-gray-900">
                     {title}
                   </h2>
                   {subtitle && (
-                    <p className="mt-1 text-xs sm:text-sm text-gray-500 font-medium">{subtitle}</p>
+                    <p className="mt-1 text-base font-medium leading-[21.28px] text-gray-500">
+                      {subtitle}
+                    </p>
                   )}
                 </div>
               )}

@@ -1,158 +1,27 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useState } from 'react';
-import { HiOutlineUserCircle } from 'react-icons/hi';
-import { RiHeadphoneLine } from 'react-icons/ri';
-import { HiOutlineMenu } from 'react-icons/hi';
-import { useAuth } from '@/contexts/AuthContext';
-
-import VietjetMobileDrawer from './VietjetMobileDrawer';
+import SubpageHeader from './SubpageHeader';
 
 /**
- * Header cho trang Check-in: 1 thanh đỏ duy nhất (không AnnouncementBar,
- * không Utility bar riêng, không Quick-rail).
+ * Header cho trang Check-in.
  *
- * - Chiều cao 74px trên desktop, 54px trên mobile, nền gradient #D91E18 → #C4161C.
- * - Trên mobile: hiện thanh đỏ với tiêu đề "CHECK-IN" ở giữa, nút hamburger ở phải.
- * - Bấm hamburger mở VietjetMobileDrawer đúng chuẩn ảnh tham chiếu.
+ * Số đo lấy từ DOM sống của vietjetair.com (13/11/2026, 1440×900):
+ *   - Header TRẮNG 74px: nền `#FFFFFF`, viền dưới 2px `#E31E24`, bo góc
+ *     dưới 16px, shadow `rgba(0,0,0,0.08) 0 8px 24px`.
+ *   - Nội dung trang bắt đầu NGAY dưới header (y=77, container 1200px).
+ *
+ * Ở MOBILE site thật dùng băng đỏ toàn chiều rộng với `H1` trắng `16px/700`
+ * uppercase (`LÀM THỦ TỤC`) — nên `mobileRed` mặc định bật.
+ *
+ * Trước đây trang này dùng 1 thanh đỏ gradient 70px — không khớp site thật.
+ * Nay dùng chung `SubpageHeader` với các trang con khác.
  */
-const NAV_LINKS = [
-  { label: 'CHUYẾN BAY CỦA TÔI', href: '/chuyen-bay-cua-toi' },
-  { label: 'ONLINE CHECK-IN', href: '/lam-thu-tuc' },
-  { label: 'DỊCH VỤ CHUYẾN BAY', href: '/dich-vu' },
-  { label: 'DỊCH VỤ KHÁC', href: '/dich-vu#khac' },
-] as const;
-
-export default function CheckInHeader({ title = 'CHECK-IN' }: { title?: string }) {
-  const { user } = useAuth();
-  const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  const isActive = (href: string) =>
-    href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
-
-  return (
-    <>
-      <header
-        className="sticky top-0 z-40 h-[54px] lg:h-[70px] text-white shadow-[0_2px_10px_rgba(0,0,0,0.20)]"
-        style={{
-          background: 'linear-gradient(180deg, #D91E18 0%, #C4161C 100%)',
-        }}
-      >
-        {/* Mobile Header (< lg) matching Screenshot 1 */}
-        <div className="flex lg:hidden h-full items-center justify-between px-4">
-          <Link
-            href="/trang-chu"
-            aria-label="Vietjet Air - Trang chủ"
-            className="flex shrink-0 items-center transition hover:opacity-90"
-          >
-            <img
-              src="/images/vj-logo.svg"
-              alt="Vietjet Air"
-              className="h-[22px] w-auto brightness-0 invert"
-            />
-          </Link>
-          <h1 className="font-sans font-black italic tracking-wider text-lg sm:text-xl uppercase text-white text-center">
-            {title}
-          </h1>
-          <button
-            type="button"
-            onClick={() => setMobileOpen(true)}
-            aria-label="Mở menu"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 border border-slate-700 text-white"
-          >
-            <HiOutlineMenu className="h-8 w-8" />
-          </button>
-        </div>
-
-        {/* Desktop Header (>= lg) */}
-        <div className="hidden lg:block mx-auto max-w-[1080px] h-full px-4 sm:px-6 lg:px-8">
-          <div className="flex h-full items-center justify-between">
-            {/* Logo (trái) */}
-            <Link
-              href="/trang-chu"
-              aria-label="Vietjet Air - Trang chủ"
-              className="flex shrink-0 items-center transition hover:opacity-90"
-            >
-              <img
-                src="/images/vj-logo.svg"
-                alt="Vietjet Air"
-                className="h-[28px] sm:h-[30px] w-auto brightness-0 invert"
-              />
-            </Link>
-
-            {/* Phải: 2 hàng (tiện ích trên, menu dưới) */}
-            <div className="flex flex-col items-end justify-between">
-              {/* Hàng trên: Cụm tiện ích */}
-              <div className="flex items-center gap-[10px] text-sm3 font-semibold text-white">
-                <a
-                  href="tel:19001166"
-                  className="flex items-center gap-1.5 text-white hover:text-vjyellow transition-colors"
-                >
-                  <RiHeadphoneLine aria-hidden="true" className="h-3.5 w-3.5 text-white" />
-                  <span>Hỗ trợ</span>
-                </a>
-
-                {user ? (
-                  <span className="flex items-center gap-1.5 text-white">
-                    <HiOutlineUserCircle aria-hidden="true" className="h-4 w-4 text-white" />
-                    <span>{(user.fullName || user.email)?.replace(/\s*\(CCCD:.*?\)/gi, '')}</span>
-                  </span>
-                ) : (
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/35 bg-black/25 hover:bg-black/35 text-white backdrop-blur-xs transition-all shadow-2xs font-bold text-xs">
-                    <HiOutlineUserCircle aria-hidden="true" className="h-4 w-4 text-white" />
-                    <Link
-                      href="/dang-ky"
-                      className="text-white hover:text-vjyellow transition-colors hover:underline"
-                    >
-                      Đăng ký
-                    </Link>
-                    <span className="text-white/40">|</span>
-                    <Link
-                      href="/dang-nhap"
-                      className="text-white hover:text-vjyellow transition-colors hover:underline"
-                    >
-                      Đăng nhập
-                    </Link>
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  className="flex items-center justify-center h-[22px] px-2 rounded-[3px] border border-white/85 bg-transparent text-xs font-semibold text-white hover:bg-white/10 transition-colors"
-                >
-                  <span>Tiếng Việt</span>
-                  <span>▾</span>
-                </button>
-              </div>
-
-              {/* Hàng dưới: Thanh Menu chính */}
-              <nav aria-label="Điều hướng chính" className="flex items-center gap-[22px]">
-                {NAV_LINKS.map((link) => {
-                  const active = isActive(link.href);
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      aria-current={active ? 'page' : undefined}
-                      className={`relative text-sm2 font-semibold uppercase text-white transition-colors ${
-                        active ? 'font-extrabold' : 'hover:text-vjyellow'
-                      }`}
-                    >
-                      {link.label}
-                    </Link>
-                  );
-                })}
-              </nav>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Vietjet Mobile Drawer matching Screenshot 6 */}
-      <VietjetMobileDrawer isOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
-    </>
-  );
+export default function CheckInHeader({
+  title = 'ONLINE CHECK-IN',
+  mobileRed = true,
+}: {
+  title?: string;
+  mobileRed?: boolean;
+}) {
+  return <SubpageHeader title={title} mobileRed={mobileRed} />;
 }

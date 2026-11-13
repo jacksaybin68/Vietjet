@@ -293,6 +293,21 @@ module.exports = {
           'green-2': '#3DCC4A',
           // Nền announcement bar trên site thật.
           'announce-bg': '#FDFDFD',
+          // ─── Token đo từ vietjetair.com (trang con: my/search-booking, checkin) ───
+          // Header trang con: nền trắng, viền dưới 2px đỏ #E31E24.
+          'header-sub': '#FFFFFF',
+          'header-sub-border': '#E31E24',
+          // Nút pill trắng của header ("Tải ứng dụng").
+          'pill-gray': '#F7F7F7',
+          'pill-gray-border': '#DDDDDD',
+          // Nút pill vàng ("Đăng nhập") — gradient #FFEB63 → #F5D200.
+          'pill-gold-from': '#FFEB63',
+          'pill-gold-to': '#F5D200',
+          'pill-gold-border': '#F0CC00',
+          // Chữ nav trang con #1F1F1F, chữ chính #333333.
+          'nav-ink': '#1F1F1F',
+          // Màu chữ của nút "Tìm kiếm" khi bị vô hiệu (MUI disabled).
+          'btn-disabled-ink': '#75767A',
           // ─── Hạng vé (đo từ vietjetair.com) ───
           // Nhãn hạng vé nền đặc: Business dùng nâu-vàng, Deluxe cam, Eco xanh.
           'fare-business': '#8E7022',
@@ -360,8 +375,12 @@ module.exports = {
         'br-vj': '0 0 10px 0',
         // `rounded-xs` được tham chiếu ở một vài component.
         xs: '0.125rem',
-        // Bo góc thanh điều hướng dưới ở mobile.
-        'vj-bottomnav': '15px 15px 0 0',
+        // Bo góc thanh điều hướng dưới ở mobile: 15px 15px 0 0 (site thật).
+        // Ghi dưới dạng giá trị đơn để `rounded-t-vj-bottomnav` sinh được —
+        // Tailwind không nội suy được utility theo hướng với token 4 giá trị.
+        'vj-bottomnav': '15px',
+        // Header trang con (my/search-booking, checkin): trắng, bo góc dưới.
+        'vj-header': '0 0 16px 16px',
       },
       boxShadow: {
         'vj-sm': '0 2px 8px rgba(0,0,0,0.07)',
@@ -432,6 +451,8 @@ module.exports = {
         // Thanh điều hướng dưới ở mobile.
         'gradient-vj-bottomnav':
           'linear-gradient(rgba(0,0,0,0.8) 4.03%, rgba(0,0,0,0.153) 216.13%)',
+        // Nút pill vàng của header trang con ("Đăng nhập").
+        'gradient-vj-pill-gold': 'linear-gradient(rgb(255, 235, 99) 0%, rgb(245, 210, 0) 100%)',
       },
       animation: {
         'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',

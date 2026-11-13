@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import '../styles/tailwind.css';
 import { PageTransition } from '@/shared/components/layouts';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthModalProvider } from '@/features/auth/components';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { ChatWidgets } from '@/features/chat';
 import { SiteOverlays } from '@/shared/components/feedback/SiteOverlays';
@@ -100,14 +101,18 @@ export default function RootLayout({
         <MobileBottomNav />
         <ThemeProvider>
           <AuthProvider>
-            {/* Đây là `<div>`, không phải `<main>`: `children` chứa luôn `<Header />`
+            {/* Modal SkyJoy ID mở từ header — bọc ngoài `children` để mọi
+                route (kể cả trang con) đều mở được cùng một modal. */}
+            <AuthModalProvider>
+              {/* Đây là `<div>`, không phải `<main>`: `children` chứa luôn `<Header />`
                 của từng trang, nên một landmark ở tầng này sẽ bọc cả thanh điều
                 hướng lặp lại — skip link trỏ vào nó thì Tab kế tiếp rơi đúng vào
                 announcement bar, tức là không bỏ qua được gì. Từng trang tự đặt
                 `<main id="main-content">` **sau** `<Header />` của nó. */}
-            <div>
-              <PageTransition>{children}</PageTransition>
-            </div>
+              <div>
+                <PageTransition>{children}</PageTransition>
+              </div>
+            </AuthModalProvider>
             <ChatWidgets />
             <SiteOverlays />
           </AuthProvider>

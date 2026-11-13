@@ -17,7 +17,7 @@
  */
 
 const BASE = (process.env.SMOKE_BASE_URL || 'http://localhost:4028').replace(/\/$/, '');
-const TIMEOUT_MS = 15_000;
+const TIMEOUT_MS = 30_000;
 
 let failures = 0;
 

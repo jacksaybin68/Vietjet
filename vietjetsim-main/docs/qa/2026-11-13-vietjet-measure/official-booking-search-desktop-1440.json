@@ -1,0 +1,22 @@
+{
+  "route": "booking-search",
+  "viewport": "desktop-1440",
+  "header": {
+    "x": 16,
+    "y": 0,
+    "w": 1408,
+    "h": 74,
+    "fs": "16px",
+    "fw": "500",
+    "color": "rgb(31, 31, 31)",
+    "bg": "rgb(255, 255, 255)",
+    "radius": "0px 0px 16px 16px",
+    "shadow": "rgba(0, 0, 0, 0.08) 0px 8px 24px 0px"
+  },
+  "headerBg": "rgb(255, 255, 255)",
+  "headerRadius": "0px 0px 16px 16px",
+  "h1": null,
+  "h2": null,
+  "inputs": [],
+  "submit": null
+}

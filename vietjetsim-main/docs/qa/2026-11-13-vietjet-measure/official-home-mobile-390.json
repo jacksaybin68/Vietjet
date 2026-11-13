@@ -1,0 +1,33 @@
+{
+  "route": "home",
+  "viewport": "mobile-390",
+  "header": {
+    "x": 0,
+    "y": 35,
+    "w": 390,
+    "h": 56,
+    "fs": "14px",
+    "fw": "500",
+    "color": "rgb(255, 255, 255)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "shadow": "none"
+  },
+  "headerBg": "rgba(0, 0, 0, 0)",
+  "headerRadius": "0px",
+  "h1": null,
+  "h2": {
+    "x": 27,
+    "y": 633,
+    "w": 146,
+    "h": 22,
+    "fs": "16px",
+    "fw": "600",
+    "color": "rgb(31, 42, 51)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "shadow": "none"
+  },
+  "inputs": [],
+  "submit": null
+}

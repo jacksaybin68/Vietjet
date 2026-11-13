@@ -1,0 +1,69 @@
+{
+  "route": "checkin",
+  "viewport": "desktop-1440",
+  "header": {
+    "x": 16,
+    "y": 0,
+    "w": 1408,
+    "h": 74,
+    "fs": "16px",
+    "fw": "500",
+    "color": "rgb(31, 31, 31)",
+    "bg": "rgb(255, 255, 255)",
+    "radius": "0px 0px 16px 16px",
+    "shadow": "rgba(0, 0, 0, 0.08) 0px 8px 24px 0px"
+  },
+  "headerBg": "rgb(255, 255, 255)",
+  "headerRadius": "0px 0px 16px 16px",
+  "h1": {
+    "x": 170,
+    "y": 188,
+    "w": 410,
+    "h": 26,
+    "fs": "20px",
+    "fw": "600",
+    "color": "rgb(0, 0, 0)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "shadow": "none"
+  },
+  "h2": null,
+  "inputs": [
+    {
+      "x": 190,
+      "y": 292,
+      "w": 370,
+      "h": 40,
+      "fs": "16px",
+      "fw": "500",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    },
+    {
+      "x": 190,
+      "y": 342,
+      "w": 370,
+      "h": 40,
+      "fs": "16px",
+      "fw": "500",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    }
+  ],
+  "submit": {
+    "x": 312,
+    "y": 392,
+    "w": 127,
+    "h": 39,
+    "fs": "14px",
+    "fw": "500",
+    "color": "rgb(117, 118, 122)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "10px",
+    "shadow": "none"
+  }
+}

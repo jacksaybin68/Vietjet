@@ -1,4 +1,4 @@
- 'use client';
+'use client';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -23,6 +23,9 @@ import { FlightDatePickerPopover, formatDisplayDate, toInputDate } from './DateP
  *     gradient đỏ 20.12deg, chữ trắng.
  *   - Tab 2 "Đổi thưởng & Mua Skypoint" — 103px, gradient vàng 135deg, chữ đen.
  *   - Tab 3 "Gửi hàng nhanh" — 76px, gradient đỏ 20.12deg, chữ trắng.
+ *   - MOBILE (390×844): hàng tab trải hết bề ngang 390px — 207px / 105px /
+ *     78px, bo góc 10px 10px 0 0, gradient đỏ 11.3deg (màu đục), tab vàng
+ *     135deg.
  *   - Chữ tab: JambonoMedium 14px/500, KHÔNG uppercase, canh giữa.
  */
 const TABS = [
@@ -30,21 +33,21 @@ const TABS = [
     id: 'flight',
     label: 'Mua hành lý, suất ăn chọn chỗ ngồi và hơn thế nữa...',
     href: '/dich-vu#hanh-ly',
-    width: 'w-[201px]',
+    width: 'w-[207px] lg:w-[201px]',
     variant: 'red',
   },
   {
     id: 'rewards',
     label: 'Đổi thưởng & Mua Skypoint',
     href: '/dich-vu#skypoint',
-    width: 'w-[103px]',
+    width: 'w-[105px] lg:w-[103px]',
     variant: 'gold',
   },
   {
     id: 'cargo',
     label: 'Gửi hàng nhanh',
     href: '/dich-vu#hang-hoa',
-    width: 'w-[76px]',
+    width: 'w-[78px] lg:w-[76px]',
     variant: 'red',
   },
 ] as const;
@@ -279,7 +282,7 @@ export default function HeroBookingWidget() {
                 onClick={() => setOpenCalendar((prev) => (prev === 'depart' ? null : 'depart'))}
                 aria-label="Ngày đi"
                 aria-expanded={openCalendar === 'depart'}
-                className="flex w-[121px] shrink-0 items-center justify-center border-l border-[var(--border)] px-1 text-center"
+                className="flex w-[127px] shrink-0 items-center justify-center border-l border-[var(--border)] px-1 text-center lg:w-[121px]"
               >
                 <span className="text-lg font-medium leading-[18.72px] text-[var(--foreground)]">
                   {formatDisplayDate(departDate) || 'Ngày đi'}
@@ -309,7 +312,7 @@ export default function HeroBookingWidget() {
                   onClick={() => setOpenCalendar((prev) => (prev === 'return' ? null : 'return'))}
                   aria-label="Ngày về"
                   aria-expanded={openCalendar === 'return'}
-                  className="flex w-[121px] shrink-0 items-center justify-center border-l border-[var(--border)] px-1 text-center"
+                  className="flex w-[127px] shrink-0 items-center justify-center border-l border-[var(--border)] px-1 text-center lg:w-[121px]"
                 >
                   <span className="text-lg font-medium leading-[18.72px] text-[var(--foreground)]">
                     {formatDisplayDate(returnDate) || 'Ngày về'}
@@ -327,8 +330,10 @@ export default function HeroBookingWidget() {
               </button>
             </div>
 
-            {/* Ô 3: Hành khách — nền trong suốt, nhãn 12px/600, giá trị 16px/600. */}
-            <div className="relative mt-[11px] flex h-[48px] items-center gap-2 pl-[48px] pr-1">
+            {/* Ô 3: Hành khách — nền trong suốt, nhãn 12px/600, giá trị 16px/600.
+                MOBILE (390×844): site thật KHÔNG hiện hàng này (thân panel chỉ
+                có 2 ô sân bay/ngày) → ẩn hoàn toàn ở dưới `lg`. */}
+            <div className="relative mt-[11px] hidden h-[48px] items-center gap-2 pl-[48px] pr-1 lg:flex">
               <MdOutlinePerson
                 aria-hidden="true"
                 className="absolute left-[19px] top-1/2 -translate-y-1/2 text-lg2 text-[var(--foreground)]"
@@ -354,8 +359,9 @@ export default function HeroBookingWidget() {
               />
             </div>
 
-            {/* Ô 4: Mã khuyến mại — hộp trắng 342×48px, bo góc 10px. */}
-            <label className="relative mt-[11px] flex h-[48px] items-center gap-2 rounded-vj bg-white pl-[48px] pr-2">
+            {/* Ô 4: Mã khuyến mại — hộp trắng 342×48px, bo góc 10px.
+                MOBILE: site thật không hiện → ẩn ở dưới `lg`. */}
+            <label className="relative mt-[11px] hidden h-[48px] items-center gap-2 rounded-vj bg-white pl-[48px] pr-2 lg:flex">
               <MdConfirmationNumber
                 aria-hidden="true"
                 className="absolute left-[19px] top-1/2 -translate-y-1/2 text-xl2 text-[var(--foreground)]"
@@ -372,8 +378,9 @@ export default function HeroBookingWidget() {
               </span>
             </label>
 
-            {/* Hàng 5 — công tắc "Tìm vé rẻ nhất" (42px) + tiêu đề H3 18px/700 trắng. */}
-            <div className="flex h-[48px] items-center gap-2">
+            {/* Hàng 5 — công tắc "Tìm vé rẻ nhất" (42px) + tiêu đề H3 18px/700 trắng.
+                MOBILE: site thật không hiện → ẩn ở dưới `lg`. */}
+            <div className="hidden h-[48px] items-center gap-2 lg:flex">
               <button
                 type="button"
                 role="switch"
@@ -395,8 +402,11 @@ export default function HeroBookingWidget() {
             </div>
           </div>
 
-          {/* Hàng 6 — nút CTA, cao 99px, padding 30px 0, nút 200×39px. */}
-          <div className="flex h-[99px] items-center justify-center">
+          {/* Hàng 6 — nút CTA. Site thật: nút 200×39px, cách đáy khối ô nhập
+              10px, còn 29px từ đáy nút xuống đáy panel (panel cao 409px).
+              MOBILE (390×844): hàng này cao 129px — padding trên 30px, dưới
+              60px; nút nằm ở y=625 (panel bắt đầu ở y=420). */}
+          <div className="mt-[11px] flex flex-col items-center justify-center pt-[30px] pb-[60px] lg:mt-0 lg:pt-[10px] lg:pb-[29px]">
             <button
               type="submit"
               className="vj-cta vj-cta--hero hover:brightness-105 active:translate-y-[1px] transition-all duration-150 cursor-pointer"

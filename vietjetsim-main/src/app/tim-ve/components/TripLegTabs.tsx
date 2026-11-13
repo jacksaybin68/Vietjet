@@ -66,16 +66,16 @@ function LegButton({
       </span>
       <span className="min-w-0">
         <span className="flex items-center gap-1.5">
-          <span className="text-xs font-bold uppercase tracking-wider opacity-80">{label}</span>
+          <span className="font-koho text-sm font-semibold uppercase tracking-wide opacity-90">
+            {label}
+          </span>
           {info.flightNo && (
-            <span
-              className={`text-xs font-black font-koho ${active ? 'text-white' : 'text-vjred'}`}
-            >
+            <span className={`text-sm font-bold font-koho ${active ? 'text-white' : 'text-vjred'}`}>
               {info.flightNo}
             </span>
           )}
         </span>
-        <span className="block truncate text-xs font-black">
+        <span className="block truncate font-koho text-sm font-semibold">
           {info.trip} · {info.date}
         </span>
       </span>
