@@ -27,6 +27,13 @@ const eslintConfig = [
       '.next-prod/',
       '.next-qa-*/',
       '.next-skyid/',
+      // Bất kỳ cây build thứ hai nào sinh ra bằng `DIST_DIR=.next-<tên>` cũng
+      // phải bị ignore — `.next-rodriguez/` (305 MB) là ví dụ: nó không khớp
+      // bất kỳ mẫu liệt kê tường minh nào ở trên, nên `eslint .` quét cả nó
+      // và một lượt lint mất hơn 10 phút thay vì ~80 giây. Mẫu `**/.next-*/**`
+      // bắt được mọi tên biến thể, kể cả cây build sinh ra sau này.
+      '**/.next-*/**',
+      '**/.next*/**',
       // Cây build sinh ra cho lượt đo QA còn lại (`.qa-build/`). Cùng lý do với
       // `.next-uicheck`: `eslint .` quét cả nó sẽ mất hàng phút — và nếu cây
       // build bị dọn giữa chừng, eslint chết với ENOENT khi đọc file `.js`

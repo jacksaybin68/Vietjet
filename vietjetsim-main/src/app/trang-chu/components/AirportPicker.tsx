@@ -12,15 +12,35 @@ export interface Airport {
 }
 
 export const DOMESTIC_AIRPORT_CODES = new Set([
-  'SGN', 'HAN', 'DAD', 'PQC', 'CXR', 'HPH', 'HUI', 'DLI', 'VII', 'VDO',
-  'VCA', 'UIH', 'BMV', 'PXU', 'TBB', 'VCL', 'THD', 'VDH', 'DIN', 'VCS', 'VKG'
+  'SGN',
+  'HAN',
+  'DAD',
+  'PQC',
+  'CXR',
+  'HPH',
+  'HUI',
+  'DLI',
+  'VII',
+  'VDO',
+  'VCA',
+  'UIH',
+  'BMV',
+  'PXU',
+  'TBB',
+  'VCL',
+  'THD',
+  'VDH',
+  'DIN',
+  'VCS',
+  'VKG',
 ]);
 
 export const TOP_DOMESTIC_HUBS = ['SGN', 'HAN', 'DAD', 'PQC', 'CXR'];
 
 export function isDomesticAirport(airport: Airport): boolean {
   if (typeof airport.isDomestic === 'boolean') return airport.isDomestic;
-  if (airport.country && (airport.country === 'Việt Nam' || airport.country === 'Vietnam')) return true;
+  if (airport.country && (airport.country === 'Việt Nam' || airport.country === 'Vietnam'))
+    return true;
   return DOMESTIC_AIRPORT_CODES.has(airport.code.toUpperCase());
 }
 
@@ -376,9 +396,7 @@ export default function AirportPicker({
                 rather than in a footer of its own: on a short screen every row
                 the panel gives back is another airport the customer can see. */}
               <span className="shrink-0 text-xs2 tabular-nums text-vj-text-soft">
-                {query.trim()
-                  ? `${totalCount} / ${airports.length}`
-                  : `${airports.length} sân bay`}
+                {query.trim() ? `${totalCount} / ${airports.length}` : `${airports.length} sân bay`}
               </span>
             </div>
             <ul

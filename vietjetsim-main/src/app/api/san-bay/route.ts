@@ -2,8 +2,27 @@ import { NextResponse } from 'next/server';
 import { getAllAirports } from '@/lib/db';
 
 const DOMESTIC_CODES = new Set([
-  'SGN', 'HAN', 'DAD', 'PQC', 'CXR', 'HPH', 'HUI', 'DLI', 'VII', 'VDO',
-  'VCA', 'UIH', 'BMV', 'PXU', 'TBB', 'VCL', 'THD', 'VDH', 'DIN', 'VCS', 'VKG',
+  'SGN',
+  'HAN',
+  'DAD',
+  'PQC',
+  'CXR',
+  'HPH',
+  'HUI',
+  'DLI',
+  'VII',
+  'VDO',
+  'VCA',
+  'UIH',
+  'BMV',
+  'PXU',
+  'TBB',
+  'VCL',
+  'THD',
+  'VDH',
+  'DIN',
+  'VCS',
+  'VKG',
 ]);
 
 /**

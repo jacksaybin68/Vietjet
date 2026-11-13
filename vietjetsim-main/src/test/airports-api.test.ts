@@ -15,10 +15,21 @@ describe('GET /api/san-bay', () => {
     ]);
     const res = await GET();
     expect(res.status).toBe(200);
-    await expect(res.json()).resolves.toEqual({
+    // `/api/san-bay` phục vụ cả `country` và `isDomestic` (commit f22e44b):
+    // `AirportPicker` cần cờ nội địa để sắp xếp, và bộ lọc quốc gia phải
+    // đọc được tên nước chứ không suy ra từ mã sân bay. Khẳng định bằng
+    // `toMatchObject` với đủ 5 trường — `toEqual` toàn phần sẽ đỏ mỗi lần
+    // route bổ sung một trường mà client thực sự dùng.
+    await expect(res.json()).resolves.toMatchObject({
       airports: [
-        { code: 'HAN', city: 'Hà Nội', airport: 'Nội Bài' },
-        { code: 'VDH', city: 'Đồng Hới', airport: 'Đồng Hới' },
+        { code: 'HAN', city: 'Hà Nội', airport: 'Nội Bài', country: 'Vietnam', isDomestic: true },
+        {
+          code: 'VDH',
+          city: 'Đồng Hới',
+          airport: 'Đồng Hới',
+          country: 'Vietnam',
+          isDomestic: true,
+        },
       ],
     });
   });
