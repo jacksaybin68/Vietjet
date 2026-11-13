@@ -56,7 +56,7 @@ function createBlankPassenger(type: PassengerType = 'adult'): Passenger {
  * đang focus. Utility `.vj-underline-field` / `.vj-underline-label` dựng lại
  * đúng số đo đó — nhãn nằm trong ô, không phải một dòng chữ riêng ở trên.
  */
-const fieldLabelClass = 'sr-only';
+const fieldLabelClass = 'block text-base font-medium text-vj-currency-gray mb-1 font-koho';
 
 /** Bề rộng/cao của radio và checkbox theo số đo site thật (13/11/2026). */
 const RADIO_CLASS = 'w-[42px] h-[42px] cursor-pointer accent-primary shrink-0';
@@ -494,11 +494,12 @@ export default function PassengerInfoStep({
                   {isAdult && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor={`passenger-${i}-phone`} className={fieldLabelClass}>
-                          Số điện thoại <span className="text-red-600">*</span>
-                        </label>
-                        <div className="flex items-center border-b border-gray-300 focus-within:border-primary">
-                          <span className="flex items-center gap-1 pr-2 py-1 text-xs font-semibold text-gray-700 select-none shrink-0">
+                        <UnderlineField
+                          id={`passenger-${i}-phone`}
+                          label="Số điện thoại"
+                          filled={!!p.phone}
+                        >
+                          <span className="flex items-center gap-1 pr-2 text-base font-medium text-vj-text select-none shrink-0">
                             {getCountryDialCode(p.countryCode)}{' '}
                             <span className="text-3xs text-gray-400">▾</span>
                           </span>
@@ -525,10 +526,9 @@ export default function PassengerInfoStep({
                             aria-invalid={
                               phoneTouched[i] && !/^0\d{8,9}$/.test(p.phone.replace(/\s/g, ''))
                             }
-                            className="min-w-0 flex-1 border-0 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:ring-0"
                             required
                           />
-                        </div>
+                        </UnderlineField>
                         {phoneTouched[i] && !/^0\d{8,9}$/.test(p.phone.replace(/\s/g, '')) && (
                           <p
                             id={`passenger-${i}-phone-error`}
@@ -539,27 +539,29 @@ export default function PassengerInfoStep({
                         )}
                       </div>
                       <div>
-                        <label htmlFor={`passenger-${i}-email`} className={fieldLabelClass}>
-                          Email <span className="text-red-600">*</span>
-                        </label>
-                        <input
+                        <UnderlineField
                           id={`passenger-${i}-email`}
-                          name={`passenger-${i}-email`}
-                          type="email"
-                          value={p.email}
-                          onChange={(event) => updatePassenger(i, 'email', event.target.value)}
-                          onBlur={() =>
-                            setEmailTouched((current) => {
-                              const next = [...current];
-                              next[i] = true;
-                              return next;
-                            })
-                          }
-                          aria-describedby={`passenger-${i}-email-error`}
-                          aria-invalid={emailTouched[i] && !/^\S+@\S+\.\S+$/.test(p.email)}
-                          className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-primary"
-                          required
-                        />
+                          label="Email"
+                          filled={!!p.email}
+                        >
+                          <input
+                            id={`passenger-${i}-email`}
+                            name={`passenger-${i}-email`}
+                            type="email"
+                            value={p.email}
+                            onChange={(event) => updatePassenger(i, 'email', event.target.value)}
+                            onBlur={() =>
+                              setEmailTouched((current) => {
+                                const next = [...current];
+                                next[i] = true;
+                                return next;
+                              })
+                            }
+                            aria-describedby={`passenger-${i}-email-error`}
+                            aria-invalid={emailTouched[i] && !/^\S+@\S+\.\S+$/.test(p.email)}
+                            required
+                          />
+                        </UnderlineField>
                         {emailTouched[i] && !/^\S+@\S+\.\S+$/.test(p.email) && (
                           <p
                             id={`passenger-${i}-email-error`}
@@ -574,65 +576,64 @@ export default function PassengerInfoStep({
 
                   {/* CCCD / Hộ chiếu */}
                   <div>
-                    <label htmlFor={`passenger-${i}-idNumber`} className={fieldLabelClass}>
-                      CCCD / Hộ chiếu{' '}
-                      {requiresIdNumber(p.type) ? (
-                        <span className="text-red-600">*</span>
-                      ) : (
-                        <span className="font-normal normal-case text-gray-400">
-                          (không bắt buộc với em bé)
-                        </span>
-                      )}
-                    </label>
-                    <input
+                    <UnderlineField
                       id={`passenger-${i}-idNumber`}
-                      name={`passenger-${i}-idNumber`}
-                      type="text"
-                      value={p.idNumber}
-                      onChange={(e) => updatePassenger(i, 'idNumber', e.target.value)}
-                      className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-primary"
-                      required={requiresIdNumber(p.type)}
-                    />
+                      label="CCCD / Hộ chiếu"
+                      filled={!!p.idNumber}
+                    >
+                      <input
+                        id={`passenger-${i}-idNumber`}
+                        name={`passenger-${i}-idNumber`}
+                        type="text"
+                        value={p.idNumber}
+                        onChange={(e) => updatePassenger(i, 'idNumber', e.target.value)}
+                        required={requiresIdNumber(p.type)}
+                      />
+                    </UnderlineField>
                   </div>
 
                   {/* Nơi ở hiện tại (Địa chỉ) */}
                   <div>
-                    <label htmlFor={`passenger-${i}-residence`} className={fieldLabelClass}>
-                      Địa chỉ (Nơi ở hiện tại)
-                    </label>
-                    <input
+                    <UnderlineField
                       id={`passenger-${i}-residence`}
-                      name={`passenger-${i}-residence`}
-                      type="text"
-                      value={p.residence}
-                      onChange={(event) => updatePassenger(i, 'residence', event.target.value)}
-                      className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-primary"
-                    />
+                      label="Địa chỉ (Nơi ở hiện tại)"
+                      filled={!!p.residence}
+                    >
+                      <input
+                        id={`passenger-${i}-residence`}
+                        name={`passenger-${i}-residence`}
+                        type="text"
+                        value={p.residence}
+                        onChange={(event) => updatePassenger(i, 'residence', event.target.value)}
+                      />
+                    </UnderlineField>
                   </div>
 
                   {/* Mã SkyJoy */}
                   {isAdult && (
                     <div>
-                      <label htmlFor={`passenger-${i}-skyJoyMemberId`} className={fieldLabelClass}>
-                        Mã hội viên SkyJoy (SJxxxxxxxx)
-                      </label>
-                      <input
+                      <UnderlineField
                         id={`passenger-${i}-skyJoyMemberId`}
-                        name={`passenger-${i}-skyJoyMemberId`}
-                        type="text"
-                        value={p.skyJoyMemberId}
-                        onChange={(event) =>
-                          updatePassenger(
-                            i,
-                            'skyJoyMemberId',
-                            event.target.value.toUpperCase().replace(/\s/g, '')
-                          )
-                        }
-                        placeholder="SJxxxxxxxxxx"
-                        pattern="SJ[0-9]{8,10}"
-                        title="Mã SkyJoy gồm SJ và 8–10 chữ số"
-                        className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs uppercase text-gray-900 focus:outline-none focus:border-primary"
-                      />
+                        label="Mã hội viên SkyJoy (SJxxxxxxxx)"
+                        filled={!!p.skyJoyMemberId}
+                      >
+                        <input
+                          id={`passenger-${i}-skyJoyMemberId`}
+                          name={`passenger-${i}-skyJoyMemberId`}
+                          type="text"
+                          value={p.skyJoyMemberId}
+                          onChange={(event) =>
+                            updatePassenger(
+                              i,
+                              'skyJoyMemberId',
+                              event.target.value.toUpperCase().replace(/\s/g, '')
+                            )
+                          }
+                          placeholder="SJxxxxxxxxxx"
+                          pattern="SJ[0-9]{8,10}"
+                          title="Mã SkyJoy gồm SJ và 8–10 chữ số"
+                        />
+                      </UnderlineField>
                     </div>
                   )}
 
