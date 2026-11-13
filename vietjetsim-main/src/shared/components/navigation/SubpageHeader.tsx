@@ -235,8 +235,13 @@ export default function SubpageHeader({
             />
           </Link>
           {showMobileTitle ? (
+            /* H1 của băng đỏ ở mobile: 16px/700 JambonoMedium, TRẮNG (đo được
+               ở site thật — `/vi/my/search-booking` và `/vi/checkin` ở 390×844
+               cho `h1` 16px/700, màu `rgb(255,255,255)` trên nền đỏ). Trước đây
+               là `text-base2` (15px) `font-black` (800) `tracking-wide` — lệch
+               cả cỡ chữ lẫn độ đậm so với số đo. */
             <h1
-              className={`truncate text-center text-base2 font-black uppercase tracking-wide ${
+              className={`truncate text-center text-base font-bold font-jambono uppercase ${
                 mobileRed ? 'text-white' : 'text-[var(--vj-nav-ink)]'
               }`}
             >

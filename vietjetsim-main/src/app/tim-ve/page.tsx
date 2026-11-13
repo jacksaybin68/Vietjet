@@ -37,8 +37,10 @@ export default async function FlightBookingPage({
     <div className="min-h-screen bg-gradient-to-b from-vj-blue-tint-5 via-vj-blue-tint-4 to-vj-blue-tint-3 relative overflow-x-hidden w-full max-w-full">
       {/* Header trắng 74px — đo được ở site thật (newweb.vietjetair.com
           /vi/pages/booking-search, 1440×900): nền #FFFFFF, viền dưới 2px
-          #E31E24, bo góc dưới 16px, shadow rgba(0,0,0,.08) 0 8px 24px. */}
-      <Header variant="subpage" mobileTitle="CHỌN CHUYẾN BAY" />
+          #E31E24, bo góc dưới 16px, shadow rgba(0,0,0,.08) 0 8px 24px.
+          Ở MOBILE site thật đổi sang băng ĐỎ toàn chiều rộng với `H1` trắng
+          16px/700 — nên `mobileRed` bật băng đỏ + logo đảo màu. */}
+      <Header variant="subpage" mobileTitle="LỰA CHỌN CHUYẾN BAY" mobileRed />
 
       <main id="main-content">
         <ErrorBoundary variant="booking">

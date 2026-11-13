@@ -238,6 +238,8 @@ input[type='date'].vj-no-native-icon::-moz-calendar-picker-indicator {
    * 2px đỏ #E31E24, bo góc dưới 16px, shadow rgba(0,0,0,0.08) 0 8px 24px. */
   --vj-header-sub: #ffffff;
   --vj-header-sub-border: #e31e24;
+  /* Alias theo plan §1: viền dưới header trang con (2px #E31E24). */
+  --vj-header-border: #e31e24;
   --vj-nav-ink: #1f1f1f;
   --vj-pill-gray: #f7f7f7;
   --vj-pill-gray-border: #dddddd;

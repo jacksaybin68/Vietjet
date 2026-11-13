@@ -2,8 +2,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Flight } from '@/features/bookings/types/booking-flow';
 
-import { getBookingTotals, getFareForClass, type FareClassId } from '@/features/bookings/pricing';
-import BookingBottomBar from '@/features/bookings/components/BookingBottomBar';
+import { getFareForClass, type FareClassId } from '@/features/bookings/pricing';
 import { Icon, AppImage } from '@/shared/components/ui';
 import { FlightResultsSkeleton } from '@/shared/components/ui';
 import { getErrorMessage } from '@/lib/utils';
@@ -270,42 +269,25 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
           const isOuterDay = idx === 0 || idx === 4;
 
           if (isSelected) {
+            // Ô ngày active trên site thật là pill vàng #FFDD32, chữ nâu
+            // rgb(115 62 10) — không phải cloud scalloped. Đo 13/11/2026.
             return (
               <button
                 key={iso}
                 type="button"
                 onClick={() => onSelect?.(iso)}
                 aria-current="date"
-                className="relative px-2 sm:px-5 py-1.5 sm:py-2 flex flex-col items-center justify-center text-center transition-transform hover:scale-105 active:scale-95 cursor-pointer min-w-[95px] sm:min-w-[130px] max-w-[120px] focus:outline-none focus:ring-0"
+                className="flex flex-col items-center justify-center text-center px-2 sm:px-4 py-1.5 sm:py-2 rounded-vj bg-[var(--vj-yellow-tab)] text-[var(--vj-tab-ink)] transition-transform hover:scale-105 active:scale-95 cursor-pointer min-w-[95px] sm:min-w-[130px] max-w-[120px] focus:outline-none focus:ring-0"
               >
-                {/* Scalloped / puffy cloud SVG badge background matching sample image */}
-                <svg
-                  viewBox="0 0 140 70"
-                  className="absolute inset-0 w-full h-full text-accent filter drop-shadow-[0_2px_4px_rgba(245,158,11,0.35)] z-0"
-                  fill="currentColor"
-                  preserveAspectRatio="none"
-                >
-                  <circle cx="28" cy="38" r="22" />
-                  <circle cx="50" cy="24" r="22" />
-                  <circle cx="75" cy="18" r="20" />
-                  <circle cx="98" cy="24" r="22" />
-                  <circle cx="118" cy="38" r="20" />
-                  <circle cx="102" cy="50" r="20" />
-                  <circle cx="75" cy="54" r="20" />
-                  <circle cx="48" cy="50" r="20" />
-                  <rect x="28" y="24" width="86" height="30" />
-                </svg>
-                <div className="relative z-10">
-                  <span className="block text-3xs sm:text-xs font-semibold text-gray-900 leading-tight">
-                    {WEEKDAY_LABELS[day.getDay()]}
-                  </span>
-                  <span className="block text-xs sm:text-sm font-black text-gray-950 leading-tight my-0.5">
-                    {day.getDate()} tháng {day.getMonth() + 1}
-                  </span>
-                  <span className="block text-3xs sm:text-xs font-black text-primary-dark italic leading-tight">
-                    Từ <span className="font-extrabold">{price}</span> VND
-                  </span>
-                </div>
+                <span className="block text-sm2 font-medium leading-tight">
+                  {WEEKDAY_LABELS[day.getDay()]}
+                </span>
+                <span className="block text-sm2 font-bold leading-tight my-0.5">
+                  {day.getDate()} tháng {day.getMonth() + 1}
+                </span>
+                <span className="block text-sm2 font-bold leading-tight">
+                  Từ <span className="font-bold">{price}</span> VND
+                </span>
               </button>
             );
           }
@@ -317,14 +299,14 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
               onClick={() => onSelect?.(iso)}
               className={`${isOuterDay ? 'hidden sm:flex' : 'flex'} flex-col items-center justify-center text-center px-1 sm:px-3 py-1.5 sm:py-2 transition-transform hover:scale-105 cursor-pointer min-w-[75px] sm:min-w-[110px] max-w-[90px] focus:outline-none focus:ring-0`}
             >
-              <span className="text-3xs sm:text-xs font-medium text-gray-600 leading-tight">
+              <span className="text-sm2 font-medium text-vj-text leading-tight">
                 {WEEKDAY_LABELS[day.getDay()]}
               </span>
-              <span className="text-xs sm:text-sm font-bold text-gray-950 leading-tight my-0.5">
+              <span className="text-sm2 font-bold text-vj-text leading-tight my-0.5">
                 {day.getDate()} tháng {day.getMonth() + 1}
               </span>
-              <span className="text-3xs sm:text-xs font-bold text-gray-900 leading-tight">
-                Từ <span className="font-extrabold">{price}</span> VND
+              <span className="text-sm2 font-bold text-vj-text leading-tight">
+                Từ <span className="font-bold">{price}</span> VND
               </span>
             </button>
           );
@@ -703,25 +685,6 @@ export default function FlightResultsStep({
       }
     }
   }, [filtered, search?.cheapest, expandedFlightNo, onSelect, onFlightSelect]);
-
-  // ─── Sticky totals bar (vietjetair.com parity) ──────────────────────────
-  // The real results page pins a bar with the running total and a "Đi tiếp"
-  // CTA to the bottom of the viewport. Before a fare is picked the site shows
-  // 0 VND; here the bar previews the top-ranked flight (cheapest under the
-  // default sort) so the CTA carries a concrete price. Fare + the shared
-  // tax/fee rate is exactly what `createBooking` will charge.
-  const adultCount = Math.max(1, Number.parseInt(pax ?? '1', 10) || 1);
-  const childCount = Math.max(0, Number.parseInt(child ?? '0', 10) || 0);
-  const infantCount = Math.max(0, Number.parseInt(infant ?? '0', 10) || 0);
-  const passengerCount = adultCount + childCount + infantCount;
-  const leadFlight = !isLoading && filtered.length > 0 ? filtered[0] : null;
-  const leadTotal = leadFlight
-    ? getBookingTotals({
-        farePerPassenger: leadFlight.price,
-        passengerCount,
-        paxCounts: { adult: adultCount, child: childCount, infant: infantCount },
-      }).total
-    : 0;
 
   return (
     <div className="w-full relative items-start pb-16 sm:pb-14">
@@ -1117,23 +1080,27 @@ export default function FlightResultsStep({
           </div>
         )}
 
-        {/* 4 Fare Class Headers — hiển thị 4 cột thẳng hàng trên cả mobile và desktop */}
+        {/* 4 Fare Class Headers — hiển thị 4 cột thẳng hàng trên cả mobile và desktop.
+            Quy ước "một bảng màu": nền ô hạng #F8F8F8, chữ #333333 (đo 13/11/2026).
+            Logo hạng vé trong repo là PNG chữ TRẮNG nên trên nền sáng phải đảo
+            màu (brightness-0 invert) — nếu giữ nền đủ 4 màu như site thật thì
+            hàng này là "chip 4 màu" mà quy ước của dự án đã loại bỏ. */}
         {!isLoading && filtered.length > 0 && (
           <div className="flex flex-row items-stretch gap-0 mt-3 mb-1">
-            {/* Empty space matching left yellow box */}
-            <div className="w-[100px] sm:w-[28%] lg:w-[240px] shrink-0" />
+            {/* Khoảng trống khớp với ô thông tin chuyến bay bên trái (226px). */}
+            <div className="w-[100px] sm:w-[28%] lg:w-[226px] shrink-0" />
             {/* 4 Fare Headers aligned with flight card columns */}
-            <div className="flex-1 min-w-0 grid grid-cols-4 gap-0.5">
+            <div className="flex-1 min-w-0 grid grid-cols-4 gap-0 lg:grid-cols-[repeat(4,minmax(0,1fr))]">
               <div
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('business')}
-                className="bg-vj-fare-business text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs min-h-[28px]"
+                className="bg-vj-surface-fare text-vj-text py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:bg-[var(--vj-bar-gray)] shadow-xs min-h-[28px]"
               >
                 <img
                   src="/images/fare-classes/business-logo.png"
                   alt="BUSINESS"
-                  className="h-3.5 sm:h-4.5 w-auto object-contain max-w-[85%]"
+                  className="h-3.5 sm:h-4.5 w-auto object-contain max-w-[85%] brightness-0 invert"
                 />
                 <span className="sr-only">BUSINESS</span>
               </div>
@@ -1141,12 +1108,12 @@ export default function FlightResultsStep({
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('skyboss')}
-                className="bg-primary-dark text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs min-h-[28px]"
+                className="bg-vj-surface-fare text-vj-text py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:bg-[var(--vj-bar-gray)] shadow-xs min-h-[28px]"
               >
                 <img
                   src="/images/fare-classes/skyboss-logo.png"
                   alt="skyBOSS"
-                  className="h-3.5 sm:h-4.5 w-auto object-contain max-w-[85%]"
+                  className="h-3.5 sm:h-4.5 w-auto object-contain max-w-[85%] brightness-0 invert"
                 />
                 <span className="sr-only">skyBOSS</span>
               </div>
@@ -1154,12 +1121,12 @@ export default function FlightResultsStep({
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('deluxe')}
-                className="bg-vj-fare-deluxe text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs min-h-[28px]"
+                className="bg-vj-surface-fare text-vj-text py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:bg-[var(--vj-bar-gray)] shadow-xs min-h-[28px]"
               >
                 <img
                   src="/images/fare-classes/deluxe-logo.png"
                   alt="Deluxe"
-                  className="h-3.5 sm:h-4.5 w-auto object-contain max-w-[85%]"
+                  className="h-3.5 sm:h-4.5 w-auto object-contain max-w-[85%] brightness-0 invert"
                 />
                 <span className="sr-only">Deluxe</span>
               </div>
@@ -1167,12 +1134,12 @@ export default function FlightResultsStep({
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('eco')}
-                className="bg-vj-fare-eco text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs min-h-[28px]"
+                className="bg-vj-surface-fare text-vj-text py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:bg-[var(--vj-bar-gray)] shadow-xs min-h-[28px]"
               >
                 <img
                   src="/images/fare-classes/eco-logo.png"
                   alt="Eco"
-                  className="h-3.5 sm:h-4.5 w-auto object-contain max-w-[85%]"
+                  className="h-3.5 sm:h-4.5 w-auto object-contain max-w-[85%] brightness-0 invert"
                 />
                 <span className="sr-only">Eco</span>
               </div>
@@ -1312,7 +1279,7 @@ export default function FlightResultsStep({
                       setExpandedFlightNo(flight.flightNo);
                     }
                   }}
-                  className="w-[105px] sm:w-[28%] lg:w-[240px] shrink-0 bg-vj-fare-gold p-1.5 sm:p-3 lg:p-4 border-r border-yellow-400 flex flex-col items-center justify-between sm:justify-center text-center relative select-none cursor-pointer hover:bg-yellow-400 transition-colors focus:outline-none focus:ring-0"
+                  className="w-[105px] sm:w-[28%] lg:w-[226px] shrink-0 bg-vj-fare-gold p-1.5 sm:p-3 lg:p-4 border-r border-yellow-400 flex flex-col items-center justify-between sm:justify-center text-center relative select-none cursor-pointer hover:bg-yellow-400 transition-colors focus:outline-none focus:ring-0"
                 >
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2.5">
                     <div className="flex items-center gap-1">
@@ -2186,135 +2153,12 @@ export default function FlightResultsStep({
         )}
       </div>
 
-      {/* Booking Summary Sidebar — desktop only. Below `lg` it would stack under
-          the flight list as a third full-width block, while the same totals are
-          already pinned in the sticky bar, so mobile drops it. */}
-      <aside className="hidden lg:col-span-3 w-full min-w-0 lg:block">
-        <div className="bg-[var(--background)] rounded-vj border border-primary/20 sticky top-[160px] overflow-hidden shadow-sm">
-          {/* Header bar — vietjetair.com paints this one solid red. */}
-          <div className="bg-primary px-3 py-2 text-white flex items-center justify-center relative">
-            <h3 className="font-black font-koho text-sm tracking-wider uppercase">
-              Thông tin đặt chỗ
-            </h3>
-            <div className="absolute right-0 top-0 h-full overflow-hidden flex items-center pointer-events-none">
-              <div className="w-16 h-24 bg-white/5 rounded-full -translate-x-1/4 -rotate-45" />
-            </div>
-          </div>
-
-          <div className="bg-[var(--surface-2)] border-b border-[var(--border)] px-3 py-2">
-            <span className="text-xs font-bold text-[var(--foreground)]">Thông tin hành khách</span>
-          </div>
-
-          <div className="p-4 space-y-4">
-            <div className="border border-[rgb(var(--primary-rgb))]/10 rounded-vj p-3 bg-[rgb(var(--primary-rgb))]/5 border-l-4 border-l-primary">
-              <div className="flex justify-between items-start mb-2">
-                <span className="font-bold text-[var(--foreground)] font-koho text-sm uppercase">
-                  Chuyến đi
-                </span>
-                <button className="text-2xs font-bold text-primary hover:underline">
-                  Chi tiết
-                </button>
-              </div>
-              <div className="text-xs font-bold text-[var(--foreground)] pb-1 break-words">
-                {search?.from && search?.to ? (
-                  <>
-                    {getAirportCity(search.from)} ({search.from.toUpperCase()})
-                    <Icon name="PaperAirplaneIcon" size={11} className="inline mx-1 text-primary" />
-                    {getAirportCity(search.to)} ({search.to.toUpperCase()})
-                  </>
-                ) : (
-                  <span className="italic font-normal text-[var(--foreground-muted)]">
-                    Vui lòng chọn chuyến bay
-                  </span>
-                )}
-              </div>
-              {/* Fare placeholders — the real site keeps the three cells empty until a
-                  flight is picked, which is exactly the state of this step. */}
-              <div className="text-xs2 tracking-[0.2em] text-[var(--foreground-subtle)] pt-1">
-                --- | --- | --- | ---
-              </div>
-            </div>
-
-            <div className="border border-[var(--border)] rounded-vj p-3 bg-[rgb(var(--surface-2-rgb))]/50">
-              <div className="flex justify-between items-start mb-2">
-                <span className="font-bold text-[var(--foreground-muted)] font-koho text-sm uppercase">
-                  Hành khách
-                </span>
-              </div>
-              <div className="flex justify-between items-center text-xs text-[var(--foreground-muted)] font-semibold border-b border-dashed border-[var(--border)] pb-2 mb-2">
-                <span>Người lớn (x1)</span>
-                <span>0₫</span>
-              </div>
-              <div className="flex justify-between items-center mt-2">
-                <span className="text-2xs text-[var(--foreground-muted)] font-bold uppercase tracking-wider">
-                  Hành lý & Dịch vụ
-                </span>
-                <span className="text-xs font-semibold text-[var(--foreground-subtle)]">
-                  Chưa chọn
-                </span>
-              </div>
-            </div>
-
-            <div className="border-t-2 border-dashed border-[var(--border)] pt-3 relative">
-              <div className="absolute -left-5 top-1.5 w-3 h-3 bg-[var(--surface)] rounded-full border-r border-[rgb(var(--primary-rgb))]/20" />
-              <div className="absolute -right-5 top-1.5 w-3 h-3 bg-[var(--surface)] rounded-full border-l border-[rgb(var(--primary-rgb))]/20" />
-              <div className="flex justify-between items-center mb-1">
-                <span className="font-black text-[var(--foreground-muted)] font-koho text-xs2 tracking-widest uppercase">
-                  Tóm tắt
-                </span>
-              </div>
-              <div className="mt-2 space-y-1.5">
-                {['Giá vé', 'Thuế, phí'].map((row) => (
-                  <div
-                    key={row}
-                    className="flex items-center justify-between rounded-vj bg-[var(--surface-2)] px-3 py-2"
-                  >
-                    <span className="text-xs font-semibold text-[var(--foreground-muted)]">
-                      {row}
-                    </span>
-                    <span className="text-xs font-bold text-[var(--foreground-subtle)]">---</span>
-                  </div>
-                ))}
-                <div className="flex items-center justify-between rounded-vj bg-[var(--surface-2)] px-3 py-2">
-                  <span className="text-xs font-semibold text-[var(--foreground-muted)]">
-                    Dịch vụ
-                  </span>
-                  <span className="text-xs font-bold text-[var(--foreground)] flex items-center gap-1">
-                    0 VND
-                    <Icon name="ChevronDownIcon" size={12} />
-                  </span>
-                </div>
-              </div>
-              <div className="text-right text-2xs text-[var(--foreground-subtle)] italic mt-2">
-                Đã bao gồm thuế, phí, phụ thu
-              </div>
-            </div>
-          </div>
-
-          {/* Total bar — solid red band, same as the real site's summary footer. */}
-          <div className="bg-primary px-3 py-2.5 flex items-center justify-between">
-            <span className="text-sm font-black font-koho uppercase tracking-wide text-white">
-              Tổng tiền
-            </span>
-            <span className="text-sm sm:text-base font-black font-koho text-white">0 VND</span>
-          </div>
-        </div>
-      </aside>
-
-      {/* Sticky totals bar — desktop only */}
-      <div className="hidden lg:block">
-        <BookingBottomBar
-          total={leadTotal}
-          ctaLabel="Đi tiếp"
-          onCta={() => {
-            if (!leadFlight) return;
-            onSelect(leadFlight);
-            onFlightSelect?.(leadFlight.flightNo, leadFlight.class as string, leadFlight.price);
-          }}
-          disabled={!leadFlight}
-          testId="results-bottom-bar"
-        />
-      </div>
+      {/* Không còn bản sao panel tổng ở đây: `/tim-ve` render panel "Thông tin
+          đặt chỗ" đúng chuẩn (380px, gradient đỏ, thanh mục #F1F1F1) ở cột
+          phải qua `BookingSummaryPanel`, và thanh "Tổng tiền" dính đáy qua
+          `FlightBookingResultsWrapper`. Bản sao cũ ở đây vẽ thêm MỘT panel
+          tổng thứ hai trong cột trái và MỘT thanh đáy thứ hai — hai thanh cùng
+          `position: fixed` chồng lên nhau ở desktop. */}
 
       <FareBenefitsModal
         open={Boolean(compareFare)}

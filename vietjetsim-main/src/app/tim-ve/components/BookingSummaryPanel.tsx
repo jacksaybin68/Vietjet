@@ -176,7 +176,7 @@ export default function BookingSummaryPanel({
 
         {/* Section: Chuyến đi — nền #F1F1F1, chữ #333333 (quy ước 1 bảng màu) */}
         <div className="border-b border-gray-200/80">
-          <div className="vj-summary-bar px-4 flex items-center justify-between text-sm font-semibold text-vj-text uppercase">
+          <div className="vj-summary-bar px-4 flex items-center justify-between text-lg font-semibold text-vj-text">
             <span>Chuyến đi</span>
             {data.flightNo && (
               <div className="flex items-center gap-1 text-primary font-bold font-koho text-lg tracking-normal normal-case">
@@ -296,7 +296,7 @@ export default function BookingSummaryPanel({
         {/* Section: Chuyến về (always present for roundtrip matching screenshot) */}
         {(data.isRoundTrip || data.returnLeg !== undefined) && (
           <div className="border-b border-gray-200/80">
-            <div className="vj-summary-bar px-4 flex items-center justify-between text-sm font-semibold text-vj-text uppercase">
+            <div className="vj-summary-bar px-4 flex items-center justify-between text-lg font-semibold text-vj-text">
               <span>Chuyến về</span>
               {data.returnLeg?.flightNo && (
                 <div className="flex items-center gap-1 text-primary font-bold font-koho text-lg tracking-normal normal-case">

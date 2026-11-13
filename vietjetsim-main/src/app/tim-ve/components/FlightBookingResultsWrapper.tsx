@@ -93,15 +93,7 @@ export default function FlightBookingResultsWrapper({
     child: Number(searchParams.get('child') ?? 0) || 0,
     infant: Number(searchParams.get('infant') ?? 0) || 0,
   }));
-  const [isPaxDropdownOpen, setIsPaxDropdownOpen] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState<SelectedBooking | null>(null);
-  const [flightBaseAmount, setClientTotal] = useState(0);
-
   const tripLabel = isRoundTrip ? 'Chuyến bay khứ hồi' : 'Chuyến bay một chiều';
-  const [bookings, setBookings] = useState<Record<'outbound' | 'inbound', SelectedBooking | null>>({
-    outbound: null,
-    inbound: null,
-  });
 
   const [bookings, setBookings] = useState<Record<'outbound' | 'inbound', SelectedBooking | null>>({
     outbound: null,
@@ -110,41 +102,96 @@ export default function FlightBookingResultsWrapper({
   const [continueSignal, setContinueSignal] = useState(0);
   const [showBenefitsModal, setShowBenefitsModal] = useState(false);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [isPaxDropdownOpen, setIsPaxDropdownOpen] = useState(false);
   const [bookingStep, setBookingStep] = useState(1);
+  /** Tổng tiền do bước con báo lên — panel tổng tính từ `bookings`, thanh đáy
+      tính từ đây, nên hai nơi phải lấy cùng một nguồn. */
+  const [clientTotal, setClientTotal] = useState<number>(0);
 
   const paxRef = useRef<HTMLDivElement>(null);
 
-  const outbound = bookings.outbound;
-  const inbound = bookings.inbound;
+  useEffect(() => {
+    if (!isPaxDropdownOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (!paxRef.current?.contains(e.target as Node)) {
+        setIsPaxDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isPaxDropdownOpen]);
 
-  const outboundAmount = outbound?.total ?? 0;
-  const inboundAmount = inbound?.total ?? 0;
-  const totalBookingAmount = outboundAmount + inboundAmount;
+  const selectedBooking = bookings[bookingKey];
 
   const handlePaxCountsChange = useCallback(
-    (next: Record<PassengerType, number>) => {
-      setPaxCounts(next);
+    (newPax: Record<PassengerType, number>) => {
+      setPaxCounts(newPax);
+      // Đổi số hành khách phải tính lại giá của chuyến đã chọn: giá vé trên
+      // panel và trên thanh đáy là của TRẠNG THÁI HIỆN TẠI, không phải của
+      // trạng thái lúc bấm chọn. Trẻ em tính 75% (khớp `pricing.ts`).
+      setBookings((prev) => {
+        const next = { ...prev };
+        (['outbound', 'inbound'] as const).forEach((key) => {
+          const item = next[key];
+          if (item) {
+            const currentWeight = paxCounts.adult + paxCounts.child * 0.75 || 1;
+            const unitFare = item.fare / currentWeight;
+            const nextWeight = newPax.adult + newPax.child * 0.75;
+            const nextFare = Math.round(unitFare * nextWeight);
+            const nextTax = 581581 * (newPax.adult || 1);
+            next[key] = {
+              ...item,
+              fare: nextFare,
+              tax: nextTax,
+              total: nextFare + nextTax,
+            };
+          }
+        });
+        return next;
+      });
     },
-    []
+    [paxCounts.adult, paxCounts.child]
   );
 
   const handleFlightSelect = useCallback(
-    (booking: Partial<SelectedBooking>) => {
+    (
+      flightNo: string,
+      fareClass: string,
+      fare: number,
+      fares?: Partial<Record<FareClassId, number>>,
+      flight?: { departTime?: string; arriveTime?: string },
+      leg: 'outbound' | 'inbound' = 'outbound'
+    ) => {
+      const normalized = normalizeFareClass(fareClass);
+      const tax = 581581 * (paxCounts.adult || 1);
+      const baseFare = fares?.eco ?? Math.round(fare / (FARE_CLASS_MULTIPLIER[normalized] ?? 1));
+      const legFlight = {
+        flightNo,
+        fareClass: normalized,
+        fare,
+        tax,
+        total: fare + tax,
+        baseFare,
+        fares,
+        departTime: flight?.departTime || (leg === 'outbound' ? '06:00' : '18:30'),
+        arriveTime: flight?.arriveTime || (leg === 'outbound' ? '08:15' : '20:45'),
+      };
+
       setBookings((prev) => ({
         ...prev,
-        [bookingKey]: { ...prev[bookingKey], ...booking } as SelectedBooking,
+        [leg]: legFlight,
       }));
-      setSelectedBooking((prev) =>
-        prev ? { ...prev, ...booking } : (booking as SelectedBooking)
-      );
     },
-    [bookingKey]
+    [paxCounts.adult]
   );
 
   const handleContinue = useCallback(() => {
+    setContinueSignal((n) => n + 1);
     setBookingStep((prev) => prev + 1);
   }, []);
 
+  const [outboundFrom, outboundTo] = trip.split('→').map((part) => part.trim());
+  const returnTrip = [outboundTo, outboundFrom].filter(Boolean).join(' → ');
   const formatDay = (iso?: string | null) => {
     if (!iso) return '--/--/----';
     const d = new Date(iso);
@@ -153,6 +200,26 @@ export default function FlightBookingResultsWrapper({
     const year = d.getFullYear();
     return `${day}/${month}/${year}`;
   };
+
+  useEffect(() => {
+    // Tiêu đề bước trên mobile: rút ngắn vì thanh header chỉ còn ~230px bề
+    // rộng cho chữ (logo + nút menu), nên "LỰA CHỌN CHUYẾN BAY" bị cắt thành
+    // "LỰA CHỌN CHUYẾN …". Desktop không dùng chuỗi này.
+    const titles: Record<number, string> = {
+      1: 'CHỌN CHUYẾN BAY',
+      2: 'THÔNG TIN KHÁCH',
+      3: 'CHỌN DỊCH VỤ',
+      4: 'THANH TOÁN',
+    };
+    const title = titles[bookingStep] || 'CHỌN CHUYẾN BAY';
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('vj-booking-step-title', { detail: title }));
+    }
+  }, [bookingStep]);
+
+  const flightBaseAmount =
+    (bookings.outbound?.total ?? 0) + (isRoundTrip ? (bookings.inbound?.total ?? 0) : 0);
+  const totalBookingAmount = Math.max(clientTotal, flightBaseAmount);
 
   return (
     <>
