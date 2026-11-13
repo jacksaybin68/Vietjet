@@ -81,18 +81,18 @@ export function SeatMap({
 
   const getSeatColor = (seat: Seat) => {
     if (seat.isOccupied) {
-      return 'bg-gray-300cursor-not-allowed';
+      return 'bg-gray-300 cursor-not-allowed text-gray-500';
     }
     if (selectedSeats.includes(seat.id) || seat.isSelected) {
-      return 'bg-blue-500 text-white ring-2 ring-blue-300';
+      return 'bg-primary text-white ring-2 ring-primary/40 font-bold';
     }
     if (seat.isExtraLegroom || emergencyExitRows.includes(seat.row)) {
-      return 'bg-amber-100/50 hover:bg-amber-200:bg-amber-800 text-amber-800';
+      return 'bg-amber-100/60 hover:bg-amber-200 text-amber-900 border border-amber-300';
     }
     if (seat.class === 'business') {
-      return 'bg-purple-100/50 hover:bg-purple-200:bg-purple-800 text-purple-800';
+      return 'bg-purple-100/60 hover:bg-purple-200 text-purple-900 border border-purple-300';
     }
-    return 'bg-green-100/50 hover:bg-green-200:bg-green-800 text-green-800';
+    return 'bg-green-100/60 hover:bg-green-200 text-green-900 border border-green-300';
   };
 
   const formatPrice = (price: number) => {

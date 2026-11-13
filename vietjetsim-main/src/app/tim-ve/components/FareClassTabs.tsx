@@ -40,7 +40,7 @@ export default function FareClassTabs({ activeClass, onSelect, onCompare }: Fare
             <button
               type="button"
               onClick={() => onSelect(cls.id)}
-              className={`px-4 py-2 font-koho text-sm font-semibold uppercase tracking-wide transition-colors ${
+              className={`px-4 py-2 font-koho text-sm font-semibold uppercase tracking-normal transition-colors ${
                 active ? 'text-primary' : 'text-vjdark hover:bg-[var(--surface-2)]'
               }`}
             >

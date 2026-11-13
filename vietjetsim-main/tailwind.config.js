@@ -308,6 +308,18 @@ module.exports = {
           'nav-ink': '#1F1F1F',
           // Màu chữ của nút "Tìm kiếm" khi bị vô hiệu (MUI disabled).
           'btn-disabled-ink': '#75767A',
+          // Nền ô hạng vé trong danh sách chuyến bay (đo từ DOM sống 13/11/2026).
+          'surface-fare': '#F8F8F8',
+          // Nền thanh mục trong panel "Thông tin đặt chỗ" (đo 13/11/2026).
+          'bar-gray': '#F1F1F1',
+          // Màu chữ "Hết chỗ" (đo 13/11/2026) — khác `muted` #939393.
+          'sold-out': '#939598',
+          // Màu mã tiền tệ đi kèm giá vé (đo 13/11/2026).
+          'currency-gray': '#6D6E71',
+          // Gạch chân ô nhập kiểu Material-UI underline (đo 13/11/2026).
+          'field-line': '#D9D9D9',
+          // Viền dưới header trang con (đo 13/11/2026).
+          'header-border': '#E31E24',
           // ─── Hạng vé (đo từ vietjetair.com) ───
           // Nhãn hạng vé nền đặc: Business dùng nâu-vàng, Deluxe cam, Eco xanh.
           'fare-business': '#8E7022',

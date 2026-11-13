@@ -15,9 +15,10 @@ export default function ContinueButton({
 }: ContinueButtonProps) {
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`w-full lg:w-[200px] py-3 rounded-vj bg-primary text-white font-black text-center uppercase tracking-wider transition-colors duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-dark`}
+      className={`vj-cta w-full lg:w-[127px] h-[39px] rounded-vj font-koho text-sm font-medium text-center uppercase tracking-normal transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed`}
     >
       {label}
     </button>

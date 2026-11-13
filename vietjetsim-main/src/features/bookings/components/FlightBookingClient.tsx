@@ -572,8 +572,10 @@ function FlightBookingClientInner({
         </div>
       </div>
 
-      {/* Step Content */}
-      <div className="mx-auto max-w-5xl">
+      {/* Step Content — chiếm trọn cột trái 820px của khung đặt vé (site thật:
+          container 1230px, cột trái 820px). Không đặt `max-w-5xl` ở đây vì
+          nó sẽ thu hẹp cột trái về 1024px-centered, lệch với số đo. */}
+      <div className="mx-auto max-w-full">
         {step === 1 && (
           <ErrorBoundary inline variant="api" retryLabel="Tìm lại chuyến bay">
             {isRoundTrip && (

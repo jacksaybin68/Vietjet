@@ -148,6 +148,15 @@ input[type='date'].vj-no-native-icon::-moz-calendar-picker-indicator {
   --vj-text: #333333;
   --vj-text-gray: #6c6c6c;
   --vj-text-muted: #939393;
+  /* ─── Token luồng đặt vé (đo 13/11/2026 từ DOM sống) ───
+   * Nền ô hạng vé #F8F8F8, nền thanh mục panel #F1F1F1, chữ "Hết chỗ"
+   * #939598, mã tiền tệ #6D6E71, gạch chân ô nhập #D9D9D9. */
+  --vj-fare-bg: #f8f8f8;
+  --vj-bar-gray: #f1f1f1;
+  --vj-sold-out: #939598;
+  --vj-currency-gray: #6d6e71;
+  --vj-field-line: #d9d9d9;
+  --vj-border-back: #808080;
   /* Site thật dùng hai họ font:
    *   - KoHo (300–700) cho toàn bộ văn bản.
    *   - JambonoMedium cho nút / CTA / nhãn in đậm (đo được trên DOM sống:
@@ -298,8 +307,6 @@ input[type='date'].vj-no-native-icon::-moz-calendar-picker-indicator {
   /* Trạng thái disabled của CTA SkyID — `.btn-primary:disabled`. */
   --vj-skyid-disabled-bg: #f5f5f5;
   --vj-skyid-disabled-ink: #c4c4c4;
-  /* Chiều rộng panel ảnh bên trái (`.gid__wrapper-bg`). */
-  --vj-skyid-art-width: 576px;
 
   /* ─── Token dọn nợ hex (ratchet scripts/css-debt.cjs) ───
    * Các giá trị dưới đây từng nằm rải rác dưới dạng `bg-[#rrggbb]` trong
@@ -1016,7 +1023,7 @@ h6 {
 
 .vj-summary-bar {
   min-height: 52px;
-  background-color: #f1f1f1;
+  background-color: var(--vj-bar-gray, #f1f1f1);
 }
 
 /* ─── Ô nhập gạch chân (MUI Input-underline) ────────────────────────────
@@ -1029,7 +1036,7 @@ h6 {
   width: 100%;
   height: 40px;
   padding: 6px 0 7px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--vj-field-line, #d9d9d9);
   background-color: transparent;
   transition: border-color 160ms ease;
 }
@@ -1056,7 +1063,9 @@ h6 {
   opacity: 1;
 }
 
-/* Nhãn nổi trên ô gạch chân: 16px/500, đổi sang nhỏ khi field có giá trị. */
+/* Nhãn nổi trên ô gạch chân: 16px/500, đổi sang nhỏ khi field có giá trị.
+ * Số đo site thật (13/11/2026): nhãn 16px/500 màu #6D6E71, thu nhỏ còn
+ * 8px/500 khi field có dữ liệu hoặc đang focus. */
 .vj-underline-label {
   position: absolute;
   left: 0;
@@ -1065,7 +1074,7 @@ h6 {
   font-size: 16px;
   line-height: 21.28px;
   font-weight: 500;
-  color: var(--foreground);
+  color: var(--vj-currency-gray, #6d6e71);
   pointer-events: none;
   transition:
     font-size 140ms ease,
@@ -1075,10 +1084,10 @@ h6 {
 
 .vj-underline-field:focus-within .vj-underline-label,
 .vj-underline-field[data-filled='true'] .vj-underline-label {
-  font-size: 12px;
-  line-height: 16px;
+  font-size: 8px;
+  line-height: 10px;
   transform: translateY(-180%);
-  color: var(--foreground-muted);
+  color: var(--vj-currency-gray, #6d6e71);
 }
 
 /* Dải tab trắng 50px của trang tra cứu (site thật: 16px/700 uppercase). */
@@ -1397,10 +1406,10 @@ h6 {
  * Site thật dùng hai lớp: `.authenLayout` phủ nền `bg.jpg` (1921×1081) `cover`,
  * còn `.gid__wrapper-bg` là MỘT panel ảnh cố định bên trái (`width:576px`,
  * `background-position:25% center`, `background-size:cover`,
- * `pointer-events:none`). Ở đây ảnh đó tách riêng thành `.vj-skyid-art` làm
- * một CỘT bên trái (rộng 576px), khối form nằm ở cột còn lại — không nằm đè
- * lên ảnh, tránh chữ trên nền ảnh. Nền đổi sang đỏ thương hiệu cho phần
- * còn lại của trang. */
+ * `pointer-events:none`). Ở đây panel ảnh đó được gộp vào nền của chính
+ * `.vj-skyid-layout`: ảnh `cover` toàn trang, khối form trắng nằm ở giữa —
+ * đúng như `.authenLayout` của site thật, và chữ không bao giờ nằm đè lên
+ * ảnh. */
 .vj-skyid-layout {
   position: relative;
   display: flex;
@@ -1517,6 +1526,7 @@ h6 {
 
 .vj-skyid-input::placeholder {
   color: var(--vj-skyid-placeholder);
+  font-weight: 400;
   opacity: 1;
 }
 
@@ -2720,8 +2730,12 @@ h6 {
   font-weight: 500;
   color: #333333;
 }
-/* Placeholder guidance should be prominent and readable across light forms. */
-input:not(.vj-auth-input)::placeholder,
+/* Placeholder guidance should be prominent and readable across light forms.
+ *
+ * `.vj-skyid-input` là ngoại lệ: site thật đặt placeholder `#C4C4C4` thường,
+ * nên nó phải thoát khỏi rule `!important` này (đo 13/11/2026 —
+ * `input.form-control::placeholder { color:#C4C4C4 }`). */
+input:not(.vj-auth-input):not(.vj-skyid-input)::placeholder,
 textarea::placeholder {
   color: #000000 !important;
   font-weight: 700;

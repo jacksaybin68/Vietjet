@@ -53,15 +53,16 @@ const FARE_CLASS_CONFIG: Record<
 };
 
 /**
- * Màu nền nhãn hạng vé trong card kết quả — khớp đúng với hàng header ở
- * desktop (`bg-vj-fare-business` / `#D71920` / `#FF8800` / `#388E3C`), để nhãn ở
- * mobile và header ở desktop nói cùng một ngôn ngữ màu.
+ * Nhãn hạng vé trong card kết quả. Quy ước "một bảng màu" của dự án: mọi hạng
+ * dùng chung nền trung tính `#F8F8F8` + chữ `#333333`; hạng đang chọn được
+ * đánh dấu bằng viền/nền đỏ thương hiệu. Bốn chip xanh/cam/nâu của site thật
+ * đã đo được nhưng cố ý không sao chép (xem AGENTS.md).
  */
 const FARE_BADGE_CLASS: Record<string, string> = {
-  business: 'bg-vj-fare-business',
-  skyboss: 'bg-primary-dark',
-  deluxe: 'bg-vj-fare-deluxe',
-  eco: 'bg-vj-fare-eco',
+  business: 'bg-vj-surface-fare text-vj-text',
+  skyboss: 'bg-vj-surface-fare text-vj-text',
+  deluxe: 'bg-vj-surface-fare text-vj-text',
+  eco: 'bg-vj-surface-fare text-vj-text',
 };
 
 const DEPARTURE_TIME_SLOTS = [
@@ -1377,8 +1378,8 @@ export default function FlightResultsStep({
                           isSoldOut
                             ? 'bg-gray-100/80 text-gray-400'
                             : isSelected
-                              ? 'bg-amber-50/90 ring-2 ring-inset ring-vj-fare-gold shadow-xs'
-                              : 'bg-white hover:bg-amber-50/30'
+                              ? 'bg-[rgb(var(--vj-red-rgb))]/10 ring-2 ring-inset ring-primary shadow-xs'
+                              : 'bg-vj-surface-fare hover:bg-vj-surface-fare/70'
                         }`}
                       >
                         {/* Hidden fare div for test suite expectation */}
@@ -1386,7 +1387,7 @@ export default function FlightResultsStep({
 
                         {isSelected && !isSoldOut && (
                           <div className="absolute top-1 inset-x-0 flex justify-center pointer-events-none z-10">
-                            <span className="inline-flex items-center gap-0.5 text-5xs sm:text-4xs font-black text-emerald-800 bg-emerald-100/90 px-1 sm:px-1.5 py-0.5 rounded-full shadow-2xs leading-none uppercase tracking-wider">
+                            <span className="inline-flex items-center gap-0.5 text-5xs sm:text-4xs font-bold text-primary bg-[rgb(var(--vj-red-rgb))]/10 px-1 sm:px-1.5 py-0.5 rounded-full shadow-2xs leading-none uppercase tracking-wider">
                               <svg
                                 className="w-1.5 h-1.5 sm:w-2 sm:h-2"
                                 viewBox="0 0 12 12"
@@ -1407,7 +1408,7 @@ export default function FlightResultsStep({
                           <div className="flex-1 flex flex-col items-center justify-center p-1 sm:p-2 text-center select-none min-h-[56px] sm:min-h-[78px]">
                             {/* Mobile: vẫn phải ghi tên hạng */}
                             <span
-                              className={`sm:hidden mb-0.5 inline-flex items-center rounded-full px-1 py-0.5 text-5xs font-black uppercase tracking-wider leading-none text-white opacity-70 ${
+                              className={`sm:hidden mb-0.5 inline-flex items-center rounded-full px-1 py-0.5 text-5xs font-bold uppercase tracking-wider leading-none ${
                                 FARE_BADGE_CLASS[fc.id] ?? 'bg-gray-500'
                               }`}
                             >
@@ -1420,7 +1421,7 @@ export default function FlightResultsStep({
                                 className="rotate-45 opacity-60"
                               />
                             </div>
-                            <span className="text-5xs sm:text-xs font-bold text-gray-500 leading-tight">
+                            <span className="text-sm font-semibold text-vj-sold-out leading-tight">
                               Hết chỗ
                             </span>
                             <button
@@ -1469,20 +1470,23 @@ export default function FlightResultsStep({
                           >
                             {/* Mobile: nhãn hạng vé */}
                             <span
-                              className={`sm:hidden mb-0.5 inline-flex items-center rounded-full px-1 py-0.5 text-5xs font-black uppercase tracking-wider leading-none text-white ${
+                              className={`sm:hidden mb-0.5 inline-flex items-center rounded-full px-1 py-0.5 text-5xs font-bold uppercase tracking-wider leading-none ${
                                 FARE_BADGE_CLASS[fc.id] ?? 'bg-gray-500'
                               }`}
                             >
                               {fc.name}
                             </span>
+                            {/* Giá vé: số tiền 26px/400 JambonoMedium #333333,
+                                mã tiền tệ 16px/500 #6D6E71 (đo 13/11/2026). */}
                             <span
-                              className={`text-3xs xs:text-xs sm:text-sm lg:text-base xl:text-lg font-black font-koho leading-none tracking-tight transition-colors whitespace-nowrap ${
-                                isSelected
-                                  ? 'text-primary'
-                                  : 'text-gray-950 group-hover:text-primary'
+                              className={`text-xl5 font-jambono font-normal font-koho leading-none whitespace-nowrap transition-colors ${
+                                isSelected ? 'text-primary' : 'text-vj-text group-hover:text-primary'
                               }`}
                             >
-                              {fc.price.toLocaleString('vi-VN')} VND
+                              {fc.price.toLocaleString('vi-VN')}
+                              <span className="text-base font-medium text-vj-currency-gray ml-1">
+                                VND
+                              </span>
                             </span>
                             <svg
                               className={`w-2 h-2 sm:w-3 sm:h-3 text-gray-400 mt-0.5 sm:mt-1 transition-transform duration-200 ${

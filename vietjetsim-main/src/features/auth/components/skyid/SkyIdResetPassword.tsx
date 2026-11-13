@@ -29,7 +29,14 @@ export default function SkyIdResetPassword() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token') || '';
 
-  const [checking, setChecking] = useState(true);
+  /**
+   * Trạng thái ban đầu được tính TỪ `token` ngay lần render đầu, không phải
+   * sau `useEffect`: nếu khởi tạo `checking = true` rồi mới cập nhật trong
+   * effect, màn hình sẽ nháy qua trạng thái "Đang kiểm tra liên kết..." ở
+   * những viewport hydrate chậm — `ui-check` chụp đúng khoảnh khắc đó và báo
+   * "nội dung quá ngắn". Không có token thì không cần kiểm tra gì cả.
+   */
+  const [checking, setChecking] = useState(token.length > 0);
   const [tokenValid, setTokenValid] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');

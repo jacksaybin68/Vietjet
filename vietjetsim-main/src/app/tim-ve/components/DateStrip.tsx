@@ -32,7 +32,7 @@ export default function DateStrip({ items, selectedValue, onSelect }: DateStripP
   const _minPrice = validPrices.length > 0 ? Math.min(...validPrices) : null;
 
   return (
-    <section className="w-full border-b border-black/10 bg-[var(--background)]">
+    <section className="w-full border-b border-black/10 bg-white">
       <div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
         {/* Thanh cuộn ngang */}
         <div
@@ -51,8 +51,8 @@ export default function DateStrip({ items, selectedValue, onSelect }: DateStripP
                 onClick={() => onSelect(item.value)}
                 className={`relative flex flex-col items-center justify-center shrink-0 min-w-[130px] px-3 py-2 rounded-vj transition-all shadow-sm ${
                   active
-                    ? 'bg-gradient-to-b from-vjyellow to-accent-light text-[var(--foreground)] font-black border-2 border-yellow-500 ring-2 ring-vjyellow/40 scale-105 z-10'
-                    : 'border border-gray-200/90 bg-white text-gray-700 font-semibold hover:border-amber-300 hover:bg-amber-50/30'
+                    ? 'bg-[var(--vj-yellow-tab)] text-[var(--vj-tab-ink)] font-bold border border-transparent'
+                    : 'border border-gray-200/90 bg-white text-gray-700 font-medium hover:border-amber-300 hover:bg-amber-50/30'
                 }`}
               >
                 <span className="text-sm2 font-medium leading-tight">{dayOfWeek}</span>
@@ -60,7 +60,7 @@ export default function DateStrip({ items, selectedValue, onSelect }: DateStripP
                 {item.price && (
                   <span
                     className={`text-sm2 font-bold mt-0.5 ${
-                      active ? 'text-red-700 font-black' : 'text-gray-500'
+                      active ? 'text-[var(--vj-tab-ink)]' : 'text-gray-500'
                     }`}
                   >
                     {active ? 'Từ ' : ''}

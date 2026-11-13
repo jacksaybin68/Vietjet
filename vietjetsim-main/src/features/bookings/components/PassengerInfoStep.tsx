@@ -50,9 +50,45 @@ function createBlankPassenger(type: PassengerType = 'adult'): Passenger {
  * label baselines drifted by a pixel or two from field to field, which reads
  * as sloppy rather than intentional. One constant makes drift impossible —
  * a new field picks up the same typography instead of re-inventing it.
+ *
+ * Site thật (đo 13/11/2026) dùng floating-label kiểu Material-UI: nhãn
+ * `16px/500` màu `#6D6E71`, thu nhỏ còn `8px/500` khi field có dữ liệu hoặc
+ * đang focus. Utility `.vj-underline-field` / `.vj-underline-label` dựng lại
+ * đúng số đo đó — nhãn nằm trong ô, không phải một dòng chữ riêng ở trên.
  */
-const fieldLabelClass =
-  'block text-2xs sm:text-xs font-bold uppercase tracking-wider text-[var(--foreground)] mb-1 font-koho';
+const fieldLabelClass = 'sr-only';
+
+/** Bề rộng/cao của radio và checkbox theo số đo site thật (13/11/2026). */
+const RADIO_CLASS = 'w-[42px] h-[42px] cursor-pointer accent-primary shrink-0';
+const CHECKBOX_CLASS = 'w-[14px] h-[14px] rounded border-gray-300 accent-primary shrink-0';
+
+/**
+ * Ô nhập kiểu Material-UI underline — cao 40px, gạch chân 1px `#D9D9D9`
+ * (2px đỏ khi focus), chữ 16px/500, nhãn nổi 16px/500 `#6D6E71` thu nhỏ còn
+ * 8px/500 khi ô đã có dữ liệu. Số đo lấy từ DOM sống của site thật
+ * (13/11/2026) và dựng lại bằng utility `.vj-underline-field` /
+ * `.vj-underline-label` trong `src/styles/tailwind.css`.
+ */
+function UnderlineField({
+  id,
+  label,
+  filled = false,
+  children,
+}: {
+  id: string;
+  label: string;
+  filled?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="vj-underline-field relative" data-filled={filled ? 'true' : 'false'}>
+      {children}
+      <label htmlFor={id} className="vj-underline-label">
+        {label}
+      </label>
+    </div>
+  );
+}
 
 export default function PassengerInfoStep({
   flight,
@@ -138,8 +174,8 @@ export default function PassengerInfoStep({
   return (
     <>
       <div className="w-full pb-20">
-        {/* Page Section Title */}
-        <h2 className="text-sm sm:text-base font-bold text-gray-800 mb-3 font-koho">
+        {/* Page Section Title — h3 18px/600 (đo 13/11/2026) */}
+        <h2 className="text-lg font-semibold text-vj-text mb-3 font-koho">
           Thông tin hành khách
         </h2>
 
@@ -339,7 +375,9 @@ export default function PassengerInfoStep({
                 <div className="p-4 sm:p-5 space-y-4">
                   {/* Gender row */}
                   <div>
-                    <label className={fieldLabelClass}>Giới tính</label>
+                    <div className="vj-underline-field relative">
+                      <span className="vj-underline-label">Giới tính</span>
+                    </div>
                     <div className="flex items-center gap-6 mt-1">
                       {[
                         ['male', 'Nam'],
@@ -348,7 +386,7 @@ export default function PassengerInfoStep({
                       ].map(([val, label]) => (
                         <label
                           key={val}
-                          className="flex items-center gap-2 cursor-pointer text-xs font-medium text-gray-800 select-none"
+                          className="flex items-center gap-2 cursor-pointer text-sm2 font-medium text-vj-text select-none"
                         >
                           <input
                             id={`passenger-${i}-gender-${val}`}
@@ -357,7 +395,7 @@ export default function PassengerInfoStep({
                             value={val}
                             checked={p.gender === val}
                             onChange={() => updatePassenger(i, 'gender', val)}
-                            className="accent-primary w-4 h-4 cursor-pointer"
+                            className={RADIO_CLASS}
                           />
                           <span>{label}</span>
                         </label>
@@ -367,40 +405,38 @@ export default function PassengerInfoStep({
 
                   {/* Name Fields: Họ và tên */}
                   <div>
-                    <label htmlFor={`passenger-${i}-name`} className={fieldLabelClass}>
-                      Họ và tên <span className="text-red-600">*</span>
-                    </label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <span className="text-2xs font-semibold text-gray-600 block mb-0.5">
-                          Họ (Theo giấy tờ tuỳ thân)*
-                        </span>
-                        <input
+                        <UnderlineField
                           id={`passenger-${i}-name`}
-                          name={`passenger-${i}-name`}
-                          type="text"
-                          placeholder="Theo giấy tờ tuỳ thân"
-                          value={p.name}
-                          onChange={(e) => updatePassenger(i, 'name', e.target.value)}
-                          className="w-full border-0 border-b-2 border-primary bg-transparent py-2 sm:py-1 text-base text-gray-900 focus:outline-none focus:border-primary placeholder:text-gray-400 placeholder:italic placeholder:font-normal placeholder:text-xs sm:placeholder:text-2xs"
-                          required
-                        />
+                          label="Họ (Theo giấy tờ tuỳ thân)"
+                          filled={!!p.name}
+                        >
+                          <input
+                            id={`passenger-${i}-name`}
+                            name={`passenger-${i}-name`}
+                            type="text"
+                            value={p.name}
+                            onChange={(e) => updatePassenger(i, 'name', e.target.value)}
+                            required
+                          />
+                        </UnderlineField>
                       </div>
                       <div>
-                        <span className="text-2xs font-semibold text-gray-600 block mb-0.5">
-                          Tên đệm & tên*
-                        </span>
-                        <input
+                        <UnderlineField
                           id={`passenger-${i}-firstName`}
-                          name={`passenger-${i}-firstName`}
-                          type="text"
-                          aria-label="Tên đệm & tên"
-                          placeholder="Tên đệm và tên theo giấy tờ tuỳ thân"
-                          value={p.firstName || ''}
-                          onChange={(e) => updatePassenger(i, 'firstName', e.target.value)}
-                          className="w-full border-0 border-b-2 border-primary bg-transparent py-2 sm:py-1 text-base text-gray-900 focus:outline-none focus:border-primary placeholder:text-gray-400 placeholder:italic placeholder:font-normal placeholder:text-xs sm:placeholder:text-2xs"
-                          required
-                        />
+                          label="Tên đệm & tên"
+                          filled={!!p.firstName}
+                        >
+                          <input
+                            id={`passenger-${i}-firstName`}
+                            name={`passenger-${i}-firstName`}
+                            type="text"
+                            value={p.firstName || ''}
+                            onChange={(e) => updatePassenger(i, 'firstName', e.target.value)}
+                            required
+                          />
+                        </UnderlineField>
                       </div>
                     </div>
                     <div className="mt-1.5 text-2xs text-blue-600 flex items-center gap-1">
@@ -414,38 +450,42 @@ export default function PassengerInfoStep({
                   {/* Ngày sinh & Quốc gia */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor={`passenger-${i}-dob`} className={fieldLabelClass}>
-                        Ngày sinh*(DD/MM/YYYY)
-                      </label>
-                      <input
+                      <UnderlineField
                         id={`passenger-${i}-dob`}
-                        name={`passenger-${i}-dob`}
-                        type="date"
-                        value={p.dob}
-                        onChange={(e) => updatePassenger(i, 'dob', e.target.value)}
-                        className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-primary"
-                        required
-                      />
+                        label="Ngày sinh (DD/MM/YYYY)"
+                        filled={!!p.dob}
+                      >
+                        <input
+                          id={`passenger-${i}-dob`}
+                          name={`passenger-${i}-dob`}
+                          type="date"
+                          value={p.dob}
+                          onChange={(e) => updatePassenger(i, 'dob', e.target.value)}
+                          required
+                        />
+                      </UnderlineField>
                     </div>
                     {isAdult && (
                       <div>
-                        <label htmlFor={`passenger-${i}-countryCode`} className={fieldLabelClass}>
-                          Quốc gia <span className="text-red-600">*</span>
-                        </label>
-                        <select
+                        <UnderlineField
                           id={`passenger-${i}-countryCode`}
-                          name={`passenger-${i}-countryCode`}
-                          value={p.countryCode}
-                          onChange={(e) => updatePassenger(i, 'countryCode', e.target.value)}
-                          className="w-full border-0 border-b border-gray-300 bg-transparent py-1 text-xs text-gray-900 focus:outline-none focus:border-primary"
-                          required
+                          label="Quốc gia"
+                          filled
                         >
-                          {COUNTRY_DIAL_CODES.map((country) => (
-                            <option key={country.code} value={country.code}>
-                              {country.name}
-                            </option>
-                          ))}
-                        </select>
+                          <select
+                            id={`passenger-${i}-countryCode`}
+                            name={`passenger-${i}-countryCode`}
+                            value={p.countryCode}
+                            onChange={(e) => updatePassenger(i, 'countryCode', e.target.value)}
+                            required
+                          >
+                            {COUNTRY_DIAL_CODES.map((country) => (
+                              <option key={country.code} value={country.code}>
+                                {country.name}
+                              </option>
+                            ))}
+                          </select>
+                        </UnderlineField>
                       </div>
                     )}
                   </div>

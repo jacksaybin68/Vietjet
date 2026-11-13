@@ -810,7 +810,7 @@ export default function SkyIdAuthFlow({
     >
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="relative w-full max-w-[420px]">
-          <SkyIdShell title={title} subtitle={subtitle} showArt={false}>
+          <SkyIdShell title={title} subtitle={subtitle}>
             {body}
           </SkyIdShell>
           {onClose ? (

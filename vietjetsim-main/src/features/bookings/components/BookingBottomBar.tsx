@@ -58,7 +58,7 @@ export default function BookingBottomBar({
           <button
             type="button"
             onClick={onBack}
-            className="rounded-vj border border-[var(--border)] bg-white px-4 py-1.5 text-xs font-bold text-[var(--foreground-muted)] transition-colors hover:bg-[var(--surface-2)] sm:text-sm"
+            className="rounded-[5px] border border-[var(--vj-border-back)] bg-white h-[39px] px-4 text-sm font-medium text-vj-text transition-colors hover:bg-gray-50"
           >
             Quay lại
           </button>
@@ -68,21 +68,21 @@ export default function BookingBottomBar({
 
         {/* Center: Total price */}
         <div className="flex flex-col items-center leading-tight">
-          <span className="text-2xs uppercase tracking-wide text-[var(--foreground-subtle)] font-medium">
+          <span className="text-2xl3 font-semibold text-gray-800 font-koho">
             Tổng tiền
           </span>
-          <span className="text-base font-black font-koho text-[var(--primary)] sm:text-lg">
+          <span className="text-xl4 font-bold font-jambono text-primary">
             {total.toLocaleString('vi-VN')} VND
           </span>
         </div>
 
-        {/* Right: primary CTA (brand red) */}
+        {/* Right: primary CTA (.vj-cta gradient vàng) */}
         <button
           type={isSubmit ? 'submit' : 'button'}
           form={formId}
           onClick={isSubmit ? undefined : action}
           disabled={isDisabled}
-          className="rounded-vj bg-[var(--primary)] hover:bg-[var(--primary-dark)] px-6 py-2 font-koho text-xs font-black text-white transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm shadow-sm"
+          className="vj-cta h-[39px] px-6 rounded-vj font-koho text-sm font-medium uppercase tracking-normal transition-all shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
         >
           {label}
         </button>

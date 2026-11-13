@@ -130,10 +130,10 @@ export default function BookingSummaryPanel({
           gradient đỏ `359.2deg` cao `56px` với `h3` 20px/700 trắng, các thanh
           mục cao `52px` nền `#F1F1F1` tiêu đề `18px/600`, thanh tổng nền trắng
           "Tổng tiền" `20px/600` + giá `22px/700`, nút "Đi tiếp" `127×39`. */}
-      <aside className="hidden lg:flex lg:w-[380px] flex-col rounded-t-vj overflow-hidden shadow-sm border border-gray-200 bg-white h-fit sticky top-16">
+      <aside className="hidden lg:flex lg:w-[380px] lg:flex-none flex-col rounded-[5px] overflow-hidden shadow-sm border border-gray-200 bg-white h-fit sticky top-4">
         {/* Panel header — gradient đỏ 359.2deg, cao 56px */}
         <div className="vj-summary-head px-4 flex items-center justify-center">
-          <h3 className="font-koho text-xl font-bold uppercase text-white tracking-wide">
+          <h3 className="font-koho text-2xl3 font-bold uppercase text-white tracking-normal">
             THÔNG TIN ĐẶT CHỖ
           </h3>
         </div>
@@ -144,10 +144,10 @@ export default function BookingSummaryPanel({
             className="vj-summary-bar px-4 flex items-center justify-between cursor-pointer"
             onClick={() => setShowPaxDetail(!showPaxDetail)}
           >
-            <span className="font-koho text-lg font-semibold text-gray-800">
+            <span className="font-koho text-lg font-semibold text-vj-text">
               Thông tin hành khách
             </span>
-            <div className="flex items-center gap-1 font-bold text-gray-950 font-koho text-sm">
+            <div className="flex items-center gap-1 font-bold text-vj-text font-koho text-sm">
               <span>{totalPaxCount} khách</span>
               {showPaxDetail ? <RiArrowUpSLine size={16} /> : <RiArrowDownSLine size={16} />}
             </div>
@@ -174,12 +174,12 @@ export default function BookingSummaryPanel({
           )}
         </div>
 
-        {/* Section: Chuyến đi */}
+        {/* Section: Chuyến đi — nền #F1F1F1, chữ #333333 (quy ước 1 bảng màu) */}
         <div className="border-b border-gray-200/80">
-          <div className="bg-sky-100 px-4 py-2 flex items-center justify-between text-xs font-bold text-sky-700 uppercase">
+          <div className="vj-summary-bar px-4 flex items-center justify-between text-xs font-bold text-vj-text uppercase">
             <span>Chuyến đi</span>
             {data.flightNo && (
-              <div className="flex items-center gap-1 text-primary font-black font-koho text-sm tracking-tight normal-case">
+              <div className="flex items-center gap-1 text-primary font-bold font-koho text-sm tracking-tight normal-case">
                 <span>{outboundTotal.toLocaleString('vi-VN')} VND</span>
                 <RiEditLine size={14} className="stroke-[1]" />
               </div>
@@ -187,12 +187,13 @@ export default function BookingSummaryPanel({
           </div>
 
           <div className="p-3 space-y-1 bg-white">
-            <div className="text-xs font-black text-gray-900 leading-tight flex items-center">
+            {/* Tuyến 16px/700; ngày/số hiệu 14px/500 (đo 13/11/2026) */}
+            <div className="text-base font-bold text-vj-text leading-tight flex items-center">
               <span>{origin}</span>
               <SummaryPlaneIcon />
               <span>{destination}</span>
             </div>
-            <div className="text-2xs text-gray-500 font-semibold">
+            <div className="text-sm font-medium text-gray-600">
               {data.flightNo
                 ? `${formatViSummaryDate(data.date)} | ${data.departTime || '04:40'} - ${data.arriveTime || '06:50'} | ${data.flightNo} | ${formatFareClassName(data.fareClass)}`
                 : '--- | --- | --- | ---'}
@@ -206,9 +207,9 @@ export default function BookingSummaryPanel({
             className="vj-summary-bar px-4 flex items-center justify-between cursor-pointer"
             onClick={() => setShowFareDetail(!showFareDetail)}
           >
-            <span className="font-koho text-lg font-semibold text-gray-800">Giá vé</span>
+            <span className="font-koho text-lg font-semibold text-vj-text">Giá vé</span>
             {data.fare && data.fare > 0 ? (
-              <div className="flex items-center gap-1 font-bold text-gray-950 font-koho text-sm">
+              <div className="flex items-center gap-1 font-bold text-primary font-koho text-lg">
                 <span>{data.fare.toLocaleString('vi-VN')} VND</span>
                 {showFareDetail ? <RiArrowUpSLine size={16} /> : <RiArrowDownSLine size={16} />}
               </div>
@@ -243,8 +244,8 @@ export default function BookingSummaryPanel({
             className="vj-summary-bar px-4 flex items-center justify-between cursor-pointer"
             onClick={() => setShowTaxDetail(!showTaxDetail)}
           >
-            <span className="font-koho text-lg font-semibold text-gray-800">Thuế, phí</span>
-            <div className="flex items-center gap-1 font-bold text-gray-950 font-koho text-sm">
+            <span className="font-koho text-lg font-semibold text-vj-text">Thuế, phí</span>
+            <div className="flex items-center gap-1 font-bold text-vj-text font-koho text-sm">
               {data.tax && data.tax > 0 ? (
                 <span>{data.tax.toLocaleString('vi-VN')} VND</span>
               ) : (
@@ -285,8 +286,8 @@ export default function BookingSummaryPanel({
           className="vj-summary-bar px-4 border-b border-gray-200/80 flex items-center justify-between cursor-pointer"
           onClick={() => setShowServiceDetail(!showServiceDetail)}
         >
-          <span className="font-koho text-lg font-semibold text-gray-800">Dịch vụ</span>
-          <div className="flex items-center gap-1 font-bold text-gray-950 font-koho text-sm">
+          <span className="font-koho text-lg font-semibold text-vj-text">Dịch vụ</span>
+          <div className="flex items-center gap-1 font-bold text-vj-text font-koho text-sm">
             <span>{totalServices.toLocaleString('vi-VN')} VND</span>
             <RiArrowDownSLine size={16} />
           </div>
@@ -295,10 +296,10 @@ export default function BookingSummaryPanel({
         {/* Section: Chuyến về (always present for roundtrip matching screenshot) */}
         {(data.isRoundTrip || data.returnLeg !== undefined) && (
           <div className="border-b border-gray-200/80">
-            <div className="bg-sky-100 px-4 py-2 flex items-center justify-between text-xs font-bold text-sky-700 uppercase">
+            <div className="vj-summary-bar px-4 flex items-center justify-between text-xs font-bold text-vj-text uppercase">
               <span>Chuyến về</span>
               {data.returnLeg?.flightNo && (
-                <div className="flex items-center gap-1 text-primary font-black font-koho text-sm tracking-tight normal-case">
+                <div className="flex items-center gap-1 text-primary font-bold font-koho text-sm tracking-tight normal-case">
                   <span>
                     {(
                       data.returnLeg.total ?? (data.returnLeg.fare ?? 0) + (data.returnLeg.tax ?? 0)
@@ -310,12 +311,12 @@ export default function BookingSummaryPanel({
               )}
             </div>
             <div className="p-3 space-y-1 bg-white text-xs">
-              <div className="text-xs font-black text-gray-900 leading-tight flex items-center">
+              <div className="text-base font-bold text-vj-text leading-tight flex items-center">
                 <span>{destination}</span>
                 <SummaryPlaneIcon />
                 <span>{origin}</span>
               </div>
-              <div className="text-2xs text-gray-500 font-semibold">
+              <div className="text-sm font-medium text-gray-600">
                 {data.returnLeg?.flightNo
                   ? `${formatViSummaryDate(data.returnLeg.date ?? data.date)} | ${data.returnLeg.departTime || '---'} - ${data.returnLeg.arriveTime || '---'} | ${data.returnLeg.flightNo} | ${formatFareClassName(data.returnLeg.fareClass)}`
                   : '--- | --- | --- | ---'}
@@ -328,9 +329,9 @@ export default function BookingSummaryPanel({
                 className="vj-summary-bar px-4 flex items-center justify-between cursor-pointer"
                 onClick={() => setShowReturnFareDetail(!showReturnFareDetail)}
               >
-                <span className="font-koho text-lg font-semibold text-gray-800">Giá vé</span>
+                <span className="font-koho text-lg font-semibold text-vj-text">Giá vé</span>
                 {data.returnLeg?.fare && data.returnLeg.fare > 0 ? (
-                  <div className="flex items-center gap-1 font-bold text-gray-950 font-koho text-sm">
+                  <div className="flex items-center gap-1 font-bold text-vj-text font-koho text-sm">
                     <span>{data.returnLeg.fare.toLocaleString('vi-VN')} VND</span>
                     {showReturnFareDetail ? (
                       <RiArrowUpSLine size={16} />
@@ -367,9 +368,9 @@ export default function BookingSummaryPanel({
 
             {/* Bar: Thuế, phí (Chuyến về) */}
             <div className="vj-summary-bar px-4 flex items-center justify-between">
-              <span className="font-koho text-lg font-semibold text-gray-800">Thuế, phí</span>
+              <span className="font-koho text-lg font-semibold text-vj-text">Thuế, phí</span>
               {data.returnLeg?.tax && data.returnLeg.tax > 0 ? (
-                <div className="flex items-center gap-1 font-bold text-gray-950 font-koho text-sm">
+                <div className="flex items-center gap-1 font-bold text-vj-text font-koho text-sm">
                   <span>{data.returnLeg.tax.toLocaleString('vi-VN')} VND</span>
                   <RiArrowDownSLine size={16} />
                 </div>
@@ -410,10 +411,10 @@ export default function BookingSummaryPanel({
           </div>
         )}
 
-        {/* Thanh tổng — nền trắng: "Tổng tiền" 20px/600, giá 22px/700. */}
+        {/* Thanh tổng — nền trắng: "Tổng tiền" 20px/600, giá 22px/700 Jambono. */}
         <div className="bg-white px-4 py-3 flex items-center justify-between mt-auto border-t border-gray-200/80">
-          <span className="font-koho text-xl font-semibold text-gray-900">Tổng tiền</span>
-          <span className="font-koho text-xl4 font-bold text-gray-900">
+          <span className="font-koho text-2xl3 font-semibold text-vj-text">Tổng tiền</span>
+          <span className="font-jambono text-xl4 font-bold text-vj-text">
             {(
               outboundTotal +
               (data.isRoundTrip && data.returnLeg

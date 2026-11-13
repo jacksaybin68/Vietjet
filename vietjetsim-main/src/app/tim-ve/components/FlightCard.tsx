@@ -27,35 +27,20 @@ export interface FlightCardProps {
   onOpenBenefits?: () => void;
 }
 
+// One palette only (see the design brief in AGENTS.md): the fare header of
+// every cabin shares the same neutral surface `#F8F8F8`; the selected cabin
+// is the only one that gets the brand-red mark. The four coloured chips that
+// Vietjet's site uses (green / orange / brown) were measured live but are
+// deliberately NOT reproduced — they read as noise next to the red CTAs.
 const FARE_COLUMNS: readonly {
   id: string;
   label: string;
-  bgHeader: string;
-  textHeader: string;
   priceKey: keyof FlightPrice;
 }[] = [
-  {
-    id: 'BUSINESS',
-    label: 'BUSINESS',
-    bgHeader: 'bg-vj-gold-bronze',
-    textHeader: 'text-white',
-    priceKey: 'business',
-  },
-  {
-    id: 'SKYBOSS',
-    label: 'SkyBOSS',
-    bgHeader: 'bg-primary-dark',
-    textHeader: 'text-white',
-    priceKey: 'skyboss',
-  },
-  {
-    id: 'DELUXE',
-    label: 'Deluxe',
-    bgHeader: 'bg-orange-500',
-    textHeader: 'text-white',
-    priceKey: 'deluxe',
-  },
-  { id: 'ECO', label: 'Eco', bgHeader: 'bg-success', textHeader: 'text-white', priceKey: 'eco' },
+  { id: 'BUSINESS', label: 'BUSINESS', priceKey: 'business' },
+  { id: 'SKYBOSS', label: 'SkyBOSS', priceKey: 'skyboss' },
+  { id: 'DELUXE', label: 'Deluxe', priceKey: 'deluxe' },
+  { id: 'ECO', label: 'Eco', priceKey: 'eco' },
 ] as const;
 
 export default function FlightCard({
@@ -74,7 +59,7 @@ export default function FlightCard({
         <div className="w-[100px] sm:w-[130px] shrink-0 bg-vj-gold-deep p-2 flex flex-col justify-between items-center text-center">
           <span className="text-3xs font-bold text-gray-700">{flight.no}</span>
           <div className="py-1">
-            <div className="text-xs sm:text-sm font-black text-gray-950 leading-tight">
+            <div className="text-sm font-medium text-gray-950 leading-tight font-koho">
               {flight.depart} <span className="text-3xs font-normal">Đến</span> {flight.arrive}
             </div>
             <div className="text-4xs sm:text-3xs text-gray-800 font-medium mt-0.5 flex items-center justify-center gap-1">
@@ -103,7 +88,7 @@ export default function FlightCard({
           <span className="text-3xs text-gray-600 leading-none">˅</span>
         </div>
 
-        {/* Cột 2: 4 cột hạng ghế */}
+        {/* Cột 2: 4 cột hạng ghế — ô 141×96, nền #F8F8F8 (đo 13/11/2026) */}
         <div className="flex-1 grid grid-cols-4 gap-1 p-1.5 sm:p-2 min-w-0 bg-white">
           {FARE_COLUMNS.map((col) => {
             const active = selectedClass?.toUpperCase() === col.id;
@@ -116,17 +101,16 @@ export default function FlightCard({
                 type="button"
                 disabled={isZero}
                 onClick={() => onSelect(flight.no, col.id, priceVal)}
-                className={`flex flex-col items-center justify-between rounded-md border transition-all overflow-hidden focus:outline-none focus:ring-0 ${
+                className={`flex flex-col items-center justify-between h-24 min-w-[141px] rounded-md border transition-all overflow-hidden focus:outline-none focus:ring-0 ${
                   active
-                    ? 'border-success ring-2 ring-success/30 bg-green-50/50'
+                    ? 'border-primary bg-[rgb(var(--vj-red-rgb))]/10'
                     : isZero
                       ? 'border-gray-100 bg-gray-50/70 opacity-60 cursor-not-allowed'
                       : 'border-gray-200 bg-white hover:border-gray-300'
                 }`}
               >
-                <div
-                  className={`w-full py-1 text-center text-4xs sm:text-3xs font-black uppercase tracking-wider ${col.bgHeader} ${col.textHeader}`}
-                >
+                {/* Header ô hạng: nền #F8F8F8, chữ 12px/700 uppercase #333333 */}
+                <div className="w-full py-1 text-center text-xs font-bold uppercase text-vj-text bg-vj-surface-fare">
                   {col.label}
                 </div>
                 <div className="py-1.5 sm:py-2 flex flex-col items-center">
@@ -147,12 +131,15 @@ export default function FlightCard({
                           strokeLinecap="round"
                         />
                       </svg>
-                      <span className="text-3xs text-gray-400 font-bold">Hết chỗ</span>
+                      {/* "Hết chỗ" 14px/600 màu #939598 (đo 13/11/2026) */}
+                      <span className="text-sm font-semibold text-vj-sold-out">Hết chỗ</span>
                     </div>
                   ) : (
                     <>
-                      <span className="text-xs sm:text-sm font-black text-gray-900 leading-tight font-koho group-hover:text-primary transition-colors whitespace-nowrap">
-                        {priceVal.toLocaleString('vi-VN')} VND
+                      {/* Giá 26px/400 JambonoMedium #333333; mã tiền tệ 16px/500 #6D6E71 */}
+                      <span className="text-xl5 font-jambono font-normal text-vj-text leading-tight whitespace-nowrap">
+                        {priceVal.toLocaleString('vi-VN')}
+                        <span className="text-base font-medium text-vj-currency-gray ml-1">VND</span>
                       </span>
                       <svg
                         className="w-2.5 h-2.5 text-gray-400 mt-0.5"
@@ -175,10 +162,11 @@ export default function FlightCard({
         </div>
       </article>
 
-      {/* Expanded Fare Benefit details when selected (matching Screenshot 9) */}
+      {/* Expanded Fare Benefit details when selected — nền đỏ nhạt để đồng bộ
+          quy ước "một bảng màu" (không dùng xanh lá cho trạng thái chọn). */}
       {isSelected && (
-        <div className="border-t border-green-200 bg-green-50/60 p-4 text-xs space-y-2 text-gray-800 animate-fadeIn">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-green-200/80 pb-2">
+        <div className="border-t border-[rgb(var(--vj-red-rgb))]/20 bg-[rgb(var(--vj-red-rgb))]/5 p-4 text-xs space-y-2 text-gray-800 animate-fadeIn">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[rgb(var(--vj-red-rgb))]/20 pb-2">
             <div className="flex items-center gap-2 font-bold text-gray-900">
               <span className="inline-flex items-center gap-1">
                 <span>{flight.from || 'SGN'}</span>
@@ -199,8 +187,8 @@ export default function FlightCard({
               <span>•</span>
               <span className="text-success">Bay thẳng</span>
             </div>
-            <div className="flex items-center gap-1.5 text-success font-bold">
-              <span className="w-2 h-2 rounded-full bg-success" />
+            <div className="flex items-center gap-1.5 text-primary font-bold">
+              <span className="w-2 h-2 rounded-full bg-primary" />
               <span>Đã chọn</span>
             </div>
           </div>
@@ -209,7 +197,7 @@ export default function FlightCard({
             <div>
               <div className="font-bold text-gray-900 mb-1 flex items-center gap-1.5">
                 <svg
-                  className="w-3.5 h-3.5 text-success shrink-0"
+                  className="w-3.5 h-3.5 text-primary shrink-0"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >

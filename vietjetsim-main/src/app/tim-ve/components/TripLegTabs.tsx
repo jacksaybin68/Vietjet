@@ -66,7 +66,7 @@ function LegButton({
       </span>
       <span className="min-w-0">
         <span className="flex items-center gap-1.5">
-          <span className="font-koho text-sm font-semibold uppercase tracking-wide opacity-90">
+          <span className="font-koho text-sm font-semibold uppercase tracking-normal opacity-90">
             {label}
           </span>
           {info.flightNo && (

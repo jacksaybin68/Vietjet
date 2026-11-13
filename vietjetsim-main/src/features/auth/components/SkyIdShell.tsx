@@ -33,14 +33,6 @@ export interface SkyIdShellProps {
   subtitle?: string;
   /** Ẩn khối chân trang logo (dùng khi màn đã có logo riêng). */
   hideFooter?: boolean;
-  /**
-   * Hiện panel ảnh trái 576px (`.gid__wrapper-bg`).
-   *
-   * Bản trang (route công khai) hiện; bản overlay (modal từ header) thì không —
-   * modal là lớp phủ phía trên nội dung trang, panel ảnh cố định bên trái sẽ
-   * che mất trang đang mở.
-   */
-  showArt?: boolean;
 }
 
 export default function SkyIdShell({
@@ -48,13 +40,9 @@ export default function SkyIdShell({
   title,
   subtitle,
   hideFooter = false,
-  showArt = true,
 }: SkyIdShellProps) {
   return (
     <div className="vj-skyid-layout">
-      {/* Panel ảnh trái — `.gid__wrapper-bg`. */}
-      {showArt ? <div className="vj-skyid-art" aria-hidden="true" /> : null}
-
       {/* Logo đỏ góc trên bên trái — `.gid-logo-image-red`. */}
       <img src="/images/skyid/logo-red.svg" alt="Vietjet Air" className="vj-skyid-logo-red" />
 
