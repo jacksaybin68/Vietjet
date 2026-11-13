@@ -465,8 +465,12 @@ export default function FlightBookingResultsWrapper({
       </div>
 
       {/* Khung nội dung — số đo site thật (13/11/2026, 1440×900):
-          container 1200px, cột trái 820px, khe 30px, cột phải 410px (panel 380px). */}
-      <div className="mx-auto w-full max-w-[1200px] px-[15px] pt-3 sm:pt-5 pb-24 sm:pb-28 overflow-x-hidden">
+          nội dung 1200px = cột trái 790px + khe 30px + cột phải 380px.
+          Cột trái có padding 15px nên ô của nó là 820px (đúng số đo), cột phải
+          là cột 410px của site (panel 380px nằm trong đó). Vì vậy container
+          là 1230px (1200 + padding 15px mỗi bên) chứ không phải 1260px —
+          1260px sẽ đẩy panel ra ngoài vùng nội dung 1200px của site. */}
+      <div className="mx-auto w-full max-w-[1230px] px-[15px] pt-3 sm:pt-5 pb-24 sm:pb-28 overflow-x-hidden">
         <div className="flex flex-col lg:flex-row lg:gap-[30px] items-start w-full">
           {/* Cột trái: danh sách chuyến bay (ô 820px ở desktop) */}
           {/* `w-full` là bắt buộc ở mobile: parent dùng `items-start`, nên cột
@@ -474,7 +478,7 @@ export default function FlightBookingResultsWrapper({
               dung. Không có `w-full`, lưới 4 cột giá đẩy cột này rộng ~658px
               trong viewport 390px và bị `overflow-x-hidden` của wrapper cắt mất
               (giá vé của các hạng bên phải không chạm được trên điện thoại). */}
-          <div className="w-full lg:w-[820px] lg:flex-none min-w-0">
+          <div className="w-full lg:w-[790px] lg:flex-none min-w-0 lg:px-[15px]">
             <FlightBookingClient
               continueSignal={continueSignal}
               onFlightSelect={handleFlightSelect}
