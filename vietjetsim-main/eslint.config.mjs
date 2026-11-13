@@ -27,6 +27,11 @@ const eslintConfig = [
       '.next-prod/',
       '.next-qa-*/',
       '.next-skyid/',
+      // Cây build sinh ra cho lượt đo QA còn lại (`.qa-build/`). Cùng lý do với
+      // `.next-uicheck`: `eslint .` quét cả nó sẽ mất hàng phút — và nếu cây
+      // build bị dọn giữa chừng, eslint chết với ENOENT khi đọc file `.js`
+      // đã biến mất.
+      '.qa-build/',
       'out/',
       'public/',
       'next-env.d.ts',

@@ -55,6 +55,7 @@ jest-test-results.json
 .next-prod/
 .next-qa-*/
 .next-skyid/
+.qa-build/
 
 # Optional: if using TurboRepo or monorepo
 turbo/
