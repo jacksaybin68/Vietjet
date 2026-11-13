@@ -526,18 +526,18 @@ export default function SeatSelectionDrawer({
         </div>
 
         {/* Sticky Drawer Footer — "Tổng tiền" 20px/600 trắng, giá 22px/700
-            JambonoMedium trắng (đo 13/11/2026) */}
+            JambonoMedium trắng (đo 13/11/2026). Danh sách ghế đã chọn là dòng
+            phụ 13px/500 nên không cạnh tranh với nhãn tổng. */}
         <div className="bg-primary-dark text-white p-3 flex items-center justify-between shadow-lg">
           <div>
-            <span className="text-2xl3 font-semibold text-white block">
-              Chỗ ngồi (
+            <span className="text-2xl3 font-semibold text-white block">Tổng tiền</span>
+            <span className="text-sm2 font-medium text-white/85 block mt-0.5">
               {[
                 outboundSeats.length > 0 ? `Đi: ${outboundSeats.join(', ')}` : null,
                 inboundSeats.length > 0 ? `Về: ${inboundSeats.join(', ')}` : null,
               ]
                 .filter(Boolean)
-                .join(' | ') || 'Chưa chọn'}
-              ):
+                .join(' | ') || 'Chưa chọn chỗ ngồi'}
             </span>
             <span className="text-xl4 font-bold font-jambono text-white">
               {totalSeatFee > 0 ? `${totalSeatFee.toLocaleString('vi-VN')} VND` : '0 VND'}

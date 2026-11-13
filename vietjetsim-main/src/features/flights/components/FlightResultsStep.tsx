@@ -336,6 +336,19 @@ function formatDateVi(iso?: string) {
   return `${day}/${month}/${year}`;
 }
 
+/**
+ * Nền khối "quyền lợi hạng vé" khi mở rộng.
+ *
+ * Trước đây mỗi hạng vé một màu pastel riêng (`bg-emerald-50` cho Eco,
+ * `bg-amber-50` cho Deluxe, `bg-rose-50` cho SkyBOSS, `bg-yellow-50` cho
+ * Business) — đúng cái "chip 4 màu" mà quy ước một bảng màu của dự án đã
+ * loại bỏ, và nó nằm ngay cạnh các CTA đỏ nên càng đọc như nhiễu. Cả bốn
+ * hạng dùng chung một nền đỏ nhạt (`rgb(var(--vj-red-rgb))` ở 5% — cùng
+ * sắc độ với khối đã chọn trong `FlightCard`), đồng thời với hạng đang chọn
+ * được đánh dấu bằng viền đỏ.
+ */
+const FARE_BENEFITS_BG = 'bg-[rgb(var(--vj-red-rgb))]/5';
+
 const FARE_BENEFITS: Record<
   FareClassId,
   {
@@ -345,7 +358,7 @@ const FARE_BENEFITS: Record<
   }
 > = {
   eco: {
-    bgClass: 'bg-emerald-50', // Soft pastel green matching sample 1
+    bgClass: FARE_BENEFITS_BG,
     included: ['Hành lý xách tay: 07Kg.'],
     notIncluded: [
       'Hành lý ký gửi (tùy chọn)',
@@ -357,7 +370,7 @@ const FARE_BENEFITS: Record<
     ],
   },
   deluxe: {
-    bgClass: 'bg-amber-50', // Soft warm tan/orange matching sample 2
+    bgClass: FARE_BENEFITS_BG,
     included: [
       'Hành lý xách tay: 10kg cho đường bay Châu Âu, Úc, Kazakhstan; 07kg cho các đường bay còn lại.',
       'Hành lý ký gửi: 40kg cho đường bay Châu Âu, Úc, Kazakhstan; 20kg cho các đường bay còn lại.',
@@ -368,7 +381,7 @@ const FARE_BENEFITS: Record<
     notIncluded: ['Bộ tiện ích 3 trong 1'],
   },
   skyboss: {
-    bgClass: 'bg-rose-50', // Soft pastel red/pink matching sample 3
+    bgClass: FARE_BENEFITS_BG,
     included: [
       'Hành lý xách tay: 10kg',
       'Hành lý ký gửi: 50kg cho đường bay Châu Âu, Úc, Kazakhstan; 30kg cho các đường bay còn lại và 01 bộ dụng cụ chơi golf (nếu có).',
@@ -381,7 +394,7 @@ const FARE_BENEFITS: Record<
     notIncluded: [],
   },
   business: {
-    bgClass: 'bg-yellow-50', // Soft pastel cream/gold matching sample 4
+    bgClass: FARE_BENEFITS_BG,
     included: [
       'Hành lý xách tay: 18kg',
       'Hành lý ký gửi: 60kg cho đường bay Châu Âu, Úc, Kazakhstan; 40kg cho các đường bay còn lại và 01 bộ dụng cụ chơi golf (nếu có).',
@@ -429,9 +442,11 @@ export default function FlightResultsStep({
   onContinue: _onContinue,
   search,
   onDateChange,
-  pax,
-  child,
-  infant,
+  // `pax` / `child` / `infant` vẫn nằm trong `FlightResultsStepProps` (hợp đồng
+  // public của component) nhưng KHÔNG còn được dùng ở đây: thanh "Tổng tiền"
+  // dính đáy do `FlightBookingResultsWrapper` render, và nó đã tự tính tổng từ
+  // `paxCounts` — bản sao ở đây từng vẽ thêm MỘT thanh `position: fixed` thứ
+  // hai chồng lên thanh đó ở desktop.
 }: FlightResultsStepProps) {
   const [flights, setFlights] = useState<Flight[]>([]);
   const [sortBy, setSortBy] = useState<string>('time_asc');

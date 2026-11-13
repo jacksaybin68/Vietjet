@@ -56,7 +56,7 @@ export default function DateStrip({ items, selectedValue, onSelect }: DateStripP
                 }`}
               >
                 <span className="text-sm2 font-medium leading-tight">{dayOfWeek}</span>
-                <span className="text-sm2 font-bold leading-tight">{dayMonth}</span>
+                <span className="text-sm2 font-medium leading-tight">{dayMonth}</span>
                 {item.price && (
                   <span
                     className={`text-sm2 font-bold mt-0.5 ${

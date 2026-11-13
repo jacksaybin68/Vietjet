@@ -89,7 +89,7 @@ export default function FlightCard({
         </div>
 
         {/* Cột 2: 4 cột hạng ghế — ô 141×96, nền #F8F8F8 (đo 13/11/2026) */}
-        <div className="flex-1 grid grid-cols-4 gap-1 p-1.5 sm:p-2 min-w-0 bg-white">
+        <div className="flex-1 grid grid-cols-4 gap-1 min-w-0 bg-white">
           {FARE_COLUMNS.map((col) => {
             const active = selectedClass?.toUpperCase() === col.id;
             const priceVal = flight.prices[col.priceKey];
@@ -103,7 +103,7 @@ export default function FlightCard({
                 onClick={() => onSelect(flight.no, col.id, priceVal)}
                 className={`flex flex-col items-center justify-between h-24 min-w-[141px] rounded-md border transition-all overflow-hidden focus:outline-none focus:ring-0 ${
                   active
-                    ? 'border-primary bg-[rgb(var(--vj-red-rgb))]/10'
+                    ? 'border-primary ring-2 ring-primary/40 bg-[rgb(var(--vj-red-rgb))]/10'
                     : isZero
                       ? 'border-gray-100 bg-gray-50/70 opacity-60 cursor-not-allowed'
                       : 'border-gray-200 bg-white hover:border-gray-300'
