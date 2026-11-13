@@ -120,7 +120,10 @@ describe('neon-http-bridge error forwarding', () => {
       });
 
       // The predicate the admin route actually calls, on the driver's real error.
-      const { isDuplicateFlightSchedule } = await import('@/app/api/quan-tri/chuyen-bay/route');
+      // Imported from `@/lib/flight-bulk-price` rather than the route module:
+      // Next 16 constrains a route module's exports to the HTTP methods, so a
+      // helper exported from `route.ts` fails the build's type check.
+      const { isDuplicateFlightSchedule } = await import('@/lib/flight-bulk-price');
       expect(isDuplicateFlightSchedule(error)).toBe(true);
     } finally {
       neonConfig.fetchFunction = previousFetch;

@@ -6,65 +6,11 @@ import {
   MIN_TICKET_PRICE_FLOOR,
   FARE_LADDER_RATIO,
 } from '@/lib/openclaw/web-collection';
-
-export type PriceAdjustAction =
-  | 'discount_fixed'
-  | 'increase_fixed'
-  | 'discount_percent'
-  | 'increase_percent'
-  | 'set_fixed';
-
-export interface BulkPriceAdjustFilter {
-  from_code?: string;
-  to_code?: string;
-  from_date?: string;
-  to_date?: string;
-  flight_no?: string;
-  class?: 'all' | 'economy' | 'business';
-}
-
-export interface BulkPriceAdjustPayload {
-  filter?: BulkPriceAdjustFilter;
-  action: PriceAdjustAction;
-  amount: number;
-  dryRun?: boolean;
-}
-
-export function computeAdjustedPrices(
-  currentEco: number,
-  currentBiz: number,
-  currentClass: string,
-  action: PriceAdjustAction,
-  amount: number
-): { newEco: number; newBiz: number; newPrice: number } {
-  let newEco = currentEco;
-
-  switch (action) {
-    case 'discount_fixed':
-      newEco = Math.max(MIN_TICKET_PRICE_FLOOR, Math.round(currentEco - amount));
-      break;
-    case 'increase_fixed':
-      newEco = Math.round(currentEco + amount);
-      break;
-    case 'discount_percent':
-      newEco = Math.max(
-        MIN_TICKET_PRICE_FLOOR,
-        Math.round(currentEco * (1.0 - Math.min(amount, 90) / 100.0))
-      );
-      break;
-    case 'increase_percent':
-      newEco = Math.round(currentEco * (1.0 + amount / 100.0));
-      break;
-    case 'set_fixed':
-      newEco = Math.max(MIN_TICKET_PRICE_FLOOR, Math.round(amount));
-      break;
-  }
-
-  const newBiz = Math.round(newEco * FARE_LADDER_RATIO);
-  const newPrice = currentClass === 'business' ? newBiz : newEco;
-
-  return { newEco, newBiz, newPrice };
-}
+import {
+  computeAdjustedPrices,
+  type PriceAdjustAction,
+  type BulkPriceAdjustPayload,
+} from '@/lib/flight-bulk-price';
 
 export async function POST(req: NextRequest) {
   try {

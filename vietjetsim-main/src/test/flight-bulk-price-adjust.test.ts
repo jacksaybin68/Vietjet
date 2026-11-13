@@ -1,10 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { signAccessToken } from '@/lib/auth';
-import {
-  computeAdjustedPrices,
-  POST as bulkAdjustPost,
-} from '@/app/api/quan-tri/chuyen-bay/dieu-chinh-gia/route';
+import { computeAdjustedPrices } from '@/lib/flight-bulk-price';
+import { POST as bulkAdjustPost } from '@/app/api/quan-tri/chuyen-bay/dieu-chinh-gia/route';
 
 vi.mock('@/lib/role-permissions', () => ({
   getRolePermissionsFromDb: vi.fn(async () => new Set<never>([])),
