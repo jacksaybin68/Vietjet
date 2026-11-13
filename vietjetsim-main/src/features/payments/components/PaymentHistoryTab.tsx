@@ -75,34 +75,24 @@ function PaymentDetailModal({ payment, onClose }: { payment: Payment; onClose: (
 
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
-                Mã giao dịch
-              </span>
-              <span className="text-sm font-semibold text-[#1A2948] font-[Be Vietnam Pro,sans-serif]">
+              <span className="text-sm text-[var(--foreground-muted)]">Mã giao dịch</span>
+              <span className="text-sm font-semibold text-[#1A2948]">
                 {payment.id.slice(0, 8).toUpperCase()}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
-                Mã đặt chỗ
-              </span>
-              <span className="text-sm font-semibold text-[#1A2948] font-[Be Vietnam Pro,sans-serif]">
-                {payment.booking_code}
-              </span>
+              <span className="text-sm text-[var(--foreground-muted)]">Mã đặt chỗ</span>
+              <span className="text-sm font-semibold text-[#1A2948]">{payment.booking_code}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
-                Phương thức
-              </span>
-              <span className="text-sm font-semibold text-[#1A2948] font-[Be Vietnam Pro,sans-serif]">
+              <span className="text-sm text-[var(--foreground-muted)]">Phương thức</span>
+              <span className="text-sm font-semibold text-[#1A2948]">
                 {METHOD_LABELS[payment.method] || payment.method}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
-                Ngày thanh toán
-              </span>
-              <span className="text-sm font-semibold text-[#1A2948] font-[Be Vietnam Pro,sans-serif]">
+              <span className="text-sm text-[var(--foreground-muted)]">Ngày thanh toán</span>
+              <span className="text-sm font-semibold text-[#1A2948]">
                 {formatDate(payment.created_at)}
               </span>
             </div>
@@ -192,7 +182,7 @@ export default function PaymentHistoryTab() {
           <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[#1A2948]">
             Lịch sử thanh toán
           </h2>
-          <p className="text-sm text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
+          <p className="text-sm text-[var(--foreground-muted)] mt-1">
             Xem lại tất cả giao dịch của bạn
           </p>
         </div>
@@ -212,25 +202,19 @@ export default function PaymentHistoryTab() {
           <div className="text-2xl font-bold font-[KoHo,sans-serif] text-emerald-500">
             {payments.filter((p) => p.status === 'completed').length}
           </div>
-          <div className="text-xs text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
-            Thành công
-          </div>
+          <div className="text-xs text-[var(--foreground-muted)] mt-1">Thành công</div>
         </div>
         <div className="bg-white rounded-2xl border border-[var(--border)] p-4 text-center shadow-vj-card">
           <div className="text-2xl font-bold font-[KoHo,sans-serif] text-amber-500">
             {payments.filter((p) => p.status === 'pending').length}
           </div>
-          <div className="text-xs text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
-            Đang xử lý
-          </div>
+          <div className="text-xs text-[var(--foreground-muted)] mt-1">Đang xử lý</div>
         </div>
         <div className="bg-white rounded-2xl border border-[var(--border)] p-4 text-center shadow-vj-card">
           <div className="text-2xl font-bold font-[KoHo,sans-serif] text-violet-500">
             {payments.filter((p) => p.status === 'refunded').length}
           </div>
-          <div className="text-xs text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
-            Đã hoàn tiền
-          </div>
+          <div className="text-xs text-[var(--foreground-muted)] mt-1">Đã hoàn tiền</div>
         </div>
       </div>
 
@@ -240,7 +224,7 @@ export default function PaymentHistoryTab() {
           <div className="w-16 h-16 bg-[var(--surface-2)] rounded-full flex items-center justify-center mx-auto mb-3">
             <Icon name="ReceiptPercentIcon" size={28} className="text-[var(--foreground-subtle)]" />
           </div>
-          <p className="text-[var(--foreground-muted)] text-sm font-[Be Vietnam Pro,sans-serif]">
+          <p className="text-[var(--foreground-muted)] text-sm">
             Chưa có giao dịch thanh toán nào.
           </p>
         </div>
@@ -274,7 +258,7 @@ export default function PaymentHistoryTab() {
                         {status.label}
                       </span>
                     </div>
-                    <div className="text-xs text-[var(--foreground-muted)] mt-0.5 font-[Be Vietnam Pro,sans-serif]">
+                    <div className="text-xs text-[var(--foreground-muted)] mt-0.5">
                       {METHOD_LABELS[payment.method] || payment.method} ·{' '}
                       {formatDate(payment.created_at)}
                     </div>

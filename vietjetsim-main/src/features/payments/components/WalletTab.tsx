@@ -602,7 +602,7 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
           <h2 className="text-2xl font-bold font-[KoHo,sans-serif] text-[var(--foreground)]">
             Ví Vietjet Air
           </h2>
-          <p className="text-sm text-[var(--foreground-muted)] mt-1 font-[Be Vietnam Pro,sans-serif]">
+          <p className="text-sm text-[var(--foreground-muted)] mt-1">
             Quản lý số dư và phương thức thanh toán
           </p>
         </div>
@@ -634,9 +634,7 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Icon name="WalletIcon" size={20} className="text-white/70" />
-              <span className="text-sm text-white/70 font-[Be Vietnam Pro,sans-serif]">
-                Số dư ví
-              </span>
+              <span className="text-sm text-white/70">Số dư ví</span>
             </div>
 
             {/* Account Number Display */}
@@ -650,9 +648,7 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
                 title="Nhấn để copy"
               >
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs text-white/60 font-[Be Vietnam Pro,sans-serif] uppercase tracking-wider">
-                    Số TK:
-                  </span>
+                  <span className="text-xs text-white/60 uppercase tracking-wider">Số TK:</span>
                   <span className="text-sm font-bold font-[KoHo,sans-serif] text-white tracking-widest">
                     {wallet.account_number}
                   </span>
@@ -673,9 +669,7 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
           {/* Topup Form */}
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
             <div className="mb-3">
-              <label className="block text-xs text-white/70 mb-1 font-[Be Vietnam Pro,sans-serif]">
-                Nguồn nạp tiền
-              </label>
+              <label className="block text-xs text-white/70 mb-1">Nguồn nạp tiền</label>
               <select
                 value={selectedTopupMethod?.id || ''}
                 onChange={(e) => setTopupMethodId(e.target.value)}
@@ -700,7 +694,7 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
                     setTopupAmount(val ? parseInt(val, 10).toLocaleString('vi-VN') : '');
                   }}
                   placeholder="Nhập số tiền nạp"
-                  className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 text-sm focus:outline-none focus:ring-2 focus:ring-white/40 font-[Be Vietnam Pro,sans-serif]"
+                  className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 text-sm focus:outline-none focus:ring-2 focus:ring-white/40"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 text-sm">
                   VND
@@ -719,7 +713,7 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
               </button>
             </div>
             {activeTopupMethods.length === 0 && (
-              <p className="text-xs text-white/80 mt-2 font-[Be Vietnam Pro,sans-serif]">
+              <p className="text-xs text-white/80 mt-2">
                 Bạn cần thêm phương thức thanh toán trước khi nạp tiền.
               </p>
             )}
@@ -728,7 +722,7 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
                 <button
                   key={amt}
                   onClick={() => setTopupAmount(amt.toLocaleString('vi-VN'))}
-                  className="flex-1 py-1.5 bg-white/15 hover:bg-white/25 rounded-lg text-xs font-semibold text-white transition-colors font-[Be Vietnam Pro,sans-serif]"
+                  className="flex-1 py-1.5 bg-white/15 hover:bg-white/25 rounded-lg text-xs font-semibold text-white transition-colors"
                 >
                   {amt >= 1000000
                     ? `${(amt / 1000000).toFixed(0)}M`
@@ -764,10 +758,10 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
               <div className="w-16 h-16 bg-[var(--surface-2)] rounded-full flex items-center justify-center mx-auto mb-3">
                 <Icon name="CreditCardIcon" size={28} className="text-[var(--foreground-subtle)]" />
               </div>
-              <p className="text-[var(--foreground-muted)] text-sm font-[Be Vietnam Pro,sans-serif]">
+              <p className="text-[var(--foreground-muted)] text-sm">
                 Chưa có phương thức thanh toán nào.
               </p>
-              <p className="text-[var(--foreground-subtle)] text-xs mt-1 font-[Be Vietnam Pro,sans-serif]">
+              <p className="text-[var(--foreground-subtle)] text-xs mt-1">
                 Thêm thẻ hoặc tài khoản ngân hàng để thanh toán nhanh hơn.
               </p>
             </div>
@@ -803,12 +797,12 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
                         : method.bankName || 'Ngân hàng'}
                     </span>
                     {method.isDefault && (
-                      <span className="px-2 py-0.5 bg-[rgb(var(--accent-rgb))]/25 text-[var(--foreground)] rounded-full text-xs font-semibold font-[Be Vietnam Pro,sans-serif]">
+                      <span className="px-2 py-0.5 bg-[rgb(var(--accent-rgb))]/25 text-[var(--foreground)] rounded-full text-xs font-semibold">
                         Mặc định
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-[var(--foreground-muted)] mt-0.5 font-[Be Vietnam Pro,sans-serif]">
+                  <p className="text-xs text-[var(--foreground-muted)] mt-0.5">
                     {method.type === 'card'
                       ? `${method.cardHolderName || ''}${method.expiryMonth ? ` · Hết hạn ${method.expiryMonth.toString().padStart(2, '0')}/${method.expiryYear}` : ''}`
                       : method.bankId
@@ -822,7 +816,7 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
                   {!method.isDefault && (
                     <button
                       onClick={() => handleSetDefault(method.id)}
-                      className="px-3 py-1.5 text-xs text-[var(--foreground-muted)] hover:text-[var(--primary)] hover:bg-[var(--surface-2)] rounded-lg transition-colors font-semibold font-[Be Vietnam Pro,sans-serif]"
+                      className="px-3 py-1.5 text-xs text-[var(--foreground-muted)] hover:text-[var(--primary)] hover:bg-[var(--surface-2)] rounded-lg transition-colors font-semibold"
                     >
                       Đặt mặc định
                     </button>
@@ -867,7 +861,7 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-[var(--foreground-muted)] mb-2 font-[Be Vietnam Pro,sans-serif]">
+              <p className="text-xs text-[var(--foreground-muted)] mb-2">
                 Tài khoản nhận: {selectedWithdrawBank?.bankName} - {selectedWithdrawBank?.bankId}
               </p>
               <div className="flex items-center gap-2">
@@ -891,7 +885,7 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
               </div>
             </>
           ) : (
-            <p className="text-sm text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
+            <p className="text-sm text-[var(--foreground-muted)]">
               Bạn cần liên kết tài khoản ngân hàng để rút tiền về STK.
             </p>
           )}
@@ -905,9 +899,7 @@ export default function WalletTab({ user: _user }: WalletTabProps) {
             </h3>
           </div>
           {transactions.length === 0 ? (
-            <p className="text-sm text-[var(--foreground-muted)] font-[Be Vietnam Pro,sans-serif]">
-              Chưa có giao dịch.
-            </p>
+            <p className="text-sm text-[var(--foreground-muted)]">Chưa có giao dịch.</p>
           ) : (
             <div className="space-y-2">
               {transactions.map((tx) => {

@@ -452,7 +452,7 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
         </div>
       </div>
 
-      <div className="flex flex-col lg:row gap-4">
+      <div className="flex flex-col lg:flex-row gap-4">
         <div className="relative flex-1 group">
           <Icon
             name="MagnifyingGlassIcon"

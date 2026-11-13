@@ -959,7 +959,7 @@ export default function ChatTab() {
             {/* Input */}
             <div className="px-4 py-3 bg-white border-t border-gray-100 flex-shrink-0 space-y-2">
               {/* Quick reply templates */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-2xs">
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-2xs">
                 <span className="text-gray-400 font-bold whitespace-nowrap uppercase tracking-wider text-3xs">
                   Trả lời nhanh:
                 </span>

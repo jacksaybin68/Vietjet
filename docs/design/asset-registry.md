@@ -64,6 +64,7 @@ SkyID / thanh toán / hạng vé đã thêm asset mới). Bổ sung nhóm A9–A
 | `hero-bangkok-temple.jpg` | `public/images/hero/` | Travel guide Bangkok | `/trang-chu` | AI generated | 901 KB | 🟢 |
 | `hero-singapore-bay.jpg` | `public/images/hero/` | Travel guide Singapore | `/trang-chu` | AI generated | 905 KB | 🟢 |
 | `hero-hongkong-skyline.jpg` | `public/images/hero/` | Deal HAN + travel guide + promo DiDi | `/trang-chu` | AI generated | 901 KB | 🟢 |
+| `banner-chuyenbay-ngoai-te.jpg` | `public/images/hero/` | Banner dịch vụ ngoại tệ | `/chuyen-bay-cua-toi` | Nội bộ | 256 KB | 🟢 |
 
 ### A4. Minh hoạ booking & mascot (3 file)
 | Tên file | Đường dẫn | Mục đích | Route sử dụng | Nguồn gốc | Kích thước | Trạng thái |

@@ -222,7 +222,7 @@ export async function POST(request: NextRequest) {
         ancillaryFee
     );
 
-    const clientTotal =
+    const _clientTotal =
       typeof clientTotalPrice === 'number' && Number.isFinite(clientTotalPrice)
         ? Math.round(clientTotalPrice)
         : 0;
