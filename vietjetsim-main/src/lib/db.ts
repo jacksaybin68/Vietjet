@@ -430,7 +430,21 @@ export async function deleteUser(userId: string): Promise<void> {
 
 export async function getAllAirports(): Promise<AirportRecord[]> {
   return (await sql`
-    SELECT * FROM airports ORDER BY city
+    SELECT * FROM airports
+    ORDER BY
+      CASE
+        WHEN country IN ('Vietnam', 'Việt Nam') OR code IN ('SGN', 'HAN', 'DAD', 'PQC', 'CXR', 'HPH', 'HUI', 'DLI', 'VII', 'VDO', 'VCA', 'UIH', 'BMV', 'PXU', 'TBB', 'VCL', 'THD', 'VDH', 'DIN', 'VCS', 'VKG') THEN 0
+        ELSE 1
+      END,
+      CASE code
+        WHEN 'SGN' THEN 1
+        WHEN 'HAN' THEN 2
+        WHEN 'DAD' THEN 3
+        WHEN 'PQC' THEN 4
+        WHEN 'CXR' THEN 5
+        ELSE 10
+      END,
+      city ASC
   `) as AirportRecord[];
 }
 

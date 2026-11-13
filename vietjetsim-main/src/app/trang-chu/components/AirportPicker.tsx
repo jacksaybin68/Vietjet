@@ -7,6 +7,21 @@ export interface Airport {
   code: string;
   city: string;
   airport: string;
+  country?: string;
+  isDomestic?: boolean;
+}
+
+export const DOMESTIC_AIRPORT_CODES = new Set([
+  'SGN', 'HAN', 'DAD', 'PQC', 'CXR', 'HPH', 'HUI', 'DLI', 'VII', 'VDO',
+  'VCA', 'UIH', 'BMV', 'PXU', 'TBB', 'VCL', 'THD', 'VDH', 'DIN', 'VCS', 'VKG'
+]);
+
+export const TOP_DOMESTIC_HUBS = ['SGN', 'HAN', 'DAD', 'PQC', 'CXR'];
+
+export function isDomesticAirport(airport: Airport): boolean {
+  if (typeof airport.isDomestic === 'boolean') return airport.isDomestic;
+  if (airport.country && (airport.country === 'Việt Nam' || airport.country === 'Vietnam')) return true;
+  return DOMESTIC_AIRPORT_CODES.has(airport.code.toUpperCase());
 }
 
 // 16px below `sm` so iOS Safari does not zoom the page when the field is tapped.
@@ -204,12 +219,39 @@ export default function AirportPicker({
   }, [open]);
 
   const selected = airports.find((a) => a.code === value) ?? airports[0];
-  const results = useMemo(() => {
+  const { domesticResults, internationalResults, totalCount } = useMemo(() => {
     const q = fold(query.trim());
-    if (!q) return airports;
-    return airports.filter(
-      (a) => fold(a.city).includes(q) || fold(a.code).includes(q) || fold(a.airport).includes(q)
-    );
+    const filtered = !q
+      ? airports
+      : airports.filter(
+          (a) => fold(a.city).includes(q) || fold(a.code).includes(q) || fold(a.airport).includes(q)
+        );
+
+    const domestic: Airport[] = [];
+    const international: Airport[] = [];
+
+    for (const item of filtered) {
+      if (isDomesticAirport(item)) {
+        domestic.push(item);
+      } else {
+        international.push(item);
+      }
+    }
+
+    domestic.sort((a, b) => {
+      const rankA = TOP_DOMESTIC_HUBS.indexOf(a.code);
+      const rankB = TOP_DOMESTIC_HUBS.indexOf(b.code);
+      if (rankA !== -1 && rankB !== -1) return rankA - rankB;
+      if (rankA !== -1) return -1;
+      if (rankB !== -1) return 1;
+      return a.city.localeCompare(b.city, 'vi');
+    });
+
+    return {
+      domesticResults: domestic,
+      internationalResults: international,
+      totalCount: domestic.length + international.length,
+    };
   }, [airports, query]);
 
   const choose = (code: string) => {
@@ -335,7 +377,7 @@ export default function AirportPicker({
                 the panel gives back is another airport the customer can see. */}
               <span className="shrink-0 text-xs2 tabular-nums text-vj-text-soft">
                 {query.trim()
-                  ? `${results.length} / ${airports.length}`
+                  ? `${totalCount} / ${airports.length}`
                   : `${airports.length} sân bay`}
               </span>
             </div>
@@ -344,34 +386,103 @@ export default function AirportPicker({
               className="overflow-y-auto py-1"
               style={{ maxHeight: listMaxHeight ?? LIST_CAP }}
             >
-              {results.length === 0 && (
+              {totalCount === 0 && (
                 <li className="px-3 py-3 text-sm text-vj-text-soft">Không tìm thấy sân bay</li>
               )}
-              {results.map((airport) => (
-                <li key={airport.code}>
-                  <button
-                    type="button"
-                    role="option"
-                    aria-selected={airport.code === value}
-                    onClick={() => choose(airport.code)}
-                    className={`flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-[var(--vj-sky)] ${
-                      airport.code === value ? 'bg-vj-surface-rose' : ''
-                    }`}
+
+              {/* Nhóm sân bay nội địa (ưu tiên phía trên) */}
+              {domesticResults.length > 0 && (
+                <>
+                  <li
+                    role="presentation"
+                    className="sticky top-0 z-10 flex items-center justify-between bg-red-50/95 px-3 py-1.5 text-xs font-semibold text-red-800 border-b border-red-100/80 backdrop-blur-sm"
                   >
-                    <span className="w-4 shrink-0 text-[var(--accent)]">
-                      {airport.code === value && <MdCheck className="text-sm" />}
+                    <span className="flex items-center gap-1.5 font-bold">
+                      <span aria-hidden="true">🇻🇳</span> Chặng bay nội địa
                     </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-bold text-[var(--foreground)]">
-                        {airport.city} ( {airport.code} )
-                      </span>
-                      <span className="block truncate text-xs2 leading-tight text-vj-text-soft">
-                        {airport.airport}
-                      </span>
+                    <span className="text-[11px] font-semibold text-red-600 bg-white/90 px-2 py-0.5 rounded-full border border-red-100">
+                      {domesticResults.length}
                     </span>
-                  </button>
-                </li>
-              ))}
+                  </li>
+                  {domesticResults.map((airport) => (
+                    <li key={airport.code}>
+                      <button
+                        type="button"
+                        role="option"
+                        aria-selected={airport.code === value}
+                        onClick={() => choose(airport.code)}
+                        className={`flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-[var(--vj-sky)] transition-colors ${
+                          airport.code === value ? 'bg-vj-surface-rose' : ''
+                        }`}
+                      >
+                        <span className="w-4 shrink-0 text-[var(--accent)]">
+                          {airport.code === value && <MdCheck className="text-sm" />}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-center justify-between gap-1">
+                            <span className="truncate text-sm font-bold text-[var(--foreground)]">
+                              {airport.city} ( {airport.code} )
+                            </span>
+                            <span className="shrink-0 rounded bg-red-100/70 px-1.5 py-0.5 text-[10px] font-semibold text-red-700">
+                              Nội địa
+                            </span>
+                          </span>
+                          <span className="block truncate text-xs2 leading-tight text-vj-text-soft">
+                            {airport.airport}
+                          </span>
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </>
+              )}
+
+              {/* Nhóm sân bay quốc tế (phía dưới) */}
+              {internationalResults.length > 0 && (
+                <>
+                  <li
+                    role="presentation"
+                    className="sticky top-0 z-10 flex items-center justify-between bg-sky-50/95 px-3 py-1.5 text-xs font-semibold text-sky-800 border-t border-b border-sky-100/80 backdrop-blur-sm"
+                  >
+                    <span className="flex items-center gap-1.5 font-bold">
+                      <span aria-hidden="true">🌏</span> Chặng bay quốc tế
+                    </span>
+                    <span className="text-[11px] font-semibold text-sky-700 bg-white/90 px-2 py-0.5 rounded-full border border-sky-100">
+                      {internationalResults.length}
+                    </span>
+                  </li>
+                  {internationalResults.map((airport) => (
+                    <li key={airport.code}>
+                      <button
+                        type="button"
+                        role="option"
+                        aria-selected={airport.code === value}
+                        onClick={() => choose(airport.code)}
+                        className={`flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-[var(--vj-sky)] transition-colors ${
+                          airport.code === value ? 'bg-vj-surface-rose' : ''
+                        }`}
+                      >
+                        <span className="w-4 shrink-0 text-[var(--accent)]">
+                          {airport.code === value && <MdCheck className="text-sm" />}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-center justify-between gap-1">
+                            <span className="truncate text-sm font-bold text-[var(--foreground)]">
+                              {airport.city} ( {airport.code} )
+                            </span>
+                            <span className="shrink-0 rounded bg-blue-100/70 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">
+                              Quốc tế
+                            </span>
+                          </span>
+                          <span className="block truncate text-xs2 leading-tight text-vj-text-soft">
+                            {airport.airport}
+                          </span>
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </>
+              )}
             </ul>
           </div>,
           document.body

@@ -177,3 +177,4 @@ function displayFlightFares(flight: any) {
   console.log(`- Giá Business: ${flight.fares.business.toLocaleString('vi-VN')}₫`);
 }
 ```
+
