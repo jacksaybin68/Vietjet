@@ -29,18 +29,14 @@ export interface DiscountLike {
  * The result never exceeds the booking amount, and never goes below zero — a
  * discount that leaves the customer owing a negative amount is not a discount.
  */
-export function computeDiscountAmount(
-  discount: DiscountLike,
-  bookingAmount: number
-): number {
+export function computeDiscountAmount(discount: DiscountLike, bookingAmount: number): number {
   const amount = Number(bookingAmount);
   if (!Number.isFinite(amount) || amount <= 0) return 0;
 
   const value = Number(discount.value);
   if (!Number.isFinite(value) || value <= 0) return 0;
 
-  let computed =
-    discount.type === 'fixed' ? value : (amount * value) / 100;
+  let computed = discount.type === 'fixed' ? value : (amount * value) / 100;
 
   if (
     discount.type === 'percentage' &&

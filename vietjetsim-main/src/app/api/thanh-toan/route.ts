@@ -200,7 +200,6 @@ export async function POST(request: NextRequest) {
     // the fare, `cashDue` is what has to arrive.
     let cashDue = discountedTotal;
     let loyaltyPointsSpent = 0;
-    let pointsValueVnd = 0;
 
     const requestedPointsToRedeem = Number(points_to_redeem || pointsToRedeem || 0);
     const paysWithPoints = requestedPointsToRedeem > 0 || method === 'skypoint';
@@ -248,8 +247,8 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      pointsValueVnd = skypointValueOfPoints(pointsToSpend, rate);
-      cashDue = Math.max(0, discountedTotal - pointsValueVnd);
+      const pointsValue = skypointValueOfPoints(pointsToSpend, rate);
+      cashDue = Math.max(0, discountedTotal - pointsValue);
 
       // The amount is checked *before* the points are spent, so a customer who
       // mistypes the figure does not lose points to a request that was going to

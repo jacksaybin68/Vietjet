@@ -34,9 +34,41 @@ const os = require('node:os');
 const path = require('node:path');
 const { setTimeout: sleep } = require('node:timers/promises');
 
-const BASE = (process.env.UI_CHECK_BASE_URL || 'http://localhost:4028').replace(/\/$/, '');
+const BASE_INPUT = (process.env.UI_CHECK_BASE_URL || 'http://localhost:4028').replace(/\/$/, '');
+// `BASE` được resolve lúc chạy (xem `resolveBase`) nên nó phải là `let`.
+let BASE = BASE_INPUT;
 const CHROME =
   process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+/**
+ * `localhost` KHÔNG phải lúc nào cũng tới được server. Next lắng nghe trên
+ * `::` (IPv6) và trên máy này `localhost` resolve ra `127.0.0.1` — Chrome thử
+ * IPv4 trước, không kết nối được, và hiển thị trang lỗi "Không thể truy cập
+ * trang web này" cho MỌI màn hình. Bài kiểm tra lúc đó báo 70/68 màn hình lỗi
+ * và "Failed to fetch" ở bước đăng nhập — cả hai đều là một nguyên nhân:
+ * sai địa chỉ, không phải lỗi giao diện.
+ *
+ * Vì vậy: dò base URL thật sự trả lời được (ưu tiên `::1`), rồi dùng địa chỉ
+ * đó cho toàn bộ lượt chạy.
+ */
+async function resolveBase() {
+  const candidates = [BASE_INPUT];
+  // Thay `localhost` bằng dạng IPv6 tường viết rõ ràng — dạng này luôn
+  // trỏ tới cùng server Next đang lắng nghe trên `::`.
+  const port = new URL(BASE_INPUT).port || '80';
+  if (new URL(BASE_INPUT).hostname === 'localhost') candidates.push(`http://[::1]:${port}`);
+  for (const candidate of candidates) {
+    try {
+      const res = await fetch(`${candidate}/trang-chu`, {
+        signal: AbortSignal.timeout(8000),
+        redirect: 'manual',
+      });
+      if (res.status > 0) return candidate;
+    } catch {
+      /* thử candidate tiếp theo */
+    }
+  }
+  return BASE_INPUT;
+}
 // Cổng debug CDP. Cho phép đổi qua env để chạy song song với một phiên
 // ui-check khác trên cùng máy — nếu không, hai phiên tranh cùng cổng 9333 và
 // phiên sau attach nhầm vào Chrome của phiên trước (kết quả: 404 asset rác).
@@ -49,7 +81,7 @@ const SHOTS_DIR =
 const PROFILE_DIR =
   process.env.CHROME_PROFILE_DIR || path.join(os.tmpdir(), 'vietjet-ui-check', 'chrome-profile');
 const TOMORROW = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
-const RESULTS_URL = `${BASE}/tim-ve?from=HAN&to=SGN&depart=${TOMORROW}`;
+const resultsUrl = () => `${BASE}/tim-ve?from=HAN&to=SGN&depart=${TOMORROW}`;
 
 const ADMIN = { email: 'admin@vietjetair.vn', password: 'admin123' };
 const USER = { email: 'user@vietjetair.vn', password: 'user123' };
@@ -426,6 +458,9 @@ const PROBE = `(() => {
 async function main() {
   rmSync(SHOTS_DIR, { recursive: true, force: true });
   mkdirSync(SHOTS_DIR, { recursive: true });
+  // Dò địa chỉ server thật sự trả lời được TRƯỚC khi chụp ảnh: `localhost`
+  // có thể trỏ tới loopback IPv4 trong khi Next chỉ lắng nghe trên IPv6.
+  BASE = await resolveBase();
   // Cổng nghiệm thu phải là production build (xem AGENTS.md). Ghi nhận sớm
   // để báo cáo nói rõ lượt chạy này đang đo bản dev hay bản build.
   const DEV_SERVER = await detectDevServer();
@@ -504,7 +539,7 @@ async function main() {
   // Route công khai + auth public, mỗi route ở cả ba viewport canonical.
   // Cộng dồn 3 màn auth public (/dang-ky, /quen-mat-khau, /dat-lai-mat-khau).
   await captureAll('01-trang-chu', `${BASE}/trang-chu`);
-  await captureAll('02-ket-qua-tim-ve', RESULTS_URL);
+  await captureAll('02-ket-qua-tim-ve', resultsUrl());
   await captureAll('03-dang-nhap', `${BASE}/dang-nhap`);
   await captureAll('04-tra-cuu', `${BASE}/tra-cuu`);
   await captureAll('05-lam-thu-tuc', `${BASE}/lam-thu-tuc`);

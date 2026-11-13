@@ -114,9 +114,7 @@ describe('POST /api/thanh-toan — amount reconciliation', () => {
   });
 
   it('charges exactly the booking total when no discount and no points are involved', async () => {
-    const res = await createPayment(
-      req({ booking_id: 'bk-1', method: 'card', amount: 2_000_000 })
-    );
+    const res = await createPayment(req({ booking_id: 'bk-1', method: 'card', amount: 2_000_000 }));
 
     expect(res.status).toBe(201);
     expect(mocks.createPaymentAndConfirmBooking).toHaveBeenCalledWith(
@@ -197,9 +195,7 @@ describe('POST /api/thanh-toan — amount reconciliation', () => {
   it('records a SkyPoint-only payment as the cash actually charged', async () => {
     // Paying entirely with SkyPoint: the customer hands over no cash, so the
     // amount sent is 0 — the fare was covered by the points.
-    const res = await createPayment(
-      req({ booking_id: 'bk-1', method: 'skypoint', amount: 0 })
-    );
+    const res = await createPayment(req({ booking_id: 'bk-1', method: 'skypoint', amount: 0 }));
 
     expect(res.status).toBe(201);
     expect(mocks.spendLoyaltyPoints).toHaveBeenCalledWith(
