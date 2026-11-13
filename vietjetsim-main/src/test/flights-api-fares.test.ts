@@ -36,7 +36,9 @@ describe('GET /api/chuyen-bay — Enriched 4 fare classes', () => {
       },
     ]);
 
-    const req = new NextRequest('http://localhost:4028/api/chuyen-bay?from=HAN&to=SGN&date=2026-11-20');
+    const req = new NextRequest(
+      'http://localhost:4028/api/chuyen-bay?from=HAN&to=SGN&date=2026-11-20'
+    );
     const res = await GET(req);
     expect(res.status).toBe(200);
 

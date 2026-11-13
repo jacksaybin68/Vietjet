@@ -70,7 +70,10 @@ const PROBE = () => {
     .filter(vis)
     .find((el) => {
       const c = getComputedStyle(el);
-      return /lựa chọn chuyến bay|chon chuyen bay/i.test(el.textContent || '') && c.backgroundColor !== 'rgba(0, 0, 0, 0)';
+      return (
+        /lựa chọn chuyến bay|chon chuyen bay/i.test(el.textContent || '') &&
+        c.backgroundColor !== 'rgba(0, 0, 0, 0)'
+      );
     });
   const h1Like = redBand
     ? all('*')
@@ -101,13 +104,17 @@ const PROBE = () => {
   // --- "Hết chỗ" ---
   const soldOut = all('div,span,p,button')
     .filter(vis)
-    .filter((el) => /hết chỗ/i.test(el.textContent || '') && (el.textContent || '').trim().length < 24)
+    .filter(
+      (el) => /hết chỗ/i.test(el.textContent || '') && (el.textContent || '').trim().length < 24
+    )
     .map(box)
     .slice(0, 4);
 
   // --- Panel tổng bên phải ---
   const panelHead = byText('h1,h2,h3,div', /thông tin đặt chỗ/i);
-  const panel = panelHead ? box(panelHead.closest('aside') || panelHead.parentElement?.parentElement) : null;
+  const panel = panelHead
+    ? box(panelHead.closest('aside') || panelHead.parentElement?.parentElement)
+    : null;
   const panelBars = all('div,h4,span')
     .filter(vis)
     .filter((el) => {
@@ -173,10 +180,9 @@ const PROBE = () => {
     waitUntil: 'domcontentloaded',
     timeout: 120000,
   });
-  await page.waitForFunction(
-    () => (document.body.innerText || '').includes('Tìm chuyến bay'),
-    { timeout: 60000 }
-  );
+  await page.waitForFunction(() => (document.body.innerText || '').includes('Tìm chuyến bay'), {
+    timeout: 60000,
+  });
   await new Promise((r) => setTimeout(r, 3000));
 
   // Bấm nút tìm chuyến bay (site tự điền sẵn điểm đi/đến mặc định).

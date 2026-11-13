@@ -132,10 +132,9 @@ const PROBE = () => {
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 120000 });
       // SPA render client-side: chờ cho tới khi body có nội dung thật.
       await page
-        .waitForFunction(
-          () => (document.body.innerText || '').trim().length > 80,
-          { timeout: 45000 }
-        )
+        .waitForFunction(() => (document.body.innerText || '').trim().length > 80, {
+          timeout: 45000,
+        })
         .catch(() => null);
       await new Promise((r) => setTimeout(r, 8000));
       const data = await page.evaluate(PROBE);
