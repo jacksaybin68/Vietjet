@@ -93,7 +93,15 @@ export default function FlightBookingResultsWrapper({
     child: Number(searchParams.get('child') ?? 0) || 0,
     infant: Number(searchParams.get('infant') ?? 0) || 0,
   }));
+  const [isPaxDropdownOpen, setIsPaxDropdownOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<SelectedBooking | null>(null);
+  const [flightBaseAmount, setClientTotal] = useState(0);
+
   const tripLabel = isRoundTrip ? 'Chuyến bay khứ hồi' : 'Chuyến bay một chiều';
+  const [bookings, setBookings] = useState<Record<'outbound' | 'inbound', SelectedBooking | null>>({
+    outbound: null,
+    inbound: null,
+  });
 
   const [bookings, setBookings] = useState<Record<'outbound' | 'inbound', SelectedBooking | null>>({
     outbound: null,
@@ -102,142 +110,56 @@ export default function FlightBookingResultsWrapper({
   const [continueSignal, setContinueSignal] = useState(0);
   const [showBenefitsModal, setShowBenefitsModal] = useState(false);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
-  const [isPaxDropdownOpen, setIsPaxDropdownOpen] = useState(false);
+  const [bookingStep, setBookingStep] = useState(1);
+
   const paxRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!isPaxDropdownOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (!paxRef.current?.contains(e.target as Node)) {
-        setIsPaxDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isPaxDropdownOpen]);
+  const outbound = bookings.outbound;
+  const inbound = bookings.inbound;
 
-  const selectedBooking = bookings[bookingKey];
+  const outboundAmount = outbound?.total ?? 0;
+  const inboundAmount = inbound?.total ?? 0;
+  const totalBookingAmount = outboundAmount + inboundAmount;
 
   const handlePaxCountsChange = useCallback(
-    (newPax: Record<PassengerType, number>) => {
-      setPaxCounts(newPax);
-      setBookings((prev) => {
-        const next = { ...prev };
-        (['outbound', 'inbound'] as const).forEach((key) => {
-          const item = next[key];
-          if (item) {
-            const currentWeight = paxCounts.adult + paxCounts.child * 0.75 || 1;
-            const unitFare = item.fare / currentWeight;
-            const nextWeight = newPax.adult + newPax.child * 0.75;
-            const nextFare = Math.round(unitFare * nextWeight);
-            const nextTax = 581581 * (newPax.adult || 1);
-            next[key] = {
-              ...item,
-              fare: nextFare,
-              tax: nextTax,
-              total: nextFare + nextTax,
-            };
-          }
-        });
-        return next;
-      });
+    (next: Record<PassengerType, number>) => {
+      setPaxCounts(next);
     },
-    [paxCounts.adult, paxCounts.child]
+    []
   );
 
   const handleFlightSelect = useCallback(
-    (
-      flightNo: string,
-      fareClass: string,
-      fare: number,
-      fares?: Partial<Record<FareClassId, number>>,
-      flight?: { departTime?: string; arriveTime?: string },
-      leg: 'outbound' | 'inbound' = 'outbound'
-    ) => {
-      const normalized = normalizeFareClass(fareClass);
-      const tax = 581581 * (paxCounts.adult || 1);
-      const baseFare = fares?.eco ?? Math.round(fare / (FARE_CLASS_MULTIPLIER[normalized] ?? 1));
-      const legFlight = {
-        flightNo,
-        fareClass: normalized,
-        fare,
-        tax,
-        total: fare + tax,
-        baseFare,
-        fares,
-        departTime: flight?.departTime || (leg === 'outbound' ? '06:00' : '18:30'),
-        arriveTime: flight?.arriveTime || (leg === 'outbound' ? '08:15' : '20:45'),
-      };
-
+    (booking: Partial<SelectedBooking>) => {
       setBookings((prev) => ({
         ...prev,
-        [leg]: legFlight,
+        [bookingKey]: { ...prev[bookingKey], ...booking } as SelectedBooking,
       }));
+      setSelectedBooking((prev) =>
+        prev ? { ...prev, ...booking } : (booking as SelectedBooking)
+      );
     },
-    [paxCounts.adult]
+    [bookingKey]
   );
 
   const handleContinue = useCallback(() => {
-    setContinueSignal((n) => n + 1);
+    setBookingStep((prev) => prev + 1);
   }, []);
 
-  const [outboundFrom, outboundTo] = trip.split('→').map((part) => part.trim());
-  const returnTrip = [outboundTo, outboundFrom].filter(Boolean).join(' → ');
-  const formatDay = (iso?: string | null) =>
-    iso
-      ? new Date(iso).toLocaleDateString('vi-VN', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-        })
-      : '--/--/----';
-
-  const [bookingStep, setBookingStep] = useState(1);
-
-  useEffect(() => {
-    // Tiêu đề bước trên mobile: rút ngắn vì thanh header chỉ còn ~230px bề
-    // rộng cho chữ (logo + nút menu), nên "LỰA CHỌN CHUYẾN BAY" bị cắt thành
-    // "LỰA CHỌN CHUYẾN …". Desktop không dùng chuỗi này.
-    const titles: Record<number, string> = {
-      1: 'CHỌN CHUYẾN BAY',
-      2: 'THÔNG TIN KHÁCH',
-      3: 'CHỌN DỊCH VỤ',
-      4: 'THANH TOÁN',
-    };
-    const title = titles[bookingStep] || 'CHỌN CHUYẾN BAY';
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('vj-booking-step-title', { detail: title }));
-    }
-  }, [bookingStep]);
-
-  const [clientTotal, setClientTotal] = useState<number>(0);
-  const flightBaseAmount =
-    (bookings.outbound?.total ?? 0) + (isRoundTrip ? (bookings.inbound?.total ?? 0) : 0);
-  const totalBookingAmount = Math.max(clientTotal, flightBaseAmount);
+  const formatDay = (iso?: string | null) => {
+    if (!iso) return '--/--/----';
+    const d = new Date(iso);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
 
   return (
     <>
-      {/* Trip strip — full-bleed brand-yellow band directly under the red header */}
+      {/* Trip strip under header */}
       <div className="bg-accent text-gray-950 shadow-sm" data-testid="trip-board">
         <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-x-3 px-3 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-sm lg:px-8">
-          {/* Mobile "Tổng [X] VND ▾" button matching Screenshot 3 & 4 */}
-          <div className="flex sm:hidden items-center">
-            <button
-              type="button"
-              onClick={() => setShowSummaryModal(true)}
-              className="bg-white rounded-full px-3 py-1 text-xs font-black text-gray-900 flex items-center gap-1.5 shadow-xs cursor-pointer hover:bg-gray-50 active:scale-95 transition-all focus:outline-none focus:ring-0"
-            >
-              <span>Tổng</span>
-              <span className="text-red-600 font-black">
-                {totalBookingAmount > 0
-                  ? `${totalBookingAmount.toLocaleString('vi-VN')} VND`
-                  : '0 VND'}
-              </span>
-              <span className="text-3xs text-gray-500">▾</span>
-            </button>
-          </div>
-
-          <div className="hidden sm:flex flex-wrap items-center gap-x-3 gap-y-1 font-bold">
+          <div className="flex items-center gap-1">
             <span className="font-black uppercase tracking-wide">{tripLabel}</span>
             <span className="opacity-50">|</span>
             <div className="relative inline-block" ref={paxRef}>
@@ -276,7 +198,7 @@ export default function FlightBookingResultsWrapper({
                           type="button"
                           onClick={() => {
                             if (paxCounts.adult > 1) {
-                              handlePaxCountsChange({ ...paxCounts, adult: paxCounts.adult - 1 });
+                              setPaxCounts((prev) => ({ ...prev, adult: prev.adult - 1 }));
                             }
                           }}
                           disabled={paxCounts.adult <= 1}
@@ -290,12 +212,18 @@ export default function FlightBookingResultsWrapper({
                         <button
                           type="button"
                           onClick={() => {
-                            const total = paxCounts.adult + paxCounts.child + paxCounts.infant;
+                            const total =
+                              paxCounts.adult + paxCounts.child + paxCounts.infant;
                             if (total < 9) {
-                              handlePaxCountsChange({ ...paxCounts, adult: paxCounts.adult + 1 });
+                              setPaxCounts((prev) => ({
+                                ...prev,
+                                adult: prev.adult + 1,
+                              }));
                             }
                           }}
-                          disabled={paxCounts.adult + paxCounts.child + paxCounts.infant >= 9}
+                          disabled={
+                            paxCounts.adult + paxCounts.child + paxCounts.infant >= 9
+                          }
                           className="w-6 h-6 flex items-center justify-center rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed font-bold cursor-pointer"
                         >
                           +
@@ -314,7 +242,7 @@ export default function FlightBookingResultsWrapper({
                           type="button"
                           onClick={() => {
                             if (paxCounts.child > 0) {
-                              handlePaxCountsChange({ ...paxCounts, child: paxCounts.child - 1 });
+                              setPaxCounts((prev) => ({ ...prev, child: prev.child - 1 }));
                             }
                           }}
                           disabled={paxCounts.child <= 0}
@@ -328,9 +256,16 @@ export default function FlightBookingResultsWrapper({
                         <button
                           type="button"
                           onClick={() => {
-                            const total = paxCounts.adult + paxCounts.child + paxCounts.infant;
-                            if (total < 9 && paxCounts.child < paxCounts.adult * 2) {
-                              handlePaxCountsChange({ ...paxCounts, child: paxCounts.child + 1 });
+                            const total =
+                              paxCounts.adult + paxCounts.child + paxCounts.infant;
+                            if (
+                              total < 9 &&
+                              paxCounts.child < paxCounts.adult * 2
+                            ) {
+                              setPaxCounts((prev) => ({
+                                ...prev,
+                                child: prev.child + 1,
+                              }));
                             }
                           }}
                           disabled={
@@ -355,7 +290,7 @@ export default function FlightBookingResultsWrapper({
                           type="button"
                           onClick={() => {
                             if (paxCounts.infant > 0) {
-                              handlePaxCountsChange({ ...paxCounts, infant: paxCounts.infant - 1 });
+                              setPaxCounts((prev) => ({ ...prev, infant: prev.infant - 1 }));
                             }
                           }}
                           disabled={paxCounts.infant <= 0}
@@ -369,9 +304,16 @@ export default function FlightBookingResultsWrapper({
                         <button
                           type="button"
                           onClick={() => {
-                            const total = paxCounts.adult + paxCounts.child + paxCounts.infant;
-                            if (total < 9 && paxCounts.infant < paxCounts.adult) {
-                              handlePaxCountsChange({ ...paxCounts, infant: paxCounts.infant + 1 });
+                            const total =
+                              paxCounts.adult + paxCounts.child + paxCounts.infant;
+                            if (
+                              total < 9 &&
+                              paxCounts.infant < paxCounts.adult
+                            ) {
+                              setPaxCounts((prev) => ({
+                                ...prev,
+                                infant: prev.infant + 1,
+                              }));
                             }
                           }}
                           disabled={
@@ -384,15 +326,15 @@ export default function FlightBookingResultsWrapper({
                         </button>
                       </div>
                     </div>
-                  </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setIsPaxDropdownOpen(false)}
-                    className="w-full mt-3 py-1.5 bg-primary text-white font-bold rounded-vj hover:bg-red-700 transition-colors cursor-pointer text-center"
-                  >
-                    Xác nhận
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsPaxDropdownOpen(false)}
+                      className="w-full mt-3 py-1.5 bg-primary text-white font-bold rounded-vj hover:bg-red-700 transition-colors cursor-pointer text-center"
+                    >
+                      Xác nhận
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -456,10 +398,8 @@ export default function FlightBookingResultsWrapper({
       </div>
 
       {/* Khung nội dung — số đo site thật (13/11/2026, 1440×900):
-          container 1230px gồm padding 15px mỗi bên → nội dung 1200px.
-          Chia: cột trái 790px (ô trong 820px kể cả padding 15px), khe 30px,
-          cột phải 380px (panel trong cột 410px của site). */}
-      <div className="mx-auto w-full max-w-[1230px] px-[15px] pt-3 sm:pt-5 pb-24 sm:pb-28 overflow-x-hidden">
+          container 1200px, cột trái 820px, khe 30px, cột phải 410px (panel 380px). */}
+      <div className="mx-auto w-full max-w-[1200px] px-[15px] pt-3 sm:pt-5 pb-24 sm:pb-28 overflow-x-hidden">
         <div className="flex flex-col lg:flex-row lg:gap-[30px] items-start w-full">
           {/* Cột trái: danh sách chuyến bay (ô 820px ở desktop) */}
           {/* `w-full` là bắt buộc ở mobile: parent dùng `items-start`, nên cột
@@ -467,7 +407,7 @@ export default function FlightBookingResultsWrapper({
               dung. Không có `w-full`, lưới 4 cột giá đẩy cột này rộng ~658px
               trong viewport 390px và bị `overflow-x-hidden` của wrapper cắt mất
               (giá vé của các hạng bên phải không chạm được trên điện thoại). */}
-          <div className="w-full lg:w-[790px] lg:flex-none min-w-0 lg:px-[15px]">
+          <div className="w-full lg:w-[820px] lg:flex-none min-w-0">
             <FlightBookingClient
               continueSignal={continueSignal}
               onFlightSelect={handleFlightSelect}
@@ -478,38 +418,40 @@ export default function FlightBookingResultsWrapper({
             />
           </div>
 
-          {/* Cột phải: panel thông tin đặt chỗ (~32%) */}
-          <BookingSummaryPanel
-            data={{
-              trip,
-              date: formatDay(departParam),
-              flightNo: bookings.outbound?.flightNo,
-              fareClass: bookings.outbound?.fareClass,
-              fare: bookings.outbound?.fare ?? 0,
-              tax: bookings.outbound?.tax ?? 0,
-              serviceFee: 0,
-              departTime: bookings.outbound?.departTime,
-              arriveTime: bookings.outbound?.arriveTime,
-              total: bookings.outbound?.total ?? 0,
-              isRoundTrip,
-              paxCounts,
-              returnLeg: isRoundTrip
-                ? {
-                    trip: returnTrip,
-                    date: formatDay(returnParam),
-                    flightNo: bookings.inbound?.flightNo,
-                    fareClass: bookings.inbound?.fareClass,
-                    fare: bookings.inbound?.fare ?? 0,
-                    tax: bookings.inbound?.tax ?? 0,
-                    departTime: bookings.inbound?.departTime,
-                    arriveTime: bookings.inbound?.arriveTime,
-                    total: bookings.inbound?.total ?? 0,
-                  }
-                : undefined,
-            }}
-            onContinue={handleContinue}
-            canContinue={bookings.outbound !== null}
-          />
+          {/* Cột phải: panel thông tin đặt chỗ (~410px), panel trong 380px */}
+          <div className="lg:w-[410px] lg:flex-none min-w-0">
+            <BookingSummaryPanel
+              data={{
+                trip,
+                date: formatDay(departParam),
+                flightNo: bookings.outbound?.flightNo,
+                fareClass: bookings.outbound?.fareClass,
+                fare: bookings.outbound?.fare ?? 0,
+                tax: bookings.outbound?.tax ?? 0,
+                serviceFee: 0,
+                departTime: bookings.outbound?.departTime,
+                arriveTime: bookings.outbound?.arriveTime,
+                total: bookings.outbound?.total ?? 0,
+                isRoundTrip,
+                paxCounts,
+                returnLeg: isRoundTrip
+                  ? {
+                      trip: returnTrip,
+                      date: formatDay(returnParam),
+                      flightNo: bookings.inbound?.flightNo,
+                      fareClass: bookings.inbound?.fareClass,
+                      fare: bookings.inbound?.fare ?? 0,
+                      tax: bookings.inbound?.tax ?? 0,
+                      departTime: bookings.inbound?.departTime,
+                      arriveTime: bookings.inbound?.arriveTime,
+                      total: bookings.inbound?.total ?? 0,
+                    }
+                  : undefined,
+              }}
+              onContinue={handleContinue}
+              canContinue={bookings.outbound !== null}
+            />
+          </div>
         </div>
       </div>
 
