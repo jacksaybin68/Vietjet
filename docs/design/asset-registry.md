@@ -3,6 +3,11 @@
 **Ngày lập:** 18/10/2026
 **Cập nhật:** 19/10/2026 (bản đối soát thực tế) — đối chiếu `find public -type f` với tham chiếu thật trong `src/`/`scripts/`, xoá **62 file orphan**, gỡ **5 hotlink S3** khỏi `PromotionalBannersSection`, thay **17 tham chiếu asset rủi ro** bằng asset nội bộ.
 **Cập nhật:** 13/11/2026 — đối chiếu kích thước logo (265×46 px) và icon dịch vụ (25×25 px) với số đo từ vietjetair.com; bổ sung mục A7.
+**Cập nhật:** 13/11/2026 — quét lại toàn bộ `public/` bằng `scripts/audit-public-assets.cjs`:
+`public/` nay có **116 file** (không còn là 41 như bản 19/10 — các đợt làm giao diện
+SkyID / thanh toán / hạng vé đã thêm asset mới). Bổ sung nhóm A9–A15 để **mọi file
+đều có dòng đăng ký**; 36 file được đánh dấu 🟡 "chưa tham chiếu" và để lại cho
+đợt dọn orphan kế tiếp. **0 hotlink** tới domain ngoài.
 **Mục đích:** Đăng ký mọi tài sản media (ảnh, icon, font) dùng trong giao diện công khai của `vietjetsim-main`, kèm chủ sở hữu / giấy phép, route sử dụng, kích thước và trạng thái.
 **Phương pháp:** quét mọi đường dẫn `/...` trong `src/` + `scripts/`, đối chiếu sự tồn tại của file; quét ngược mọi file trong `public/` để tìm orphan.
 **Hồ sơ số đo giao diện:** [`docs/qa/VIETJET_THAM_SO_GIAO_DIEN_2026-11-13.md`](../qa/VIETJET_THAM_SO_GIAO_DIEN_2026-11-13.md)
@@ -116,6 +121,128 @@ render ở đúng 25×25 px bằng thuộc tính `h-[25px] w-[25px]` trong
 > Site thật đặt footer trên nền trắng `#FFFFFF` với hoạ tiết `footer-pattern.svg`
 > (cao 371px tại 1440×900). Asset này **không** sao chép từ vietjetair.com —
 > nó là vector vẽ lại theo mô tả hoạ tiết, giữ ràng buộc "0 hotlink".
+
+### A9. Font thương hiệu Jambono (3 file — bổ sung 13/11/2026)
+
+Site thật dùng **hai họ font**: `KoHo` (300–700) cho toàn bộ văn bản và
+`JambonoMedium` cho nút / CTA / nhãn in đậm (đo được trên DOM sống: nút
+"TÌM CHUYẾN BAY" dùng JambonoMedium 16px/500 — KoHo không phải font nút).
+Ba file `.ttf` được nạp từ `/fonts/*.ttf` trong `src/styles/tailwind.css`
+(`@font-face`), **không** nạp từ CDN, để bản dựng offline ổn định.
+
+| Tên file | Đường dẫn | Mục đích | Nguồn gốc | Kích thước | Trạng thái |
+| --- | --- | --- | --- | --- | --- |
+| `Jambono-Medium.ttf` | `public/fonts/` | `--vj-font-cta` (nút CTA, tab dịch vụ) | Bản gốc của hãng, nạp nội bộ | 159 KB | 🟢 |
+| `Jambono-Black.ttf` | `public/fonts/` | `--vj-font-display` | Bản gốc của hãng, nạp nội bộ | 144 KB | 🟢 |
+| `Jambono-Light.ttf` | `public/fonts/` | `--vj-font-light` | Bản gốc của hãng, nạp nội bộ | 164 KB | 🟢 |
+
+### A10. Icon dịch vụ bổ trợ (4 file)
+
+Icon cho các drawer dịch vụ bổ trợ (hành lý, suất ăn, chỗ ngồi, ưu tiên).
+
+| Tên file | Đường dẫn | Mục đích | Route sử dụng | Nguồn gốc | Kích thước | Trạng thái |
+| --- | --- | --- | --- | --- | --- | --- |
+| `baggage.png` | `public/images/ancillary/` | Icon hành lý | Drawer hành lý | PNG nội bộ tự vẽ | 3 KB | 🟢 |
+| `meal.png` | `public/images/ancillary/` | Icon suất ăn | Drawer suất ăn | PNG nội bộ tự vẽ | 5 KB | 🟢 |
+| `seat.png` | `public/images/ancillary/` | Icon chỗ ngồi | Drawer chọn ghế | PNG nội bộ tự vẽ | 3 KB | 🟡 chưa tham chiếu |
+| `priority.png` | `public/images/ancillary/` | Icon ưu tiên | Drawer ưu tiên | PNG nội bộ tự vẽ | 5 KB | 🟡 chưa tham chiếu |
+
+### A11. Logo hạng vé (4 file)
+
+| Tên file | Đường dẫn | Mục đích | Route sử dụng | Nguồn gốc | Kích thước | Trạng thái |
+| --- | --- | --- | --- | --- | --- | --- |
+| `business-logo.png` | `public/images/fare-classes/` | Logo hạng Business | `/tim-ve` (tab hạng vé) | PNG nội bộ tự vẽ | 1,1 KB | 🟢 |
+| `skyboss-logo.png` | `public/images/fare-classes/` | Logo hạng SkyBOSS | `/tim-ve` (tab hạng vé) | PNG nội bộ tự vẽ | 1,2 KB | 🟢 |
+| `deluxe-logo.png` | `public/images/fare-classes/` | Logo hạng Deluxe | `/tim-ve` (tab hạng vé) | PNG nội bộ tự vẽ | 1,3 KB | 🟢 |
+| `eco-logo.png` | `public/images/fare-classes/` | Logo hạng Eco | `/tim-ve` (tab hạng vé) | PNG nội bộ tự vẽ | 1,2 KB | 🟢 |
+
+### A12. Logo thương hiệu & ruy băng (3 file có tham chiếu)
+
+| Tên file | Đường dẫn | Mục đích | Route sử dụng | Nguồn gốc | Kích thước | Trạng thái |
+| --- | --- | --- | --- | --- | --- | --- |
+| `vietjet-air-circle.jpg` | `public/images/brand/` | Logo tròn Vietjet Air | Header / trang thông tin | Nội bộ | 10 KB | 🟢 |
+| `vietjet-ribbon.png` | `public/images/brand/` | Ruy băng thương hiệu | Trang giới thiệu | Nội bộ | 7 KB | 🟢 |
+| `vietjet-air-circle.jpg` | `public/images/payments/` | Logo tròn Vietjet Air (bản dùng ở màn thanh toán) | `/thanh-toan` | Nội bộ (trùng byte với bản trong `brand/`) | 10 KB | 🟢 |
+
+### A13. Logo phương thức thanh toán (15 file)
+
+| Tên file | Đường dẫn | Mục đích | Route sử dụng | Nguồn gốc | Kích thước | Trạng thái |
+| --- | --- | --- | --- | --- | --- | --- |
+| `vietqr.svg` | `public/images/payments/` | Mã QR VietQR | `/thanh-toan` | SVG nội bộ | 9,5 KB | 🟢 |
+| `vnpay.svg` | `public/images/payments/` | Logo VNPay | `/thanh-toan` | SVG nội bộ | 26 KB | 🟢 |
+| `momo.png` | `public/images/payments/` | Logo MoMo | `/thanh-toan` | PNG nội bộ | 9,4 KB | 🟢 |
+| `zalopay.png` | `public/images/payments/` | Logo ZaloPay | `/thanh-toan` | PNG nội bộ | 20 KB | 🟢 |
+| `napas.png` | `public/images/payments/` | Logo Napas | `/thanh-toan` | PNG nội bộ | 22 KB | 🟢 |
+| `movi.png` | `public/images/payments/` | Logo MoVi | `/thanh-toan` | PNG nội bộ | 1,9 KB | 🟢 |
+| `amex.png` | `public/images/payments/` | Logo American Express | `/thanh-toan` | PNG nội bộ | 57 KB | 🟢 |
+| `visa.svg` | `public/images/payments/` | Logo Visa | `/thanh-toan` | SVG nội bộ | 0,8 KB | 🟢 |
+| `mastercard.svg` | `public/images/payments/` | Logo Mastercard | `/thanh-toan` | SVG nội bộ | 0,2 KB | 🟢 |
+| `jcb.svg` | `public/images/payments/` | Logo JCB | `/thanh-toan` | SVG nội bộ | 6 KB | 🟢 |
+| `apple-pay.svg` | `public/images/payments/` | Logo Apple Pay | `/thanh-toan` | SVG nội bộ | 1,4 KB | 🟢 |
+| `google-pay.svg` | `public/images/payments/` | Logo Google Pay | `/thanh-toan` | SVG nội bộ | 4,5 KB | 🟢 |
+| `galaxy-pay.png` | `public/images/payments/` | Logo Galaxy Pay | `/thanh-toan` | PNG nội bộ | 3,2 KB | 🟢 |
+| `galaxy-pay.svg` | `public/images/skyid/` | Logo Galaxy Pay (bản vector cho màn SkyID) | `/dang-nhap` | SVG nội bộ | 4,7 KB | 🟢 |
+| `uploaded-117.png` | `public/images/payments/` | Ảnh minh hoạ phương thức | `/thanh-toan` | Nội bộ | 7 KB | 🟡 chưa tham chiếu |
+
+### A14. Asset màn SkyID (15 file)
+
+| Tên file | Đường dẫn | Mục đích | Route sử dụng | Nguồn gốc | Kích thước | Trạng thái |
+| --- | --- | --- | --- | --- | --- | --- |
+| `bg.jpg` | `public/images/skyid/` | Nền màn SkyID | `/dang-nhap`, `/dang-ky` | Ảnh nội bộ | 739 KB | 🟢 |
+| `bg-bot.png` | `public/images/skyid/` | Hoạ tiết nền dưới | Màn SkyID | PNG nội bộ | 4 KB | 🟢 |
+| `bg-top-right.png` | `public/images/skyid/` | Hoạ tiết nền góc trên phải | Màn SkyID | PNG nội bộ | 3,5 KB | 🟢 |
+| `logo-red.svg` | `public/images/skyid/` | Logo đỏ | Màn SkyID | SVG nội bộ | 7,2 KB | 🟢 |
+| `logo-white.svg` | `public/images/skyid/` | Logo trắng | Màn SkyID | SVG nội bộ | 6,7 KB | 🟢 |
+| `vietjet-air.svg` | `public/images/skyid/` | Logo Vietjet Air vector | Màn SkyID | SVG nội bộ | 5,4 KB | 🟢 |
+| `sky-loy.svg` | `public/images/skyid/` | Logo SkyJoy | Màn SkyID | SVG nội bộ | 4,5 KB | 🟢 |
+| `ic_checked.svg` | `public/images/skyid/` | Icon dấu tick | Màn SkyID | SVG nội bộ | 0,6 KB | 🟢 |
+| `bg.png` | `public/images/skyid/` | Bản PNG của nền SkyID | Màn SkyID | Nội bộ | 723 KB | 🟡 chưa tham chiếu |
+| `info.svg` | `public/images/skyid/` | Icon thông tin | Màn SkyID | SVG nội bộ | 1,8 KB | 🟡 chưa tham chiếu |
+| `success.svg` | `public/images/skyid/` | Icon thành công | Màn SkyID | SVG nội bộ | 0,7 KB | 🟡 chưa tham chiếu |
+| `warning.svg` | `public/images/skyid/` | Icon cảnh báo | Màn SkyID | SVG nội bộ | 0,8 KB | 🟡 chưa tham chiếu |
+| `warning-error.png` | `public/images/skyid/` | Icon cảnh báo (raster) | Màn SkyID | PNG nội bộ | 0,4 KB | 🟡 chưa tham chiếu |
+| `logo-mb-right.png` | `public/images/skyid/` | Logo mobile góc phải | Màn SkyID | PNG nội bộ | 9,9 KB | 🟡 chưa tham chiếu |
+
+### A15. Asset thương hiệu chưa tham chiếu (26 file — cần rà soát)
+
+Nhóm file có tên do CMS sinh (`media_1792675*.png`) hoặc bản logo cũ. Không có
+tham chiếu nào trong `src/`, `scripts/`, `e2e/` — chúng **không bị hiển thị**
+nhưng vẫn nằm trong `public/`, tức là vẫn được serve công khai.
+
+| Tên file | Đường dẫn | Nhóm | Kích thước |
+| --- | --- | --- | --- |
+| `media_1792675044257.jpg` | `public/images/brand/` | CMS | 9,7 KB |
+| `media_1792675044257.png` | `public/images/brand/` | CMS | 3,2 KB |
+| `media_1792675044260.png` | `public/images/brand/` | CMS | 57 KB |
+| `media_1792675117112.png` | `public/images/brand/` | CMS | 6,6 KB |
+| `media_1792675122109.png` | `public/images/brand/` | CMS | 7,1 KB |
+| `media_1792675126007.png` | `public/images/brand/` | CMS | 1,4 KB |
+| `media_1792675157346.png` | `public/images/brand/` | CMS | 1,2 KB |
+| `media_1792675159817.png` | `public/images/brand/` | CMS | 1,2 KB |
+| `media_1792675176247.png` | `public/images/brand/` | CMS | 1,2 KB |
+| `media_1792675178195.png` | `public/images/brand/` | CMS | 1,2 KB |
+| `media_1792675182886.png` | `public/images/brand/` | CMS | 3,3 KB |
+| `media_1792675185605.png` | `public/images/brand/` | CMS | 5,5 KB |
+| `media_1792675187787.png` | `public/images/brand/` | CMS | 1,3 KB |
+| `media_1792675215625.png` | `public/images/brand/` | CMS | 5,2 KB |
+| `media_1792675217118.png` | `public/images/brand/` | CMS | 3 KB |
+| `media_1792675219028.png` | `public/images/brand/` | CMS | 4,7 KB |
+| `media_1792675231484.png` | `public/images/brand/` | CMS | 2,9 KB |
+| `media_1792675237505.png` | `public/images/brand/` | CMS | 1,1 KB |
+| `media_1792675253456.png` | `public/images/brand/` | CMS | 4,4 KB |
+| `media_1792675260743.png` | `public/images/brand/` | CMS | 1,4 KB |
+| `media_1792675265542.png` | `public/images/brand/` | CMS | 3,2 KB |
+| `hot-badge.png` | `public/images/brand/` | Badge | 1,4 KB |
+| `seatbelt-icon.png` | `public/images/brand/` | Icon | 1,2 KB |
+| `vietjet-logo-red.png` | `public/images/brand/` | Logo | 3,3 KB |
+| `vietjet-logo-white.png` | `public/images/brand/` | Logo | 5,5 KB |
+| `banner-chuyenbay-mobile.png` | `public/images/hero/` | Banner | 122 KB |
+
+> **Việc còn lại:** 36 file trong bảng trên (A10/A13/A14/A15) không có tham chiếu
+> thật. Chúng **không gây lỗi** — nhưng theo chính sách của registry ("mọi file
+> trong `public/` phải có tham chiếu thật", đã áp dụng cho 62 file bị xoá ở
+> đợt 19/10) thì chúng nên được **xoá** hoặc được dùng. Xem
+> `scripts/audit-public-assets.cjs` để chạy lại kiểm tra này bất cứ lúc nào.
 
 
 ---

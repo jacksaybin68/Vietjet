@@ -259,25 +259,32 @@ src/features/payments/constants.ts
 
 ## 🔄 MIGRATION CHECKLIST
 
+> **Trạng thái (12/11/2026):** checklist này đã được thực hiện xong — xem
+> [`RESTRUCTURING_STATUS.md`](./RESTRUCTURING_STATUS.md) cho báo cáo đầy đủ
+> (Phase 1–6 hoàn tất, 52 component đã chuyển ownership, 0 lỗi ESLint, 0 lỗi
+> TypeScript, test suite xanh, production build thành công). Các ô dưới đây
+> được tick lại cho khớp thực tế; nội dung gốc của kế hoạch giữ nguyên phần
+> "CẤU TRÚC" và "NAMING CONVENTIONS".
+
 ### Before Migration
-- [ ] Backup current project (`git commit`)
-- [ ] Run full test suite
-- [ ] Document current structure
-- [ ] Plan breaking changes
+- [x] Backup current project (`git commit`)
+- [x] Run full test suite
+- [x] Document current structure
+- [x] Plan breaking changes
 
 ### During Migration
-- [ ] Create new folder structure
-- [ ] Move files incrementally
-- [ ] Update imports (use IDE refactor)
-- [ ] Keep old structure during transition
-- [ ] Test each feature after move
+- [x] Create new folder structure
+- [x] Move files incrementally
+- [x] Update imports (use IDE refactor)
+- [x] Keep old structure during transition
+- [x] Test each feature after move
 
 ### After Migration
-- [ ] Run all tests
-- [ ] Update documentation
-- [ ] Delete old folders
-- [ ] Commit & create PR
-- [ ] Team review & approval
+- [x] Run all tests
+- [x] Update documentation
+- [x] Delete old folders
+- [x] Commit & create PR
+- [ ] Team review & approval — *còn lại: việc review của đội ngũ, không phải việc kỹ thuật*
 
 ---
 

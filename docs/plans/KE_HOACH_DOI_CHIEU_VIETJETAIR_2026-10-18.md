@@ -248,14 +248,23 @@ Khiếm khuyết tìm được và đã sửa trong lần chụp đầu: `Activi
 
 ### Phase 6 — QA, regression và tối ưu
 
-1. 🟡 Mở rộng `scripts/ui-check.cjs`: **✅ đủ ba viewport canonical cho 12 route hiện có, cộng 4 cờ cấu trúc landmark và 1 phép thử hành vi skip link**. **Còn thiếu:** interaction cookie/promo/menu, focus/keyboard tổng quát, trạng thái lỗi, và **5 bề mặt chưa nằm trong cổng**: `/quen-mat-khau`, `/dat-lai-mat-khau`, `/thanh-toan`, `/dat-ve/[id]`, cùng các panel `/dich-vu?service=<id>` khác (`meal`, `seat`, `insurance`, `priority`, `lounge` — hiện chỉ chụp `baggage`).
-2. Thêm visual regression: **trước tiên phải chọn và cài công cụ diff** (`pixelmatch`/`looks-same`/`playwright` — repo hiện chỉ có `puppeteer-core` để chụp, không có để so sánh), định nghĩa masking cho banner động, và dùng ngưỡng diff theo section thay vì toàn trang.
-3. Kiểm tra Lighthouse/Next bundle: ảnh `next/image` hoặc `<img>` có kích thước cố định, preload hero đúng một ảnh, font không gây CLS. *(Chưa chạy Lighthouse lần nào — mốc "≥90" ở `docs/plans/phase-1-execution.md` mục 5 là mục tiêu, chưa phải số đo.)*
+1. 🟡 Mở rộng `scripts/ui-check.cjs`: **✅ đủ ba viewport canonical cho 12 route hiện có, cộng 4 cờ cấu trúc landmark và 1 phép thử hành vi skip link**. **Còn thiếu:** interaction cookie/promo/menu, focus/keyboard tổng quát, trạng thái lỗi, và các panel `/dich-vu?service=<id>` khác (`meal`, `seat`, `insurance`, `priority`, `lounge` — hiện chỉ chụp `baggage`).
+   - *Đính chính 13/11/2026:* phần "5 bề mặt chưa nằm trong cổng" trong bản cũ của mục này **đã cũ** — `/quen-mat-khau`, `/dat-lai-mat-khau`, `/thanh-toan` và `/dat-ve/[id]` đã có trong `scripts/ui-check.cjs` từ đợt 19/10. Phần còn thiếu thật sự chỉ là **5 panel dịch vụ** (mỗi panel là một bề mặt layout riêng dùng chung route `/dich-vu`). Đã bổ sung 5 panel này vào cổng (`07b-dich-vu-<id>`) ngày 13/11/2026.
+2. ✅ **Đã chọn và cài công cụ diff ảnh: `pixelmatch` + `pngjs`** (13/11/2026) — cả hai đã là dependency trực tiếp của repo, nên **không thêm dependency mới nào**.
+   - Cổng mới: `npm run test:visual` → `scripts/visual-diff.cjs`. Chụp 10 màn tĩnh × 3 viewport, so với baseline ở `docs/qa/visual-baseline/`, xuất **ảnh diff** để người review thấy đúng chỗ lệch (không chỉ "hỏng"). Ngưỡng: 0.1% pixel lệch hoặc 2000px tuyệt đối (có thể ghi đè bằng `VISUAL_MAX_DIFF_PERCENT` / `VISUAL_MAX_DIFF_PIXELS`).
+   - **Masking cho vùng động:** hero carousel tự chạy nên ảnh hai lần chụp khác nhau dù giao diện không đổi. Cơ chế là attribute `data-visual-mask="hero"` đặt ngay trong `HeroSection.tsx` — hợp đồng nằm cạnh markup chứ không giấu trong script.
+   - **Vì sao so với baseline CỦA CHÍNH DỰ ÁN, không so với ảnh chụp vietjetair.com:** site thật là React SPA, bố cục đổi theo A/B test và chiến dịch, nên ảnh chụp hôm nay không phải chuẩn để so ngày mai — baseline từ site thật sẽ đỏ mỗi tuần mà không ai sửa gì. Mục tiêu thật của Phase 6 là **bắt hồi quy**, và baseline của chính dự án làm đúng điều đó. Phép đối chiếu với site thật vẫn còn, ở dạng **số đo** (không so pixel): `scripts/compare-parity.cjs` và `scripts/measure-official*.cjs`.
+   - **Giới hạn đã biết:** baseline chỉ gồm màn nội dung TĨNH. Màn có dữ liệu động (kết quả tìm vé, tài khoản, thanh toán) sẽ đổi mỗi lần seed lại chuyến bay — muốn gate chúng thì phải kèm quy trình seed cố định.
+3. ✅ **Đã chạy phép đo hiệu năng — cổng mới `npm run test:perf`** (13/11/2026) → `scripts/perf-check.cjs`.
+   - Đo trực tiếp bằng CDP (`PerformanceObserver` + `Performance.getMetrics`) những gì Lighthouse đọc: **LCP**, **CLS**, **FCP**, và **ảnh nào là LCP element**.
+   - Ba yêu cầu cụ thể của Phase 6 đều có phép kiểm riêng: ảnh nào thiếu `width`/`height` (nguyên nhân gốc của CLS), preload hero có đúng một ảnh không, font có gây CLS không (`webfontsLoaded` + CLS tổng).
+   - **Vì sao không dùng `lighthouse` CLI:** nó là dependency nặng (~30 MB kéo theo cả chuỗi audit) chỉ để đọc 4 con số; CDP cho đúng dữ liệu đó mà không thêm dependency. Ngoài ra mốc "≥90 điểm" ở `docs/plans/phase-1-execution.md` mục 5 là **mục tiêu, không phải số đo** — điểm số tổng hợp phụ thuộc mạng của người chạy nên không tái lập được trong CI. Ở đây đo LCP/CLS trực tiếp: có nghĩa với người dùng và tái lập được.
+   - Ngưỡng: LCP ≤ 2500ms, CLS ≤ 0.1 (ghi đè bằng `PERF_MAX_LCP_MS` / `PERF_MAX_CLS`).
 4. Chạy lint, type-check, unit/integration, build, smoke, UI check và manual keyboard/mobile review.
 
 **Cổng duyệt phát hành:** toàn bộ gate xanh, không có asset chưa rõ quyền, changelog/screenshot được cập nhật.
 
-**Trạng thái 19/10/2026:** ba viewport canonical ✅, landmark ✅, skip link ✅; công cụ diff ảnh ❌ chưa chọn; interaction/Lighthouse ❌ chưa làm.
+**Trạng thái 13/11/2026:** ba viewport canonical ✅, landmark ✅, skip link ✅; **công cụ diff ảnh ✅ (`pixelmatch` + `pngjs`, cổng `npm run test:visual`)**; **đo hiệu năng ✅ (LCP/CLS/FCP + kiểm ảnh kích thước cố định + preload, cổng `npm run test:perf`)**; **5 panel dịch vụ ✅ đã vào cổng `test:ui`**; interaction cookie/promo/menu, focus/keyboard tổng quát và trạng thái lỗi ❌ chưa làm.
 
 ## 6. Thứ tự thực thi và phụ thuộc
 
