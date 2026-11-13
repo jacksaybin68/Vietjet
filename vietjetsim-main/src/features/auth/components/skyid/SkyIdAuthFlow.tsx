@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
@@ -13,11 +12,7 @@ import PhoneStep from './steps/PhoneStep';
 import PasswordStep from './steps/PasswordStep';
 import RegisterStep from './steps/RegisterStep';
 import OtpStep from './steps/OtpStep';
-import {
-  SKY_ID_COUNTRY_CODES,
-  type IdentifierMode,
-  type SkyIdCountry,
-} from './steps/types';
+import { SKY_ID_COUNTRY_CODES, type IdentifierMode, type SkyIdCountry } from './steps/types';
 import { useResendCountdown } from './useResendCountdown';
 
 /**
