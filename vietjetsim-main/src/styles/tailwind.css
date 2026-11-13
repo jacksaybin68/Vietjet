@@ -1514,11 +1514,21 @@ h6 {
   box-shadow: none;
 }
 
+/* Nhãn nổi của ô số điện thoại: dịch sang mép trái vùng gõ số (sau cờ),
+   đúng như site thật (nhãn ở `x = 85px` khi cờ chiếm 90px). */
+.vj-skyid-label-phone {
+  left: 85px;
+}
+
 /* Ô nhập có cờ + mã quốc gia (intl-tel).
  *
  * Viền được vẽ bằng `inset box-shadow` chứ không phải `border`, để phần trong
  * cao đúng 32px như `input.form-control` của site thật (nếu dùng `border` thì
- * `box-sizing: border-box` làm phần trong chỉ còn 30px). */
+ * `box-sizing: border-box` làm phần trong chỉ còn 30px).
+ *
+ * `overflow:hidden` ở đây chỉ áp cho viền bo góc — dropdown mã quốc gia cần
+ * tràn ra ngoài nên nó nằm ở `.vj-skyid-phone-menu` với `position:absolute`
+ * và `z-index` cao, tách khỏi khối bị cắt. */
 .vj-skyid-phone {
   position: relative;
   display: flex;
@@ -1531,7 +1541,6 @@ h6 {
   box-shadow:
     inset 0 0 0 1px var(--vj-skyid-border),
     0 4px 20px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
 }
 
 .vj-skyid-phone:focus-within {
@@ -1552,6 +1561,38 @@ h6 {
   line-height: 24px;
   color: var(--vj-skyid-ink);
   white-space: nowrap;
+}
+
+/* Nút mở danh sách mã quốc gia — nằm trong ô nhập nhưng cho phép dropdown
+   tràn ra (không bị `overflow:hidden` của ô nhập cắt). */
+.vj-skyid-phone-menu {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.vj-skyid-phone-menu > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  padding: 0 6px 0 10px;
+  border: 0;
+  background: transparent;
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--vj-skyid-ink);
+  cursor: pointer;
+}
+
+/* Ô nhập số: chừa chỗ cho cờ + mã quốc gia ở mép trái (95px = 85px + đệm). */
+.vj-skyid-input-phone {
+  padding-left: 95px;
 }
 
 .vj-skyid-phone .vj-skyid-input {
