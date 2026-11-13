@@ -391,45 +391,32 @@ export default function SkyIdAuthFlow({
           ? 'Nhập mã OTP được gửi qua tin nhắn để đăng nhập không cần mật khẩu.'
           : 'Đăng nhập để quản lý chuyến bay, đặt vé và tích điểm SkyJoy.';
 
-  /** Danh sách mã quốc gia — dùng chung cho bước số điện thoại và bước mật khẩu. */
+  /** Danh sách mã quốc gia — nằm trong khối cờ của ô nhập số điện thoại. */
   const countryMenu = (
-    <div className="vj-skyid-phone-menu">
-      <button
-        type="button"
-        onClick={() => setCountryOpen((open) => !open)}
-        aria-expanded={countryOpen}
-        aria-haspopup="listbox"
-        aria-label="Chọn mã quốc gia"
-      >
-        <HiOutlineChevronDown aria-hidden="true" className="text-xs" />
-      </button>
-      {countryOpen ? (
-        <ul
-          role="listbox"
-          aria-label="Mã quốc gia"
-          className="absolute left-0 top-[calc(100%+4px)] z-40 w-44 overflow-hidden rounded-md border border-[var(--vj-skyid-border)] bg-white py-1 shadow-lg"
-        >
-          {COUNTRY_CODES.map((c) => (
-            <li key={c.code}>
-              <button
-                type="button"
-                role="option"
-                aria-selected={c.code === country.code}
-                onClick={() => {
-                  setCountry(c);
-                  setCountryOpen(false);
-                }}
-                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm font-medium text-[var(--vj-skyid-ink)] hover:bg-[var(--surface-2)]"
-              >
-                <span aria-hidden="true">{c.flag}</span>
-                <span>{c.dial}</span>
-                <span className="text-xs text-[var(--vj-skyid-muted)]">{c.label}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-    </div>
+    <ul
+      role="listbox"
+      aria-label="Mã quốc gia"
+      className="absolute left-0 top-[calc(100%+4px)] z-40 w-44 overflow-hidden rounded-md border border-[var(--vj-skyid-border)] bg-white py-1 shadow-lg"
+    >
+      {COUNTRY_CODES.map((c) => (
+        <li key={c.code}>
+          <button
+            type="button"
+            role="option"
+            aria-selected={c.code === country.code}
+            onClick={() => {
+              setCountry(c);
+              setCountryOpen(false);
+            }}
+            className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm font-medium text-[var(--vj-skyid-ink)] hover:bg-[var(--surface-2)]"
+          >
+            <span aria-hidden="true">{c.flag}</span>
+            <span>{c.dial}</span>
+            <span className="text-xs text-[var(--vj-skyid-muted)]">{c.label}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
   );
 
   const body = (
@@ -483,7 +470,9 @@ export default function SkyIdAuthFlow({
               onChange={(v) => setPhone(v.replace(/[^\d]/g, ''))}
               flag={country.flag}
               dial={country.dial}
-              countryMenu={countryMenu}
+              countryMenu={countryOpen ? countryMenu : null}
+              countryOpen={countryOpen}
+              onToggleCountry={() => setCountryOpen((open) => !open)}
               placeholder="Nhập số điện thoại của bạn"
             />
           ) : (

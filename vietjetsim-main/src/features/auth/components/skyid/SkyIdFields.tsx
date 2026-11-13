@@ -77,8 +77,8 @@ export function SkyIdField({
  *  vào mép trái ô nhập (`left:0`, rộng 90px), còn ô nhập số bị đẩy sang phải
  *  (`x = 85px` so với mép khối) — và Nhãn nổi cũng nằm đúng ở `x = 85px`, tức
  *  ngay trên mép trái của vùng gõ số, KHÔNG đè lên cờ. Ở đây dựng lại đúng
- *  quan hệ đó: cờ tuyệt đối ở mép trái, ô nhập `padding-left:95px`, nhãn ở
- *  `left:85px`.
+ *  quan hệ đó: cờ + mã quốc gia tuyệt đối ở mép trái (rộng 85px), ô nhập
+ *  đẩy sang `margin-left:85px`, nhãn ở `left:85px`.
  */
 export interface SkyIdPhoneFieldProps {
   id: string;
@@ -87,7 +87,11 @@ export interface SkyIdPhoneFieldProps {
   onChange: (value: string) => void;
   flag: string;
   dial: string;
+  /** Danh sách mã quốc gia (dropdown), đã bọc trong `role="listbox"`. */
   countryMenu?: React.ReactNode;
+  /** Đang mở danh sách mã quốc gia hay không. */
+  countryOpen?: boolean;
+  onToggleCountry?: () => void;
   invalid?: boolean;
   autoComplete?: string;
   readOnly?: boolean;
@@ -102,6 +106,8 @@ export function SkyIdPhoneField({
   flag,
   dial,
   countryMenu,
+  countryOpen = false,
+  onToggleCountry,
   invalid = false,
   autoComplete = 'tel',
   readOnly = false,
@@ -113,11 +119,30 @@ export function SkyIdPhoneField({
         {label}
       </label>
       <div className="vj-skyid-phone">
-        <span className="vj-skyid-phone-code" aria-hidden="true">
-          <span>{flag}</span>
-          <span>{dial}</span>
-        </span>
-        {countryMenu}
+        <div className="vj-skyid-phone-menu">
+          <button
+            type="button"
+            onClick={onToggleCountry}
+            aria-expanded={countryOpen}
+            aria-haspopup="listbox"
+            aria-label="Chọn mã quốc gia"
+          >
+            <span aria-hidden="true">{flag}</span>
+            <span>{dial}</span>
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 20 20"
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M5 8l5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          {countryMenu}
+        </div>
         <input
           id={id}
           type="tel"

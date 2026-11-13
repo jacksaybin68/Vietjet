@@ -1580,27 +1580,28 @@ h6 {
   align-items: center;
   gap: 4px;
   height: 100%;
-  padding: 0 6px 0 10px;
+  padding: 0 8px 0 10px;
   border: 0;
   background: transparent;
   font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
   font-size: 16px;
   line-height: 24px;
   color: var(--vj-skyid-ink);
+  white-space: nowrap;
   cursor: pointer;
 }
 
-/* Ô nhập số: chừa chỗ cho cờ + mã quốc gia ở mép trái (95px = 85px + đệm). */
+/* Ô nhập số: đẩy sang phải khối cờ (85px), nhãn nổi cũng ở `left:85px`. */
 .vj-skyid-input-phone {
-  padding-left: 95px;
+  margin-left: 85px;
 }
 
 .vj-skyid-phone .vj-skyid-input {
   height: 100%;
+  width: auto;
   border: 0;
   border-radius: 0;
   box-shadow: none;
-  padding-left: 16px;
   flex: 1 1 auto;
   min-width: 0;
 }
