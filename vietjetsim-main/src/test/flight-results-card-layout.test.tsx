@@ -62,10 +62,13 @@ describe('FlightResultsStep — card bố cục 1 hàng ngang', () => {
     expect(card.className).toContain('flex-row');
   });
 
-  it('khối thông tin chuyến bay chiếm cột cố định 240px trên desktop và border-r', async () => {
+  // Khối thông tin chuyến bay chiếm cột trái của card. Số đo site thật
+  // (13/11/2026): cột trái 820px − padding 15px mỗi bên = 790px nội dung;
+  // 4 ô hạng vé mỗi ô 141px = 564px → khối thông tin còn 226px.
+  it('khối thông tin chuyến bay chiếm cột cố định 226px trên desktop và border-r', async () => {
     const card = await renderResults();
     const info = card.firstElementChild as HTMLElement;
-    expect(info.className).toContain('lg:w-[240px]');
+    expect(info.className).toContain('lg:w-[226px]');
     expect(info.className).toContain('border-r');
   });
 

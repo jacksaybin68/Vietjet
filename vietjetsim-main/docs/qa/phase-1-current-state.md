@@ -236,8 +236,6 @@ index.ts
 
 | File | Dòng | Class |
 |------|------|-------|
-| `app/error.tsx` | 14 | `from-[#1A2948] via-[#1e325a] to-[#EC2029]/20` |
-| `app/error.tsx` | 23, 29, 50, 58 | `text-[#EC2029]`, `text-[#1A2948]` |
 | `app/chuyen-bay-cua-toi/page.tsx` | 275 | `bg-[#fdeff5]` |
 | `app/chuyen-bay-cua-toi/page.tsx` | 334 | `text-[#555555]` |
 | `app/dang-nhap/page.tsx` | 81, 84, 88, 96 | `text-[#555960]`, `text-[#333]`, `text-[#939598]` |

@@ -3299,7 +3299,14 @@ export async function getLoyaltyTransactions(
 export async function spendLoyaltyPoints(
   userId: string,
   pointsToSpend: number,
-  description: string = 'Đổi điểm thưởng'
+  description: string = 'Đổi điểm thưởng',
+  /**
+   * The booking the points were spent on. `loyalty_transactions.booking_id`
+   * already existed but nothing wrote to it, so a refund had no way to find
+   * out how many points a booking had burned. Linking the row here is what
+   * lets the refund path hand them back.
+   */
+  bookingId?: string | null
 ): Promise<LoyaltyTransactionRecord> {
   if (pointsToSpend <= 0) {
     throw new Error('Points to spend must be greater than 0');
@@ -3315,8 +3322,8 @@ export async function spendLoyaltyPoints(
       WHERE id = ${loyalty.id} AND available_points >= ${pointsToSpend}
       RETURNING id
     )
-    INSERT INTO loyalty_transactions (user_loyalty_id, points, type, description)
-    SELECT id, ${-pointsToSpend}, 'redeem', ${description}
+    INSERT INTO loyalty_transactions (user_loyalty_id, points, type, description, booking_id)
+    SELECT id, ${-pointsToSpend}, 'redeem', ${description}, ${bookingId ?? null}
     FROM updated
     RETURNING id, user_loyalty_id, points, type, description, created_at
   `;
@@ -3360,6 +3367,96 @@ export async function refundLoyaltyPoints(
   }
 
   return transaction;
+}
+
+/**
+ * Hoàn lại SkyPoint đã dùng cho một đơn đặt chỗ cụ thể.
+ *
+ * Khi khách thanh toán bằng tiền mặt + điểm, họ đã mất điểm. Nếu đơn bị hoàn
+ * tiền mà điểm không trả lại, khách mất tiền *và* mất điểm cho cùng một chuyến
+ * bay — đúng thứ mà quy trình hoàn tiền nên tránh.
+ *
+ * Điểm đã dùng được ghi vào `loyalty_transactions` với `type = 'redeem'`. Hàm
+ * này tính tổng điểm đã trừ của đơn rồi cộng lại, và trừ điểm đã hoàn trước đó
+ * để không bao giờ hoàn hai lần.
+ */
+export async function refundLoyaltyPointsForBooking(
+  bookingId: string,
+  userId: string
+): Promise<{ pointsRefunded: number } | null> {
+  const booking = asFirstRow<BookingRecord>(
+    await sql`SELECT booking_code FROM bookings WHERE id = ${bookingId} LIMIT 1`
+  );
+  const bookingCode = booking?.booking_code || bookingId;
+
+  // Điểm đã dùng: ưu tiên `booking_id` (ghi từ bản vá mới), fallback khớp mô
+  // tả bằng mã đặt chỗ cho các giao dịch cũ chưa có `booking_id`.
+  const spentRows = await sql`
+    SELECT COALESCE(SUM(t.points), 0) AS spent
+    FROM loyalty_transactions t
+    JOIN user_loyalty ul ON ul.id = t.user_loyalty_id
+    WHERE ul.user_id = ${userId}
+      AND t.type = 'redeem'
+      AND t.points < 0
+      AND (
+        t.booking_id::text = ${bookingId}
+        OR t.description ILIKE ${'%đặt chỗ ' + bookingCode + '%'}
+      )
+  `;
+  const spent = Math.abs(Number(asFirstRow<{ spent: number }>(spentRows)?.spent) || 0);
+  if (spent <= 0) return { pointsRefunded: 0 };
+
+  // Điểm đã hoàn trước đó cho cùng đơn (chống hoàn hai lần).
+  const refundedRows = await sql`
+    SELECT COALESCE(SUM(t.points), 0) AS refunded
+    FROM loyalty_transactions t
+    JOIN user_loyalty ul ON ul.id = t.user_loyalty_id
+    WHERE ul.user_id = ${userId}
+      AND t.type = 'adjust'
+      AND t.points > 0
+      AND (
+        t.booking_id::text = ${bookingId}
+        OR t.description ILIKE ${'%Hoàn điểm do hoàn tiền đặt chỗ ' + bookingCode + '%'}
+      )
+  `;
+  const alreadyRefunded = Number(asFirstRow<{ refunded: number }>(refundedRows)?.refunded) || 0;
+
+  const pointsToRefund = spent - alreadyRefunded;
+  if (pointsToRefund <= 0) return { pointsRefunded: 0 };
+
+  await refundLoyaltyPoints(
+    userId,
+    pointsToRefund,
+    `Hoàn điểm do hoàn tiền đặt chỗ ${bookingCode}`
+  );
+
+  return { pointsRefunded: pointsToRefund };
+}
+
+/**
+ * Tổng số tiền mặt đã thu cho một đơn (đã hoàn tất).
+ *
+ * Đơn trả bằng SkyPoint thu 0đ, đơn trả bằng ví/cash + điểm thu đúng phần
+ * tiền mặt. Số tiền hoàn phải bám theo con số này, không theo `total_price`:
+ * hoàn theo giá vé gốc khiến công ty trả ra tiền mà khách chưa từng trả.
+ *
+ * `hasCompletedPayment` phân biệt "không có tiền nào thu" với "tiền chưa
+ * được ghi nhận". Chuyển khoản ngân hàng chỉ ghi nhận là `completed` sau khi
+ * nhân viên xác nhận, nên đơn đó vẫn phải cho khách gửi yêu cầu hoàn tiền.
+ */
+export async function getBookingCashPaid(
+  bookingId: string
+): Promise<{ cashPaid: number; hasCompletedPayment: boolean }> {
+  const rows = await sql`
+    SELECT COALESCE(SUM(amount), 0) AS paid, COUNT(*) AS cnt
+    FROM payments
+    WHERE booking_id = ${bookingId} AND status = 'completed'
+  `;
+  const row = asFirstRow<{ paid: number; cnt: number }>(rows);
+  return {
+    cashPaid: Number(row?.paid) || 0,
+    hasCompletedPayment: Number(row?.cnt) > 0,
+  };
 }
 
 /**

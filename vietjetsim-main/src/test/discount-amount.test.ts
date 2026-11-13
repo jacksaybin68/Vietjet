@@ -30,7 +30,10 @@ describe('computeDiscountAmount', () => {
 
   it('ignores the cap for a fixed amount — the cap is for percentage codes', () => {
     expect(
-      computeDiscountAmount({ type: 'fixed', value: 500_000, max_discount_amount: 300_000 }, 2_000_000)
+      computeDiscountAmount(
+        { type: 'fixed', value: 500_000, max_discount_amount: 300_000 },
+        2_000_000
+      )
     ).toBe(500_000);
   });
 

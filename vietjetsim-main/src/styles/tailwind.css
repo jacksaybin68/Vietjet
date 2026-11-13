@@ -157,6 +157,8 @@ input[type='date'].vj-no-native-icon::-moz-calendar-picker-indicator {
   --vj-currency-gray: #6d6e71;
   --vj-field-line: #d9d9d9;
   --vj-border-back: #808080;
+  /* Viền dưới header trang con (2px #E31E24) — theo plan §1. */
+  --vj-header-border: #e31e24;
   /* Site thật dùng hai họ font:
    *   - KoHo (300–700) cho toàn bộ văn bản.
    *   - JambonoMedium cho nút / CTA / nhãn in đậm (đo được trên DOM sống:
@@ -238,8 +240,6 @@ input[type='date'].vj-no-native-icon::-moz-calendar-picker-indicator {
    * 2px đỏ #E31E24, bo góc dưới 16px, shadow rgba(0,0,0,0.08) 0 8px 24px. */
   --vj-header-sub: #ffffff;
   --vj-header-sub-border: #e31e24;
-  /* Alias theo plan §1: viền dưới header trang con (2px #E31E24). */
-  --vj-header-border: #e31e24;
   --vj-nav-ink: #1f1f1f;
   --vj-pill-gray: #f7f7f7;
   --vj-pill-gray-border: #dddddd;

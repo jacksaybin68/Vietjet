@@ -6,6 +6,7 @@ import {
   updateRefundStatus,
   updateBookingStatus,
   refundWallet,
+  refundLoyaltyPointsForBooking,
   setRefundVisibility,
   updateRefundDetails,
   isRefundFeatureEnabled,
@@ -173,6 +174,7 @@ export async function PATCH(request: NextRequest) {
           const payment = paymentResults[0];
           let walletRefunded = false;
           let walletAlreadyPaid = false;
+          let pointsRefunded = 0;
           if (payment?.method === 'wallet' && refundRecord.user_id) {
             const refundAmount = Number(refundRecord.amount) || Number(payment.amount);
             try {
@@ -198,13 +200,35 @@ export async function PATCH(request: NextRequest) {
             }
           }
 
+          // 2b. SkyPoint spent on this booking must come back. The customer
+          //     burned points on the fare; refunding the money without the
+          //     points would charge them twice for the same cancelled trip.
+          if (refundRecord.user_id) {
+            try {
+              const result = await refundLoyaltyPointsForBooking(
+                refundRecord.booking_id,
+                refundRecord.user_id
+              );
+              pointsRefunded = result?.pointsRefunded ?? 0;
+            } catch (pointsErr) {
+              console.error(
+                `[REFUND] Failed to restore SkyPoint for booking ${refundRecord.booking_id}:`,
+                pointsErr
+              );
+            }
+          }
+
           // 3. Mark booking as refunded
           await updateBookingStatus(refundRecord.booking_id, 'refunded');
+          const pointSummary =
+            pointsRefunded > 0
+              ? `, ${pointsRefunded.toLocaleString('vi-VN')} SkyPoint đã được hoàn lại`
+              : '';
           refundSummary = walletRefunded
-            ? ' Seats released, wallet credited and booking marked as refunded'
+            ? ` Seats released, wallet credited and booking marked as refunded${pointSummary}`
             : walletAlreadyPaid
-              ? ' Seats released; wallet was already refunded for this booking'
-              : ' Seats released and booking marked as refunded';
+              ? ` Seats released; wallet was already refunded for this booking${pointSummary}`
+              : ` Seats released and booking marked as refunded${pointSummary}`;
           console.info(
             `[REFUND] Processing refund for booking ${refundRecord.booking_id}:${refundSummary}`
           );

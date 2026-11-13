@@ -19,10 +19,21 @@ const IGNORED_NAMES = new Set(['node_modules', '.next', '.git', '.env', '.env.lo
 // Next.js build output beyond the default `.next`: `next.config.mjs` honours
 // `DIST_DIR`, and the UI gate builds into `.next-uicheck` for that reason. A
 // build directory holds thousands of files, several of them named
-// `node_modules_*.js`, so browsing the tree would leak the whole build. Match
-// the family, and only directories — a project file may legitimately be
-// dot-named.
-const isBuildDir = (name: string) => name === '.next' || name.startsWith('.next-');
+// `node_modules_*.js`, so browsing the tree would leak the whole build.
+//
+// The match is on a dot-prefixed BUILD directory, not on a fixed list:
+// `.next`, `.next-uicheck`, `.next-qa-<date>`, `.next-skyid` all share the
+// `.next` family, and this repo's QA gate also uses `.qa-build` / `.qa-logs`
+// for the same thing. An earlier version matched only `.next*` and therefore
+// leaked `.qa-build` into the tree — the tree then contained a
+// `node_modules_*.js` chunk and the "no node_modules in the tree" assertion
+// failed, which is exactly the leak this rule exists to prevent.
+//
+// Only dot-prefixed directories are matched: a project file may legitimately
+// be named `build` or `dist`, and those must stay browsable.
+const BUILD_DIR_PREFIXES = ['.next', '.qa-'];
+const isBuildDir = (name: string) =>
+  BUILD_DIR_PREFIXES.some((prefix) => name === prefix || name.startsWith(`${prefix}-`));
 const SENSITIVE_PATTERNS = [
   /^\.env($|\.)/,
   /(^|\/)\.git($|\/)/,

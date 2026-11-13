@@ -502,13 +502,32 @@ async function main() {
     try {
       reset(state);
       const stability = await goto(cdp, url, viewport);
-      let probe = { error: 'probe failed' };
+      /* Probe hỏng không được phép giết cả lượt chạy — vẫn chụp ảnh và ghi
+         lỗi vào báo cáo để biết màn nào không đo được. Nhưng nó cũng phải giữ
+         ĐÚNG HÌNH DẠNG của một probe thật: phần báo cáo đọc `probe.overflowX`,
+         `probe.overlappedBoxes`… Nếu thiếu field, chính dòng in báo cáo sẽ ném
+         `TypeError` và làm hỏng cả lượt chạy. */
+      let probe = {
+        error: 'probe failed',
+        overflowX: 0,
+        overlappedBoxes: [],
+        emptySrcImages: 0,
+        mainCount: 0,
+        mainContentCount: 0,
+        nestedMain: 0,
+        mainAfterHeader: null,
+        bodyText: 0,
+        images: 0,
+        h1: null,
+        header: false,
+        footer: false,
+        url: null,
+      };
       try {
         probe = await evaluate(cdp, PROBE, 60000);
       } catch (e) {
-        /* Probe hỏng không được phép giết cả lượt chạy — vẫn chụp ảnh và ghi
-           lỗi vào báo cáo để biết màn nào không đo được. */
-        probe = { error: String(e && e.message ? e.message : e) };
+        /* Giữ nguyên bộ field mặc định ở trên, chỉ ghi lý do hỏng. */
+        probe.error = String(e && e.message ? e.message : e);
       }
       const screen = `${name}-${viewport.label}`;
       const file = await shot(cdp, screen);
@@ -827,6 +846,7 @@ async function main() {
       ? r.pageErrors.filter((e) => !DEV_ONLY_ERRORS.some((p) => e.includes(p)))
       : r.pageErrors;
     if (r.probe.overflowX > 1) flags.push(`TRÀN NGANG ${r.probe.overflowX}px`);
+    if (r.probe.error) flags.push(`PROBE HỎNG: ${r.probe.error}`);
     if (r.probe.overlappedBoxes.length)
       flags.push(`BOX TRÙNG: ${r.probe.overlappedBoxes.join(', ')}`);
     if (r.probe.emptySrcImages) flags.push(`IMG SRC RỖNG x${r.probe.emptySrcImages}`);

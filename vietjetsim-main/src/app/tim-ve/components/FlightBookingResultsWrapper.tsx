@@ -466,15 +466,25 @@ export default function FlightBookingResultsWrapper({
               dung. Không có `w-full`, lưới 4 cột giá đẩy cột này rộng ~658px
               trong viewport 390px và bị `overflow-x-hidden` của wrapper cắt mất
               (giá vé của các hạng bên phải không chạm được trên điện thoại). */}
-          <div className="w-full lg:w-[820px] lg:flex-none min-w-0 lg:px-[15px]">
-            <FlightBookingClient
-              continueSignal={continueSignal}
-              onFlightSelect={handleFlightSelect}
-              onStepChange={setBookingStep}
-              onPaxCountsChange={handlePaxCountsChange}
-              baseTotal={flightBaseAmount}
-              onTotalChange={setClientTotal}
-            />
+          <div className="w-full lg:w-[820px] lg:flex-none min-w-0">
+            {/* H1 cột trái — site thật (đo 13/11/2026, 1440×900): nền đỏ,
+                chữ trắng 16px/700 JambonoMedium uppercase. Nằm NGOÀI lớp
+                padding 15px của cột để mép trái khớp x=120 (nội dung chuyến
+                bay), giống dải dịch vụ phụ của header. Ở mobile tiêu đề đã
+                nằm trong băng đỏ của header nên bản này chỉ hiện từ `lg`. */}
+            <h1 className="hidden lg:block mb-2 rounded-vj bg-primary px-4 py-2.5 text-base font-bold font-jambono uppercase text-white tracking-normal">
+              Lựa chọn chuyến bay
+            </h1>
+            <div className="lg:px-[15px]">
+              <FlightBookingClient
+                continueSignal={continueSignal}
+                onFlightSelect={handleFlightSelect}
+                onStepChange={setBookingStep}
+                onPaxCountsChange={handlePaxCountsChange}
+                baseTotal={flightBaseAmount}
+                onTotalChange={setClientTotal}
+              />
+            </div>
           </div>
 
           {/* Cột phải: panel thông tin đặt chỗ 380px (x=940…1320 ở 1440) */}

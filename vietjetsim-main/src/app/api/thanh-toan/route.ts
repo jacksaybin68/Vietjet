@@ -269,7 +269,10 @@ export async function POST(request: NextRequest) {
           pointsToSpend,
           requestedPointsToRedeem > 0
             ? `Thanh toán Cash + Points cho đặt chỗ ${booking.booking_code ?? booking_id}`
-            : `Thanh toán SkyPoint cho đặt chỗ ${booking.booking_code ?? booking_id}`
+            : `Thanh toán SkyPoint cho đặt chỗ ${booking.booking_code ?? booking_id}`,
+          // Ghi liên kết đơn lên giao dịch điểm: nếu đơn bị hoàn tiền, số điểm
+          // đã dùng phải được trả lại (xem `refundLoyaltyPointsForBooking`).
+          booking_id
         );
         loyaltyPointsSpent = pointsToSpend;
       } catch (loyaltyError) {

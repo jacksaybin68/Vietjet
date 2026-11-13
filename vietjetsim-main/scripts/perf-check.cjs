@@ -343,7 +343,11 @@ async function main() {
 
     writeFileSync(
       path.join(OUT_DIR, 'report.json'),
-      JSON.stringify({ base: BASE, thresholds: { lcpMs: MAX_LCP_MS, cls: MAX_CLS }, results }, null, 2)
+      JSON.stringify(
+        { base: BASE, thresholds: { lcpMs: MAX_LCP_MS, cls: MAX_CLS }, results },
+        null,
+        2
+      )
     );
 
     console.log('\n=== CỔNG HIỆU NĂNG ===');
@@ -351,7 +355,9 @@ async function main() {
     let failed = 0;
     for (const r of results) {
       if (r.flags.length) failed += 1;
-      console.log(`${r.flags.length ? '⚠️ ' : '✅ '}${r.page.padEnd(18)} LCP=${r.lcp}ms CLS=${r.cls}`);
+      console.log(
+        `${r.flags.length ? '⚠️ ' : '✅ '}${r.page.padEnd(18)} LCP=${r.lcp}ms CLS=${r.cls}`
+      );
     }
 
     if (failed > 0) {

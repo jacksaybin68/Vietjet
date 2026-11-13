@@ -138,7 +138,10 @@ describe('POST /api/thanh-toan — amount reconciliation', () => {
     expect(mocks.spendLoyaltyPoints).toHaveBeenCalledWith(
       'user-1',
       1000,
-      expect.stringContaining('Cash + Points')
+      expect.stringContaining('Cash + Points'),
+      // The booking is linked to the points transaction so a refund can
+      // hand them back.
+      'bk-1'
     );
     // The charge is the cash actually owed — the points are not money.
     expect(mocks.createPaymentAndConfirmBooking).toHaveBeenCalledWith(
@@ -201,7 +204,8 @@ describe('POST /api/thanh-toan — amount reconciliation', () => {
     expect(mocks.spendLoyaltyPoints).toHaveBeenCalledWith(
       'user-1',
       2000, // 2.000.000 VND at 1 point = 1.000 VND
-      expect.stringContaining('SkyPoint')
+      expect.stringContaining('SkyPoint'),
+      'bk-1'
     );
     expect(mocks.createPaymentAndConfirmBooking).toHaveBeenCalledWith(
       expect.objectContaining({ amount: 0 })

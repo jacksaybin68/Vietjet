@@ -1339,8 +1339,10 @@ export default function FlightResultsStep({
                 </div>
 
                 {/* Right: Fare Classes — 4 cột 1 hàng ngang trên cả mobile và desktop.
-                    Ô hạng 141×96 (đo site thật 13/11/2026). */}
-                <div className="flex-1 min-w-0 grid grid-cols-4 gap-0.5 p-0.5 sm:p-0 bg-gray-100/60">
+                    Ô hạng 141×96 (đo site thật 13/11/2026): cột trái 790px −
+                    khối thông tin 226px = 564px, chia 4 → đúng 141px/ô nên
+                    desktop không có khe (gap-0). */}
+                <div className="flex-1 min-w-0 grid grid-cols-4 gap-0.5 sm:gap-0 p-0.5 sm:p-0 bg-gray-100/60">
                   {fareClasses.map((fc) => {
                     const fares = Object.fromEntries(
                       fareClasses.map((item) => [item.id, item.price])
@@ -1462,7 +1464,7 @@ export default function FlightResultsStep({
                             {/* Giá vé: số tiền 26px/400 JambonoMedium #333333,
                                 mã tiền tệ 16px/500 #6D6E71 (đo 13/11/2026). */}
                             <span
-                              className={`text-xl5 font-jambono font-normal font-koho leading-none whitespace-nowrap transition-colors ${
+                              className={`text-xl5 font-jambono font-normal leading-none whitespace-nowrap transition-colors ${
                                 isSelected
                                   ? 'text-primary'
                                   : 'text-vj-text group-hover:text-primary'

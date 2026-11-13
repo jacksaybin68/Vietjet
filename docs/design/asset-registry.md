@@ -186,16 +186,21 @@ Icon cho các drawer dịch vụ bổ trợ (hành lý, suất ăn, chỗ ngồi
 
 ### A14. Asset màn SkyID (15 file)
 
+Nguồn gốc chi tiết từng file (URL tải trực tiếp / cách chụp từ DOM sống):
+[`vietjetsim-main/docs/qa/so-do-skyid-2026-11-13.md` §5.1](../vietjetsim-main/docs/qa/so-do-skyid-2026-11-13.md).
+Đây là **asset thương hiệu của Vietjet Air / SkyJoy ID**, dùng để mô phỏng giao diện;
+dùng thương mại cần xin phép chủ sở hữu.
+
 | Tên file | Đường dẫn | Mục đích | Route sử dụng | Nguồn gốc | Kích thước | Trạng thái |
 | --- | --- | --- | --- | --- | --- | --- |
-| `bg.jpg` | `public/images/skyid/` | Nền màn SkyID | `/dang-nhap`, `/dang-ky` | Ảnh nội bộ | 739 KB | 🟢 |
-| `bg-bot.png` | `public/images/skyid/` | Hoạ tiết nền dưới | Màn SkyID | PNG nội bộ | 4 KB | 🟢 |
-| `bg-top-right.png` | `public/images/skyid/` | Hoạ tiết nền góc trên phải | Màn SkyID | PNG nội bộ | 3,5 KB | 🟢 |
-| `logo-red.svg` | `public/images/skyid/` | Logo đỏ | Màn SkyID | SVG nội bộ | 7,2 KB | 🟢 |
-| `logo-white.svg` | `public/images/skyid/` | Logo trắng | Màn SkyID | SVG nội bộ | 6,7 KB | 🟢 |
-| `vietjet-air.svg` | `public/images/skyid/` | Logo Vietjet Air vector | Màn SkyID | SVG nội bộ | 5,4 KB | 🟢 |
-| `sky-loy.svg` | `public/images/skyid/` | Logo SkyJoy | Màn SkyID | SVG nội bộ | 4,5 KB | 🟢 |
-| `ic_checked.svg` | `public/images/skyid/` | Icon dấu tick | Màn SkyID | SVG nội bộ | 0,6 KB | 🟢 |
+| `bg.jpg` | `public/images/skyid/` | Nền màn SkyID | `/dang-nhap`, `/dang-ky` | Chụp từ DOM sống SkyID | 739 KB | 🟢 |
+| `bg-bot.png` | `public/images/skyid/` | Hoạ tiết nền dưới | Màn SkyID | Chụp từ DOM sống SkyID | 4 KB | 🟢 |
+| `bg-top-right.png` | `public/images/skyid/` | Hoạ tiết nền góc trên phải | Màn SkyID | Chụp từ DOM sống SkyID | 3,5 KB | 🟢 |
+| `logo-red.svg` | `public/images/skyid/` | Logo đỏ | Màn SkyID | Chụp từ DOM sống SkyID | 7,2 KB | 🟢 |
+| `logo-white.svg` | `public/images/skyid/` | Logo trắng | Màn SkyID | Chụp từ DOM sống SkyID | 6,7 KB | 🟢 |
+| `vietjet-air.svg` | `public/images/skyid/` | Logo Vietjet Air vector | Màn SkyID | CDN SkyID (`vietjet-air-iframe-v2/images/`) | 5,4 KB | 🟢 |
+| `sky-loy.svg` | `public/images/skyid/` | Logo SkyJoy | Màn SkyID | CDN SkyID (`vietjet-air-iframe-v2/images/`) | 4,5 KB | 🟢 |
+| `ic_checked.svg` | `public/images/skyid/` | Icon dấu tick | Màn SkyID | CDN SkyID (`vietjet-air-iframe-v2/images/`) | 0,6 KB | 🟢 |
 | `bg.png` | `public/images/skyid/` | Bản PNG của nền SkyID | Màn SkyID | Nội bộ | 723 KB | 🟡 chưa tham chiếu |
 | `info.svg` | `public/images/skyid/` | Icon thông tin | Màn SkyID | SVG nội bộ | 1,8 KB | 🟡 chưa tham chiếu |
 | `success.svg` | `public/images/skyid/` | Icon thành công | Màn SkyID | SVG nội bộ | 0,7 KB | 🟡 chưa tham chiếu |

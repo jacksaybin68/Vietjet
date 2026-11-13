@@ -114,4 +114,23 @@ describe('Editor files API authorization', () => {
     expect(names).not.toContain('node_modules');
     expect(names).not.toContain('.env');
   });
+
+  /**
+   * Cây build KHÔNG chỉ có tên `.next`: `next.config.mjs` đọc `DIST_DIR`, và cổng
+   * QA của repo này dựng build vào `.next-uicheck` / `.next-qa-<ngày>` /
+   * `.qa-build`. Bản cũ của `isBuildDir` chỉ khớp họ `.next*`, nên `.qa-build`
+   * lọt vào cây — bên trong có các chunk tên `node_modules_*.js`, tức đúng nội
+   * dung mà quy tắc này sinh ra để chặn. Bài test này ghim cả họ `.qa-*`.
+   */
+  it('does not leak build output directories into the directory tree', async () => {
+    const res = await listEditorFiles(getRequest('action=tree', adminToken));
+
+    expect(res.status).toBe(200);
+    const { tree } = await res.json();
+
+    const names = JSON.stringify(tree);
+    expect(names).not.toContain('.qa-build');
+    expect(names).not.toContain('.next-uicheck');
+    expect(names).not.toContain('.next-qa');
+  });
 });

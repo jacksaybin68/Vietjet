@@ -1,0 +1,463 @@
+{
+  "url": "https://newweb.vietjetair.com/vi/select-flight?departAirport=HAN&arrivalAirport=SGN&departDate=2026-11-20&adult=1&child=0&infant=0",
+  "storage": {
+    "href": "https://newweb.vietjetair.com/VI/",
+    "ls": {
+      "aip-chatbot-language": "en",
+      "criteo-id5id-fast-track": "ID5*cT0eHyySwXu1cLe1moij5N-c8qHLzbe1moij5N-c8qH__2r29iZaAQEBCmr29iYA-ltjA6HdkKmAHz84bLmdFA",
+      "id5id_v2_signature": "{\"data\":{\"signature\":\"ID5_At-tE567NLlnm3MGXmfEiPUDAs23ZEs5R2mZXIKYcdQBVRQf-Jufkeg8-Is511PNVJdjk0reg4-TWLfpf9COmFoPPI9YapPsPjNT0XD_9ehI6ksvnf0lMT6r3mOLmx4QGdy9UaY_BbTvcE8xXWKzE2wetpVotHSduZFjpiZmTywTOI40REY\"},\"expireAt\":1795865766741}",
+      "temp-data-ga": "8bc81c2a-b9db-45a7-9c51-8260f3525eda-1794569743637",
+      "vj_device_id": "e32d0bad-39c6-4dd6-96ee-0897778ecd84",
+      "awswaf_session_storage": "null",
+      "_gcl_ls": "{\"schema\":\"gcl\",\"version\":1,\"gcl_ctr\":{\"value\":{\"value\":10,\"timeouts\":0,\"errors\":0,\"eopCount\":0,\"creationTimeMs\":1794569762319},\"expires\":1802345762319},\"gsid_dc\":{\"value\":{\"joinId\":\"PLNBfxow71mh26lqS5nfzHATui_xmi-aYA\",\"lastJoinedTimeMs\":1794569745869},\"expires\":1794570045869}}",
+      "_grecaptcha": "09AKhCRwi2wRExGrV4c-nSZh-5FqKbwLhQ4NPi8Qenks9vkwy8zjAPUZ2fQr151DLbiO_qBHBIAtRHwDL-mCzGYw7d4UoC7DMz8oAnRelg7nTI8zkWdsYbZccf1KjUXyTP",
+      "id5id_privacy": "{\"jurisdiction\":\"other\",\"id5_consent\":true}",
+      "clientVersionVietJetWeb": "1794567491553",
+      "__stsiteid": "445108195490f5f5724b23c311527a9e",
+      "__tz": "server",
+      "id5id_v2_3856268834750531": "{\"data\":{\"response\":{\"signature\":\"ID5_At-tE567NLlnm3MGXmfEiPUDAs23ZEs5R2mZXIKYcdQBVRQf-Jufkeg8-Is511PNVJdjk0reg4-TWLfpf9COmFoPPI9YapPsPjNT0XD_9ehI6ksvnf0lMT6r3mOLmx4QGdy9UaY_BbTvcE8xXWKzE2wetpVotHSduZFjpiZmTywTOI40REY\",\"created_at\":\"2026-11-13T11:36:06.831785951Z\",\"id5_consent\":true,\"original_uid\":\"ID5*cT0eHyySwXu1cLe1moij5N-c8qHLzbe1moij5N-c8qH__2r29iZaAQEBCmr29iYA-ltjA6HdkKmAHz84bLmdFA\",\"universal_uid\":\"ID5*cT0eHyySwXu1cLe1moij5N-c8qHLzbe1moij5N-c8qH__2r29iZaAQEBCmr29iYA-ltjA6HdkKmAHz84bLmdFA\",\"link_type\":0,\"cascade_needed\":false,\"privacy\":{\"jurisdiction\":\"other\",\"id5_consent\":true},\"ext\":{\"",
+      "id5id_privacy_exp": "Sun, 13 Dec 2026 11:36:06 GMT",
+      "__ls": "1794569766721"
+    },
+    "ss": {
+      "loginDialogTabId": "tab-1794569745461-0.5918227547380738",
+      "__notification_delay": "[{\"id\":\"39\",\"delay\":\"0\"},{\"id\":\"45\",\"delay\":\"0\"},{\"id\":\"53\",\"delay\":\"0\"},{\"id\":\"52\",\"delay\":\"0\"},{\"id\":\"51\",\"delay\":\"0\"},{\"id\":\"50\",\"delay\":\"0\"},{\"id\":\"49\",\"delay\":\"0\"},{\"id\":\"48\",\"delay\":\"0\"},{\"id\":\"47\",\"delay\":\"0\"},{\"id\":\"44\",\"delay\":\"0\"},{\"id\":\"41\",\"delay\":\"0\"},{\"id\":\"40\",\"delay\":\"0\"},{\"id\":\"42\",\"delay\":\"0\"},{\"id\":\"43\",\"delay\":\"0\"},{\"id\":\"46\",\"delay\":\"0\"},{\"id\":\"22\",\"delay\":\"0\"}]",
+      "__stutm": "{}",
+      "__smtidc": "",
+      "__la": "1794569765370",
+      "__stmd": "s",
+      "__pvc": "0",
+      "__stls": "{\"l\":null,\"s\":null,\"loc\":{\"ci\":\"dak thanh\",\"co\":\"viet nam\",\"re\":\"dak nong\"},\"isUserInScg\":false}",
+      "__uurl": "[\"/VI/\"]",
+      "__upvc": "1",
+      "ck": "ADGMOT35CHFLVDHBJNIG50K96AEGVB9HT5HJVP79R348PM2CT610",
+      "ss-data-ga": "8399d95b-68f2-47b8-af71-db6ce0141b42"
+    }
+  },
+  "requests": [
+    {
+      "method": "GET",
+      "url": "https://newweb.vietjetair.com/vi/select-flight?departAirport=HAN&arrivalAirport=SGN&departDate=2026-11-20&adult=1&child=0&infant=0"
+    },
+    {
+      "method": "GET",
+      "url": "https://newweb.vietjetair.com/manifest.json"
+    },
+    {
+      "method": "GET",
+      "url": "https://newweb.vietjetair.com/meta.json"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.google.com/ccm/collect?rcb=8&frm=0&apvc=1&ae=g&auid=1047134275.1794569746&dt=Vietjet%20Air%20%7C%20Bay%20l%C3%A0%20th%C3%ADch%20ngay!%20%7C%20Website%20ch%C3%ADnh%20th%E1%BB%A9c&en=page_view&dl=https%3A%2F%2Fnewweb.vietjetair.com%2Fvi%2F&scrsrc=www.googletagmanager.com&rnd=1707692260.1794569746&navt=n&npa=0&ep.ads_data_redaction=0&gtm=45He6bb1v71212621za200zd71212621xeaxf1&gcd=13l3l3l3"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.google.com/measurement/conversion?random=1794569749092&cv=11&tid=G-KML2W7BV5C&fst=1794569749092&fmt=8&en=page_view&gtm=45je6bb1v879655686z871212621za20gzb71212621zd71212621xecxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115616986~115938465~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url=https%3A"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.google.com/measurement/conversion?random=1794569749092&cv=11&tid=G-KML2W7BV5C&fst=1794569749092&fmt=8&en=first_visit&gtm=45je6bb1v879655686z871212621za20gzb71212621zd71212621xecxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115616986~115938465~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url=https%"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.google.com/measurement/conversion?random=1794569749092&cv=11&tid=G-KML2W7BV5C&fst=1794569749092&fmt=8&en=session_start&gtm=45je6bb1v879655686z871212621za20gzb71212621zd71212621xecxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115616986~115938465~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url=http"
+    },
+    {
+      "method": "POST",
+      "url": "https://analytics.google.com/g/collect?v=2&tid=G-KML2W7BV5C&gtm=45je6bb1v879655686z871212621za20gzb71212621zd71212621xf1&_p=1794569743438&_gaz=1&gcd=13l3l3l3l1l1&npa=0&dma=0&ecid=1484222879&_eu=AAAAAGAC&_prs=ok&cid=1250487149.1794569749&frm=0&pscdl=noapi&rcb=19&sr=800x600&uaa=x86&uab=64&uafvl=Not-A.Brand%3B99.0.0.0%7CGoogle%2520Chrome%3B157.0.8103.78%7CChromium%3B157.0.8103.78&uam=&uamb=0&uap=macO"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.google.com/measurement/conversion?random=1794569749306&cv=11&tid=G-KML2W7BV5C&fst=1794569749306&fmt=8&en=page_view&gtm=45je6bb1v879655686z871212621za20gzb71212621zd71212621xecxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115616986~115938465~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url=https%3A"
+    },
+    {
+      "method": "POST",
+      "url": "https://analytics.google.com/g/collect?v=2&tid=G-KML2W7BV5C&gtm=45je6bb1v879655686z871212621za20gzb71212621zd71212621xf1&_p=1794569743438&gcd=13l3l3l3l1l1&npa=0&dma=0&ecid=1484222879&_eu=AAAAAGQC&_prs=ok&cid=1250487149.1794569749&frm=0&pscdl=noapi&rcb=19&sr=800x600&uaa=x86&uab=64&uafvl=Not-A.Brand%3B99.0.0.0%7CGoogle%2520Chrome%3B157.0.8103.78%7CChromium%3B157.0.8103.78&uam=&uamb=0&uap=macOS&uapv="
+    },
+    {
+      "method": "GET",
+      "url": "https://t.co/1/i/adsct?bci=4&dv=Asia%2FPhnom_Penh%26vi-VN%2Cvi%2Cfr-FR%2Cfr%2Cen-US%2Cen%26Google%20Inc.%26MacIntel%26255%26800%26600%264%2624%26800%26600%260%26na%261&eci=3&event=%7B%7D&event_id=ad63311a-5901-448f-9345-85a2ca13444b&integration=gtm&p_id=Twitter&p_user_id=0&pl_id=ec47480a-5ec9-4c5c-a1eb-21a3e302011a&tw_document_href=https%3A%2F%2Fnewweb.vietjetair.com%2Fvi%2F&tw_engaged_ms=225&tw_i"
+    },
+    {
+      "method": "GET",
+      "url": "https://analytics.twitter.com/1/i/adsct?bci=4&dv=Asia%2FPhnom_Penh%26vi-VN%2Cvi%2Cfr-FR%2Cfr%2Cen-US%2Cen%26Google%20Inc.%26MacIntel%26255%26800%26600%264%2624%26800%26600%260%26na%261&eci=3&event=%7B%7D&event_id=ad63311a-5901-448f-9345-85a2ca13444b&integration=gtm&p_id=Twitter&p_user_id=0&pl_id=ec47480a-5ec9-4c5c-a1eb-21a3e302011a&tw_document_href=https%3A%2F%2Fnewweb.vietjetair.com%2Fvi%2F&tw_en"
+    },
+    {
+      "method": "GET",
+      "url": "https://t.co/1/i/adsct?bci=4&dv=Asia%2FPhnom_Penh%26vi-VN%2Cvi%2Cfr-FR%2Cfr%2Cen-US%2Cen%26Google%20Inc.%26MacIntel%26255%26800%26600%264%2624%26800%26600%260%26na%261&eci=3&event=%7B%7D&event_id=fdb26255-6242-46a1-ba46-3b060ec6c5a4&integration=gtm&p_id=Twitter&p_user_id=0&pl_id=ec47480a-5ec9-4c5c-a1eb-21a3e302011a&tw_document_href=https%3A%2F%2Fnewweb.vietjetair.com%2Fvi%2F&tw_engaged_ms=227&tw_i"
+    },
+    {
+      "method": "GET",
+      "url": "https://analytics.twitter.com/1/i/adsct?bci=4&dv=Asia%2FPhnom_Penh%26vi-VN%2Cvi%2Cfr-FR%2Cfr%2Cen-US%2Cen%26Google%20Inc.%26MacIntel%26255%26800%26600%264%2624%26800%26600%260%26na%261&eci=3&event=%7B%7D&event_id=fdb26255-6242-46a1-ba46-3b060ec6c5a4&integration=gtm&p_id=Twitter&p_user_id=0&pl_id=ec47480a-5ec9-4c5c-a1eb-21a3e302011a&tw_document_href=https%3A%2F%2Fnewweb.vietjetair.com%2Fvi%2F&tw_en"
+    },
+    {
+      "method": "GET",
+      "url": "https://bc.ds.kakao.com/bc?d=%7B%22track_id%22%3A%222608589144800212336%22%2C%22event_code%22%3A%22PageView%22%2C%22params%22%3A%7B%7D%2C%22props%22%3A%7B%22lmt%22%3A%22N%22%7D%2C%22site%22%3A%7B%22identifier%22%3A%22newweb.vietjetair.com%22%7D%2C%22sdk%22%3A%7B%22type%22%3A%22WEB%22%2C%22version%22%3A%221.8.1%22%2C%22tpc%22%3A%22Y%22%7D%2C%22page%22%3A%7B%22url%22%3A%22https%3A%2F%2Fnewweb.vietje"
+    },
+    {
+      "method": "GET",
+      "url": "https://bc.ds.kakao.com/bc?d=%7B%22track_id%22%3A%222608589144800212336%22%2C%22event_code%22%3A%22PageView%22%2C%22params%22%3A%7B%7D%2C%22props%22%3A%7B%22lmt%22%3A%22N%22%7D%2C%22site%22%3A%7B%22identifier%22%3A%22newweb.vietjetair.com%22%7D%2C%22sdk%22%3A%7B%22type%22%3A%22WEB%22%2C%22version%22%3A%221.8.1%22%2C%22tpc%22%3A%22Y%22%7D%2C%22page%22%3A%7B%22url%22%3A%22https%3A%2F%2Fnewweb.vietje"
+    },
+    {
+      "method": "GET",
+      "url": "https://bc.ds.kakao.com/bc?d=%7B%22track_id%22%3A%222608589144800212336%22%2C%22event_code%22%3A%22PageView%22%2C%22params%22%3A%7B%7D%2C%22props%22%3A%7B%22lmt%22%3A%22N%22%7D%2C%22site%22%3A%7B%22identifier%22%3A%22newweb.vietjetair.com%22%7D%2C%22sdk%22%3A%7B%22type%22%3A%22WEB%22%2C%22version%22%3A%221.8.1%22%2C%22tpc%22%3A%22Y%22%7D%2C%22page%22%3A%7B%22url%22%3A%22https%3A%2F%2Fnewweb.vietje"
+    },
+    {
+      "method": "GET",
+      "url": "https://bc.ds.kakao.com/bc?d=%7B%22track_id%22%3A%222608589144800212336%22%2C%22event_code%22%3A%22Search%22%2C%22params%22%3A%7B%7D%2C%22props%22%3A%7B%22lmt%22%3A%22N%22%7D%2C%22site%22%3A%7B%22identifier%22%3A%22newweb.vietjetair.com%22%7D%2C%22sdk%22%3A%7B%22type%22%3A%22WEB%22%2C%22version%22%3A%221.8.1%22%2C%22tpc%22%3A%22Y%22%7D%2C%22page%22%3A%7B%22url%22%3A%22https%3A%2F%2Fnewweb.vietjeta"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.google.com/measurement/1p-conversion/?random=1434247816&cv=11&tid=G-KML2W7BV5C&fst=1794569749092&fmt=8&en=page_view&gtm=45je6bb1v879655686z871212621za20gzb71212621zd71212621xecxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115616986~115938465~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url=https%3"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.google.com/measurement/1p-conversion/?random=322970439&cv=11&tid=G-KML2W7BV5C&fst=1794569749306&fmt=8&en=page_view&gtm=45je6bb1v879655686z871212621za20gzb71212621zd71212621xecxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115616986~115938465~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url=https%3A"
+    },
+    {
+      "method": "GET",
+      "url": "https://t.co/1/i/adsct?bci=4&dv=Asia%2FPhnom_Penh%26vi-VN%2Cvi%2Cfr-FR%2Cfr%2Cen-US%2Cen%26Google%20Inc.%26MacIntel%26255%26800%26600%264%2624%26800%26600%260%26na%261&eci=3&event=%7B%7D&event_id=2ef57d42-a395-4152-b867-98173370a299&integration=gtm&p_id=Twitter&p_user_id=0&pl_id=ec47480a-5ec9-4c5c-a1eb-21a3e302011a&tw_ch_fvl=Not-A.Brand%2F99.0.0.0%2CGoogle%20Chrome%2F157.0.8103.78%2CChromium%2F157"
+    },
+    {
+      "method": "GET",
+      "url": "https://analytics.twitter.com/1/i/adsct?bci=4&dv=Asia%2FPhnom_Penh%26vi-VN%2Cvi%2Cfr-FR%2Cfr%2Cen-US%2Cen%26Google%20Inc.%26MacIntel%26255%26800%26600%264%2624%26800%26600%260%26na%261&eci=3&event=%7B%7D&event_id=2ef57d42-a395-4152-b867-98173370a299&integration=gtm&p_id=Twitter&p_user_id=0&pl_id=ec47480a-5ec9-4c5c-a1eb-21a3e302011a&tw_ch_fvl=Not-A.Brand%2F99.0.0.0%2CGoogle%20Chrome%2F157.0.8103.78"
+    },
+    {
+      "method": "GET",
+      "url": "https://bc.ds.kakao.com/bc?d=%7B%22track_id%22%3A%222608589144800212336%22%2C%22event_code%22%3A%22PageView%22%2C%22params%22%3A%7B%7D%2C%22props%22%3A%7B%22lmt%22%3A%22N%22%7D%2C%22site%22%3A%7B%22identifier%22%3A%22newweb.vietjetair.com%22%7D%2C%22sdk%22%3A%7B%22type%22%3A%22WEB%22%2C%22version%22%3A%221.8.1%22%2C%22tpc%22%3A%22Y%22%7D%2C%22page%22%3A%7B%22url%22%3A%22https%3A%2F%2Fnewweb.vietje"
+    },
+    {
+      "method": "GET",
+      "url": "https://bc.ds.kakao.com/bc?d=%7B%22track_id%22%3A%222608589144800212336%22%2C%22event_code%22%3A%22PageView%22%2C%22params%22%3A%7B%7D%2C%22props%22%3A%7B%22lmt%22%3A%22N%22%7D%2C%22site%22%3A%7B%22identifier%22%3A%22newweb.vietjetair.com%22%7D%2C%22sdk%22%3A%7B%22type%22%3A%22WEB%22%2C%22version%22%3A%221.8.1%22%2C%22tpc%22%3A%22Y%22%7D%2C%22page%22%3A%7B%22url%22%3A%22https%3A%2F%2Fnewweb.vietje"
+    },
+    {
+      "method": "GET",
+      "url": "https://bc.ds.kakao.com/bc?d=%7B%22track_id%22%3A%222608589144800212336%22%2C%22event_code%22%3A%22Search%22%2C%22params%22%3A%7B%7D%2C%22props%22%3A%7B%22lmt%22%3A%22N%22%7D%2C%22site%22%3A%7B%22identifier%22%3A%22newweb.vietjetair.com%22%7D%2C%22sdk%22%3A%7B%22type%22%3A%22WEB%22%2C%22version%22%3A%221.8.1%22%2C%22tpc%22%3A%22Y%22%7D%2C%22page%22%3A%7B%22url%22%3A%22https%3A%2F%2Fnewweb.vietjeta"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.google.com/measurement/conversion?random=1794569753091&cv=11&tid=G-KML2W7BV5C&fst=1794569753091&fmt=8&en=page_view&gtm=45je6bb1v879655686z871212621za20gzb71212621zd71212621xecxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115616986~115938465~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url=https%3A"
+    },
+    {
+      "method": "POST",
+      "url": "https://analytics.google.com/g/collect?v=2&tid=G-KML2W7BV5C&gtm=45je6bb1v879655686z871212621za20gzb71212621zd71212621xf1&_p=1794569743438&gcd=13l3l3l3l1l1&npa=0&dma=0&ecid=1484222879&_eu=AAAAAGQC&_prs=ok&cid=1250487149.1794569749&frm=0&pscdl=noapi&rcb=19&sr=800x600&uaa=x86&uab=64&uafvl=Not-A.Brand%3B99.0.0.0%7CGoogle%2520Chrome%3B157.0.8103.78%7CChromium%3B157.0.8103.78&uam=&uamb=0&uap=macOS&uapv="
+    },
+    {
+      "method": "GET",
+      "url": "https://t.co/1/i/adsct?bci=4&cv=17%260&dv=Asia%2FPhnom_Penh%26vi-VN%2Cvi%2Cfr-FR%2Cfr%2Cen-US%2Cen%26Google%20Inc.%26MacIntel%26255%26800%26600%264%2624%26800%26600%260%26na%261&eci=3&event=%7B%7D&event_id=46000132-e1f1-4d5e-b734-762814c5e888&integration=gtm&p_id=Twitter&p_user_id=0&pl_id=ec47480a-5ec9-4c5c-a1eb-21a3e302011a&tw_ch_fvl=Not-A.Brand%2F99.0.0.0%2CGoogle%20Chrome%2F157.0.8103.78%2CChro"
+    },
+    {
+      "method": "GET",
+      "url": "https://analytics.twitter.com/1/i/adsct?bci=4&cv=17%260&dv=Asia%2FPhnom_Penh%26vi-VN%2Cvi%2Cfr-FR%2Cfr%2Cen-US%2Cen%26Google%20Inc.%26MacIntel%26255%26800%26600%264%2624%26800%26600%260%26na%261&eci=3&event=%7B%7D&event_id=46000132-e1f1-4d5e-b734-762814c5e888&integration=gtm&p_id=Twitter&p_user_id=0&pl_id=ec47480a-5ec9-4c5c-a1eb-21a3e302011a&tw_ch_fvl=Not-A.Brand%2F99.0.0.0%2CGoogle%20Chrome%2F157"
+    },
+    {
+      "method": "GET",
+      "url": "https://bc.ds.kakao.com/bc?d=%7B%22track_id%22%3A%222608589144800212336%22%2C%22event_code%22%3A%22PageView%22%2C%22params%22%3A%7B%7D%2C%22props%22%3A%7B%22lmt%22%3A%22N%22%7D%2C%22site%22%3A%7B%22identifier%22%3A%22newweb.vietjetair.com%22%7D%2C%22sdk%22%3A%7B%22type%22%3A%22WEB%22%2C%22version%22%3A%221.8.1%22%2C%22tpc%22%3A%22Y%22%7D%2C%22page%22%3A%7B%22url%22%3A%22https%3A%2F%2Fnewweb.vietje"
+    },
+    {
+      "method": "GET",
+      "url": "https://bc.ds.kakao.com/bc?d=%7B%22track_id%22%3A%222608589144800212336%22%2C%22event_code%22%3A%22AddToCart%22%2C%22params%22%3A%7B%7D%2C%22props%22%3A%7B%22lmt%22%3A%22N%22%7D%2C%22site%22%3A%7B%22identifier%22%3A%22newweb.vietjetair.com%22%7D%2C%22sdk%22%3A%7B%22type%22%3A%22WEB%22%2C%22version%22%3A%221.8.1%22%2C%22tpc%22%3A%22Y%22%7D%2C%22page%22%3A%7B%22url%22%3A%22https%3A%2F%2Fnewweb.vietj"
+    },
+    {
+      "method": "GET",
+      "url": "https://anylist.c.appier.net/r2?country=VN&enable_cookie_sync=1&url=https%3A%2F%2Fnewweb.vietjetair.com%2Fvi%2F&referer=&ssid=VouaElh-jNWaDrR33J5h3i&sessidx=1&siteuid=R8H054o6E2cj5tFP&appier_utmz={}&_t=1794569751299&_tz=7&uc=VN&tv=2.8.0&eqid=0D428T-YUYFLJWPX&site=vietjetair.com&lt=11404"
+    },
+    {
+      "method": "GET",
+      "url": "https://anylist.c.appier.net/r3/f815?url=https%3A%2F%2Fnewweb.vietjetair.com%2Fvi%2F&referer=&ssid=VouaElh-jNWaDrR33J5h3i&sessidx=2&siteuid=R8H054o6E2cj5tFP&appier_utmz={}&_t=1794569751305&_tz=7&uc=VN&tv=2.8.0&eqid=C8Zj6W91Br5kzHpd&jsonparams=%7B%22t%22%3A%22type_landing%22%2C%22action_id%22%3A%22ViewLanding_VietJetAir%22%2C%22track_id%22%3A%22d217d51ecdcd043%22%2C%22opts%22%3A%7B%22unique_key%22%"
+    },
+    {
+      "method": "GET",
+      "url": "https://anylist.c.appier.net/r3/f815?url=https%3A%2F%2Fnewweb.vietjetair.com%2Fvi%2F&referer=&ssid=VouaElh-jNWaDrR33J5h3i&sessidx=3&siteuid=R8H054o6E2cj5tFP&appier_utmz={}&_t=1794569751474&_tz=7&uc=VN&tv=2.8.0&eqid=0IzCZZMfOs9-f7CD&jsonparams=%7B%22t%22%3A%22type_landing%22%2C%22action_id%22%3A%22ViewLanding_VietJetAir%22%2C%22track_id%22%3A%22d217d51ecdcd043%22%2C%22opts%22%3A%7B%22unique_key%22%"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.googleadservices.com/pagead/conversion/856173178/?random=1794569754388&cv=11&fst=1794569754388&fmt=7&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1v885902214z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940090~115616986~115938465~115938469~118897920~118897930~119318177~120213116~120385422~120412526~120420414~120469145~120469153~121191153~121246026~12"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.googleadservices.com/pagead/conversion/856173178/?random=1794569754587&cv=11&fst=1794569754587&fmt=7&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1v885902214z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940090~115616986~115938465~115938469~118897920~118897930~119318177~120213116~120385422~120412526~120420414~120469145~120469153~121191153~121246026~12"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.googleadservices.com/pagead/conversion/856173178/?random=1794569754653&cv=11&fst=1794569754653&fmt=7&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1v885902214z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940090~115616986~115938465~115938469~118897920~118897930~119318177~120213116~120385422~120412526~120420414~120469145~120469153~121191153~121246026~12"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.googleadservices.com/ccm/conversion/856173178/?random=1794569754388&cv=11&fst=1794569754388&fmt=3&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1v885902214z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940090~115616986~115938465~115938469~118897920~118897930~119318177~120213116~120385422~120412526~120420414~120469145~120469153~121191153~121246026~12124"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.googleadservices.com/ccm/conversion/856173178/?random=1794569754587&cv=11&fst=1794569754587&fmt=3&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1v885902214z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940090~115616986~115938465~115938469~118897920~118897930~119318177~120213116~120385422~120412526~120420414~120469145~120469153~121191153~121246026~12124"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.googleadservices.com/ccm/conversion/856173178/?random=1794569754653&cv=11&fst=1794569754653&fmt=3&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1v885902214z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940090~115616986~115938465~115938469~118897920~118897930~119318177~120213116~120385422~120412526~120420414~120469145~120469153~121191153~121246026~12124"
+    },
+    {
+      "method": "GET",
+      "url": "https://googleads.g.doubleclick.net/pagead/viewthroughconversion/343925141/?random=1794569755032&cv=11&fst=1794569755032&bg=ffffff&guid=ON&async=1&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940092~115616986~115938465~115938468~118897920~118897930~119318177~120213116~120385422~120412528~120420416~120469145~120469153~121191153~121246026~121246034&u_w=800&"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.google.com/rmkt/collect/343925141/?random=1794569755032&cv=11&fst=1794569755032&fmt=8&bg=ffffff&guid=ON&async=1&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940092~115616986~115938465~115938468~118897920~118897930~119318177~120213116~120385422~120412528~120420416~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url=https%3A%2F"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.google.com/ccm/collect?rcb=4&frm=0&apvc=0&ae=g&auid=1047134275.1794569746&dt=Vietjet%20Air%20%7C%20Bay%20l%C3%A0%20Th%C3%ADch%20ngay!%20%7C%20Website%20ch%C3%ADnh%20th%E1%BB%A9c&tid=AW-343925141&dl=https%3A%2F%2Fnewweb.vietjetair.com%2Fvi%2Fselect-flight&scrsrc=www.googletagmanager.com&rnd=1707692260.1794569746&navt=n&npa=0&_tu=CA&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&g"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.googleadservices.com/pagead/conversion/18329185483/?random=1794569755378&cv=11&fst=1794569755378&fmt=7&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115616985~115938465~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420414~120469145~120469153~121191153~121246026~121246034~123988487&"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.googleadservices.com/pagead/conversion/18329185483/?random=1794569755428&cv=11&fst=1794569755428&fmt=7&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115616985~115938465~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420414~120469145~120469153~121191153~121246026~121246034~123988487&"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.googleadservices.com/pagead/conversion/18329185483/?random=1794569755474&cv=11&fst=1794569755474&fmt=7&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115616985~115938465~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420414~120469145~120469153~121191153~121246026~121246034~123988487&"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.googleadservices.com/ccm/conversion/18329185483/?random=1794569755378&cv=11&fst=1794569755378&fmt=3&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115616985~115938465~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420414~120469145~120469153~121191153~121246026~121246034~123988487&u_w"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.googleadservices.com/ccm/conversion/18329185483/?random=1794569755428&cv=11&fst=1794569755428&fmt=3&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115616985~115938465~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420414~120469145~120469153~121191153~121246026~121246034~123988487&u_w"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.googleadservices.com/ccm/conversion/18329185483/?random=1794569755474&cv=11&fst=1794569755474&fmt=3&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115616985~115938465~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420414~120469145~120469153~121191153~121246026~121246034~123988487&u_w"
+    },
+    {
+      "method": "GET",
+      "url": "https://newweb.vietjetair.com/vi/select-flight"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.google.com/measurement/1p-conversion/?random=474440052&cv=11&tid=G-KML2W7BV5C&fst=1794569753091&fmt=8&en=page_view&gtm=45je6bb1v879655686z871212621za20gzb71212621zd71212621xecxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115616986~115938465~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url=https%3A"
+    },
+    {
+      "method": "GET",
+      "url": "https://anylist.c.appier.net/r2?country=VN&enable_cookie_sync=1&url=https%3A%2F%2Fnewweb.vietjetair.com%2Fvi%2Fselect-flight&referer=&ssid=VouaElh-jNWaDrR33J5h3i&sessidx=4&siteuid=R8H054o6E2cj5tFP&appier_utmz={}&_t=1794569753073&_tz=7&uc=VN&tv=2.8.0&eqid=WvYTNU7c8e4E-aj9&site=vietjetair.com&lt=13178"
+    },
+    {
+      "method": "GET",
+      "url": "https://anylist.c.appier.net/r3/f815?url=https%3A%2F%2Fnewweb.vietjetair.com%2Fvi%2Fselect-flight&referer=&ssid=VouaElh-jNWaDrR33J5h3i&sessidx=5&siteuid=R8H054o6E2cj5tFP&appier_utmz={}&_t=1794569753075&_tz=7&uc=VN&tv=2.8.0&eqid=U3jGudFxD3r9VfWj&jsonparams=%7B%22t%22%3A%22type_landing%22%2C%22action_id%22%3A%22ViewLanding_VietJetAir%22%2C%22track_id%22%3A%22d217d51ecdcd043%22%2C%22opts%22%3A%7B%22u"
+    },
+    {
+      "method": "GET",
+      "url": "https://anylist.c.appier.net/r3/f815?url=https%3A%2F%2Fnewweb.vietjetair.com%2Fvi%2Fselect-flight&referer=&ssid=VouaElh-jNWaDrR33J5h3i&sessidx=6&siteuid=R8H054o6E2cj5tFP&appier_utmz={}&_t=1794569753081&_tz=7&uc=VN&tv=2.8.0&eqid=WZZOHuX0REVwXdVL&jsonparams=%7B%22t%22%3A%22type_ad_view_2%22%2C%22action_id%22%3A%22ViewTwoPages_VietJetAir%22%2C%22track_id%22%3A%22d217d51ecdcd043%22%2C%22isCountReload%"
+    },
+    {
+      "method": "GET",
+      "url": "https://newweb.vietjetair.com/manifest.json"
+    },
+    {
+      "method": "GET",
+      "url": "https://newweb.vietjetair.com/meta.json"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.google.com/ccm/collect?rcb=15&frm=0&apvc=1&ae=g&auid=1047134275.1794569746&dt=Vietjet%20Air%20%7C%20Bay%20l%C3%A0%20Th%C3%ADch%20ngay!%20%7C%20Website%20ch%C3%ADnh%20th%E1%BB%A9c&en=page_view&dl=https%3A%2F%2Fnewweb.vietjetair.com%2FVI%2F&dr=https%3A%2F%2Fnewweb.vietjetair.com%2Fvi%2Fselect-flight&scrsrc=www.googletagmanager.com&rnd=1742005969.1794569761&navt=r&npa=0&ep.ads_data_redact"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.google.com/measurement/conversion?random=1794569761459&cv=11&tid=G-KML2W7BV5C&fst=1794569761459&fmt=8&en=page_view&gtm=45je6bb1v879655686z871212621za20gzb71212621zd71212621xecxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940091~115616985~115938466~115938469~118897920~118897930~119318177~120213116~120385423~120412528~120420416~120469145~120469153~121191153~121246026~121246034~123785234&u_w=800&"
+    },
+    {
+      "method": "POST",
+      "url": "https://analytics.google.com/g/collect?v=2&tid=G-KML2W7BV5C&gtm=45je6bb1v879655686z871212621za20gzb71212621zd71212621xf1&_p=1794569760683&gcd=13l3l3l3l1l1&npa=0&dma=0&ecid=1484222879&_eu=AAAAAGQC&_prs=ok&cid=1250487149.1794569749&frm=0&pscdl=noapi&rcb=16&sr=800x600&uaa=x86&uab=64&uafvl=Not-A.Brand%3B99.0.0.0%7CGoogle%2520Chrome%3B157.0.8103.78%7CChromium%3B157.0.8103.78&uam=&uamb=0&uap=macOS&uapv="
+    },
+    {
+      "method": "POST",
+      "url": "https://www.google.com/measurement/conversion?random=1794569761461&cv=11&tid=G-KML2W7BV5C&fst=1794569761461&fmt=8&en=page_view&gtm=45je6bb1v879655686z871212621za20gzb71212621zd71212621xecxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940091~115616985~115938466~115938469~118897920~118897930~119318177~120213116~120385423~120412528~120420416~120469145~120469153~121191153~121246026~121246034~123785234&u_w=800&"
+    },
+    {
+      "method": "POST",
+      "url": "https://analytics.google.com/g/collect?v=2&tid=G-KML2W7BV5C&gtm=45je6bb1v879655686z871212621za20gzb71212621zd71212621xf1&_p=1794569760683&gcd=13l3l3l3l1l1&npa=0&dma=0&ecid=1484222879&_eu=AAAAAGQC&_prs=ok&cid=1250487149.1794569749&frm=0&pscdl=noapi&rcb=16&sr=800x600&uaa=x86&uab=64&uafvl=Not-A.Brand%3B99.0.0.0%7CGoogle%2520Chrome%3B157.0.8103.78%7CChromium%3B157.0.8103.78&uam=&uamb=0&uap=macOS&uapv="
+    },
+    {
+      "method": "GET",
+      "url": "https://t0.c.appier.net/web2/d217d51ecdcd043/?appier_utmz_utmcsr=newweb.vietjetair.com&action_id=ViewLanding_VietJetAir&path=%2FVI%2F&cookie_uid=R8H054o6E2cj5tFP&api_version=1&escaped_qs=&webuu=VAU7KO9WcC4e0GbC1iRHjf"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.googleadservices.com/pagead/conversion/856173178/?random=1794569762073&cv=11&fst=1794569762073&fmt=7&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1v885902214z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940092~115616986~115938466~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420416~120469145~120469153~121191153~121246026~12"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.googleadservices.com/ccm/conversion/856173178/?random=1794569762073&cv=11&fst=1794569762073&fmt=8&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1v885902214z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940092~115616986~115938466~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420416~120469145~120469153~121191153~121246026~12124"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.googleadservices.com/pagead/conversion/856173178/?random=1794569762098&cv=11&fst=1794569762098&fmt=7&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1v885902214z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940092~115616986~115938466~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420416~120469145~120469153~121191153~121246026~12"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.googleadservices.com/ccm/conversion/856173178/?random=1794569762098&cv=11&fst=1794569762098&fmt=8&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1v885902214z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940092~115616986~115938466~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420416~120469145~120469153~121191153~121246026~12124"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.googleadservices.com/pagead/conversion/18329185483/?random=1794569762233&cv=11&fst=1794569762233&fmt=7&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115938466~115938469~118897920~118897930~119318177~120213116~120385422~120412526~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url="
+    },
+    {
+      "method": "GET",
+      "url": "https://www.googleadservices.com/pagead/conversion/18329185483/?random=1794569762271&cv=11&fst=1794569762271&fmt=7&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115938466~115938469~118897920~118897930~119318177~120213116~120385422~120412526~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url="
+    },
+    {
+      "method": "GET",
+      "url": "https://www.googleadservices.com/ccm/conversion/18329185483/?random=1794569762233&cv=11&fst=1794569762233&fmt=3&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115938466~115938469~118897920~118897930~119318177~120213116~120385422~120412526~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url=htt"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.googleadservices.com/ccm/conversion/18329185483/?random=1794569762271&cv=11&fst=1794569762271&fmt=3&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115938466~115938469~118897920~118897930~119318177~120213116~120385422~120412526~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url=htt"
+    },
+    {
+      "method": "GET",
+      "url": "https://googleads.g.doubleclick.net/pagead/viewthroughconversion/343925141/?random=1794569762381&cv=11&fst=1794569762381&bg=ffffff&guid=ON&async=1&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115938466~115938469~118897920~118897930~119318177~120213116~120385422~120412528~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url=https%3A"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.google.com/rmkt/collect/343925141/?random=1794569762381&cv=11&fst=1794569762381&fmt=8&bg=ffffff&guid=ON&async=1&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115938466~115938469~118897920~118897930~119318177~120213116~120385422~120412528~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url=https%3A%2F%2Fnewweb.vietjetair"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.google.com/ccm/collect?rcb=16&frm=0&apvc=0&ae=g&auid=1047134275.1794569746&dt=Vietjet%20Air%20%7C%20Bay%20l%C3%A0%20Th%C3%ADch%20ngay!%20%7C%20Website%20ch%C3%ADnh%20th%E1%BB%A9c&tid=AW-343925141&dl=https%3A%2F%2Fnewweb.vietjetair.com%2FVI%2F&dr=https%3A%2F%2Fnewweb.vietjetair.com%2Fvi%2Fselect-flight&scrsrc=www.googletagmanager.com&rnd=1742005969.1794569761&navt=r&npa=0&_tu=CA&gtm=45b"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.google.com/measurement/1p-conversion/?random=1451413148&cv=11&tid=G-KML2W7BV5C&fst=1794569761459&fmt=8&en=page_view&gtm=45je6bb1v879655686z871212621za20gzb71212621zd71212621xecxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940091~115616985~115938466~115938469~118897920~118897930~119318177~120213116~120385423~120412528~120420416~120469145~120469153~121191153~121246026~121246034~123785234&u_w=800"
+    },
+    {
+      "method": "GET",
+      "url": "https://anylist.c.appier.net/r2?country=VN&enable_cookie_sync=1&url=https%3A%2F%2Fnewweb.vietjetair.com%2FVI%2F&referer=https%3A%2F%2Fnewweb.vietjetair.com%2Fvi%2Fselect-flight&ssid=VouaElh-jNWaDrR33J5h3i&sessidx=9&siteuid=R8H054o6E2cj5tFP&appier_utmz={%22csr%22:%22newweb.vietjetair.com%22,%22timestamp%22:1794569762}&_t=1794569761735&_tz=7&uc=VN&tv=2.8.0&eqid=-Vm3unI30uQaAiHk&site=vietjetair.com&l"
+    },
+    {
+      "method": "GET",
+      "url": "https://anylist.c.appier.net/r3/f815?url=https%3A%2F%2Fnewweb.vietjetair.com%2FVI%2F&referer=https%3A%2F%2Fnewweb.vietjetair.com%2Fvi%2Fselect-flight&ssid=VouaElh-jNWaDrR33J5h3i&sessidx=10&siteuid=R8H054o6E2cj5tFP&appier_utmz={%22csr%22:%22newweb.vietjetair.com%22,%22timestamp%22:1794569762}&_t=1794569761739&_tz=7&uc=VN&tv=2.8.0&eqid=OgAVHK3j5HGk7VEW&jsonparams=%7B%22t%22%3A%22type_landing%22%2C%2"
+    },
+    {
+      "method": "GET",
+      "url": "https://anylist.c.appier.net/r3/f815?url=https%3A%2F%2Fnewweb.vietjetair.com%2FVI%2F&referer=https%3A%2F%2Fnewweb.vietjetair.com%2Fvi%2Fselect-flight&ssid=VouaElh-jNWaDrR33J5h3i&sessidx=11&siteuid=R8H054o6E2cj5tFP&appier_utmz={%22csr%22:%22newweb.vietjetair.com%22,%22timestamp%22:1794569762}&_t=1794569761745&_tz=7&uc=VN&tv=2.8.0&eqid=hdLnk9y2JJTkka_J&jsonparams=%7B%22t%22%3A%22type_landing%22%2C%2"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.google.com/measurement/1p-conversion/?random=1842806785&cv=11&tid=G-KML2W7BV5C&fst=1794569761461&fmt=8&en=page_view&gtm=45je6bb1v879655686z871212621za20gzb71212621zd71212621xecxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940091~115616985~115938466~115938469~118897920~118897930~119318177~120213116~120385423~120412528~120420416~120469145~120469153~121191153~121246026~121246034~123785234&u_w=800"
+    },
+    {
+      "method": "GET",
+      "url": "https://t.co/1/i/adsct?bci=4&dv=Asia%2FPhnom_Penh%26vi-VN%2Cvi%2Cfr-FR%2Cfr%2Cen-US%2Cen%26Google%20Inc.%26MacIntel%26255%26800%26600%264%2624%26800%26600%260%26na%261&eci=3&event=%7B%7D&event_id=0c0fd95b-15c2-4551-b594-1a5b2efbaaf2&integration=gtm&p_id=Twitter&p_user_id=0&pl_id=17d42865-c1bd-42be-a17d-7b33c1b773b8&tw_document_href=https%3A%2F%2Fnewweb.vietjetair.com%2FVI%2F&tw_document_referrer=h"
+    },
+    {
+      "method": "GET",
+      "url": "https://analytics.twitter.com/1/i/adsct?bci=4&dv=Asia%2FPhnom_Penh%26vi-VN%2Cvi%2Cfr-FR%2Cfr%2Cen-US%2Cen%26Google%20Inc.%26MacIntel%26255%26800%26600%264%2624%26800%26600%260%26na%261&eci=3&event=%7B%7D&event_id=0c0fd95b-15c2-4551-b594-1a5b2efbaaf2&integration=gtm&p_id=Twitter&p_user_id=0&pl_id=17d42865-c1bd-42be-a17d-7b33c1b773b8&tw_document_href=https%3A%2F%2Fnewweb.vietjetair.com%2FVI%2F&tw_do"
+    },
+    {
+      "method": "GET",
+      "url": "https://t.co/1/i/adsct?bci=4&dv=Asia%2FPhnom_Penh%26vi-VN%2Cvi%2Cfr-FR%2Cfr%2Cen-US%2Cen%26Google%20Inc.%26MacIntel%26255%26800%26600%264%2624%26800%26600%260%26na%261&eci=3&event=%7B%7D&event_id=421c3699-1a3e-4b6c-bcfa-81a5a1d1c448&integration=gtm&p_id=Twitter&p_user_id=0&pl_id=17d42865-c1bd-42be-a17d-7b33c1b773b8&tw_document_href=https%3A%2F%2Fnewweb.vietjetair.com%2FVI%2F&tw_document_referrer=h"
+    },
+    {
+      "method": "GET",
+      "url": "https://analytics.twitter.com/1/i/adsct?bci=4&dv=Asia%2FPhnom_Penh%26vi-VN%2Cvi%2Cfr-FR%2Cfr%2Cen-US%2Cen%26Google%20Inc.%26MacIntel%26255%26800%26600%264%2624%26800%26600%260%26na%261&eci=3&event=%7B%7D&event_id=421c3699-1a3e-4b6c-bcfa-81a5a1d1c448&integration=gtm&p_id=Twitter&p_user_id=0&pl_id=17d42865-c1bd-42be-a17d-7b33c1b773b8&tw_document_href=https%3A%2F%2Fnewweb.vietjetair.com%2FVI%2F&tw_do"
+    },
+    {
+      "method": "GET",
+      "url": "https://gum.criteo.com/syncframe?topUrl=newweb.vietjetair.com&origin=onetag&ceid=56870611-dbe4-4305-a16c-754a85f954c0#{%22bundle%22:{%22identifierExtractor%22:{%22origin%22:0},%22value%22:null},%22cw%22:true,%22optout%22:{%22identifierExtractor%22:{%22origin%22:0},%22value%22:null},%22origin%22:%22onetag%22,%22tld%22:%22vietjetair.com%22,%22topUrl%22:%22newweb.vietjetair.com%22,%22version%22:%225_"
+    },
+    {
+      "method": "GET",
+      "url": "https://t.co/1/i/adsct?bci=4&dv=Asia%2FPhnom_Penh%26vi-VN%2Cvi%2Cfr-FR%2Cfr%2Cen-US%2Cen%26Google%20Inc.%26MacIntel%26255%26800%26600%264%2624%26800%26600%260%26na%261&eci=3&event=%7B%7D&event_id=a10c9a25-c9d2-439b-aa19-4eb69d9da2f0&integration=gtm&p_id=Twitter&p_user_id=0&pl_id=17d42865-c1bd-42be-a17d-7b33c1b773b8&tw_ch_fvl=Not-A.Brand%2F99.0.0.0%2CGoogle%20Chrome%2F157.0.8103.78%2CChromium%2F157"
+    },
+    {
+      "method": "GET",
+      "url": "https://analytics.twitter.com/1/i/adsct?bci=4&dv=Asia%2FPhnom_Penh%26vi-VN%2Cvi%2Cfr-FR%2Cfr%2Cen-US%2Cen%26Google%20Inc.%26MacIntel%26255%26800%26600%264%2624%26800%26600%260%26na%261&eci=3&event=%7B%7D&event_id=a10c9a25-c9d2-439b-aa19-4eb69d9da2f0&integration=gtm&p_id=Twitter&p_user_id=0&pl_id=17d42865-c1bd-42be-a17d-7b33c1b773b8&tw_ch_fvl=Not-A.Brand%2F99.0.0.0%2CGoogle%20Chrome%2F157.0.8103.78"
+    },
+    {
+      "method": "POST",
+      "url": "https://googleads.g.doubleclick.net/pagead/viewthroughconversion/856173178/?random=1674562645&cv=11&fst=1794569762073&fmt=8&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1v885902214z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940092~115616986~115938466~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420416~120469145~120469153~121191153~1"
+    },
+    {
+      "method": "POST",
+      "url": "https://googleads.g.doubleclick.net/pagead/viewthroughconversion/856173178/?random=1990691776&cv=11&fst=1794569762098&fmt=8&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1v885902214z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940092~115616986~115938466~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420416~120469145~120469153~121191153~1"
+    },
+    {
+      "method": "POST",
+      "url": "https://googleads.g.doubleclick.net/pagead/viewthroughconversion/18329185483/?random=1226825920&cv=11&fst=1794569762233&fmt=8&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115938466~115938469~118897920~118897930~119318177~120213116~120385422~120412526~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u"
+    },
+    {
+      "method": "POST",
+      "url": "https://googleads.g.doubleclick.net/pagead/viewthroughconversion/18329185483/?random=806480558&cv=11&fst=1794569762271&fmt=8&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115938466~115938469~118897920~118897930~119318177~120213116~120385422~120412526~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.google.com/pagead/1p-user-list/343925141/?random=1794569762381&cv=11&fst=1794567600000&bg=ffffff&guid=ON&async=1&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115938466~115938469~118897920~118897930~119318177~120213116~120385422~120412528~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url=https%3A%2F%2Fnewweb.vietjetai"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.google.com.vn/pagead/1p-user-list/343925141/?random=1794569762381&cv=11&fst=1794567600000&bg=ffffff&guid=ON&async=1&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115938466~115938469~118897920~118897930~119318177~120213116~120385422~120412528~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url=https%3A%2F%2Fnewweb.vietje"
+    },
+    {
+      "method": "GET",
+      "url": "https://s.c.appier.net/aprcm?a_i=%2Fr2%3Fcountry%3DVN%26enable_cookie_sync%3D1%26url%3Dhttps%253A%252F%252Fnewweb.vietjetair.com%252FVI%252F%26referer%3Dhttps%253A%252F%252Fnewweb.vietjetair.com%252Fvi%252Fselect-flight%26ssid%3DVouaElh-jNWaDrR33J5h3i%26sessidx%3D9%26siteuid%3DR8H054o6E2cj5tFP%26appier_utmz%3D%7B%2522csr%2522%3A%2522newweb.vietjetair.com%2522%2C%2522timestamp%2522%3A1794569762%7D%"
+    },
+    {
+      "method": "GET",
+      "url": "https://anylist.c.appier.net/r2?country=VN&enable_cookie_sync=1&url=https%3A%2F%2Fnewweb.vietjetair.com%2FVI%2F&referer=https%3A%2F%2Fnewweb.vietjetair.com%2Fvi%2Fselect-flight&ssid=VouaElh-jNWaDrR33J5h3i&sessidx=9&siteuid=R8H054o6E2cj5tFP&appier_utmz={%22csr%22:%22newweb.vietjetair.com%22,%22timestamp%22:1794569762}&_t=1794569761735&_tz=7&uc=VN&tv=2.8.0&eqid=-Vm3unI30uQaAiHk&site=vietjetair.com&l"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.google.com/pagead/1p-conversion/18329185483/?random=1226825920&cv=11&fst=1794569762233&fmt=8&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115938466~115938469~118897920~118897930~119318177~120213116~120385422~120412526~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url=https%3A%2"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.google.com/pagead/1p-conversion/856173178/?random=1990691776&cv=11&fst=1794569762098&fmt=8&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1v885902214z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940092~115616986~115938466~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420416~120469145~120469153~121191153~121246026~121246034~12"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.google.com/pagead/1p-conversion/18329185483/?random=806480558&cv=11&fst=1794569762271&fmt=8&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115938466~115938469~118897920~118897930~119318177~120213116~120385422~120412526~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url=https%3A%2F"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.google.com.vn/pagead/1p-conversion/18329185483/?random=1226825920&cv=11&fst=1794569762233&fmt=8&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115938466~115938469~118897920~118897930~119318177~120213116~120385422~120412526~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url=https%3"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.google.com.vn/pagead/1p-conversion/856173178/?random=1990691776&cv=11&fst=1794569762098&fmt=8&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1v885902214z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940092~115616986~115938466~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420416~120469145~120469153~121191153~121246026~121246034"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.google.com/pagead/1p-conversion/856173178/?random=1674562645&cv=11&fst=1794569762073&fmt=8&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1v885902214z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940092~115616986~115938466~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420416~120469145~120469153~121191153~121246026~121246034~12"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.google.com.vn/pagead/1p-conversion/18329185483/?random=806480558&cv=11&fst=1794569762271&fmt=8&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115938466~115938469~118897920~118897930~119318177~120213116~120385422~120412526~120420414~120469145~120469153~121191153~121246026~121246034&u_w=800&u_h=600&url=https%3A"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.google.com.vn/pagead/1p-conversion/856173178/?random=1674562645&cv=11&fst=1794569762073&fmt=8&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6bb1v885902214z871212621za20gzb71212621zd71212621xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=100940092~115616986~115938466~115938468~118897920~118897930~119318177~120213116~120385423~120412528~120420416~120469145~120469153~121191153~121246026~121246034"
+    },
+    {
+      "method": "GET",
+      "url": "https://twa.netcoresmartech.com/dispatch?user_key=ADGMOT35CHFLVDHBJNIG50K96AEGVB9HT5HJVP79R348PM2CT610&customer_key=&uuid=12bb11b7-d6b3-4741-b3f4-25c636124598&siteid=445108195490f5f5724b23c311527a9e&browser=chrome&sid=1794569765354&visit=new&pts=0&sts=0&url=https%3A%2F%2Fnewweb.vietjetair.com%2FVI%2F&tx=1794569765354&npv=0&title=Vietjet%20Air%20%7C%20Bay%20l%C3%A0%20Th%C3%ADch%20ngay!%20%7C%20Webs"
+    },
+    {
+      "method": "GET",
+      "url": "https://twa.netcoresmartech.com/dispatch?user_key=ADGMOT35CHFLVDHBJNIG50K96AEGVB9HT5HJVP79R348PM2CT610&customer_key=&uuid=12bb11b7-d6b3-4741-b3f4-25c636124598&siteid=445108195490f5f5724b23c311527a9e&browser=chrome&sid=1794569765354&visit=new&pts=0&sts=0&url=https%3A%2F%2Fnewweb.vietjetair.com%2FVI%2F&tx=1794569765354&npv=0&title=Vietjet%20Air%20%7C%20Bay%20l%C3%A0%20Th%C3%ADch%20ngay!%20%7C%20Webs"
+    },
+    {
+      "method": "GET",
+      "url": "https://js.boxx.ai/js_init/?smartech=true&client_id=ADGMOT35CHFLVDHBJNIG50K96AEGVB9HT5HJVP79R348PM2CT610&host=newweb.vietjetair.com&asset=445108195490f5f5724b23c311527a9e"
+    },
+    {
+      "method": "GET",
+      "url": "https://sslwidget.criteo.com/event?a=%5B87180%2C126287%2C80896%2C119789%2C130353%5D&v=5.52.0&p0=e%3Dvpg&tld=vietjetair.com&dy=1&fu=https%253A%252F%252Fnewweb.vietjetair.com%252FVI%252F&pu=https%253A%252F%252Fnewweb.vietjetair.com%252Fvi%252Fselect-flight&ceid=56870611-dbe4-4305-a16c-754a85f954c0&external_advids=%5B%7B%22type%22%3A%22Id5%22%2C%22value%22%3A%22ID5*cT0eHyySwXu1cLe1moij5N-c8qHLzbe1moi"
+    },
+    {
+      "method": "GET",
+      "url": "https://newweb.vietjetair.com/manifest.json"
+    }
+  ]
+}

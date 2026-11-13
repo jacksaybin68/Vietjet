@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Test toàn diện luồng đặt vé khứ hồi (Round-trip booking flow).
- * 
+ *
  * Kiểm tra:
  *  1. HeroBookingWidget: Lựa chọn Khứ hồi, ngày đi, ngày về.
  *  2. Trang /tim-ve: Trip board nhận diện 'Chuyến bay khứ hồi', 2 chặng đi và về.

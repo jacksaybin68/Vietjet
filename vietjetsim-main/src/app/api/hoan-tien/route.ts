@@ -5,6 +5,7 @@ import {
   getRefundsByUserId,
   createRefund,
   isRefundFeatureEnabled,
+  getBookingCashPaid,
 } from '@/lib/db';
 import { parsePaginationParams } from '@/lib/pagination';
 
@@ -121,6 +122,34 @@ export async function POST(request: NextRequest) {
           message: `Số tiền hoàn không được vượt quá ${booking.total_price.toLocaleString(
             'vi-VN'
           )} VND (tổng tiền đặt chỗ).`,
+        },
+        { status: 400 }
+      );
+    }
+
+    // ...and not more than was actually collected. A booking paid with SkyPoint
+    // collects 0đ, so asking for the full fare back would be a cash payout for
+    // a ticket the customer never paid cash for. The cap only bites once a
+    // payment has been completed; a pending bank transfer has not moved money
+    // yet and must still be refundable.
+    const { cashPaid, hasCompletedPayment } = await getBookingCashPaid(booking.id);
+    if (hasCompletedPayment && cashPaid <= 0) {
+      return NextResponse.json(
+        {
+          error: 'Nothing to refund',
+          message:
+            'Đơn đặt chỗ này được thanh toán bằng điểm SkyJoy nên không có tiền mặt để hoàn. Số điểm đã dùng sẽ được trả lại khi yêu cầu hoàn được duyệt.',
+        },
+        { status: 400 }
+      );
+    }
+    if (hasCompletedPayment && refundAmount > cashPaid) {
+      return NextResponse.json(
+        {
+          error: 'Refund amount too high',
+          message: `Số tiền hoàn không được vượt quá ${cashPaid.toLocaleString(
+            'vi-VN'
+          )} VND (số tiền đã thanh toán cho đơn này).`,
         },
         { status: 400 }
       );

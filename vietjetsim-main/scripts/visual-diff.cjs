@@ -47,6 +47,7 @@ const path = require('node:path');
 const puppeteer = require('puppeteer-core');
 const { PNG } = require('pngjs');
 const pixelmatch = require('pixelmatch').default;
+const { writeFileSync } = require('node:fs');
 
 const BASE = (process.env.VISUAL_BASE_URL || 'http://127.0.0.1:4028').replace(/\/$/, '');
 const BASELINE_DIR =
@@ -201,13 +202,20 @@ function comparePng(actualBuf, baselineBuf) {
     };
   }
   const diff = new PNG({ width: actual.width, height: actual.height });
-  const diffPixels = pixelmatch(baseline.data, actual.data, diff.data, actual.width, actual.height, {
-    // threshold 0.1 = bỏ qua khác biệt do antialiasing ở mép, giống mặc định
-    // của perceptual diff: cùng một nội dung vẫn có vài chục pixel lệch.
-    threshold: 0.1,
-    includeAA: false,
-    diffColor: [255, 0, 255],
-  });
+  const diffPixels = pixelmatch(
+    baseline.data,
+    actual.data,
+    diff.data,
+    actual.width,
+    actual.height,
+    {
+      // threshold 0.1 = bỏ qua khác biệt do antialiasing ở mép, giống mặc định
+      // của perceptual diff: cùng một nội dung vẫn có vài chục pixel lệch.
+      threshold: 0.1,
+      includeAA: false,
+      diffColor: [255, 0, 255],
+    }
+  );
   const total = actual.width * actual.height;
   return {
     ok: true,
@@ -290,7 +298,12 @@ async function main() {
   writeFileSync(
     path.join(OUT_DIR, 'report.json'),
     JSON.stringify(
-      { base: BASE, mode: UPDATE ? 'update' : 'compare', thresholds: { percent: MAX_DIFF_PERCENT, pixels: MAX_DIFF_PIXELS }, results },
+      {
+        base: BASE,
+        mode: UPDATE ? 'update' : 'compare',
+        thresholds: { percent: MAX_DIFF_PERCENT, pixels: MAX_DIFF_PIXELS },
+        results,
+      },
       null,
       2
     )

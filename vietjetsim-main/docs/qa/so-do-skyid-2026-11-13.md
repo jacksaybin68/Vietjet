@@ -128,20 +128,20 @@ Lưu ý triển khai: `.vj-skyid-card` dùng `box-sizing:border-box` (không ph�
 | `.gid-resend-otp` | `.vj-skyid-resend` | Nút gửi lại mã: `14px/22px`, màu link `#2F6BFF`; khi đang đếm ngược thì khoá (`disabled`) và chuyển màu `#C4C4C4` (`--vj-skyid-disabled-ink`). Thời gian chờ `60s` khớp hành vi SkyID thật. |
 | `.gid-content-phone` | dòng dẫn trong `OtpStep` | `14px/22px` `#7B7B7B`, phần nhấn mạnh `#333` `font-weight:700`. |
 | `input.pin-otp` | `.vj-skyid-pin` | `35px`, bo `11px`, gạch chân dưới `30% 2px`. |
+| `.gid-popup` | `.vj-skyid-panel` | Khối chứa popup form và footer, căn giữa phần màn hình còn lại sau panel ảnh. |
+| `.gid-content` | `.vj-skyid-card` | Khối form trắng, `padding:24px 34px 0`, bo góc dưới `16px`. |
+| `.gid-content-title` | `.vj-skyid-title` | Tiêu đề form `18px/26px`, `font-weight:700`, `#333`, căn giữa. |
+| `input.form-control` | `.vj-skyid-input` | Ô nhập cao `32px`, bo `4px`, viền `#E8EBEF`, focus `#FFDB01`. |
+| `.form-label` | `.vj-skyid-label` | Nhãn nổi `16px/500`, `top:10px`, `#333`. |
+| `.btn-primary` | `.vj-skyid-btn` | Nút CTA gradient vàng `135deg,#E99F24→#FD0`, chữ `#333`, bo `8px`. |
+| `.gid-link` | `.vj-skyid-link` | Link màu `#2F6BFF`, gạch chân khi hover. |
+| `.personal-data-sharing-consent-box` | `.vj-skyid-consent` | Checkbox `18×18px`, viền `2px #C4C4C4`, tick bo `4px` + `ic_checked.svg`. |
+| `.gid-logo-footer` | `.vj-skyid-footer` | Chân trang logo, `h:16px` mỗi logo. |
+| `.gid-logo-image-red` | `.vj-skyid-logo-red` | Logo đỏ `absolute top:20px left:20px`. |
+| `.gid-logo-image-white` | `.vj-skyid-logo-white` | Logo trắng `fixed bottom:20px left:20px`. |
+| SkyID wrapper (overlay) | `SkyIdShell` (`showArt={false}`) | Bản overlay trong dự án — site thật không có modal này; `.vj-skyid-layout--no-art` tắt panel ảnh trái. |
+| Quên / đặt lại mật khẩu | `ForgotPasswordStep` / `ResetPasswordStep` | Luồng chỉ có trong dự án, không có trên site thật SkyID. |
 
-| `.gid-popup` | `.vj-skyid-panel` | Khối chứa popup form và footer, căn giữa phần màn hình còn lại sau panel ảnh |
-| `.gid-content` | `.vj-skyid-card` | Khối form trắng, `padding:24px 34px 0`, bo góc dưới `16px` |
-| `.gid-content-title` | `.vj-skyid-title` | Tiêu đề form `18px/26px`, `font-weight:700`, `#333`, căn giữa |
-| `input.form-control` | `.vj-skyid-input` | Ô nhập cao `32px`, bo `4px`, viền `#E8EBEF`, focus `#FFDB01` |
-| `.form-label` | `.vj-skyid-label` | Nhãn nổi `16px/500`, `top:10px`, `#333` |
-| `.btn-primary` | `.vj-skyid-btn` | Nút CTA gradient vàng `135deg,#E99F24→#FD0`, chữ `#333`, bo `8px` |
-| `.gid-link` | `.vj-skyid-link` | Link màu `#2F6BFF`, gạch chân khi hover |
-| `.personal-data-sharing-consent-box` | `.vj-skyid-consent` | Checkbox `18×18px`, viền `2px #C4C4C4`, tick bo `4px` + `ic_checked.svg` |
-| `.gid-logo-footer` | `.vj-skyid-footer` | Chân trang logo, `h:16px` mỗi logo |
-| `.gid-logo-image-red` | `.vj-skyid-logo-red` | Logo đỏ `absolute top:20px left:20px` |
-| `.gid-logo-image-white` | `.vj-skyid-logo-white` | Logo trắng `fixed bottom:20px left:20px` |
-| SkyID wrapper (modal) | `SkyIdShell` | Component overlay mới, không có trên site thật — dùng cho bản modal trong dự án |
-| Quên / đặt lại mật khẩu | `ForgotPasswordStep` / `ResetPasswordStep` | Luồng mới trong dự án, không có trên site thật SkyID |
 Nguồn: đo trực tiếp trên DOM sống `skyjoy-id.vietjetair.com` ngày 13/11/2026.
 
 ---
@@ -171,3 +171,31 @@ Nguồn: đo trực tiếp trên DOM sống `skyjoy-id.vietjetair.com` ngày 13/
 `ic_checked.svg` — checkbox đã tick.
 `.gid__wrapper-bg` không có ảnh tĩnh trong HTML; được set runtime qua JS
 (`background-image` từ CDN) → cần chụp/tabulate từ DOM runtime khi render full-page.
+
+### 5.1 Nguồn gốc các file đã đưa vào `public/images/skyid/`
+
+Ba logo ở bảng trên tải trực tiếp từ CDN của SkyID
+(`.../vietjet-air-iframe-v2/images/`), nên nguồn gốc ghi được chắc chắn.
+Bốn file còn lại **không** có URL tĩnh trong bundle CSS — `.gid__wrapper-bg`
+nhận `background-image` lúc runtime, còn hai lớp `.imgs .top` / `.imgs .bot`
+và hai logo góc là `<img>` render bởi React — nên chúng được **chụp/cắt từ
+DOM sống** rồi lưu lại:
+
+| File trong repo | Kích thước | Cách lấy |
+|---|---|---|
+| `bg.jpg` | `1921×1081` | ảnh nền `.gid__wrapper-bg` sau khi runtime set `background-image` |
+| `bg.png` | `1351×902` | bản PNG của cùng ảnh nền (chưa tham chiếu) |
+| `bg-top-right.png` | `434×195` | lớp `.gid__wrapper-bg .imgs .top` (rộng 70% panel) |
+| `bg-bot.png` | `574×301` | lớp `.gid__wrapper-bg .imgs .bot` (rộng 100% panel) |
+| `logo-red.svg` | `116×43` | logo `.gid-logo-image-red` (vector) |
+| `logo-white.svg` | `176×65` | logo `.gid-logo-image-white` (vector) |
+| `logo-mb-right.png` | `257×70` | logo `.gid-logo-image-mb-right` (mobile, chưa tham chiếu) |
+
+**Vì sao phải ghi lại:** đây là asset thương hiệu của Vietjet, không phải ảnh
+tự do. Bảng này là hồ sơ duy nhất cho biết file nào lấy từ đâu; nếu không có
+nó, một đợt rà soát "orphan asset" sau này sẽ không phân biệt được file cũ của
+dự án với file tải về từ SkyID.
+
+> Lưu ý pháp lý: toàn bộ asset trên thuộc sở hữu của Vietjet Air / SkyJoy ID.
+> Dự án này chỉ dùng để **mô phỏng** giao diện phục vụ học tập/QA; dùng thương
+> mại cần xin phép chủ sở hữu.
