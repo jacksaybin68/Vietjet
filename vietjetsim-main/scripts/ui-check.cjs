@@ -338,12 +338,25 @@ const PROBE = `(() => {
   });
   const seen = new Map();
   const overlapped = [];
+  /* Header PHỦ lên ảnh hero là thiết kế (site thật: lớp jss120 là absolute,
+     neo ngay dưới thanh thông báo, nằm trên ảnh hero).
+     Ở viewport mobile/tablet, header (0,35,390×56) và ảnh slide đang hiện
+     (0,35,390×422) trùng đúng gốc — đó là lớp phủ, không phải chồng lấn.
+     Vì vậy: khi header là lớp PHỦ (absolute/fixed) và phần tử kia là một
+     ẢNH nền, cặp đó không phải lỗi. Header sticky/static đè lên ảnh vẫn
+     bị báo — đó mới là chồng lấn thật. */
+  const floatingHeader = (el) =>
+    el.tagName === 'HEADER' &&
+    ['absolute', 'fixed'].includes(getComputedStyle(el).position);
   for (const el of nodes) {
     const r = el.getBoundingClientRect();
     const key = Math.round(r.left) + ':' + Math.round(r.top);
     const prev = seen.get(key);
     if (prev && !prev.contains(el) && !el.contains(prev)) {
-      overlapped.push(prev.tagName + '+' + el.tagName + ' @' + key);
+      const overlayByDesign =
+        (floatingHeader(prev) && el.tagName === 'IMG') ||
+        (floatingHeader(el) && prev.tagName === 'IMG');
+      if (!overlayByDesign) overlapped.push(prev.tagName + '+' + el.tagName + ' @' + key);
     } else if (!prev) {
       seen.set(key, el);
     }

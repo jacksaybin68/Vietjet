@@ -45,7 +45,19 @@ export interface SkyJoyIdModalProps {
   onClose?: () => void;
 }
 
-type Step = 'phone' | 'password' | 'register' | 'otp';
+type Step = 'phone' | 'password' | 'register' | 'otp' | 'login-otp';
+
+/**
+ * Bước đầu cho phép nhập theo hai kiểu định danh:
+ *  - `phone`: số điện thoại kèm mã quốc gia (mặc định, khớp site thật).
+ *  - `account`: email hoặc mã hội viên SkyJoy.
+ *
+ * Backend đã tra được cả ba loại (`findAccountByIdentifier` gộp email /
+ * số điện thoại / mã hội viên vào một câu truy vấn), nhưng trước đây ô nhập
+ * lọc sạch mọi ký tự không phải số nên người dùng không thể đăng nhập bằng
+ * email hay mã hội viên — đúng những định danh mà API hỗ trợ.
+ */
+type IdentifierMode = 'phone' | 'account';
 
 const COUNTRY_CODES = [
   { code: 'VN', flag: '🇻🇳', dial: '+84', label: 'Việt Nam' },
@@ -99,6 +111,11 @@ export default function SkyJoyIdModal({
   const [country, setCountry] = useState<(typeof COUNTRY_CODES)[number]>(COUNTRY_CODES[0]);
   const [countryOpen, setCountryOpen] = useState(false);
 
+  /** Kiểu định danh ở bước đầu: số điện thoại hay email/mã hội viên. */
+  const [identifierMode, setIdentifierMode] = useState<IdentifierMode>('phone');
+  /** Email hoặc mã hội viên SkyJoy (dùng khi `identifierMode === 'account'`). */
+  const [accountIdentifier, setAccountIdentifier] = useState('');
+
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -113,6 +130,9 @@ export default function SkyJoyIdModal({
 
   const [otpCode, setOtpCode] = useState('');
   const [otpHint, setOtpHint] = useState('');
+  /** Mã OTP đăng nhập (bước `login-otp`). */
+  const [loginOtpCode, setLoginOtpCode] = useState('');
+  const [loginOtpHint, setLoginOtpHint] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -171,19 +191,84 @@ export default function SkyJoyIdModal({
     [mode, onClose, router, target]
   );
 
+  /**
+   * Định danh dùng để đăng nhập ở bước hiện tại.
+   *  - `phone` → chuỗi số điện thoại (đã bỏ ký tự không phải số).
+   *  - `account` → email hoặc mã hội viên SkyJoy, đã trim.
+   */
+  const identifier =
+    identifierMode === 'phone' ? phone.replace(/\D/g, '') : accountIdentifier.trim();
+
   const handlePhoneContinue = () => {
-    const identifier = phone.replace(/\D/g, '');
     if (!identifier) {
-      setError('Vui lòng nhập số điện thoại của bạn');
+      setError(
+        identifierMode === 'phone'
+          ? 'Vui lòng nhập số điện thoại của bạn'
+          : 'Vui lòng nhập email hoặc mã hội viên SkyJoy'
+      );
       return;
     }
     setError('');
     setStep(mode === 'register' ? 'register' : 'password');
   };
 
+  /** Gửi OTP SMS để đăng nhập không cần mật khẩu. */
+  const handleSendLoginOtp = async () => {
+    if (!identifier) {
+      setError(
+        identifierMode === 'phone'
+          ? 'Vui lòng nhập số điện thoại của bạn'
+          : 'Vui lòng nhập email hoặc mã hội viên SkyJoy'
+      );
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      const challenge = await auth.getCaptcha();
+      const captchaAnswer = autoSolveCaptcha(challenge?.token);
+      const otp = await auth.requestOtp({
+        identifier,
+        purpose: 'login',
+        captchaToken: challenge?.token,
+        captchaAnswer,
+      });
+      setLoginOtpHint(otp?.devCode ? `Mã thử nghiệm (dev): ${otp.devCode}` : '');
+      setStep('login-otp');
+      toast.info('Đã gửi mã xác thực', 'Mã OTP đã được gửi tới số điện thoại/email của bạn.');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Không gửi được mã xác thực';
+      setError(message);
+      toast.error('Lỗi gửi mã xác thực', message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /** Xác nhận OTP đăng nhập. */
+  const handleVerifyLoginOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loginOtpCode.length !== OTP_LENGTH) {
+      setError(`Vui lòng nhập đủ ${OTP_LENGTH} chữ số của mã xác thực.`);
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      const data = await auth.signInWithOtp(identifier, loginOtpCode);
+      toast.success('Đăng nhập thành công', `Chào mừng ${data.user?.fullName || 'Quý khách'}`);
+      finish(data.user?.fullName);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Đăng nhập thất bại';
+      setError(message);
+      toast.error('Đăng nhập thất bại', message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const identifier = phone.replace(/\D/g, '');
     if (!password) {
       setError('Vui lòng nhập mật khẩu');
       return;
@@ -287,14 +372,18 @@ export default function SkyJoyIdModal({
       ? 'Nhập số điện thoại'
       : step === 'password'
         ? 'Nhập mật khẩu'
-        : 'Đăng nhập';
+        : step === 'login-otp'
+          ? 'Nhập mã xác thực'
+          : 'Đăng nhập';
 
   const subtitle =
     mode === 'register'
       ? 'Tạo tài khoản SkyJoy để nhận ưu đãi và tích điểm đổi quà.'
       : step === 'password'
         ? 'Vui lòng nhập mật khẩu để tiếp tục.'
-        : 'Đăng nhập để quản lý chuyến bay, đặt vé và tích điểm SkyJoy.';
+        : step === 'login-otp'
+          ? 'Nhập mã OTP được gửi qua tin nhắn để đăng nhập không cần mật khẩu.'
+          : 'Đăng nhập để quản lý chuyến bay, đặt vé và tích điểm SkyJoy.';
 
   const form = (
     <div className="flex h-full flex-col">
@@ -313,83 +402,168 @@ export default function SkyJoyIdModal({
 
         {step === 'phone' && (
           <>
-            <label htmlFor="skyjoy-phone" className="vj-skyjoy-field-label mb-1.5">
-              Số điện thoại
-            </label>
-            <div className="vj-skyjoy-phone">
-              <div className="relative">
+            {/* Chuyển kiểu định danh — mặc định số điện thoại (khớp site thật),
+                có thêm đường vào bằng email / mã hội viên SkyJoy. */}
+            <div
+              role="tablist"
+              aria-label="Kiểu định danh đăng nhập"
+              className="mb-4 flex gap-1 rounded-lg bg-[var(--surface-2)] p-1"
+            >
+              {(
+                [
+                  { id: 'phone', label: 'Số điện thoại' },
+                  { id: 'account', label: 'Email / Mã hội viên' },
+                ] as const
+              ).map((tab) => (
                 <button
+                  key={tab.id}
                   type="button"
-                  onClick={() => setCountryOpen((open) => !open)}
-                  aria-expanded={countryOpen}
-                  aria-haspopup="listbox"
-                  className="vj-skyjoy-phone-code border-r-0"
+                  role="tab"
+                  aria-selected={identifierMode === tab.id}
+                  onClick={() => {
+                    setIdentifierMode(tab.id);
+                    setError('');
+                  }}
+                  className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-sm font-semibold transition ${
+                    identifierMode === tab.id
+                      ? 'bg-white text-[var(--vj-text)] shadow-sm'
+                      : 'text-[var(--vj-text-gray)] hover:text-[var(--vj-text)]'
+                  }`}
                 >
-                  <span aria-hidden="true">{country.flag}</span>
-                  <span>{country.dial}</span>
-                  <HiOutlineChevronDown aria-hidden="true" className="text-xs" />
+                  {tab.label}
                 </button>
-                {countryOpen && (
-                  <ul
-                    role="listbox"
-                    aria-label="Mã quốc gia"
-                    className="absolute left-0 top-[calc(100%+4px)] z-20 w-44 overflow-hidden rounded-md border border-[var(--vj-field-border)] bg-white py-1 shadow-lg"
-                  >
-                    {COUNTRY_CODES.map((c) => (
-                      <li key={c.code}>
-                        <button
-                          type="button"
-                          role="option"
-                          aria-selected={c.code === country.code}
-                          onClick={() => {
-                            setCountry(c);
-                            setCountryOpen(false);
-                          }}
-                          className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm font-medium text-[var(--vj-text)] hover:bg-[var(--surface-2)]"
-                        >
-                          <span aria-hidden="true">{c.flag}</span>
-                          <span>{c.dial}</span>
-                          <span className="text-xs text-[var(--vj-text-gray)]">{c.label}</span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-              <input
-                id="skyjoy-phone"
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value.replace(/[^\d]/g, ''))}
-                placeholder="Nhập số điện thoại của bạn"
-              />
+              ))}
             </div>
+
+            {identifierMode === 'phone' ? (
+              <>
+                <label htmlFor="skyjoy-phone" className="vj-skyjoy-field-label mb-1.5">
+                  Số điện thoại
+                </label>
+                <div className="vj-skyjoy-phone">
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setCountryOpen((open) => !open)}
+                      aria-expanded={countryOpen}
+                      aria-haspopup="listbox"
+                      className="vj-skyjoy-phone-code border-r-0"
+                    >
+                      <span aria-hidden="true">{country.flag}</span>
+                      <span>{country.dial}</span>
+                      <HiOutlineChevronDown aria-hidden="true" className="text-xs" />
+                    </button>
+                    {countryOpen && (
+                      <ul
+                        role="listbox"
+                        aria-label="Mã quốc gia"
+                        className="absolute left-0 top-[calc(100%+4px)] z-20 w-44 overflow-hidden rounded-md border border-[var(--vj-field-border)] bg-white py-1 shadow-lg"
+                      >
+                        {COUNTRY_CODES.map((c) => (
+                          <li key={c.code}>
+                            <button
+                              type="button"
+                              role="option"
+                              aria-selected={c.code === country.code}
+                              onClick={() => {
+                                setCountry(c);
+                                setCountryOpen(false);
+                              }}
+                              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm font-medium text-[var(--vj-text)] hover:bg-[var(--surface-2)]"
+                            >
+                              <span aria-hidden="true">{c.flag}</span>
+                              <span>{c.dial}</span>
+                              <span className="text-xs text-[var(--vj-text-gray)]">{c.label}</span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  <input
+                    id="skyjoy-phone"
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value.replace(/[^\d]/g, ''))}
+                    placeholder="Nhập số điện thoại của bạn"
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <label htmlFor="skyjoy-account" className="vj-skyjoy-field-label mb-1.5">
+                  Email hoặc mã hội viên SkyJoy
+                </label>
+                <div className="vj-skyjoy-phone">
+                  <input
+                    id="skyjoy-account"
+                    type="text"
+                    autoComplete="username"
+                    value={accountIdentifier}
+                    onChange={(e) => setAccountIdentifier(e.target.value)}
+                    placeholder="Nhập email hoặc mã hội viên"
+                  />
+                </div>
+              </>
+            )}
 
             <div className="mt-6 flex justify-center">
               <button
                 type="button"
                 onClick={handlePhoneContinue}
-                disabled={!phone.replace(/\D/g, '')}
+                disabled={!identifier}
                 className="vj-skyjoy-continue"
               >
                 Tiếp tục
               </button>
             </div>
+
+            {/* Đường vào thay thế: quên mật khẩu và đăng nhập bằng OTP. */}
+            {mode === 'login' ? (
+              <div className="mt-4 flex items-center justify-between gap-3 text-sm">
+                <Link
+                  href="/quen-mat-khau"
+                  className="font-semibold text-[var(--vj-link-blue)] hover:underline"
+                >
+                  Quên mật khẩu?
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleSendLoginOtp}
+                  disabled={loading || !identifier}
+                  className="cursor-pointer font-semibold text-[var(--vj-link-blue)] hover:underline disabled:cursor-not-allowed disabled:text-[var(--vj-modal-disabled-ink)] disabled:no-underline"
+                >
+                  Đăng nhập bằng mã OTP
+                </button>
+              </div>
+            ) : null}
           </>
         )}
 
         {step === 'password' && (
           <form onSubmit={handleLogin} noValidate>
             <label htmlFor="skyjoy-phone-echo" className="vj-skyjoy-field-label mb-1.5">
-              Số điện thoại
+              {identifierMode === 'phone' ? 'Số điện thoại' : 'Email hoặc mã hội viên SkyJoy'}
             </label>
             <div className="vj-skyjoy-phone">
-              <span className="vj-skyjoy-phone-code" aria-hidden="true">
-                {country.flag} {country.dial}
-              </span>
-              <input id="skyjoy-phone-echo" type="tel" value={phone} readOnly tabIndex={-1} />
+              {identifierMode === 'phone' ? (
+                <>
+                  <span className="vj-skyjoy-phone-code" aria-hidden="true">
+                    {country.flag} {country.dial}
+                  </span>
+                  <input id="skyjoy-phone-echo" type="tel" value={phone} readOnly tabIndex={-1} />
+                </>
+              ) : (
+                <input
+                  id="skyjoy-phone-echo"
+                  type="text"
+                  value={accountIdentifier}
+                  readOnly
+                  tabIndex={-1}
+                />
+              )}
             </div>
 
             <label htmlFor="skyjoy-password" className="vj-skyjoy-field-label mb-1.5 mt-4">
@@ -428,6 +602,56 @@ export default function SkyJoyIdModal({
                 className="text-sm font-semibold text-[var(--vj-link-blue)] hover:underline"
               >
                 Quay lại
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Bước xác nhận OTP đăng nhập (không cần mật khẩu). */}
+        {step === 'login-otp' && (
+          <form onSubmit={handleVerifyLoginOtp} noValidate className="space-y-3">
+            <p className="text-sm font-medium leading-[21px] text-[var(--vj-text-gray)]">
+              Mã xác thực gồm {OTP_LENGTH} chữ số đã được gửi tới{' '}
+              <span className="font-bold text-[var(--vj-text)]">{identifier}</span>. Quý khách vui
+              lòng kiểm tra tin nhắn (hoặc mục Spam/Rác) và nhập mã để hoàn tất.
+            </p>
+            {loginOtpHint ? (
+              <p className="rounded-md border border-[var(--vj-field-border)] bg-[var(--surface-2)] px-3 py-2 text-xs font-semibold text-[var(--vj-text)]">
+                {loginOtpHint}
+              </p>
+            ) : null}
+            <div>
+              <label htmlFor="skyjoy-login-otp" className="vj-skyjoy-field-label mb-1.5">
+                Mã xác thực
+              </label>
+              <div className="vj-skyjoy-phone">
+                <input
+                  id="skyjoy-login-otp"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={OTP_LENGTH}
+                  value={loginOtpCode}
+                  onChange={(e) => setLoginOtpCode(e.target.value.replace(/[^\d]/g, ''))}
+                  placeholder="Nhập mã OTP"
+                  className="tracking-[0.3em]"
+                />
+              </div>
+            </div>
+            <div className="flex justify-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setStep('phone');
+                  setLoginOtpCode('');
+                  setError('');
+                }}
+                className="text-sm font-semibold text-[var(--vj-link-blue)] hover:underline"
+              >
+                ← Quay lại
+              </button>
+              <button type="submit" disabled={loading} className="vj-skyjoy-continue">
+                {loading ? 'Đang xác nhận…' : 'Xác nhận'}
               </button>
             </div>
           </form>
@@ -623,7 +847,7 @@ export default function SkyJoyIdModal({
           </form>
         )}
 
-        {step !== 'register' && step !== 'otp' && (
+        {step !== 'register' && step !== 'otp' && step !== 'login-otp' && (
           <>
             {/* Divider "hoặc tiếp tục với" */}
             <div className="vj-skyjoy-divider my-6">hoặc tiếp tục với</div>

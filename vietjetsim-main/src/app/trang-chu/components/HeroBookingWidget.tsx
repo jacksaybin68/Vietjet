@@ -261,9 +261,14 @@ export default function HeroBookingWidget() {
 
           {/* Hàng 2 — các ô nhập, padding ngang 19px, cao 273px. */}
           <div className="px-[19px]">
-            {/* Ô 1: Điểm khởi hành + Ngày đi (một hộp trắng 342×48px). */}
+            {/* Ô 1: Điểm khởi hành + Ngày đi (một hộp trắng 342×48px).
+                Vỏ ô không cộng thêm `pl-[48px]`: nút `AirportPicker` đã tự
+                đặt icon ở `left-[14px]` và chữ ở `pl-[48px]` — tính từ mép
+                hộp trắng. Trước đây vỏ lại cộng một lần nữa nên chữ lệch
+                sang x=+96, lệch hẳn nhãn "Hành khách"/"Mã khuyến mại" (+48)
+                và tràn 7px vào cột ngày. */}
             <div className={fieldBoxClass}>
-              <div className="relative flex min-w-0 flex-1 items-center pl-[48px] pr-2">
+              <div className="relative flex min-w-0 flex-1 items-center pr-2">
                 <AirportPicker
                   label="Điểm khởi hành"
                   ariaLabel="Điểm khởi hành"
@@ -290,9 +295,9 @@ export default function HeroBookingWidget() {
               </button>
             </div>
 
-            {/* Ô 2: Điểm đến + Ngày về. */}
+            {/* Ô 2: Điểm đến + Ngày về — cùng cách căn lề như Ô 1. */}
             <div className={`mt-[11px] ${fieldBoxClass}`}>
-              <div className="relative flex min-w-0 flex-1 items-center pl-[48px] pr-2">
+              <div className="relative flex min-w-0 flex-1 items-center pr-2">
                 <AirportPicker
                   label="Điểm đến"
                   ariaLabel="Điểm đến"
@@ -330,10 +335,13 @@ export default function HeroBookingWidget() {
               </button>
             </div>
 
-            {/* Ô 3: Hành khách — nền trong suốt, nhãn 12px/600, giá trị 16px/600.
+            {/* Ô 3: Hành khách — hộp trắng 342×48px, bo góc 10px, nền trắng
+                đồng nhất với Ô 1/Ô 2/Ô 4. Trước đây nền trong suốt nên nhãn
+                xám `rgb(107,117,128)` nằm trên nền đỏ gradient, tương phản
+                quá thấp và lệch về phía trong so với các ô còn lại.
                 MOBILE (390×844): site thật KHÔNG hiện hàng này (thân panel chỉ
                 có 2 ô sân bay/ngày) → ẩn hoàn toàn ở dưới `lg`. */}
-            <div className="relative mt-[11px] hidden h-[48px] items-center gap-2 pl-[48px] pr-1 lg:flex">
+            <div className="relative mt-[11px] hidden h-[48px] items-center gap-2 rounded-vj bg-white pl-[48px] pr-1 lg:flex">
               <MdOutlinePerson
                 aria-hidden="true"
                 className="absolute left-[19px] top-1/2 -translate-y-1/2 text-lg2 text-[var(--foreground)]"
