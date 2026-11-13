@@ -26,6 +26,7 @@ const eslintConfig = [
       '.next-mobilqa/',
       '.next-prod/',
       '.next-qa-*/',
+      '.next-skyid/',
       'out/',
       'public/',
       'next-env.d.ts',

@@ -54,6 +54,7 @@ jest-test-results.json
 # Các thư mục build phụ sinh khi chạy song song nhiều pipeline QA/UI-check.
 .next-prod/
 .next-qa-*/
+.next-skyid/
 
 # Optional: if using TurboRepo or monorepo
 turbo/

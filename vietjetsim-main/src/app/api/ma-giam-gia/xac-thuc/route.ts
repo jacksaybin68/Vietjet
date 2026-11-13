@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDiscountCodeByCode, countUserDiscountUsage } from '@/lib/db';
 import { getToken } from '@/lib/auth';
 import { validateCsrfOrReject } from '@/lib/csrf';
+import { computeDiscountAmount } from '@/lib/discount';
 
 export async function POST(request: NextRequest) {
   try {
@@ -98,15 +99,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate discount amount
-    let discountAmount = 0;
-    if (discount.type === 'fixed') {
-      discountAmount = Number(discount.value);
-    } else {
-      discountAmount = (bookingAmount * Number(discount.value)) / 100;
-      if (discount.max_discount_amount) {
-        discountAmount = Math.min(discountAmount, Number(discount.max_discount_amount));
-      }
-    }
+    const discountAmount = computeDiscountAmount(discount, bookingAmount);
 
     return NextResponse.json({
       valid: true,

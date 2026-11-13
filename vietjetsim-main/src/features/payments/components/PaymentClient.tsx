@@ -554,6 +554,24 @@ export default function PaymentClient() {
     return Math.max(0, total - cashPlusPointsDiscountVnd);
   }, [total, cashPlusPointsDiscountVnd]);
 
+  /**
+   * Số tiền mặt khách phải trả — con số mà server sẽ kiểm tra.
+   *
+   * Với phương thức `skypoint` thuần (không bật Cash + Points), toàn bộ giá
+   * vé được trả bằng điểm nên tiền mặt phải trả là 0. Server tính đúng như
+   * vậy, và con số này phải được suy ra theo *cùng công thức* — trừ điểm làm
+   * tròn lên, quy đổi làm tròn xuống — nếu không hai bên lệch nhau và giao
+   * dịch bị từ chối với thông báo "Số tiền phải đúng …".
+   */
+  const cashDue = useMemo(() => {
+    if (paymentMethod !== 'skypoint') return payableTotal;
+    if (useCashPlusPoints && cashPlusPointsRedeem > 0) return payableTotal;
+    if (!skypointInfo) return payableTotal;
+    const pointsForFullTotal = skypointPointsForAmount(total, skypointInfo.rate);
+    const pointsValue = skypointValueOfPoints(pointsForFullTotal, skypointInfo.rate);
+    return Math.max(0, total - pointsValue);
+  }, [paymentMethod, payableTotal, useCashPlusPoints, cashPlusPointsRedeem, skypointInfo, total]);
+
   useEffect(() => {
     apiRequest<{
       accounts?: BankAccount[];
@@ -690,7 +708,11 @@ export default function PaymentClient() {
         method: 'POST',
         body: {
           code: promoCode,
-          bookingAmount: booking?.fareSubtotal || 0,
+          // The discount is sized against the booking total — the same base the
+          // server uses. The page's own split into fare / tax / ancillary is
+          // fabricated, so sending the fare subtotal here made a percentage
+          // code worth a different amount on the two sides.
+          bookingAmount: booking?.total || 0,
         },
       });
       if (data.valid) {
@@ -773,13 +795,13 @@ export default function PaymentClient() {
       await createPayment({
         booking_id: booking.bookingId,
         method: paymentMethod,
-        amount: payableTotal,
+        amount: cashDue,
         discount_code_id: promoData?.id ?? undefined,
         discount_amount: discountAmount,
         discount_code: promoData?.code,
         bank_account_id: selectedAdminAccount?.id,
         transfer_note: transferNoteInput.trim() || transferNote,
-        transfer_amount: transferAmountInput.trim() || String(payableTotal),
+        transfer_amount: transferAmountInput.trim() || String(cashDue),
         receipt_image: receiptImage || undefined,
         points_to_redeem:
           useCashPlusPoints && cashPlusPointsRedeem > 0 ? cashPlusPointsRedeem : undefined,
