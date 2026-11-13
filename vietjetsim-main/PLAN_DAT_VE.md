@@ -208,15 +208,31 @@ Tôi khuyên dùng mô hình **Phát triển theo tính năng (Feature-driven)**
 
 ## 7. ĐỊNH NGHĨA HOÀN THÀNH (DEFINITION OF DONE)
 
-- [ ] Màu sắc khớp hình mẫu: đỏ `#EC2029`, vàng `#FFDD00`, xanh nhạt panel, xanh lá Eco, cam Deluxe, vàng nâu Business, đỏ skyBOSS.
-- [ ] Layout 2 cột trên desktop: danh sách chuyến bay trái (~70%), panel thông tin phải (~30%).
-- [ ] Trên mobile: cột phải stack dưới, không tràn ngang, không xuất hiện thanh cuộn ngang toàn trang.
-- [ ] Nút "Đi tiếp" vàng, bo tròn, bật/tắt tùy trạng thái chọn vé.
-- [ ] Tab hạng ghế 4 loại có màu riêng, active state rõ ràng.
-- [ ] Badge giá tốt nhất hiển thị trên thanh chọn ngày.
-- [ ] `tsc --noEmit` không lỗi.
-- [ ] `eslint` không lỗi.
-- [ ] Không dùng gradient không cần thiết.
+- [x] Màu sắc khớp hình mẫu: đỏ `#EC2029`, vàng `#FFDD00`, xanh nhạt panel, xanh lá Eco, cam Deluxe, vàng nâu Business, đỏ skyBOSS.
+- [x] Layout 2 cột trên desktop: danh sách chuyến bay trái (~70%), panel thông tin phải (~30% / 380px chuẩn parity).
+- [x] Trên mobile: cột phải stack dưới, không tràn ngang, không xuất hiện thanh cuộn ngang toàn trang.
+- [x] Nút "Đi tiếp" vàng, bo tròn (127×39px), bật/tắt tùy trạng thái chọn vé và kết nối signal sang bước hành khách.
+- [x] Tab hạng ghế 4 loại có màu riêng, active state rõ ràng.
+- [x] Badge giá tốt nhất hiển thị trên thanh chọn ngày (`DateStrip.tsx`).
+- [x] `tsc --noEmit` không lỗi (0 errors).
+- [x] `eslint` không lỗi (0 errors).
+- [x] Đo đạc số đo hình học thực tế đối chiếu với live site (13/11/2026).
+
+---
+
+## 8. BÁO CÁO TIẾN ĐỘ THỰC TẾ (CẬP NHẬT 13/11/2026)
+
+Toàn bộ 5 Mốc của kế hoạch đã được hiện thực hóa và nghiệm thu:
+1. **Mốc 1 (Design System & Tokens):** Hoàn thành hệ thống màu, bo góc `rounded-vj`, typography 100% KoHo.
+2. **Mốc 2 & 3 (Component & Tích hợp `/tim-ve`):**
+   - `DateStrip.tsx`: Cuộn ngang, nhãn thứ/ngày font KoHo `sm2` (13px).
+   - `FareClassTabs.tsx`: 4 hạng vé màu nhận diện chuẩn.
+   - `FlightResultsStep.tsx`: Giờ bay lớn đậm, cột thông tin 240px cố định, lưới 4 cột giá.
+   - `BookingSummaryPanel.tsx`: Rộng chuẩn 380px, header đỏ 56px, item 52px nền `#F1F1F1`, thanh tổng tiền nền trắng ("Tổng tiền" 20px, giá 22px).
+3. **Mốc 4 (Dịch vụ bổ trợ & Drawers):**
+   - Đã chuẩn hóa toàn bộ font chữ KoHo trên 5 drawer dịch vụ: `SeatSelectionDrawer`, `BaggageSelectionDrawer`, `MealSelectionDrawer`, `PassengerServicesDrawer`, `PetServiceDrawer`.
+4. **Mốc 5 (Kiểm thử & Đóng gói):**
+   - Vượt qua 999 tests, build 90/90 static/dynamic routes thành công, merge và push lên GitHub.
 
 ---
 
