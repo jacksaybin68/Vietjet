@@ -14,6 +14,13 @@ export default defineConfig({
     // against the 5s default, so it fails intermittently on CI runners for no
     // reason other than machine speed.
     testTimeout: 20000,
+    // Mỗi file test tạo một `jsdom` riêng; chạy song song quá nhiều worker
+    // làm máy hết tài nguyên và vitest chết với "Timeout waiting for worker to
+    // respond" — lỗi hạ tầng, không phải lỗi test. `maxWorkers` giới hạn số
+    // worker song song.
+    pool: 'forks',
+    maxWorkers: 4,
+    minWorkers: 1,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
