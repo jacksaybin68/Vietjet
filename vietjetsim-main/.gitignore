@@ -59,6 +59,7 @@ jest-test-results.json
 .qa-build/
 .qa-out/
 .screenshots-hero/
+.screenshots-mobile/
 
 # Optional: if using TurboRepo or monorepo
 turbo/
