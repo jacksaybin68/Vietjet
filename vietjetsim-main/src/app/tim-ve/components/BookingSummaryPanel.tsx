@@ -213,7 +213,7 @@ export default function BookingSummaryPanel({
                 <span>{data.fare.toLocaleString('vi-VN')} VND</span>
                 {showFareDetail ? <RiArrowUpSLine size={16} /> : <RiArrowDownSLine size={16} />}
               </div>
-            ) : null}{' '}
+            ) : null}
           </div>
 
           {showFareDetail && data.fare && data.fare > 0 && (
