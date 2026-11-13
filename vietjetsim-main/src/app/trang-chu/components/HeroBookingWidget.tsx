@@ -1,4 +1,4 @@
-'use client';
+ 'use client';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -419,7 +419,7 @@ export default function HeroBookingWidget() {
               returnDate={returnDate}
               roundTrip={roundTrip}
               activeStep={openCalendar}
-              onStepChange={setOpenCalendar}
+              onStepChange={(step) => setOpenCalendar(step)}
               onSelectDepart={(value) => {
                 setDepartDate(value);
                 if (!roundTrip) setOpenCalendar(null);

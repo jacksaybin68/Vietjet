@@ -67,37 +67,40 @@ describe('HeroSection Banner', () => {
     expect(screen.getByText('Một chiều')).toBeInTheDocument();
   });
 
-  // Field copy follows vietjetair.com: nhãn ô nhập là "Từ" / "Đến" / "Ngày đi".
+  // Site thật đặt nhãn sân bay là "Điểm khởi hành" / "Điểm đến" (18px/600),
+  // không phải "Từ" / "Đến" — xem số đo ngày 13/11/2026.
   it('renders airport selectors', () => {
     render(<HeroSection />);
-    expect(screen.getByText('Từ')).toBeInTheDocument();
-    expect(screen.getByText('Đến')).toBeInTheDocument();
+    expect(screen.getByText('Điểm khởi hành')).toBeInTheDocument();
+    expect(screen.getByText('Điểm đến')).toBeInTheDocument();
   });
 
+  // Ba tab dịch vụ phía trên panel, rộng 201 / 103 / 76px, cao 52px.
   it('renders the booking bar chrome of the production site', () => {
     render(<HeroSection />);
-    expect(screen.getByText('Đặt vé')).toBeInTheDocument();
-    expect(screen.getByText('Khách sạn')).toBeInTheDocument();
-    expect(screen.getByText('Skyshop')).toBeInTheDocument();
-    expect(screen.getByText('Đổi thưởng vé máy bay')).toBeInTheDocument();
+    expect(
+      screen.getByText('Mua hành lý, suất ăn chọn chỗ ngồi và hơn thế nữa...')
+    ).toBeInTheDocument();
+    expect(screen.getByText('Đổi thưởng & Mua Skypoint')).toBeInTheDocument();
+    expect(screen.getByText('Gửi hàng nhanh')).toBeInTheDocument();
     expect(screen.getByText('Hành khách')).toBeInTheDocument();
     expect(screen.getByText('Tìm vé rẻ nhất')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Đổi điểm khởi hành/i })).toBeInTheDocument();
   });
 
-  // Site thật: dải đặt vé là một thanh ngang — bốn ô (Từ, Đến, Ngày đi, Hành
-  // khách) cạnh nhau trong cùng một hàng, không phải hai hàng xếp dọc.
-  it('lays the four booking fields out in a single row', () => {
+  // Ô nhập của panel là các hộp 48px xếp dọc trong thân form 410px, mỗi hộp có
+  // nhãn và giá trị riêng — không phải một hàng ngang 4 cột như bố cục cũ.
+  it('stacks the booking fields vertically inside the panel body', () => {
     const { container } = render(<HeroSection />);
-    const grid = container.querySelector('.lg\\:grid-cols-\\[235px_235px_235px_235px_1fr\\]');
-    expect(grid).not.toBeNull();
+    const field = container.querySelector('.vj-booking-panel .h-\\[48px\\]');
+    expect(field).not.toBeNull();
   });
 
   it('lets the customer pick one-way and round-trip trips', () => {
     render(<HeroSection />);
-    const oneWay = screen.getByRole('button', { name: 'Một chiều' });
-    expect(oneWay).toHaveAttribute('aria-pressed', 'false');
+    const oneWay = screen.getByRole('radio', { name: 'Một chiều' });
+    expect(oneWay).not.toBeChecked();
     fireEvent.click(oneWay);
-    expect(oneWay).toHaveAttribute('aria-pressed', 'true');
+    expect(oneWay).toBeChecked();
   });
 });

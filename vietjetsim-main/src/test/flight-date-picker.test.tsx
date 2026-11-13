@@ -181,12 +181,13 @@ describe('HeroBookingWidget Date Selection Flow', () => {
 
     expect(screen.getByRole('button', { name: /Ngày về/i })).toBeInTheDocument();
 
-    const oneWayButton = screen.getByRole('button', { name: 'Một chiều' });
+    // Site thật dùng radio cho loại hành trình (18×18px), không phải button.
+    const oneWayButton = screen.getByRole('radio', { name: 'Một chiều' });
     fireEvent.click(oneWayButton);
 
     expect(screen.queryByRole('button', { name: /Ngày về/i })).not.toBeInTheDocument();
 
-    const roundTripButton = screen.getByRole('button', { name: 'Khứ hồi' });
+    const roundTripButton = screen.getByRole('radio', { name: 'Khứ hồi' });
     fireEvent.click(roundTripButton);
 
     expect(screen.getByRole('button', { name: /Ngày về/i })).toBeInTheDocument();
