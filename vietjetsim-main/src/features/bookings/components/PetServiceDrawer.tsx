@@ -40,7 +40,7 @@ export default function PetServiceDrawer({
         {/* Header - Red bar with Vietjet curve top-right (Screenshot 2) */}
         <div className="relative bg-primary-dark text-white px-4 py-3 flex items-center justify-between shadow-md overflow-hidden">
           <div className="w-8 shrink-0" />
-          <h2 className="font-sans font-black italic tracking-wide text-base sm:text-lg uppercase text-white text-center">
+          <h2 className="font-koho font-bold tracking-wide text-base sm:text-lg uppercase text-white text-center">
             MANG THEO THÚ CƯNG
           </h2>
           <div className="relative z-10">
@@ -113,7 +113,7 @@ export default function PetServiceDrawer({
           {/* Banner "THÚ CƯNG ƠI, BAY THÔI!" matching Screenshot 2 */}
           <div className="rounded-vj overflow-hidden bg-gradient-to-r from-amber-100 via-orange-100 to-sky-100 border border-amber-300 p-4 text-center shadow-sm relative">
             <div className="relative z-10">
-              <h3 className="text-base font-black text-red-600 tracking-wide mb-2 uppercase flex items-center justify-center gap-1.5 font-sans drop-shadow-2xs">
+              <h3 className="text-base font-bold text-red-600 tracking-wide mb-2 uppercase flex items-center justify-center gap-1.5 font-koho drop-shadow-2xs">
                 <span>THÚ CƯNG ƠI, BAY THÔI!</span>
                 <RiHeartFill className="text-red-500 text-sm" />
               </h3>

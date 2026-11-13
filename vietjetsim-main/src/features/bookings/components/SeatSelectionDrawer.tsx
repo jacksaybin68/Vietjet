@@ -244,7 +244,7 @@ export default function SeatSelectionDrawer({
         {/* Header with Vietjet curve top-right (Screenshot 9) */}
         <div className="relative bg-primary-dark text-white px-4 py-3 flex items-center justify-between shadow-md overflow-hidden">
           <div className="w-8 shrink-0" />
-          <h2 className="font-sans font-black italic tracking-wide text-base sm:text-lg uppercase text-white text-center">
+          <h2 className="font-koho font-bold tracking-wide text-base sm:text-lg uppercase text-white text-center">
             CHỌN CHỖ NGỒI YÊU THÍCH
           </h2>
           <div className="relative z-10">

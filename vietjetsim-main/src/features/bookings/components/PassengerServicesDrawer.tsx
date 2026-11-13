@@ -40,7 +40,7 @@ export default function PassengerServicesDrawer({
         {/* Header - Red bar with Vietjet curve top-right (Screenshot 1) */}
         <div className="relative bg-primary-dark text-white px-4 py-3 flex items-center justify-between shadow-md overflow-hidden">
           <div className="w-8 shrink-0" />
-          <h2 className="font-sans font-black italic tracking-wide text-base sm:text-lg uppercase text-white text-center">
+          <h2 className="font-koho font-bold tracking-wide text-base sm:text-lg uppercase text-white text-center">
             DỊCH VỤ THEO HÀNH KHÁCH
           </h2>
           <div className="relative z-10">
