@@ -180,11 +180,12 @@ export default function Header({
   }, [mobileTitle]);
 
   useEffect(() => {
-    const handleStepTitle = (e: CustomEvent<string>) => {
-      if (e.detail) setDynamicTitle(e.detail);
+    const handleStepTitle = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      if (customEvent.detail) setDynamicTitle(customEvent.detail);
     };
-    window.addEventListener('vj-booking-step-title' as any, handleStepTitle);
-    return () => window.removeEventListener('vj-booking-step-title' as any, handleStepTitle);
+    window.addEventListener('vj-booking-step-title', handleStepTitle);
+    return () => window.removeEventListener('vj-booking-step-title', handleStepTitle);
   }, []);
   const [megaMenu, setMegaMenu] = useState<'flight' | 'other' | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
@@ -242,15 +243,16 @@ export default function Header({
       {!compactMode && <AnnouncementBar />}
 
       <header
-        className={`sticky top-0 z-40 transition-all duration-200 ${
+        className={`transition-all duration-200 ${
           compactMode
-            ? 'bg-primary-dark text-white shadow-[0_2px_10px_rgba(0,0,0,0.18)]'
-            : transparentMode
-              ? // Site thật: header KHÔNG phải thanh đỏ — đó là một lớp tối
-                // mảnh phủ lên ảnh hero. Gradient đo được:
-                // linear-gradient(rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.094) 100%).
-                'bg-gradient-vj-scrim text-white shadow-none'
-              : 'bg-white/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.08)]'
+            ? 'sticky top-0 z-40 bg-primary-dark text-white shadow-[0_2px_10px_rgba(0,0,0,0.18)]'
+            : isHomepage
+              ? // Trang chủ: header là lớp PHỦ (absolute) nằm trên ảnh hero —
+                // đúng như site thật, nơi `jss108` có `position:absolute;
+                // top:50px; height:118px; z-index:1300`. Nhờ vậy hero bắt đầu
+                // ngay dưới thanh thông báo 50px, đúng toạ độ site thật.
+                'sticky top-0 z-40 lg:absolute lg:inset-x-0 lg:top-0 lg:z-[1300] lg:h-0 lg:shadow-none'
+              : 'sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.08)]'
         }`}
       >
         {/* Mobile Header for compactMode (< lg) matching Screenshot 3 & 4 */}
@@ -285,356 +287,244 @@ export default function Header({
           </div>
         )}
 
-        {/* Tầng 2 — Trang chủ: MỘT hàng 72px trải hết chiều ngang.
-            Site thật (đo 13/11/2026): logo 140×26 @x=30 → chữ trắng 17px/500
-            (active 700) → cụm nút tròn nền trắng 16% viền trắng 45% → nút
-            "Đăng nhập" gradient vàng 36px. Không có thanh menu đỏ, không có
-            dải icon dịch vụ phụ — cả hai chỉ là bản sao cũ. */}
+        {/* Tầng 2 — Trang chủ: header 4 tầng đúng số đo site thật.
+            Site thật (đo 13/11/2026, viewport 1440×900):
+              - Tầng 2 = lớp phủ tối `absolute` cao 118px, đặt trên hero:
+                gradient linear-gradient(rgba(0,0,0,.5) 0%, rgba(0,0,0,.094) 100%),
+                padding-top 10px, z-index 1300.
+              - Hàng logo + tiện ích: cao 68px. Logo 265×46 tại x=120 (căn giữa
+                trong 68px → y=71). Cột phải x=385, rộng 935px.
+              - Hàng tiện ích (20px, sát mép phải): "Hỗ trợ" (icon 20px + chữ
+                16px/700 trắng), "Đăng ký | Đăng nhập" 16px/700, nút ngôn ngữ
+                "Tiếng Việt" (viền trắng 1px, bo 3px, cao 20px).
+              - Hàng menu chính (33px, sát mép phải, gap 5px): chữ 16px/600
+                uppercase, mục active có gạch dưới #F7C61A.
+              - Tầng 3 = dải dịch vụ phụ cao 35px, nền gradient đen → trong suốt,
+                icon 25×25 + chữ 16px/700, gap 24px, active #F7C61A. */}
         {!compactMode && (
-          <div
-            className={`transition-colors ${
-              lightChrome ? 'bg-transparent text-white' : 'bg-white text-[var(--foreground)]'
-            }`}
-          >
-            <div className="mx-auto flex h-[72px] max-w-[1200px] items-center px-4 sm:px-6 lg:px-0">
-              {/* Logo Vietjet — 140×26px trên desktop (đo được trên site thật). */}
-              <Link
-                href="/trang-chu"
-                aria-label="Vietjet Air - Trang chủ"
-                className="flex shrink-0 items-center transition hover:opacity-95"
-              >
-                <img
-                  src="/images/vj-logo.svg"
-                  alt="Vietjet Air"
-                  className={`h-[26px] w-[140px] object-contain ${
-                    lightChrome ? 'brightness-0 invert' : ''
-                  }`}
-                />
-              </Link>
+          <div className="hidden lg:block">
+            {/* Lớp phủ tối phủ lên ảnh hero. */}
+            <div className="vj-header-scrim">
+              {/* Hàng logo + cột phải (tiện ích + menu chính). */}
+              <div className="mx-auto flex h-[68px] max-w-[1200px] items-center">
+                {/* Logo Vietjet — 265×46px (đo được trên site thật). */}
+                <Link
+                  href="/trang-chu"
+                  aria-label="Vietjet Air - Trang chủ"
+                  className="flex w-[265px] shrink-0 items-center transition hover:opacity-95"
+                >
+                  <img
+                    src="/images/vj-logo.svg"
+                    alt="Vietjet Air"
+                    className="h-[46px] w-[265px] object-contain brightness-0 invert"
+                  />
+                </Link>
 
-              {/* Chính nav — 17px/500, active 700. */}
-              <div
-                ref={megaMenuRef}
-                className="relative ml-10"
-                onMouseLeave={() => setMegaMenu(null)}
-              >
-                <nav aria-label="Điều hướng chính" className="hidden items-center gap-6 lg:flex">
-                  {NAV_LINKS.map((link) => {
-                    const active = isActivePath(pathname, link.href);
-                    const isMega =
-                      'mega' in link && (link.mega === 'flight' || link.mega === 'other');
-                    const isCurrentMega = isMega && megaMenu === link.mega;
+                {/* Cột phải — rộng 935px (1200 − 265), hai hàng dồn xuống mép phải. */}
+                <div className="ml-auto flex w-[935px] flex-col items-end">
+                  {/* Hàng tiện ích — cao 20px. */}
+                  <div className="flex h-[20px] items-center justify-end gap-3 pr-2.5 text-white">
+                    {/* 🎧 Hỗ trợ */}
+                    <a
+                      href="tel:19001166"
+                      className="flex items-center gap-1.5 text-base font-bold text-white transition hover:text-vjgold"
+                    >
+                      <RiHeadphoneLine aria-hidden="true" className="h-5 w-5 shrink-0" />
+                      <span>Hỗ trợ</span>
+                    </a>
 
-                    return (
-                      <div
-                        key={link.href}
-                        className="relative"
-                        onMouseEnter={() => {
-                          if (isMega) setMegaMenu(link.mega as 'flight' | 'other');
-                          else setMegaMenu(null);
-                        }}
+                    {/* Globe + Đăng ký | Đăng nhập */}
+                    <HiOutlineGlobeAlt aria-hidden="true" className="h-5 w-5 shrink-0" />
+                    <span className="text-base font-bold text-white">
+                      <Link href="/dang-ky" className="transition hover:text-vjgold">
+                        Đăng ký
+                      </Link>
+                      <span className="px-1.5 text-white">|</span>
+                      <Link href="/dang-nhap" className="transition hover:text-vjgold">
+                        Đăng nhập
+                      </Link>
+                    </span>
+
+                    {/* Nút ngôn ngữ — viền trắng 1px, bo góc 3px, cao 20px. */}
+                    <div ref={langMenuRef} className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setLangMenuOpen((open) => !open)}
+                        aria-expanded={langMenuOpen}
+                        className="flex h-[20px] items-center gap-1 rounded-[3px] border border-white bg-transparent px-[5px] text-sm font-medium text-white transition hover:bg-white/15"
                       >
-                        <Link
-                          href={link.href}
-                          aria-current={active ? 'page' : undefined}
-                          onClick={() => {
-                            if (isMega)
-                              setMegaMenu((prev) =>
-                                prev === link.mega ? null : (link.mega as 'flight' | 'other')
-                              );
-                          }}
-                          className={`flex items-center gap-1 whitespace-nowrap py-1.5 text-lg2 transition-colors duration-200 ${
-                            active || isCurrentMega
-                              ? 'font-bold text-white'
-                              : 'font-medium text-white/90 hover:text-white'
-                          }`}
-                        >
-                          <span>{link.label}</span>
-                          {isMega && (
-                            <HiOutlineChevronDown
-                              className={`text-xs transition-transform duration-200 ${
-                                isCurrentMega ? 'rotate-180' : ''
+                        <span className="pl-[5px] text-base font-bold">{currentLang}</span>
+                        <HiOutlineChevronDown aria-hidden="true" className="text-xs" />
+                      </button>
+
+                      {langMenuOpen && (
+                        <div className="absolute right-0 top-[calc(100%+8px)] w-36 overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-lg text-gray-800">
+                          {['Tiếng Việt', 'English'].map((lang) => (
+                            <button
+                              key={lang}
+                              type="button"
+                              onClick={() => {
+                                setCurrentLang(lang);
+                                setLangMenuOpen(false);
+                              }}
+                              className={`flex w-full items-center justify-between px-3 py-2 text-left text-xs font-semibold ${
+                                currentLang === lang
+                                  ? 'bg-red-50 font-bold text-vjred'
+                                  : 'text-gray-700 hover:bg-gray-50'
                               }`}
-                            />
-                          )}
-                        </Link>
-                      </div>
-                    );
-                  })}
-                </nav>
-
-                {/* Mega Menu Dropdown */}
-                {megaMenu && (
-                  <div
-                    className="absolute left-0 top-full mt-1.5 w-[640px] rounded-2xl bg-white p-5 shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-gray-100 z-50 text-gray-800 animate-fadeIn"
-                    onMouseEnter={() => {}}
-                  >
-                    <div className="grid grid-cols-2 gap-5 divide-x divide-gray-100">
-                      {/* Cột 1: Hành lý, suất ăn & dịch vụ bổ trợ */}
-                      <div className="pr-3">
-                        <h4 className="text-xs font-black uppercase tracking-wider text-primary-dark pb-2 mb-2 border-b border-gray-100 font-koho">
-                          Hành lý, suất ăn &amp; dịch vụ bổ trợ
-                        </h4>
-                        <div className="space-y-1.5">
-                          {FLIGHT_SERVICES_ITEMS.slice(0, 3).map((item) => (
-                            <Link
-                              key={item.title}
-                              href={item.href}
-                              onClick={() => setMegaMenu(null)}
-                              className="group block rounded-xl p-2 transition-all hover:bg-red-50/70 border border-transparent hover:border-red-100"
                             >
-                              <div className="flex items-center gap-1.5 mb-0.5">
-                                <span className="text-xs font-bold text-gray-900 group-hover:text-vjred transition-colors leading-tight">
-                                  {item.title}
-                                </span>
-                                {item.isHot && (
-                                  <span className="text-3xs bg-red-600 text-white font-black px-1.5 py-0.2 rounded uppercase shrink-0 italic">
-                                    HOT
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xs2 text-gray-500 line-clamp-2 leading-snug">
-                                {item.desc}
-                              </p>
-                            </Link>
+                              <span>{lang}</span>
+                              {currentLang === lang ? '✓' : null}
+                            </button>
                           ))}
                         </div>
-                      </div>
-
-                      {/* Cột 2: Dịch vụ khác */}
-                      <div className="pl-4">
-                        <h4 className="text-xs font-black uppercase tracking-wider text-primary-dark pb-2 mb-2 border-b border-gray-100 font-koho">
-                          Dịch vụ khác
-                        </h4>
-                        <div className="space-y-1.5">
-                          {OTHER_SERVICES_ITEMS.slice(0, 3).map((item) => (
-                            <Link
-                              key={item.title}
-                              href={item.href}
-                              onClick={() => setMegaMenu(null)}
-                              className="group block rounded-xl p-2 transition-all hover:bg-red-50/70 border border-transparent hover:border-red-100"
-                            >
-                              <div className="flex items-center gap-1.5 mb-0.5">
-                                <span className="text-xs font-bold text-gray-900 group-hover:text-vjred transition-colors leading-tight">
-                                  {item.title}
-                                </span>
-                                {item.isHot && (
-                                  <span className="text-3xs bg-red-600 text-white font-black px-1.5 py-0.2 rounded uppercase shrink-0 italic">
-                                    HOT
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xs2 text-gray-500 line-clamp-2 leading-snug">
-                                {item.desc}
-                              </p>
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </div>
-                )}
-              </div>
 
-              {/* Cụm tiện ích bên phải trên desktop */}
-              <div className="ml-auto hidden items-center gap-3 lg:flex">
-                {/* 🎧 Hỗ trợ */}
-                <a
-                  href="tel:19001166"
-                  className={`flex items-center gap-1.5 text-lg2 font-medium transition ${
-                    lightChrome ? 'text-white hover:text-vjgold' : 'text-gray-700 hover:text-vjred'
-                  }`}
-                >
-                  <RiHeadphoneLine aria-hidden="true" className="text-base" />
-                  <span>Hỗ trợ 1900 1166</span>
-                </a>
-
-                {/* Dropdown Tiếng Việt ▾ — pill tròn trong suốt */}
-                <div ref={langMenuRef} className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setLangMenuOpen((open) => !open)}
-                    aria-expanded={langMenuOpen}
-                    className={`flex h-[36px] items-center gap-1 px-3 text-sm font-medium transition ${
-                      lightChrome
-                        ? 'vj-utility-pill text-white hover:bg-white/25'
-                        : 'rounded-full border border-gray-200 bg-gray-50 text-gray-700 hover:text-vjred'
-                    }`}
+                  {/* Hàng menu chính — cao 33px, sát mép phải, gap 5px. */}
+                  <div
+                    ref={megaMenuRef}
+                    className="relative"
+                    onMouseLeave={() => setMegaMenu(null)}
                   >
-                    <HiOutlineGlobeAlt aria-hidden="true" className="text-base" />
-                    <span>{currentLang}</span>
-                    <HiOutlineChevronDown className="text-2xs" />
-                  </button>
+                    <nav aria-label="Điều hướng chính" className="vj-nav-bar">
+                      {NAV_LINKS.map((link) => {
+                        const active = isActivePath(pathname, link.href);
+                        const isMega =
+                          'mega' in link && (link.mega === 'flight' || link.mega === 'other');
+                        const isCurrentMega = isMega && megaMenu === link.mega;
 
-                  {langMenuOpen && (
-                    <div className="absolute right-0 top-[calc(100%+8px)] w-36 overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-lg text-gray-800">
-                      {['Tiếng Việt', 'English'].map((lang) => (
-                        <button
-                          key={lang}
-                          type="button"
-                          onClick={() => {
-                            setCurrentLang(lang);
-                            setLangMenuOpen(false);
-                          }}
-                          className={`flex w-full items-center justify-between px-3 py-2 text-left text-xs font-semibold ${
-                            currentLang === lang
-                              ? 'bg-red-50 font-bold text-vjred'
-                              : 'text-gray-700 hover:bg-gray-50'
-                          }`}
-                        >
-                          <span>{lang}</span>
-                          {currentLang === lang ? '✓' : null}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* 👤 Đăng ký | Đăng nhập hoặc Menu Tài khoản */}
-                {user ? (
-                  <div ref={accountMenuRef} className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setAccountMenuOpen((open) => !open)}
-                      aria-expanded={accountMenuOpen}
-                      className={`flex h-[36px] items-center gap-1.5 rounded-lg border px-3 font-bold transition ${
-                        lightChrome
-                          ? 'border-white/30 bg-black/20 text-white hover:bg-black/30'
-                          : 'border-gray-200 bg-gray-50 text-gray-800 hover:bg-gray-100'
-                      }`}
-                    >
-                      <HiOutlineUserCircle
-                        aria-hidden="true"
-                        className={`text-base ${lightChrome ? 'text-white' : 'text-vjred'}`}
-                      />
-                      <span className="max-w-[120px] truncate">
-                        {(user.fullName || user.email)?.replace(/\s*\(CCCD:.*?\)/gi, '')}
-                      </span>
-                      <HiOutlineChevronDown className="text-xs text-gray-400" />
-                    </button>
-
-                    {accountMenuOpen && (
-                      <div className="absolute right-0 top-[calc(100%+8px)] w-60 overflow-hidden rounded-xl border border-gray-200 bg-white py-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
-                        <div className="border-b border-gray-100 px-4 py-2.5 bg-gray-50/50">
-                          <p className="truncate text-xs font-bold text-gray-900">
-                            {(user.fullName || user.email)?.replace(/\s*\(CCCD:.*?\)/gi, '')}
-                          </p>
-                          <p className="truncate text-xs2 text-gray-500">{user.email}</p>
-                        </div>
-                        {accountLinks.map(([label, href]) => (
-                          <Link
-                            key={href}
-                            href={href}
-                            onClick={() => setAccountMenuOpen(false)}
-                            className="block px-4 py-2 text-xs font-semibold text-gray-700 transition hover:bg-red-50 hover:text-vjred"
+                        return (
+                          <div
+                            key={link.href}
+                            className="relative"
+                            onMouseEnter={() => {
+                              if (isMega) setMegaMenu(link.mega as 'flight' | 'other');
+                              else setMegaMenu(null);
+                            }}
                           >
-                            {label}
-                          </Link>
-                        ))}
-                        <button
-                          type="button"
-                          onClick={() => void signOut()}
-                          className="flex w-full items-center gap-2 border-t border-gray-100 px-4 py-2.5 text-left text-xs font-bold text-vjred transition hover:bg-red-50"
-                        >
-                          <HiOutlineLogout aria-hidden="true" />
-                          Đăng xuất
-                        </button>
+                            <Link
+                              href={link.href}
+                              aria-current={active ? 'page' : undefined}
+                              onClick={() => {
+                                if (isMega)
+                                  setMegaMenu((prev) =>
+                                    prev === link.mega ? null : (link.mega as 'flight' | 'other')
+                                  );
+                              }}
+                              className={`vj-nav-bar-item ${
+                                active || isCurrentMega ? 'vj-nav-bar-item--active' : ''
+                              }`}
+                            >
+                              <span>{link.label}</span>
+                              {isMega && (
+                                <HiOutlineChevronDown
+                                  className={`ml-1 text-xs transition-transform duration-200 ${
+                                    isCurrentMega ? 'rotate-180' : ''
+                                  }`}
+                                />
+                              )}
+                            </Link>
+                          </div>
+                        );
+                      })}
+                    </nav>
+
+                    {/* Mega Menu Dropdown */}
+                    {megaMenu && (
+                      <div
+                        className="absolute right-0 top-full mt-1.5 w-[640px] rounded-2xl bg-white p-5 shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-gray-100 z-50 text-gray-800 animate-fadeIn"
+                        onMouseEnter={() => {}}
+                      >
+                        <div className="grid grid-cols-2 gap-5 divide-x divide-gray-100">
+                          {/* Cột 1: Hành lý, suất ăn & dịch vụ bổ trợ */}
+                          <div className="pr-3">
+                            <h4 className="text-xs font-black uppercase tracking-wider text-primary-dark pb-2 mb-2 border-b border-gray-100 font-koho">
+                              Hành lý, suất ăn &amp; dịch vụ bổ trợ
+                            </h4>
+                            <div className="space-y-1.5">
+                              {FLIGHT_SERVICES_ITEMS.slice(0, 3).map((item) => (
+                                <Link
+                                  key={item.title}
+                                  href={item.href}
+                                  onClick={() => setMegaMenu(null)}
+                                  className="group block rounded-xl p-2 transition-all hover:bg-red-50/70 border border-transparent hover:border-red-100"
+                                >
+                                  <div className="flex items-center gap-1.5 mb-0.5">
+                                    <span className="text-xs font-bold text-gray-900 group-hover:text-vjred transition-colors leading-tight">
+                                      {item.title}
+                                    </span>
+                                    {item.isHot && (
+                                      <span className="text-3xs bg-red-600 text-white font-black px-1.5 py-0.2 rounded uppercase shrink-0 italic">
+                                        HOT
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-xs2 text-gray-500 line-clamp-2 leading-snug">
+                                    {item.desc}
+                                  </p>
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Cột 2: Dịch vụ khác */}
+                          <div className="pl-4">
+                            <h4 className="text-xs font-black uppercase tracking-wider text-primary-dark pb-2 mb-2 border-b border-gray-100 font-koho">
+                              Dịch vụ khác
+                            </h4>
+                            <div className="space-y-1.5">
+                              {OTHER_SERVICES_ITEMS.slice(0, 3).map((item) => (
+                                <Link
+                                  key={item.title}
+                                  href={item.href}
+                                  onClick={() => setMegaMenu(null)}
+                                  className="group block rounded-xl p-2 transition-all hover:bg-red-50/70 border border-transparent hover:border-red-100"
+                                >
+                                  <div className="flex items-center gap-1.5 mb-0.5">
+                                    <span className="text-xs font-bold text-gray-900 group-hover:text-vjred transition-colors leading-tight">
+                                      {item.title}
+                                    </span>
+                                    {item.isHot && (
+                                      <span className="text-3xs bg-red-600 text-white font-black px-1.5 py-0.2 rounded uppercase shrink-0 italic">
+                                        HOT
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-xs2 text-gray-500 line-clamp-2 leading-snug">
+                                    {item.desc}
+                                  </p>
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
-                ) : (
-                  <>
-                    <Link
-                      href="/dang-ky"
-                      className={`flex h-[36px] items-center justify-center px-4 text-sm font-bold transition ${
-                        lightChrome
-                          ? 'vj-utility-pill text-white hover:bg-white/25'
-                          : 'rounded-full border border-gray-200 bg-gray-50 text-gray-800 hover:bg-gray-100'
-                      }`}
-                    >
-                      Đăng ký
-                    </Link>
-                    {/* Nút "Đăng nhập" gradient vàng — 36px, chữ 15px/700 đỏ. */}
-                    <Link href="/dang-nhap" className="vj-login-pill">
-                      Đăng nhập
-                    </Link>
-                  </>
-                )}
+                </div>
               </div>
 
-              {/* Mobile controls for default mode */}
-              <div className="ml-auto flex items-center gap-1.5 sm:gap-2 lg:hidden text-xs font-semibold">
-                <a
-                  href="tel:19001166"
-                  aria-label="Gọi hỗ trợ"
-                  className={`flex items-center gap-1 px-1.5 py-1 ${
-                    lightChrome
-                      ? 'text-white hover:text-vjyellow'
-                      : 'text-gray-700 hover:text-vjred'
-                  }`}
-                >
-                  <RiHeadphoneLine className="text-base" />
-                  <span className="hidden min-[380px]:inline text-3xs sm:text-xs">Hỗ trợ</span>
-                </a>
-
-                {user ? (
-                  <span
-                    className={`max-w-[75px] truncate text-3xs sm:text-xs font-bold ${
-                      lightChrome ? 'text-white' : 'text-gray-800'
-                    }`}
-                  >
-                    {(user.fullName || user.email)?.replace(/\s*\(CCCD:.*?\)/gi, '')}
-                  </span>
-                ) : (
-                  <div
-                    className={`flex items-center gap-1 text-3xs sm:text-xs font-bold px-2.5 py-1 rounded-full border transition-all ${
-                      lightChrome
-                        ? 'vj-utility-pill text-white'
-                        : 'border-gray-200 bg-gray-100 text-gray-800'
-                    }`}
-                  >
-                    <Link
-                      href="/dang-ky"
-                      className="hover:text-vjyellow transition hover:underline"
-                    >
-                      Đăng ký
-                    </Link>
-                    <span className={lightChrome ? 'text-white/40' : 'text-gray-400'}>|</span>
-                    <Link
-                      href="/dang-nhap"
-                      className="hover:text-vjyellow transition hover:underline"
-                    >
-                      Đăng nhập
-                    </Link>
-                  </div>
-                )}
-
-                {/* Dropdown VI */}
-                <button
-                  type="button"
-                  onClick={() => setLangMenuOpen((open) => !open)}
-                  aria-expanded={langMenuOpen}
-                  className={`flex items-center gap-0.5 rounded px-1.5 py-0.5 text-3xs sm:text-xs font-bold border ${
-                    lightChrome
-                      ? 'vj-utility-pill text-white'
-                      : 'border-gray-200 bg-gray-50 text-gray-700'
-                  }`}
-                >
-                  <span>VI</span>
-                  <span className="text-3xs">▾</span>
-                </button>
-
-                {/* Hamburger button */}
-                <button
-                  type="button"
-                  onClick={() => setMobileMenuOpen(true)}
-                  aria-label="Mở menu"
-                  className={`flex h-8 w-8 items-center justify-center ${
-                    lightChrome ? 'text-white' : 'text-gray-700'
-                  }`}
-                >
-                  <HiOutlineMenu className="text-2xl" />
-                </button>
+              {/* Tầng 3 — Dải dịch vụ phụ, cao 35px, nền gradient đen → trong suốt. */}
+              <div className="vj-quick-rail-wrap">
+                <ul className="vj-quick-rail mx-auto max-w-[1200px]">
+                  {QUICK_SERVICES.map((item) => (
+                    <li key={item.label} className={item.highlight ? 'active' : undefined}>
+                      <Link href={item.href}>
+                        <img
+                          src={item.iconSrc}
+                          alt=""
+                          aria-hidden="true"
+                          width={25}
+                          height={25}
+                          className="h-[25px] w-[25px] shrink-0"
+                        />
+                        <span>{item.label}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
           </div>

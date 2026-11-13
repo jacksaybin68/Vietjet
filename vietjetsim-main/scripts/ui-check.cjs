@@ -141,7 +141,6 @@ async function attach() {
     ws.addEventListener('open', resolve);
     ws.addEventListener('error', reject);
   });
-
   const cdp = new Cdp(ws);
   const state = { consoleErrors: [], pageErrors: [], httpErrors: [] };
 
@@ -173,7 +172,19 @@ async function attach() {
   await cdp.send('Runtime.enable');
   await cdp.send('Log.enable');
   await cdp.send('Network.enable');
-  return { cdp, state };
+  return { cdp, state, targetId: target.id };
+}
+
+/** Đóng target Chrome sau khi chụp xong màn hình — nếu không, mỗi trang rất cao
+ *  (`/tim-ve` > 5000px) giữ nguyên cây DOM đã rasterize trong RAM và Chrome bị
+ *  treo, khiến CDP ngừng trả lời. */
+async function closeTarget(targetId) {
+  if (!targetId) return;
+  try {
+    await fetch(`http://127.0.0.1:${PORT}/json/close/${targetId}`);
+  } catch {
+    /* Chrome đã tự dọn — không cần làm gì. */
+  }
 }
 
 async function evaluate(cdp, expression, timeout = 30000) {
@@ -260,12 +271,16 @@ async function waitForStable(cdp, { maxMs = 15000, quietMs = 800 } = {}) {
 }
 
 async function goto(cdp, url, { width = 1440, height = 900, mobile = false } = {}) {
-  await cdp.send('Emulation.setDeviceMetricsOverride', {
-    width,
-    height,
-    deviceScaleFactor: 2,
-    mobile,
-  });
+  await cdp.send(
+    'Emulation.setDeviceMetricsOverride',
+    {
+      width,
+      height,
+      deviceScaleFactor: 2,
+      mobile,
+    },
+    120000
+  );
   // `Page.loadEventFired` là tín hiệu "đã xong" LÝ LẼ nhưng không phải tín hiệu
   // "đã sẵn sàng": Chrome có thể bắn nó trước lúc tài nguyên con (script
   // chunk) kịp tải, và ở một số route (route có `useSearchParams`, hay trang
@@ -341,7 +356,7 @@ const PROBE = `(() => {
     header: !!document.querySelector('header'),
     footer: !!document.querySelector('footer'),
     overflowX: de.scrollWidth - de.clientWidth,
-    bodyText: document.body.innerText.replace(/\\s+/g, ' ').trim().length,
+    bodyText: document.body ? document.body.innerText.replace(/\\s+/g, ' ').trim().length : -1,
     buttons: document.querySelectorAll('button').length,
     inputs: document.querySelectorAll('input').length,
     images: images.length,
@@ -389,42 +404,51 @@ async function main() {
 
   const browserWs = new WebSocket(await connect());
   await new Promise((r) => browserWs.addEventListener('open', r, { once: true }));
-  const { cdp, state } = await attach();
   const results = [];
 
-  const reset = () => {
+  const reset = (state) => {
     state.consoleErrors.length = 0;
     state.pageErrors.length = 0;
     state.httpErrors.length = 0;
   };
 
   const capture = async (name, url, { viewport = VIEWPORTS[0], interact } = {}) => {
-    reset();
     console.log(`  → ${name}-${viewport.label}`);
-    const stability = await goto(cdp, url, viewport);
-    let probe = { error: 'probe failed' };
+    /* Mỗi màn dùng MỘT target Chrome riêng: giữ một target suốt lượt chụp khiến
+       Chrome phải rasterize lại các trang rất cao (`/tim-ve` > 5000px) liên tục và
+       bị treo, nên CDP không còn trả lời. Target mới = bộ nhớ sạch + không còn
+       trạng thái cache của màn trước (ảnh "đăng nhập" bị đổi thành console vì
+       phiên admin còn sót). */
+    const { cdp, state, targetId } = await attach();
     try {
-      probe = await evaluate(cdp, PROBE, 60000);
-    } catch (e) {
-      /* Probe hỏng không được phép giết cả lượt chạy — vẫn chụp ảnh và ghi
-         lỗi vào báo cáo để biết màn nào không đo được. */
-      probe = { error: String(e && e.message ? e.message : e) };
+      reset(state);
+      const stability = await goto(cdp, url, viewport);
+      let probe = { error: 'probe failed' };
+      try {
+        probe = await evaluate(cdp, PROBE, 60000);
+      } catch (e) {
+        /* Probe hỏng không được phép giết cả lượt chạy — vẫn chụp ảnh và ghi
+           lỗi vào báo cáo để biết màn nào không đo được. */
+        probe = { error: String(e && e.message ? e.message : e) };
+      }
+      const screen = `${name}-${viewport.label}`;
+      const file = await shot(cdp, screen);
+      results.push({
+        screen,
+        viewport: viewport.label,
+        requestedUrl: url,
+        stable: stability.stable,
+        probe,
+        consoleErrors: [...state.consoleErrors],
+        pageErrors: [...state.pageErrors],
+        // 401 là chủ ý ở các trang cần session; các mã khác mới đáng báo.
+        httpErrors: state.httpErrors.filter((e) => !e.startsWith('401 ')),
+        file,
+        ...(interact ? await interact(cdp) : {}),
+      });
+    } finally {
+      await closeTarget(targetId);
     }
-    const screen = `${name}-${viewport.label}`;
-    const file = await shot(cdp, screen);
-    results.push({
-      screen,
-      viewport: viewport.label,
-      requestedUrl: url,
-      stable: stability.stable,
-      probe,
-      consoleErrors: [...state.consoleErrors],
-      pageErrors: [...state.pageErrors],
-      // 401 là chủ ý ở các trang cần session; các mã khác mới đáng báo.
-      httpErrors: state.httpErrors.filter((e) => !e.startsWith('401 ')),
-      file,
-      ...(interact ? await interact(cdp) : {}),
-    });
   };
 
   // Một màn hình ở cả ba viewport canonical. Thứ tự desktop → tablet → mobile
@@ -450,10 +474,14 @@ async function main() {
   await captureAll('13-dat-lai-mat-khau', `${BASE}/dat-lai-mat-khau`);
 
   const login = async (who) => {
-    await goto(cdp, `${BASE}/dang-nhap`);
-    return evaluate(
-      cdp,
-      `(async () => {
+    /* Đăng nhập trong target riêng: cookie phiên phải nằm ở profile dùng chung
+       của Chrome nên các target sau vẫn dùng được phiên này. */
+    const { cdp, targetId } = await attach();
+    try {
+      await goto(cdp, `${BASE}/dang-nhap`);
+      return await evaluate(
+        cdp,
+        `(async () => {
         /* Chrome mới tạo target ở about:blank — document.cookie trên nguồn
            không phải http(s) sẽ ném SecurityError. Bọc trong try/catch để
            probe trả về null thay vì làm hỏng cả lượt chạy. */
@@ -471,8 +499,11 @@ async function main() {
         const body = await res.json().catch(() => ({}));
         return { status: res.status, role: body.user && body.user.role };
       })()`,
-      90000
-    );
+        90000
+      );
+    } finally {
+      await closeTarget(targetId);
+    }
   };
 
   const userLogin = await login(USER);
@@ -495,19 +526,29 @@ async function main() {
   // /editor là standalone route, admin-only (giống /quan-tri).
   await captureAll('20-editor', `${BASE}/editor`);
 
-  // Trở lại bảng quản trị để kiểm tra widget OpenClaw
-  await goto(cdp, `${BASE}/quan-tri`);
-  await sleep(1000);
+  // Trở lại bảng quản trị để kiểm tra widget OpenClaw.
+  // `cdp` ở scope này phải là target RIÊNG: mỗi `capture()` đã đóng target của
+  // nó, nên không có biến `cdp` nào tồn tại ở scope `main()`. Dùng lại biến của
+  // lần capture gần nhất sẽ là "ReferenceError: cdp is not defined".
+  const widgetTarget = await attach();
+  const widgetCdp = widgetTarget.cdp;
+  // `widget` và `skip` được khai báo NGOÀI try: phần báo cáo cuối cùng đọc chúng
+  // sau khi target đã đóng.
+  let widget = {};
+  let skip = {};
+  try {
+    await goto(widgetCdp, `${BASE}/quan-tri`);
+    await sleep(1000);
 
-  // ── Widget OpenClaw: mở panel, đọc nhãn backend và thử gửi một câu ─────────
-  const widgetLauncher = `[...document.querySelectorAll('button')].find((b) => (b.getAttribute('aria-label') || '').includes('OpenClaw'))`;
-  const widget = { launcherFound: await evaluate(cdp, `!!${widgetLauncher}`) };
-  if (widget.launcherFound) {
-    await evaluate(cdp, `(() => { (${widgetLauncher}).click(); return true; })()`);
-    await sleep(2000);
-    widget.panel = await evaluate(
-      cdp,
-      `(() => {
+    // ── Widget OpenClaw: mở panel, đọc nhãn backend và thử gửi một câu ─────────
+    const widgetLauncher = `[...document.querySelectorAll('button')].find((b) => (b.getAttribute('aria-label') || '').includes('OpenClaw'))`;
+    widget = { launcherFound: await evaluate(widgetCdp, `!!${widgetLauncher}`) };
+    if (widget.launcherFound) {
+      await evaluate(widgetCdp, `(() => { (${widgetLauncher}).click(); return true; })()`);
+      await sleep(2000);
+      widget.panel = await evaluate(
+        widgetCdp,
+        `(() => {
         const label = [...document.querySelectorAll('div, p, span')]
           .map((e) => (e.innerText || '').trim())
           .find((t) => t.startsWith('Đang trực tuyến') || t.startsWith('Ollama') || t.startsWith('OpenClaw Gateway'));
@@ -518,15 +559,15 @@ async function main() {
           inputPlaceholder: input ? input.getAttribute('placeholder') : null,
         };
       })()`
-    );
-    widget.file = await shot(cdp, '16-openclaw-widget');
+      );
+      widget.file = await shot(widgetCdp, '16-openclaw-widget');
 
-    // Gửi thử một câu để xem luồng chat thật (Ollama ngoại tuyến ⇒ phải trả lời
-    // lịch sự, không được hiện khung trống hay lỗi).
-    if (widget.panel?.hasInput) {
-      widget.send = await evaluate(
-        cdp,
-        `(async () => {
+      // Gửi thử một câu để xem luồng chat thật (Ollama ngoại tuyến ⇒ phải trả lời
+      // lịch sự, không được hiện khung trống hay lỗi).
+      if (widget.panel?.hasInput) {
+        widget.send = await evaluate(
+          widgetCdp,
+          `(async () => {
           const input = document.getElementById('openclaw-input');
           const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
           setter.call(input, 'Cập nhật chuyến bay HAN-SGN hôm nay');
@@ -536,11 +577,11 @@ async function main() {
           if (button && !button.disabled) button.click();
           return { typed: true, clicked: !!button && !button.disabled };
         })()`
-      );
-      await sleep(3000);
-      widget.afterSend = await evaluate(
-        cdp,
-        `(() => {
+        );
+        await sleep(3000);
+        widget.afterSend = await evaluate(
+          widgetCdp,
+          `(() => {
           const text = document.body.innerText || '';
           return {
             hasOfflineNotice: /ngoại tuyến|Ngoại tuyến/.test(text),
@@ -548,9 +589,16 @@ async function main() {
             tail: text.replace(/\\s+/g, ' ').slice(-220),
           };
         })()`
-      );
-      widget.afterSendFile = await shot(cdp, '17-openclaw-sau-khi-gui');
+        );
+        widget.afterSendFile = await shot(widgetCdp, '17-openclaw-sau-khi-gui');
+      }
     }
+  } catch (e) {
+    // Lỗi ở bước kiểm tra widget không được phép giết cả lượt chạy — các màn
+    // hình đã chụp và phép thử skip link vẫn phải ra báo cáo.
+    widget.error = e && e.message ? e.message : String(e);
+  } finally {
+    await closeTarget(widgetTarget.targetId);
   }
 
   // ── Skip link: hành vi thật, không chỉ cấu trúc DOM ────────────────────────
@@ -558,41 +606,47 @@ async function main() {
   // cần, không phải điều kiện đủ — nó không cho biết bàn phím có thật sự đi qua
   // thanh điều hướng. Ở đây: Tab đầu tiên phải rơi vào đúng skip link, Enter phải
   // đặt đích về `#main-content`, và Tab kế tiếp phải nằm *trong* `#main-content`.
-  await goto(cdp, `${BASE}/trang-chu`, VIEWPORTS[0]);
-  const skip = {
-    inDom: await evaluate(cdp, `!!document.querySelector('a[href="#main-content"]')`),
-  };
-  if (skip.inDom) {
-    // Chuẩn hoá điểm xuất phát của Tab tuần tự về đầu document.
-    await evaluate(cdp, `(document.activeElement && document.activeElement.blur(), true)`);
-    await pressKey(cdp, 'Tab');
-    skip.firstTabIsSkipLink = await evaluate(
-      cdp,
-      `document.activeElement === document.querySelector('a[href="#main-content"]')`
-    );
-    if (skip.firstTabIsSkipLink) {
-      await pressKey(cdp, 'Enter');
-      await sleep(300);
-      skip.hash = await evaluate(cdp, `location.hash`);
-      await pressKey(cdp, 'Tab');
-      skip.nextTabInMain = await evaluate(
-        cdp,
-        `(() => {
+  const skipTarget = await attach();
+  const skipCdp = skipTarget.cdp;
+  try {
+    await goto(skipCdp, `${BASE}/trang-chu`, VIEWPORTS[0]);
+    skip = {
+      inDom: await evaluate(skipCdp, `!!document.querySelector('a[href="#main-content"]')`),
+    };
+    if (skip.inDom) {
+      // Chuẩn hoá điểm xuất phát của Tab tuần tự về đầu document.
+      await evaluate(skipCdp, `(document.activeElement && document.activeElement.blur(), true)`);
+      await pressKey(skipCdp, 'Tab');
+      skip.firstTabIsSkipLink = await evaluate(
+        skipCdp,
+        `document.activeElement === document.querySelector('a[href="#main-content"]')`
+      );
+      if (skip.firstTabIsSkipLink) {
+        await pressKey(skipCdp, 'Enter');
+        await sleep(300);
+        skip.hash = await evaluate(skipCdp, `location.hash`);
+        await pressKey(skipCdp, 'Tab');
+        skip.nextTabInMain = await evaluate(
+          skipCdp,
+          `(() => {
           const main = document.querySelector('#main-content');
           const el = document.activeElement;
           return !!main && !!el && el !== document.body && main.contains(el);
         })()`
-      );
-      skip.nextTabTag = await evaluate(
-        cdp,
-        `(() => {
+        );
+        skip.nextTabTag = await evaluate(
+          skipCdp,
+          `(() => {
           const el = document.activeElement;
           if (!el || el === document.body) return 'body';
           return el.tagName + (el.id ? '#' + el.id : '') +
             (el.className && typeof el.className === 'string' ? '.' + el.className.split(' ')[0] : '');
         })()`
-      );
+        );
+      }
     }
+  } finally {
+    await closeTarget(skipTarget.targetId);
   }
 
   chrome.kill('SIGTERM');

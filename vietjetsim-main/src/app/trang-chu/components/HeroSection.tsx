@@ -72,16 +72,21 @@ export default function HeroSection() {
   }, []);
 
   return (
-    // Site thật (đo 13/11/2026): hero cao 950px ở desktop, đặt ngay dưới
-    // thanh thông báo 50px. Dải đặt vé nằm ĐÈ lên mép dưới hero — không có
-    // sóng SVG ở giữa. Trên mobile hero cao 380px và dải đặt vé trôi xuống
-    // bình thường (absolute chỉ từ `lg` trở lên).
-    <section className="relative w-full overflow-hidden bg-sky-100">
+    // Số đo site thật (13/11/2026, viewport 1440×900):
+    //   - Hero cao 725px, nằm ngay dưới thanh thông báo 50px (y=50..775).
+    //   - Ảnh slider 1440×720, bo tròn không, canh trên.
+    //   - Dải đặt vé rộng 380px nằm ở mép phải container 1200px, đỉnh ở
+    //     y=214 (164px tính từ đỉnh hero).
+    //   - Chấm điều hướng slider: `ul` absolute tại top 589.016px (hero-relative),
+    //     canh giữa toàn bề ngang, mỗi chấm 20×20px.
+    // Lưu ý: `section` KHÔNG dùng `overflow-hidden` — popover lịch 630px mở ra
+    // ngoài khung panel và sẽ bị cắt mất nếu khối cha cắt tràn. Ảnh nền vẫn
+    // được cắt riêng trong lớp bọc của nó.
+    <section className="relative w-full bg-sky-100">
       <h1 className="sr-only">Vietjet Air - Thông báo quan trọng Nhà ga T3 Jakarta</h1>
 
-      {/* Ảnh nền hero — slider các banner. Khung có chiều cao cụ thể vì ảnh
-          nằm absolute; nếu không section sẽ collapse về 0px. */}
-      <div className="relative h-[380px] sm:h-[560px] lg:h-[950px]">
+      <div className="relative h-[380px] sm:h-[560px] lg:h-[725px]">
+        {/* Ảnh nền hero — slider các banner. */}
         <div className="absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
           {HERO_BANNERS.map((banner, idx) => (
             <div
@@ -99,31 +104,40 @@ export default function HeroSection() {
           ))}
         </div>
 
-        {/* Chấm điều hướng slider — site thật đặt ngay phía trên dải đặt vé
-            (Y=686 ở mobile, chấm căn giữa banner). Canh theo container 1200px. */}
-        <div
+        {/* Chấm điều hướng slider — site thật: absolute tại top 589.016px tính từ
+            đỉnh hero, `text-align:center`, mỗi chấm là nút 20×20px với nội dung
+            "•" 12px (trắng khi không active, đỏ #EC2029 khi active). */}
+        <ul
           data-testid="hero-slider-dots"
-          className="absolute inset-x-0 bottom-[56px] z-20 mx-auto flex max-w-[1200px] items-center justify-center gap-2 px-4 sm:px-6 lg:bottom-[330px] lg:px-0"
+          className="pointer-events-none absolute inset-x-0 top-[589px] z-20 flex justify-center"
         >
           {HERO_BANNERS.map((_, idx) => (
-            <button
-              key={idx}
-              type="button"
-              aria-label={`Chuyển sang banner ${idx + 1}`}
-              onClick={() => setCurrentBannerIndex(idx)}
-              className={`rounded-full transition-all duration-300 cursor-pointer ${
-                idx === currentBannerIndex
-                  ? 'w-2.5 h-2.5 bg-vjred scale-110 shadow-xs'
-                  : 'w-2 h-2 bg-white/80 hover:bg-white'
-              }`}
-            />
+            <li key={idx} className="relative inline-block h-5 w-5">
+              <button
+                type="button"
+                aria-label={`Chuyển sang banner ${idx + 1}`}
+                aria-current={idx === currentBannerIndex ? 'true' : undefined}
+                onClick={() => setCurrentBannerIndex(idx)}
+                className="pointer-events-auto block h-5 w-5 cursor-pointer p-[5px] text-xs leading-none transition-colors before:block before:h-auto before:w-auto before:content-['•']"
+                style={{ color: idx === currentBannerIndex ? '#EC2029' : '#FFFFFF' }}
+              />
+            </li>
           ))}
+        </ul>
+
+        {/* Dải đặt vé — container 1200px, panel 380px neo ở mép phải.
+            Chỉ hiển thị từ `lg` trở lên; trên mobile bản riêng nằm dưới hero. */}
+        <div className="absolute inset-x-0 top-0 z-20 hidden h-full lg:block">
+          <div className="mx-auto flex h-full max-w-[1200px] items-center justify-end">
+            <div className="w-[380px] max-w-[380px] translate-y-[65px]">
+              <HeroBookingWidget />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Dải đặt vé — 1200px, nằm ở mép dưới hero (desktop) và trôi xuống
-          ngay sau banner (mobile). */}
-      <div className="relative z-20 -mt-[40px] sm:-mt-[90px] lg:absolute lg:inset-x-0 lg:bottom-0 lg:mt-0">
+      {/* Dải đặt vé trên mobile — trôi xuống ngay sau banner. */}
+      <div className="relative z-20 lg:hidden">
         <HeroBookingWidget />
       </div>
     </section>

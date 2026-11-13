@@ -67,6 +67,13 @@ interface Props {
   variant?: 'bordered' | 'flush' | 'field';
   /** Extra classes on the outer wrapper, e.g. to span a grid track. */
   className?: string;
+  /**
+   * Class cho nhãn hiển thị. Panel đặt vé của trang chủ dùng nhãn 18px/600
+   * (đo được trên site thật) thay vì nhãn 12px/600 mặc định.
+   */
+  headingClass?: string;
+  /** Class cho giá trị sân bay. Mặc định 16px/500. */
+  valueClass?: string;
 }
 
 /**
@@ -86,6 +93,8 @@ export default function AirportPicker({
   onChange,
   variant = 'bordered',
   className = '',
+  headingClass = '',
+  valueClass = '',
 }: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -210,29 +219,27 @@ export default function AirportPicker({
 
   return (
     <div ref={containerRef} className={`relative min-w-0 h-full ${className}`}>
-      <label
-        className={
-          variant === 'field'
-            ? 'flex h-[56px] w-full min-w-0 items-center gap-2 rounded-vj border border-[var(--border)] bg-white px-3 transition-colors hover:border-[var(--accent)] focus-within:border-[var(--accent)]'
-            : variant === 'flush'
-              ? 'flex h-full min-h-[48px] items-center gap-2 bg-white px-3 py-1.5 focus-within:bg-vj-surface-cream'
-              : 'flex min-h-[48px] items-center gap-2 rounded-vj border border-vj-border bg-white px-3 py-1.5 focus-within:border-[var(--accent)]'
-        }
-      >
-        <Icon className={iconClass} />
-        <span className="min-w-0 flex-1">
-          <span className={variant === 'field' ? fieldLabelClass : labelClass}>{label}</span>
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-haspopup="listbox"
-            aria-expanded={open}
-            aria-label={ariaLabel ?? label}
-            className={`w-full min-w-0 border-0 bg-transparent px-0 text-base font-medium text-[var(--foreground)] outline-none ${
-              variant === 'field' ? '' : 'sm:text-lg2'
-            } flex cursor-pointer items-center justify-between gap-1 text-left`}
-          >
-            <span className={variant === 'field' ? fieldValueClass : 'truncate'}>
+      {variant === 'flush' ? (
+        // Biến thể "flush" — nằm trong hộp trắng đã có sẵn viền/bo góc.
+        // Số đo site thật (13/11/2026):
+        //   - Icon sân bay 20×19px nằm ở x = mép hộp + 14px, canh giữa dọc.
+        //   - Nhãn 18px/600 nằm ở x = mép hộp + 48px (dòng trên).
+        //   - Giá trị sân bay 17px/600 nằm dưới nhãn, cùng cột trái.
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-label={ariaLabel ?? label}
+          className="relative flex h-full w-full min-w-0 cursor-pointer flex-col items-start justify-center gap-0.5 bg-transparent pl-[48px] text-left"
+        >
+          <Icon
+            aria-hidden="true"
+            className="absolute left-[14px] top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--foreground)]"
+          />
+          <span className={`block truncate ${headingClass || labelClass}`}>{label}</span>
+          <span className="flex w-full min-w-0 items-center justify-between gap-1">
+            <span className={`truncate ${valueClass || 'text-base font-medium'}`}>
               {selected.city} ( {selected.code} )
             </span>
             <svg
@@ -240,7 +247,7 @@ export default function AirportPicker({
               fill="currentColor"
               strokeWidth="0"
               viewBox="0 0 24 24"
-              className={iconClass}
+              className="shrink-0 text-lg text-[var(--foreground)]"
               height="1em"
               width="1em"
               xmlns="http://www.w3.org/2000/svg"
@@ -249,9 +256,50 @@ export default function AirportPicker({
               <path fill="none" d="M0 0h24v24H0z" />
               <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z" />
             </svg>
-          </button>
-        </span>
-      </label>
+          </span>
+        </button>
+      ) : (
+        <label
+          className={
+            variant === 'field'
+              ? 'flex h-[56px] w-full min-w-0 items-center gap-2 rounded-vj border border-[var(--border)] bg-white px-3 transition-colors hover:border-[var(--accent)] focus-within:border-[var(--accent)]'
+              : 'flex min-h-[48px] items-center gap-2 rounded-vj border border-vj-border bg-white px-3 py-1.5 focus-within:border-[var(--accent)]'
+          }
+        >
+          <Icon className={iconClass} />
+          <span className="min-w-0 flex-1">
+            <span className={variant === 'field' ? fieldLabelClass : labelClass}>{label}</span>
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-haspopup="listbox"
+              aria-expanded={open}
+              aria-label={ariaLabel ?? label}
+              className={`w-full min-w-0 border-0 bg-transparent px-0 text-base font-medium text-[var(--foreground)] outline-none ${
+                variant === 'field' ? '' : 'sm:text-lg2'
+              } flex cursor-pointer items-center justify-between gap-1 text-left`}
+            >
+              <span className={variant === 'field' ? fieldValueClass : 'truncate'}>
+                {selected.city} ( {selected.code} )
+              </span>
+              <svg
+                stroke="currentColor"
+                fill="currentColor"
+                strokeWidth="0"
+                viewBox="0 0 24 24"
+                className={iconClass}
+                height="1em"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path fill="none" d="M0 0h24v24H0z" />
+                <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z" />
+              </svg>
+            </button>
+          </span>
+        </label>
+      )}
 
       {open &&
         createPortal(

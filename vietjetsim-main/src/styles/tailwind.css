@@ -566,17 +566,26 @@ h6 {
 }
 
 /* Thanh tab dịch vụ phía trên panel: cao 52px, bo góc 5px 5px 0 0.
-   Rộng theo số đo site thật: 201px / 103px / 76px (tổng 380px). */
+   Rộng theo số đo site thật: 201px / 103px / 76px (tổng 380px).
+   Trên mobile 4 tab vượt bề ngang 358px → thanh cuộn ngang, ẩn scrollbar. */
 .vj-booking-tabs {
   display: flex;
   align-items: stretch;
   height: 52px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.vj-booking-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .vj-booking-tab {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
   padding: 6px 8px;
   font-size: 14px;
   line-height: 24.5px;
@@ -601,6 +610,22 @@ h6 {
 
 .vj-booking-tab:hover {
   filter: brightness(1.06);
+}
+
+/* Chữ trong tab dịch vụ: font thương hiệu JambonoMedium 14px/500, canh giữa.
+   Đo được trên site thật (13/11/2026) — span bên trong nút là `display:flex`,
+   `align-items:center`, `justify-content:center`, chiều cao 40px. */
+.vj-booking-tab__label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  width: 100%;
+  font-family: var(--vj-font-cta);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  text-align: center;
 }
 
 /* Ô nhập trong dải đặt vé: cao 48px, bo góc 10px, nền trắng.
@@ -669,6 +694,38 @@ h6 {
   font-weight: 500;
 }
 
+/* Mục của dải dịch vụ phụ: icon 25×25 + chữ 16px/700. */
+.vj-quick-rail li a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 35px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  transition: color 160ms ease;
+}
+
+.vj-quick-rail li a:hover {
+  color: var(--vj-nav-active);
+}
+
+.vj-quick-rail li.active a {
+  color: var(--vj-nav-active);
+}
+
+/* Nền của dải dịch vụ phụ: gradient đen → trong suốt (đo được trên site
+ * thật: linear-gradient(rgb(0,0,0) -1232.29%, rgba(0,0,0,0) 148.96%)). */
+.vj-quick-rail-wrap {
+  background-image: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.35) 55%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
 /* Header: hàng menu chính (nav trên cùng) — chữ 16px/600 uppercase. */
 .vj-nav-bar {
   display: flex;
@@ -695,14 +752,36 @@ h6 {
   color: var(--vj-nav-active);
 }
 
+/* Mục menu đang active: gạch dưới màu vàng #F7C61A. */
+.vj-nav-bar-item--active {
+  color: #ffffff;
+  box-shadow: inset 0 -2px 0 0 var(--vj-nav-active);
+}
+
+/* Lớp phủ tối của header (site thật: `jss108`, position absolute, top 50px,
+ * height 118px, padding-top 10px, z-index 1300). Gradient đo được:
+ * linear-gradient(rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.094) 100%). */
+.vj-header-scrim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 118px;
+  padding-top: 10px;
+  z-index: 1300;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.094) 100%);
+  color: #ffffff;
+}
+
 /* Footer — site thật dùng nền TRẮNG phủ pattern, KHÔNG phải nền xanh trời.
-   (Đo 13/11/2026: `.jss94` background-color #fff + footer-pattern.svg, cao 371px.) */
+   (Đo 13/11/2026: background-color #fff + footer-pattern.svg, background-size
+   300px cover, cao 905px.) */
 .vj-footer-sky {
   background-color: #ffffff;
   background-image: url('/images/footer-pattern.svg');
-  background-repeat: repeat;
-  background-position: top left;
-  background-size: 120px 24px;
+  background-repeat: no-repeat;
+  background-position: 100% 100%;
+  background-size: 300px cover;
 }
 
 /* Khối nội dung footer: container 1200px, không thẻ trắng bo góc 40px. */
@@ -715,15 +794,16 @@ h6 {
 /* Cột tiêu đề trong footer: 18px/700 màu đỏ thương hiệu. */
 .vj-footer-heading {
   font-size: 18px;
-  line-height: 28px;
+  line-height: 23px;
   font-weight: 700;
-  color: var(--primary);
+  /* Site thật dùng #333333 cho tiêu đề cột, KHÔNG phải đỏ thương hiệu. */
+  color: var(--foreground);
 }
 
-/* Liên kết footer: 16px/500 màu #333 (đo được trên site thật). */
+/* Liên kết footer: 14px/500 màu #333, line-height 22.4px (đo được trên site thật). */
 .vj-footer-link {
-  font-size: 16px;
-  line-height: 24px;
+  font-size: 14px;
+  line-height: 22.4px;
   font-weight: 500;
   color: var(--foreground);
   transition: color 160ms ease;
