@@ -181,9 +181,7 @@ tracking page and check-in, and `searchBookingsByPnr` joins on it. So `035`
 touches **no flight that has a booking**, and reports the ones it skipped
 instead of silently leaving them. Two remain on purpose, each with a live
 booking: `VJ101-1000` (VJDEMO01, completed) and `VJ789-1043` (VJ644052,
-confirmed). Widening the validator to accept their shape is still open.
-
-The dump used to reason about this is
+- Đã xác nhận: validator tại `src/lib/flight-no.ts:37` và CHECK trong migration `036_flight_no_shape_check.sql` đều chấp nhận `VJ101-1000` và `VJ789-1043` qua mẫu `(-[0-9]{4})?$`, nên cả hai số hiệu này sửa được qua console admin. Công việc này không còn mở.
 `database-backup/neon_dump_pre_003_020.sql` (2.1 MB, taken before these
 changes). Restoring it locally needs `postgres:17-alpine` and the
 `pg_session_jwt` CREATE EXTENSION stripped — Neon ships that extension and
@@ -1273,8 +1271,11 @@ values above come from the theme's own leaked stylesheet ‚Äî don't "correct"
 Keep auth CTAs on that one utility rather than reintroducing `.vj-btn`.
 
 **The auth screens are a 1-column SkyID clone, not a modal.** `SkyIdShell`
-(`src/features/auth/components/SkyIdShell.tsx`) is the whole-page shell: the
-`bg.jpg` full-bleed background, a white `.vj-skyid-card` (`max-width:420px`,
+(`src/features/auth/components/SkyIdShell.tsx`) is the whole-page shell: a
+full-bleed `bg.jpg` background plus the left art panel (`.vj-skyid-art`,
+`--vj-skyid-art-width` = `576px`, `532px` under `max-height:800px`, `455px` under
+`max-width:1100px`, hidden under `899px`) carrying `bg-top-right.png` and
+`bg-bot.png`; then a white `.vj-skyid-card` (`max-width:420px`,
 `padding:24px 34px 0`, `border-radius:0 0 16px 16px`), the red logo
 `absolute top:20px left:20px`, the white logo `fixed bottom:20px left:20px`, and
 the "Được cung cấp và xác thực bởi SkyJoy ID" footer with three `h:16px` logos.
@@ -1282,13 +1283,15 @@ the "Được cung cấp và xác thực bởi SkyJoy ID" footer with three `h:1
 them. The four auth routes (`/dang-nhap`, `/dang-ky`, `/quen-mat-khau`,
 `/dat-lai-mat-khau`) are standalone: no `<Header />`, no `<Footer />`, exactly one
 `<main id="main-content">`. `AuthModalProvider` renders the same component as a
-`fixed` overlay with `rgba(0,0,0,.4)` behind it.
+`fixed` overlay with `rgba(0,0,0,.4)` behind it, and passes `showArt={false}` so
+the overlay has no left panel — that is what `.vj-skyid-layout--no-art` (which
+zeroes `--vj-skyid-art-offset`) is for.
 
 Two measurements are load-bearing and were wrong once already:
 
 - **`.vj-skyid-input` is exempt from the global placeholder rule.** A global
-  `input:not(.vj-auth-input)::placeholder { color:#000 !important; font-weight:700 }`
-  overrides the SkyID placeholder unless the selector also excludes
+  `input:not(.vj-skyid-input)::placeholder { color:#000 !important; font-weight:700 }`
+  overrides the SkyID placeholder unless the selector excludes
   `.vj-skyid-input`. The real form uses `#C4C4C4` at weight 400. Measure it with
   `getComputedStyle(input, '::placeholder')` — the visual result is
   indistinguishable from a black bold placeholder until you read the value.
