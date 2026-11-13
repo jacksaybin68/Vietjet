@@ -784,6 +784,29 @@ export default function PaymentClient() {
         return;
       }
     }
+
+    if (paymentMethod === 'movi') {
+      if (!moviFullName.trim()) {
+        setPaymentError('Vui lòng nhập Họ và tên người đăng ký trả sau Movi');
+        setShowErrorModal(true);
+        return;
+      }
+      if (!moviBirthDate.trim()) {
+        setPaymentError('Vui lòng nhập Ngày sinh (DD/MM/YYYY)');
+        setShowErrorModal(true);
+        return;
+      }
+      if (!moviCccd.trim() || moviCccd.trim().length < 9) {
+        setPaymentError('Vui lòng nhập số CMND/CCCD hợp lệ (từ 9 đến 12 số)');
+        setShowErrorModal(true);
+        return;
+      }
+      if (!moviPhone.trim() || moviPhone.trim().replace(/\D/g, '').length < 10) {
+        setPaymentError('Vui lòng nhập số điện thoại hợp lệ (10 số)');
+        setShowErrorModal(true);
+        return;
+      }
+    }
     setLoading(true);
     setPaymentError(null);
     setShowErrorModal(false);
@@ -800,7 +823,10 @@ export default function PaymentClient() {
         discount_amount: discountAmount,
         discount_code: promoData?.code,
         bank_account_id: selectedAdminAccount?.id,
-        transfer_note: transferNoteInput.trim() || transferNote,
+        transfer_note:
+          paymentMethod === 'movi'
+            ? `MOVI: ${moviFullName.trim()} - CCCD ${moviCccd.trim()} - SĐT ${moviPhone.trim()}`
+            : transferNoteInput.trim() || transferNote,
         transfer_amount: transferAmountInput.trim() || String(cashDue),
         receipt_image: receiptImage || undefined,
         points_to_redeem:
