@@ -1,7 +1,7 @@
 'use client';
 
 import React, { Suspense } from 'react';
-import SkyIdForgotPassword from '@/features/auth/components/skyid/SkyIdForgotPassword';
+import SkyIdForgotPassword from '@/features/auth/components/skyid/steps/ForgotPasswordStep';
 
 /**
  * Trang "Quên mật khẩu?".

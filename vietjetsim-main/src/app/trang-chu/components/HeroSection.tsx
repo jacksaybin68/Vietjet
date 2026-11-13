@@ -94,8 +94,19 @@ export default function HeroSection() {
       <h1 className="sr-only">Vietjet Air - Thông báo quan trọng Nhà ga T3 Jakarta</h1>
 
       <div className="relative h-[422px] sm:h-[560px] lg:h-[725px]">
-        {/* Ảnh nền hero — slider các banner. */}
-        <div className="absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+        {/* Ảnh nền hero — slider các banner.
+
+            `data-visual-mask="hero"`: banner này TỰ CHẠY (đổi slide mỗi vài
+            giây), nên ảnh chụp ở hai thời điểm khác nhau sẽ khác nhau dù giao diện
+            không đổi. Cổng diff ảnh (`scripts/visual-diff.cjs`) đọc attribute này
+            để tô xám vùng đó trước khi so — nếu không, mọi lần chạy đều báo lệch
+            và cổng trở nên vô nghĩa. Đây là hợp đồng giữa component và cổng
+            QA, nên nó nằm cạnh markup chứ không giấu trong script. */}
+        <div
+          className="absolute inset-0 z-0 overflow-hidden"
+          aria-hidden="true"
+          data-visual-mask="hero"
+        >
           {HERO_BANNERS.map((banner, idx) => (
             <div
               key={banner.id}

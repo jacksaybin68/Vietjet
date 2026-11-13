@@ -62,7 +62,7 @@ async function goToOtpStep() {
   fireEvent.change(screen.getByLabelText('Tên đệm và tên'), { target: { value: 'Văn A' } });
   fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'a@b.com' } });
   fireEvent.click(screen.getByRole('checkbox'));
-  fireEvent.click(screen.getByRole('button', { name: /Tiếp tục/ }));
+  fireEvent.click(screen.getByRole('button', { name: 'Đăng ký' }));
 
   await waitFor(() => {
     expect(screen.getByText(/Mã xác thực gồm/)).toBeInTheDocument();
@@ -91,7 +91,7 @@ describe('SkyID — bước OTP và nút gửi lại mã', () => {
       await vi.advanceTimersByTimeAsync(60_000);
     });
 
-    expect(screen.getByRole('button', { name: 'Gửi lại mã' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /^Gửi lại mã$/ })).toBeEnabled();
   });
 
   it('bấm gửi lại mã thì gọi lại API và khoá lại nút trong 60 giây', async () => {
@@ -102,7 +102,7 @@ describe('SkyID — bước OTP và nút gửi lại mã', () => {
       await vi.advanceTimersByTimeAsync(60_000);
     });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Gửi lại mã' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Gửi lại mã$/ }));
 
     await waitFor(() => {
       expect(mockAuth.requestOtp).toHaveBeenCalledTimes(2);

@@ -405,7 +405,7 @@ export default function PassengerInfoStep({
                       <div>
                         <UnderlineField
                           id={`passenger-${i}-name`}
-                          label="Họ (Theo giấy tờ tuỳ thân)"
+                          label="Họ và tên"
                           filled={!!p.name}
                         >
                           <input
@@ -414,6 +414,7 @@ export default function PassengerInfoStep({
                             type="text"
                             value={p.name}
                             onChange={(e) => updatePassenger(i, 'name', e.target.value)}
+                            placeholder="Họ (Theo giấy tờ tuỳ thân)"
                             required
                           />
                         </UnderlineField>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { Suspense } from 'react';
-import SkyIdResetPassword from '@/features/auth/components/skyid/SkyIdResetPassword';
+import SkyIdResetPassword from '@/features/auth/components/skyid/steps/ResetPasswordStep';
 
 /**
  * Trang "Đặt lại mật khẩu" — `/dat-lai-mat-khau?token=…`.

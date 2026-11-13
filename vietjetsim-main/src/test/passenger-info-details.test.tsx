@@ -89,18 +89,18 @@ describe('PassengerInfoStep extended contact and consent fields', () => {
     expect(screen.getAllByLabelText(/CCCD \/ Hộ chiếu/)).toHaveLength(3);
   });
 
-  // Every field label used to be a copy-pasted class string that drifted into
-  // three different orders, and "Giới tính" alone got a larger bottom margin
-  // than the other seven — so the label baselines did not line up across the
-  // grid. One shared constant now owns the typography.
+  // The form switched to Material-UI floating labels (đo site thật 13/11/2026):
+  // every text field carries the `.vj-underline-label` utility, and the
+  // standalone "Giới tính" row label carries the shared `fieldLabelClass`.
+  // One shared class per kind means the labels cannot drift apart again.
   it('gives every field label the same typography', () => {
     render(
       <PassengerInfoStep flight={flight} passengerCount={1} onSubmit={vi.fn()} onBack={vi.fn()} />
     );
 
-    const labels = [
-      'Giới tính',
+    const floating = [
       /Họ và tên/,
+      /Tên đệm & tên/,
       /Quốc gia/,
       /Ngày sinh/,
       /Số điện thoại/,
@@ -109,17 +109,23 @@ describe('PassengerInfoStep extended contact and consent fields', () => {
       /Địa chỉ/,
       /Mã hội viên SkyJoy/,
     ].map((name) =>
-      typeof name === 'string'
-        ? screen.getByText(name)
-        : screen.getByText((_, el) => el?.tagName === 'LABEL' && name.test(el.textContent ?? ''))
+      screen.getByText((_, el) => el?.tagName === 'LABEL' && name.test(el.textContent ?? ''))
     );
 
     // More than one distinct className means the labels have drifted apart again.
-    expect(new Set(labels.map((l) => l.className)).size).toBe(1);
-    // The uppercase tracked field-label treatment, and the KoHo face, are part of it.
-    expect(labels[0].className).toContain('uppercase');
-    expect(labels[0].className).toContain('tracking-wider');
-    expect(labels[0].className).toContain('font-koho');
+    expect(new Set(floating.map((l) => l.className)).size).toBe(1);
+    expect(floating[0].className).toContain('vj-underline-label');
+
+    // The row label that is not floating keeps the project's shared field label
+    // typography: KoHo, 16px/500, grey.
+    const genderLabel = screen.getByText('Giới tính');
+    expect(genderLabel.className).toContain('text-base');
+    expect(genderLabel.className).toContain('font-medium');
+    expect(genderLabel.className).toContain('text-vj-currency-gray');
+    expect(genderLabel.className).toContain('font-koho');
+    // The old uppercase/tracked treatment is gone (plan §3).
+    expect(genderLabel.className).not.toContain('uppercase');
+    expect(genderLabel.className).not.toContain('tracking-wider');
   });
 
   it('shows validation messages and submits complete passenger plus policy consent', async () => {

@@ -1356,7 +1356,8 @@ export default function FlightResultsStep({
                   </span>
                 </div>
 
-                {/* Right: Fare Classes — 4 cột 1 hàng ngang trên cả mobile và desktop */}
+                {/* Right: Fare Classes — 4 cột 1 hàng ngang trên cả mobile và desktop.
+                    Ô hạng 141×96 (đo site thật 13/11/2026). */}
                 <div className="flex-1 min-w-0 grid grid-cols-4 gap-0.5 p-0.5 sm:p-0 bg-gray-100/60">
                   {fareClasses.map((fc) => {
                     const fares = Object.fromEntries(
@@ -1374,7 +1375,7 @@ export default function FlightResultsStep({
                     return (
                       <div
                         key={fc.id}
-                        className={`relative flex min-w-0 flex-col overflow-hidden transition-all duration-200 ${
+                        className={`relative flex min-w-0 min-h-[96px] flex-col overflow-hidden transition-all duration-200 ${
                           isSoldOut
                             ? 'bg-gray-100/80 text-gray-400'
                             : isSelected

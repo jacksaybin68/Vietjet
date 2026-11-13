@@ -1904,6 +1904,35 @@ h6 {
   background-repeat: no-repeat;
 }
 
+/* Dòng "gửi lại mã" — `.gid-resend-otp` của SkyID (`14px/22px`).
+ *
+ * Nút gửi lại chỉ bấm được khi hết thời gian chờ; trong lúc đó nó hiện đồng hồ
+ * đếm ngược. Dùng `aria-live` để người dùng đọc bằng trình đọc màn hình biết
+ * mình còn phải chờ bao lâu nữa. */
+.vj-skyid-resend {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  border: 0;
+  background: transparent;
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 400;
+  color: var(--vj-skyid-link);
+  cursor: pointer;
+}
+
+.vj-skyid-resend:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.vj-skyid-resend:disabled {
+  color: var(--vj-skyid-disabled-ink);
+  cursor: not-allowed;
+}
+
 /* Chân trang logo — `.gid-logo-footer`. */
 .vj-skyid-footer {
   margin-top: auto;
