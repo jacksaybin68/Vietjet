@@ -373,11 +373,9 @@ export default function PassengerInfoStep({
                 </div>
 
                 <div className="p-4 sm:p-5 space-y-4">
-                  {/* Gender row */}
+                  {/* Gender row — nhóm radio, nhãn là dòng chữ riêng (không nổi) */}
                   <div>
-                    <div className="vj-underline-field relative">
-                      <span className="vj-underline-label">Giới tính</span>
-                    </div>
+                    <label className={fieldLabelClass}>Giới tính</label>
                     <div className="flex items-center gap-6 mt-1">
                       {[
                         ['male', 'Nam'],
@@ -658,7 +656,7 @@ export default function PassengerInfoStep({
                           onChange={(e) =>
                             setConsents((c) => ({ ...c, marketing: e.target.checked }))
                           }
-                          className="w-3.5 h-3.5 rounded border-gray-300 accent-primary"
+                          className={CHECKBOX_CLASS}
                         />
                         <span>Gửi thông tin khuyến mãi, ưu đãi</span>
                       </label>
@@ -667,7 +665,7 @@ export default function PassengerInfoStep({
                           type="checkbox"
                           checked={consents.survey}
                           onChange={(e) => setConsents((c) => ({ ...c, survey: e.target.checked }))}
-                          className="w-3.5 h-3.5 rounded border-gray-300 accent-primary"
+                          className={CHECKBOX_CLASS}
                         />
                         <span>Thực hiện khảo sát và chăm sóc khách hàng</span>
                       </label>
@@ -687,7 +685,7 @@ export default function PassengerInfoStep({
                 onChange={(e) =>
                   setConsents((c) => ({ ...c, retainForFutureBooking: e.target.checked }))
                 }
-                className="w-4 h-4 rounded border-gray-300 accent-primary"
+                className={CHECKBOX_CLASS}
               />
               <span>Lưu thông tin hành khách cho các lần đặt vé sau</span>
             </label>
@@ -701,7 +699,7 @@ export default function PassengerInfoStep({
                 checked={consents.policyAccepted}
                 onChange={(e) => setConsents((c) => ({ ...c, policyAccepted: e.target.checked }))}
                 required
-                className="w-4 h-4 rounded border-gray-300 accent-primary mt-0.5 shrink-0"
+                className={`${CHECKBOX_CLASS} mt-0.5`}
               />
               <span>
                 Tôi đã đọc, hiểu và đồng ý với{' '}
