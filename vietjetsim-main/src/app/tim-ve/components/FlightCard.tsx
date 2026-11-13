@@ -139,7 +139,9 @@ export default function FlightCard({
                       {/* Giá 26px/400 JambonoMedium #333333; mã tiền tệ 16px/500 #6D6E71 */}
                       <span className="text-xl5 font-jambono font-normal text-vj-text leading-tight whitespace-nowrap">
                         {priceVal.toLocaleString('vi-VN')}
-                        <span className="text-base font-medium text-vj-currency-gray ml-1">VND</span>
+                        <span className="text-base font-medium text-vj-currency-gray ml-1">
+                          VND
+                        </span>
                       </span>
                       <svg
                         className="w-2.5 h-2.5 text-gray-400 mt-0.5"

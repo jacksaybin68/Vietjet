@@ -175,9 +175,7 @@ export default function PassengerInfoStep({
     <>
       <div className="w-full pb-20">
         {/* Page Section Title — h3 18px/600 (đo 13/11/2026) */}
-        <h2 className="text-lg font-semibold text-vj-text mb-3 font-koho">
-          Thông tin hành khách
-        </h2>
+        <h2 className="text-lg font-semibold text-vj-text mb-3 font-koho">Thông tin hành khách</h2>
 
         {/* SkyJoy Banner Card matching screenshot */}
         <div className="bg-white rounded-vj border border-gray-200/90 p-3.5 sm:p-4 flex items-center justify-between mb-4 shadow-sm">
@@ -465,11 +463,7 @@ export default function PassengerInfoStep({
                     </div>
                     {isAdult && (
                       <div>
-                        <UnderlineField
-                          id={`passenger-${i}-countryCode`}
-                          label="Quốc gia"
-                          filled
-                        >
+                        <UnderlineField id={`passenger-${i}-countryCode`} label="Quốc gia" filled>
                           <select
                             id={`passenger-${i}-countryCode`}
                             name={`passenger-${i}-countryCode`}

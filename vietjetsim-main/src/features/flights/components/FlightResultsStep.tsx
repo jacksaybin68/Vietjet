@@ -1480,7 +1480,9 @@ export default function FlightResultsStep({
                                 mã tiền tệ 16px/500 #6D6E71 (đo 13/11/2026). */}
                             <span
                               className={`text-xl5 font-jambono font-normal font-koho leading-none whitespace-nowrap transition-colors ${
-                                isSelected ? 'text-primary' : 'text-vj-text group-hover:text-primary'
+                                isSelected
+                                  ? 'text-primary'
+                                  : 'text-vj-text group-hover:text-primary'
                               }`}
                             >
                               {fc.price.toLocaleString('vi-VN')}
