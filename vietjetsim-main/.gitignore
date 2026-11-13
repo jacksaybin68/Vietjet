@@ -51,5 +51,9 @@ jest-test-results.json
 # Build riêng cho UI gate, không đè .next của dev server (next.config.mjs đọc DIST_DIR).
 .next-uicheck/
 
+# Các thư mục build phụ sinh khi chạy song song nhiều pipeline QA/UI-check.
+.next-prod/
+.next-qa-*/
+
 # Optional: if using TurboRepo or monorepo
 turbo/
