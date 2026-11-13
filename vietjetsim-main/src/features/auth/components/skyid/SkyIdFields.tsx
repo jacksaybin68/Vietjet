@@ -71,7 +71,15 @@ export function SkyIdField({
   );
 }
 
-/** Ô nhập có cờ + mã quốc gia, đúng hàng của `intl-tel` trên site thật. */
+/** Ô nhập có cờ + mã quốc gia, đúng hàng của `intl-tel` trên site thật.
+ *
+ *  Trên site thật, `.iti__country-container` là khối `position:absolute` bám
+ *  vào mép trái ô nhập (`left:0`, rộng 90px), còn ô nhập số bị đẩy sang phải
+ *  (`x = 85px` so với mép khối) — và Nhãn nổi cũng nằm đúng ở `x = 85px`, tức
+ *  ngay trên mép trái của vùng gõ số, KHÔNG đè lên cờ. Ở đây dựng lại đúng
+ *  quan hệ đó: cờ tuyệt đối ở mép trái, ô nhập `padding-left:95px`, nhãn ở
+ *  `left:85px`.
+ */
 export interface SkyIdPhoneFieldProps {
   id: string;
   label: string;
@@ -101,15 +109,15 @@ export function SkyIdPhoneField({
 }: SkyIdPhoneFieldProps) {
   return (
     <div className="relative">
-      <label htmlFor={id} className="vj-skyid-label">
+      <label htmlFor={id} className="vj-skyid-label vj-skyid-label-phone">
         {label}
       </label>
       <div className="vj-skyid-phone">
-        {countryMenu}
         <span className="vj-skyid-phone-code" aria-hidden="true">
           <span>{flag}</span>
           <span>{dial}</span>
         </span>
+        {countryMenu}
         <input
           id={id}
           type="tel"
@@ -119,7 +127,7 @@ export function SkyIdPhoneField({
           readOnly={readOnly}
           placeholder={placeholder}
           aria-invalid={invalid || undefined}
-          className="vj-skyid-input"
+          className="vj-skyid-input vj-skyid-input-phone"
         />
       </div>
     </div>
