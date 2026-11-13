@@ -1476,28 +1476,33 @@ export default function PaymentClient() {
         data-testid="trip-board"
       >
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-x-3 px-3 py-2 sm:px-6 sm:py-2.5 text-xs sm:text-sm">
-          {/* Mobile "Tổng [X] VND ▾" button */}
-          <div className="flex sm:hidden items-center">
+          {/* Mobile "Tổng [X] VND ▾" button + compact route */}
+          <div className="flex sm:hidden items-center gap-2">
             <button
               type="button"
               onClick={() => setShowSummaryModal(true)}
-              className="bg-white rounded-full px-3 py-1 text-xs font-black text-gray-900 flex items-center gap-1.5 shadow-xs cursor-pointer hover:bg-gray-50 active:scale-95 transition-all border border-amber-200"
+              className="bg-white rounded-full px-2.5 py-1 text-2xs font-bold text-gray-900 flex items-center gap-1 shadow-xs cursor-pointer hover:bg-gray-50 active:scale-95 transition-all border border-amber-200 shrink-0"
             >
               <span>Tổng:</span>
-              <span className="text-red-600 font-black">
+              <span className="text-red-600 font-bold">
                 {total > 0 ? `${total.toLocaleString('vi-VN')} VND` : '0 VND'}
               </span>
               <span className="text-3xs text-gray-500">▾</span>
             </button>
+            <div className="flex items-center gap-1 font-koho text-2xs font-semibold text-gray-900 truncate">
+              <span>{booking?.fromCity || booking?.from || 'TP. HCM'}</span>
+              <span className="text-red-600">✈</span>
+              <span>{booking?.toCity || booking?.to || 'Đà Nẵng'}</span>
+            </div>
           </div>
 
           <div className="hidden sm:flex items-center gap-2 font-koho">
-            <span className="font-black text-sm uppercase tracking-wide text-gray-950 font-koho">
+            <span className="font-bold text-xs uppercase tracking-normal text-gray-950 font-koho">
               {booking?.fromCity || 'TP. HCM'} ({booking?.from || 'SGN'})
             </span>
             <svg
-              width="14"
-              height="14"
+              width="12"
+              height="12"
               viewBox="0 0 24 24"
               fill="currentColor"
               className="text-red-600 rotate-45 inline shrink-0"
@@ -1505,10 +1510,10 @@ export default function PaymentClient() {
             >
               <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
             </svg>
-            <span className="font-black text-sm uppercase tracking-wide text-gray-950 font-koho">
-              {booking?.toCity || 'Hà Nội'} ({booking?.to || 'HAN'})
+            <span className="font-bold text-xs uppercase tracking-normal text-gray-950 font-koho">
+              {booking?.toCity || 'Đà Nẵng'} ({booking?.to || 'DAD'})
             </span>
-            <span className="text-xs font-bold text-gray-700 bg-white/70 px-2 py-0.5 rounded-full ml-1 border border-amber-300/60 font-koho">
+            <span className="text-3xs font-semibold text-gray-700 bg-white/70 px-2 py-0.5 rounded-full ml-1 border border-amber-300/60 font-koho">
               {booking?.flightNo ? `Chuyến bay ${booking.flightNo}` : 'VJ141'}
             </span>
           </div>
@@ -2899,7 +2904,11 @@ export default function PaymentClient() {
         onClose={() => setShowSummaryModal(false)}
         outboundFare={booking?.total ? Math.round(booking.total * 0.7) : 1220400}
         outboundFlightNo={booking?.flightNo ?? 'VJ141'}
-        outboundTrip={booking?.from && booking?.to ? `${booking.from} → ${booking.to}` : undefined}
+        outboundTrip={
+          booking?.from && booking?.to
+            ? `${booking.fromCity || booking.from} (${booking.from}) → ${booking.toCity || booking.to} (${booking.to})`
+            : undefined
+        }
       />
     </>
   );

@@ -100,41 +100,41 @@ export default function BookingTicketCard({
 
           <div className="flex items-center justify-between gap-2 pb-4 border-b border-[var(--border)]">
             <div className="text-left min-w-0">
-              <span className="text-2xl sm:text-3xl font-black font-koho text-[var(--foreground)] block leading-none">
+              <span className="text-lg sm:text-xl font-bold font-koho text-[var(--foreground)] block leading-tight">
                 {from}
               </span>
-              <span className="text-xs font-semibold text-[var(--foreground-muted)] mt-1 block truncate">
+              <span className="text-[11px] font-medium text-[var(--foreground-muted)] mt-0.5 block truncate">
                 {fromCity}
               </span>
-              <span className="text-sm font-bold text-primary mt-1 block">{departTime}</span>
+              <span className="text-xs sm:text-sm font-semibold text-primary mt-0.5 block">{departTime}</span>
             </div>
 
             {/* Đường bay */}
             <div className="flex-1 px-2 sm:px-4 flex flex-col items-center">
-              <span className="text-3xs font-bold uppercase tracking-wider text-[var(--foreground-subtle)] mb-1.5">
+              <span className="text-3xs font-medium uppercase tracking-wider text-[var(--foreground-subtle)] mb-1">
                 Bay thẳng
               </span>
               <div className="w-full flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-[var(--vj-red)] shrink-0" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--vj-red)] shrink-0" />
                 <div className="h-0.5 flex-1 bg-gradient-to-r from-[var(--vj-red)] via-[var(--vj-yellow)] to-[var(--vj-red)] relative">
                   <Icon
                     name="PaperAirplaneIcon"
-                    size={14}
+                    size={12}
                     className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rotate-45 text-[var(--vj-red)] bg-[var(--background)] px-0.5"
                   />
                 </div>
-                <div className="w-2 h-2 rounded-full bg-[var(--vj-red)] shrink-0" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--vj-red)] shrink-0" />
               </div>
             </div>
 
             <div className="text-right min-w-0">
-              <span className="text-2xl sm:text-3xl font-black font-koho text-[var(--foreground)] block leading-none">
+              <span className="text-lg sm:text-xl font-bold font-koho text-[var(--foreground)] block leading-tight">
                 {to}
               </span>
-              <span className="text-xs font-semibold text-[var(--foreground-muted)] mt-1 block truncate">
+              <span className="text-[11px] font-medium text-[var(--foreground-muted)] mt-0.5 block truncate">
                 {toCity}
               </span>
-              <span className="text-sm font-bold text-primary mt-1 block">{arriveTime}</span>
+              <span className="text-xs sm:text-sm font-semibold text-primary mt-0.5 block">{arriveTime}</span>
             </div>
           </div>
         </section>
