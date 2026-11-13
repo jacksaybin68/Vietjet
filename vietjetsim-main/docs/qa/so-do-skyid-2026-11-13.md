@@ -121,6 +121,29 @@ Lưu ý triển khai: `.vj-skyid-card` dùng `box-sizing:border-box` (không ph�
 | `.gid-alert` | `margin:8px 0`; `.alert-content { padding-left:26px; text-align:start }` |
 | `.personal-data-sharing-consent-box` | `18×18px`, `border:2px solid #C4C4C4`, `border-radius:0`, checked → `border-radius:4px` + `ic_checked.svg` |
 
+### 3.1 Ánh xạ sang lớp của dự án
+
+| Site thật | Lớp trong dự án | Ghi chú |
+|---|---|---|
+| `.gid-resend-otp` | `.vj-skyid-resend` | Nút gửi lại mã: `14px/22px`, màu link `#2F6BFF`; khi đang đếm ngược thì khoá (`disabled`) và chuyển màu `#C4C4C4` (`--vj-skyid-disabled-ink`). Thời gian chờ `60s` khớp hành vi SkyID thật. |
+| `.gid-content-phone` | dòng dẫn trong `OtpStep` | `14px/22px` `#7B7B7B`, phần nhấn mạnh `#333` `font-weight:700`. |
+| `input.pin-otp` | `.vj-skyid-pin` | `35px`, bo `11px`, gạch chân dưới `30% 2px`. |
+
+| `.gid-popup` | `.vj-skyid-panel` | Khối chứa popup form và footer, căn giữa phần màn hình còn lại sau panel ảnh |
+| `.gid-content` | `.vj-skyid-card` | Khối form trắng, `padding:24px 34px 0`, bo góc dưới `16px` |
+| `.gid-content-title` | `.vj-skyid-title` | Tiêu đề form `18px/26px`, `font-weight:700`, `#333`, căn giữa |
+| `input.form-control` | `.vj-skyid-input` | Ô nhập cao `32px`, bo `4px`, viền `#E8EBEF`, focus `#FFDB01` |
+| `.form-label` | `.vj-skyid-label` | Nhãn nổi `16px/500`, `top:10px`, `#333` |
+| `.btn-primary` | `.vj-skyid-btn` | Nút CTA gradient vàng `135deg,#E99F24→#FD0`, chữ `#333`, bo `8px` |
+| `.gid-link` | `.vj-skyid-link` | Link màu `#2F6BFF`, gạch chân khi hover |
+| `.personal-data-sharing-consent-box` | `.vj-skyid-consent` | Checkbox `18×18px`, viền `2px #C4C4C4`, tick bo `4px` + `ic_checked.svg` |
+| `.gid-logo-footer` | `.vj-skyid-footer` | Chân trang logo, `h:16px` mỗi logo |
+| `.gid-logo-image-red` | `.vj-skyid-logo-red` | Logo đỏ `absolute top:20px left:20px` |
+| `.gid-logo-image-white` | `.vj-skyid-logo-white` | Logo trắng `fixed bottom:20px left:20px` |
+| SkyID wrapper (modal) | `SkyIdShell` | Component overlay mới, không có trên site thật — dùng cho bản modal trong dự án |
+| Quên / đặt lại mật khẩu | `ForgotPasswordStep` / `ResetPasswordStep` | Luồng mới trong dự án, không có trên site thật SkyID |
+Nguồn: đo trực tiếp trên DOM sống `skyjoy-id.vietjetair.com` ngày 13/11/2026.
+
 ---
 
 ## 4. Nhúng trong `vietjetair.com` (`/vi/signin`)
@@ -136,6 +159,8 @@ Lưu ý triển khai: `.vj-skyid-card` dùng `box-sizing:border-box` (không ph�
 ---
 
 ## 5. Asset chính thức (đã tải về `/tmp`)
+
+
 
 | File | Kích thước gốc | URL |
 |---|---|---|
