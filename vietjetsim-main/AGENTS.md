@@ -1264,12 +1264,39 @@ must land _inside_ it. That check cannot pass by doing nothing — if Tab never 
 focused element is still the skip link, which is outside `#main-content`.
 
 The auth screens do **not** use `vj-btn-primary`. Their submit buttons use
-`vj-auth-submit` (48px tall, 344px wide, 4px radius, flat 90¬∞ gold sweep `#F9A51A‚Üí#FFDD00`,
-`#333` text, hover only dims to `opacity: .9`), copied from the real SkyID login theme.
-That theme lives on `skyjoy-authen.vietjetair.com`, which fronts a Keycloak realm on
+`vj-skyid-btn` (38px tall, min 160px / max 232px, 8px radius, gold sweep
+`linear-gradient(135deg,#E99F24 0%,#FD0 100%)`, `#333` text, disabled `#F5F5F5`/`#C4C4C4`),
+copied from the real SkyID login theme. That theme lives on
+`skyjoy-authen.vietjetair.com`, which fronts a Keycloak realm on
 `skyjoy-id.vietjetair.com`; both answer a VPN/proxy block page to this sandbox, so the
 values above come from the theme's own leaked stylesheet ‚Äî don't "correct" them to red.
 Keep auth CTAs on that one utility rather than reintroducing `.vj-btn`.
+
+**The auth screens are a 1-column SkyID clone, not a modal.** `SkyIdShell`
+(`src/features/auth/components/SkyIdShell.tsx`) is the whole-page shell: the
+`bg.jpg` full-bleed background, a white `.vj-skyid-card` (`max-width:420px`,
+`padding:24px 34px 0`, `border-radius:0 0 16px 16px`), the red logo
+`absolute top:20px left:20px`, the white logo `fixed bottom:20px left:20px`, and
+the "Được cung cấp và xác thực bởi SkyJoy ID" footer with three `h:16px` logos.
+`AuthShell`/`AlertBanner`/`SkyJoyIdModal` were **deleted** — do not reintroduce
+them. The four auth routes (`/dang-nhap`, `/dang-ky`, `/quen-mat-khau`,
+`/dat-lai-mat-khau`) are standalone: no `<Header />`, no `<Footer />`, exactly one
+`<main id="main-content">`. `AuthModalProvider` renders the same component as a
+`fixed` overlay with `rgba(0,0,0,.4)` behind it.
+
+Two measurements are load-bearing and were wrong once already:
+
+- **`.vj-skyid-input` is exempt from the global placeholder rule.** A global
+  `input:not(.vj-auth-input)::placeholder { color:#000 !important; font-weight:700 }`
+  overrides the SkyID placeholder unless the selector also excludes
+  `.vj-skyid-input`. The real form uses `#C4C4C4` at weight 400. Measure it with
+  `getComputedStyle(input, '::placeholder')` — the visual result is
+  indistinguishable from a black bold placeholder until you read the value.
+- **The SkyID field is 32px tall overall, and the phone row draws its border with
+  `inset box-shadow`, not `border`.** A `border-box` element with a 1px border
+  loses 2px of inner height, so the phone row (`.vj-skyid-phone`) uses
+  `inset 0 0 0 1px` to keep its inner height at exactly 32px and to let the
+  country-code dropdown overflow its rounded corner.
 
 Floating labels (`.form-label-float`) sit on a `var(--background)` chip when lifted; the
 light-only canvas has no `.dark` override to feed, and a hard-coded `background: white`
@@ -1281,14 +1308,13 @@ renders the brand red sweep via `.vj-page-hero`. Do not re-add an inline
 were consolidated onto it. `/hanh-ly` is a pure `redirect()` and correctly has no
 chrome.
 
-The auth screens share `AuthShell` (split brand/form layout) and `AlertBanner` from
-`@/features/auth/components`; `/dang-nhap` toggles login and registration in one route
-(`?tab=register` deep-links registration, `?redirect=` restores the bounced path). The
-tab strip follows SkyID's order ‚Äî **ƒêƒÉng k√Ω before ƒêƒÉng nh·∫≠p** ‚Äî while the default tab
-stays login, so keep the array order and the default state in sync when editing. The
-terms/privacy links in the registration form point at `/gioi-thieu`, matching
-`Footer.tsx`; they were previously `href="#"`, which silently made a legally-required
-consent link a no-op.
+`/dang-nhap` and `/dang-ky` share `SkyIdAuthFlow`
+(`src/features/auth/components/skyid/`), which renders the whole flow in one
+component (phone → password / OTP / register). `/dang-nhap` still accepts
+`?tab=register` (deep-links registration) and `?redirect=` (restores the bounced
+path); `/dang-ky` opens straight into the register flow. The terms/privacy links in
+the registration form point at `/gioi-thieu`, matching `Footer.tsx`; they were
+previously `href="#"`, which silently made a legally-required consent link a no-op.
 Password recovery is `/quen-mat-khau` (request a link) ‚Üí `/dat-lai-mat-khau?token=‚Ä¶`
 (consume it). Tokens are single-use and hashed in `account_recovery` via
 `src/lib/password-reset.ts`; a successful reset revokes refresh tokens and sessions.

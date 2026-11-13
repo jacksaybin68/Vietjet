@@ -1048,6 +1048,8 @@ h6 {
 .vj-underline-field input {
   width: 100%;
   height: 32px;
+  min-width: 0;
+  flex: 1 1 auto;
   border: 0;
   padding: 0;
   background: transparent;
@@ -1056,6 +1058,29 @@ h6 {
   font-weight: 500;
   color: var(--foreground);
   outline: none;
+}
+
+/* Select và ô ngày cùng cao 40px với input — cùng một hàng trong form hành
+ * khách (đo 13/11/2026: mọi ô nhập trong form đều cao 40px). */
+.vj-underline-field select,
+.vj-underline-field input[type='date'] {
+  width: 100%;
+  height: 32px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font-size: 16px;
+  line-height: 21.28px;
+  font-weight: 500;
+  font-family: var(--vj-font);
+  color: var(--foreground);
+  outline: none;
+}
+
+/* Ô chọn (quốc gia) dùng chung khung gạch chân với ô nhập. */
+.vj-underline-field select {
+  appearance: none;
+  cursor: pointer;
 }
 
 .vj-underline-field input::placeholder {
@@ -1406,17 +1431,24 @@ h6 {
  * Site thật dùng hai lớp: `.authenLayout` phủ nền `bg.jpg` (1921×1081) `cover`,
  * còn `.gid__wrapper-bg` là MỘT panel ảnh cố định bên trái (`width:576px`,
  * `background-position:25% center`, `background-size:cover`,
- * `pointer-events:none`). Ở đây panel ảnh đó được gộp vào nền của chính
- * `.vj-skyid-layout`: ảnh `cover` toàn trang, khối form trắng nằm ở giữa —
- * đúng như `.authenLayout` của site thật, và chữ không bao giờ nằm đè lên
- * ảnh. */
+ * `pointer-events:none`).
+ *
+ * Ở đây giữ nguyên cấu trúc hai lớp: `.vj-skyid-layout` phủ nền `cover` toàn
+ * trang, còn `.vj-skyid-art` là panel ảnh bám mép trái. Nhưng khối form phải
+ * nằm ở CỘT còn lại chứ không đè lên ảnh — nên `.vj-skyid-layout` chuyển sang
+ * `flex-direction:row` và phần đệm trái bằng đúng bề rộng panel, để form
+ * luôn căn giữa trong phần màn hình không bị panel chiếm. */
 .vj-skyid-layout {
   position: relative;
   display: flex;
   min-height: 100vh;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
+  flex-direction: row;
+  /* Bề rộng panel ảnh và khoảng lệch tương ứng của khối form. Bản modal
+   * (overlay) ghi đè `--vj-skyid-art-offset` thành `0` vì không có panel. */
+  --vj-skyid-art-width: 576px;
+  --vj-skyid-art-offset: var(--vj-skyid-art-width);
   background-image: url('/images/skyid/bg.jpg');
   background-position: center center;
   background-repeat: no-repeat;
@@ -1429,15 +1461,14 @@ h6 {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.35) 0%,
-    rgba(0, 0, 0, 0.08) 100%
-  );
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.08) 100%);
   pointer-events: none;
 }
 
-/* Khối chứa popup form và footer — `.gid-popup`. */
+/* Khối chứa popup form và footer — `.gid-popup`.
+ *
+ * `margin-left` bằng bề rộng panel ảnh để khối form căn giữa trong phần màn
+ * hình còn lại, thay vì bị panel 576px đẩy lệch sang phải. */
 .vj-skyid-panel {
   position: relative;
   z-index: 1;
@@ -1446,6 +1477,97 @@ h6 {
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  margin-left: var(--vj-skyid-art-offset);
+}
+
+/* Panel ảnh bên trái — `.gid__wrapper-bg` của SkyID.
+ *
+ * Site thật dùng một lớp `position:fixed` rộng `576px` bám mép trái, nền
+ * `cover` lấy từ `25% center`, kèm hai lớp ảnh con (`.imgs .top` rộng 70%
+ * đặt trên-phải, `.imgs .bot` rộng 100% đặt dưới-phải) — hai lớp ảnh đó
+ * chính là `bg-top-right.png` (434px) và `bg-bot.png` (574px) đã tải về.
+ *
+ * Ở đây panel là một lớp `position:absolute` bám mép trái (tương đương
+ * `fixed` của site thật) với `pointer-events:none` để ảnh không bắt sự kiện
+ * chuột; bề rộng lấy từ `--vj-skyid-art-width` nên chỉ cần sửa một biến
+ * khi đổi breakpoint. */
+.vj-skyid-art {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: var(--vj-skyid-art-width);
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  background-image: url('/images/skyid/bg.jpg');
+  background-position: 25% center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* Hai lớp ảnh con của panel — `.gid__wrapper-bg .imgs .top` / `.bot`. */
+.vj-skyid-art::before,
+.vj-skyid-art::after {
+  content: '';
+  position: absolute;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+/* `.imgs .top`: trên-phải, rộng 70% của panel. */
+.vj-skyid-art::before {
+  top: 0;
+  right: 0;
+  width: 70%;
+  height: auto;
+  aspect-ratio: 434 / 195;
+  background-image: url('/images/skyid/bg-top-right.png');
+}
+
+/* `.imgs .bot`: dưới-phải, rộng 100% của panel. */
+.vj-skyid-art::after {
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 574 / 301;
+  background-image: url('/images/skyid/bg-bot.png');
+}
+
+/* Site thật thu hẹp panel khi màn hình thấp hoặc hẹp (đo trên DOM sống):
+ *   - `max-height:800px` → `532px`
+ *   - `max-width:1100px` → `455px`
+ *
+ * Cả bề rộng panel lẫn khoảng lệch của khối form đều đọc từ cùng biến, nên
+ * một chỗ sửa là hai bên luôn khớp. */
+@media (max-height: 800px) {
+  .vj-skyid-layout {
+    --vj-skyid-art-width: 532px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .vj-skyid-layout {
+    --vj-skyid-art-width: 455px;
+  }
+}
+
+/* Dưới 900px panel ảnh không còn chỗ đứng cạnh form — site thật cũng ẩn nó
+ * và chỉ giữ nền `cover` toàn trang. */
+@media (max-width: 899px) {
+  .vj-skyid-layout {
+    --vj-skyid-art-offset: 0;
+  }
+
+  .vj-skyid-art {
+    display: none;
+  }
+}
+
+/* Bản modal (overlay) không có panel ảnh — form phải căn giữa trọn màn hình. */
+.vj-skyid-layout--no-art {
+  --vj-skyid-art-offset: 0;
 }
 
 /* Khối form trắng — `.gid-content`.
@@ -2735,7 +2857,7 @@ h6 {
  * `.vj-skyid-input` là ngoại lệ: site thật đặt placeholder `#C4C4C4` thường,
  * nên nó phải thoát khỏi rule `!important` này (đo 13/11/2026 —
  * `input.form-control::placeholder { color:#C4C4C4 }`). */
-input:not(.vj-auth-input):not(.vj-skyid-input)::placeholder,
+input:not(.vj-skyid-input)::placeholder,
 textarea::placeholder {
   color: #000000 !important;
   font-weight: 700;
@@ -2822,24 +2944,13 @@ select option {
 
 /*
  * Auth forms bold styling.
- * .vj-auth-input/.vj-auth-submit add bold to inputs/buttons; the label rules are
- * scoped with `:has(.vj-auth-input)` on purpose: the booking wizard reuses
- * `.form-label-float` and keeps its lighter label.
+ *
+ * `.vj-auth-input`/`.vj-auth-submit` đã bị gỡ cùng `AuthShell` (13/11/2026) —
+ * bộ SkyID dùng `.vj-skyid-input`/`.vj-skyid-btn` riêng. Rule `select option`
+ * vẫn giữ: nó làm phần chữ trong option của native select đậm đúng như form
+ * thật, và không phụ thuộc vào lớp đã xoá.
  */
-.vj-auth-input,
-.vj-auth-submit,
-.vj-auth-input option,
 select option {
-  font-weight: 700;
-}
-.form-field-float:has(.vj-auth-input) .form-label-float,
-.form-field-float .vj-auth-input ~ .form-label-float {
-  font-weight: 700;
-  color: #555960;
-}
-.form-field-float .vj-auth-input:focus ~ .form-label-float,
-.form-field-float .vj-auth-input:not(:placeholder-shown) ~ .form-label-float,
-.form-field-float.has-value .vj-auth-input ~ .form-label-float {
   font-weight: 700;
 }
 
@@ -3327,32 +3438,6 @@ select option {
 }
 .vj-btn-letsgo:active {
   transform: scale(0.98);
-}
-
-/* SkyID auth submit. Mirrors the real SkyID (skyjoy-authen) login theme:
-   48px tall, 344px wide, 4px radius, flat 90deg gold sweep, #333 text.
-   Keep this reserved for the auth forms — other CTAs stay on .vj-cta/.vj-btn. */
-.vj-auth-submit {
-  height: 48px;
-  max-width: none;
-  margin-inline: 0;
-  border: none;
-  border-radius: 4px;
-  background: linear-gradient(90deg, var(--vj-grad-gold-from) 0%, var(--vj-grad-gold-to) 100%);
-  color: var(--vj-text);
-  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 16px;
-}
-
-.vj-auth-submit:hover {
-  filter: brightness(1.03);
-  box-shadow: 0 4px 12px rgba(136, 92, 0, 0.16);
-}
-
-.vj-auth-submit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 /* VietJet Tab Active - red gradient */

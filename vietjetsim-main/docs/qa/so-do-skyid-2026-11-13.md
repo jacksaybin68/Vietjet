@@ -59,6 +59,45 @@ Breakpoints:
 - `max-width:1100px` → `.gid__wrapper-bg { width:455px }`
 - mobile → `.gid-logo-image-red { width:40% }`, `.gid-logo-image-mb-right { width:50% }`
 
+### 2b. Xác minh lại trên DOM sống (13/11/2026, phiên đăng nhập thật)
+
+Đo lại sau khi đã đăng nhập, `.form-label` **không** float: nó giữ nguyên
+`top:10px` ở cả trạng thái rỗng lẫn khi đã nhập (`transform:none`), tức nhãn
+luôn nằm giữa theo chiều ngang trên viền ô nhập. Ô nhập `padding:5px 10px`
+(`padding-left:10px`), cao `32px`.
+
+Quan hệ hình học của ô số điện thoại (`intl-tel`):
+
+| Thành phần | Toạ độ (so với mép trái khối) |
+|---|---|
+| `.iti__country-container` | `x=0`, rộng `90px` (`position:absolute`) |
+| Ô nhập số | `x=85px` (đẩy sang phải bởi cờ) |
+| `.form-label` | `x=85px` — nằm đúng trên mép trái vùng gõ số, **không** đè lên cờ |
+
+Dựng lại trong `vietjetsim-main`: nhãn `.vj-skyid-label-phone { left:85px }`,
+ô nhập `.vj-skyid-input-phone { margin-left:85px }`, cờ nằm trong
+`.vj-skyid-phone-menu { position:absolute; left:0 }`.
+
+### 2c. Bố cục dựng lại trong dự án (đo bằng `scripts/measure-skyid-layout.cjs`)
+
+| Thành phần | Giá trị ở 1440×900 | Giá trị ở 390×844 |
+|---|---|---|
+| `.vj-skyid-layout` | `1440×900`, nền `bg.jpg` `cover` | `390×844` |
+| `.vj-skyid-card` | `420×450`, `x=510` | `358×450`, `x=16` |
+| `.vj-skyid-title` | `18px/26px/700` | `18px/26px/700` |
+| `.vj-skyid-label` | `16px/12px/500`, `#333` | `16px/12px/500` |
+| `.vj-skyid-input` | `h=32px` | `h=32px` |
+| `.vj-skyid-btn` | `160×38`, `border-radius:8px`, gradient vàng | `160×38` |
+| `.vj-skyid-logo-red` | `116×43` tại `(20,20)` | `116×43` |
+| `.vj-skyid-logo-white` | `176×65` | ẩn |
+| Logo chân trang | `h=16px` | `h=16px` |
+| `document.scrollWidth` | `1440` (không tràn) | `390` (không tràn) |
+
+Lưu ý triển khai: `.vj-skyid-card` dùng `box-sizing:border-box` (không phải
+`content-box` như site thật) để tổng bề rộng vẫn là 420px mà không tràn ngang
+ở viewport 390px — đo `content-box` cho ra `x=-4px`.
+
+
 ---
 
 ## 3. Form / input / button

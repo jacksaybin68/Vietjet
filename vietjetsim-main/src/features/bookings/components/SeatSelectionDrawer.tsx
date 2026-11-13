@@ -348,41 +348,37 @@ export default function SeatSelectionDrawer({
             </span>
           </div>
 
-          {/* Seat Legend */}
+          {/* Seat Legend — nhãn 14px/500, swatch 24×24 bo 2px (đo 13/11/2026) */}
           <div className="bg-white rounded-vj p-3 border border-gray-200 shadow-sm mb-4">
-            <div className="grid grid-cols-2 gap-y-2 gap-x-3 text-xs2 font-medium text-gray-700">
+            <div className="grid grid-cols-2 gap-y-2 gap-x-3 text-sm font-medium text-vj-text">
               <div className="flex items-center gap-2">
-                <span className="w-3.5 h-3.5 rounded bg-yellow-500 shrink-0" />
-                <span>Ghế Business</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-3.5 h-3.5 rounded bg-red-600 shrink-0" />
+                <span className="w-6 h-6 rounded border-2 border-amber-300 bg-amber-100/70 shrink-0" />
                 <span>Ghế cao cấp</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3.5 h-3.5 rounded bg-green-500 shrink-0" />
+                <span className="w-6 h-6 rounded border-2 border-[var(--vj-field-line)] bg-vj-surface-fare shrink-0" />
                 <span>Ghế tiêu chuẩn</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3.5 h-3.5 rounded bg-sky-600 shrink-0" />
+                <span className="w-6 h-6 rounded border-2 border-sky-300 bg-sky-100 shrink-0" />
                 <span>Ghế để chân rộng</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3.5 h-3.5 rounded bg-purple-600 shrink-0" />
+                <span className="w-6 h-6 rounded border-2 border-purple-300 bg-purple-100/70 shrink-0" />
                 <span>Ghế hàng trước</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3.5 h-3.5 rounded bg-orange-600 shrink-0 ring-2 ring-orange-600/40" />
-                <span className="font-bold text-orange-600">Ghế đang chọn</span>
+                <span className="w-6 h-6 rounded border-2 border-primary bg-primary shrink-0" />
+                <span>Ghế đang chọn</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3.5 h-3.5 rounded bg-gray-200 text-gray-500 flex items-center justify-center text-3xs font-bold shrink-0">
+                <span className="w-6 h-6 rounded border-2 border-vj-sold-out bg-vj-sold-out text-white flex items-center justify-center text-3xs font-bold shrink-0">
                   ✕
                 </span>
                 <span>Đã có người</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3.5 h-3.5 rounded bg-gray-300 text-gray-500 flex items-center justify-center text-3xs font-bold shrink-0">
+                <span className="w-6 h-6 rounded border-2 border-gray-400 bg-gray-300 text-gray-500 flex items-center justify-center text-3xs font-bold shrink-0">
                   🔒
                 </span>
                 <span>Đang giữ</span>
@@ -398,8 +394,8 @@ export default function SeatSelectionDrawer({
 
           {/* Seat Grid */}
           <div className="bg-white rounded-vj p-3 border border-gray-200 shadow-inner">
-            {/* Header letters */}
-            <div className="flex items-center justify-between text-xs font-bold text-gray-600 mb-2 px-1">
+            {/* Header letters — 14px/500 #6D6E71 (đo 13/11/2026) */}
+            <div className="flex items-center justify-between text-sm font-medium text-vj-currency-gray mb-2 px-1">
               <div className="flex gap-2">
                 {COLS_LEFT.map((col) => (
                   <span key={col} className="w-7 text-center">
@@ -437,15 +433,23 @@ export default function SeatSelectionDrawer({
                           const isLocked = sseLocked.has(seatId) && !lockedSeats.has(seatId);
                           const isSelected = currentSeats.includes(seatId);
 
-                          let bgColor = 'bg-green-500 text-white hover:opacity-90'; // standard
+                          let bgColor =
+                            'bg-vj-surface-fare text-vj-text border border-[var(--vj-field-line)] hover:bg-gray-100'; // standard
                           if (row <= 2)
-                            bgColor = 'bg-yellow-500 text-white hover:opacity-90'; // business
+                            bgColor =
+                              'bg-amber-100/70 text-amber-900 border border-amber-300 hover:bg-amber-200';
+                          // business
                           else if (row <= 5)
-                            bgColor = 'bg-purple-600 text-white hover:opacity-90'; // front
-                          else if (isExitRow) bgColor = 'bg-sky-600 text-white hover:opacity-90'; // extra legroom
+                            bgColor =
+                              'bg-purple-100/70 text-purple-900 border border-purple-300 hover:bg-purple-200';
+                          // front
+                          else if (isExitRow)
+                            bgColor =
+                              'bg-sky-100 text-sky-800 border border-sky-300 hover:bg-sky-200'; // extra legroom
                           if (isSelected)
-                            bgColor = 'bg-orange-600 text-white ring-2 ring-orange-300';
-                          if (isOccupied) bgColor = 'bg-gray-200 text-gray-400 cursor-not-allowed';
+                            bgColor =
+                              'bg-primary text-white border border-primary ring-2 ring-primary/40';
+                          if (isOccupied) bgColor = 'bg-vj-sold-out text-white cursor-not-allowed';
                           if (isLocked) bgColor = 'bg-gray-300 text-gray-500 cursor-not-allowed';
 
                           return (
@@ -453,7 +457,7 @@ export default function SeatSelectionDrawer({
                               key={seatId}
                               disabled={isOccupied || isLocked || isLocking}
                               onClick={() => handleToggleSeat(seatId)}
-                              className={`w-7 h-7 rounded text-2xs font-black flex items-center justify-center transition-all ${bgColor}`}
+                              className={`w-7 h-7 rounded text-2xs font-medium flex items-center justify-center transition-all ${bgColor}`}
                               title={`Ghế ${seatId} - ${getSeatCharge(seatId).toLocaleString('vi-VN')}₫${
                                 isLocked ? ' (Đang giữ bởi người khác)' : ''
                               }`}
@@ -477,13 +481,25 @@ export default function SeatSelectionDrawer({
                           const isLocked = sseLocked.has(seatId) && !lockedSeats.has(seatId);
                           const isSelected = currentSeats.includes(seatId);
 
-                          let bgColor = 'bg-green-500 text-white hover:opacity-90';
-                          if (row <= 2) bgColor = 'bg-yellow-500 text-white hover:opacity-90';
-                          else if (row <= 5) bgColor = 'bg-purple-600 text-white hover:opacity-90';
-                          else if (isExitRow) bgColor = 'bg-sky-600 text-white hover:opacity-90';
+                          // Bảng màu ghế theo số đo site thật (13/11/2026) —
+                          // giống hệt cột trái để lưới ghế nhìn là một khối.
+                          let bgColor =
+                            'bg-vj-surface-fare text-vj-text border border-[var(--vj-field-line)] hover:bg-gray-100'; // standard
+                          if (row <= 2)
+                            bgColor =
+                              'bg-amber-100/70 text-amber-900 border border-amber-300 hover:bg-amber-200';
+                          // business
+                          else if (row <= 5)
+                            bgColor =
+                              'bg-purple-100/70 text-purple-900 border border-purple-300 hover:bg-purple-200';
+                          // front
+                          else if (isExitRow)
+                            bgColor =
+                              'bg-sky-100 text-sky-800 border border-sky-300 hover:bg-sky-200'; // extra legroom
                           if (isSelected)
-                            bgColor = 'bg-orange-600 text-white ring-2 ring-orange-300';
-                          if (isOccupied) bgColor = 'bg-gray-200 text-gray-400 cursor-not-allowed';
+                            bgColor =
+                              'bg-primary text-white border border-primary ring-2 ring-primary/40';
+                          if (isOccupied) bgColor = 'bg-vj-sold-out text-white cursor-not-allowed';
                           if (isLocked) bgColor = 'bg-gray-300 text-gray-500 cursor-not-allowed';
 
                           return (
@@ -491,7 +507,7 @@ export default function SeatSelectionDrawer({
                               key={seatId}
                               disabled={isOccupied || isLocked || isLocking}
                               onClick={() => handleToggleSeat(seatId)}
-                              className={`w-7 h-7 rounded text-2xs font-black flex items-center justify-center transition-all ${bgColor}`}
+                              className={`w-7 h-7 rounded text-2xs font-medium flex items-center justify-center transition-all ${bgColor}`}
                               title={`Ghế ${seatId} - ${getSeatCharge(seatId).toLocaleString('vi-VN')}₫${
                                 isLocked ? ' (Đang giữ bởi người khác)' : ''
                               }`}
@@ -509,10 +525,11 @@ export default function SeatSelectionDrawer({
           </div>
         </div>
 
-        {/* Sticky Drawer Footer */}
+        {/* Sticky Drawer Footer — "Tổng tiền" 20px/600 trắng, giá 22px/700
+            JambonoMedium trắng (đo 13/11/2026) */}
         <div className="bg-primary-dark text-white p-3 flex items-center justify-between shadow-lg">
           <div>
-            <span className="text-xs2 text-gray-200 block">
+            <span className="text-2xl3 font-semibold text-white block">
               Chỗ ngồi (
               {[
                 outboundSeats.length > 0 ? `Đi: ${outboundSeats.join(', ')}` : null,
@@ -522,7 +539,7 @@ export default function SeatSelectionDrawer({
                 .join(' | ') || 'Chưa chọn'}
               ):
             </span>
-            <span className="text-base font-black">
+            <span className="text-xl4 font-bold font-jambono text-white">
               {totalSeatFee > 0 ? `${totalSeatFee.toLocaleString('vi-VN')} VND` : '0 VND'}
             </span>
           </div>

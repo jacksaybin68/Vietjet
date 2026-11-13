@@ -456,17 +456,18 @@ export default function FlightBookingResultsWrapper({
       </div>
 
       {/* Khung nội dung — số đo site thật (13/11/2026, 1440×900):
-          container 1230px gồm padding 15px mỗi bên (nội dung 1200px),
-          cột trái 820px, cột phải 380px (panel trong cột 410px của site). */}
+          container 1230px gồm padding 15px mỗi bên → nội dung 1200px.
+          Chia: cột trái 790px (ô trong 820px kể cả padding 15px), khe 30px,
+          cột phải 380px (panel trong cột 410px của site). */}
       <div className="mx-auto w-full max-w-[1230px] px-[15px] pt-3 sm:pt-5 pb-24 sm:pb-28 overflow-x-hidden">
-        <div className="flex flex-col lg:flex-row gap-6 items-start w-full">
-          {/* Cột trái: danh sách chuyến bay (820px ở desktop) */}
+        <div className="flex flex-col lg:flex-row lg:gap-[30px] items-start w-full">
+          {/* Cột trái: danh sách chuyến bay (ô 820px ở desktop) */}
           {/* `w-full` là bắt buộc ở mobile: parent dùng `items-start`, nên cột
               con không tự giãn theo bề rộng container — nó lấy bề rộng nội
               dung. Không có `w-full`, lưới 4 cột giá đẩy cột này rộng ~658px
               trong viewport 390px và bị `overflow-x-hidden` của wrapper cắt mất
               (giá vé của các hạng bên phải không chạm được trên điện thoại). */}
-          <div className="w-full lg:w-[820px] lg:flex-none min-w-0">
+          <div className="w-full lg:w-[790px] lg:flex-none min-w-0 lg:px-[15px]">
             <FlightBookingClient
               continueSignal={continueSignal}
               onFlightSelect={handleFlightSelect}
@@ -520,9 +521,7 @@ export default function FlightBookingResultsWrapper({
             <div className="mx-auto max-w-[1200px] flex items-center justify-between">
               <div className="flex-1 flex flex-col items-center">
                 {/* "Tổng tiền" 20px/600, giá 22px/700 Jambono (đo 13/11/2026) */}
-                <span className="text-2xl3 font-semibold text-gray-800 font-koho">
-                  Tổng tiền
-                </span>
+                <span className="text-2xl3 font-semibold text-gray-800 font-koho">Tổng tiền</span>
                 <span className="text-xl4 font-bold font-jambono text-primary leading-none">
                   {totalBookingAmount.toLocaleString('vi-VN')} VND
                 </span>

@@ -233,10 +233,10 @@ export default function BaggageSelectionDrawer({
                   <div
                     key={pkg.id}
                     onClick={() => handleSelectPkg(pkg.id)}
-                    className={`relative cursor-pointer rounded-vj border p-2.5 flex flex-col items-center justify-center text-center transition-all bg-white ${
+                    className={`relative cursor-pointer rounded-vj border p-2.5 flex flex-col items-center justify-center text-center transition-all bg-vj-surface-fare ${
                       isSelected
-                        ? 'border-primary-dark ring-2 ring-primary-dark/20 shadow-md'
-                        : 'border-gray-200 hover:border-gray-300 shadow-sm'
+                        ? 'border-primary border-2 shadow-md'
+                        : 'border-vj-field-line hover:border-gray-300 shadow-sm'
                     }`}
                   >
                     {isSelected && (
@@ -249,8 +249,15 @@ export default function BaggageSelectionDrawer({
                       size={24}
                       className={isSelected ? 'text-primary-dark' : 'text-gray-400'}
                     />
-                    <span className="text-xs font-black text-gray-900 mt-1">{pkg.label}</span>
-                    <span className="text-xs2 font-bold text-primary-dark mt-0.5">
+                    {/* Tên gói 16px/700 KoHo, kg 13px/500 #6D6E71, giá 16px/500
+                        #EC2029 (đo 13/11/2026) */}
+                    <span className="text-base font-bold text-vj-text mt-1 font-koho">
+                      {pkg.label}
+                    </span>
+                    <span className="text-sm2 font-medium text-vj-currency-gray">
+                      {pkg.weight}kg hành lý ký gửi
+                    </span>
+                    <span className="text-base font-medium text-primary mt-0.5">
                       {pkg.price.toLocaleString('vi-VN')}₫
                     </span>
                   </div>
@@ -271,10 +278,10 @@ export default function BaggageSelectionDrawer({
                   <div
                     key={pkg.id}
                     onClick={() => handleSelectPkg(pkg.id)}
-                    className={`relative cursor-pointer rounded-vj border p-3 flex flex-col items-center justify-center text-center transition-all bg-white ${
+                    className={`relative cursor-pointer rounded-vj border p-3 flex flex-col items-center justify-center text-center transition-all bg-vj-surface-fare ${
                       isSelected
-                        ? 'border-primary-dark ring-2 ring-primary-dark/20 shadow-md'
-                        : 'border-gray-200 hover:border-gray-300 shadow-sm'
+                        ? 'border-primary border-2 shadow-md'
+                        : 'border-vj-field-line hover:border-gray-300 shadow-sm'
                     }`}
                   >
                     {isSelected && (
@@ -283,8 +290,11 @@ export default function BaggageSelectionDrawer({
                         className="absolute top-1.5 right-1.5 text-green-500"
                       />
                     )}
-                    <span className="text-xs font-black text-gray-900">{pkg.label}</span>
-                    <span className="text-xs font-bold text-primary-dark mt-1">
+                    <span className="text-base font-bold text-vj-text font-koho">{pkg.label}</span>
+                    <span className="text-sm2 font-medium text-vj-currency-gray">
+                      {pkg.weight}kg
+                    </span>
+                    <span className="text-base font-medium text-primary mt-1">
                       {pkg.price.toLocaleString('vi-VN')}₫
                     </span>
                   </div>
@@ -338,10 +348,11 @@ export default function BaggageSelectionDrawer({
           </div>
         </div>
 
-        {/* Sticky Drawer Footer */}
+        {/* Sticky Drawer Footer — "Tổng tiền" 20px/600 trắng, giá 22px/700 Jambono */}
         <div className="bg-primary-dark text-white p-3 flex items-center justify-between shadow-lg">
           <div>
-            <span className="text-xs2 text-gray-200 block">
+            <span className="text-2xl3 font-semibold text-white block">
+              Tổng tiền (
               {isRoundTrip ? (
                 <>
                   Đi: {outboundPackage ? outboundPackage.label : '7kg'} | Về:{' '}
@@ -352,8 +363,9 @@ export default function BaggageSelectionDrawer({
               ) : (
                 'Hành lý:'
               )}
+              )
             </span>
-            <span className="text-base font-black">
+            <span className="text-xl4 font-bold font-jambono text-white">
               {totalFee > 0 ? `${totalFee.toLocaleString('vi-VN')} VND` : '0 VND'}
             </span>
           </div>
@@ -361,7 +373,7 @@ export default function BaggageSelectionDrawer({
           <button
             type="button"
             onClick={handleConfirm}
-            className="bg-vjgold hover:bg-yellow-400 text-black text-xs font-bold px-6 py-2 rounded shadow transition-colors"
+            className="bg-vjgold hover:bg-yellow-400 text-black text-sm font-medium px-6 py-2 rounded-vj shadow transition-colors"
           >
             Xác nhận
           </button>

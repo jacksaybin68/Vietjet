@@ -79,20 +79,30 @@ export function SeatMap({
   // Emergency exit rows
   const emergencyExitRows = [10, 11];
 
+  // Bảng màu ghế theo số đo site thật (13/11/2026):
+  //   - ghế tiêu chuẩn: nền #F8F8F8, viền #D9D9D9
+  //   - ghế cao cấp (business): nền vàng nhạt
+  //   - ghế để chân rộng: nền xanh nhạt
+  //   - ghế hàng trước (cửa thoát hiểm): nền tím nhạt
+  //   - ghế đang chọn: đỏ thương hiệu #EC2029, chữ trắng
+  //   - ghế đã có người: xám #939598
   const getSeatColor = (seat: Seat) => {
     if (seat.isOccupied) {
-      return 'bg-gray-300 cursor-not-allowed text-gray-500';
+      return 'bg-vj-sold-out cursor-not-allowed text-white';
     }
     if (selectedSeats.includes(seat.id) || seat.isSelected) {
       return 'bg-primary text-white ring-2 ring-primary/40 font-bold';
     }
-    if (seat.isExtraLegroom || emergencyExitRows.includes(seat.row)) {
-      return 'bg-amber-100/60 hover:bg-amber-200 text-amber-900 border border-amber-300';
+    if (seat.isExtraLegroom) {
+      return 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300';
+    }
+    if (emergencyExitRows.includes(seat.row)) {
+      return 'bg-purple-100/70 hover:bg-purple-200 text-purple-900 border border-purple-300';
     }
     if (seat.class === 'business') {
-      return 'bg-purple-100/60 hover:bg-purple-200 text-purple-900 border border-purple-300';
+      return 'bg-amber-100/70 hover:bg-amber-200 text-amber-900 border border-amber-300';
     }
-    return 'bg-green-100/60 hover:bg-green-200 text-green-900 border border-green-300';
+    return 'bg-vj-surface-fare hover:bg-gray-100 text-vj-text border border-[var(--vj-field-line)]';
   };
 
   const formatPrice = (price: number) => {
@@ -101,27 +111,31 @@ export function SeatMap({
 
   return (
     <div className={`bg-white rounded-vj p-4 ${className}`}>
-      {/* Legend */}
+      {/* Legend — nhãn 14px/500, swatch 24×24 bo 2px (đo 13/11/2026) */}
       <div className="flex flex-wrap gap-4 mb-6 pb-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-green-100/50" />
-          <span className="text-xs text-gray-600">Phổ thông</span>
+          <div className="w-6 h-6 rounded border-2 border-[var(--vj-field-line)] bg-vj-surface-fare" />
+          <span className="text-sm font-medium text-vj-text">Ghế tiêu chuẩn</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-purple-100/50" />
-          <span className="text-xs text-gray-600">Thương gia</span>
+          <div className="w-6 h-6 rounded border-2 border-amber-300 bg-amber-100/70" />
+          <span className="text-sm font-medium text-vj-text">Ghế cao cấp</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-amber-100/50" />
-          <span className="text-xs text-gray-600">Chỗ rộng</span>
+          <div className="w-6 h-6 rounded border-2 border-sky-300 bg-sky-100" />
+          <span className="text-sm font-medium text-vj-text">Ghế để chân rộng</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-blue-500" />
-          <span className="text-xs text-gray-600">Đã chọn</span>
+          <div className="w-6 h-6 rounded border-2 border-purple-300 bg-purple-100/70" />
+          <span className="text-sm font-medium text-vj-text">Ghế hàng trước</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-gray-300" />
-          <span className="text-xs text-gray-600">Đã đặt</span>
+          <div className="w-6 h-6 rounded border-2 border-primary bg-primary" />
+          <span className="text-sm font-medium text-vj-text">Ghế đang chọn</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded border-2 border-vj-sold-out bg-vj-sold-out" />
+          <span className="text-sm font-medium text-vj-text">Đã có người</span>
         </div>
       </div>
 
@@ -132,7 +146,10 @@ export function SeatMap({
           <div className="flex mb-2">
             <div className="w-8" />
             {columns.map((col, idx) => (
-              <div key={col} className="flex-1 text-center text-sm font-medium text-gray-600">
+              <div
+                key={col}
+                className="flex-1 text-center text-sm font-medium text-vj-currency-gray"
+              >
                 <span className={idx === 2 ? 'mr-8' : idx === 3 ? 'ml-8' : ''}>{col}</span>
               </div>
             ))}

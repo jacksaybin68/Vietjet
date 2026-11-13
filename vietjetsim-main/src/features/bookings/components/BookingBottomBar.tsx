@@ -52,7 +52,8 @@ export default function BookingBottomBar({
       className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--border)] bg-[var(--surface)] shadow-[0_-2px_12px_rgba(0,0,0,0.08)]"
       data-testid={testId}
     >
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-3 py-2 sm:px-4 md:px-6">
+      {/* Container 1200px — khớp số đo site thật (13/11/2026) */}
+      <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-3 px-3 py-2 sm:px-4 md:px-6">
         {/* Left: Optional Back button or spacer */}
         {onBack ? (
           <button
@@ -68,9 +69,7 @@ export default function BookingBottomBar({
 
         {/* Center: Total price */}
         <div className="flex flex-col items-center leading-tight">
-          <span className="text-2xl3 font-semibold text-gray-800 font-koho">
-            Tổng tiền
-          </span>
+          <span className="text-2xl3 font-semibold text-gray-800 font-koho">Tổng tiền</span>
           <span className="text-xl4 font-bold font-jambono text-primary">
             {total.toLocaleString('vi-VN')} VND
           </span>
