@@ -3,7 +3,7 @@ import { sql } from '@/lib/neon';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 import { sendPaymentFailedEmail } from '@/lib/mail';
 import { sendAutomaticPaymentInvoiceEmail } from '@/lib/payment-invoice';
-import { writeAuditLog } from '@/lib/db';
+import { writeAuditLog, awardBookingLoyaltyPoints } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
@@ -169,9 +169,18 @@ export async function PATCH(request: NextRequest) {
           WHERE id = ${targetPayment.id}
         `;
       } else {
+        // The amount recorded here must be the cash actually collected, which is
+        // the fare minus the discount that was applied — not the gross fare. The
+        // booking row carries `discount_amount`; without it the payment row
+        // overstated revenue and inflated the refund ceiling
+        // (`getBookingCashPaid` sums `payments.amount`).
+        const discountedAmount = Math.max(
+          0,
+          Number(targetBooking.total_price || 0) - Number(targetBooking.discount_amount || 0)
+        );
         const createdP = await sql`
           INSERT INTO payments (booking_id, method, status, amount)
-          VALUES (${targetBooking.id}, 'vietqr', 'completed', ${targetBooking.total_price})
+          VALUES (${targetBooking.id}, 'vietqr', 'completed', ${discountedAmount})
           RETURNING *
         `;
         targetPayment = (createdP as any[])[0];
@@ -183,6 +192,22 @@ export async function PATCH(request: NextRequest) {
         SET status = 'confirmed', updated_at = NOW() 
         WHERE id = ${targetBooking.id}
       `;
+
+      // 3. Tích lũy điểm SkyJoy khi admin đối soát thành công. Nếu bỏ qua,
+      // một booking xác nhận qua admin sẽ không bao giờ tích điểm, trong khi
+      // booking thanh toán trực tiếp thì có — khách bị mất điểm chỉ vì cách
+      // họ thanh toán.
+      const collectedAmount = Number(targetPayment?.amount || targetBooking.total_price || 0);
+      if (collectedAmount > 0 && targetBooking.user_id) {
+        try {
+          await awardBookingLoyaltyPoints(targetBooking.id, collectedAmount, targetBooking.user_id);
+        } catch (loyaltyError) {
+          console.error(
+            'Failed to award loyalty points for admin-confirmed booking:',
+            loyaltyError
+          );
+        }
+      }
 
       // 3. Tự động gửi email hoá đơn thanh toán & vé điện tử cho khách hàng
       await sendAutomaticPaymentInvoiceEmail(targetBooking.id, {
@@ -230,6 +255,17 @@ export async function PATCH(request: NextRequest) {
         SET status = 'cancelled', updated_at = NOW() 
         WHERE id = ${targetBooking.id}
       `;
+
+      // Release the seats this booking was holding.
+      //
+      // This was missing, and it left the `seats` rows pointing at a cancelled
+      // booking. The partial unique index `idx_seats_flight_seat_unique`
+      // (migration 041) covers `(flight_id, seat_number) WHERE booking_id IS
+      // NOT NULL`, so those seats could never be booked again — while the SSE
+      // feed showed them as free, because it only counts bookings in
+      // ('confirmed', 'pending'). The result was a seat the customer could
+      // click, pay for, and then be refused at the last moment, permanently.
+      await sql`DELETE FROM seats WHERE booking_id = ${targetBooking.id}`;
 
       // Restore seats on flight
       const countRes = await sql`

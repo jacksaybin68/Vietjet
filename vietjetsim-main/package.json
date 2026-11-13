@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbo -p 4028",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start -p 4028",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -46,7 +46,7 @@
     "dotenv": "^17.4.2",
     "grapesjs": "^0.23.6",
     "jsonwebtoken": "^9.0.3",
-    "next": "^16.4.0",
+    "next": "16.4.6",
     "nextjs-toploader": "^3.9.17",
     "nodemailer": "^10.0.16",
     "otplib": "^13.4.0",

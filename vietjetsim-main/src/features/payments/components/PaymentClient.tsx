@@ -2453,7 +2453,7 @@ export default function PaymentClient() {
                           <span className="text-2xl font-black text-[#E50051] tracking-tight leading-none lowercase">
                             movi
                           </span>
-                          <span className="text-[10px] font-bold text-gray-800 leading-tight mt-1 text-center font-koho">
+                          <span className="text-2xs font-bold text-gray-800 leading-tight mt-1 text-center font-koho">
                             Bay trước, trả sau
                           </span>
                         </div>

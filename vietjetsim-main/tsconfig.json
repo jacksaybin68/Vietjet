@@ -63,13 +63,18 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "next-env.d.ts",
-    ".next-uicheck/types/**/*.ts",
-    ".next-uicheck/dev/types/**/*.ts",
+    ".next-devcheck/types/**/*.ts",
+    ".next-devcheck/dev/types/**/*.ts",
+    ".next-paritygate/types/**/*.ts",
+    ".next-paritygate/dev/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
     "e2e",
-    "playwright.config.ts"
+    "playwright.config.ts",
+    ".next-*",
+    ".qa-build",
+    ".qa-out"
   ]
 }

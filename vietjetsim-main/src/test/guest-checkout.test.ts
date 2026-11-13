@@ -16,6 +16,7 @@ vi.mock('@/lib/mail', () => ({
   sendPaymentSuccessEmail: vi.fn().mockResolvedValue(true),
   sendPaymentInstructionEmail: vi.fn().mockResolvedValue(true),
   sendPaymentFailedEmail: vi.fn().mockResolvedValue(true),
+  sendPaymentPendingReviewEmail: vi.fn().mockResolvedValue(true),
   sendRefundNotificationEmail: vi.fn().mockResolvedValue(true),
 }));
 
@@ -107,6 +108,16 @@ describe('Guest Checkout & Payment without Login', () => {
     vi.clearAllMocks();
   });
 
+  /**
+   * The cookie `POST /api/dat-ve` hands the browser when it creates a guest
+   * booking. It is what tells the server "this browser is the guest that made
+   * the booking" — without it an anonymous caller that merely knows the id is
+   * refused, because a booking UUID is not a secret.
+   */
+  const guestCookie = () => ({
+    cookie: `vj_guest_bookings=${encodeURIComponent(JSON.stringify(['guest-bk-123']))}`,
+  });
+
   it('allows unauthenticated guest to create booking via POST /api/dat-ve', async () => {
     const { POST: createBookingPost } = await import('@/app/api/dat-ve/route');
 
@@ -178,7 +189,9 @@ describe('Guest Checkout & Payment without Login', () => {
   it('allows unauthenticated guest to fetch booking details via GET /api/dat-ve/[id]', async () => {
     const { GET: getBookingDetails } = await import('@/app/api/dat-ve/[id]/route');
 
-    const req = new NextRequest('http://localhost:4028/api/dat-ve/guest-bk-123');
+    const req = new NextRequest('http://localhost:4028/api/dat-ve/guest-bk-123', {
+      headers: guestCookie(),
+    });
     const res = await getBookingDetails(req, {
       params: Promise.resolve({ id: 'guest-bk-123' }),
     });
@@ -223,7 +236,7 @@ describe('Guest Checkout & Payment without Login', () => {
 
     const req = new NextRequest('http://localhost:4028/api/thanh-toan', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...guestCookie() },
       body: JSON.stringify({
         booking_id: 'guest-bk-123',
         method: 'card',
@@ -243,7 +256,7 @@ describe('Guest Checkout & Payment without Login', () => {
 
     const req = new NextRequest('http://localhost:4028/api/thanh-toan', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...guestCookie() },
       body: JSON.stringify({
         booking_id: 'guest-bk-123',
         method: 'card',
@@ -263,7 +276,7 @@ describe('Guest Checkout & Payment without Login', () => {
 
     const req = new NextRequest('http://localhost:4028/api/thanh-toan', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...guestCookie() },
       body: JSON.stringify({
         booking_id: 'guest-bk-123',
         method: 'skypoint',
@@ -282,7 +295,7 @@ describe('Guest Checkout & Payment without Login', () => {
 
     const req = new NextRequest('http://localhost:4028/api/thanh-toan', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...guestCookie() },
       body: JSON.stringify({
         booking_id: 'guest-bk-123',
         method: 'wallet',

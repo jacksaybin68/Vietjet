@@ -418,7 +418,7 @@ export default function AirportPicker({
                     <span className="flex items-center gap-1.5 font-bold">
                       <span aria-hidden="true">🇻🇳</span> Chặng bay nội địa
                     </span>
-                    <span className="text-[11px] font-semibold text-red-600 bg-white/90 px-2 py-0.5 rounded-full border border-red-100">
+                    <span className="text-xs2 font-semibold text-red-600 bg-white/90 px-2 py-0.5 rounded-full border border-red-100">
                       {domesticResults.length}
                     </span>
                   </li>
@@ -441,7 +441,7 @@ export default function AirportPicker({
                             <span className="truncate text-sm font-bold text-[var(--foreground)]">
                               {airport.city} ( {airport.code} )
                             </span>
-                            <span className="shrink-0 rounded bg-red-100/70 px-1.5 py-0.5 text-[10px] font-semibold text-red-700">
+                            <span className="shrink-0 rounded bg-red-100/70 px-1.5 py-0.5 text-2xs font-semibold text-red-700">
                               Nội địa
                             </span>
                           </span>
@@ -465,7 +465,7 @@ export default function AirportPicker({
                     <span className="flex items-center gap-1.5 font-bold">
                       <span aria-hidden="true">🌏</span> Chặng bay quốc tế
                     </span>
-                    <span className="text-[11px] font-semibold text-sky-700 bg-white/90 px-2 py-0.5 rounded-full border border-sky-100">
+                    <span className="text-xs2 font-semibold text-sky-700 bg-white/90 px-2 py-0.5 rounded-full border border-sky-100">
                       {internationalResults.length}
                     </span>
                   </li>
@@ -488,7 +488,7 @@ export default function AirportPicker({
                             <span className="truncate text-sm font-bold text-[var(--foreground)]">
                               {airport.city} ( {airport.code} )
                             </span>
-                            <span className="shrink-0 rounded bg-blue-100/70 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">
+                            <span className="shrink-0 rounded bg-blue-100/70 px-1.5 py-0.5 text-2xs font-semibold text-blue-700">
                               Quốc tế
                             </span>
                           </span>

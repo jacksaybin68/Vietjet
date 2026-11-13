@@ -200,19 +200,6 @@ function FlightBookingClientInner({
     }
   }, [continueSignal, toast]);
 
-  function formatDateViShort(iso?: string) {
-    if (!iso) return '';
-    try {
-      const parts = iso.split('-');
-      if (parts.length === 3) {
-        return `${parts[2]}/${parts[1]}/${parts[0]}`;
-      }
-    } catch {
-      /* ignore formatting error and fallback to raw iso */
-    }
-    return iso;
-  }
-
   const handleFlightSelect = (
     flight: Flight,
     leg: 'outbound' | 'inbound' = currentLeg,
@@ -578,91 +565,6 @@ function FlightBookingClientInner({
       <div className="mx-auto max-w-full">
         {step === 1 && (
           <ErrorBoundary inline variant="api" retryLabel="Tìm lại chuyến bay">
-            {isRoundTrip && (
-              <div className="mb-3 sm:mb-4 flex items-center justify-between gap-1.5 sm:gap-3 bg-white p-1.5 sm:p-2 rounded-vj border border-gray-200/90 shadow-xs max-w-full">
-                <button
-                  type="button"
-                  onClick={() => setCurrentLeg('outbound')}
-                  className={`flex-1 min-w-0 flex flex-col items-center py-2 px-2 sm:px-3 rounded-vj transition-all cursor-pointer relative focus:outline-none focus:ring-0 ${
-                    currentLeg === 'outbound'
-                      ? 'bg-primary-dark text-white shadow-md'
-                      : 'bg-gray-50/90 text-gray-700 hover:bg-gray-100 border border-gray-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className={`uppercase text-2xs sm:text-3xs font-black tracking-wider ${
-                        currentLeg === 'outbound' ? 'text-yellow-300' : 'text-gray-500'
-                      }`}
-                    >
-                      Chuyến đi
-                    </span>
-                    {booking.selectedFlight && (
-                      <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-3xs font-black leading-none">
-                        ✓
-                      </span>
-                    )}
-                  </div>
-                  <span className="font-extrabold text-xs sm:text-sm font-koho truncate max-w-full">
-                    {params.from} ➔ {params.to}
-                  </span>
-                  <span
-                    className={`text-2xs sm:text-3xs font-medium truncate max-w-full ${
-                      currentLeg === 'outbound' ? 'text-white/90' : 'text-gray-500'
-                    }`}
-                  >
-                    {formatDateViShort(params.depart) || 'Ngày đi'}
-                    {booking.selectedFlight ? ` · ${booking.selectedFlight.flightNo}` : ''}
-                  </span>
-                </button>
-
-                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 font-black text-xs shrink-0 shadow-2xs border border-gray-200">
-                  ⇄
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!booking.selectedFlight) {
-                      toast.info('Vui lòng chọn chuyến bay đi trước');
-                    }
-                    setCurrentLeg('inbound');
-                  }}
-                  className={`flex-1 min-w-0 flex flex-col items-center py-2 px-2 sm:px-3 rounded-vj transition-all cursor-pointer relative focus:outline-none focus:ring-0 ${
-                    currentLeg === 'inbound'
-                      ? 'bg-primary-dark text-white shadow-md'
-                      : 'bg-gray-50/90 text-gray-700 hover:bg-gray-100 border border-gray-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className={`uppercase text-2xs sm:text-3xs font-black tracking-wider ${
-                        currentLeg === 'inbound' ? 'text-yellow-300' : 'text-gray-500'
-                      }`}
-                    >
-                      Chuyến về
-                    </span>
-                    {booking.returnFlight && (
-                      <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-3xs font-black leading-none">
-                        ✓
-                      </span>
-                    )}
-                  </div>
-                  <span className="font-extrabold text-xs sm:text-sm font-koho truncate max-w-full">
-                    {params.to} ➔ {params.from}
-                  </span>
-                  <span
-                    className={`text-2xs sm:text-3xs font-medium truncate max-w-full ${
-                      currentLeg === 'inbound' ? 'text-white/90' : 'text-gray-500'
-                    }`}
-                  >
-                    {formatDateViShort(params.return) || 'Ngày về'}
-                    {booking.returnFlight ? ` · ${booking.returnFlight.flightNo}` : ''}
-                  </span>
-                </button>
-              </div>
-            )}
-
             {currentLeg === 'outbound' ? (
               <FlightResultsStep
                 key="outbound-step"

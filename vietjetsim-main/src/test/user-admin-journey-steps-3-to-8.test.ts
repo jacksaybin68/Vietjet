@@ -19,6 +19,9 @@ vi.mock('@/lib/db', async (importOriginal) => {
     createBooking: createBookingMock,
     getFlightById: getFlightByIdMock,
     getBookingById: getBookingByIdMock,
+    // The payment route resolves the booking by PNR *or* by id, so it calls
+    // `getBookingByCodeOrId` — the mock has to answer for both.
+    getBookingByCodeOrId: getBookingByIdMock,
     createPaymentAndConfirmBooking: createPaymentAndConfirmBookingMock,
     searchCheckIn: searchCheckInMock,
     createCheckIn: createCheckInMock,

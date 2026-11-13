@@ -115,8 +115,14 @@ describe('RBAC Module', () => {
       expect(canManageRole('admin', 'user')).toBe(true);
     });
 
-    it('should prevent admin from managing other admins', () => {
-      expect(canManageRole('admin', 'admin')).toBe(false);
+    it('should allow admin to grant the admin role itself', () => {
+      // `ASSIGNABLE_ROLES` is `user | admin` and `super_admin` is no longer
+      // seeded, so a plain admin would otherwise be unable to promote anyone.
+      expect(canManageRole('admin', 'admin')).toBe(true);
+    });
+
+    it('should not let admin manage a super_admin', () => {
+      expect(canManageRole('admin', 'super_admin')).toBe(false);
     });
 
     it('should prevent user from managing anyone', () => {

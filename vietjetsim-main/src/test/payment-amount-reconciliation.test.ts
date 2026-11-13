@@ -45,6 +45,9 @@ const LOYALTY = {
 
 const mocks = vi.hoisted(() => ({
   getBookingById: vi.fn(),
+  // The payment route resolves the booking by PNR *or* by id (the customer
+  // only holds the six-character code), so it calls `getBookingByCodeOrId`.
+  getBookingByCodeOrId: vi.fn(),
   getActiveBankAccounts: vi.fn(),
   getUserLoyaltyWithProgram: vi.fn(),
   spendLoyaltyPoints: vi.fn(),
@@ -70,6 +73,7 @@ vi.mock('@/lib/auth', () => ({
 vi.mock('@/lib/mail', () => ({
   sendPaymentInstructionEmail: vi.fn().mockResolvedValue(true),
   sendPaymentFailedEmail: vi.fn().mockResolvedValue(true),
+  sendPaymentPendingReviewEmail: vi.fn().mockResolvedValue(true),
 }));
 
 vi.mock('@/lib/payment-invoice', () => ({
@@ -93,6 +97,7 @@ describe('POST /api/thanh-toan — amount reconciliation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.getBookingById.mockResolvedValue(BOOKING);
+    mocks.getBookingByCodeOrId.mockResolvedValue(BOOKING);
     mocks.getActiveBankAccounts.mockResolvedValue([BANK_ACCOUNT]);
     mocks.getUserLoyaltyWithProgram.mockResolvedValue(LOYALTY);
     mocks.spendLoyaltyPoints.mockResolvedValue(undefined);

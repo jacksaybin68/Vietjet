@@ -422,7 +422,32 @@ export async function updateUserRole(
   return (results as UserRecord[])[0];
 }
 
+/**
+ * Delete a user profile.
+ *
+ * `bookings.user_id` is `REFERENCES user_profiles(id)` with **no** cascade
+ * (migration 000), so a customer with a single booking cannot be deleted at
+ * all — Postgres raises `bookings_user_id_fkey` and the admin saw a bare 500
+ * with no hint that the account simply has history. The callers pre-check the
+ * booking count and answer 409; this function keeps the same guard so a
+ * direct call cannot slip a raw constraint error through.
+ *
+ * The child rows that *do* cascade (`wallet`, `notifications`, `sessions`,
+ * `chat`, `admin_roles`, …) are removed by the foreign keys themselves.
+ */
 export async function deleteUser(userId: string): Promise<void> {
+  const bookings = await sql`
+    SELECT COUNT(*)::int AS count FROM bookings WHERE user_id = ${userId}
+  `;
+  const bookingCount = Number((bookings[0] as { count: number } | undefined)?.count ?? 0);
+  if (bookingCount > 0) {
+    const error = new Error(
+      `Không thể xóa người dùng: còn ${bookingCount} đặt vé liên kết. Hãy xử lý/huỷ các đặt vé này trước.`
+    ) as Error & { code?: string; status?: number };
+    error.code = 'USER_HAS_BOOKINGS';
+    error.status = 409;
+    throw error;
+  }
   await sql`DELETE FROM user_profiles WHERE id = ${userId}`;
 }
 
@@ -457,6 +482,18 @@ export async function getAirportByCode(code: string): Promise<AirportRecord | nu
 
 // ─── Flight Queries ─────────────────────────────────────────────────────────
 
+/**
+ * Flights a customer may still book.
+ *
+ * `cancelled` and `completed` rows used to stay in the results list, so a
+ * customer could pick a flight the operations desk had already cancelled (or
+ * one that had already landed) and then pay for it. `delayed` is kept — a
+ * delayed flight is still flyable. `departed` is dropped for the same reason
+ * as `completed`.
+ *
+ * The list has to match migration 021's `flights_status_check`, so adding a
+ * status means adding it here too.
+ */
 export async function searchFlights(params: {
   from_code: string;
   to_code: string;
@@ -476,6 +513,7 @@ export async function searchFlights(params: {
         AND depart_time >= ${startDate}
         AND depart_time <= ${endDate}
         AND available > 0
+        AND status IN ('active', 'delayed')
       ORDER BY depart_time ASC
     `) as FlightRecord[];
   }
@@ -487,6 +525,7 @@ export async function searchFlights(params: {
         AND to_code = ${params.to_code}
         AND class = ${params.class}
         AND available > 0
+        AND status IN ('active', 'delayed')
       ORDER BY depart_time ASC
     `) as FlightRecord[];
   }
@@ -496,6 +535,7 @@ export async function searchFlights(params: {
     WHERE from_code = ${params.from_code}
       AND to_code = ${params.to_code}
       AND available > 0
+      AND status IN ('active', 'delayed')
     ORDER BY depart_time ASC
   `) as FlightRecord[];
 }
@@ -789,7 +829,28 @@ export async function updateFlight(
   return asFirstRow<FlightRecord>(results)!;
 }
 
+/**
+ * Delete a flight.
+ *
+ * `bookings.flight_id` is `REFERENCES flights(id)` with **no** cascade
+ * (migration 000), so deleting a flight that has bookings raises
+ * `bookings_flight_id_fkey` and the admin saw a bare 500. `seats`,
+ * `seat_locks` and `flight_update_logs` *do* cascade, so they are not the
+ * blocker.
+ */
 export async function deleteFlight(flightId: string): Promise<void> {
+  const bookings = await sql`
+    SELECT COUNT(*)::int AS count FROM bookings WHERE flight_id = ${flightId}
+  `;
+  const bookingCount = Number((bookings[0] as { count: number } | undefined)?.count ?? 0);
+  if (bookingCount > 0) {
+    const error = new Error(
+      `Không thể xóa chuyến bay: còn ${bookingCount} đặt vé liên kết. Hãy hủy hoặc chuyển các đặt vé này trước.`
+    ) as Error & { code?: string; status?: number };
+    error.code = 'FLIGHT_HAS_BOOKINGS';
+    error.status = 409;
+    throw error;
+  }
   await sql`DELETE FROM flights WHERE id = ${flightId}`;
 }
 

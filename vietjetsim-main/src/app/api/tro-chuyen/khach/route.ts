@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
-import {
-  createUser,
-  findUserByEmail,
-  getOrCreateConversation,
-  sendChatMessage,
-  sql,
-  type UserRecord,
-} from '@/lib/db';
+import { createUser, findUserByEmail, getOrCreateConversation, sendChatMessage } from '@/lib/db';
 import { generateTokens, hashPassword, setAuthCookiesOnResponse, type User } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
@@ -42,26 +35,26 @@ export async function POST(request: NextRequest) {
     const guestEmail = `${phone}@khach.vietjetsim.vn`;
     let userRecord = await findUserByEmail(guestEmail);
 
-    if (!userRecord) {
-      // Tìm xem có user nào cùng số điện thoại không
-      const byPhone = await sql`SELECT * FROM user_profiles WHERE phone = ${phone} LIMIT 1`;
-      const foundByPhone = (byPhone as unknown as UserRecord[])[0];
-      if (foundByPhone) {
-        userRecord = foundByPhone;
-      }
-    }
-
+    // Không được "nhận diện" một tài khoản đã đăng ký chỉ bằng cách biết số
+    // điện thoại. Trước đây route này tra `user_profiles.phone` và nếu trùng
+    // thì tái sử dụng chính record đó — kèm `generateTokens()` để set cookie
+    // phiên. Bất kỳ ai biết số điện thoại của một người đã đăng ký đều từ đó
+    // đi vào được tài khoản của họ (đặt vé, xem ví, đọc PII), và tên hiển thị
+    // trong profile còn bị ghi đè bằng tên khách gõ vào.
+    //
+    // Hành vi đúng: khách chat luôn thuộc về một tài khoản khách *riêng*, tách
+    // biệt khỏi tài khoản đăng ký (kể cả khi trùng số điện thoại). Tài khoản
+    // đăng ký chỉ được liên kết khi khách tự đăng nhập.
     const cleanName = fullName.replace(/\s*\(CCCD:.*?\)/gi, '').trim();
 
     if (!userRecord) {
       const passwordHash = await hashPassword(randomUUID());
-      userRecord = await createUser(guestEmail, passwordHash, cleanName, 'user', phone);
-    } else if (
-      userRecord.full_name &&
-      (userRecord.full_name.includes('(CCCD:') || userRecord.full_name !== cleanName)
-    ) {
-      await sql`UPDATE user_profiles SET full_name = ${cleanName} WHERE id = ${userRecord.id}`;
-      userRecord.full_name = cleanName;
+      // `phone` is intentionally NOT stored: `user_profiles_phone_key` is
+      // UNIQUE (migration 007), so a guest account that claimed a registered
+      // customer's number would collide with that customer's row. The guest
+      // account is identified by its synthetic `phone@khach.vietjetsim.vn`
+      // email instead.
+      userRecord = await createUser(guestEmail, passwordHash, cleanName, 'user', null);
     }
 
     const authUser: User = {

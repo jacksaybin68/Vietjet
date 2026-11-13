@@ -339,21 +339,35 @@ export function getRoleInfo(role: AllRoles): {
 }
 
 /**
- * Admin can only manage 'user' role. Cannot manage other admins.
- */
-/**
- * Roles are strictly ordered, so an actor may manage anyone strictly below
- * them and nobody at or above their own level. Without the ordering, a legacy
- * `super_admin` could not touch a plain `admin` even though they outrank them.
+ * May `actorRole` change `targetRole`?
  *
- * Takes plain strings because callers pass roles straight from the JWT and the
- * database, which can still hold legacy names that `AllRoles` does not cover.
+ * The rule is "strictly below the actor", plus one deliberate exception:
+ * an admin may hand out the `admin` role itself.
+ *
+ * Without that exception the product deadlocks. `ASSIGNABLE_ROLES` is
+ * `user | admin`, and `roleLevel('admin') === roleLevel('admin')`, so
+ * `canManageRole('admin', 'admin')` was `false` — a plain admin could never
+ * promote anybody, and the only accounts able to do it were the legacy
+ * `super_admin` rows that no setup script creates any more. Every deployment
+ * that seeds `role = 'admin'` (see `scripts/setup-admin.cjs`) therefore had an
+ * admin who could demote a user but not promote one.
+ *
+ * `super_admin` still outranks `admin` and cannot be demoted by it, because
+ * `canManageRole('admin', 'super_admin')` stays false: the comparison is on
+ * the *target* role, and `super_admin` is strictly above `admin`.
  */
 export function canManageRole(
   actorRole: string | null | undefined,
   targetRole: string | null | undefined
 ): boolean {
-  return roleLevel(actorRole) > roleLevel(targetRole);
+  // `super_admin` is not assignable through the API and always outranks an
+  // admin, so the plain level comparison already covers it.
+  if (roleLevel(actorRole) > roleLevel(targetRole)) return true;
+
+  // The one exception: an admin may grant the `admin` role. It grants nothing
+  // they do not already have — `admin` is seeded with every permission in
+  // migration 019 — so it cannot be used to escalate past the actor.
+  return isAdminRole(actorRole) && targetRole === 'admin' && actorRole === 'admin';
 }
 
 export { isAdminRole, normalizeRole, roleLevel } from './roles';

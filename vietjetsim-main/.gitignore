@@ -52,12 +52,13 @@ jest-test-results.json
 .next-uicheck/
 
 # Các thư mục build phụ sinh khi chạy song song nhiều pipeline QA/UI-check.
-.next-prod/
-.next-qa-*/
-.next-skyid/
-.next-rodriguez/
+# Mẫu `.next-*` bắt được mọi biến thể `DIST_DIR` (kể cả những cái sinh ra
+# sau này) — trước đây chỉ liệt kê từng tên nên cây build mới luôn lọt vào
+# `git status` và vào phạm vi quét của `tsc`/`eslint`.
+.next-*/
 .qa-build/
 .qa-out/
+.screenshots-hero/
 
 # Optional: if using TurboRepo or monorepo
 turbo/

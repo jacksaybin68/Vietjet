@@ -529,17 +529,18 @@ h6 {
     justify-content: center;
   }
 
-  /* Nút "Tìm chuyến bay" trong hero: 200×39px, chữ uppercase — đúng số đo
-   * trên vietjetair.com (MUI button rộng 200px, padding 6px 16px, font
-   * 16px/500). */
+  /* Nút "Tìm chuyến bay" trong hero: 174×44px, bo góc 10px — đúng số đo
+   * trên vietjetair.com (MUI button rộng 174px, cao 44px, font 16px/500). */
   .vj-cta--hero {
-    min-height: 39px;
-    width: 200px;
-    max-width: 200px;
+    min-height: 44px;
+    height: 44px;
+    width: 174px;
+    max-width: 174px;
+    border-radius: 10px;
     text-transform: uppercase;
     font-size: 16px;
     font-weight: 500;
-    padding: 6px 16px;
+    padding: 6px 15px;
   }
 
   .vj-cta:hover {

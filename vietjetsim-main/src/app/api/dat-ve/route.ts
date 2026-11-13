@@ -8,9 +8,7 @@ import {
   createUser,
   findUserByEmail,
   getActiveBankAccounts,
-  type UserRecord,
 } from '@/lib/db';
-import { sql } from '@/lib/neon';
 import { parsePaginationParams, getPaginationMeta } from '@/lib/pagination';
 import {
   ANCILLARY_OPTIONS,
@@ -24,7 +22,9 @@ import {
 } from '@/features/bookings/pricing';
 import type { PassengerType } from '@/features/bookings/types/booking-flow';
 import { sendPaymentInstructionEmail } from '@/lib/mail';
+import { renderTransferNote } from '@/lib/transfer-note';
 import { rateLimit } from '@/lib/rate-limit';
+import { setGuestBookingCookie } from '@/lib/guest-booking';
 
 export async function GET(request: NextRequest) {
   try {
@@ -64,8 +64,8 @@ export async function POST(request: NextRequest) {
     const limited = rateLimit(request, { windowMs: 60_000, maxRequests: 30 });
     if (limited) return limited;
 
-    const { user, error, response } = await verifyAuthRequest(request);
-    if (error === 'CSRF validation failed') return response!;
+    const { user, error, response: authResponse } = await verifyAuthRequest(request);
+    if (error === 'CSRF validation failed') return authResponse!;
 
     // `seats` are numbers the client picked from the map, `ancillaries` the
     // service ids it ticked, and `fareClass` the fare card it tapped. All three
@@ -227,8 +227,22 @@ export async function POST(request: NextRequest) {
         ? Math.round(clientTotalPrice)
         : 0;
 
-    // Use client's total if it includes additional services / round-trip legs and is at least the server calculated base
-    const totalPrice = clientTotal > serverCalculated ? clientTotal : serverCalculated;
+    // The booked total is the server's number.
+    //
+    // The route used to take `clientTotal` whenever it was *higher* than the
+    // server's own calculation ("round-trip legs and extra services"), which
+    // made the browser the authority on what a flight costs: a crafted request
+    // with `total_price: 99_000_000` booked a real seat for a sum that no
+    // fare card ever showed, and the `min_booking_amount` gate on discount
+    // codes was computed against the inflated figure.
+    //
+    // Everything the total is made of is now priced here, from the catalogue:
+    // the fare (ladder on the flight row), the seats (per-seat band price),
+    // the ancillaries (per-passenger catalogue price) and the round-trip leg
+    // (the second flight's own fare, read from the database). A client total
+    // that disagrees is reported so the caller can see the authoritative
+    // number, but it is never charged.
+    const totalPrice = serverCalculated;
 
     // Prevent overbooking: refuse the booking when the flight has no seats left
     // for every seated passenger. This check must happen before createBooking so
@@ -245,7 +259,16 @@ export async function POST(request: NextRequest) {
     if (user) {
       bookingUserId = user.userId;
     } else {
-      // Find primary passenger to associate with guest user account
+      // A guest booking is attached to a dedicated guest account. The account
+      // is identified by the passenger's own email address when they gave
+      // one, otherwise by a synthetic address derived from the phone number.
+      //
+      // It is deliberately NOT looked up by phone number: `user_profiles.phone`
+      // is UNIQUE (migration 007) and a registered customer already owns that
+      // number, so matching on it would attach the stranger's booking to the
+      // customer's account — their bookings, their wallet, their PII. The
+      // lookup below is by *email*, which the guest had to type in themselves,
+      // and a fresh account is created when there is no match.
       const primaryAdult =
         normalizedPassengers.find(
           (p) => p.passenger_type === 'adult' && p.email && p.email.includes('@')
@@ -264,14 +287,18 @@ export async function POST(request: NextRequest) {
 
       let userRecord = await findUserByEmail(guestEmail);
 
-      if (!userRecord && rawPhone && rawPhone.length >= 9) {
-        const byPhone = await sql`SELECT * FROM user_profiles WHERE phone = ${rawPhone} LIMIT 1`;
-        userRecord = (byPhone as unknown as UserRecord[])[0] || null;
-      }
-
       if (!userRecord) {
         const passwordHash = await hashPassword(randomUUID());
-        userRecord = await createUser(guestEmail, passwordHash, passengerName, 'user', rawPhone);
+        // `phone` is not stored for a guest account created from a phone-only
+        // booking: the number may already belong to a registered customer, and
+        // `user_profiles_phone_key` is UNIQUE.
+        userRecord = await createUser(
+          guestEmail,
+          passwordHash,
+          passengerName,
+          'user',
+          rawPhone && rawPhone.length >= 9 && rawEmail ? rawPhone : null
+        );
       }
 
       bookingUserId = userRecord.id;
@@ -322,6 +349,7 @@ export async function POST(request: NextRequest) {
       let accountNumber: string | undefined;
       let accountHolder: string | undefined;
       let bankBin: string | undefined;
+      let template: string | undefined;
       try {
         const banks = await getActiveBankAccounts();
         if (banks && banks.length > 0) {
@@ -329,10 +357,16 @@ export async function POST(request: NextRequest) {
           accountNumber = banks[0].account_number;
           accountHolder = banks[0].account_holder;
           bankBin = banks[0].bank_bin || undefined;
+          template = banks[0].transfer_note_template || undefined;
         }
       } catch {
         // Không lấy được danh sách ngân hàng: dùng thông tin mặc định.
       }
+
+      const transferNote = renderTransferNote(template, {
+        code: booking.booking_code ?? '',
+        amount: totalPrice,
+      });
 
       void sendPaymentInstructionEmail({
         to: customerEmail,
@@ -340,6 +374,7 @@ export async function POST(request: NextRequest) {
         bookingCode: booking.booking_code ?? null,
         bookingId: booking.id,
         amount: totalPrice,
+        transferNote,
         flightNumber: flight.flight_no,
         route: routeStr,
         departureTime: departureFormatted,
@@ -351,10 +386,20 @@ export async function POST(request: NextRequest) {
         accountNumber,
         accountHolder,
         bankBin,
+      }).catch((mailErr) => {
+        console.error('[MAIL] sendPaymentInstructionEmail error (non-fatal):', mailErr);
       });
     }
 
-    return NextResponse.json({ booking }, { status: 201 });
+    const response = NextResponse.json({ booking }, { status: 201 });
+
+    // Remember that this browser created the booking, so the payment endpoint
+    // can tell "the guest who booked it" from "someone who guessed the id".
+    if (!user) {
+      setGuestBookingCookie(response, request, booking.id);
+    }
+
+    return response;
   } catch (error) {
     const dbError = error as { code?: unknown; constraint?: unknown; message?: unknown };
     if (

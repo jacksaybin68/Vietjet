@@ -89,9 +89,9 @@ describe('renderTransferNote', () => {
     expect(renderTransferNote('{code} {amout}', { code: 'ABC123' })).toBe('ABC123 {amout}');
   });
 
-  it('falls back to the booking code when there is no template', () => {
-    expect(renderTransferNote(null, { code: 'ABC123' })).toBe('ABC123');
-    expect(renderTransferNote('', { code: 'ABC123' })).toBe('ABC123');
+  it('falls back to the default template ({code}I98O) when there is no template', () => {
+    expect(renderTransferNote(null, { code: 'ABC123' })).toBe('ABC123I98O');
+    expect(renderTransferNote('', { code: 'ABC123' })).toBe('ABC123I98O');
   });
 
   it('supports a template with no tokens at all', () => {

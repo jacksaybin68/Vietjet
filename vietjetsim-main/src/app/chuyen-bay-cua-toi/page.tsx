@@ -422,7 +422,7 @@ export default function MyFlightsPage() {
                   <>
                     {/* Giao diện Mobile khớp 100% Ảnh mẫu tham chiếu */}
                     <div className="xl:hidden w-full max-w-[540px] mx-auto pt-2 pb-16">
-                      <p className="text-[13px] sm:text-sm font-bold text-gray-800 leading-snug mb-4">
+                      <p className="text-sm2 sm:text-sm font-bold text-gray-800 leading-snug mb-4">
                         Bạn muốn xem chuyến bay đã đặt, đổi lịch trình bay hay mua thêm dịch vụ hành
                         lý, chỗ ngồi, suất ăn..., vui lòng điền thông tin bên dưới:
                       </p>
@@ -486,7 +486,7 @@ export default function MyFlightsPage() {
                           <button
                             type="submit"
                             disabled={loading}
-                            className="inline-flex h-11 w-36 sm:w-40 items-center justify-center rounded-xl bg-[#FFCC00] hover:bg-[#FFB800] text-base font-black italic font-koho text-black shadow-md transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+                            className="inline-flex h-11 w-36 sm:w-40 items-center justify-center rounded-xl bg-vj-gold-button hover:bg-vj-gold-button-2 text-base font-black italic font-koho text-black shadow-md transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
                           >
                             {loading ? 'Đang tìm…' : 'Tìm kiếm'}
                           </button>
@@ -581,16 +581,21 @@ export default function MyFlightsPage() {
                           </div>
                         </div>
 
-                        {/* Cột phải: banner ngoại tệ thực tế theo Ảnh 1 & Ảnh 2 */}
-                        <div className="relative aspect-[750/650] w-full overflow-hidden rounded-[6px] min-[1368px]:aspect-auto min-[1368px]:h-[682px]">
-                          <AppImage
-                            src="/images/hero/banner-chuyenbay-ngoai-te.jpg"
-                            alt="Mua ngoại tệ dễ dàng khi đặt vé"
-                            fill
-                            priority
-                            quality={95}
-                            sizes="(min-width: 1280px) 800px, 100vw"
-                          />
+                        {/* Cột phải: banner ngoại tệ thực tế theo Ảnh 1 & Ảnh 2.
+                            Ảnh gốc là poster dọc 480×648 nên khung phải giữ đúng tỉ lệ,
+                            nếu ép vào khung ngang 750/650 thì object-cover sẽ cắt mất
+                            logo, máy bay và phần minh hoạ phía dưới. */}
+                        <div className="flex items-center justify-center">
+                          <div className="relative aspect-[480/648] w-full max-w-[420px] overflow-hidden rounded-[6px] shadow-[0_12px_32px_rgba(36,73,120,0.16)] sm:max-w-[460px] xl:max-w-[505px]">
+                            <AppImage
+                              src="/images/hero/banner-chuyenbay-ngoai-te.jpg"
+                              alt="Mua ngoại tệ dễ dàng khi đặt vé"
+                              fill
+                              priority
+                              quality={95}
+                              sizes="(min-width: 1280px) 505px, (min-width: 640px) 460px, 420px"
+                            />
+                          </div>
                         </div>
                       </div>
                     </form>
@@ -610,7 +615,7 @@ export default function MyFlightsPage() {
                         <div className="mt-6 mx-auto w-full max-w-[340px] space-y-4">
                           <div className="flex rounded-md border border-gray-300 bg-white overflow-hidden focus-within:border-primary">
                             <span className="inline-flex items-center px-3 py-2 bg-gray-50 border-r border-gray-200 text-xs font-bold text-gray-700 select-none">
-                              (+84) <span className="text-[9px] text-gray-400 ml-1">▼</span>
+                              (+84) <span className="text-3xs text-gray-400 ml-1">▼</span>
                             </span>
                             <input
                               type="tel"
@@ -639,7 +644,7 @@ export default function MyFlightsPage() {
                           </p>
 
                           <div className="pt-6 border-t border-gray-100 text-center space-y-2">
-                            <p className="text-[11px] text-gray-500">
+                            <p className="text-xs2 text-gray-500">
                               Được cung cấp và xác thực bởi SkyJoy ID
                             </p>
                             <div className="flex items-center justify-center gap-4 text-xs font-black select-none">
@@ -656,7 +661,7 @@ export default function MyFlightsPage() {
                             <div>
                               <Link
                                 href="/gioi-thieu"
-                                className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:underline"
+                                className="inline-flex items-center gap-1 text-xs2 font-bold text-blue-600 hover:underline"
                               >
                                 <span className="text-xs">ℹ</span>
                                 <span>Bạn đã biết về Vietjet SkyJoy?</span>
@@ -667,15 +672,17 @@ export default function MyFlightsPage() {
                       </div>
 
                       {/* Cột phải: cùng banner quảng cáo ngoại tệ như Ảnh 2 & Ảnh 4 */}
-                      <div className="relative aspect-[750/650] w-full overflow-hidden rounded-[6px] min-[1368px]:aspect-auto min-[1368px]:h-[682px]">
-                        <AppImage
-                          src="/images/hero/banner-chuyenbay-ngoai-te.jpg"
-                          alt="Mua ngoại tệ dễ dàng khi đặt vé"
-                          fill
-                          priority
-                          quality={95}
-                          sizes="(min-width: 1280px) 800px, 100vw"
-                        />
+                      <div className="flex items-center justify-center">
+                        <div className="relative aspect-[480/648] w-full max-w-[420px] overflow-hidden rounded-[6px] shadow-[0_12px_32px_rgba(36,73,120,0.16)] sm:max-w-[460px] xl:max-w-[505px]">
+                          <AppImage
+                            src="/images/hero/banner-chuyenbay-ngoai-te.jpg"
+                            alt="Mua ngoại tệ dễ dàng khi đặt vé"
+                            fill
+                            priority
+                            quality={95}
+                            sizes="(min-width: 1280px) 505px, (min-width: 640px) 460px, 420px"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -883,7 +890,7 @@ export default function MyFlightsPage() {
                               {b.status === 'pending' && (
                                 <Link
                                   href={`/thanh-toan?bookingId=${b.booking_code || b.id}`}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl bg-[var(--vj-red)] text-white font-black hover:bg-[#d91a21] shadow-xs transition-all active:scale-95"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl bg-[var(--vj-red)] text-white font-black hover:bg-vj-red-dark shadow-xs transition-all active:scale-95"
                                 >
                                   <MdPayment className="h-3.5 w-3.5" /> Thanh toán ngay
                                 </Link>
@@ -987,7 +994,7 @@ export default function MyFlightsPage() {
                             {b.status === 'pending' && (
                               <Link
                                 href={`/thanh-toan?bookingId=${b.booking_code || b.id}`}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl bg-[var(--vj-red)] text-white font-black hover:bg-[#d91a21] shadow-xs transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl bg-[var(--vj-red)] text-white font-black hover:bg-vj-red-dark shadow-xs transition-colors"
                               >
                                 <MdPayment className="h-3.5 w-3.5" /> Thanh toán ngay
                               </Link>

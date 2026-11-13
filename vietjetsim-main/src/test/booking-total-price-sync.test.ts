@@ -45,7 +45,7 @@ describe('Booking total_price synchronization', () => {
     });
   });
 
-  it('preserves client total_price when client booked round-trip or additional services > base flight fare', async () => {
+  it('books at the server-calculated total, ignoring a client-supplied higher total', async () => {
     const req = new NextRequest('http://localhost/api/dat-ve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -69,8 +69,11 @@ describe('Booking total_price synchronization', () => {
     const res = await POST(req);
     expect(res.status).toBe(201);
     expect(createBookingMock).toHaveBeenCalledTimes(1);
-    // Should respect the higher round-trip/services total: 3,423,662
-    expect(createBookingMock.mock.calls[0][0].total_price).toBe(3423662);
+    // The server prices the booking from the catalogue (fare ladder + tax +
+    // seat band). A client total that is merely higher is never charged, so
+    // the browser cannot decide what a flight costs.
+    expect(createBookingMock.mock.calls[0][0].total_price).toBe(1334000);
+    expect(createBookingMock.mock.calls[0][0].total_price).not.toBe(3423662);
   });
 
   it('rejects client total_price if it is maliciously lower than base flight price', async () => {

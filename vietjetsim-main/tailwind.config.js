@@ -274,6 +274,21 @@ module.exports = {
           'text-soft-strong': '#555555',
           'amber-deep': '#F59E0B',
           'amber-hover': '#E69500',
+          // ─── Sắc độ gom từ `bg-[#rrggbb]` ở trang chi tiết đơn ───
+          // Các hex này đã tồn tại trong class nhưng rải rác; gom về đây để
+          // `scripts/css-debt.cjs` đo được và để một sắc độ chỉ có một nguồn.
+          'booking-red': '#ED1B24',
+          'booking-red-hover': '#C81018',
+          'booking-red-2': '#D8161F',
+          'booking-red-3': '#990D13',
+          'booking-red-soft': '#FF5E5E',
+          'gold-button': '#FFCC00',
+          'gold-button-hover': '#E6B800',
+          'gold-button-2': '#FFB800',
+          'gold-border': '#ECC000',
+          'orange-from': '#FFA800',
+          'orange-to': '#FF9000',
+          'orange-hover-to': '#D88000',
           // ─── Hệ vàng nhiều sắc độ (đo từ vietjetair.com) ───
           // Site thật KHÔNG dùng một màu `#FFDD00` đơn lẻ: chữ trên nền
           // vàng, viền khung giá và các trạng thái dùng một thang vàng riêng,

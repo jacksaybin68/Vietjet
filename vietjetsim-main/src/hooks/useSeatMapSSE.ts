@@ -4,7 +4,8 @@ import { useEffect, useState, useRef } from 'react';
 export interface SeatMapEvent {
   flightId: string;
   occupied: string[];
-  locked: { seatId: string; expiresAt: string }[];
+  /** `sessionId` is the session holding the lock; the client compares it with its own. */
+  locked: { seatId: string; expiresAt: string; sessionId: string }[];
   updatedAt: string;
 }
 

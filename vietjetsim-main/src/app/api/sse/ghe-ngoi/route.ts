@@ -10,12 +10,13 @@ interface BookedRow {
 
 interface LockRow {
   seat_number: string;
+  session_id: string;
   expires_at: string;
 }
 
 async function fetchSeatData(flightId: string): Promise<{
   occupied: string[];
-  locked: { seatId: string; expiresAt: string }[];
+  locked: { seatId: string; expiresAt: string; sessionId: string }[];
 }> {
   // Get confirmed/pending booked seats
   const bookedRows = (await sql`
@@ -29,13 +30,13 @@ async function fetchSeatData(flightId: string): Promise<{
   const occupied = bookedRows.map((r) => r.seat_number);
 
   // Get temporary locks (gracefully handle table not existing)
-  let locked: { seatId: string; expiresAt: string }[] = [];
+  let locked: { seatId: string; expiresAt: string; sessionId: string }[] = [];
   try {
     // Clean up expired locks first
     await sql`DELETE FROM seat_locks WHERE expires_at <= NOW()`;
 
     const lockRows = (await sql`
-      SELECT seat_number, expires_at
+      SELECT seat_number, session_id, expires_at
       FROM seat_locks
       WHERE flight_id = ${flightId}
         AND expires_at > NOW()
@@ -44,6 +45,10 @@ async function fetchSeatData(flightId: string): Promise<{
     locked = lockRows.map((r) => ({
       seatId: r.seat_number,
       expiresAt: r.expires_at,
+      // The session that holds the lock. Without it the client cannot tell its
+      // own temporary hold apart from another customer's, and it renders its
+      // own seat as "đã đặt" — which then refuses to deselect it.
+      sessionId: r.session_id,
     }));
   } catch (err) {
     // seat_locks table may not exist yet — return empty locks array

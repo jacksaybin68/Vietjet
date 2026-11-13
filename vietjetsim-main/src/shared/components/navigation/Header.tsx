@@ -285,7 +285,7 @@ export default function Header({
                 // tại (13, 51), "Hỗ trợ", "Đăng ký | Đăng nhập", nút "vi" 38×20px
                 // và nút menu. Hàng này neo ngay dưới thanh thông báo nên dùng
                 // biến `--vj-announce-h` (35px, 0px khi đóng thanh).
-                'absolute inset-x-0 top-[var(--vj-announce-h,35px)] z-40 h-[56px] lg:inset-x-0 lg:top-[50px] lg:z-[1300] lg:h-0 lg:shadow-none'
+                'absolute inset-x-0 top-[var(--vj-announce-h,35px)] z-40 h-[56px] lg:inset-x-0 lg:top-[50px] lg:z-[1300] lg:h-[72px] lg:shadow-none'
               : 'sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.08)]'
         }`}
       >

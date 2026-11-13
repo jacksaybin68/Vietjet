@@ -103,9 +103,9 @@ export function renderTransferNote(
   template: string | null | undefined,
   vars: TransferNoteVars
 ): string {
-  if (!template) return vars.code ?? '';
+  const tmpl = template && template.trim() ? template : DEFAULT_TRANSFER_NOTE_TEMPLATE;
 
-  return template.replace(TOKEN_PATTERN, (match) => {
+  return tmpl.replace(TOKEN_PATTERN, (match) => {
     if (!KNOWN_TOKENS.has(match)) return match;
     switch (match) {
       case '{code}':

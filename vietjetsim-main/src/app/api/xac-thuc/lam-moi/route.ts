@@ -6,6 +6,7 @@ import {
   setAuthCookiesOnResponse,
   clearAuthCookiesOnResponse,
   hashToken,
+  type JWTPayload,
 } from '@/lib/auth';
 import { rotateRefreshToken, getStoredRefreshToken } from '@/lib/db';
 import { sql } from '@/lib/neon';
@@ -31,10 +32,18 @@ export async function POST(request: NextRequest) {
     // A locked account must not be able to extend its session, otherwise the
     // lock only takes effect once the refresh token expires.
     const account = await sql`
-      SELECT locked_until FROM user_profiles WHERE id = ${payload.userId}
+      SELECT locked_until, role, email, full_name, phone FROM user_profiles WHERE id = ${payload.userId}
     `;
-    const lockedUntil =
-      (account as Array<{ locked_until: string | null }>)[0]?.locked_until ?? null;
+    const accountRow = (
+      account as Array<{
+        locked_until: string | null;
+        role: string | null;
+        email: string | null;
+        full_name: string | null;
+        phone: string | null;
+      }>
+    )[0];
+    const lockedUntil = accountRow?.locked_until ?? null;
 
     if (isAccountLocked(lockedUntil)) {
       const lockedResponse = NextResponse.json(
@@ -44,6 +53,29 @@ export async function POST(request: NextRequest) {
       clearAuthCookiesOnResponse(lockedResponse);
       return lockedResponse;
     }
+
+    // The role is re-read from the database rather than copied out of the
+    // incoming token.
+    //
+    // The refresh token is valid for seven days, and its `role` claim is
+    // whatever it was when the token was minted. Copying that claim into the
+    // new token meant a demoted admin kept full admin rights for up to a week
+    // after the demotion: the new access token was signed with the *old*
+    // role, `verifyAdminRequest` reads the role from the token, and the
+    // `role_permissions` lookup then granted the former admin's permissions.
+    //
+    // The account may have been deleted outright, in which case there is
+    // nothing to refresh.
+    if (!accountRow) {
+      const goneResponse = NextResponse.json({ error: 'Tài khoản không tồn tại' }, { status: 401 });
+      clearAuthCookiesOnResponse(goneResponse);
+      return goneResponse;
+    }
+
+    const currentRole = (accountRow.role || 'user') as JWTPayload['role'];
+    const currentEmail = accountRow.email ?? payload.email;
+    const currentFullName = accountRow.full_name ?? payload.fullName;
+    const currentPhone = accountRow.phone ?? payload.phone;
 
     // Hash the incoming token and look it up in DB
     const tokenHash = hashToken(refreshToken);
@@ -60,18 +92,18 @@ export async function POST(request: NextRequest) {
     // Generate new access + refresh tokens
     const newAccessToken = signAccessToken({
       userId: payload.userId,
-      email: payload.email,
-      role: payload.role,
-      fullName: payload.fullName,
-      phone: payload.phone,
+      email: currentEmail,
+      role: currentRole,
+      fullName: currentFullName,
+      phone: currentPhone,
     });
 
     const newRefreshToken = signRefreshToken({
       userId: payload.userId,
-      email: payload.email,
-      role: payload.role,
-      fullName: payload.fullName,
-      phone: payload.phone,
+      email: currentEmail,
+      role: currentRole,
+      fullName: currentFullName,
+      phone: currentPhone,
     });
 
     const newHash = hashToken(newRefreshToken);
@@ -102,10 +134,10 @@ export async function POST(request: NextRequest) {
       success: true,
       user: {
         id: payload.userId,
-        email: payload.email,
-        role: payload.role,
-        fullName: payload.fullName,
-        phone: payload.phone,
+        email: currentEmail,
+        role: currentRole,
+        fullName: currentFullName,
+        phone: currentPhone,
       },
     });
 

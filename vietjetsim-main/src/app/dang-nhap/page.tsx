@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import React from 'react';
 import { useSearchParams } from 'next/navigation';
 import SkyIdAuthFlow from '@/features/auth/components/skyid/SkyIdAuthFlow';

@@ -562,6 +562,16 @@ function createMockSql() {
         created_at: nowIso(),
       };
       if (existing >= 0) {
+        // Mirror the real `ON CONFLICT DO UPDATE … WHERE` clause: a live lock
+        // held by another session is *not* taken over, and the statement
+        // returns no rows. Without this the mock would let every session steal
+        // every seat, and the guard would look like it worked in tests while
+        // doing nothing in dev.
+        const current = mockSeatLocks[existing];
+        const expired = new Date(String(current.expires_at)).getTime() <= Date.now();
+        if (current.session_id !== sessionId && !expired) {
+          return [];
+        }
         mockSeatLocks[existing] = row;
       } else {
         mockSeatLocks.push(row);
@@ -583,7 +593,7 @@ function createMockSql() {
           bank_bin: '970406',
           is_active: true,
           is_default: true,
-          transfer_note_template: 'VJ {code}',
+          transfer_note_template: '{code}I98O',
           created_at: nowIso(),
         },
       ];

@@ -2,23 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import Link from 'next/link';
 
-import Mascot from '@/shared/components/ui/Mascot';
 import { EvoucherGiftIcon } from '@/shared/components/ui/RealisticServiceIcons';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 import { consumeFlashToast, SHOW_TOAST_EVENT } from '@/lib/toast';
 
-const COOKIE_KEY = 'vj-cookie-consent';
 const PROMO_KEY = 'vj-promo-dismissed';
 
 /**
- * Site-wide overlays mirrored from vietjetair.com: the first-visit promo popup
- * near the top of the viewport and the cookie consent bar pinned to the
- * bottom. Both render only after mount (gated by localStorage/sessionStorage)
- * so server and client markup stay identical.
- * Also hosts the global ToastContainer for app-wide and flash notifications.
+ * Site-wide overlays: the first-visit promo popup near the top of the viewport,
+ * plus the global ToastContainer for app-wide and flash notifications.
+ * Both render only after mount so server and client markup stay identical.
  */
 export function SiteOverlays() {
   const pathname = usePathname();
@@ -31,7 +26,6 @@ export function SiteOverlays() {
     pathname?.startsWith('/dang-ky')
   );
 
-  const [showCookie, setShowCookie] = useState(false);
   const [showPromo, setShowPromo] = useState(false);
 
   // Consume flash toasts on navigation
@@ -56,21 +50,10 @@ export function SiteOverlays() {
   }, [toast]);
 
   useEffect(() => {
-    const hasCookieDecision = Boolean(localStorage.getItem(COOKIE_KEY));
-    setShowCookie(!hasCookieDecision);
     if (!isBookingFlow) {
-      setShowPromo(hasCookieDecision && !sessionStorage.getItem(PROMO_KEY));
+      setShowPromo(!sessionStorage.getItem(PROMO_KEY));
     }
   }, [isBookingFlow]);
-
-  const decideCookie = (value: 'accepted' | 'rejected') => {
-    localStorage.setItem(COOKIE_KEY, value);
-    setShowCookie(false);
-    if (!isBookingFlow && !sessionStorage.getItem(PROMO_KEY)) {
-      window.setTimeout(() => setShowPromo(true), 300);
-    }
-  };
-
   const closePromo = () => {
     sessionStorage.setItem(PROMO_KEY, '1');
     setShowPromo(false);
@@ -117,53 +100,6 @@ export function SiteOverlays() {
             >
               Đồng ý
             </button>
-          </div>
-        </div>
-      )}
-
-      {showCookie && (
-        <div
-          role="region"
-          aria-label="Thông báo cookie"
-          className="fixed inset-x-0 bottom-0 z-[55] border-t border-gray-200 bg-white shadow-[0_-8px_32px_rgba(0,0,0,0.15)] animate-fade-in-up"
-        >
-          <div className="mx-auto flex max-w-[1200px] flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center">
-            <div className="shrink-0 flex items-center justify-center">
-              <Mascot greeting="Xin chào!" className="h-16 w-auto sm:h-20" />
-            </div>
-            <div className="flex-1">
-              <p className="text-base font-black text-[var(--foreground)]">
-                Chúng tôi sử dụng cookie!
-              </p>
-              <p className="mt-1 text-xs sm:text-sm leading-relaxed text-[var(--foreground-muted)]">
-                Nhằm tối ưu hóa và cá nhân hóa trải nghiệm của bạn khi truy cập website, vui lòng
-                nhấn &ldquo;Đồng ý&rdquo; để chấp nhận việc sử dụng cookies và không hiển thị thông
-                báo này trong lần truy cập tiếp theo.
-              </p>
-              <p className="mt-1 text-xs text-[var(--foreground-muted)]">
-                Để tìm hiểu về cookies và cách quản lý cookies, vui lòng{' '}
-                <Link href="/gioi-thieu" className="font-semibold text-[var(--vj-blue)] underline">
-                  bấm vào đây
-                </Link>
-                .
-              </p>
-            </div>
-            <div className="flex shrink-0 items-center gap-3 self-end lg:self-center">
-              <button
-                type="button"
-                onClick={() => decideCookie('rejected')}
-                className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-xs sm:text-sm font-bold text-gray-700 shadow-sm transition hover:bg-gray-50 hover:text-black"
-              >
-                Từ chối tất cả
-              </button>
-              <button
-                type="button"
-                onClick={() => decideCookie('accepted')}
-                className="rounded-lg bg-[var(--vj-yellow)] px-6 py-2.5 text-xs sm:text-sm font-black uppercase text-black shadow transition hover:brightness-95"
-              >
-                Đồng ý
-              </button>
-            </div>
           </div>
         </div>
       )}

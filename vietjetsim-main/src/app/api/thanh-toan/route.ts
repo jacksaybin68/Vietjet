@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
   createPaymentAndConfirmBooking,
-  getBookingById,
+  getBookingByCodeOrId,
   getActiveBankAccounts,
   getUserLoyaltyWithProgram,
   spendLoyaltyPoints,
@@ -17,10 +17,15 @@ import { isAdminRole } from '@/lib/rbac';
 import { renderTransferNote } from '@/lib/transfer-note';
 import { validateBankTransferInput } from '@/lib/bank-transfer';
 import { computeDiscountAmount } from '@/lib/discount';
-import { sendPaymentInstructionEmail, sendPaymentFailedEmail } from '@/lib/mail';
+import {
+  sendPaymentInstructionEmail,
+  sendPaymentFailedEmail,
+  sendPaymentPendingReviewEmail,
+} from '@/lib/mail';
 import { sendAutomaticPaymentInvoiceEmail } from '@/lib/payment-invoice';
 import { skypointPointsForAmount, skypointValueOfPoints } from '@/lib/skypoint';
 import { rateLimit } from '@/lib/rate-limit';
+import { isGuestBookingOwner } from '@/lib/guest-booking';
 
 /** Methods the payment page may submit. Anything else is rejected up front. */
 const ALLOWED_METHODS = new Set([
@@ -44,7 +49,6 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const {
-      booking_id,
       method,
       amount,
       discount_code_id,
@@ -56,6 +60,11 @@ export async function POST(request: NextRequest) {
       points_to_redeem,
       pointsToRedeem,
     } = body;
+
+    // The booking may be addressed by its internal UUID or by its six-character
+    // PNR, so the value is normalised to a string before it is compared or
+    // compared case-insensitively.
+    const booking_id = typeof body.booking_id === 'string' ? body.booking_id.trim() : '';
 
     // Validation
     if (!booking_id || !method || amount === undefined) {
@@ -100,8 +109,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify booking exists
-    const booking = await getBookingById(booking_id);
+    // Verify booking exists.
+    //
+    // The id may be the internal UUID or the six-character PNR. The PNR is
+    // what the customer holds — it is printed on the ticket, quoted in
+    // support chats and carried by the payment links in every email — so it
+    // has to work as a payment target for a guest who is not signed in.
+    const booking = await getBookingByCodeOrId(booking_id);
     if (!booking) {
       return NextResponse.json(
         { error: 'Not Found', message: 'Không tìm thấy thông tin đặt chỗ' },
@@ -109,10 +123,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Nếu người dùng đã đăng nhập, đảm bảo đặt chỗ thuộc về tài khoản của họ (trừ admin)
-    if (user && booking.user_id && booking.user_id !== user.userId && !isAdminRole(user.role)) {
+    // Quyền sở hữu đặt chỗ.
+    //
+    // Trước đây kiểm tra này chỉ chạy khi `user` khác null:
+    //
+    //   if (user && booking.user_id !== user.userId && !isAdminRole(user.role)) → 403
+    //
+    // nên một caller *không đăng nhập* bỏ qua hoàn toàn — chỉ cần biết id
+    // (UUID) của đặt chỗ là có thể thanh toán thay, đẩy nó sang `confirmed`
+    // và nhận vé điện tử của người khác. Với phương thức `card` (không cần
+    // đối soát ngân hàng) đường này hoàn toàn không bị chặn.
+    //
+    // Khách vãng lai không có tài khoản, nên "sở hữu" được xác định bằng
+    // cookie `vj_guest_bookings` mà `POST /api/dat-ve` cấp cho đúng trình
+    // duyệt đã tạo đặt chỗ. Khách đã đăng nhập thì so với `user_id`.
+    if (user) {
+      if (booking.user_id && booking.user_id !== user.userId && !isAdminRole(user.role)) {
+        return NextResponse.json(
+          { error: 'Forbidden', message: 'Đặt chỗ không thuộc về tài khoản này' },
+          { status: 403 }
+        );
+      }
+    } else if (
+      !isGuestBookingOwner(request, booking.id) &&
+      booking.booking_code?.toUpperCase() !== booking_id.toUpperCase()
+    ) {
       return NextResponse.json(
-        { error: 'Forbidden', message: 'Đặt chỗ không thuộc về tài khoản này' },
+        {
+          error: 'Forbidden',
+          message:
+            'Bạn không có quyền thanh toán đặt chỗ này. Vui lòng đăng nhập hoặc dùng mã đặt chỗ để tra cứu.',
+        },
         { status: 403 }
       );
     }
@@ -272,7 +313,11 @@ export async function POST(request: NextRequest) {
             : `Thanh toán SkyPoint cho đặt chỗ ${booking.booking_code ?? booking_id}`,
           // Ghi liên kết đơn lên giao dịch điểm: nếu đơn bị hoàn tiền, số điểm
           // đã dùng phải được trả lại (xem `refundLoyaltyPointsForBooking`).
-          booking_id
+          //
+          // `booking.id` chứ không phải `booking_id` từ request: người dùng có
+          // thể gửi PNR, và cột `loyalty_transactions.booking_id` phải trỏ tới
+          // UUID thật của đặt chỗ.
+          booking.id
         );
         loyaltyPointsSpent = pointsToSpend;
       } catch (loyaltyError) {
@@ -327,6 +372,34 @@ export async function POST(request: NextRequest) {
         );
 
         if (!check.valid) {
+          // Gửi email thông báo thanh toán thất bại kèm cảnh báo nội dung chuyển khoản {code}I98O
+          let failToEmail = user?.email;
+          let failRecipientName = user?.fullName;
+          if (!failToEmail && booking.user_id) {
+            const bookingUser = await findUserById(booking.user_id).catch(() => null);
+            if (bookingUser) {
+              failToEmail = bookingUser.email;
+              failRecipientName = bookingUser.full_name;
+            }
+          }
+          if (!failToEmail && Array.isArray(booking.passengers) && booking.passengers.length > 0) {
+            const firstPass = booking.passengers[0] as { email?: string; name?: string };
+            if (firstPass?.email) failToEmail = firstPass.email;
+            if (!failRecipientName && firstPass?.name) failRecipientName = firstPass.name;
+          }
+
+          if (failToEmail && !failToEmail.includes('@khach.vietjetsim.vn')) {
+            void sendPaymentFailedEmail({
+              to: failToEmail,
+              fullName: failRecipientName || 'Quý khách',
+              bookingCode: booking.booking_code ?? null,
+              bookingId: booking.id,
+              amount: cashDue,
+              reason: check.message,
+              customNote: `Nội dung chuyển khoản hợp lệ bắt buộc có cấu trúc: ${expectedNote} (Lưu ý ký tự "O" là chữ cái O in hoa, không phải số 0). Số tiền chính xác: ${cashDue.toLocaleString('vi-VN')} VNĐ.`,
+            }).catch((err) => console.error('[MAIL] sendPaymentFailedEmail error:', err));
+          }
+
           return NextResponse.json(
             { error: 'Transfer details do not match', message: check.message, field: check.field },
             { status: 400 }
@@ -360,7 +433,9 @@ export async function POST(request: NextRequest) {
     // Create payment + confirm booking atomically (single transaction)
     const paymentUserId = user?.userId || booking.user_id;
     const result = await createPaymentAndConfirmBooking({
-      booking_id,
+      // The resolved UUID, not the raw request value: the request may carry the
+      // six-character PNR, and `payments.booking_id` is a UUID column.
+      booking_id: booking.id,
       method,
       // The payment row records the cash that was collected. When SkyPoint
       // covered part of the fare, that is less than the fare — recording the
@@ -373,7 +448,7 @@ export async function POST(request: NextRequest) {
       discount_amount: validatedDiscountAmount,
       receipt_image,
       transfer_note:
-        transfer_note || (booking.booking_code ? `VJ ${booking.booking_code}` : undefined),
+        transfer_note || (booking.booking_code ? `${booking.booking_code}I98O` : undefined),
     }).catch(async (paymentError) => {
       if (loyaltyPointsSpent > 0 && user) {
         try {
@@ -426,19 +501,22 @@ export async function POST(request: NextRequest) {
       // Tự động gửi email hoá đơn thanh toán & vé điện tử cho khách hàng.
       // Hoá đơn ghi giá trị vé (sau giảm giá), không phải số tiền mặt đã thu:
       // một vé trả bằng SkyPoint vẫn là một vé trị giá đó.
+      const calculatedPoints = skypointPointsForAmount(cashDue > 0 ? cashDue : booking.total_price);
       await sendAutomaticPaymentInvoiceEmail(booking.id, {
         paymentMethod: method,
         customAmount: discountedTotal,
+        pointsEarned: calculatedPoints,
       }).catch((err) => {
         console.error('Failed to auto-send payment invoice email:', err);
       });
     } else if (initialStatus === 'pending') {
-      // Đơn hàng thanh toán chuyển khoản / VNPAY-QR đang chờ đối soát: gửi email thông báo và hướng dẫn thanh toán
+      // Đơn hàng thanh toán chuyển khoản / VNPAY-QR đang chờ đối soát: gửi email thông báo
       if (toEmail && !toEmail.includes('@khach.vietjetsim.vn')) {
         let bankName: string | undefined;
         let accountNumber: string | undefined;
         let accountHolder: string | undefined;
         let bankBin: string | undefined;
+        let template: string | undefined;
         try {
           const banks = await getActiveBankAccounts();
           if (banks && banks.length > 0) {
@@ -447,26 +525,49 @@ export async function POST(request: NextRequest) {
             accountNumber = chosen.account_number;
             accountHolder = chosen.account_holder;
             bankBin = chosen.bank_bin || undefined;
+            template = chosen.transfer_note_template || undefined;
           }
         } catch {
           // Không lấy được danh sách ngân hàng: dùng thông tin mặc định.
         }
 
-        void sendPaymentInstructionEmail({
-          to: toEmail,
-          fullName: recipientName || 'Quý khách',
-          bookingCode: result.booking.booking_code ?? null,
-          bookingId: booking.id,
-          // Số tiền mặt khách phải chuyển — không phải giá trị vé.
-          amount: cashDue,
-          transferNote:
-            transfer_note ||
-            (result.booking.booking_code ? `VJ ${result.booking.booking_code}` : undefined),
-          bankName,
-          accountNumber,
-          accountHolder,
-          bankBin,
-        });
+        const noteForEmail =
+          transfer_note ||
+          renderTransferNote(template, {
+            code: result.booking.booking_code ?? '',
+            amount: cashDue,
+          });
+
+        if (receipt_image) {
+          // Vị trí 3: Khách đã tải biên lai, gửi email xác nhận đã tiếp nhận và đang đối soát
+          void sendPaymentPendingReviewEmail({
+            to: toEmail,
+            fullName: recipientName || 'Quý khách',
+            bookingCode: result.booking.booking_code ?? null,
+            bookingId: booking.id,
+            amount: cashDue,
+            transferNote: noteForEmail,
+            bankName,
+          }).catch((err) => {
+            console.error('[MAIL] sendPaymentPendingReviewEmail error:', err);
+          });
+        } else {
+          // Khách chưa tải biên lai: gửi email hướng dẫn thanh toán kèm VietQR
+          void sendPaymentInstructionEmail({
+            to: toEmail,
+            fullName: recipientName || 'Quý khách',
+            bookingCode: result.booking.booking_code ?? null,
+            bookingId: booking.id,
+            amount: cashDue,
+            transferNote: noteForEmail,
+            bankName,
+            accountNumber,
+            accountHolder,
+            bankBin,
+          }).catch((err) => {
+            console.error('[MAIL] sendPaymentInstructionEmail error:', err);
+          });
+        }
       }
     }
 

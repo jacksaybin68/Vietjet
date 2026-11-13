@@ -24,7 +24,7 @@ function normalizeRate(pointsPerThousandVnd: number | null | undefined): number 
  */
 export function skypointPointsForAmount(
   amountVnd: number,
-  pointsPerThousandVnd: number | null | undefined
+  pointsPerThousandVnd?: number | null
 ): number {
   const safeAmount = Number.isFinite(amountVnd) && amountVnd > 0 ? amountVnd : 0;
   const rate = normalizeRate(pointsPerThousandVnd);
@@ -34,7 +34,7 @@ export function skypointPointsForAmount(
 /** Giá trị VND của `points` SkyPoint (làm tròn xuống — không hứa hẹn lẻ đồng). */
 export function skypointValueOfPoints(
   points: number,
-  pointsPerThousandVnd: number | null | undefined
+  pointsPerThousandVnd?: number | null
 ): number {
   const safePoints = Number.isFinite(points) && points > 0 ? points : 0;
   const rate = normalizeRate(pointsPerThousandVnd);

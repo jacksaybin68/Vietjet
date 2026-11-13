@@ -16,6 +16,7 @@ export interface SendPaymentInvoiceResult {
 export interface SendPaymentInvoiceOptions {
   paymentMethod?: string;
   customAmount?: number;
+  pointsEarned?: number;
   /** Bỏ qua kiểm tra cấu hình để gửi cưỡng bức (ví dụ admin bấm gửi trực tiếp) */
   force?: boolean;
 }
@@ -208,6 +209,7 @@ export async function sendAutomaticPaymentInvoiceEmail(
       route: routeStr,
       departureTime: departureFormatted,
       ticketUrl: `${baseUrl}/tai-khoan?bookingId=${booking.id}`,
+      pointsEarned: options.pointsEarned,
       passengers: passengersList.map((p) => ({
         name: p.name || 'Hành khách',
         seat: p.seat_code || undefined,

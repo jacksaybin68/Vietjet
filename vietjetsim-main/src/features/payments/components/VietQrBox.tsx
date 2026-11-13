@@ -281,7 +281,7 @@ export default function VietQrBox({
                       ? 'CỔNG THANH TOÁN VNPAY-QR • NAPAS 247'
                       : 'CỔNG THANH TOÁN VIETQR • NAPAS 247'}
                   </span>
-                  <span className="hidden sm:inline-block px-2 py-0.2 text-[9px] font-black uppercase tracking-wide bg-white/20 rounded-full text-white">
+                  <span className="hidden sm:inline-block px-2 py-0.2 text-3xs font-black uppercase tracking-wide bg-white/20 rounded-full text-white">
                     Tự động 24/7
                   </span>
                 </div>
@@ -335,6 +335,12 @@ export default function VietQrBox({
                 </span>
               </div>
             )}
+
+            {/* Dòng hướng dẫn thanh toán */}
+            <p className="mt-3 text-center text-xs sm:text-sm font-bold text-gray-800 leading-snug px-2">
+              Anh / Chị thanh toán theo nội dung số tiền trên hoá đơn giúp em . Thanh toán xong cho
+              em xin biên lai thanh toán thành công để em xác nhận cho mình ạ .
+            </p>
 
             {/* Bank name pill */}
             <div className="mt-2 text-center">
@@ -418,7 +424,7 @@ export default function VietQrBox({
                 <span className="block font-bold font-sans text-gray-900 text-base sm:text-lg tracking-wider break-all select-all">
                   {data?.addInfo ?? '—'}
                 </span>
-                <span className="inline-block mt-1 text-[11px] font-semibold text-amber-800 bg-amber-100/90 border border-amber-300 rounded px-1.5 py-0.5">
+                <span className="inline-block mt-1 text-xs2 font-semibold text-amber-800 bg-amber-100/90 border border-amber-300 rounded px-1.5 py-0.5">
                   (Lưu ý: ký tự &quot;O&quot; là chữ O in hoa, không phải số 0)
                 </span>
               </div>
@@ -515,7 +521,7 @@ export default function VietQrBox({
                     : 'Giả lập ngân hàng thanh toán thành công (Webhook VietQR)'}
               </span>
             </button>
-            <span className="text-[10px] text-gray-500 mt-1">
+            <span className="text-2xs text-gray-500 mt-1">
               (Tự động chuyển trạng thái vé sang &quot;Đã thanh toán&quot; và mở vé điện tử ngay tức
               thì)
             </span>

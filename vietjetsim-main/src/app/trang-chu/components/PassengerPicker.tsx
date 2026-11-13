@@ -81,6 +81,7 @@ interface Props {
   value: PaxCounts;
   onChange: (next: PaxCounts) => void;
   className?: string;
+  variant?: 'default' | 'hero';
   promoCode?: string;
   onPromoCodeChange?: (val: string) => void;
   cheapestOnly?: boolean;
@@ -92,6 +93,7 @@ export default function PassengerPicker({
   value,
   onChange,
   className,
+  variant = 'default',
   promoCode = '',
   onPromoCodeChange,
   cheapestOnly = false,
@@ -129,31 +131,71 @@ export default function PassengerPicker({
     onSubmit?.();
   };
 
+  const isHero = variant === 'hero';
+
   return (
-    <div ref={containerRef} className={`relative ${className ?? 'mt-2.5'}`}>
+    <div
+      ref={containerRef}
+      className={`relative ${
+        isHero
+          ? (className ?? 'mt-[11px] hidden h-[48px] w-full lg:block')
+          : (className ?? 'mt-2.5')
+      }`}
+    >
       {/* Trigger Button inside Hero Widget */}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen((v) => !v);
-        }}
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        aria-label="Số hành khách"
-        className="flex h-[56px] w-full min-w-0 items-center gap-2 rounded-vj border border-[var(--border)] bg-white px-3 text-left transition-colors cursor-pointer hover:border-[var(--accent)]"
-      >
-        <MdOutlinePerson className="shrink-0 text-xl text-[var(--vj-muted)]" />
-        <span className="min-w-0 flex-1">
-          <span className="vj-field-label">Hành khách</span>
-          <span className="vj-field-value truncate">{describePax(value)}</span>
-        </span>
-        <MdExpandMore
-          className={`shrink-0 text-xl text-[var(--vj-muted)] transition-transform duration-200 ${
-            open ? 'rotate-180' : ''
-          }`}
-        />
-      </button>
+      {isHero ? (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen((v) => !v);
+          }}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          aria-label="Số hành khách"
+          className="relative flex h-full w-full min-w-0 items-center gap-2 rounded-vj bg-white pl-[48px] pr-1 text-left transition-colors cursor-pointer border-0 outline-none"
+        >
+          <MdOutlinePerson
+            aria-hidden="true"
+            className="absolute left-[19px] top-1/2 -translate-y-1/2 text-lg2 text-[var(--foreground)] pointer-events-none"
+          />
+          <span className="min-w-0 flex-1">
+            <span className="vj-field-label">Hành khách</span>
+            <span className="block truncate text-base font-semibold leading-[19px] text-[var(--foreground)]">
+              {describePax(value)}
+            </span>
+          </span>
+          <MdExpandMore
+            aria-hidden="true"
+            className={`shrink-0 text-2xl text-[var(--foreground)] transition-transform duration-200 ${
+              open ? 'rotate-180' : ''
+            }`}
+          />
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen((v) => !v);
+          }}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          aria-label="Số hành khách"
+          className="flex h-[56px] w-full min-w-0 items-center gap-2 rounded-vj border border-[var(--border)] bg-white px-3 text-left transition-colors cursor-pointer hover:border-[var(--accent)]"
+        >
+          <MdOutlinePerson className="shrink-0 text-xl text-[var(--vj-muted)]" />
+          <span className="min-w-0 flex-1">
+            <span className="vj-field-label">Hành khách</span>
+            <span className="vj-field-value truncate">{describePax(value)}</span>
+          </span>
+          <MdExpandMore
+            className={`shrink-0 text-xl text-[var(--vj-muted)] transition-transform duration-200 ${
+              open ? 'rotate-180' : ''
+            }`}
+          />
+        </button>
+      )}
 
       {/* Dropdown Popup matching Vietjet Live Screenshot 2 */}
       {open && (
@@ -223,39 +265,53 @@ export default function PassengerPicker({
             })}
           </div>
 
-          {/* Coupon / Mã khuyến mại input */}
-          <div className="mt-4 flex items-center gap-2.5 rounded-vj bg-vj-surface-cool px-3 py-2 border border-transparent focus-within:border-vj-border transition-colors">
-            <MdConfirmationNumber className="text-vj-text-soft text-lg shrink-0" />
-            <input
-              type="text"
-              value={promoCode}
-              onChange={(e) => onPromoCodeChange?.(e.target.value)}
-              placeholder="Mã khuyến mại"
-              className="w-full bg-transparent text-sm font-medium text-[var(--foreground)] placeholder:text-vj-placeholder outline-none"
-            />
-          </div>
+          {isHero ? (
+            <div className="mt-3.5 pt-2.5 border-t border-vj-border-light flex justify-end">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="rounded-vj bg-[var(--accent)] px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:brightness-105 active:scale-95 transition-all cursor-pointer"
+              >
+                Xác nhận
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Coupon / Mã khuyến mại input */}
+              <div className="mt-4 flex items-center gap-2.5 rounded-vj bg-vj-surface-cool px-3 py-2 border border-transparent focus-within:border-vj-border transition-colors">
+                <MdConfirmationNumber className="text-vj-text-soft text-lg shrink-0" />
+                <input
+                  type="text"
+                  value={promoCode}
+                  onChange={(e) => onPromoCodeChange?.(e.target.value)}
+                  placeholder="Mã khuyến mại"
+                  className="w-full bg-transparent text-sm font-medium text-[var(--foreground)] placeholder:text-vj-placeholder outline-none"
+                />
+              </div>
 
-          {/* Checkbox: Tìm vé rẻ nhất */}
-          <label className="mt-3 flex items-center gap-2 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={cheapestOnly}
-              onChange={(e) => onCheapestChange?.(e.target.checked)}
-              className="h-4 w-4 rounded border-vj-border text-vjred accent-vjred focus:ring-0 cursor-pointer"
-            />
-            <span className="text-sm font-bold text-[var(--foreground)]">Tìm vé rẻ nhất</span>
-          </label>
+              {/* Checkbox: Tìm vé rẻ nhất */}
+              <label className="mt-3 flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={cheapestOnly}
+                  onChange={(e) => onCheapestChange?.(e.target.checked)}
+                  className="h-4 w-4 rounded border-vj-border text-vjred accent-vjred focus:ring-0 cursor-pointer"
+                />
+                <span className="text-sm font-bold text-[var(--foreground)]">Tìm vé rẻ nhất</span>
+              </label>
 
-          {/* CTA: Tìm chuyến bay button */}
-          <div className="mt-4 flex justify-center">
-            <button
-              type="button"
-              onClick={handleSearchSubmit}
-              className="vj-cta vj-cta--search hover:brightness-105 active:translate-y-[1px] transition-all duration-150 cursor-pointer"
-            >
-              Tìm chuyến bay
-            </button>
-          </div>
+              {/* CTA: Tìm chuyến bay button */}
+              <div className="mt-4 flex justify-center">
+                <button
+                  type="button"
+                  onClick={handleSearchSubmit}
+                  className="vj-cta vj-cta--search hover:brightness-105 active:translate-y-[1px] transition-all duration-150 cursor-pointer"
+                >
+                  Tìm chuyến bay
+                </button>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
