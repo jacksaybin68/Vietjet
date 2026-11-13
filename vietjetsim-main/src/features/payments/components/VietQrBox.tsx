@@ -413,10 +413,13 @@ export default function VietQrBox({
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <span className="block text-3xs sm:text-2xs font-black uppercase tracking-wider text-red-600 font-koho flex items-center gap-1">
-                  <span>Nội dung </span>
+                  <span>Nội dung chuyển khoản (bắt buộc)</span>
                 </span>
-                <span className="block font-mono font-black text-gray-900 text-sm sm:text-base break-all select-all">
+                <span className="block font-bold font-sans text-gray-900 text-base sm:text-lg tracking-wider break-all select-all">
                   {data?.addInfo ?? '—'}
+                </span>
+                <span className="inline-block mt-1 text-[11px] font-semibold text-amber-800 bg-amber-100/90 border border-amber-300 rounded px-1.5 py-0.5">
+                  (Lưu ý: ký tự &quot;O&quot; là chữ O in hoa, không phải số 0)
                 </span>
               </div>
               <button

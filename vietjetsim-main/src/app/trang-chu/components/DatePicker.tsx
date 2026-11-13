@@ -234,7 +234,17 @@ export function FlightDatePickerPopover({
               <ChevronRight className="text-xl" />
             </button>
           ) : (
-            <div className="w-6" />
+            <>
+              <button
+                type="button"
+                onClick={nextMonth}
+                className="p-1 rounded text-gray-700 hover:text-black hover:bg-gray-100 transition-colors cursor-pointer md:hidden"
+                aria-label="Tháng sau (mobile)"
+              >
+                <ChevronRight className="text-xl" />
+              </button>
+              <div className="hidden md:block w-6" />
+            </>
           )}
         </div>
 

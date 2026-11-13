@@ -2086,9 +2086,12 @@ export default function PaymentClient() {
                                     <label className="text-2xs font-bold text-primary/60 uppercase tracking-widest block mb-0.5">
                                       Nội dung chuyển khoản
                                     </label>
-                                    <p className="text-base font-black text-primary leading-none tracking-widest">
+                                    <p className="text-base font-black text-primary leading-none tracking-widest font-sans">
                                       {transferNote}
                                     </p>
+                                    <span className="inline-block mt-1 text-[11px] font-semibold text-amber-800 bg-amber-100/90 border border-amber-300 rounded px-1.5 py-0.5">
+                                      (Lưu ý: ký tự &quot;O&quot; là chữ O in hoa, không phải số 0)
+                                    </span>
                                   </div>
                                   <button
                                     type="button"
