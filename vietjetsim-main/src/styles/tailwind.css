@@ -264,6 +264,43 @@ input[type='date'].vj-no-native-icon::-moz-calendar-picker-indicator {
   --vj-modal-disabled-bg: #f5f5f5;
   --vj-modal-disabled-ink: #c4c4c4;
 
+  /* ─── Token SkyID (đo trực tiếp trên DOM sống 13/11/2026) ───
+   * Site thật `vietjetair.com/vi/signin` nhúng iframe SkyID
+   * (`skyjoy-id.vietjetair.com`). Bộ giao diện này thay thế modal 2 cột
+   * cũ: form 1 cột trên nền ảnh toàn trang, nút CTA vàng gradient.
+   * Hồ sơ đầy đủ: docs/qa/so-do-skyid-2026-11-13.md */
+  /* Gradient vàng của nút CTA SkyID: `.gid-content .btn-primary`. */
+  --vj-skyid-gold: linear-gradient(135deg, #e99f24 0%, #fd0 100%);
+  --vj-skyid-gold-hover: #edaf17;
+  --vj-skyid-gold-outline: #e99f24;
+  /* Màu chữ: `.gid-content-title` #333, `.gid-content-phone span` #212529. */
+  --vj-skyid-ink: #333333;
+  --vj-skyid-ink-strong: #212529;
+  --vj-skyid-muted: #7b7b7b;
+  /* Viền ô nhập: `#E8EBEF`, focus `#FFDB01`, lỗi `#E60A32`. */
+  --vj-skyid-border: #e8ebef;
+  --vj-skyid-border-rgb: 232 235 239;
+  --vj-skyid-border-focus: #ffdb01;
+  --vj-skyid-border-error: #e60a32;
+  --vj-skyid-border-error-rgb: 230 10 50;
+  --vj-skyid-placeholder: #c4c4c4;
+  /* Link "Đăng ký ngay" — `.gid-link`. */
+  --vj-skyid-link: #2f6bff;
+  --vj-skyid-link-rgb: 47 107 255;
+  /* Lớp nền mờ của panel logo (`.gid`, `.gid-header`). */
+  --vj-skyid-panel: rgba(248, 248, 248, 0.8);
+  /* Tối phủ khi mở modal (`.gid__wrapper-popup-bg`). */
+  --vj-skyid-overlay: rgba(0, 0, 0, 0.4);
+  /* Bán kính góc: input 4px, nút 8px, khối form 16px. */
+  --vj-skyid-radius-input: 4px;
+  --vj-skyid-radius-btn: 8px;
+  --vj-skyid-radius-panel: 16px;
+  /* Trạng thái disabled của CTA SkyID — `.btn-primary:disabled`. */
+  --vj-skyid-disabled-bg: #f5f5f5;
+  --vj-skyid-disabled-ink: #c4c4c4;
+  /* Chiều rộng panel ảnh bên trái (`.gid__wrapper-bg`). */
+  --vj-skyid-art-width: 576px;
+
   /* ─── Token dọn nợ hex (ratchet scripts/css-debt.cjs) ───
    * Các giá trị dưới đây từng nằm rải rác dưới dạng `bg-[#rrggbb]` trong
    * class Tailwind. Chúng được gom về đây để có một nguồn sắc độ duy nhất và
@@ -1342,6 +1379,411 @@ h6 {
 .vj-skyjoy-login-btn:hover {
   background-color: rgba(236, 32, 41, 0.04);
   border-color: rgba(236, 32, 41, 0.24);
+}
+
+/* ─── SkyID (đo 13/11/2026 từ DOM sống của skyjoy-id.vietjetair.com) ────────
+ * Bộ giao diện xác thực thật của Vietjet: form 1 cột trên nền ảnh toàn trang.
+ * Hồ sơ đầy đủ: docs/qa/so-do-skyid-2026-11-13.md
+ *   - `.authenLayout`: nền `bg.jpg` (1921×1081) `cover`, căn giữa, `min-height:100vh`.
+ *   - `.gid-content`: khối form trắng, `padding:24px 34px 0`, bo góc dưới `16px`.
+ *   - `.gid-content-title`: `18px/700`, `#333`, căn giữa.
+ *   - `input.form-control`: cao `32px`, bo `4px`, viền `#E8EBEF`, focus `#FFDB01`.
+ *   - `.btn-primary`: gradient vàng `135deg,#E99F24→#FD0`, chữ `#333`, bo `8px`.
+ *   - `.gid-logo-image-red`: logo đỏ `absolute top:20px left:20px`.
+ *   - `.gid-logo-image-white`: logo trắng `fixed bottom:20px left:20px`. */
+
+/* Vỏ trang: ảnh toàn trang, form căn giữa cả chiều ngang lẫn chiều dọc.
+ *
+ * Site thật dùng hai lớp: `.authenLayout` phủ nền `bg.jpg` (1921×1081) `cover`,
+ * còn `.gid__wrapper-bg` là MỘT panel ảnh cố định bên trái (`width:576px`,
+ * `background-position:25% center`, `background-size:cover`,
+ * `pointer-events:none`). Ở đây ảnh đó tách riêng thành `.vj-skyid-art` làm
+ * một CỘT bên trái (rộng 576px), khối form nằm ở cột còn lại — không nằm đè
+ * lên ảnh, tránh chữ trên nền ảnh. Nền đổi sang đỏ thương hiệu cho phần
+ * còn lại của trang. */
+.vj-skyid-layout {
+  position: relative;
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-image: url('/images/skyid/bg.jpg');
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  padding: 1.5625rem 1.25rem;
+}
+
+/* Lớp phủ tối nhẹ trên ảnh để logo trắng góc dưới vẫn đọc được. */
+.vj-skyid-layout::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.35) 0%,
+    rgba(0, 0, 0, 0.08) 100%
+  );
+  pointer-events: none;
+}
+
+/* Khối form trắng — `.gid-content`.
+ *
+ * Site thật dùng `box-sizing:content-box` với `padding:24px 34px 0`, nên khối
+ * rộng `420px + 68px`. Ở đây dùng `border-box` với cùng giá trị `max-width`
+ * để tổng bề rộng khớp 420px — cùng kết quả nhìn thấy nhưng không tràn ngang
+ * ở viewport 390px (content-box sẽ vượt màn, đo được `x = -4px`). */
+.vj-skyid-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  box-sizing: border-box;
+  padding: 24px 34px 0;
+  border-radius: 0 0 var(--vj-skyid-radius-panel) var(--vj-skyid-radius-panel);
+  background-color: #ffffff;
+  text-align: center;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+
+/* Tiêu đề — `.gid-content-title`. */
+.vj-skyid-title {
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 700;
+  color: var(--vj-skyid-ink);
+}
+
+/* Dòng phụ dưới tiêu đề. */
+.vj-skyid-subtitle {
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 400;
+  color: var(--vj-skyid-muted);
+}
+
+/* Nhãn nổi trên ô nhập — `.form-label` của SkyID. */
+.vj-skyid-label {
+  position: absolute;
+  left: 0;
+  top: 10px;
+  user-select: none;
+  pointer-events: none;
+  padding-left: 10px;
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 12px;
+  font-weight: 500;
+  color: var(--vj-skyid-ink);
+}
+
+/* Ô nhập — `input.form-control`. */
+.vj-skyid-input {
+  width: 100%;
+  height: 32px;
+  padding: 5px 10px;
+  border: 1px solid var(--vj-skyid-border);
+  border-radius: var(--vj-skyid-radius-input);
+  background-color: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--vj-skyid-ink);
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.vj-skyid-input:focus {
+  border-color: var(--vj-skyid-border-focus);
+  box-shadow: none;
+}
+
+.vj-skyid-input::placeholder {
+  color: var(--vj-skyid-placeholder);
+  opacity: 1;
+}
+
+.vj-skyid-input[aria-invalid='true'] {
+  border-color: var(--vj-skyid-border-error);
+  box-shadow: none;
+}
+
+/* Ô nhập có cờ + mã quốc gia (intl-tel).
+ *
+ * Viền được vẽ bằng `inset box-shadow` chứ không phải `border`, để phần trong
+ * cao đúng 32px như `input.form-control` của site thật (nếu dùng `border` thì
+ * `box-sizing: border-box` làm phần trong chỉ còn 30px). */
+.vj-skyid-phone {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 32px;
+  border: 0;
+  border-radius: var(--vj-skyid-radius-input);
+  background-color: #ffffff;
+  box-shadow:
+    inset 0 0 0 1px var(--vj-skyid-border),
+    0 4px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.vj-skyid-phone:focus-within {
+  box-shadow:
+    inset 0 0 0 1px var(--vj-skyid-border-focus),
+    0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.vj-skyid-phone-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  height: 100%;
+  padding: 0 10px;
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--vj-skyid-ink);
+  white-space: nowrap;
+}
+
+.vj-skyid-phone .vj-skyid-input {
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding-left: 16px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Nút CTA chính — `.gid-content .btn-primary`. */
+.vj-skyid-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 160px;
+  max-width: 232px;
+  min-height: 38px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: var(--vj-skyid-radius-btn);
+  background: var(--vj-skyid-gold);
+  font-family: 'JambonoMedium', 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  color: var(--vj-skyid-ink);
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+.vj-skyid-btn:hover:not(:disabled) {
+  background-color: var(--vj-skyid-gold-hover);
+}
+
+.vj-skyid-btn:focus-visible {
+  outline: var(--vj-skyid-gold-outline) solid 2px;
+  outline-offset: 1px;
+}
+
+.vj-skyid-btn:disabled {
+  background-color: var(--vj-skyid-disabled-bg);
+  color: var(--vj-skyid-disabled-ink);
+  cursor: not-allowed;
+}
+
+/* Nút phụ (social, quay lại) — viền `#E8EBEF`, bo góc `8px`. */
+.vj-skyid-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 6px 12px;
+  border: 1px solid var(--vj-skyid-border);
+  border-radius: var(--vj-skyid-radius-btn);
+  background-color: #ffffff;
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 700;
+  color: var(--vj-skyid-ink);
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+.vj-skyid-btn-ghost:hover:not(:disabled) {
+  background-color: var(--surface-2);
+}
+
+.vj-skyid-btn-ghost:disabled {
+  color: var(--vj-modal-disabled-ink);
+  cursor: not-allowed;
+}
+
+/* Link màu xanh của SkyID — `.gid-link`. */
+.vj-skyid-link {
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--vj-skyid-link);
+}
+
+.vj-skyid-link:hover {
+  text-decoration: underline;
+}
+
+/* Divider "hoặc tiếp tục với" — dùng chung với `.vj-skyjoy-divider`. */
+.vj-skyid-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  color: var(--vj-skyid-placeholder);
+}
+
+.vj-skyid-divider::before,
+.vj-skyid-divider::after {
+  content: '';
+  flex: 1 1 auto;
+  height: 1px;
+  background-color: var(--vj-skyid-border);
+}
+
+/* Checkbox đồng ý — `.personal-data-sharing-consent-box` của SkyID. */
+.vj-skyid-consent {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  border: 2px solid var(--vj-skyid-placeholder);
+  border-radius: 0;
+  background-color: #ffffff;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 18px 18px;
+  appearance: none;
+  cursor: pointer;
+}
+
+.vj-skyid-consent:checked {
+  border: 0;
+  border-radius: 4px;
+  background-image: url('/images/skyid/ic_checked.svg');
+}
+
+/* Ô nhập mã OTP — `input.pin-otp`. */
+.vj-skyid-pin {
+  width: 35px;
+  height: 35px;
+  padding: 0;
+  border: 0;
+  border-radius: 11px;
+  background-color: #ffffff;
+  background-image: linear-gradient(#000, #000);
+  background-position: center bottom 5px;
+  background-size: 30% 2px;
+  background-repeat: no-repeat;
+  box-shadow: none;
+  font-family: 'Verdana', ui-monospace, monospace;
+  font-size: 25px;
+  line-height: 50px;
+  text-align: center;
+  color: var(--vj-skyid-ink);
+  outline: none;
+}
+
+/* Ô nhập mã OTP có viền khi chưa điền. */
+.vj-skyid-pin-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 35px;
+  border-radius: 11px;
+  background-color: #ffffff;
+  background-image: linear-gradient(#000, #000);
+  background-position: center bottom 5px;
+  background-size: 30% 2px;
+  background-repeat: no-repeat;
+}
+
+/* Chân trang logo — `.gid-logo-footer`. */
+.vj-skyid-footer {
+  margin-top: auto;
+  padding-top: 15px;
+  text-align: center;
+}
+
+.vj-skyid-footer-description {
+  padding-bottom: 8px;
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 500;
+  color: var(--vj-skyid-muted);
+}
+
+.vj-skyid-footer-logos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vj-skyid-footer-logos img {
+  height: 16px;
+}
+
+/* Logo đỏ góc trên — `.gid-logo-image-red`. */
+.vj-skyid-logo-red {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 2;
+  width: 116px;
+  height: auto;
+}
+
+/* Logo trắng góc dưới — `.gid-logo-image-white`. */
+.vj-skyid-logo-white {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 2;
+  width: 176px;
+  height: auto;
+}
+
+/* Mobile: logo đỏ thu nhỏ còn 40%, logo trắng ẩn đi, khối form bớt đệm. */
+@media (max-width: 767px) {
+  .vj-skyid-layout {
+    padding: 1.25rem 1rem;
+  }
+
+  .vj-skyid-card {
+    max-width: 100%;
+    padding: 24px 20px 0;
+  }
+
+  .vj-skyid-logo-red {
+    width: 40%;
+    max-width: 116px;
+  }
+
+  .vj-skyid-logo-white {
+    display: none;
+  }
 }
 
 /* Table rows share one hover/transition treatment across dashboard and admin tables. */

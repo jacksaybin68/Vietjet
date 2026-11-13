@@ -29,15 +29,18 @@ describe('RootLayout skip link (Phase 1 a11y)', () => {
   // standalone and so have no `<Header />` of their own. `src/app/page.tsx` only
   // re-exports the homepage, and `/hanh-ly` + `/lam-thu-tuc-truc-tuyen` are pure
   // `redirect()`s, so none of those renders chrome and none is expected here.
+  //
+  // Màn SkyID (13/11/2026) đã bỏ `AuthShell.tsx`: `/dang-nhap`, `/dang-ky`,
+  // `/quen-mat-khau` và `/dat-lai-mat-khau` giờ dùng `SkyIdShell` — trang đứng
+  // riêng, không có `<Header />`. Danh sách nên dừng ở 11 route render chrome.
   const chromeRenderingFiles = [
     ...fs
       .readdirSync(appDir, { recursive: true, encoding: 'utf-8' })
       .filter((e) => e.endsWith('page.tsx')),
-    '../features/auth/components/AuthShell.tsx',
   ].filter((entry) => /<Header[\s/>]/.test(sourceOf(entry)));
 
   it('scans every surface that renders the shared header', () => {
-    expect(chromeRenderingFiles.length).toBeGreaterThanOrEqual(12);
+    expect(chromeRenderingFiles.length).toBeGreaterThanOrEqual(11);
   });
 
   it.each(chromeRenderingFiles)('%s: main#main-content follows <Header />', (entry) => {
