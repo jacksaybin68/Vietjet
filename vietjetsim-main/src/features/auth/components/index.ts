@@ -1,7 +1,11 @@
 export { default as ProtectedRoute } from './ProtectedRoute';
 export { default as SkyIdShell } from './SkyIdShell';
 export { default as SkyIdAuthFlow } from './skyid/SkyIdAuthFlow';
-export { default as SkyIdForgotPassword } from './skyid/SkyIdForgotPassword';
-export { default as SkyIdResetPassword } from './skyid/SkyIdResetPassword';
+export { default as SkyIdForgotPassword } from './skyid/steps/ForgotPasswordStep';
+export { default as SkyIdResetPassword } from './skyid/steps/ResetPasswordStep';
+export { default as SkyIdPhoneStep } from './skyid/steps/PhoneStep';
+export { default as SkyIdPasswordStep } from './skyid/steps/PasswordStep';
+export { default as SkyIdRegisterStep } from './skyid/steps/RegisterStep';
+export { default as SkyIdOtpStep } from './skyid/steps/OtpStep';
 export { RoleBadge, RoleDot } from './RoleBadge';
 export { AuthModalProvider, useAuthModal, type OpenAuthModalOptions } from './AuthModalProvider';

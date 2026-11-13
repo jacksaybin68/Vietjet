@@ -8,8 +8,17 @@ import { useToast } from '@/hooks/useToast';
 import { flashToast } from '@/lib/toast';
 import { OTP_LENGTH, normalizePassportName } from '@/lib/skyjoy';
 import SkyIdShell from '../SkyIdShell';
-import { SkyIdField, SkyIdPhoneField, SkyIdPinInput } from './SkyIdFields';
-import { SkyIdDevHint, SkyIdErrorNote, SkyIdSocialButtons } from './SkyIdControls';
+import { SkyIdErrorNote, SkyIdSocialButtons } from './SkyIdControls';
+import PhoneStep from './steps/PhoneStep';
+import PasswordStep from './steps/PasswordStep';
+import RegisterStep from './steps/RegisterStep';
+import OtpStep from './steps/OtpStep';
+import {
+  SKY_ID_COUNTRY_CODES,
+  type IdentifierMode,
+  type SkyIdCountry,
+} from './steps/types';
+import { useResendCountdown } from './useResendCountdown';
 
 /**
  * Luồng xác thực SkyID — bản sao giao diện của trang đăng nhập / đăng ký
@@ -42,29 +51,7 @@ export interface SkyIdAuthFlowProps {
 
 type Step = 'phone' | 'password' | 'register' | 'otp' | 'login-otp';
 
-/**
- * Bước đầu cho phép nhập theo hai kiểu định danh:
- *  - `phone`: số điện thoại kèm mã quốc gia (mặc định, khớp site thật).
- *  - `account`: email hoặc mã hội viên SkyJoy.
- *
- * Backend đã tra được cả ba loại (`findAccountByIdentifier` gộp email /
- * số điện thoại / mã hội viên vào một câu truy vấn), nhưng trước đây ô nhập
- * lọc sạch mọi ký tự không phải số nên người dùng không thể đăng nhập bằng
- * email hay mã hội viên — đúng những định danh mà API hỗ trợ.
- */
-type IdentifierMode = 'phone' | 'account';
-
-const COUNTRY_CODES = [
-  { code: 'VN', flag: '🇻🇳', dial: '+84', label: 'Việt Nam' },
-  { code: 'US', flag: '🇺🇸', dial: '+1', label: 'Hoa Kỳ' },
-  { code: 'GB', flag: '🇬🇧', dial: '+44', label: 'Anh' },
-  { code: 'JP', flag: '🇯🇵', dial: '+81', label: 'Nhật Bản' },
-  { code: 'KR', flag: '🇰🇷', dial: '+82', label: 'Hàn Quốc' },
-  { code: 'AU', flag: '🇦🇺', dial: '+61', label: 'Australia' },
-] as const;
-
-const CURRENT_YEAR = new Date().getFullYear();
-const BIRTH_YEARS = Array.from({ length: CURRENT_YEAR - 1900 + 1 }, (_, i) => CURRENT_YEAR - i);
+const COUNTRY_CODES = SKY_ID_COUNTRY_CODES;
 
 /**
  * Giải CAPTCHA của chính dự án: `/api/xac-thuc/captcha` ký payload bằng
@@ -103,7 +90,7 @@ export default function SkyIdAuthFlow({
   const [step, setStep] = useState<Step>('phone');
 
   const [phone, setPhone] = useState('');
-  const [country, setCountry] = useState<(typeof COUNTRY_CODES)[number]>(COUNTRY_CODES[0]);
+  const [country, setCountry] = useState<SkyIdCountry>(COUNTRY_CODES[0]);
   const [countryOpen, setCountryOpen] = useState(false);
 
   /** Kiểu định danh ở bước đầu: số điện thoại hay email/mã hội viên. */
@@ -130,6 +117,15 @@ export default function SkyIdAuthFlow({
   const [loginOtpHint, setLoginOtpHint] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  /**
+   * Đồng hồ đếm ngược của nút "Gửi lại mã" (`.gid-resend-otp`).
+   *
+   * Tách riêng cho luồng đăng ký và luồng đăng nhập để việc gửi lại mã ở một
+   * luồng không mở khóa nút của luồng còn lại.
+   */
+  const [registerOtpCooldown, startRegisterOtpCountdown] = useResendCountdown();
+  const [loginOtpCooldown, startLoginOtpCountdown] = useResendCountdown();
 
   // Provider social: nút chỉ bấm được khi server đã cấu hình OAuth cho nó.
   const [socialEnabled, setSocialEnabled] = useState<Record<string, boolean>>({});
@@ -232,6 +228,7 @@ export default function SkyIdAuthFlow({
       });
       setLoginOtpHint(otp?.devCode ? `Mã thử nghiệm (dev): ${otp.devCode}` : '');
       setStep('login-otp');
+      startLoginOtpCountdown();
       toast.info('Đã gửi mã xác thực', 'Mã OTP đã được gửi tới số điện thoại/email của bạn.');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Không gửi được mã xác thực';
@@ -318,6 +315,7 @@ export default function SkyIdAuthFlow({
         });
         setOtpHint(otp?.devCode ? `Mã thử nghiệm (dev): ${otp.devCode}` : '');
         setStep('otp');
+        startRegisterOtpCountdown();
         toast.info('Đã gửi mã xác thực', `Mã OTP đã được gửi tới ${email.trim()}.`);
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Đăng ký thất bại';
@@ -327,6 +325,64 @@ export default function SkyIdAuthFlow({
         setLoading(false);
       }
     })();
+  };
+
+  /**
+   * Gửi lại mã OTP đăng nhập — `.gid-resend-otp` của SkyID.
+   *
+   * Chỉ chạy được khi đồng hồ đếm ngược đã về 0; sau khi gửi lại thành công
+   * thì đồng hồ chạy lại từ đầu.
+   */
+  const handleResendLoginOtp = async () => {
+    if (loginOtpCooldown > 0) return;
+    setLoading(true);
+    setError('');
+    try {
+      const challenge = await auth.getCaptcha();
+      const captchaAnswer = autoSolveCaptcha(challenge?.token);
+      const otp = await auth.requestOtp({
+        identifier,
+        purpose: 'login',
+        captchaToken: challenge?.token,
+        captchaAnswer,
+      });
+      setLoginOtpHint(otp?.devCode ? `Mã thử nghiệm (dev): ${otp.devCode}` : '');
+      startLoginOtpCountdown();
+      toast.info('Đã gửi lại mã xác thực', 'Mã OTP mới đã được gửi tới quý khách.');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Không gửi lại được mã xác thực';
+      setError(message);
+      toast.error('Lỗi gửi lại mã xác thực', message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /** Gửi lại mã OTP đăng ký — `.gid-resend-otp` của SkyID. */
+  const handleResendRegisterOtp = async () => {
+    if (registerOtpCooldown > 0) return;
+    setLoading(true);
+    setError('');
+    try {
+      const challenge = await auth.getCaptcha();
+      const captchaAnswer = autoSolveCaptcha(challenge?.token);
+      const otp = await auth.requestOtp({
+        phone: phone.replace(/\D/g, ''),
+        email: email.trim(),
+        purpose: 'register',
+        captchaToken: challenge?.token,
+        captchaAnswer,
+      });
+      setOtpHint(otp?.devCode ? `Mã thử nghiệm (dev): ${otp.devCode}` : '');
+      startRegisterOtpCountdown();
+      toast.info('Đã gửi lại mã xác thực', `Mã OTP mới đã được gửi tới ${email.trim()}.`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Không gửi lại được mã xác thực';
+      setError(message);
+      toast.error('Lỗi gửi lại mã xác thực', message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVerifyOtp = (e: React.FormEvent) => {
@@ -423,338 +479,111 @@ export default function SkyIdAuthFlow({
       <SkyIdErrorNote message={error} />
 
       {step === 'phone' ? (
-        <>
-          {/* Chuyển kiểu định danh — mặc định số điện thoại (khớp site thật),
-              có thêm đường vào bằng email / mã hội viên SkyJoy.
-              Chỉ hiện ở chế độ đăng nhập: đăng ký bắt buộc dùng số điện thoại
-              (OTP đăng ký được gửi về số này). */}
-          {mode === 'login' ? (
-            <div
-              role="tablist"
-              aria-label="Kiểu định danh đăng nhập"
-              className="mb-4 flex gap-1 rounded-lg bg-[var(--surface-2)] p-1"
-            >
-              {(
-                [
-                  { id: 'phone', label: 'Số điện thoại' },
-                  { id: 'account', label: 'Email / Mã hội viên' },
-                ] as const
-              ).map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={identifierMode === tab.id}
-                  onClick={() => {
-                    setIdentifierMode(tab.id);
-                    setError('');
-                  }}
-                  className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-sm font-semibold transition ${
-                    identifierMode === tab.id
-                      ? 'bg-white text-[var(--vj-skyid-ink)] shadow-sm'
-                      : 'text-[var(--vj-skyid-muted)] hover:text-[var(--vj-skyid-ink)]'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          ) : null}
-
-          {identifierMode === 'phone' ? (
-            <SkyIdPhoneField
-              id="skyid-phone"
-              label="Số điện thoại"
-              value={phone}
-              onChange={(v) => setPhone(v.replace(/[^\d]/g, ''))}
-              flag={country.flag}
-              dial={country.dial}
-              countryMenu={countryOpen ? countryMenu : null}
-              countryOpen={countryOpen}
-              onToggleCountry={() => setCountryOpen((open) => !open)}
-              placeholder="Nhập số điện thoại của bạn"
-            />
-          ) : (
-            <SkyIdField
-              id="skyid-account"
-              label="Email hoặc mã hội viên SkyJoy"
-              value={accountIdentifier}
-              onChange={setAccountIdentifier}
-              autoComplete="username"
-              placeholder="Nhập email hoặc mã hội viên"
-            />
-          )}
-
-          <div className="mt-5 flex justify-center">
-            <button
-              type="button"
-              onClick={handlePhoneContinue}
-              disabled={!identifier}
-              className="vj-skyid-btn"
-            >
-              Tiếp tục
-            </button>
-          </div>
-
-          {/* Đường vào thay thế: quên mật khẩu và đăng nhập bằng OTP. */}
-          {mode === 'login' ? (
-            <div className="mt-4 flex items-center justify-between gap-3">
-              <Link href="/quen-mat-khau" className="vj-skyid-link">
-                Quên mật khẩu?
-              </Link>
-              <button
-                type="button"
-                onClick={handleSendLoginOtp}
-                disabled={loading || !identifier}
-                className="vj-skyid-link disabled:cursor-not-allowed disabled:text-[var(--vj-modal-disabled-ink)]"
-              >
-                Đăng nhập bằng mã OTP
-              </button>
-            </div>
-          ) : null}
-        </>
+        <PhoneStep
+          mode={mode}
+          identifierMode={identifierMode}
+          onIdentifierModeChange={(next) => {
+            setIdentifierMode(next);
+            setError('');
+          }}
+          phone={phone}
+          onPhoneChange={(v) => setPhone(v.replace(/[^\d]/g, ''))}
+          accountIdentifier={accountIdentifier}
+          onAccountIdentifierChange={setAccountIdentifier}
+          country={country}
+          countryOpen={countryOpen}
+          onToggleCountry={() => setCountryOpen((open) => !open)}
+          countryMenu={countryMenu}
+          canContinue={Boolean(identifier)}
+          onContinue={handlePhoneContinue}
+          onSendLoginOtp={handleSendLoginOtp}
+          loading={loading}
+        />
       ) : null}
 
       {step === 'password' ? (
-        <form onSubmit={handleLogin} noValidate>
-          <SkyIdPhoneField
-            id="skyid-phone-echo"
-            label={identifierMode === 'phone' ? 'Số điện thoại' : 'Email hoặc mã hội viên SkyJoy'}
-            value={identifierMode === 'phone' ? phone : accountIdentifier}
-            onChange={() => undefined}
-            flag={country.flag}
-            dial={country.dial}
-            readOnly
-          />
-
-          <div className="relative mt-4">
-            <label htmlFor="skyid-password" className="vj-skyid-label">
-              Mật khẩu
-            </label>
-            <input
-              id="skyid-password"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Nhập mật khẩu"
-              className="vj-skyid-input"
-              style={{ paddingRight: 60 }}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-[var(--vj-skyid-muted)]"
-            >
-              {showPassword ? 'Ẩn' : 'Hiện'}
-            </button>
-          </div>
-
-          <div className="mt-5 flex flex-col items-center gap-3">
-            <button type="submit" disabled={loading} className="vj-skyid-btn">
-              {loading ? 'Đang đăng nhập…' : 'Đăng nhập'}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setStep('phone');
-                setPassword('');
-                setError('');
-              }}
-              className="vj-skyid-link"
-            >
-              Quay lại
-            </button>
-          </div>
-        </form>
+        <PasswordStep
+          identifier={identifierMode === 'phone' ? phone : accountIdentifier}
+          identifierLabel={
+            identifierMode === 'phone' ? 'Số điện thoại' : 'Email hoặc mã hội viên SkyJoy'
+          }
+          country={country}
+          password={password}
+          onPasswordChange={setPassword}
+          showPassword={showPassword}
+          onTogglePassword={() => setShowPassword((v) => !v)}
+          onSubmit={handleLogin}
+          onBack={() => {
+            setStep('phone');
+            setPassword('');
+            setError('');
+          }}
+          loading={loading}
+        />
       ) : null}
 
       {/* Bước xác nhận OTP đăng nhập (không cần mật khẩu). */}
       {step === 'login-otp' ? (
-        <form onSubmit={handleVerifyLoginOtp} noValidate>
-          <p className="text-sm leading-[22px] text-[var(--vj-skyid-muted)]">
-            Mã xác thực gồm {OTP_LENGTH} chữ số đã được gửi tới{' '}
-            <span className="font-bold text-[var(--vj-skyid-ink)]">{identifier}</span>. Quý khách
-            vui lòng kiểm tra tin nhắn (hoặc mục Spam/Rác) và nhập mã để hoàn tất.
-          </p>
-          <SkyIdDevHint hint={loginOtpHint} />
-          <div className="mt-4">
-            <SkyIdPinInput
-              length={OTP_LENGTH}
-              value={loginOtpCode}
-              onChange={(v) => setLoginOtpCode(v.replace(/[^\d]/g, ''))}
-              id="skyid-login-otp"
-            />
-          </div>
-          <div className="mt-5 flex flex-col items-center gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                setStep('phone');
-                setLoginOtpCode('');
-                setError('');
-              }}
-              className="vj-skyid-link"
-            >
-              Quay lại
-            </button>
-            <button type="submit" disabled={loading} className="vj-skyid-btn">
-              {loading ? 'Đang xác nhận…' : 'Xác nhận'}
-            </button>
-          </div>
-        </form>
+        <OtpStep
+          destination={identifier}
+          hint={loginOtpHint}
+          code={loginOtpCode}
+          onCodeChange={setLoginOtpCode}
+          onSubmit={handleVerifyLoginOtp}
+          onBack={() => {
+            setStep('phone');
+            setLoginOtpCode('');
+            setError('');
+          }}
+          backLabel="Quay lại"
+          loading={loading}
+          inputId="skyid-login-otp"
+          resendCooldown={loginOtpCooldown}
+          onResend={handleResendLoginOtp}
+        />
       ) : null}
 
       {step === 'register' ? (
-        <form onSubmit={handleRegister} noValidate className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <SkyIdField
-              id="skyid-surname"
-              label="Họ"
-              value={surname}
-              onChange={setSurname}
-              autoComplete="family-name"
-              placeholder="NGUYEN"
-            />
-            <SkyIdField
-              id="skyid-given-name"
-              label="Tên đệm và tên"
-              value={givenName}
-              onChange={setGivenName}
-              autoComplete="given-name"
-              placeholder="VAN A"
-            />
-          </div>
-
-          <div>
-            <span className="mb-1 block text-sm font-medium text-[var(--vj-skyid-muted)]">
-              Ngày sinh
-            </span>
-            <div className="vj-skyid-phone px-2">
-              <select
-                aria-label="Ngày"
-                value={birthDay}
-                onChange={(e) => setBirthDay(e.target.value)}
-                className="w-12 bg-transparent text-sm font-medium text-[var(--vj-skyid-ink)] outline-none"
-              >
-                <option value="">Ngày</option>
-                {Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0')).map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
-              <span className="text-[var(--vj-skyid-muted)]">/</span>
-              <select
-                aria-label="Tháng"
-                value={birthMonth}
-                onChange={(e) => setBirthMonth(e.target.value)}
-                className="w-14 bg-transparent text-sm font-medium text-[var(--vj-skyid-ink)] outline-none"
-              >
-                <option value="">Tháng</option>
-                {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0')).map((m) => (
-                  <option key={m} value={m}>
-                    {m}
-                  </option>
-                ))}
-              </select>
-              <span className="text-[var(--vj-skyid-muted)]">/</span>
-              <select
-                aria-label="Năm"
-                value={birthYear}
-                onChange={(e) => setBirthYear(e.target.value)}
-                className="flex-1 bg-transparent text-sm font-medium text-[var(--vj-skyid-ink)] outline-none"
-              >
-                <option value="">Năm</option>
-                {BIRTH_YEARS.map((y) => (
-                  <option key={y} value={y}>
-                    {y}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <SkyIdField
-            id="skyid-email"
-            label="Email"
-            type="email"
-            value={email}
-            onChange={setEmail}
-            autoComplete="email"
-            placeholder="email@example.com"
-          />
-
-          <SkyIdField
-            id="skyid-referral"
-            label="Mã giới thiệu SkyJoy (nếu có)"
-            value={referralCode}
-            onChange={setReferralCode}
-            placeholder="SJ12345678"
-          />
-
-          <label className="flex cursor-pointer select-none items-start gap-2 pt-1 text-xs text-[var(--vj-skyid-muted)]">
-            <input
-              type="checkbox"
-              checked={agree}
-              onChange={(e) => setAgree(e.target.checked)}
-              className="vj-skyid-consent mt-0.5"
-            />
-            <span>
-              Tôi đồng ý với{' '}
-              <Link
-                href="/gioi-thieu"
-                target="_blank"
-                rel="noreferrer"
-                className="vj-skyid-link font-bold underline"
-              >
-                Điều khoản dịch vụ và Chính sách bảo mật
-              </Link>{' '}
-              của Vietjet SkyJoy.
-            </span>
-          </label>
-
-          <div className="flex justify-center pt-1">
-            <button type="submit" disabled={loading} className="vj-skyid-btn">
-              {loading ? 'Đang đăng ký…' : 'Đăng ký'}
-            </button>
-          </div>
-        </form>
+        <RegisterStep
+          surname={surname}
+          onSurnameChange={setSurname}
+          givenName={givenName}
+          onGivenNameChange={setGivenName}
+          birthDay={birthDay}
+          onBirthDayChange={setBirthDay}
+          birthMonth={birthMonth}
+          onBirthMonthChange={setBirthMonth}
+          birthYear={birthYear}
+          onBirthYearChange={setBirthYear}
+          email={email}
+          onEmailChange={setEmail}
+          referralCode={referralCode}
+          onReferralCodeChange={setReferralCode}
+          agree={agree}
+          onAgreeChange={setAgree}
+          onSubmit={handleRegister}
+          loading={loading}
+        />
       ) : null}
 
       {step === 'otp' ? (
-        <form onSubmit={handleVerifyOtp} noValidate>
-          <p className="text-sm leading-[22px] text-[var(--vj-skyid-muted)]">
-            Mã xác thực gồm {OTP_LENGTH} chữ số đã được gửi tới {email.trim()}. Quý khách vui lòng
-            kiểm tra hộp thư đến (hoặc mục Spam/Rác) và nhập mã để hoàn tất.
-          </p>
-          <SkyIdDevHint hint={otpHint} />
-          <div className="mt-4">
-            <SkyIdPinInput
-              length={OTP_LENGTH}
-              value={otpCode}
-              onChange={(v) => setOtpCode(v.replace(/[^\d]/g, ''))}
-              id="skyid-otp"
-            />
-          </div>
-          <div className="mt-5 flex flex-col items-center gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                setStep('register');
-                setOtpCode('');
-                setError('');
-              }}
-              className="vj-skyid-link"
-            >
-              Sửa thông tin
-            </button>
-            <button type="submit" disabled={loading} className="vj-skyid-btn">
-              {loading ? 'Đang xác nhận…' : 'Xác nhận'}
-            </button>
-          </div>
-        </form>
+        <OtpStep
+          destination={email.trim()}
+          hint={otpHint}
+          code={otpCode}
+          onCodeChange={setOtpCode}
+          onSubmit={handleVerifyOtp}
+          onBack={() => {
+            setStep('register');
+            setOtpCode('');
+            setError('');
+          }}
+          backLabel="Sửa thông tin"
+          loading={loading}
+          inputId="skyid-otp"
+          resendCooldown={registerOtpCooldown}
+          onResend={handleResendRegisterOtp}
+        />
       ) : null}
 
       {step !== 'register' && step !== 'otp' && step !== 'login-otp' ? (

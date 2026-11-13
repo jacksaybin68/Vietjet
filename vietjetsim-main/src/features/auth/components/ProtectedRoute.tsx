@@ -26,10 +26,10 @@ export default function ProtectedRoute({ children, requiredRole = 'user' }: Prot
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-50">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--surface)]">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-stone-200 border-t-primary rounded-full animate-spin" />
-          <p className="text-sm text-stone-500 font-medium">Đang tải...</p>
+          <div className="w-12 h-12 border-4 border-[var(--border)] border-t-primary rounded-full animate-spin" />
+          <p className="text-sm text-[var(--vj-text-soft)] font-medium">Đang tải...</p>
         </div>
       </div>
     );
