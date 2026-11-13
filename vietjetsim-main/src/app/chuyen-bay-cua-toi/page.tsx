@@ -7,6 +7,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAuthModal } from '@/features/auth/components';
 import { Header, Footer } from '@/shared/components/navigation';
 import {
   MdFlight as FlightIcon,
@@ -122,6 +123,7 @@ export default function MyFlightsPage() {
   // Chỉ gọi /api/dat-ve khi đã đăng nhập — gọi khi khách vãng lai sẽ nhận 401 và
   // hiện thành lỗi console (badge "Issues" của Next dev overlay).
   const { user: authUser, loading: authLoading } = useAuth();
+  const { openAuthModal } = useAuthModal();
 
   const fetchBookings = useCallback(async () => {
     try {
@@ -279,43 +281,40 @@ export default function MyFlightsPage() {
           className="pointer-events-none absolute bottom-0 right-0 z-0 w-[min(720px,58vw)] select-none opacity-90"
         />
 
-        <Header variant="compact" mobileTitle="CHUYẾN BAY CỦA TÔI" hideMobileLogo />
+        <Header variant="subpage" mobileTitle="ĐẶT CHỖ CỦA TÔI" mobileRed />
 
-        {/* Thanh Tab Mobile: "Tìm kiếm mã đặt chỗ" | "Chuyến bay của tôi" khớp 100% Ảnh tham chiếu */}
-        <div className="xl:hidden w-full bg-white border-b border-gray-200 shadow-xs relative z-20">
-          <div className="flex">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={view === 'search'}
-              onClick={() => {
-                viewPinned.current = true;
-                setView('search');
-              }}
-              className={`flex-1 py-3 text-center text-sm font-bold transition-all border-b-2 cursor-pointer ${
-                view === 'search'
-                  ? 'text-primary border-primary'
-                  : 'text-gray-600 border-transparent hover:text-gray-900'
-              }`}
-            >
-              Tìm kiếm mã đặt chỗ
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={view === 'list'}
-              onClick={() => {
-                viewPinned.current = true;
-                setView('list');
-              }}
-              className={`flex-1 py-3 text-center text-sm font-bold transition-all border-b-2 cursor-pointer ${
-                view === 'list'
-                  ? 'text-primary border-primary'
-                  : 'text-gray-600 border-transparent hover:text-gray-900'
-              }`}
-            >
-              Chuyến bay của tôi
-            </button>
+        {/* Dải tab tra cứu — đo được ở site thật (1440×900): dải rộng 1200px,
+            bo góc 12px, padding 16px; bên trong là PILL cao 36px, bo góc 18px,
+            gap 8px. Tab active nền #FFDD32 chữ rgb(115,62,10); tab inactive
+            nền trong suốt chữ #333. */}
+        <div className="relative z-20 mx-auto w-full max-w-[1200px] px-4 pt-2 sm:px-6 min-[1200px]:px-0">
+          <div className="vj-pill-tabs" role="tablist" aria-label="Dịch vụ tra cứu">
+            {(
+              [
+                { id: 'search', label: 'Chuyến bay của tôi', TabIcon: MdConfirmationNumber },
+                { id: 'list', label: 'Đơn hàng SkyShop', TabIcon: FlightIcon },
+              ] as const
+            ).map((chip) => {
+              const active = view === chip.id;
+              const TabIcon = chip.TabIcon;
+              return (
+                <button
+                  key={chip.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  data-active={active}
+                  onClick={() => {
+                    viewPinned.current = true;
+                    setView(chip.id);
+                  }}
+                  className="vj-pill-tab"
+                >
+                  <TabIcon aria-hidden="true" className="h-4 w-4 shrink-0" />
+                  {chip.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -324,150 +323,27 @@ export default function MyFlightsPage() {
               container của vietjetair.com, đo tại 1440×900). ===== */}
           <section className="relative flex-1">
             <div className="mx-auto w-full max-w-[1200px] px-4 sm:px-6 min-[1200px]:px-0">
-              <div className="pt-4 xl:pt-[65px]">
-                <div
-                  role="tablist"
-                  aria-label="Chuyến bay của tôi"
-                  className="hidden xl:flex items-end overflow-hidden rounded-t-[10px] xl:overflow-visible gap-2"
-                >
-                  {(
-                    [
-                      {
-                        id: 'search',
-                        label: 'Tìm kiếm mã đặt chỗ',
-                        TabIcon: MdConfirmationNumber,
-                      },
-                      { id: 'list', label: 'Chuyến bay của tôi', TabIcon: FlightIcon },
-                    ] as const
-                  ).map((chip) => {
-                    const active = view === chip.id;
-                    const TabIcon = chip.TabIcon;
-                    return (
-                      <button
-                        key={chip.id}
-                        type="button"
-                        role="tab"
-                        aria-selected={active}
-                        onClick={() => {
-                          viewPinned.current = true;
-                          setView(chip.id);
-                        }}
-                        className={`relative flex h-11 items-center gap-2 rounded-t-[10px] px-5 text-xs font-black uppercase tracking-wider transition-all sm:text-sm ${
-                          active
-                            ? 'bg-white text-primary shadow-[0_-4px_16px_rgba(36,73,120,0.08)] border-t-2 border-primary'
-                            : 'bg-white/60 text-gray-500 hover:bg-white/80 hover:text-primary backdrop-blur-sm'
-                        }`}
-                      >
-                        <TabIcon aria-hidden="true" className="text-base" />
-                        {chip.label}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Tab 1: Form tra cứu đặt chỗ */}
+              <div className="pt-4 xl:pt-[26px]">
+                {/* Tab 1: Form tra cứu đặt chỗ.
+                    Số đo từ newweb.vietjetair.com (/vi/my/search-booking, 1440×900):
+                    card nền rgba(255,255,255,.94) bo góc 12px, cao ~560px; hai cột
+                    600/600 — trái là form (khối nội dung rộng 400px CĂN GIỮA trong
+                    cột 600px), phải là slider ảnh 600×500 bo góc 5px. */}
                 {view === 'search' && (
-                  <>
-                    {/* Giao diện Mobile khớp 100% Ảnh mẫu tham chiếu */}
-                    <div className="xl:hidden w-full max-w-[540px] mx-auto pt-2 pb-16">
-                      <p className="text-sm2 sm:text-sm font-bold text-gray-800 leading-snug mb-4">
-                        Bạn muốn xem chuyến bay đã đặt, đổi lịch trình bay hay mua thêm dịch vụ hành
-                        lý, chỗ ngồi, suất ăn..., vui lòng điền thông tin bên dưới:
-                      </p>
+                  <div className="vj-lookup-card grid w-full grid-cols-1 overflow-hidden lg:grid-cols-[600px_600px]">
+                    {/* Cột trái: tiêu đề + mô tả + 3 ô nhập + nút + khối SkyJoy */}
+                    <div className="flex flex-col px-5 pb-8 pt-5 lg:border-r lg:border-[var(--vj-field-border)] lg:px-0 lg:pb-[39px] lg:pt-[20px]">
+                      <div className="w-full max-w-[400px] mx-auto">
+                        <h2 className="text-xl font-semibold uppercase leading-[26px] text-[var(--vj-text)]">
+                          Chuyến bay của tôi
+                        </h2>
+                        <p className="mt-2 text-base font-medium leading-[21.28px] text-[var(--vj-text)]">
+                          Bạn muốn xem chuyến bay đã đặt, đổi lịch trình bay hay mua thêm dịch vụ
+                          hành lý, chỗ ngồi, suất ăn..., vui lòng điền thông tin bên dưới:
+                        </p>
 
-                      <form onSubmit={handleSearchBooking} noValidate>
-                        <div className="space-y-3">
-                          <div className="relative">
-                            <input
-                              id="mobi-booking-code"
-                              type="text"
-                              required
-                              autoComplete="off"
-                              autoCapitalize="characters"
-                              value={bookingCode}
-                              onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
-                              className="w-full h-12 rounded-vj bg-white px-4 text-sm font-bold text-gray-900 shadow-sm border border-gray-100 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                            />
-                            {!bookingCode && (
-                              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-700 select-none">
-                                Mã đặt chỗ<span className="text-primary font-bold">*</span>
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="relative">
-                            <input
-                              id="mobi-surname"
-                              type="text"
-                              required
-                              autoComplete="family-name"
-                              value={surname}
-                              onChange={(e) => setSurname(e.target.value)}
-                              className="w-full h-12 rounded-vj bg-white px-4 text-sm font-bold text-gray-900 shadow-sm border border-gray-100 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                            />
-                            {!surname && (
-                              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-700 select-none">
-                                Họ<span className="text-primary font-bold">*</span>
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="relative">
-                            <input
-                              id="mobi-given-name"
-                              type="text"
-                              required
-                              autoComplete="given-name"
-                              value={givenName}
-                              onChange={(e) => setGivenName(e.target.value)}
-                              className="w-full h-12 rounded-vj bg-white px-4 text-sm font-bold text-gray-900 shadow-sm border border-gray-100 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                            />
-                            {!givenName && (
-                              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-700 select-none">
-                                Tên đệm và tên<span className="text-primary font-bold">*</span>
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex justify-center my-6">
-                          <button
-                            type="submit"
-                            disabled={loading}
-                            className="inline-flex h-11 w-36 sm:w-40 items-center justify-center rounded-vj bg-accent hover:bg-accent-light text-base font-black italic font-koho text-black shadow-md transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
-                          >
-                            {loading ? 'Đang tìm…' : 'Tìm kiếm'}
-                          </button>
-                        </div>
-                      </form>
-
-                      {/* Banner ngang Ngoại tệ sẵn sàng - Hành trình an tâm */}
-                      <div className="w-full overflow-hidden rounded-vj shadow-md border border-white/60 mb-6">
-                        <img
-                          src="/images/hero/banner-chuyenbay-mobile.png"
-                          alt="Mua ngoại tệ dễ dàng khi đặt vé"
-                          className="w-full h-auto object-cover"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Giao diện Desktop */}
-                    <form
-                      onSubmit={handleSearchBooking}
-                      className="hidden xl:block rounded-[12px] bg-[rgba(248,251,255,0.95)] px-4 pb-8 pt-6 shadow-[0_18px_50px_rgba(36,73,120,0.14)] ring-1 ring-white/70 backdrop-blur-[2px] sm:px-6 xl:rounded-l-[12px] xl:pb-[39px] xl:pl-[46px] xl:pr-[3px] xl:pt-[34px] animate-fadeIn"
-                    >
-                      <div className="grid grid-cols-1 gap-8 xl:grid-cols-[458px_minmax(0,1fr)] xl:gap-[60px]">
-                        {/* Cột trái: tiêu đề + mô tả + ba trường nhập. */}
-                        <div className="flex flex-col">
-                          <h1 className="text-lg font-black uppercase tracking-tight text-gray-900">
-                            CHUYẾN BAY CỦA TÔI
-                          </h1>
-                          <p className="mt-2 text-xs leading-relaxed text-gray-600">
-                            Bạn muốn xem chuyến bay đã đặt, đổi lịch trình bay hay mua thêm dịch vụ
-                            hành lý, chỗ ngồi, suất ăn..., vui lòng điền thông tin bên dưới:
-                          </p>
-
-                          <div className="mt-[22px] space-y-[18px]">
+                        <form onSubmit={handleSearchBooking} noValidate>
+                          <div className="mt-[22px] space-y-[17px]">
                             <div className="vj-lookup-field">
                               <input
                                 id="booking-code"
@@ -478,7 +354,7 @@ export default function MyFlightsPage() {
                                 value={bookingCode}
                                 onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
                                 placeholder=" "
-                                className="vj-lookup-input font-heading-800 uppercase tracking-wide"
+                                className="vj-lookup-input uppercase tracking-wide"
                               />
                               <label htmlFor="booking-code" className="vj-lookup-label">
                                 Mã đặt chỗ <span className="text-[var(--vj-red)]">*</span>
@@ -513,7 +389,7 @@ export default function MyFlightsPage() {
                                 className="vj-lookup-input"
                               />
                               <label htmlFor="given-name" className="vj-lookup-label">
-                                Tên đệm & Tên <span className="text-[var(--vj-red)]">*</span>
+                                Tên đệm và tên <span className="text-[var(--vj-red)]">*</span>
                               </label>
                             </div>
                           </div>
@@ -522,107 +398,139 @@ export default function MyFlightsPage() {
                             <button
                               type="submit"
                               disabled={loading}
-                              className="inline-flex h-10 px-8 items-center justify-center rounded-vj bg-vjyellow hover:bg-vjamber text-sm font-black text-gray-900 shadow-md transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+                              className="vj-lookup-btn disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               {loading ? 'Đang tìm…' : 'Tìm kiếm'}
                             </button>
                           </div>
-                        </div>
+                        </form>
 
-                        {/* Cột phải: banner ngoại tệ thực tế theo Ảnh 1 & Ảnh 2 */}
-                        <div className="relative aspect-[750/650] w-full overflow-hidden rounded-[6px] min-[1200px]:aspect-auto min-[1200px]:h-[682px]">
-                          <AppImage
-                            src="/images/hero/banner-chuyenbay-ngoai-te.jpg"
-                            alt="Mua ngoại tệ dễ dàng khi đặt vé"
-                            fill
-                            priority
-                            quality={95}
-                            sizes="(min-width: 1280px) 800px, 100vw"
-                          />
-                        </div>
-                      </div>
-                    </form>
-                  </>
-                )}
-
-                {/* Tab 2: Chuyến bay sắp tới (khi khách chưa đăng nhập -> hiển thị form đăng nhập theo Ảnh 2 & 4) */}
-                {view === 'list' && !authUser && (
-                  <div className="rounded-[12px] bg-[rgba(248,251,255,0.95)] px-4 pb-8 pt-6 shadow-[0_18px_50px_rgba(36,73,120,0.14)] ring-1 ring-white/70 backdrop-blur-[2px] sm:px-6 xl:rounded-l-[12px] xl:pb-[39px] xl:pl-[46px] xl:pr-[3px] xl:pt-[34px] animate-fadeIn">
-                    <div className="grid grid-cols-1 gap-8 xl:grid-cols-[458px_minmax(0,1fr)] xl:gap-[60px]">
-                      {/* Cột trái: Đăng nhập bằng số điện thoại / SkyJoy ID */}
-                      <div className="flex flex-col justify-center py-6">
-                        <h2 className="text-center text-base sm:text-lg font-black uppercase tracking-wide text-gray-900">
-                          Đăng nhập
-                        </h2>
-
-                        <div className="mt-6 mx-auto w-full max-w-[340px] space-y-4">
-                          <div className="flex rounded-md border border-gray-300 bg-white overflow-hidden focus-within:border-primary">
-                            <span className="inline-flex items-center px-3 py-2 bg-gray-50 border-r border-gray-200 text-xs font-bold text-gray-700 select-none">
-                              (+84) <span className="text-3xs text-gray-400 ml-1">▼</span>
-                            </span>
-                            <input
-                              type="tel"
-                              placeholder="Số điện thoại"
-                              className="flex-1 px-3 py-2 text-xs font-bold outline-none text-gray-900 bg-transparent"
-                            />
-                          </div>
-
-                          <div className="flex justify-center">
-                            <Link
-                              href="/dang-nhap?redirect=/chuyen-bay-cua-toi"
-                              className="w-full py-2.5 rounded-vj bg-gray-100 hover:bg-vjyellow text-gray-400 hover:text-gray-900 text-center font-black text-xs border border-gray-200 transition-colors shadow-sm"
-                            >
-                              Đăng nhập
-                            </Link>
-                          </div>
-
-                          <p className="text-center text-xs text-gray-600">
-                            Bạn chưa có tài khoản?{' '}
-                            <Link
-                              href="/dang-ky?redirect=/chuyen-bay-cua-toi"
-                              className="font-bold text-blue-600 underline hover:text-blue-700"
+                        {/* Khối SkyJoy dưới form — nút "Đăng nhập" 48px bo 12px,
+                            viền rgba(236,32,41,.1), chữ #D6231E; dòng giới thiệu
+                            14px với link #0088FF. */}
+                        <div className="mt-8">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              openAuthModal('login', { redirectTo: '/chuyen-bay-cua-toi' })
+                            }
+                            className="vj-skyjoy-login-btn"
+                          >
+                            <MdLogin aria-hidden="true" className="h-5 w-5 shrink-0" />
+                            Đăng nhập
+                          </button>
+                          <p className="mt-3 text-sm font-normal leading-[21px] tracking-[0.1px] text-[var(--vj-text-gray)]">
+                            Bạn đã biết về Vietjet SkyJoy?{' '}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                openAuthModal('register', { redirectTo: '/chuyen-bay-cua-toi' })
+                              }
+                              className="font-medium text-[var(--vj-link-blue)] hover:underline"
                             >
                               Đăng ký ngay
-                            </Link>
+                            </button>
                           </p>
-
-                          <div className="pt-6 border-t border-gray-100 text-center space-y-2">
-                            <p className="text-xs2 text-gray-500">
-                              Được cung cấp và xác thực bởi SkyJoy ID
-                            </p>
-                            <div className="flex items-center justify-center gap-4 text-xs font-black select-none">
-                              <span>
-                                <span className="text-primary">Sky</span>
-                                <span className="text-vjamber">Joy</span>
-                              </span>
-                              <span className="text-primary italic">vietjetAir.com</span>
-                              <span>
-                                <span className="text-primary">Sky</span>
-                                <span className="text-amber-800">Pay</span>
-                              </span>
-                            </div>
-                            <div>
-                              <Link
-                                href="/gioi-thieu"
-                                className="inline-flex items-center gap-1 text-xs2 font-bold text-blue-600 hover:underline"
-                              >
-                                <span className="text-xs">ℹ</span>
-                                <span>Bạn đã biết về Vietjet SkyJoy?</span>
-                              </Link>
-                            </div>
-                          </div>
                         </div>
                       </div>
+                    </div>
 
-                      {/* Cột phải: cùng banner quảng cáo ngoại tệ như Ảnh 2 & Ảnh 4 */}
-                      <div className="relative aspect-[750/650] w-full overflow-hidden rounded-[6px] min-[1200px]:aspect-auto min-[1200px]:h-[682px]">
+                    {/* Cột phải: slider ảnh 600×500 bo góc 5px */}
+                    <div className="p-4 lg:p-0">
+                      <div className="relative w-full overflow-hidden rounded-[5px] lg:h-[500px]">
                         <AppImage
                           src="/images/hero/banner-chuyenbay-ngoai-te.jpg"
                           alt="Mua ngoại tệ dễ dàng khi đặt vé"
                           fill
                           priority
                           quality={95}
-                          sizes="(min-width: 1280px) 800px, 100vw"
+                          sizes="(min-width: 1024px) 600px, 100vw"
+                          className="object-cover"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab 2: Đơn hàng SkyShop — khách chưa đăng nhập thì hiện khối
+                    đăng nhập SkyJoy ID, đặt trong card 2 cột 600/600 giống tab 1. */}
+                {view === 'list' && !authUser && (
+                  <div className="vj-lookup-card grid w-full grid-cols-1 overflow-hidden lg:grid-cols-[600px_600px]">
+                    {/* Cột trái: đăng nhập bằng số điện thoại / SkyJoy ID */}
+                    <div className="flex flex-col px-5 pb-8 pt-5 lg:border-r lg:border-[var(--vj-field-border)] lg:px-0 lg:pb-[39px] lg:pt-[20px]">
+                      <div className="w-full max-w-[400px] mx-auto">
+                        <h2 className="text-xl font-semibold uppercase leading-[26px] text-[var(--vj-text)]">
+                          Đơn hàng SkyShop
+                        </h2>
+                        <p className="mt-2 text-base font-medium leading-[21.28px] text-[var(--vj-text)]">
+                          Đăng nhập tài khoản Vietjet SkyJoy ID để xem các đơn hàng Skyshop của bạn,
+                          theo dõi trạng thái giao hàng và tích điểm đổi quà.
+                        </p>
+
+                        <div className="mt-[22px]">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              openAuthModal('login', { redirectTo: '/chuyen-bay-cua-toi' })
+                            }
+                            className="vj-skyjoy-login-btn"
+                          >
+                            <MdLogin aria-hidden="true" className="h-5 w-5 shrink-0" />
+                            Đăng nhập
+                          </button>
+                          <p className="mt-3 text-sm font-normal leading-[21px] tracking-[0.1px] text-[var(--vj-text-gray)]">
+                            Bạn chưa có tài khoản?{' '}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                openAuthModal('register', { redirectTo: '/chuyen-bay-cua-toi' })
+                              }
+                              className="font-medium text-[var(--vj-link-blue)] hover:underline"
+                            >
+                              Đăng ký ngay
+                            </button>
+                          </p>
+                        </div>
+
+                        <div className="mt-8 border-t border-[var(--border)] pt-6 text-center">
+                          <p className="text-xs2 text-[var(--vj-text-gray)]">
+                            Được cung cấp và xác thực bởi SkyJoy ID
+                          </p>
+                          <div className="mt-3 flex items-center justify-center gap-4 text-xs font-black select-none">
+                            <span>
+                              <span className="text-primary">Sky</span>
+                              <span className="text-vjamber">Joy</span>
+                            </span>
+                            <span className="text-primary italic">vietjetAir.com</span>
+                            <span>
+                              <span className="text-primary">Sky</span>
+                              <span className="text-amber-800">Pay</span>
+                            </span>
+                          </div>
+                          <div className="mt-2">
+                            <Link
+                              href="/gioi-thieu"
+                              className="inline-flex items-center gap-1 text-xs2 font-bold text-[var(--vj-link-blue)] hover:underline"
+                            >
+                              <span className="text-xs">ℹ</span>
+                              <span>Bạn đã biết về Vietjet SkyJoy?</span>
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Cột phải: cùng banner quảng cáo ngoại tệ như tab 1 */}
+                    <div className="p-4 lg:p-0">
+                      <div className="relative w-full overflow-hidden rounded-[5px] lg:h-[500px]">
+                        <AppImage
+                          src="/images/hero/banner-chuyenbay-ngoai-te.jpg"
+                          alt="Mua ngoại tệ dễ dàng khi đặt vé"
+                          fill
+                          priority
+                          quality={95}
+                          sizes="(min-width: 1024px) 600px, 100vw"
+                          className="object-cover"
                         />
                       </div>
                     </div>

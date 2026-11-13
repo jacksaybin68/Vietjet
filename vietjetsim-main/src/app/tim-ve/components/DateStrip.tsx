@@ -55,11 +55,11 @@ export default function DateStrip({ items, selectedValue, onSelect }: DateStripP
                     : 'border border-gray-200/90 bg-white text-gray-700 font-semibold hover:border-amber-300 hover:bg-amber-50/30'
                 }`}
               >
-                <span className="text-xs2 font-bold opacity-90">{dayOfWeek}</span>
-                <span className="text-xs font-black">{dayMonth}</span>
+                <span className="text-sm2 font-medium leading-tight">{dayOfWeek}</span>
+                <span className="text-sm2 font-bold leading-tight">{dayMonth}</span>
                 {item.price && (
                   <span
-                    className={`text-xs2 font-bold mt-0.5 ${
+                    className={`text-sm2 font-bold mt-0.5 ${
                       active ? 'text-red-700 font-black' : 'text-gray-500'
                     }`}
                   >

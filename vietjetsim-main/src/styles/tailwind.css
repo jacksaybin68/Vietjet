@@ -168,7 +168,7 @@ input[type='date'].vj-no-native-icon::-moz-calendar-picker-indicator {
   /* ─── Token đo trực tiếp từ vietjetair.com (13/11/2026) ───
    * Giá trị lấy từ getComputedStyle của DOM sống + đếm tần suất hex trong
    * main.6165d6fe.chunk.js. Hồ sơ đầy đủ:
-   * docs/qa/VIETJET_THAM_SO_GIAO_DIEN_2026-11-13.md */
+   * docs/qa/so-do-vietjetair-2026-11-13.md */
   /* Lớp tối phủ lên ảnh hero — header desktop và mobile đều dùng đúng
      lớp này thay vì thanh đỏ. */
   --vj-scrim-from: rgba(0, 0, 0, 0.5);
@@ -223,6 +223,46 @@ input[type='date'].vj-no-native-icon::-moz-calendar-picker-indicator {
   --vj-login-grad-to: #f5d200;
   --vj-login-ink: #e31e24;
   --vj-login-ink-rgb: 227 30 36;
+
+  /* ─── Token header trang con (đo 13/11/2026 từ DOM sống) ───
+   * Header của /vi/my/search-booking và /vi/checkin: nền trắng, viền dưới
+   * 2px đỏ #E31E24, bo góc dưới 16px, shadow rgba(0,0,0,0.08) 0 8px 24px. */
+  --vj-header-sub: #ffffff;
+  --vj-header-sub-border: #e31e24;
+  --vj-nav-ink: #1f1f1f;
+  --vj-pill-gray: #f7f7f7;
+  --vj-pill-gray-border: #dddddd;
+  --vj-pill-gold-from: #ffeb63;
+  --vj-pill-gold-to: #f5d200;
+  --vj-pill-gold-border: #f0cc00;
+  --vj-btn-disabled-ink: #75767a;
+
+  /* ─── Token card tra cứu + modal SkyJoy ID (đo 13/11/2026 từ DOM sống) ───
+   * Hồ sơ đầy đủ: docs/qa/so-do-vietjetair-2026-11-13.md
+   *   - Pill tab đang chọn: nền #FFDD32, chữ rgb(115 62 10).
+   *   - Card tra cứu: nền rgba(255,255,255,.94), bo góc 12px.
+   *   - Ô nhập: bo góc 5px, viền #D9DEE5.
+   *   - Nút "Tìm kiếm": bo góc 10px, gradient 26.73deg.
+   *   - Modal SkyJoy ID: bo góc 8px, nút "Tiếp tục" 146×48px. */
+  --vj-yellow-tab: #ffdd32;
+  --vj-yellow-tab-rgb: 255 221 50;
+  --vj-tab-ink: #733e0a;
+  --vj-tab-ink-rgb: 115 62 10;
+  --vj-skyjoy-id: #d6231e;
+  --vj-skyjoy-id-rgb: 214 35 30;
+  --vj-link-blue: #0088ff;
+  --vj-link-blue-rgb: 0 136 255;
+  --vj-radius-field: 5px;
+  --vj-radius-card: 12px;
+  --vj-radius-modal: 8px;
+  --vj-radius-btn: 10px;
+  --vj-field-border: #d9dee5;
+  --vj-field-border-rgb: 217 222 229;
+  /* Nền card tra cứu — trắng hơi trong suốt, đo được trên site thật. */
+  --vj-lookup-card-bg: rgba(255, 255, 255, 0.94);
+  /* Trạng thái disabled của nút "Tiếp tục" trong modal SkyJoy ID. */
+  --vj-modal-disabled-bg: #f5f5f5;
+  --vj-modal-disabled-ink: #c4c4c4;
 
   /* ─── Token dọn nợ hex (ratchet scripts/css-debt.cjs) ───
    * Các giá trị dưới đây từng nằm rải rác dưới dạng `bg-[#rrggbb]` trong
@@ -443,10 +483,13 @@ h6 {
     justify-content: center;
   }
 
-  /* Nút "Tìm chuyến bay" trong hero: 39px cao, chữ uppercase — đúng số đo
-   * trên vietjetair.com (MUI button padding 6px 16px, font 16px/500). */
+  /* Nút "Tìm chuyến bay" trong hero: 200×39px, chữ uppercase — đúng số đo
+   * trên vietjetair.com (MUI button rộng 200px, padding 6px 16px, font
+   * 16px/500). */
   .vj-cta--hero {
     min-height: 39px;
+    width: 200px;
+    max-width: 200px;
     text-transform: uppercase;
     font-size: 16px;
     font-weight: 500;
@@ -543,7 +586,10 @@ h6 {
   background-color: transparent;
   border: 0;
   cursor: pointer;
-  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .vj-pill-item[data-active='true'] {
@@ -555,14 +601,18 @@ h6 {
 
 /* Panel đặt vé (site thật, đo 13/11/2026):
    - Thân panel: gradient 30.3deg, bo góc 0 0 5px 5px, cao 410px, rộng 380px.
-   - Hàng tab phía trên: cao 52px, bo góc 5px 5px 0 0, mỗi tab gradient riêng. */
+   - Hàng tab phía trên: cao 52px, bo góc 5px 5px 0 0, mỗi tab gradient riêng.
+   - MOBILE (390×844): panel rộng 390px, cao 304px, bo góc 0 (không bo đáy),
+     vẫn gradient 30.3deg. */
 .vj-booking-panel {
-  background-image: linear-gradient(
-    30.3deg,
-    rgba(217, 26, 33, 0.73) 33.94%,
-    #6f0000 163.23%
-  );
+  background-image: linear-gradient(30.3deg, rgba(217, 26, 33, 0.73) 33.94%, #6f0000 163.23%);
   border-radius: 0 0 5px 5px;
+}
+
+@media (max-width: 1023px) {
+  .vj-booking-panel {
+    border-radius: 0;
+  }
 }
 
 /* Thanh tab dịch vụ phía trên panel: cao 52px, bo góc 5px 5px 0 0.
@@ -591,15 +641,25 @@ h6 {
   line-height: 24.5px;
   font-weight: 500;
   color: #ffffff;
-  background-image: linear-gradient(
-    20.12deg,
-    rgba(217, 26, 33, 0.8) 19.6%,
-    rgba(111, 0, 0, 0.8) 93.86%
-  );
+  /* MOBILE (390×844): gradient 11.3deg, màu đục (đo trực tiếp site thật). */
+  background-image: linear-gradient(11.3deg, rgb(217, 26, 33) 30.49%, rgb(111, 0, 0) 186.99%);
   border: 0;
-  border-radius: 5px 5px 0 0;
+  border-radius: 10px 10px 0 0;
   cursor: pointer;
   transition: filter 160ms ease;
+}
+
+/* DESKTOP (≥1024px): bo góc 5px 5px 0 0, gradient 20.12deg nửa trong suốt
+   — đo được trên site thật ở viewport 1440×900. */
+@media (min-width: 1024px) {
+  .vj-booking-tab {
+    background-image: linear-gradient(
+      20.12deg,
+      rgba(217, 26, 33, 0.8) 19.6%,
+      rgba(111, 0, 0, 0.8) 93.86%
+    );
+    border-radius: 5px 5px 0 0;
+  }
 }
 
 /* Tab vàng (Đổi thưởng & Mua Skypoint) — chữ đen trên nền vàng. */
@@ -683,12 +743,14 @@ h6 {
  *   - Cách mép trái container 1200px: 40px (padding-left của <ul>).
  *   - Khoảng cách giữa các mục: 24px.
  */
+/* Dải dịch vụ phụ — site thật: cao 35px, CĂN PHẢI trong container 1200px
+ * (mục đầu ở x=278, mục cuối kết thúc ở x=1320), gap 24px. */
 .vj-quick-rail {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   height: 35px;
   gap: 24px;
-  padding-left: 40px;
   font-size: 16px;
   line-height: 35px;
   font-weight: 500;
@@ -817,6 +879,469 @@ h6 {
    The gold `.vj-cta` stays reserved for the flight-search CTA. */
 .vj-btn-pill {
   border-radius: 9999px;
+}
+
+/* ─── Header trang con (my/search-booking, checkin) ──────────────────────
+ * Đo trực tiếp từ DOM sống của vietjetair.com (13/11/2026, 1440×900):
+ *   - Nền trắng #FFFFFF, viền dưới 2px #E31E24.
+ *   - Bo góc dưới 16px, shadow `rgba(0,0,0,0.08) 0 8px 24px`.
+ *   - Nav 17px/500 KoHo, màu #1F1F1F.
+ */
+.vj-subheader {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background-color: var(--vj-header-sub);
+  border-bottom: 2px solid var(--vj-header-sub-border);
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.vj-subheader-nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  height: 74px;
+}
+
+.vj-subheader-nav a {
+  font-size: 17px;
+  line-height: 23.8px;
+  font-weight: 500;
+  color: var(--vj-nav-ink);
+  white-space: nowrap;
+  transition: color 160ms ease;
+}
+
+.vj-subheader-nav a:hover {
+  color: var(--primary);
+}
+
+/* Nút pill trắng ("Tải ứng dụng") — nền #F7F7F7, viền #DDDDDD. */
+.vj-subheader-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 20px;
+  border: 1px solid var(--vj-pill-gray-border);
+  border-radius: 999px;
+  background-color: var(--vj-pill-gray);
+  font-size: 15px;
+  line-height: 15px;
+  font-weight: 500;
+  color: var(--vj-nav-ink);
+  transition: filter 160ms ease;
+}
+
+.vj-subheader-pill:hover {
+  filter: brightness(0.97);
+}
+
+/* Nút pill vàng ("Đăng nhập") — gradient #FFEB63 → #F5D200, viền #F0CC00. */
+.vj-subheader-pill--gold {
+  border-color: var(--vj-pill-gold-border);
+  background-image: linear-gradient(var(--vj-pill-gold-from) 0%, var(--vj-pill-gold-to) 100%);
+  font-weight: 700;
+}
+
+/* Nút tròn nhỏ ("Hỗ trợ", "Tiếng Việt") — 28px cao, bo tròn 999px, viền #DDDDDD. */
+.vj-subheader-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 12.5px;
+  border: 1px solid var(--vj-pill-gray-border);
+  border-radius: 999px;
+  background-color: transparent;
+  font-size: 15px;
+  line-height: 15px;
+  font-weight: 500;
+  color: var(--vj-nav-ink);
+  transition: background-color 160ms ease;
+}
+
+.vj-subheader-chip:hover {
+  background-color: var(--surface-2);
+}
+
+/* ─── Panel "Thông tin đặt chỗ" (đo 13/11/2026) ───────────────────────────
+ * Site thật (1440×900):
+ *   - Panel rộng `380px`.
+ *   - Header gradient đỏ `359.2deg`, cao `56px`, `h3` 20px/700 trắng.
+ *   - Thanh mục cao `52px`, nền `#F1F1F1`, tiêu đề `18px/600`.
+ *   - Thanh tổng nền trắng: "Tổng tiền" 20px/600, giá 22px/700. */
+.vj-summary-head {
+  height: 56px;
+  background-image: linear-gradient(359.2deg, var(--vj-red) 0%, var(--vj-red-deep) 100%);
+}
+
+.vj-summary-bar {
+  min-height: 52px;
+  background-color: #f1f1f1;
+}
+
+/* ─── Ô nhập gạch chân (MUI Input-underline) ────────────────────────────
+ * Site thật dùng `MuiInputBase-root MuiInput-root MuiInput-underline`:
+ * cao 40px, không viền trên/side, gạch chân 2px khi focus.
+ */
+.vj-underline-field {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+  padding: 6px 0 7px;
+  border-bottom: 1px solid var(--border);
+  background-color: transparent;
+  transition: border-color 160ms ease;
+}
+
+.vj-underline-field:focus-within {
+  border-bottom: 2px solid var(--primary);
+}
+
+.vj-underline-field input {
+  width: 100%;
+  height: 32px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font-size: 16px;
+  line-height: 21.28px;
+  font-weight: 500;
+  color: var(--foreground);
+  outline: none;
+}
+
+.vj-underline-field input::placeholder {
+  color: var(--vj-field-placeholder);
+  opacity: 1;
+}
+
+/* Nhãn nổi trên ô gạch chân: 16px/500, đổi sang nhỏ khi field có giá trị. */
+.vj-underline-label {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  line-height: 21.28px;
+  font-weight: 500;
+  color: var(--foreground);
+  pointer-events: none;
+  transition:
+    font-size 140ms ease,
+    transform 140ms ease,
+    color 140ms ease;
+}
+
+.vj-underline-field:focus-within .vj-underline-label,
+.vj-underline-field[data-filled='true'] .vj-underline-label {
+  font-size: 12px;
+  line-height: 16px;
+  transform: translateY(-180%);
+  color: var(--foreground-muted);
+}
+
+/* Dải tab trắng 50px của trang tra cứu (site thật: 16px/700 uppercase). */
+.vj-subtabs {
+  display: flex;
+  align-items: stretch;
+  height: 50px;
+  background-color: #ffffff;
+}
+
+.vj-subtabs-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 50px;
+  padding: 0 20px;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--vj-text-gray);
+  transition:
+    color 160ms ease,
+    background-color 160ms ease;
+}
+
+.vj-subtabs-item:hover {
+  color: var(--primary);
+}
+
+.vj-subtabs-item[data-active='true'] {
+  color: var(--primary);
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+/* Khung card tra cứu — site thật (13/11/2026): nền rgba(255,255,255,.94),
+   bo góc 12px, cao ~560px. */
+.vj-lookup-card {
+  background: var(--vj-lookup-card-bg);
+  border-radius: var(--vj-radius-card);
+  box-shadow: 0 3px 12px rgba(0, 31, 62, 0.08);
+}
+
+/* Nút "Tìm kiếm" 127×39 của site thật (đo trên DOM sống). */
+.vj-lookup-btn,
+.vj-search-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 127px;
+  height: 39px;
+  border: 0;
+  border-radius: 10px;
+  background-image: linear-gradient(
+    26.73deg,
+    rgb(249, 165, 26) 13.7%,
+    rgb(251, 182, 18) 29.8%,
+    rgb(255, 221, 0) 66.81%
+  );
+  font-size: 14px;
+  line-height: 24.5px;
+  font-weight: 500;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: opacity 160ms ease;
+}
+
+.vj-lookup-btn:disabled,
+.vj-search-btn:disabled {
+  color: var(--vj-btn-disabled-ink);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ─── Modal SkyJoy ID (đo 13/11/2026 từ DOM sống) ─────────────────────────
+ * Modal 2 cột mở từ header: cột trái form `536px`, cột phải hero `600×600px`.
+ *   - Tiêu đề `32px/700`, phụ đề `16px/400`.
+ *   - Ô điện thoại: nhãn `12px/500` phía trên, input `16px/500`.
+ *   - Nút "Tiếp tục": `146×48px`, bo góc `8px`.
+ *     Disabled: nền `#F5F5F5`, chữ `#C4C4C4`.
+ *   - Divider "hoặc tiếp tục với": `16px/500`, màu `#C4C4C4`.
+ *   - Nút social `Apple` / `Google`: chữ `16px/700`.
+ *   - Footer "Được cung cấp và xác thực bởi SkyJoy ID": `14px/500`. */
+.vj-skyjoy-modal {
+  display: grid;
+  grid-template-columns: 536px 600px;
+  width: 100%;
+  max-width: min(1136px, 100%);
+  overflow: hidden;
+  border-radius: var(--vj-radius-modal);
+  background-color: #ffffff;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+}
+
+@media (max-width: 1199px) {
+  .vj-skyjoy-modal {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: min(536px, 100%);
+  }
+}
+
+.vj-skyjoy-hero {
+  width: 600px;
+  height: 600px;
+  object-fit: cover;
+  background-color: #f7f7f7;
+}
+
+@media (max-width: 1199px) {
+  .vj-skyjoy-hero {
+    display: none;
+  }
+}
+
+.vj-skyjoy-title {
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 700;
+  color: var(--vj-text);
+}
+
+.vj-skyjoy-subtitle {
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  color: var(--vj-text-gray);
+}
+
+.vj-skyjoy-field-label {
+  display: block;
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--vj-text-gray);
+}
+
+.vj-skyjoy-phone {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  overflow: hidden;
+  border: 1px solid var(--vj-field-border);
+  border-radius: var(--vj-radius-modal);
+  background-color: #ffffff;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.vj-skyjoy-phone:focus-within {
+  border-color: var(--vj-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 212, 0.16);
+}
+
+.vj-skyjoy-phone-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  padding: 0 12px;
+  border-right: 1px solid var(--vj-field-border);
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--vj-text);
+  white-space: nowrap;
+}
+
+.vj-skyjoy-phone input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  padding: 0 14px;
+  background: transparent;
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--vj-text);
+  outline: none;
+}
+
+.vj-skyjoy-phone input::placeholder {
+  color: var(--vj-field-placeholder);
+  opacity: 1;
+}
+
+.vj-skyjoy-continue {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 146px;
+  height: 48px;
+  border: 0;
+  border-radius: var(--vj-radius-modal);
+  background-color: var(--primary);
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    opacity 160ms ease;
+}
+
+.vj-skyjoy-continue:hover:not(:disabled) {
+  background-color: var(--vj-red-dark);
+}
+
+.vj-skyjoy-continue:disabled {
+  background-color: var(--vj-modal-disabled-bg);
+  color: var(--vj-modal-disabled-ink);
+  cursor: not-allowed;
+}
+
+.vj-skyjoy-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  color: var(--vj-modal-disabled-ink);
+}
+
+.vj-skyjoy-divider::before,
+.vj-skyjoy-divider::after {
+  content: '';
+  flex: 1 1 auto;
+  height: 1px;
+  background-color: var(--vj-field-border);
+}
+
+.vj-skyjoy-social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  border: 1px solid var(--vj-field-border);
+  border-radius: var(--vj-radius-modal);
+  background-color: #ffffff;
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--vj-text);
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.vj-skyjoy-social:hover:not(:disabled) {
+  background-color: var(--surface-2);
+}
+
+.vj-skyjoy-social:disabled {
+  color: var(--vj-modal-disabled-ink);
+  cursor: not-allowed;
+}
+
+.vj-skyjoy-footer {
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--vj-text-gray);
+}
+
+/* Khối "Đăng nhập" dưới form tra cứu của `/chuyen-bay-cua-toi`.
+ * Số đo site thật: cao `48px`, bo góc `12px`, nền trắng, viền
+ * `1px rgba(236,32,41,0.1)`, chữ `#D6231E` `16px`, icon `20×20`. */
+.vj-skyjoy-login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 48px;
+  border: 1px solid rgba(236, 32, 41, 0.1);
+  border-radius: var(--vj-radius-card);
+  background-color: #ffffff;
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--vj-skyjoy-id);
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.vj-skyjoy-login-btn:hover {
+  background-color: rgba(236, 32, 41, 0.04);
+  border-color: rgba(236, 32, 41, 0.24);
 }
 
 /* Table rows share one hover/transition treatment across dashboard and admin tables. */
@@ -1572,68 +2097,120 @@ h6 {
   white-space: nowrap;
 }
 
-/* Booking-lookup field — the 47px, 10px-radius input on
-   `/chuyen-bay-cua-toi`. Bo góc 10px là chuẩn site thật (không phải 7px).
-   The label rests at 17px inside the field and lifts to
-   a 12px caption on focus or once the field has a value. Kept as CSS (like
-   `.form-field-float`) because the sibling selector `:not(:placeholder-shown)`
-   is what keeps a filled field's label lifted without JS state. */
+/* Booking-lookup field — ô nhập tra cứu ở `/chuyen-bay-cua-toi` và
+  `/lam-thu-tuc`. Số đo site thật (13/11/2026, 1440×900):
+     - ô nhập cao đúng `40px`, nền trắng, VIỀN ĐẦY 1px `#D9DEE5`, bo góc `5px`,
+       padding ngang `20px`;
+     - chữ trong ô `16px/500` KoHo, màu `#333333`;
+     - nhãn `16px/600` (dấu `*` màu `#EC2029`), nâng lên caption `12px/500`
+       khi focus hoặc đã có giá trị.
+   Nhãn nâng bằng CSS (như `.form-field-float`) vì selector
+   `:not(:placeholder-shown)` giữ được trạng thái "đã nhập" mà không cần JS. */
 .vj-lookup-field {
   position: relative;
+  height: 40px;
 }
 
 .vj-lookup-field .vj-lookup-input {
   width: 100%;
-  height: 47px;
-  border: 1px solid #d9dee5;
-  border-radius: 10px;
+  height: 40px;
+  border: 1px solid var(--vj-field-border);
+  border-radius: var(--vj-radius-field);
   background: #ffffff;
-  padding: 18px 22px 4px;
+  padding: 14px 20px 4px;
   font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
-  font-size: 17px;
-  line-height: 1.2;
-  color: #333333;
-  box-shadow: 0 1px 3px rgba(15, 35, 70, 0.08);
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 500;
+  color: var(--vj-text);
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease;
 }
 
 .vj-lookup-field .vj-lookup-input:focus {
-  border-color: var(--vj-blue);
-  box-shadow:
-    0 0 0 3px rgba(37, 99, 212, 0.16),
-    0 1px 3px rgba(15, 35, 70, 0.08);
+  border-color: var(--primary);
+  box-shadow: none;
 }
 
 .vj-lookup-field .vj-lookup-input:focus-visible {
-  outline: 3px solid var(--vj-blue);
-  outline-offset: 2px;
+  outline: none;
 }
 
 .vj-lookup-field .vj-lookup-label {
   position: absolute;
-  left: 22px;
+  left: 20px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 17px;
-  line-height: 1.2;
-  font-weight: 500;
-  color: #333333;
+  font-size: 16px;
+  line-height: 21.28px;
+  font-weight: 600;
+  color: var(--vj-text);
   pointer-events: none;
   transition:
     top 160ms ease,
     font-size 160ms ease,
-    color 160ms ease,
-    transform 160ms ease;
+    font-weight 160ms ease,
+    color 160ms ease;
 }
 
 .vj-lookup-field .vj-lookup-input:focus ~ .vj-lookup-label,
 .vj-lookup-field .vj-lookup-input:not(:placeholder-shown) ~ .vj-lookup-label {
-  top: 7px;
+  top: 4px;
   transform: none;
   font-size: 12px;
-  color: #7a808a;
+  line-height: 14px;
+  font-weight: 500;
+  color: var(--vj-text-gray);
+}
+
+/* ─── Pill tab (đo 13/11/2026) ────────────────────────────────────────────
+ * Dải tab "Dịch vụ tra cứu" của site thật dùng pill bo góc `18px`, cao
+ * `36px`; tab đang chọn nền `#FFDD32`, chữ `rgb(115 62 10)`. */
+.vj-pill-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 20px;
+  border-radius: 18px;
+  background-color: transparent;
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+  color: var(--vj-text-gray);
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.vj-pill-tab:hover {
+  background-color: rgba(255, 221, 50, 0.35);
+  color: var(--vj-tab-ink);
+}
+
+.vj-pill-tab[aria-selected='true'],
+.vj-pill-tab[data-active='true'] {
+  background-color: var(--vj-yellow-tab);
+  color: var(--vj-tab-ink);
+}
+
+/* Dải chứa các pill tab — bo góc 12px, nền trắng, padding 16px (đo 13/11/2026:
+   dải rộng 1200px, cao 69px, bên trong là pill cao 36px, bo góc 18px, gap 8px). */
+.vj-pill-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  border-radius: var(--vj-radius-card);
+  background-color: #ffffff;
+  box-shadow: 0 3px 12px rgba(0, 31, 62, 0.08);
+}
+
+.vj-pill-tabs .vj-pill-tab {
+  min-width: 160px;
 }
 
 /* Form focus styles */
@@ -2249,12 +2826,18 @@ select option {
   max-width: none;
   margin-inline: 0;
   border: none;
-  border-radius: 4px;
-  background: linear-gradient(90deg, var(--vj-grad-gold-from) 0%, var(--vj-grad-gold-to) 100%);
+  border-radius: var(--vj-radius);
+  background-image: linear-gradient(
+    26.73deg,
+    rgb(249, 165, 26) 13.7%,
+    rgb(251, 182, 18) 29.8%,
+    rgb(255, 221, 0) 66.81%
+  );
   color: var(--vj-text);
   font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
-  font-weight: 700;
+  font-weight: 500;
   font-size: 16px;
+  line-height: 21.28px;
 }
 
 .vj-auth-submit:hover {
