@@ -3,7 +3,8 @@
 > **Ngày thực hiện:** 13/11/2026  
 > **Nguồn đối chiếu:** [https://www.vietjetair.com/vi/](https://www.vietjetair.com/vi/) (Bản live công khai)  
 > **Công cụ đo đạc:** Chrome DevTools Protocol (`window.getComputedStyle`) + Phân tích bundle CSS/JS gốc.  
-> **Trạng thái:** ✅ **Đã hoàn tất toàn bộ các hạng mục chuẩn hóa & vượt qua tất cả các cổng kiểm tra.**
+> **Trạng thái:** ✅ **Đã hoàn tất toàn bộ các hạng mục chuẩn hóa & vượt qua tất cả các cổng kiểm tra.**  
+> **Commit kiểm định:** `effa56e` trên nhánh `cursor/vietjet-ui-parity-polish-2026-11-13`.
 
 ---
 
