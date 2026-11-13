@@ -373,7 +373,7 @@ export default function BaggageSelectionDrawer({
           <button
             type="button"
             onClick={handleConfirm}
-            className="vj-cta disabled:opacity-50 disabled:cursor-not-allowed h-[39px] px-6 rounded-vj font-koho text-sm font-medium uppercase tracking-normal transition-all shadow-sm active:scale-95 cursor-pointer"
+            className="vj-cta disabled:opacity-50 disabled:cursor-not-allowed h-[39px] min-h-[39px] px-6 rounded-vj font-koho text-sm font-medium uppercase tracking-normal transition-all shadow-sm active:scale-95 cursor-pointer"
           >
             Xác nhận
           </button>

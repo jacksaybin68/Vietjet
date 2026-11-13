@@ -336,6 +336,8 @@ export default function SeatSelectionStep({
   // Merge live SSE seat data into local dynamicSeats state
   useEffect(() => {
     if (!liveSeatData) return;
+    const mySession = getSessionId();
+
     setDynamicSeats((prev) => {
       const next = { ...prev };
       for (const seatId of liveSeatData.occupied) {
@@ -344,6 +346,11 @@ export default function SeatSelectionStep({
         }
       }
       for (const lock of liveSeatData.locked) {
+        // A lock held by *this* session is the seat the customer just picked.
+        // Rendering it as "đã đặt" made the seat look unavailable to its own
+        // holder, and `toggleSeat` refused to deselect it (`status ===
+        // 'occupied'`), so the customer could not change their mind.
+        if (lock.sessionId && mySession && lock.sessionId === mySession) continue;
         if (next[lock.seatId] && next[lock.seatId].status !== 'occupied') {
           next[lock.seatId] = { ...next[lock.seatId], status: 'occupied' };
         }
@@ -352,7 +359,7 @@ export default function SeatSelectionStep({
     });
     // Deselect any seat that became occupied remotely
     setSelected((prev) => prev.filter((id) => !liveSeatData.occupied.includes(id)));
-  }, [liveSeatData]);
+  }, [liveSeatData, getSessionId]);
 
   // A child must sit beside an adult; an infant is absent here because it
   // rides on a lap and is filtered out of `seatedPassengers`.

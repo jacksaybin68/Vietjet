@@ -81,7 +81,7 @@ export default function BookingBottomBar({
           form={formId}
           onClick={isSubmit ? undefined : action}
           disabled={isDisabled}
-          className="vj-cta h-[39px] px-6 rounded-vj font-koho text-sm font-medium uppercase tracking-normal transition-all shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
+          className="vj-cta h-[39px] min-h-[39px] px-6 rounded-vj font-koho text-sm font-medium uppercase tracking-normal transition-all shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
         >
           {label}
         </button>
