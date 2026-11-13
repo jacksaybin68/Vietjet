@@ -55,6 +55,34 @@ const ADMIN = { email: 'admin@vietjetair.vn', password: 'admin123' };
 const USER = { email: 'user@vietjetair.vn', password: 'user123' };
 
 /**
+ * Lỗi chỉ có ở DEV SERVER (HMR của Turbopack gọi `hmrRefresh` giữa lúc route
+ * đang biên dịch). Ở production build, các lỗi này không tồn tại — nên khi
+ * cổng nghiệm thu trỏ nhầm vào dev server, chúng phải bị loại khỏi báo cáo
+ * lỗi, còn nếu chạy production mà gặp thì đó là lỗi thật.
+ */
+const DEV_ONLY_ERRORS = [
+  'Router action dispatched before initialization',
+  'hmrRefresh',
+  'Fast Refresh',
+];
+
+/**
+ * Phân biệt dev server và production build. Dev server Next trả 200 cho
+ * `/_next/webpack-hmr` (nó nâng cấp lên WebSocket), production build trả 404
+ * vì không có endpoint đó.
+ */
+async function detectDevServer() {
+  try {
+    const res = await fetch(`${BASE}/_next/webpack-hmr`, {
+      signal: AbortSignal.timeout(5000),
+    });
+    return res.status === 200;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Bộ viewport canonical (khớp mục 2 của kế hoạch đối chiếu). Mọi màn hình được
  * chụp ở cả ba: `desktop` 1440×900, `tablet` 768×1024, `mobile` 390×844.
  * `tablet` trước đây chưa từng được kiểm tra, dù đây là breakpoint dễ vỡ nhất
@@ -398,6 +426,9 @@ const PROBE = `(() => {
 async function main() {
   rmSync(SHOTS_DIR, { recursive: true, force: true });
   mkdirSync(SHOTS_DIR, { recursive: true });
+  // Cổng nghiệm thu phải là production build (xem AGENTS.md). Ghi nhận sớm
+  // để báo cáo nói rõ lượt chạy này đang đo bản dev hay bản build.
+  const DEV_SERVER = await detectDevServer();
   // Hồ sơ Chrome dùng lại từ lần trước vẫn giữ cookie phiên, và `/dang-nhap` của
   // một phiên admin bị proxy đưa thẳng sang `/quan-tri` — nên ảnh "trang đăng
   // nhập" hoá ra là console. Mỗi lần chạy phải là khách mới.
@@ -479,6 +510,14 @@ async function main() {
   await captureAll('05-lam-thu-tuc', `${BASE}/lam-thu-tuc`);
   await captureAll('06-chuyen-bay-cua-toi', `${BASE}/chuyen-bay-cua-toi`);
   await captureAll('07-dich-vu-hanh-ly', `${BASE}/dich-vu?service=baggage`);
+  // Sáu panel dịch vụ dùng CHUNG một route (`/dich-vu`) với `?service=<id>` mở
+  // đúng panel — mỗi panel là một bề mặt layout riêng (ảnh, tiêu đề, bảng
+  // giá, nút CTA), nên chỉ chụp `baggage` là chỉ kiểm tra 1/6 bề mặt đó.
+  // `src/app/dich-vu/page.tsx` định nghĩa đúng sáu id: baggage, meal, seat,
+  // insurance, priority, lounge — thêm id vào đây mà không thêm route mới.
+  for (const service of ['meal', 'seat', 'insurance', 'priority', 'lounge']) {
+    await captureAll(`07b-dich-vu-${service}`, `${BASE}/dich-vu?service=${service}`);
+  }
   await captureAll('08-gioi-thieu', `${BASE}/gioi-thieu`);
   await captureAll('09-hoi-dap', `${BASE}/hoi-dap`);
   await captureAll('10-lien-he', `${BASE}/lien-he`);
@@ -492,9 +531,15 @@ async function main() {
     const { cdp, targetId } = await attach();
     try {
       await goto(cdp, `${BASE}/dang-nhap`);
-      return await evaluate(
-        cdp,
-        `(async () => {
+      /* Một lần `fetch` bị "Failed to fetch" KHÔNG được phép giết cả lượt
+         chạy: 40+ màn hình đã chụp xong sẽ mất trắng chỉ vì một request bị
+         đóng giữa chừng (dev server đang biên dịch route, connection bị
+         reset). Thử lại vài lần, rồi báo cáo thay vì ném exception. */
+      let last = null;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        last = await evaluate(
+          cdp,
+          `(async () => {
         /* Chrome mới tạo target ở about:blank — document.cookie trên nguồn
            không phải http(s) sẽ ném SecurityError. Bọc trong try/catch để
            probe trả về null thay vì làm hỏng cả lượt chạy. */
@@ -504,16 +549,39 @@ async function main() {
         } catch {
           csrf = null;
         }
-        const res = await fetch('/api/xac-thuc/dang-nhap', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json', 'x-csrf-token': csrf || '' },
-          body: JSON.stringify({ email: ${JSON.stringify(who.email)}, password: ${JSON.stringify(who.password)} }),
-        });
-        const body = await res.json().catch(() => ({}));
-        return { status: res.status, role: body.user && body.user.role };
+        /* Thiếu cookie CSRF (proxy chỉ seed nó cho phiên cookieless, và
+           cookie có thể bị chặn theo chính sách trình duyệt) thì mời nó
+           trước — nếu không, mọi request mutation đều trả 403 và bài
+           đăng nhập hỏng với lý do khó đoán. */
+        if (!csrf) {
+          try {
+            await fetch('/api/csrf', { credentials: 'same-origin' });
+            csrf = (document.cookie.match(/csrf_token=([^;]+)/) || [])[1] || null;
+          } catch {
+            csrf = null;
+          }
+        }
+        try {
+          const res = await fetch('/api/xac-thuc/dang-nhap', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'content-type': 'application/json', 'x-csrf-token': csrf || '' },
+            body: JSON.stringify({ email: ${JSON.stringify(who.email)}, password: ${JSON.stringify(who.password)} }),
+          });
+          const body = await res.json().catch(() => ({}));
+          return { ok: true, status: res.status, role: body.user && body.user.role };
+        } catch (e) {
+          /* Lỗi mức mạng (fetch bị đóng, DNS, TLS) — trả về thay vì ném để
+             vòng thử lại có cơ hội thành công. */
+          return { ok: false, error: e && e.message ? e.message : String(e), csrf: !!csrf };
+        }
       })()`,
-        90000
-      );
+          90000
+        );
+        if (last && last.ok) return last;
+        await sleep(1500 * attempt);
+      }
+      return last || { ok: false, error: 'không đăng nhập được' };
     } finally {
       await closeTarget(targetId);
     }
@@ -666,14 +734,26 @@ async function main() {
   writeFileSync(
     path.join(SHOTS_DIR, 'report.json'),
     JSON.stringify(
-      { base: BASE, results, widget, skip, logins: { user: userLogin, admin: adminLogin } },
+      {
+        base: BASE,
+        devServer: DEV_SERVER,
+        results,
+        widget,
+        skip,
+        logins: { user: userLogin, admin: adminLogin },
+      },
       null,
       2
     )
   );
 
   console.log('\n=== KIỂM TRA GIAO DIỆN ===');
-  console.log(`Server: ${BASE}  ·  ảnh: ${SHOTS_DIR}\n`);
+  console.log(`Server: ${BASE}  ·  ảnh: ${SHOTS_DIR}`);
+  console.log(
+    DEV_SERVER
+      ? '⚠️  Đang chạy trên DEV SERVER — cổng này KHÔNG phải cổng nghiệm thu (xem AGENTS.md)'
+      : '✓  Production build\n'
+  );
 
   let failed = 0;
 
@@ -687,8 +767,30 @@ async function main() {
     skipFlags.push(`Tab kế tiếp không nằm trong #main-content (${skip.nextTabTag})`);
   if (skipFlags.length) failed += 1;
 
+  // Đăng nhập hỏng làm 3 màn hình phía sau (tài khoản, thanh toán, quản trị)
+  // chụp sai trạng thái — nên nó phải là một lỗi của cổng, không phải chỉ là
+  // một dòng thông tin trong báo cáo.
+  for (const [who, res] of [
+    ['user', userLogin],
+    ['admin', adminLogin],
+  ]) {
+    if (!res || !res.ok) {
+      failed += 1;
+      console.error(
+        `⚠️  Đăng nhập ${who} thất bại: ${res ? res.error || res.status : 'không có phản hồi'}`
+      );
+    }
+  }
+
   for (const r of results) {
     const flags = [];
+    /* Lỗi do HMR của dev server ("Router action dispatched before
+       initialization" — đến từ `hmrRefresh`) không tồn tại trong production
+       build. Nếu chạy nhầm cổng dev, báo lỗi này là báo động giả; nếu chạy
+       production mà vẫn thấy thì đó là lỗi thật. */
+    const pageErrors = DEV_SERVER
+      ? r.pageErrors.filter((e) => !DEV_ONLY_ERRORS.some((p) => e.includes(p)))
+      : r.pageErrors;
     if (r.probe.overflowX > 1) flags.push(`TRÀN NGANG ${r.probe.overflowX}px`);
     if (r.probe.overlappedBoxes.length)
       flags.push(`BOX TRÙNG: ${r.probe.overlappedBoxes.join(', ')}`);
@@ -700,7 +802,7 @@ async function main() {
     if (r.probe.mainAfterHeader === false)
       flags.push('#main-content KHÔNG nằm sau <header> — skip link không bỏ qua được nav');
     if (r.consoleErrors.length) flags.push(`console.error x${r.consoleErrors.length}`);
-    if (r.pageErrors.length) flags.push(`JS exception x${r.pageErrors.length}`);
+    if (pageErrors.length) flags.push(`JS exception x${pageErrors.length}`);
     if (r.httpErrors.length) flags.push(`HTTP lỗi x${r.httpErrors.length}`);
     if (!r.stable) flags.push('trang chưa ổn định');
     if (r.probe.bodyText < 200) flags.push('nội dung quá ngắn');
@@ -711,7 +813,7 @@ async function main() {
         `| text=${r.probe.bodyText} imgs=${r.probe.images} | ${r.file}` +
         (flags.length ? `\n      → ${flags.join(' · ')}` : '')
     );
-    for (const e of r.pageErrors.slice(0, 2)) console.log(`      JS: ${e.split('\n')[0]}`);
+    for (const e of pageErrors.slice(0, 2)) console.log(`      JS: ${e.split('\n')[0]}`);
     for (const e of r.consoleErrors.slice(0, 2)) console.log(`      console: ${e}`);
     for (const e of r.httpErrors.slice(0, 2)) console.log(`      http: ${e}`);
   }
