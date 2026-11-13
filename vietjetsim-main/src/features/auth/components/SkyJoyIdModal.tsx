@@ -143,6 +143,8 @@ export default function SkyJoyIdModal({
     setMode(initialMode);
     setStep('phone');
     setError('');
+    // Đăng ký chỉ dùng số điện thoại → luôn quay về tab số điện thoại.
+    setIdentifierMode('phone');
   }, [initialMode]);
 
   useEffect(() => {
@@ -403,37 +405,41 @@ export default function SkyJoyIdModal({
         {step === 'phone' && (
           <>
             {/* Chuyển kiểu định danh — mặc định số điện thoại (khớp site thật),
-                có thêm đường vào bằng email / mã hội viên SkyJoy. */}
-            <div
-              role="tablist"
-              aria-label="Kiểu định danh đăng nhập"
-              className="mb-4 flex gap-1 rounded-lg bg-[var(--surface-2)] p-1"
-            >
-              {(
-                [
-                  { id: 'phone', label: 'Số điện thoại' },
-                  { id: 'account', label: 'Email / Mã hội viên' },
-                ] as const
-              ).map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={identifierMode === tab.id}
-                  onClick={() => {
-                    setIdentifierMode(tab.id);
-                    setError('');
-                  }}
-                  className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-sm font-semibold transition ${
-                    identifierMode === tab.id
-                      ? 'bg-white text-[var(--vj-text)] shadow-sm'
-                      : 'text-[var(--vj-text-gray)] hover:text-[var(--vj-text)]'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
+                có thêm đường vào bằng email / mã hội viên SkyJoy.
+                Chỉ hiện ở chế độ đăng nhập: đăng ký bắt buộc dùng số điện thoại
+                (OTP đăng ký được gửi về số này). */}
+            {mode === 'login' ? (
+              <div
+                role="tablist"
+                aria-label="Kiểu định danh đăng nhập"
+                className="mb-4 flex gap-1 rounded-lg bg-[var(--surface-2)] p-1"
+              >
+                {(
+                  [
+                    { id: 'phone', label: 'Số điện thoại' },
+                    { id: 'account', label: 'Email / Mã hội viên' },
+                  ] as const
+                ).map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={identifierMode === tab.id}
+                    onClick={() => {
+                      setIdentifierMode(tab.id);
+                      setError('');
+                    }}
+                    className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-sm font-semibold transition ${
+                      identifierMode === tab.id
+                        ? 'bg-white text-[var(--vj-text)] shadow-sm'
+                        : 'text-[var(--vj-text-gray)] hover:text-[var(--vj-text)]'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
 
             {identifierMode === 'phone' ? (
               <>
@@ -896,6 +902,7 @@ export default function SkyJoyIdModal({
                 onClick={() => {
                   setMode('login');
                   setStep('phone');
+                  setIdentifierMode('phone');
                   setError('');
                 }}
                 className="font-bold text-[var(--vj-link-blue)] underline"
@@ -911,6 +918,7 @@ export default function SkyJoyIdModal({
                 onClick={() => {
                   setMode('register');
                   setStep('phone');
+                  setIdentifierMode('phone');
                   setError('');
                 }}
                 className="font-bold text-[var(--vj-link-blue)] underline"
