@@ -393,24 +393,21 @@ export default function SkyIdAuthFlow({
 
   /** Danh sách mã quốc gia — dùng chung cho bước số điện thoại và bước mật khẩu. */
   const countryMenu = (
-    <div className="relative">
+    <div className="vj-skyid-phone-menu">
       <button
         type="button"
         onClick={() => setCountryOpen((open) => !open)}
         aria-expanded={countryOpen}
         aria-haspopup="listbox"
         aria-label="Chọn mã quốc gia"
-        className="vj-skyid-phone-code"
       >
-        <span aria-hidden="true">{country.flag}</span>
-        <span>{country.dial}</span>
         <HiOutlineChevronDown aria-hidden="true" className="text-xs" />
       </button>
       {countryOpen ? (
         <ul
           role="listbox"
           aria-label="Mã quốc gia"
-          className="absolute left-0 top-[calc(100%+4px)] z-20 w-44 overflow-hidden rounded-md border border-[var(--vj-skyid-border)] bg-white py-1 shadow-lg"
+          className="absolute left-0 top-[calc(100%+4px)] z-40 w-44 overflow-hidden rounded-md border border-[var(--vj-skyid-border)] bg-white py-1 shadow-lg"
         >
           {COUNTRY_CODES.map((c) => (
             <li key={c.code}>
