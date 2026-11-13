@@ -4,7 +4,8 @@
 > **Nguồn đối chiếu:** [https://www.vietjetair.com/vi/](https://www.vietjetair.com/vi/) (Bản live công khai)  
 > **Công cụ đo đạc:** Chrome DevTools Protocol (`window.getComputedStyle`) + Phân tích bundle CSS/JS gốc.  
 > **Trạng thái:** ✅ **Đã hoàn tất toàn bộ các hạng mục chuẩn hóa & vượt qua tất cả các cổng kiểm tra.**  
-> **Commit kiểm định:** `effa56e` trên nhánh `cursor/vietjet-ui-parity-polish-2026-11-13`.
+> **Commit kiểm định:** `d260f09` trên nhánh `cursor/vietjet-ui-parity-polish-2026-11-13`
+> (commit nội dung giao diện: `effa56e`).
 
 ---
 
@@ -127,21 +128,35 @@ flowchart LR
 ```
 
 ### 3.3 Header 4 Tầng ([Header.tsx](../../vietjetsim-main/src/shared/components/navigation/Header.tsx))
-- **Tầng 1:** Announcement Bar (`h-[50px] bg-vj-announce-bg max-w-[1200px]`).
-- **Tầng 2:** Utility Row (`h-[60px] max-w-[1200px]`, Đăng ký / Đăng nhập `text-base font-bold`).
-- **Tầng 3:** Menu điều hướng chính (`h-[33px] max-w-[1200px]`, font 14px uppercase).
-- **Tầng 4:** Quick-rail 9 dịch vụ (`h-[35px] max-w-[1200px]`, icon 25×25px, font 16px/500, active `#F7C61A`).
+Số đo thật trên site (13/11/2026, viewport 1440×900):
+
+| Tầng | Cao | Vị trí | Ghi chú |
+|---|---|---|---|
+| **1. Announcement Bar** | `50px` | y=0..50 | Nền `#FDFDFD`, container 1200px (`x=120..1320`) |
+| **2. Scrim overlay** | `118px` | y=50..168 | `z-index 1300`, `padding-top 10px`, gradient `linear-gradient(rgba(0,0,0,.5) 0%, rgba(0,0,0,.094) 100%)` |
+| **2a. Hàng logo + tiện ích** | `68px` | y=60..128 | Logo `265×46px` tại `x=120, y=71`; cột phải rộng 935px |
+| **2b. Hàng tiện ích** | `20px` | y=60 | "Hỗ trợ" (icon 20px + 16px/700), "Đăng ký \| Đăng nhập" 16px/700, nút ngôn ngữ viền trắng 1px bo 3px |
+| **2c. Menu chính** | `33px` | y=95..128 | gap 5px, chữ 16px/600 uppercase, active gạch dưới `#F7C61A` |
+| **3. Quick-rail** | `35px` | y=133..168 | 9 dịch vụ, icon 25×25px, chữ 16px/700, gap 24px, padding-left 40px, active `#F7C61A` |
+
+Class dùng trong mã: `.vj-header-scrim`, `.vj-nav-bar` / `.vj-nav-bar-item`, `.vj-quick-rail` / `.vj-quick-rail-wrap`.
 
 ### 3.4 Hero & Booking Widget ([HeroBookingWidget.tsx](../../vietjetsim-main/src/app/trang-chu/components/HeroBookingWidget.tsx))
-- Khung panel: `w-[380px] max-w-[380px]`.
-- 3 tab dịch vụ: `min-h-[52px] rounded-t-vj-tab` (bo đỉnh `5px 5px 0 0`).
-- Thân form: `bg-gradient-vj-panel rounded-vj-panel-bottom` (cao 410px).
-- Trường nhập liệu: `min-h-[48px] rounded-vj` (bo góc 10px).
-- Nút CTA "Tìm chuyến bay": `w-[200px] h-[39px] .vj-cta--hero` bo 10px.
+| Phần tử | Số đo thật |
+|---|---|
+| Khung panel | `380px`, neo mép phải container 1200px (`x=940..1320`), đỉnh `y=214` |
+| 3 tab dịch vụ | cao `52px`, rộng `201 / 103 / 76px`, bo đỉnh `5px 5px 0 0`, chữ JambonoMedium 14px/500 |
+| Thân form | cao `410px`, gradient `30.3deg`, bo đáy `0 0 5px 5px` |
+| Hàng loại hành trình | cao `58px`, padding `16.5px 15px`, radio `18×18px`, tiền tệ 17px/700 |
+| Ô nhập | cao `48px`, bo góc 10px, rộng 342px; nhãn sân bay 18px/600, giá trị 17px/600; nhãn "Hành khách"/"Mã khuyến mại" 12px/600 |
+| Cột ngày | rộng `121px`, chữ 18px/500; nút đảo chiều `24×28px` tại `left: -19px` |
+| Công tắc "Tìm vé rẻ nhất" | `42×42px`, tiêu đề H3 18px/700 trắng |
+| Nút CTA "Tìm chuyến bay" | `200×39px`, gradient `26.73deg`, bo góc 10px |
 
 ### 3.5 Footer ([Footer.tsx](../../vietjetsim-main/src/shared/components/navigation/Footer.tsx))
-- Nền trắng `bg-white` kết hợp họa tiết `url('/images/footer-pattern.svg')`.
-- Giới hạn `max-w-[1200px]`, bố cục 5 cột `lg:grid-cols-5`.
+- Nền trắng `bg-white` kết hợp họa tiết `url('/images/footer-pattern.svg')` (300px cover).
+- Container `max-w-[1200px]`, `padding-top 60px`, bố cục 5 cột tại `x = 120 / 367 / 613 / 860 / 1106`.
+- Tiêu đề cột: `18px / 700 / #333333`; liên kết: `14px / 500 / #333333`, line-height 22.4px.
 
 ---
 
@@ -155,20 +170,42 @@ stateDiagram-v2
     TailwindLint --> CSSDebt: npm run lint:css-debt
     CSSDebt --> Build: npm run build
     Build --> SmokeTest: npm run test:smoke
-    SmokeTest --> Complete: Production Ready (Port 4028)
+    SmokeTest --> UnitTest: npx vitest run
+    UnitTest --> Complete: Production Ready (Port 4028)
 ```
 
 | Cổng Kiểm Tra | Lệnh Kiểm Thử | Tiêu Chuẩn Đạt | Kết Quả Thực Tế | Trạng Thái |
 |---|---|---|---|:---:|
 | **1. TypeScript** | `npm run type-check` | Không có lỗi kiểu dữ liệu (`tsc --noEmit`) | Hoàn thành sạch sẽ (Exit Code 0) | ✅ **PASS** |
 | **2. ESLint & Prettier**| `npx eslint ...` | Không có lỗi cú pháp hoặc vi phạm lint | 0 lỗi sau khi tự động fix format | ✅ **PASS** |
-| **3. Tailwind Classes**| `npm run lint:tailwind-classes` | Không có class dính typo hoặc không tồn tại | 2316 token quét: 0 class hỏng | ✅ **PASS** |
+| **3. Tailwind Classes**| `npm run lint:tailwind-classes` | Không có class dính typo hoặc không tồn tại | 2335 token quét: 0 class hỏng | ✅ **PASS** |
 | **4. Ratchet Nợ CSS** | `npm run lint:css-debt` | Nợ CSS không tăng so với baseline | fontSize: 107, color: 79 (Bằng baseline) | ✅ **PASS** |
 | **5. Production Build** | `npm run build` | Biên dịch toàn bộ 90 routes App Router | Thành công 90/90 static/dynamic routes | ✅ **PASS** |
 | **6. Smoke Test Live** | `npm run test:smoke` | Server phản hồi 200/307, guard session, CSRF | 100% Passed (12 trang + public APIs + CSRF) | ✅ **PASS** |
-| **7. Tuân Thủ Bản Quyền**| Rà soát Network & Assets | Không hotlink, không copy CSS/asset trực tiếp | 0 hotlink tới vietjetair.com; chỉ复刻 số đo | ✅ **PASS** |
+| **7. Unit Test** | `npx vitest run` | 110 file test, 1001 test case | 110/110 file PASS, 1001/1001 test PASS | ✅ **PASS** |
+| **8. Tuân Thủ Bản Quyền**| Rà soát Network & Assets | Không hotlink, không copy CSS/asset trực tiếp | 0 hotlink tới vietjetair.com; chỉ复刻 số đo | ✅ **PASS** |
+
+### 4.1 Lỗi phát hiện & đã sửa trong quá trình nghiệm thu
+
+| # | Vấn đề | Nguyên nhân | Cách sửa |
+|---|---|---|---|
+| 1 | 8 unit test fail (`hero-banner`, `flight-date-picker`, `airport-picker`) | `HeroSection` render **hai** bản `HeroBookingWidget` (một cho desktop, một cho mobile) → form trùng `id="hero-booking-form"`, mọi truy vấn theo vai trò báo "nhiều phần tử khớp" | Chỉ render **một** bản, đổi cách đặt theo breakpoint (`lg:absolute lg:top-[164px]` cho desktop, `relative` cho mobile) |
+| 2 | Popover lịch 630px bị cắt mất | `<section>` của hero có `overflow-hidden` | Bỏ `overflow-hidden` ở `<section>`; ảnh nền vẫn được cắt riêng trong lớp bọc của nó |
+| 3 | Test cũ kỳ vọng nhãn "Từ"/"Đến" và nút bấm loại hành trình | Site thật dùng nhãn **"Điểm khởi hành"/"Điểm đến"** (18px/600) và **radio 18×18px** | Cập nhật test theo số đo site thật ngày 13/11/2026 |
+| 4 | Nợ CSS tăng +11 `text-[Npx]` | Widget dùng cỡ chữ tuỳ ý (17/18/21/24/26px) | Chuyển sang token có sẵn (`text-lg2` 17px, `text-lg` 18px, `text-xl2` 21px, `text-2xl` 24px, `text-xl5` 26px) → nợ CSS về đúng baseline |
+| 5 | `AirportPicker` biến thể `flush` không còn viền/bo góc riêng | Chuyển `<label>` → `<button>` (toàn bộ control là vùng bấm mở danh sách) | Test cập nhật theo markup mới; hành vi giữ nguyên |
+
+### 4.2 Số đo bổ sung xác nhận trong lượt nghiệm thu
+
+- Panel đặt vé: `w-[380px]`, đỉnh tại `y=214` (164px tính từ đỉnh hero ở y=50), neo mép phải container 1200px (`x=940..1320`).
+- Chấm slider: 20×20px, active `#EC2029`, inactive `#FFFFFF`.
+- Bottom nav mobile: 63px, gradient `linear-gradient(rgba(0,0,0,0.8) 4.03%, rgba(0,0,0,0.153) 216.13%)`.
+- Nhãn sân bay: icon 20×19px tại mép hộp + 14px; nhãn 18px/600 tại mép hộp + 48px; giá trị 17px/600.
+- Cột ngày: 121px, chữ 18px/500; nút đảo chiều 24×28px đè tại `left: -19px`.
 
 ---
 
 ## 5. Kết Luận
 Giao diện đã đạt độ chuẩn xác hình học và màu sắc tuyệt đối so với bản live của **VietjetAir.com**, đồng thời giữ toàn vẹn hệ thống backend/database/API, không can thiệp vào ranh giới thanh toán theo đúng nguyên tắc dự án.
+
+Lượt nghiệm thu cuối đã vượt qua **8/8 cổng kiểm tra**: type-check, ESLint/Prettier, lint Tailwind classes, ratchet nợ CSS, production build, smoke test live, unit test (1001/1001) và rà soát bản quyền. Năm lỗi thật phát hiện trong quá trình nghiệm thu (mục 4.1) đều đã được sửa và kèm theo test tương ứng.
