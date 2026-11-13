@@ -1,0 +1,5 @@
+{
+  "route": "booking-search",
+  "viewport": "mobile-390",
+  "error": "Navigation timeout of 120000 ms exceeded"
+}

@@ -8,7 +8,7 @@ export default function Loading() {
     <div className="min-h-screen bg-white overflow-x-hidden">
       {/* Header skeleton */}
       <div className="bg-white shadow-sm border-b border-stone-100">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-[1200px] mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-stone-200 animate-pulse" />
             <div className="w-24 h-4 bg-stone-100 rounded animate-pulse" />

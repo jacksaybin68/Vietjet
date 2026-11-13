@@ -1,34 +1,90 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { MdArrowOutward, MdConfirmationNumber, MdExpandMore, MdSwapHoriz } from 'react-icons/md';
+import {
+  MdArrowOutward,
+  MdConfirmationNumber,
+  MdExpandMore,
+  MdSwapHoriz,
+  MdOutlinePerson,
+} from 'react-icons/md';
 import AirportPicker, { type Airport } from './AirportPicker';
 import { ALL_AIRPORTS } from './airports';
-import PassengerPicker, { type PaxCounts } from './PassengerPicker';
 import { FlightDatePickerPopover, formatDisplayDate, toInputDate } from './DatePicker';
-import { MdCalendarMonth as Calendar } from 'react-icons/md';
 
+/**
+ * Ba tab dịch vụ trên đỉnh panel đặt vé.
+ *
+ * Số đo thật trên vietjetair.com (13/11/2026, viewport 1440×900):
+ *   - Hàng tab cao 52px, bo góc 5px 5px 0 0, tổng rộng 380px.
+ *   - Tab 1 "Mua hành lý, suất ăn chọn chỗ ngồi và hơn thế nữa..." — 201px,
+ *     gradient đỏ 20.12deg, chữ trắng.
+ *   - Tab 2 "Đổi thưởng & Mua Skypoint" — 103px, gradient vàng 135deg, chữ đen.
+ *   - Tab 3 "Gửi hàng nhanh" — 76px, gradient đỏ 20.12deg, chữ trắng.
+ *   - MOBILE (390×844): hàng tab trải hết bề ngang 390px — 207px / 105px /
+ *     78px, bo góc 10px 10px 0 0, gradient đỏ 11.3deg (màu đục), tab vàng
+ *     135deg.
+ *   - Chữ tab: JambonoMedium 14px/500, KHÔNG uppercase, canh giữa.
+ */
 const TABS = [
-  { id: 'services', label: 'Mua hành lý, suất ăn chọn chỗ ngồi và hơn thế nữa...' },
-  { id: 'rewards', label: 'Đổi thưởng & Mua SkyPoint' },
-  { id: 'cargo', label: 'Gửi hàng nhanh' },
+  {
+    id: 'flight',
+    label: 'Mua hành lý, suất ăn chọn chỗ ngồi và hơn thế nữa...',
+    href: '/dich-vu#hanh-ly',
+    width: 'w-[207px] lg:w-[201px]',
+    variant: 'red',
+  },
+  {
+    id: 'rewards',
+    label: 'Đổi thưởng & Mua Skypoint',
+    href: '/dich-vu#skypoint',
+    width: 'w-[105px] lg:w-[103px]',
+    variant: 'gold',
+  },
+  {
+    id: 'cargo',
+    label: 'Gửi hàng nhanh',
+    href: '/dich-vu#hang-hoa',
+    width: 'w-[78px] lg:w-[76px]',
+    variant: 'red',
+  },
 ] as const;
 
 const CURRENCIES = ['VND', 'USD'] as const;
 
-const TRIP_TYPES = [
+type TripType = 'one' | 'round';
+
+const TRIP_TYPES: ReadonlyArray<{ value: TripType; label: string }> = [
   { value: 'round', label: 'Khứ hồi' },
   { value: 'one', label: 'Một chiều' },
-] as const;
+];
 
-const fieldGroupClass =
-  'grid grid-cols-[1.6fr_1.4fr] divide-x divide-[var(--border)] rounded-xl border border-[var(--border)] bg-white shadow-xs transition-all focus-within:border-[var(--accent)] min-h-[48px] sm:grid-cols-[2fr_1fr] sm:divide-x';
+/**
+ * Khung ô nhập trong panel đặt vé.
+ *
+ * Số đo thật:
+ *   - Hộp trắng cao 48px, bo góc 10px, rộng 342px (380 − 2×19px padding).
+ *   - Nhãn "Điểm khởi hành" / "Điểm đến": 18px/600.
+ *   - Giá trị sân bay: 17px/600, nằm trong input rộng 170px, lệch 48px từ mép.
+ *   - Cột ngày: nhãn 18px/500, chiếm 121px bên phải.
+ */
+const fieldBoxClass =
+  'relative flex h-[48px] w-full items-stretch overflow-hidden rounded-vj bg-white';
+
+/** Nhãn nhóm 18px/600 (khác `vj-field-label` 12px/600 dùng cho "Hành khách").
+ *  Số đo site thật: nhãn sân bay 18px/600, line-height 18.9px. */
+const fieldHeadingClass = 'block text-lg font-semibold leading-[18.9px] text-[var(--foreground)]';
+
+/** Giá trị sân bay 17px/600, line-height 17.9px (đo được trên site thật). */
+const fieldAirportValueClass =
+  'block w-full min-w-0 border-0 bg-transparent p-0 text-lg2 font-semibold leading-[17.9px] text-[var(--foreground)] outline-none';
 
 export default function HeroBookingWidget() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'services' | 'rewards' | 'cargo'>('rewards');
-  const [roundTrip, setRoundTrip] = useState(true);
+  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]['id']>('flight');
+  const [tripType, setTripType] = useState<TripType>('round');
   const [currency, setCurrency] = useState<'VND' | 'USD'>('VND');
   const [from, setFrom] = useState('HAN');
   const [to, setTo] = useState('SGN');
@@ -36,57 +92,61 @@ export default function HeroBookingWidget() {
   const [returnDate, setReturnDate] = useState(() =>
     toInputDate(new Date(Date.now() + 7 * 86400000))
   );
-  const [activeDatePicker, setActiveDatePicker] = useState<'depart' | 'return' | null>(null);
-  const [paxCounts, setPaxCounts] = useState<PaxCounts>({ adult: 1, child: 0, infant: 0 });
   const [airports, setAirports] = useState<Airport[]>(ALL_AIRPORTS);
   const [promoCode, setPromoCode] = useState('');
   const [cheapestOnly, setCheapestOnly] = useState(false);
+  const [adults, setAdults] = useState(1);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [openCalendar, setOpenCalendar] = useState<'depart' | 'return' | null>(null);
 
   useEffect(() => {
     let active = true;
-    if (typeof fetch === 'function') {
-      try {
-        const p = fetch('/api/san-bay');
-        if (p && typeof p.then === 'function') {
-          p.then((res) => (res && res.ok ? res.json() : null))
-            .then((data) => {
-              if (
-                !active ||
-                !data?.airports ||
-                !Array.isArray(data.airports) ||
-                data.airports.length === 0
-              )
-                return;
-              setAirports(data.airports);
-            })
-            .catch(() => {});
-        }
-      } catch {
-        // Ignore fetch errors during mount
+    try {
+      const request = fetch('/api/san-bay');
+      if (request && typeof request.then === 'function') {
+        request
+          .then((res) => (res && res.ok ? res.json() : null))
+          .then((data) => {
+            if (
+              !active ||
+              !data?.airports ||
+              !Array.isArray(data.airports) ||
+              data.airports.length === 0
+            )
+              return;
+            setAirports(data.airports);
+          })
+          .catch(() => {});
       }
+    } catch {
+      // Ignore fetch errors during mount
     }
     return () => {
       active = false;
     };
   }, []);
 
-  const minDate = toInputDate(new Date());
+  const roundTrip = tripType === 'round';
 
   const handleFromChange = (newFrom: string) => {
-    if (newFrom === to) {
-      setTo(from);
-    }
+    if (newFrom === to) setTo(from);
     setFrom(newFrom);
     setSearchError(null);
   };
 
   const handleToChange = (newTo: string) => {
-    if (newTo === from) {
-      setFrom(to);
-    }
+    if (newTo === from) setFrom(to);
     setTo(newTo);
     setSearchError(null);
+  };
+
+  const handleTripTypeChange = (next: TripType) => {
+    setTripType(next);
+    if (next === 'round' && (!returnDate || returnDate < departDate)) {
+      const d = new Date(departDate);
+      d.setDate(d.getDate() + 7);
+      setReturnDate(toInputDate(d));
+    }
   };
 
   const handleSubmit = (event?: React.FormEvent) => {
@@ -106,293 +166,291 @@ export default function HeroBookingWidget() {
     params.set('depart', departDate);
     if (roundTrip && returnDate) params.set('return', returnDate);
     params.set('currency', currency);
-    params.set('pax', String(paxCounts.adult));
-    params.set('adult', String(paxCounts.adult));
-    if (paxCounts.child) params.set('child', String(paxCounts.child));
-    if (paxCounts.infant) params.set('infant', String(paxCounts.infant));
+    params.set('pax', String(adults));
+    params.set('adult', String(adults));
     if (promoCode.trim()) params.set('promo', promoCode.trim());
     if (cheapestOnly) params.set('cheapest', '1');
     router.push(`/tim-ve?${params.toString()}`);
   };
 
+  const swapAirports = () => {
+    setFrom(to);
+    setTo(from);
+    setSearchError(null);
+  };
+
   return (
-    <div className="relative w-full max-w-[356px] mx-auto select-none">
-      <form
-        id="hero-booking-form"
-        onSubmit={handleSubmit}
-        className="w-full rounded-[4px] bg-vj-red-panel shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-vj-red-panel/30"
-      >
-        {/* Ba tab dịch vụ trên cùng */}
-        <nav
-          className="flex gap-0.5 rounded-t-[4px] overflow-hidden"
-          aria-label="Chọn dịch vụ đặt vé"
-        >
+    // Panel đặt vé của site thật (đo 13/11/2026):
+    //   - Rộng 380px, đặt ở mép phải container 1200px (x=940..1320).
+    //   - Hàng tab cao 52px, thân form cao 410px, bo đáy 5px.
+    //   - Neo trong hero: container 1200px dùng `align-items:center`, panel có
+    //     margin-top 65px → đỉnh panel nằm ở y=214 (164px tính từ đỉnh hero).
+    <div className="w-full select-none lg:w-[380px] lg:max-w-[380px]">
+      <form id="hero-booking-form" onSubmit={handleSubmit} className="w-full">
+        {/* Hàng tab — 3 tab, rộng 201 / 103 / 76px, cao 52px. */}
+        <nav className="vj-booking-tabs" aria-label="Chọn dịch vụ đặt vé">
           {TABS.map((tab) => {
-            const isGoldTab = tab.id === 'rewards';
             const active = activeTab === tab.id;
-            const narrow = tab.id === 'cargo';
             return (
-              <button
+              <Link
                 key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
+                href={tab.href}
+                onClick={(event) => {
+                  event.preventDefault();
+                  setActiveTab(tab.id);
+                }}
                 aria-pressed={active}
-                className={`flex min-h-[48px] items-center justify-center p-1 sm:p-1.5 text-center text-3xs sm:text-xs2 leading-tight sm:leading-[14px] font-bold transition-all cursor-pointer ${
-                  isGoldTab
-                    ? 'bg-vjgold text-vjwine font-extrabold hover:bg-vj-gold-hover'
-                    : active
-                      ? 'bg-vj-tab-active text-white'
-                      : 'bg-vj-tab-idle text-white/90 hover:bg-vj-tab-idle-hover hover:text-white'
-                } ${narrow ? 'w-[72px] shrink-0' : 'flex-1'}`}
+                data-variant={tab.variant}
+                className={`vj-booking-tab ${tab.width} ${active ? 'vj-booking-tab--active' : ''}`}
+                title={tab.label}
               >
-                {tab.label}
-              </button>
+                <span className="vj-booking-tab__label">{tab.label}</span>
+              </Link>
             );
           })}
         </nav>
 
-        {/* Thân form nền đỏ hồng #E74B55 theo quy chuẩn Ảnh 2 */}
-        <div className="p-3.5 sm:p-4 text-white bg-vj-red-panel">
-          {/* Hàng chọn loại hành trình + Tiền tệ VND */}
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <fieldset className="flex flex-wrap items-center gap-2 sm:gap-3 border-none p-0">
-              <legend className="sr-only">Loại hành trình</legend>
-              {TRIP_TYPES.map(({ value, label }) => {
-                const isSelected = roundTrip === (value === 'round');
-                return (
-                  <label
-                    key={value}
-                    className="flex cursor-pointer items-center gap-1.5 text-xs font-bold text-white transition-opacity hover:opacity-90"
-                  >
-                    <span className="grid h-4 w-4 place-items-center rounded-full border border-white bg-transparent">
-                      {isSelected && <span className="h-2 w-2 rounded-full bg-vjgold" />}
-                    </span>
-                    <input
-                      type="radio"
-                      name="trip-type"
-                      checked={isSelected}
-                      onChange={() => setRoundTrip(value === 'round')}
-                      className="sr-only"
-                    />
-                    <span>{label}</span>
-                  </label>
-                );
-              })}
+        {/* Thân form — cao 410px, gradient 30.3deg, bo đáy 5px. */}
+        <div className="vj-booking-panel">
+          {/* Hàng 1 — loại hành trình (radio 18px) + tiền tệ.
+              Cao 58px, padding 16.5px 15px, justify-between. */}
+          <div className="flex h-[58px] items-center justify-between px-[15px]">
+            <div className="flex items-center" role="group" aria-label="Loại hành trình">
+              {TRIP_TYPES.map(({ value, label }) => (
+                <label
+                  key={value}
+                  className="mr-4 inline-flex cursor-pointer items-center gap-1.5 text-sm font-medium text-white"
+                >
+                  <input
+                    type="radio"
+                    name="vj-trip-type"
+                    value={value}
+                    checked={tripType === value}
+                    onChange={() => handleTripTypeChange(value)}
+                    className="h-[18px] w-[18px] shrink-0 cursor-pointer appearance-none rounded-full border border-white bg-transparent checked:bg-white"
+                  />
+                  {label}
+                </label>
+              ))}
               <a
                 href="/trang-chu#hero-booking-form"
-                className="flex items-center gap-0.5 text-xs font-bold text-white hover:text-vjgold transition-colors"
+                className="inline-flex items-center gap-0.5 text-sm font-medium text-white transition hover:opacity-80"
               >
                 Nhiều chặng
-                <MdArrowOutward className="text-xs2" />
+                <MdArrowOutward aria-hidden="true" className="text-xs" />
               </a>
-            </fieldset>
+            </div>
 
-            <div className="flex items-center">
-              <label className="flex h-7 items-center rounded border border-white/40 bg-black/10 px-2 text-xs font-bold text-white hover:border-white transition-colors cursor-pointer">
-                <select
-                  value={currency}
-                  onChange={(event) => setCurrency(event.target.value as 'VND' | 'USD')}
-                  aria-label="Loại tiền tệ"
-                  className="cursor-pointer appearance-none border-0 bg-transparent pr-1 text-xs font-bold text-white outline-none"
+            {/* Tiền tệ — chữ 17px/700 trắng + mũi tên 24px. */}
+            <label className="flex h-[24px] items-center gap-1 text-white">
+              <select
+                value={currency}
+                onChange={(event) => setCurrency(event.target.value as 'VND' | 'USD')}
+                aria-label="Loại tiền tệ"
+                className="cursor-pointer appearance-none border-0 bg-transparent p-0 pr-0 text-lg2 font-bold leading-none text-white outline-none"
+              >
+                {CURRENCIES.map((code) => (
+                  <option key={code} value={code}>
+                    {code}
+                  </option>
+                ))}
+              </select>
+              <MdExpandMore className="pointer-events-none h-6 w-6 shrink-0" />
+            </label>
+          </div>
+
+          {/* Hàng 2 — các ô nhập, padding ngang 19px, cao 273px. */}
+          <div className="px-[19px]">
+            {/* Ô 1: Điểm khởi hành + Ngày đi (một hộp trắng 342×48px).
+                Vỏ ô không cộng thêm `pl-[48px]`: nút `AirportPicker` đã tự
+                đặt icon ở `left-[14px]` và chữ ở `pl-[48px]` — tính từ mép
+                hộp trắng. Trước đây vỏ lại cộng một lần nữa nên chữ lệch
+                sang x=+96, lệch hẳn nhãn "Hành khách"/"Mã khuyến mại" (+48)
+                và tràn 7px vào cột ngày. */}
+            <div className={fieldBoxClass}>
+              <div className="relative flex min-w-0 flex-1 items-center pr-2">
+                <AirportPicker
+                  label="Điểm khởi hành"
+                  ariaLabel="Điểm khởi hành"
+                  icon="takeoff"
+                  value={from}
+                  airports={airports}
+                  onChange={handleFromChange}
+                  variant="flush"
+                  className="h-full w-full"
+                  headingClass={fieldHeadingClass}
+                  valueClass={fieldAirportValueClass}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setOpenCalendar((prev) => (prev === 'depart' ? null : 'depart'))}
+                aria-label="Ngày đi"
+                aria-expanded={openCalendar === 'depart'}
+                className="flex w-[127px] shrink-0 items-center justify-center border-l border-[var(--border)] px-1 text-center lg:w-[121px]"
+              >
+                <span className="text-lg font-medium leading-[18.72px] text-[var(--foreground)]">
+                  {formatDisplayDate(departDate) || 'Ngày đi'}
+                </span>
+              </button>
+            </div>
+
+            {/* Ô 2: Điểm đến + Ngày về — cùng cách căn lề như Ô 1. */}
+            <div className={`mt-[11px] ${fieldBoxClass}`}>
+              <div className="relative flex min-w-0 flex-1 items-center pr-2">
+                <AirportPicker
+                  label="Điểm đến"
+                  ariaLabel="Điểm đến"
+                  icon="land"
+                  value={to}
+                  airports={airports}
+                  onChange={handleToChange}
+                  variant="flush"
+                  className="h-full w-full"
+                  headingClass={fieldHeadingClass}
+                  valueClass={fieldAirportValueClass}
+                />
+              </div>
+              {roundTrip && (
+                <button
+                  type="button"
+                  onClick={() => setOpenCalendar((prev) => (prev === 'return' ? null : 'return'))}
+                  aria-label="Ngày về"
+                  aria-expanded={openCalendar === 'return'}
+                  className="flex w-[127px] shrink-0 items-center justify-center border-l border-[var(--border)] px-1 text-center lg:w-[121px]"
                 >
-                  {CURRENCIES.map((code) => (
-                    <option key={code} value={code} className="text-[var(--foreground)]">
-                      {code}
+                  <span className="text-lg font-medium leading-[18.72px] text-[var(--foreground)]">
+                    {formatDisplayDate(returnDate) || 'Ngày về'}
+                  </span>
+                </button>
+              )}
+              {/* Nút đảo chiều — đè lên mép trái hộp (site thật: 24×28px tại x=940). */}
+              <button
+                type="button"
+                aria-label="Đổi điểm khởi hành và điểm đến"
+                onClick={swapAirports}
+                className="absolute -left-[19px] top-1/2 z-10 grid h-7 w-6 -translate-y-1/2 cursor-pointer place-items-center text-white transition hover:scale-110 active:scale-95"
+              >
+                <MdSwapHoriz className="text-xl5" />
+              </button>
+            </div>
+
+            {/* Ô 3: Hành khách — hộp trắng 342×48px, bo góc 10px, nền trắng
+                đồng nhất với Ô 1/Ô 2/Ô 4. Trước đây nền trong suốt nên nhãn
+                xám `rgb(107,117,128)` nằm trên nền đỏ gradient, tương phản
+                quá thấp và lệch về phía trong so với các ô còn lại.
+                MOBILE (390×844): site thật KHÔNG hiện hàng này (thân panel chỉ
+                có 2 ô sân bay/ngày) → ẩn hoàn toàn ở dưới `lg`. */}
+            <div className="relative mt-[11px] hidden h-[48px] items-center gap-2 rounded-vj bg-white pl-[48px] pr-1 lg:flex">
+              <MdOutlinePerson
+                aria-hidden="true"
+                className="absolute left-[19px] top-1/2 -translate-y-1/2 text-lg2 text-[var(--foreground)]"
+              />
+              <span className="min-w-0 flex-1">
+                <span className="vj-field-label">Hành khách</span>
+                <select
+                  value={String(adults)}
+                  onChange={(event) => setAdults(Number(event.target.value))}
+                  aria-label="Số hành khách"
+                  className="w-full min-w-0 cursor-pointer appearance-none border-0 bg-transparent p-0 text-base font-semibold leading-[19px] text-[var(--foreground)] outline-none"
+                >
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                    <option key={n} value={String(n)}>
+                      {n} người lớn
                     </option>
                   ))}
                 </select>
-                <MdExpandMore className="text-xs text-white shrink-0 pointer-events-none" />
-              </label>
-            </div>
-          </div>
-
-          {/* Các trường điểm khởi hành, điểm đến và ngày bay */}
-          <div className="relative">
-            {/* Hàng 1: Khởi hành + Ngày đi */}
-            <div className={fieldGroupClass}>
-              <AirportPicker
-                label="Điểm khởi hành"
-                icon="takeoff"
-                value={from}
-                airports={airports}
-                onChange={handleFromChange}
-                variant="flush"
+              </span>
+              <MdExpandMore
+                aria-hidden="true"
+                className="shrink-0 text-2xl text-[var(--foreground)]"
               />
-              <label
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    setActiveDatePicker((prev) => (prev === 'depart' ? null : 'depart'));
-                  }
-                }}
-                onClick={() => setActiveDatePicker((prev) => (prev === 'depart' ? null : 'depart'))}
-                aria-label="Ngày đi"
-                aria-expanded={activeDatePicker === 'depart'}
-                className={`w-full h-full min-h-[48px] flex items-center gap-2 bg-white px-3 py-1.5 cursor-pointer hover:bg-amber-50 focus-within:bg-amber-50 min-w-0 text-left transition-colors ${
-                  activeDatePicker === 'depart' ? 'bg-amber-50/90 ring-1 ring-vjred ring-inset' : ''
+            </div>
+
+            {/* Ô 4: Mã khuyến mại — hộp trắng 342×48px, bo góc 10px.
+                MOBILE: site thật không hiện → ẩn ở dưới `lg`. */}
+            <label className="relative mt-[11px] hidden h-[48px] items-center gap-2 rounded-vj bg-white pl-[48px] pr-2 lg:flex">
+              <MdConfirmationNumber
+                aria-hidden="true"
+                className="absolute left-[19px] top-1/2 -translate-y-1/2 text-xl2 text-[var(--foreground)]"
+              />
+              <span className="min-w-0 flex-1">
+                <span className="vj-field-label">Mã khuyến mại</span>
+                <input
+                  value={promoCode}
+                  onChange={(event) => setPromoCode(event.target.value)}
+                  placeholder="Mã khuyến mại"
+                  aria-label="Mã khuyến mại"
+                  className="w-full min-w-0 border-0 bg-transparent p-0 text-base font-semibold leading-[19px] text-[var(--foreground)] outline-none placeholder:text-[var(--vj-field-placeholder)]"
+                />
+              </span>
+            </label>
+
+            {/* Hàng 5 — công tắc "Tìm vé rẻ nhất" (42px) + tiêu đề H3 18px/700 trắng.
+                MOBILE: site thật không hiện → ẩn ở dưới `lg`. */}
+            <div className="hidden h-[48px] items-center gap-2 lg:flex">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={cheapestOnly}
+                aria-label="Tìm vé rẻ nhất"
+                onClick={() => setCheapestOnly((prev) => !prev)}
+                className={`relative h-[42px] w-[42px] shrink-0 cursor-pointer rounded-full transition ${
+                  cheapestOnly ? 'bg-vjred' : 'bg-white/35'
                 }`}
               >
-                <Calendar className="shrink-0 text-base text-[var(--foreground-subtle)]" />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-2xs font-bold uppercase leading-tight tracking-[0.06em] text-[var(--foreground-subtle)]">
-                    Ngày đi
-                  </span>
-                  <span className="block text-sm2 font-bold text-[var(--foreground)] truncate">
-                    {formatDisplayDate(departDate) || 'Ngày đi'}
-                  </span>
-                </span>
-              </label>
-            </div>
-
-            {/* Nút đảo chiều sân bay */}
-            <button
-              type="button"
-              aria-label="Đổi điểm khởi hành và điểm đến"
-              onClick={() => {
-                setFrom(to);
-                setTo(from);
-                setSearchError(null);
-              }}
-              className="absolute -left-3 top-[53px] -translate-y-1/2 z-10 grid h-7 w-7 place-items-center rounded-full bg-white text-vjred shadow-[0_2px_8px_rgba(0,0,0,0.22)] border border-gray-100 hover:scale-110 active:scale-95 transition-transform cursor-pointer"
-            >
-              <MdSwapHoriz className="text-lg" />
-            </button>
-
-            {/* Hàng 2: Điểm đến + Ngày về */}
-            <div className={`${fieldGroupClass} mt-2.5`}>
-              <AirportPicker
-                label="Điểm đến"
-                icon="land"
-                value={to}
-                airports={airports}
-                onChange={handleToChange}
-                variant="flush"
-                className={roundTrip ? '' : 'col-span-2 sm:col-span-2'}
-              />
-              {roundTrip && (
-                <label
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setActiveDatePicker((prev) => (prev === 'return' ? null : 'return'));
-                    }
-                  }}
-                  onClick={() =>
-                    setActiveDatePicker((prev) => (prev === 'return' ? null : 'return'))
-                  }
-                  aria-label="Ngày về"
-                  aria-expanded={activeDatePicker === 'return'}
-                  className={`w-full h-full min-h-[48px] flex items-center gap-2 bg-white px-3 py-1.5 cursor-pointer hover:bg-amber-50 focus-within:bg-amber-50 min-w-0 text-left transition-colors ${
-                    activeDatePicker === 'return'
-                      ? 'bg-amber-50/90 ring-1 ring-vjred ring-inset'
-                      : ''
+                <span
+                  aria-hidden="true"
+                  className={`absolute top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-white transition-all ${
+                    cheapestOnly ? 'left-[19px]' : 'left-[3px]'
                   }`}
-                >
-                  <Calendar className="shrink-0 text-base text-[var(--foreground-subtle)]" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-2xs font-bold uppercase leading-tight tracking-[0.06em] text-[var(--foreground-subtle)]">
-                      Ngày về
-                    </span>
-                    <span className="block text-sm2 font-bold text-[var(--foreground)] truncate">
-                      {formatDisplayDate(returnDate) || 'Ngày về'}
-                    </span>
-                  </span>
-                </label>
-              )}
+                />
+              </button>
+              <h3 className="text-lg font-bold leading-[18.72px] text-white">Tìm vé rẻ nhất</h3>
             </div>
-
-            {/* Lịch chọn ngày bay 2 tháng chuẩn Vietjet Air */}
-            {activeDatePicker && (
-              <FlightDatePickerPopover
-                departDate={departDate}
-                returnDate={returnDate}
-                roundTrip={roundTrip}
-                activeStep={activeDatePicker}
-                onStepChange={setActiveDatePicker}
-                onSelectDepart={(date) => {
-                  setDepartDate(date);
-                  if (roundTrip && returnDate && returnDate < date) {
-                    const d = new Date(date);
-                    d.setDate(d.getDate() + 3);
-                    setReturnDate(toInputDate(d));
-                  }
-                }}
-                onSelectReturn={setReturnDate}
-                onTripTypeChange={(isRound) => {
-                  setRoundTrip(isRound);
-                  if (isRound && (!returnDate || returnDate < departDate)) {
-                    const d = new Date(departDate);
-                    d.setDate(d.getDate() + 7);
-                    setReturnDate(toInputDate(d));
-                  }
-                }}
-                onClose={() => setActiveDatePicker(null)}
-                minDate={minDate}
-              />
-            )}
           </div>
 
-          {/* Hàng 3: Hành khách */}
-          <div className="mt-2.5 rounded-xl border border-[var(--border)] bg-white shadow-xs relative z-30 min-h-[48px] flex items-center">
-            <PassengerPicker
-              value={paxCounts}
-              onChange={setPaxCounts}
-              promoCode={promoCode}
-              onPromoCodeChange={setPromoCode}
-              cheapestOnly={cheapestOnly}
-              onCheapestChange={setCheapestOnly}
-              onSubmit={() => handleSubmit()}
-              className="mt-0 w-full h-full"
-            />
-          </div>
-
-          {/* Hàng 4: Mã khuyến mại (hiển thị khi picker đóng) */}
-          <label className="mt-2.5 flex min-h-[48px] items-center gap-2.5 rounded-xl border border-[var(--border)] bg-white px-3 py-1.5 shadow-xs transition-all focus-within:border-[var(--accent)] cursor-text">
-            <MdConfirmationNumber className="shrink-0 text-lg text-vjred/80" />
-            <span className="min-w-0 flex-1">
-              <span className="block text-2xs font-bold uppercase leading-tight tracking-[0.06em] text-[var(--foreground-subtle)]">
-                Mã khuyến mại
-              </span>
-              <input
-                value={promoCode}
-                onChange={(event) => setPromoCode(event.target.value)}
-                placeholder="Mã khuyến mại"
-                className="w-full min-w-0 border-0 bg-transparent px-0 text-sm2 font-bold text-[var(--foreground)] outline-none placeholder:text-[var(--foreground-subtle)] placeholder:font-normal"
-              />
-            </span>
-          </label>
-
-          {/* Hàng 5: Checkbox Tìm vé rẻ nhất */}
-          <label className="mt-3 flex items-center gap-2 text-xs sm:text-sm2 font-semibold text-white cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={cheapestOnly}
-              onChange={(event) => setCheapestOnly(event.target.checked)}
-              className="h-4 w-4 rounded border-white/60 text-vjgold focus:ring-0 cursor-pointer accent-vjgold"
-            />
-            <span>Tìm vé rẻ nhất</span>
-          </label>
-
-          {/* Thông báo kiểm tra hợp lệ */}
-          {searchError && (
-            <div className="mt-2.5 p-2 rounded-lg bg-white/95 border border-red-500 text-red-600 text-xs font-bold text-center shadow-sm">
-              {searchError}
-            </div>
-          )}
-
-          {/* Hàng 6: Nút Tìm chuyến bay — Màu vàng #FFD51A, bo góc dạng viên thuốc, chữ đỏ sẫm đậm */}
-          <div className="mt-3.5 flex justify-center">
+          {/* Hàng 6 — nút CTA. Site thật: nút 200×39px, cách đáy khối ô nhập
+              10px, còn 29px từ đáy nút xuống đáy panel (panel cao 409px).
+              MOBILE (390×844): hàng này cao 129px — padding trên 30px, dưới
+              60px; nút nằm ở y=625 (panel bắt đầu ở y=420). */}
+          <div className="mt-[11px] flex flex-col items-center justify-center pt-[30px] pb-[60px] lg:mt-0 lg:pt-[10px] lg:pb-[29px]">
             <button
               type="submit"
-              className="min-h-[40px] w-[55%] max-w-[200px] rounded-full bg-vjgold hover:bg-vj-gold-hover text-vjwine font-extrabold italic text-base2 tracking-wide shadow-sm hover:shadow-md active:translate-y-[1px] transition-all duration-150 flex items-center justify-center cursor-pointer"
+              className="vj-cta vj-cta--hero hover:brightness-105 active:translate-y-[1px] transition-all duration-150 cursor-pointer"
             >
               Tìm chuyến bay
             </button>
           </div>
+
+          {searchError && (
+            <div className="mx-[19px] mb-3 rounded-vj bg-white/95 px-3 py-1.5 text-center text-xs font-bold text-vjred shadow-sm">
+              {searchError}
+            </div>
+          )}
+
+          {/* Lịch chọn ngày — site thật mở popover 630px (2 tháng) khi bấm
+              vào cột "Ngày đi" / "Ngày về". */}
+          {openCalendar && (
+            <FlightDatePickerPopover
+              departDate={departDate}
+              returnDate={returnDate}
+              roundTrip={roundTrip}
+              activeStep={openCalendar}
+              onStepChange={(step) => setOpenCalendar(step)}
+              onSelectDepart={(value) => {
+                setDepartDate(value);
+                if (!roundTrip) setOpenCalendar(null);
+              }}
+              onSelectReturn={(value) => {
+                setReturnDate(value);
+                setOpenCalendar(null);
+              }}
+              onTripTypeChange={(isRound) => handleTripTypeChange(isRound ? 'round' : 'one')}
+              onClose={() => setOpenCalendar(null)}
+              minDate={toInputDate(new Date())}
+            />
+          )}
         </div>
       </form>
     </div>

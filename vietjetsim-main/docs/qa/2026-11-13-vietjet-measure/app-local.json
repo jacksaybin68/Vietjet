@@ -1,0 +1,597 @@
+[
+  {
+    "route": "home",
+    "local": "/trang-chu",
+    "viewport": "desktop-1440",
+    "header": {
+      "x": 0,
+      "y": 50,
+      "w": 1440,
+      "h": 0,
+      "fs": "14px",
+      "fw": "500",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px"
+    },
+    "headerBg": "rgba(0, 0, 0, 0)",
+    "headerRadius": "0px",
+    "h1": {
+      "x": -1,
+      "y": 49,
+      "w": 1,
+      "h": 1,
+      "fs": "14px",
+      "fw": "700",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    },
+    "h2": {
+      "x": 752,
+      "y": 1193,
+      "w": 648,
+      "h": 76,
+      "fs": "56px",
+      "fw": "600",
+      "color": "rgb(31, 39, 45)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    },
+    "inputs": [
+      {
+        "x": 955,
+        "y": 285,
+        "w": 71,
+        "h": 20,
+        "fs": "14px",
+        "fw": "500",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "shadow": "none"
+      },
+      {
+        "x": 1042,
+        "y": 285,
+        "w": 84,
+        "h": 20,
+        "fs": "14px",
+        "fw": "500",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "shadow": "none"
+      },
+      {
+        "x": 1007,
+        "y": 507,
+        "w": 286,
+        "h": 35,
+        "fs": "14px",
+        "fw": "500",
+        "color": "rgb(51, 51, 51)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "shadow": "none"
+      }
+    ],
+    "submit": null
+  },
+  {
+    "route": "home",
+    "local": "/trang-chu",
+    "viewport": "mobile-390",
+    "header": {
+      "x": 0,
+      "y": 35,
+      "w": 390,
+      "h": 0,
+      "fs": "14px",
+      "fw": "500",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    },
+    "headerBg": "rgba(0, 0, 0, 0)",
+    "headerRadius": "0px",
+    "h1": {
+      "x": -1,
+      "y": 34,
+      "w": 1,
+      "h": 1,
+      "fs": "14px",
+      "fw": "700",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    },
+    "h2": {
+      "x": 20,
+      "y": 2068,
+      "w": 350,
+      "h": 152,
+      "fs": "56px",
+      "fw": "600",
+      "color": "rgb(31, 39, 45)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    },
+    "inputs": [
+      {
+        "x": 15,
+        "y": 486,
+        "w": 71,
+        "h": 20,
+        "fs": "14px",
+        "fw": "500",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "shadow": "none"
+      },
+      {
+        "x": 102,
+        "y": 486,
+        "w": 84,
+        "h": 20,
+        "fs": "14px",
+        "fw": "500",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "shadow": "none"
+      },
+      {
+        "x": 67,
+        "y": 708,
+        "w": 296,
+        "h": 35,
+        "fs": "14px",
+        "fw": "500",
+        "color": "rgb(51, 51, 51)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "shadow": "none"
+      }
+    ],
+    "submit": null
+  },
+  {
+    "route": "my-search-booking",
+    "local": "/chuyen-bay-cua-toi",
+    "viewport": "desktop-1440",
+    "header": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 76,
+      "fs": "14px",
+      "fw": "500",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgb(255, 255, 255)",
+      "radius": "0px 0px 16px 16px",
+      "shadow": "rgba(0, 0, 0, 0.08) 0px 8px 24px 0px"
+    },
+    "headerBg": "rgb(255, 255, 255)",
+    "headerRadius": "0px 0px 16px 16px",
+    "h1": null,
+    "h2": {
+      "x": 166,
+      "y": 194,
+      "w": 458,
+      "h": 26,
+      "fs": "20px",
+      "fw": "600",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    },
+    "inputs": [
+      {
+        "x": 215,
+        "y": 314,
+        "w": 360,
+        "h": 47,
+        "fs": "14px",
+        "fw": "500",
+        "color": "rgb(51, 51, 51)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "shadow": "none"
+      },
+      {
+        "x": 215,
+        "y": 379,
+        "w": 360,
+        "h": 47,
+        "fs": "14px",
+        "fw": "500",
+        "color": "rgb(51, 51, 51)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "shadow": "none"
+      },
+      {
+        "x": 215,
+        "y": 444,
+        "w": 360,
+        "h": 47,
+        "fs": "14px",
+        "fw": "500",
+        "color": "rgb(51, 51, 51)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "shadow": "none"
+      }
+    ],
+    "submit": {
+      "x": 332,
+      "y": 515,
+      "w": 127,
+      "h": 39,
+      "fs": "14px",
+      "fw": "500",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "10px",
+      "shadow": "none"
+    }
+  },
+  {
+    "route": "my-search-booking",
+    "local": "/chuyen-bay-cua-toi",
+    "viewport": "mobile-390",
+    "header": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 132,
+      "fs": "14px",
+      "fw": "500",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgb(255, 255, 255)",
+      "radius": "0px 0px 16px 16px",
+      "shadow": "rgba(0, 0, 0, 0.08) 0px 8px 24px 0px"
+    },
+    "headerBg": "rgb(255, 255, 255)",
+    "headerRadius": "0px 0px 16px 16px",
+    "h1": {
+      "x": 163,
+      "y": 91,
+      "w": 159,
+      "h": 22,
+      "fs": "15px",
+      "fw": "900",
+      "color": "rgb(31, 31, 31)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    },
+    "h2": null,
+    "inputs": [
+      {
+        "x": 16,
+        "y": 294,
+        "w": 358,
+        "h": 47,
+        "fs": "14px",
+        "fw": "500",
+        "color": "rgb(51, 51, 51)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "shadow": "none"
+      },
+      {
+        "x": 16,
+        "y": 358,
+        "w": 358,
+        "h": 47,
+        "fs": "14px",
+        "fw": "500",
+        "color": "rgb(51, 51, 51)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "shadow": "none"
+      },
+      {
+        "x": 16,
+        "y": 422,
+        "w": 358,
+        "h": 47,
+        "fs": "14px",
+        "fw": "500",
+        "color": "rgb(51, 51, 51)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "shadow": "none"
+      }
+    ],
+    "submit": {
+      "x": 132,
+      "y": 493,
+      "w": 127,
+      "h": 39,
+      "fs": "14px",
+      "fw": "500",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "10px",
+      "shadow": "none"
+    }
+  },
+  {
+    "route": "checkin",
+    "local": "/lam-thu-tuc",
+    "viewport": "desktop-1440",
+    "header": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 76,
+      "fs": "14px",
+      "fw": "500",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgb(255, 255, 255)",
+      "radius": "0px 0px 16px 16px",
+      "shadow": "rgba(0, 0, 0, 0.08) 0px 8px 24px 0px"
+    },
+    "headerBg": "rgb(255, 255, 255)",
+    "headerRadius": "0px 0px 16px 16px",
+    "h1": {
+      "x": 140,
+      "y": 195,
+      "w": 369,
+      "h": 26,
+      "fs": "20px",
+      "fw": "600",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    },
+    "h2": {
+      "x": 562,
+      "y": 302,
+      "w": 585,
+      "h": 24,
+      "fs": "16px",
+      "fw": "700",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    },
+    "inputs": [
+      {
+        "x": 140,
+        "y": 304,
+        "w": 369,
+        "h": 47,
+        "fs": "14px",
+        "fw": "500",
+        "color": "rgb(51, 51, 51)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "shadow": "none"
+      },
+      {
+        "x": 140,
+        "y": 368,
+        "w": 369,
+        "h": 47,
+        "fs": "14px",
+        "fw": "500",
+        "color": "rgb(51, 51, 51)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "shadow": "none"
+      }
+    ],
+    "submit": {
+      "x": 261,
+      "y": 435,
+      "w": 127,
+      "h": 39,
+      "fs": "14px",
+      "fw": "500",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "10px",
+      "shadow": "none"
+    }
+  },
+  {
+    "route": "checkin",
+    "local": "/lam-thu-tuc",
+    "viewport": "mobile-390",
+    "header": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 132,
+      "fs": "14px",
+      "fw": "500",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgb(255, 255, 255)",
+      "radius": "0px 0px 16px 16px",
+      "shadow": "rgba(0, 0, 0, 0.08) 0px 8px 24px 0px"
+    },
+    "headerBg": "rgb(255, 255, 255)",
+    "headerRadius": "0px 0px 16px 16px",
+    "h1": {
+      "x": 176,
+      "y": 91,
+      "w": 134,
+      "h": 22,
+      "fs": "15px",
+      "fw": "900",
+      "color": "rgb(31, 31, 31)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    },
+    "h2": {
+      "x": 44,
+      "y": 657,
+      "w": 302,
+      "h": 24,
+      "fs": "14px",
+      "fw": "700",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    },
+    "inputs": [
+      {
+        "x": 40,
+        "y": 310,
+        "w": 310,
+        "h": 47,
+        "fs": "14px",
+        "fw": "500",
+        "color": "rgb(51, 51, 51)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "shadow": "none"
+      },
+      {
+        "x": 40,
+        "y": 374,
+        "w": 310,
+        "h": 47,
+        "fs": "14px",
+        "fw": "500",
+        "color": "rgb(51, 51, 51)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "shadow": "none"
+      }
+    ],
+    "submit": {
+      "x": 132,
+      "y": 441,
+      "w": 127,
+      "h": 39,
+      "fs": "14px",
+      "fw": "500",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "10px",
+      "shadow": "none"
+    }
+  },
+  {
+    "route": "booking-search",
+    "local": "/tim-ve",
+    "viewport": "desktop-1440",
+    "header": {
+      "x": 0,
+      "y": 50,
+      "w": 1440,
+      "h": 0,
+      "fs": "14px",
+      "fw": "500",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px"
+    },
+    "headerBg": "rgba(0, 0, 0, 0)",
+    "headerRadius": "0px",
+    "h1": {
+      "x": -1,
+      "y": 49,
+      "w": 1,
+      "h": 1,
+      "fs": "14px",
+      "fw": "700",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    },
+    "h2": {
+      "x": 752,
+      "y": 1193,
+      "w": 648,
+      "h": 76,
+      "fs": "56px",
+      "fw": "600",
+      "color": "rgb(31, 39, 45)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    },
+    "inputs": [
+      {
+        "x": 955,
+        "y": 285,
+        "w": 71,
+        "h": 20,
+        "fs": "14px",
+        "fw": "500",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "shadow": "none"
+      },
+      {
+        "x": 1042,
+        "y": 285,
+        "w": 84,
+        "h": 20,
+        "fs": "14px",
+        "fw": "500",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "shadow": "none"
+      },
+      {
+        "x": 1007,
+        "y": 507,
+        "w": 286,
+        "h": 35,
+        "fs": "14px",
+        "fw": "500",
+        "color": "rgb(51, 51, 51)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "shadow": "none"
+      }
+    ],
+    "submit": null
+  },
+  {
+    "route": "booking-search",
+    "local": "/tim-ve",
+    "viewport": "mobile-390",
+    "header": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "fs": "14px",
+      "fw": "500",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    },
+    "headerBg": "rgba(0, 0, 0, 0)",
+    "headerRadius": "0px",
+    "h1": null,
+    "h2": null,
+    "inputs": [],
+    "submit": null
+  }
+]

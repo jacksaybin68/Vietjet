@@ -100,7 +100,7 @@ export function SeatMap({
   };
 
   return (
-    <div className={`bg-whiterounded-lg p-4 ${className}`}>
+    <div className={`bg-white rounded-vj p-4 ${className}`}>
       {/* Legend */}
       <div className="flex flex-wrap gap-4 mb-6 pb-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
@@ -178,7 +178,7 @@ export function SeatMap({
                 {/* Aisle */}
                 <div className="w-8 flex items-center justify-center">
                   {(isExtraLegroom || isEmergency) && (
-                    <span className="text-[8px] text-amber-500font-medium">
+                    <span className="text-4xs text-amber-500 font-medium">
                       {isEmergency ? 'EXIT' : 'XL'}
                     </span>
                   )}

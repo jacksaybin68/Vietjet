@@ -25,6 +25,7 @@ import {
 } from 'react-icons/ri';
 import { MdFlightTakeoff } from 'react-icons/md';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAuthModal } from '@/features/auth/components';
 
 interface VietjetMobileDrawerProps {
   isOpen: boolean;
@@ -50,6 +51,7 @@ const MENU_ITEMS = [
 
 export default function VietjetMobileDrawer({ isOpen, onClose }: VietjetMobileDrawerProps) {
   const { user, signOut } = useAuth();
+  const { openAuthModal } = useAuthModal();
   const pathname = usePathname();
 
   if (!isOpen) return null;
@@ -114,14 +116,17 @@ export default function VietjetMobileDrawer({ isOpen, onClose }: VietjetMobileDr
               </div>
             </div>
           ) : (
-            <Link
-              href="/dang-nhap"
-              onClick={onClose}
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                openAuthModal('login');
+              }}
               className="flex items-center gap-3 text-base font-bold text-white hover:text-vjyellow transition-colors"
             >
               <HiOutlineUserCircle className="h-7 w-7 text-white" />
               <span>Đăng ký/Đăng nhập</span>
-            </Link>
+            </button>
           )}
         </div>
 
@@ -140,7 +145,7 @@ export default function VietjetMobileDrawer({ isOpen, onClose }: VietjetMobileDr
                   key={item.label}
                   href={item.href}
                   onClick={onClose}
-                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-[13.5px] font-semibold transition-colors ${
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm4 font-semibold transition-colors ${
                     isActive
                       ? 'bg-white/20 text-white font-bold'
                       : 'text-white/95 hover:bg-white/10 hover:text-white'

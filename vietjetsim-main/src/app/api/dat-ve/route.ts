@@ -330,7 +330,9 @@ export async function POST(request: NextRequest) {
           accountHolder = banks[0].account_holder;
           bankBin = banks[0].bank_bin || undefined;
         }
-      } catch {}
+      } catch {
+        // Không lấy được danh sách ngân hàng: dùng thông tin mặc định.
+      }
 
       void sendPaymentInstructionEmail({
         to: customerEmail,

@@ -54,14 +54,14 @@ const FARE_CLASS_CONFIG: Record<
 
 /**
  * Màu nền nhãn hạng vé trong card kết quả — khớp đúng với hàng header ở
- * desktop (`bg-[#8E7022]` / `#D71920` / `#FF8800` / `#388E3C`), để nhãn ở
+ * desktop (`bg-vj-fare-business` / `#D71920` / `#FF8800` / `#388E3C`), để nhãn ở
  * mobile và header ở desktop nói cùng một ngôn ngữ màu.
  */
 const FARE_BADGE_CLASS: Record<string, string> = {
-  business: 'bg-[#8E7022]',
-  skyboss: 'bg-[#D71920]',
-  deluxe: 'bg-[#FF8800]',
-  eco: 'bg-[#388E3C]',
+  business: 'bg-vj-fare-business',
+  skyboss: 'bg-primary-dark',
+  deluxe: 'bg-vj-fare-deluxe',
+  eco: 'bg-vj-fare-eco',
 };
 
 const DEPARTURE_TIME_SLOTS = [
@@ -121,7 +121,7 @@ function SearchErrorModal({ message, onRetry, onDismiss }: SearchErrorModalProps
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-3 sm:px-4">
       <div
-        className="bg-[var(--surface)] rounded-2xl sm:rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden"
+        className="bg-[var(--surface)] rounded-vj sm:rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden"
         style={{ boxShadow: '0 32px 72px rgba(0,0,0,0.25)', animation: 'fadeInUp 0.3s ease-out' }}
       >
         <div className="h-1.5 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
@@ -138,14 +138,14 @@ function SearchErrorModal({ message, onRetry, onDismiss }: SearchErrorModalProps
           <div className="flex flex-col gap-2.5 sm:gap-3 w-full">
             <button
               onClick={onRetry}
-              className="w-full flex items-center justify-center gap-1.5 sm:gap-2 bg-primary hover:bg-primary-dark text-white font-bold py-2.5 sm:py-3.5 rounded-xl transition-all shadow-vj-btn hover:shadow-vj-btn-hover hover:-translate-y-0.5"
+              className="w-full flex items-center justify-center gap-1.5 sm:gap-2 bg-primary hover:bg-primary-dark text-white font-bold py-2.5 sm:py-3.5 rounded-vj transition-all shadow-vj-btn hover:shadow-vj-btn-hover hover:-translate-y-0.5"
             >
               <Icon name="ArrowPathIcon" size={14} />
               Tìm lại
             </button>
             <button
               onClick={onDismiss}
-              className="w-full py-2.5 sm:py-3 rounded-xl border border-[var(--border)] text-[var(--foreground-muted)] font-semibold text-sm hover:bg-[var(--surface-2)] transition-all"
+              className="w-full py-2.5 sm:py-3 rounded-vj border border-[var(--border)] text-[var(--foreground-muted)] font-semibold text-sm hover:bg-[var(--surface-2)] transition-all"
             >
               Đóng
             </button>
@@ -280,7 +280,7 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
                 {/* Scalloped / puffy cloud SVG badge background matching sample image */}
                 <svg
                   viewBox="0 0 140 70"
-                  className="absolute inset-0 w-full h-full text-[#FFCC00] filter drop-shadow-[0_2px_4px_rgba(245,158,11,0.35)] z-0"
+                  className="absolute inset-0 w-full h-full text-accent filter drop-shadow-[0_2px_4px_rgba(245,158,11,0.35)] z-0"
                   fill="currentColor"
                   preserveAspectRatio="none"
                 >
@@ -301,7 +301,7 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
                   <span className="block text-xs sm:text-sm font-black text-gray-950 leading-tight my-0.5">
                     {day.getDate()} tháng {day.getMonth() + 1}
                   </span>
-                  <span className="block text-3xs sm:text-xs font-black text-[#D71920] italic leading-tight">
+                  <span className="block text-3xs sm:text-xs font-black text-primary-dark italic leading-tight">
                     Từ <span className="font-extrabold">{price}</span> VND
                   </span>
                 </div>
@@ -424,14 +424,14 @@ function FlightRowStatusBadge({
 
   if (status === 'delayed') {
     return (
-      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] sm:text-2xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
+      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-4xs sm:text-2xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
         <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />⏱ Trễ chuyến
       </span>
     );
   }
   if (status === 'cancelled') {
     return (
-      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] sm:text-2xs font-bold bg-red-100 text-red-800 border border-red-300">
+      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-4xs sm:text-2xs font-bold bg-red-100 text-red-800 border border-red-300">
         ✕ Đã hủy
       </span>
     );
@@ -740,7 +740,7 @@ export default function FlightResultsStep({
       {/* Filter Sidebar - hidden on desktop to match reference UI */}
       <aside className="hidden">
         <div
-          className="bg-[var(--surface)] rounded-xl border border-[var(--border)] md:sticky md:top-[200px] md:top-[230px] overflow-hidden"
+          className="bg-[var(--surface)] rounded-vj border border-[var(--border)] md:sticky md:top-[200px] md:top-[230px] overflow-hidden"
           style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}
         >
           {/* Red accent top bar */}
@@ -800,7 +800,7 @@ export default function FlightResultsStep({
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full text-base sm:text-sm border border-[var(--border)] rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 text-[var(--foreground)] focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200/40 bg-[var(--surface-2)] form-input transition-all"
+                  className="w-full text-base sm:text-sm border border-[var(--border)] rounded-vj px-2 sm:px-3 py-1.5 sm:py-2 text-[var(--foreground)] focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200/40 bg-[var(--surface-2)] form-input transition-all"
                 >
                   {SORT_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -909,7 +909,7 @@ export default function FlightResultsStep({
                     <button
                       key={idx}
                       onClick={() => toggleSlot(idx)}
-                      className={`text-left px-1.5 sm:px-2 py-2 sm:py-1.5 rounded-lg border text-3xs sm:text-2xs transition-all ${
+                      className={`text-left px-1.5 sm:px-2 py-2 sm:py-1.5 rounded-vj border text-3xs sm:text-2xs transition-all ${
                         filters.departureSlots.includes(idx)
                           ? 'border-primary bg-primary/5 text-primary font-semibold'
                           : 'border-[var(--border)] text-[var(--foreground-muted)] hover:border-primary/40 hover:text-primary'
@@ -1004,24 +1004,24 @@ export default function FlightResultsStep({
       <div className="w-full min-w-0 space-y-4">
         {/* Route board — clean white card with opposing red and gray arrows matching sample */}
         {search?.from && search?.to && (
-          <div className="rounded-xl bg-white border border-gray-100 shadow-xs px-2.5 py-2 sm:px-8 sm:py-3.5 mb-2 mx-auto w-full max-w-lg">
+          <div className="rounded-vj bg-white border border-gray-100 shadow-xs px-2.5 py-2 sm:px-8 sm:py-3.5 mb-2 mx-auto w-full max-w-lg">
             <div className="flex items-center justify-between sm:justify-center gap-1 sm:gap-14">
               <div className="text-center min-w-0 flex-1 sm:flex-initial">
                 <div className="text-xl sm:text-3xl font-black text-gray-950 font-koho leading-none tracking-tight">
                   {search.from.toUpperCase()}
                 </div>
-                <div className="text-[11px] sm:text-sm text-gray-600 font-medium mt-1 truncate">
+                <div className="text-xs2 sm:text-sm text-gray-600 font-medium mt-1 truncate">
                   {getAirportCity(search.from)}
                 </div>
               </div>
 
               {/* Opposing arrows: top red right, bottom gray left matching screenshot */}
               <div className="flex flex-col items-center justify-center gap-1.5 px-1 sm:px-8 shrink-0">
-                <div className="w-8 sm:w-16 h-1 bg-[#D71920] relative rounded-full">
-                  <span className="absolute right-0 -top-1 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-l-[7px] border-l-[#D71920]" />
+                <div className="w-8 sm:w-16 h-1 bg-primary-dark relative rounded-full">
+                  <span className="absolute right-0 -top-1 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-l-[7px] border-l-primary-dark" />
                 </div>
-                <div className="w-8 sm:w-16 h-1 bg-[#E0E0E0] relative rounded-full">
-                  <span className="absolute left-0 -top-1 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-r-[7px] border-r-[#E0E0E0]" />
+                <div className="w-8 sm:w-16 h-1 bg-vj-line relative rounded-full">
+                  <span className="absolute left-0 -top-1 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-r-[7px] border-r-vj-line" />
                 </div>
               </div>
 
@@ -1029,7 +1029,7 @@ export default function FlightResultsStep({
                 <div className="text-xl sm:text-3xl font-black text-gray-950 font-koho leading-none tracking-tight">
                   {search.to.toUpperCase()}
                 </div>
-                <div className="text-[11px] sm:text-sm text-gray-600 font-medium mt-1 truncate">
+                <div className="text-xs2 sm:text-sm text-gray-600 font-medium mt-1 truncate">
                   {getAirportCity(search.to)}
                 </div>
               </div>
@@ -1058,9 +1058,9 @@ export default function FlightResultsStep({
 
         {/* Quick Sorting Bar */}
         {!isLoading && filtered.length > 0 && (
-          <div className="bg-white border border-gray-200/90 rounded-xl p-2 sm:p-2.5 my-2.5 shadow-2xs flex flex-wrap items-center justify-between gap-2">
+          <div className="bg-white border border-gray-200/90 rounded-vj p-2 sm:p-2.5 my-2.5 shadow-2xs flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded-lg bg-red-50 text-primary flex items-center justify-center shrink-0">
+              <span className="w-6 h-6 rounded-vj bg-red-50 text-primary flex items-center justify-center shrink-0">
                 <RiArrowUpDownLine size={13} />
               </span>
               <span className="text-xs font-black text-gray-900 font-koho">
@@ -1101,7 +1101,7 @@ export default function FlightResultsStep({
                     key={opt.value}
                     type="button"
                     onClick={() => setSortBy(opt.value)}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all font-koho border ${
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-vj text-xs font-bold whitespace-nowrap transition-all font-koho border ${
                       isActive
                         ? 'bg-primary text-white border-primary shadow-xs'
                         : 'bg-stone-50 text-gray-700 border-gray-200 hover:bg-stone-100 hover:text-gray-900'
@@ -1127,7 +1127,7 @@ export default function FlightResultsStep({
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('business')}
-                className="bg-[#8E7022] text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs min-h-[28px]"
+                className="bg-vj-fare-business text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs min-h-[28px]"
               >
                 <img
                   src="/images/fare-classes/business-logo.png"
@@ -1140,7 +1140,7 @@ export default function FlightResultsStep({
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('skyboss')}
-                className="bg-[#D71920] text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs min-h-[28px]"
+                className="bg-primary-dark text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs min-h-[28px]"
               >
                 <img
                   src="/images/fare-classes/skyboss-logo.png"
@@ -1153,7 +1153,7 @@ export default function FlightResultsStep({
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('deluxe')}
-                className="bg-[#FF8800] text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs min-h-[28px]"
+                className="bg-vj-fare-deluxe text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs min-h-[28px]"
               >
                 <img
                   src="/images/fare-classes/deluxe-logo.png"
@@ -1166,7 +1166,7 @@ export default function FlightResultsStep({
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('eco')}
-                className="bg-[#388E3C] text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs min-h-[28px]"
+                className="bg-vj-fare-eco text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:opacity-90 shadow-xs min-h-[28px]"
               >
                 <img
                   src="/images/fare-classes/eco-logo.png"
@@ -1184,7 +1184,7 @@ export default function FlightResultsStep({
 
         {/* Error state */}
         {!isLoading && loadError && (
-          <div className="bg-[var(--surface)] rounded-xl border border-[var(--border)] overflow-hidden">
+          <div className="bg-[var(--surface)] rounded-vj border border-[var(--border)] overflow-hidden">
             <div className="h-1 w-full bg-gradient-to-r from-primary/40 via-primary to-primary/40" />
             <div className="px-6 py-8 sm:px-8 sm:py-12 text-center">
               <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[rgb(var(--primary-rgb))]/10 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
@@ -1202,7 +1202,7 @@ export default function FlightResultsStep({
                   setShowErrorModal(false);
                   fetchFlights();
                 }}
-                className="vj-btn vj-btn-md vj-btn-primary rounded-xl shadow-glow-red hover:shadow-none"
+                className="vj-btn vj-btn-md vj-btn-primary rounded-vj shadow-glow-red hover:shadow-none"
               >
                 <Icon name="ArrowPathIcon" size={14} />
                 Thử lại
@@ -1275,7 +1275,7 @@ export default function FlightResultsStep({
                 key={flight.id}
                 data-testid="flight-result-card"
                 style={{ transitionDelay: `${Math.min(idx * 50, 300)}ms` }}
-                className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs hover:shadow-md transition-shadow duration-200 relative flex flex-row flex-wrap mb-2 sm:mb-3"
+                className="bg-white rounded-vj border border-gray-200 overflow-hidden shadow-xs hover:shadow-md transition-shadow duration-200 relative flex flex-row flex-wrap mb-2 sm:mb-3"
               >
                 {/* Left: Flight Info - bright yellow box matching real Vietjet */}
                 <div
@@ -1311,11 +1311,11 @@ export default function FlightResultsStep({
                       setExpandedFlightNo(flight.flightNo);
                     }
                   }}
-                  className="w-[105px] sm:w-[28%] lg:w-[240px] shrink-0 bg-[#FFC700] p-1.5 sm:p-3 lg:p-4 border-r border-yellow-400 flex flex-col items-center justify-between sm:justify-center text-center relative select-none cursor-pointer hover:bg-yellow-400 transition-colors focus:outline-none focus:ring-0"
+                  className="w-[105px] sm:w-[28%] lg:w-[240px] shrink-0 bg-vj-fare-gold p-1.5 sm:p-3 lg:p-4 border-r border-yellow-400 flex flex-col items-center justify-between sm:justify-center text-center relative select-none cursor-pointer hover:bg-yellow-400 transition-colors focus:outline-none focus:ring-0"
                 >
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2.5">
                     <div className="flex items-center gap-1">
-                      <span className="text-[9px] sm:text-2xs font-bold text-gray-900 tracking-wider uppercase leading-tight">
+                      <span className="text-3xs sm:text-2xs font-bold text-gray-900 tracking-wider uppercase leading-tight">
                         {flight.flightNo}
                       </span>
                       <FlightRowStatusBadge flightId={flight.id} defaultStatus={flight.status} />
@@ -1325,7 +1325,7 @@ export default function FlightResultsStep({
                       <span className="text-xs sm:text-base lg:text-xl font-black text-gray-950 font-koho leading-none">
                         {flight.departTime}
                       </span>
-                      <span className="text-[7.5px] sm:text-2xs font-bold text-gray-700 leading-none">
+                      <span className="text-5xs sm:text-2xs font-bold text-gray-700 leading-none">
                         Đến
                       </span>
                       <span className="text-xs sm:text-base lg:text-xl font-black text-gray-950 font-koho leading-none">
@@ -1334,7 +1334,7 @@ export default function FlightResultsStep({
                     </div>
                   </div>
 
-                  <div className="text-[7px] sm:text-2xs text-gray-800 font-medium leading-tight flex items-center justify-center whitespace-nowrap gap-0.5 sm:gap-1 mt-0.5 sm:mt-1">
+                  <div className="text-5xs sm:text-2xs text-gray-800 font-medium leading-tight flex items-center justify-center whitespace-nowrap gap-0.5 sm:gap-1 mt-0.5 sm:mt-1">
                     <span className="inline-flex items-center justify-center gap-0.5 sm:gap-1">
                       <svg
                         className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-gray-800 shrink-0 rotate-45 inline-block"
@@ -1350,7 +1350,7 @@ export default function FlightResultsStep({
                     <span className="text-red-700 font-bold inline">Bay thẳng</span>
                   </div>
 
-                  <span className="hidden sm:block text-[9px] sm:text-xs text-gray-700 mt-0.5 leading-none">
+                  <span className="hidden sm:block text-3xs sm:text-xs text-gray-700 mt-0.5 leading-none">
                     ∨
                   </span>
                 </div>
@@ -1377,7 +1377,7 @@ export default function FlightResultsStep({
                           isSoldOut
                             ? 'bg-gray-100/80 text-gray-400'
                             : isSelected
-                              ? 'bg-amber-50/90 ring-2 ring-inset ring-[#FFC700] shadow-xs'
+                              ? 'bg-amber-50/90 ring-2 ring-inset ring-vj-fare-gold shadow-xs'
                               : 'bg-white hover:bg-amber-50/30'
                         }`}
                       >
@@ -1386,7 +1386,7 @@ export default function FlightResultsStep({
 
                         {isSelected && !isSoldOut && (
                           <div className="absolute top-1 inset-x-0 flex justify-center pointer-events-none z-10">
-                            <span className="inline-flex items-center gap-0.5 text-[6.5px] sm:text-[8px] font-black text-emerald-800 bg-emerald-100/90 px-1 sm:px-1.5 py-0.5 rounded-full shadow-2xs leading-none uppercase tracking-wider">
+                            <span className="inline-flex items-center gap-0.5 text-5xs sm:text-4xs font-black text-emerald-800 bg-emerald-100/90 px-1 sm:px-1.5 py-0.5 rounded-full shadow-2xs leading-none uppercase tracking-wider">
                               <svg
                                 className="w-1.5 h-1.5 sm:w-2 sm:h-2"
                                 viewBox="0 0 12 12"
@@ -1407,7 +1407,7 @@ export default function FlightResultsStep({
                           <div className="flex-1 flex flex-col items-center justify-center p-1 sm:p-2 text-center select-none min-h-[56px] sm:min-h-[78px]">
                             {/* Mobile: vẫn phải ghi tên hạng */}
                             <span
-                              className={`sm:hidden mb-0.5 inline-flex items-center rounded-full px-1 py-0.5 text-[7px] font-black uppercase tracking-wider leading-none text-white opacity-70 ${
+                              className={`sm:hidden mb-0.5 inline-flex items-center rounded-full px-1 py-0.5 text-5xs font-black uppercase tracking-wider leading-none text-white opacity-70 ${
                                 FARE_BADGE_CLASS[fc.id] ?? 'bg-gray-500'
                               }`}
                             >
@@ -1420,7 +1420,7 @@ export default function FlightResultsStep({
                                 className="rotate-45 opacity-60"
                               />
                             </div>
-                            <span className="text-[7.5px] sm:text-xs font-bold text-gray-500 leading-tight">
+                            <span className="text-5xs sm:text-xs font-bold text-gray-500 leading-tight">
                               Hết chỗ
                             </span>
                             <button
@@ -1469,14 +1469,14 @@ export default function FlightResultsStep({
                           >
                             {/* Mobile: nhãn hạng vé */}
                             <span
-                              className={`sm:hidden mb-0.5 inline-flex items-center rounded-full px-1 py-0.5 text-[7px] font-black uppercase tracking-wider leading-none text-white ${
+                              className={`sm:hidden mb-0.5 inline-flex items-center rounded-full px-1 py-0.5 text-5xs font-black uppercase tracking-wider leading-none text-white ${
                                 FARE_BADGE_CLASS[fc.id] ?? 'bg-gray-500'
                               }`}
                             >
                               {fc.name}
                             </span>
                             <span
-                              className={`text-[9.5px] xs:text-xs sm:text-sm lg:text-base xl:text-lg font-black font-koho leading-none tracking-tight transition-colors whitespace-nowrap ${
+                              className={`text-3xs xs:text-xs sm:text-sm lg:text-base xl:text-lg font-black font-koho leading-none tracking-tight transition-colors whitespace-nowrap ${
                                 isSelected
                                   ? 'text-primary'
                                   : 'text-gray-950 group-hover:text-primary'
@@ -1643,7 +1643,7 @@ export default function FlightResultsStep({
 
         {/* Enhanced empty state */}
         {!isLoading && filtered.length === 0 && (
-          <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] overflow-hidden animate-[fadeInUp_0.4s_ease-out]">
+          <div className="bg-[var(--surface)] rounded-vj border border-[var(--border)] overflow-hidden animate-[fadeInUp_0.4s_ease-out]">
             {/* Top accent bar */}
             <div className="h-1 w-full bg-gradient-to-r from-primary/40 via-primary to-primary/40" />
             <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 px-6 sm:px-8 py-8 sm:py-10">
@@ -1677,7 +1677,7 @@ export default function FlightResultsStep({
                 </p>
 
                 {/* Suggestions */}
-                <div className="bg-[var(--surface-2)] rounded-xl p-3 sm:p-4 mb-4 sm:mb-5 text-left max-w-sm">
+                <div className="bg-[var(--surface-2)] rounded-vj p-3 sm:p-4 mb-4 sm:mb-5 text-left max-w-sm">
                   <p className="text-2xs sm:text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-2.5 sm:mb-3 font-koho">
                     Gợi ý cho bạn
                   </p>
@@ -1760,7 +1760,7 @@ export default function FlightResultsStep({
                               onClick={() => onDateChange?.(iso)}
                               data-testid="available-date"
                               aria-label={`Xem chuyến bay ngày ${iso}`}
-                              className="inline-flex items-center gap-1.5 rounded-xl border border-primary/30 bg-[var(--surface)] px-3 py-2 text-xs2 sm:text-xs font-bold text-primary transition-all hover:bg-primary hover:text-white"
+                              className="inline-flex items-center gap-1.5 rounded-vj border border-primary/30 bg-[var(--surface)] px-3 py-2 text-xs2 sm:text-xs font-bold text-primary transition-all hover:bg-primary hover:text-white"
                             >
                               <Icon name="CalendarDaysIcon" size={12} />
                               {date.toLocaleDateString('vi-VN', {
@@ -1777,7 +1777,7 @@ export default function FlightResultsStep({
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="inline-flex items-center gap-1.5 sm:gap-2 text-2xs sm:text-sm font-bold text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all hover:opacity-90 hover:shadow-md active:scale-95"
+                      className="inline-flex items-center gap-1.5 sm:gap-2 text-2xs sm:text-sm font-bold text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-vj transition-all hover:opacity-90 hover:shadow-md active:scale-95"
                       style={{ background: 'var(--primary)' }}
                     >
                       <Icon name="XMarkIcon" size={12} />
@@ -1787,7 +1787,7 @@ export default function FlightResultsStep({
                   {activeFilterCount > 0 && (
                     <button
                       onClick={resetFilters}
-                      className="inline-flex items-center gap-1.5 sm:gap-2 text-2xs sm:text-sm font-bold text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all hover:opacity-90 hover:shadow-md active:scale-95"
+                      className="inline-flex items-center gap-1.5 sm:gap-2 text-2xs sm:text-sm font-bold text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-vj transition-all hover:opacity-90 hover:shadow-md active:scale-95"
                       style={{ background: 'var(--primary)' }}
                     >
                       <Icon name="ArrowPathIcon" size={12} />
@@ -1796,7 +1796,7 @@ export default function FlightResultsStep({
                   )}
                   <button
                     onClick={resetFilters}
-                    className="inline-flex items-center gap-1.5 sm:gap-2 text-2xs sm:text-sm font-bold text-[var(--foreground-muted)] border border-[var(--border)] hover:border-primary/40 hover:bg-[var(--surface-2)] px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all"
+                    className="inline-flex items-center gap-1.5 sm:gap-2 text-2xs sm:text-sm font-bold text-[var(--foreground-muted)] border border-[var(--border)] hover:border-primary/40 hover:bg-[var(--surface-2)] px-4 sm:px-5 py-2 sm:py-2.5 rounded-vj transition-all"
                   >
                     <Icon name="AdjustmentsHorizontalIcon" size={12} />
                     Xem tất cả chuyến bay
@@ -1840,14 +1840,14 @@ export default function FlightResultsStep({
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => setCompareIds([])}
-                  className="vj-btn vj-btn-sm vj-btn-outline rounded-xl"
+                  className="vj-btn vj-btn-sm vj-btn-outline rounded-vj"
                 >
                   Xóa tất cả
                 </button>
                 <button
                   onClick={() => setShowComparison(true)}
                   disabled={compareIds.length < 2}
-                  className={`vj-btn vj-btn-sm rounded-xl ${
+                  className={`vj-btn vj-btn-sm rounded-vj ${
                     compareIds.length >= 2
                       ? 'vj-btn-primary shadow-glow-red hover:shadow-none'
                       : 'bg-[var(--surface-2)] text-[var(--foreground-muted)] cursor-not-allowed'
@@ -1918,7 +1918,7 @@ export default function FlightResultsStep({
                         )}
                         <div className="flex items-center gap-2 mb-1">
                           <div
-                            className={`h-7 px-2 rounded-lg flex items-center justify-center shrink-0 ${flight.class === 'business' ? 'bg-accent' : 'bg-gradient-red'}`}
+                            className={`h-7 px-2 rounded-vj flex items-center justify-center shrink-0 ${flight.class === 'business' ? 'bg-accent' : 'bg-gradient-red'}`}
                           >
                             <img
                               src="/logo-internal.svg"
@@ -2148,7 +2148,7 @@ export default function FlightResultsStep({
                           onSelect(flight);
                           onFlightSelect?.(flight.flightNo, flight.class as string, flight.price);
                         }}
-                        className={`w-full vj-btn vj-btn-md rounded-xl font-bold ${
+                        className={`w-full vj-btn vj-btn-md rounded-vj font-bold ${
                           flight.class === 'business'
                             ? 'vj-btn-accent'
                             : 'vj-btn-primary shadow-glow-red hover:shadow-none'
@@ -2183,7 +2183,7 @@ export default function FlightResultsStep({
           the flight list as a third full-width block, while the same totals are
           already pinned in the sticky bar, so mobile drops it. */}
       <aside className="hidden lg:col-span-3 w-full min-w-0 lg:block">
-        <div className="bg-[var(--background)] rounded-xl border border-primary/20 sticky top-[160px] overflow-hidden shadow-sm">
+        <div className="bg-[var(--background)] rounded-vj border border-primary/20 sticky top-[160px] overflow-hidden shadow-sm">
           {/* Header bar — vietjetair.com paints this one solid red. */}
           <div className="bg-primary px-3 py-2 text-white flex items-center justify-center relative">
             <h3 className="font-black font-koho text-sm tracking-wider uppercase">
@@ -2199,7 +2199,7 @@ export default function FlightResultsStep({
           </div>
 
           <div className="p-4 space-y-4">
-            <div className="border border-[rgb(var(--primary-rgb))]/10 rounded-lg p-3 bg-[rgb(var(--primary-rgb))]/5 border-l-4 border-l-primary">
+            <div className="border border-[rgb(var(--primary-rgb))]/10 rounded-vj p-3 bg-[rgb(var(--primary-rgb))]/5 border-l-4 border-l-primary">
               <div className="flex justify-between items-start mb-2">
                 <span className="font-bold text-[var(--foreground)] font-koho text-sm uppercase">
                   Chuyến đi
@@ -2228,7 +2228,7 @@ export default function FlightResultsStep({
               </div>
             </div>
 
-            <div className="border border-[var(--border)] rounded-lg p-3 bg-[rgb(var(--surface-2-rgb))]/50">
+            <div className="border border-[var(--border)] rounded-vj p-3 bg-[rgb(var(--surface-2-rgb))]/50">
               <div className="flex justify-between items-start mb-2">
                 <span className="font-bold text-[var(--foreground-muted)] font-koho text-sm uppercase">
                   Hành khách
@@ -2260,7 +2260,7 @@ export default function FlightResultsStep({
                 {['Giá vé', 'Thuế, phí'].map((row) => (
                   <div
                     key={row}
-                    className="flex items-center justify-between rounded-lg bg-[var(--surface-2)] px-3 py-2"
+                    className="flex items-center justify-between rounded-vj bg-[var(--surface-2)] px-3 py-2"
                   >
                     <span className="text-xs font-semibold text-[var(--foreground-muted)]">
                       {row}
@@ -2268,7 +2268,7 @@ export default function FlightResultsStep({
                     <span className="text-xs font-bold text-[var(--foreground-subtle)]">---</span>
                   </div>
                 ))}
-                <div className="flex items-center justify-between rounded-lg bg-[var(--surface-2)] px-3 py-2">
+                <div className="flex items-center justify-between rounded-vj bg-[var(--surface-2)] px-3 py-2">
                   <span className="text-xs font-semibold text-[var(--foreground-muted)]">
                     Dịch vụ
                   </span>

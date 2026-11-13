@@ -114,7 +114,7 @@ export default function BaggageSelectionDrawer({
       {/* Drawer content */}
       <div className="relative w-full max-w-lg bg-white h-full shadow-2xl flex flex-col z-10 animate-slideInRight">
         {/* Header with Vietjet curve top-right (Screenshot 10) */}
-        <div className="relative bg-[#C4161C] text-white px-4 py-3 flex items-center justify-between shadow-md overflow-hidden">
+        <div className="relative bg-primary-dark text-white px-4 py-3 flex items-center justify-between shadow-md overflow-hidden">
           <div className="w-8 shrink-0" />
           <h2 className="font-sans font-black italic tracking-wide text-sm sm:text-base uppercase text-white text-center">
             CHỌN HÀNH LÝ/DỊCH VỤ NỐI CHUYẾN
@@ -171,8 +171,8 @@ export default function BaggageSelectionDrawer({
 
         {/* Passenger Card matching Screenshot 10 */}
         <div className="p-4 bg-gray-50 border-b border-gray-200">
-          <div className="max-w-xs mx-auto overflow-hidden rounded-xl border border-red-200 shadow-sm bg-white text-center">
-            <div className="bg-[#C4161C] py-2 px-4 text-white">
+          <div className="max-w-xs mx-auto overflow-hidden rounded-vj border border-red-200 shadow-sm bg-white text-center">
+            <div className="bg-primary-dark py-2 px-4 text-white">
               <div className="text-3xs uppercase tracking-wider text-white/80">Người lớn</div>
               <div className="text-sm font-black tracking-tight">{passengerName}</div>
             </div>
@@ -194,12 +194,12 @@ export default function BaggageSelectionDrawer({
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto px-4 py-4 bg-slate-50 space-y-4">
-          <div className="text-xs font-bold text-green-700 flex items-center gap-1.5 bg-green-50 p-2.5 rounded-lg border border-green-200">
+          <div className="text-xs font-bold text-green-700 flex items-center gap-1.5 bg-green-50 p-2.5 rounded-vj border border-green-200">
             <span>ⓘ</span>
             <span>Hạng vé của bạn đã bao gồm 7kg hành lý xách tay</span>
           </div>
           {/* Promo banner */}
-          <div className="bg-gradient-to-r from-red-600 to-rose-500 text-white rounded-xl p-4 shadow-sm flex items-center gap-3">
+          <div className="bg-gradient-to-r from-red-600 to-rose-500 text-white rounded-vj p-4 shadow-sm flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center shrink-0">
               <RiSuitcaseLine size={28} className="text-yellow-300" />
             </div>
@@ -214,7 +214,7 @@ export default function BaggageSelectionDrawer({
           </div>
 
           {/* Included note */}
-          <div className="flex items-center gap-2 text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg p-2.5">
+          <div className="flex items-center gap-2 text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-vj p-2.5">
             <RiInformationLine size={18} className="text-emerald-600 shrink-0" />
             <span>
               Hạng vé của bạn đã bao gồm <strong>7kg hành lý xách tay</strong>
@@ -233,7 +233,7 @@ export default function BaggageSelectionDrawer({
                   <div
                     key={pkg.id}
                     onClick={() => handleSelectPkg(pkg.id)}
-                    className={`relative cursor-pointer rounded-xl border p-2.5 flex flex-col items-center justify-center text-center transition-all bg-white ${
+                    className={`relative cursor-pointer rounded-vj border p-2.5 flex flex-col items-center justify-center text-center transition-all bg-white ${
                       isSelected
                         ? 'border-primary-dark ring-2 ring-primary-dark/20 shadow-md'
                         : 'border-gray-200 hover:border-gray-300 shadow-sm'
@@ -271,7 +271,7 @@ export default function BaggageSelectionDrawer({
                   <div
                     key={pkg.id}
                     onClick={() => handleSelectPkg(pkg.id)}
-                    className={`relative cursor-pointer rounded-xl border p-3 flex flex-col items-center justify-center text-center transition-all bg-white ${
+                    className={`relative cursor-pointer rounded-vj border p-3 flex flex-col items-center justify-center text-center transition-all bg-white ${
                       isSelected
                         ? 'border-primary-dark ring-2 ring-primary-dark/20 shadow-md'
                         : 'border-gray-200 hover:border-gray-300 shadow-sm'
@@ -296,7 +296,7 @@ export default function BaggageSelectionDrawer({
           {/* Radio: Không mua thêm */}
           <div
             onClick={() => setCurrentPkgId(null)}
-            className={`cursor-pointer rounded-xl border p-3 flex items-center gap-2.5 transition-all bg-white ${
+            className={`cursor-pointer rounded-vj border p-3 flex items-center gap-2.5 transition-all bg-white ${
               currentPkgId === null
                 ? 'border-green-500 bg-emerald-50/30 ring-2 ring-emerald-500/20'
                 : 'border-gray-200 hover:border-gray-300'
@@ -314,14 +314,14 @@ export default function BaggageSelectionDrawer({
           </div>
 
           {/* Priority Hand Luggage (+2kg) */}
-          <div className="rounded-xl border border-gray-200 bg-white p-3.5 shadow-sm space-y-2">
+          <div className="rounded-vj border border-gray-200 bg-white p-3.5 shadow-sm space-y-2">
             <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider">
               Hành lý xách tay ưu tiên ({activeLeg === 'outbound' ? 'Chiều đi' : 'Chiều về'})
             </h4>
             <p className="text-xs2 text-gray-500">
               Bổ sung 2kg nâng tổng xách tay lên 9kg, kích thước 56x36x23cm
             </p>
-            <label className="flex items-center justify-between p-2 rounded-lg bg-gray-50 border border-gray-200 cursor-pointer hover:bg-gray-100">
+            <label className="flex items-center justify-between p-2 rounded-vj bg-gray-50 border border-gray-200 cursor-pointer hover:bg-gray-100">
               <span className="text-xs font-bold text-gray-800">
                 Hành lý xách tay ưu tiên (tối đa 9 kg)
               </span>

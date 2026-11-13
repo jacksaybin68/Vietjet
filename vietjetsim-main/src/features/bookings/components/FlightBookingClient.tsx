@@ -577,26 +577,26 @@ function FlightBookingClientInner({
         {step === 1 && (
           <ErrorBoundary inline variant="api" retryLabel="Tìm lại chuyến bay">
             {isRoundTrip && (
-              <div className="mb-3 sm:mb-4 flex items-center justify-between gap-1.5 sm:gap-3 bg-white p-1.5 sm:p-2 rounded-2xl border border-gray-200/90 shadow-xs max-w-full">
+              <div className="mb-3 sm:mb-4 flex items-center justify-between gap-1.5 sm:gap-3 bg-white p-1.5 sm:p-2 rounded-vj border border-gray-200/90 shadow-xs max-w-full">
                 <button
                   type="button"
                   onClick={() => setCurrentLeg('outbound')}
-                  className={`flex-1 min-w-0 flex flex-col items-center py-2 px-2 sm:px-3 rounded-xl transition-all cursor-pointer relative focus:outline-none focus:ring-0 ${
+                  className={`flex-1 min-w-0 flex flex-col items-center py-2 px-2 sm:px-3 rounded-vj transition-all cursor-pointer relative focus:outline-none focus:ring-0 ${
                     currentLeg === 'outbound'
-                      ? 'bg-[#D71920] text-white shadow-md'
+                      ? 'bg-primary-dark text-white shadow-md'
                       : 'bg-gray-50/90 text-gray-700 hover:bg-gray-100 border border-gray-100'
                   }`}
                 >
                   <div className="flex items-center gap-1.5">
                     <span
-                      className={`uppercase text-[10px] sm:text-3xs font-black tracking-wider ${
+                      className={`uppercase text-2xs sm:text-3xs font-black tracking-wider ${
                         currentLeg === 'outbound' ? 'text-yellow-300' : 'text-gray-500'
                       }`}
                     >
                       Chuyến đi
                     </span>
                     {booking.selectedFlight && (
-                      <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px] font-black leading-none">
+                      <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-3xs font-black leading-none">
                         ✓
                       </span>
                     )}
@@ -605,7 +605,7 @@ function FlightBookingClientInner({
                     {params.from} ➔ {params.to}
                   </span>
                   <span
-                    className={`text-[10px] sm:text-3xs font-medium truncate max-w-full ${
+                    className={`text-2xs sm:text-3xs font-medium truncate max-w-full ${
                       currentLeg === 'outbound' ? 'text-white/90' : 'text-gray-500'
                     }`}
                   >
@@ -626,22 +626,22 @@ function FlightBookingClientInner({
                     }
                     setCurrentLeg('inbound');
                   }}
-                  className={`flex-1 min-w-0 flex flex-col items-center py-2 px-2 sm:px-3 rounded-xl transition-all cursor-pointer relative focus:outline-none focus:ring-0 ${
+                  className={`flex-1 min-w-0 flex flex-col items-center py-2 px-2 sm:px-3 rounded-vj transition-all cursor-pointer relative focus:outline-none focus:ring-0 ${
                     currentLeg === 'inbound'
-                      ? 'bg-[#D71920] text-white shadow-md'
+                      ? 'bg-primary-dark text-white shadow-md'
                       : 'bg-gray-50/90 text-gray-700 hover:bg-gray-100 border border-gray-100'
                   }`}
                 >
                   <div className="flex items-center gap-1.5">
                     <span
-                      className={`uppercase text-[10px] sm:text-3xs font-black tracking-wider ${
+                      className={`uppercase text-2xs sm:text-3xs font-black tracking-wider ${
                         currentLeg === 'inbound' ? 'text-yellow-300' : 'text-gray-500'
                       }`}
                     >
                       Chuyến về
                     </span>
                     {booking.returnFlight && (
-                      <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px] font-black leading-none">
+                      <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-3xs font-black leading-none">
                         ✓
                       </span>
                     )}
@@ -650,7 +650,7 @@ function FlightBookingClientInner({
                     {params.to} ➔ {params.from}
                   </span>
                   <span
-                    className={`text-[10px] sm:text-3xs font-medium truncate max-w-full ${
+                    className={`text-2xs sm:text-3xs font-medium truncate max-w-full ${
                       currentLeg === 'inbound' ? 'text-white/90' : 'text-gray-500'
                     }`}
                   >
@@ -845,13 +845,13 @@ export default function FlightBookingClient(props: FlightBookingClientProps) {
 function FlightSearchSkeleton() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-      <div className="bg-[var(--surface)] rounded-2xl shadow-lg p-8 animate-pulse">
-        <div className="h-8 bg-[var(--surface-2)] rounded-lg w-1/3 mb-6" />
+      <div className="bg-[var(--surface)] rounded-vj shadow-lg p-8 animate-pulse">
+        <div className="h-8 bg-[var(--surface-2)] rounded-vj w-1/3 mb-6" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
             <div key={i}>
               <div className="h-4 bg-[var(--surface-2)] rounded w-1/2 mb-2" />
-              <div className="h-10 bg-[var(--surface-2)] rounded-lg" />
+              <div className="h-10 bg-[var(--surface-2)] rounded-vj" />
             </div>
           ))}
         </div>

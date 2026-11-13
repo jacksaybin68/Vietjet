@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:css-debt": "node scripts/css-debt.cjs",
+    "lint:tailwind-classes": "node scripts/check-tailwind-classes.cjs",
     "format": "prettier --write \"src/**/*.{ts,tsx,css,md,json}\"",
     "serve": "next start",
     "type-check": "tsc --noEmit",

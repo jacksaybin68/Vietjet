@@ -11,11 +11,11 @@ export function RoleBadge({ role, size = 'md' }: RoleBadgeProps) {
 
   if (size === 'sm') {
     return isAdmin ? (
-      <span className="px-1.5 py-0.5 text-[10px] font-bold bg-primary-100 text-primary rounded-full">
+      <span className="px-1.5 py-0.5 text-2xs font-bold bg-primary-100 text-primary rounded-full">
         Quản trị viên
       </span>
     ) : (
-      <span className="px-1.5 py-0.5 text-[10px] font-bold bg-blue-100 text-blue-700 rounded-full">
+      <span className="px-1.5 py-0.5 text-2xs font-bold bg-blue-100 text-blue-700 rounded-full">
         Người dùng
       </span>
     );

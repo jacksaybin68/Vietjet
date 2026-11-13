@@ -1,0 +1,19 @@
+{
+  "url": "https://newweb.vietjetair.com/vi/select-flight",
+  "bodyText": "",
+  "dateBtns": [],
+  "fareTabs": [],
+  "priceNodes": [],
+  "h3": [],
+  "h4": [],
+  "h5": [],
+  "buttons": [],
+  "aside": null,
+  "header": null,
+  "classHints": {
+    "dateStrip": [],
+    "fare": [],
+    "card": []
+  },
+  "total": null
+}

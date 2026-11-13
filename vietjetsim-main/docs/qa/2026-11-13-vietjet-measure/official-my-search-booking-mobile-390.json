@@ -1,0 +1,70 @@
+{
+  "route": "my-search-booking",
+  "viewport": "mobile-390",
+  "header": null,
+  "headerBg": null,
+  "headerRadius": null,
+  "h1": {
+    "x": 17,
+    "y": 15,
+    "w": 320,
+    "h": 19,
+    "fs": "16px",
+    "fw": "700",
+    "color": "rgb(255, 255, 255)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "shadow": "none"
+  },
+  "h2": null,
+  "inputs": [
+    {
+      "x": 50,
+      "y": 241,
+      "w": 290,
+      "h": 40,
+      "fs": "16px",
+      "fw": "500",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    },
+    {
+      "x": 50,
+      "y": 298,
+      "w": 290,
+      "h": 40,
+      "fs": "16px",
+      "fw": "500",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    },
+    {
+      "x": 50,
+      "y": 355,
+      "w": 290,
+      "h": 40,
+      "fs": "16px",
+      "fw": "500",
+      "color": "rgb(51, 51, 51)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "shadow": "none"
+    }
+  ],
+  "submit": {
+    "x": 132,
+    "y": 412,
+    "w": 127,
+    "h": 39,
+    "fs": "14px",
+    "fw": "500",
+    "color": "rgb(51, 51, 51)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "10px",
+    "shadow": "none"
+  }
+}

@@ -141,19 +141,15 @@ export default function PassengerPicker({
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-label="Số hành khách"
-        className="w-full h-full min-h-[48px] flex items-center gap-2.5 bg-white px-3 py-1.5 text-left transition-colors cursor-pointer hover:bg-amber-50 rounded-xl"
+        className="flex h-[56px] w-full min-w-0 items-center gap-2 rounded-vj border border-[var(--border)] bg-white px-3 text-left transition-colors cursor-pointer hover:border-[var(--accent)]"
       >
-        <MdOutlinePerson className="shrink-0 text-xl text-gray-700" />
+        <MdOutlinePerson className="shrink-0 text-xl text-[var(--vj-muted)]" />
         <span className="min-w-0 flex-1">
-          <span className="block text-2xs font-bold uppercase leading-tight tracking-[0.06em] text-gray-500">
-            Hành khách
-          </span>
-          <span className="block text-sm font-extrabold text-gray-900 truncate">
-            {describePax(value)}
-          </span>
+          <span className="vj-field-label">Hành khách</span>
+          <span className="vj-field-value truncate">{describePax(value)}</span>
         </span>
         <MdExpandMore
-          className={`shrink-0 text-xl text-gray-700 transition-transform duration-200 ${
+          className={`shrink-0 text-xl text-[var(--vj-muted)] transition-transform duration-200 ${
             open ? 'rotate-180' : ''
           }`}
         />
@@ -164,7 +160,7 @@ export default function PassengerPicker({
         <div
           role="dialog"
           aria-label="Chọn số hành khách"
-          className="absolute left-0 top-full z-50 mt-1 w-full max-w-[calc(100vw-28px)] min-w-[280px] sm:min-w-[340px] rounded-xl border border-gray-200 bg-white p-3.5 sm:p-4 shadow-[0_16px_50px_rgba(0,0,0,0.22)] animate-fadeIn text-gray-800"
+          className="absolute left-0 top-full z-50 mt-1 w-full max-w-[calc(100vw-28px)] min-w-[280px] sm:min-w-[340px] rounded-vj border border-vj-border bg-white p-3.5 sm:p-4 shadow-[0_16px_50px_rgba(0,0,0,0.22)] animate-fadeIn text-[var(--foreground)]"
         >
           {/* Top Row: Yêu cầu trợ giúp đặc biệt */}
           <div className="flex justify-end mb-3">
@@ -184,13 +180,15 @@ export default function PassengerPicker({
               return (
                 <div
                   key={row.type}
-                  className="flex items-center justify-between gap-3 py-1 border-b border-gray-100 last:border-b-0"
+                  className="flex items-center justify-between gap-3 py-1 border-b border-vj-border-light last:border-b-0"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <Icon className="text-2xl text-gray-400 shrink-0" />
+                    <Icon className="text-2xl text-vj-text-soft shrink-0" />
                     <div className="min-w-0">
-                      <span className="block text-sm font-bold text-gray-800">{row.title}</span>
-                      <span className="block text-xs text-gray-400 leading-tight">
+                      <span className="block text-sm font-bold text-[var(--foreground)]">
+                        {row.title}
+                      </span>
+                      <span className="block text-xs text-vj-text-soft leading-tight">
                         {row.ageDisplay}
                         <span className="sr-only">{row.testHint}</span>
                       </span>
@@ -203,11 +201,11 @@ export default function PassengerPicker({
                       onClick={() => step(row.type, -1)}
                       disabled={value[row.type] <= row.min}
                       aria-label={`Giảm số ${row.title}`}
-                      className="grid h-8 w-8 place-items-center rounded-full border border-gray-300 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                      className="grid h-8 w-8 place-items-center rounded-full border border-vj-border text-vj-text-soft hover:bg-vj-surface-cool disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
                     >
                       <MdRemove className="text-sm" />
                     </button>
-                    <span className="w-5 text-center text-sm font-bold text-gray-900">
+                    <span className="w-5 text-center text-sm font-bold text-[var(--foreground)]">
                       {value[row.type]}
                     </span>
                     <button
@@ -215,7 +213,7 @@ export default function PassengerPicker({
                       onClick={() => step(row.type, 1)}
                       disabled={value[row.type] >= maxFor(value, row.type)}
                       aria-label={`Tăng số ${row.title}`}
-                      className="grid h-8 w-8 place-items-center rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                      className="grid h-8 w-8 place-items-center rounded-full border border-vj-border text-vj-text-strong hover:bg-vj-surface-cool disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
                     >
                       <MdAdd className="text-sm" />
                     </button>
@@ -226,14 +224,14 @@ export default function PassengerPicker({
           </div>
 
           {/* Coupon / Mã khuyến mại input */}
-          <div className="mt-4 flex items-center gap-2.5 rounded-lg bg-gray-100 px-3 py-2 border border-transparent focus-within:border-gray-300 transition-colors">
-            <MdConfirmationNumber className="text-gray-500 text-lg shrink-0" />
+          <div className="mt-4 flex items-center gap-2.5 rounded-vj bg-vj-surface-cool px-3 py-2 border border-transparent focus-within:border-vj-border transition-colors">
+            <MdConfirmationNumber className="text-vj-text-soft text-lg shrink-0" />
             <input
               type="text"
               value={promoCode}
               onChange={(e) => onPromoCodeChange?.(e.target.value)}
               placeholder="Mã khuyến mại"
-              className="w-full bg-transparent text-sm font-medium text-gray-800 placeholder:text-gray-400 outline-none"
+              className="w-full bg-transparent text-sm font-medium text-[var(--foreground)] placeholder:text-vj-placeholder outline-none"
             />
           </div>
 
@@ -243,9 +241,9 @@ export default function PassengerPicker({
               type="checkbox"
               checked={cheapestOnly}
               onChange={(e) => onCheapestChange?.(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-red-600 accent-red-600 focus:ring-0 cursor-pointer"
+              className="h-4 w-4 rounded border-vj-border text-vjred accent-vjred focus:ring-0 cursor-pointer"
             />
-            <span className="text-sm font-bold text-gray-800">Tìm vé rẻ nhất</span>
+            <span className="text-sm font-bold text-[var(--foreground)]">Tìm vé rẻ nhất</span>
           </label>
 
           {/* CTA: Tìm chuyến bay button */}
@@ -253,7 +251,7 @@ export default function PassengerPicker({
             <button
               type="button"
               onClick={handleSearchSubmit}
-              className="w-full max-w-[210px] py-2.5 px-6 rounded-full bg-vjgold hover:bg-vj-gold-hover text-vjwine font-black text-sm tracking-wide shadow-sm flex items-center justify-center cursor-pointer transition-all active:scale-98"
+              className="vj-cta vj-cta--search hover:brightness-105 active:translate-y-[1px] transition-all duration-150 cursor-pointer"
             >
               Tìm chuyến bay
             </button>

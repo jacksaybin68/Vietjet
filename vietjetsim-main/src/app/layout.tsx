@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import '../styles/tailwind.css';
 import { PageTransition } from '@/shared/components/layouts';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthModalProvider } from '@/features/auth/components';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { ChatWidgets } from '@/features/chat';
 import { SiteOverlays } from '@/shared/components/feedback/SiteOverlays';
@@ -45,16 +46,17 @@ export default function RootLayout({
   return (
     <html lang="vi" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
-        {/* KoHo is VietJet's primary body font; Be Vietnam Pro for headings */}
+        {/* KoHo is VietJet's only font family — the production bundle of
+            vietjetair.com loads KoHo 300–700 and nothing else. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* `@next/next/no-page-custom-font` targets the Pages Router’s
             `pages/_document.js`; this app is App Router only, so the rule fires as
-            a false positive. Switching to `next/font` would change how the KoHo /
-            Be Vietnam Pro CSS variables are wired into tailwind.config.js. */}
+            a false positive. Switching to `next/font` would change how the KoHo
+            CSS variables are wired into tailwind.config.js. */}
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=KoHo:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=KoHo:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
           rel="stylesheet"
         />
 
@@ -62,7 +64,7 @@ export default function RootLayout({
 
         {/* Vietjet Air is a local booking simulator and is intentionally not indexed as the official airline site. */}
       </head>
-      <body className="bg-[var(--background)] pb-[calc(60px+env(safe-area-inset-bottom))] text-[var(--foreground)] lg:pb-0">
+      <body className="bg-[var(--background)] pb-[calc(62px+env(safe-area-inset-bottom))] text-[var(--foreground)] lg:pb-0">
         {/* Skip link — phần tử đầu tiên nhận focus. Đích `#main-content` do từng
             trang tự đặt *sau* `<Header />` của nó; lý do không đặt ở tầng này nằm
             ở ghi chú trên `<div>` bên dưới. */}
@@ -99,14 +101,18 @@ export default function RootLayout({
         <MobileBottomNav />
         <ThemeProvider>
           <AuthProvider>
-            {/* Đây là `<div>`, không phải `<main>`: `children` chứa luôn `<Header />`
+            {/* Modal SkyJoy ID mở từ header — bọc ngoài `children` để mọi
+                route (kể cả trang con) đều mở được cùng một modal. */}
+            <AuthModalProvider>
+              {/* Đây là `<div>`, không phải `<main>`: `children` chứa luôn `<Header />`
                 của từng trang, nên một landmark ở tầng này sẽ bọc cả thanh điều
                 hướng lặp lại — skip link trỏ vào nó thì Tab kế tiếp rơi đúng vào
                 announcement bar, tức là không bỏ qua được gì. Từng trang tự đặt
                 `<main id="main-content">` **sau** `<Header />` của nó. */}
-            <div>
-              <PageTransition>{children}</PageTransition>
-            </div>
+              <div>
+                <PageTransition>{children}</PageTransition>
+              </div>
+            </AuthModalProvider>
             <ChatWidgets />
             <SiteOverlays />
           </AuthProvider>

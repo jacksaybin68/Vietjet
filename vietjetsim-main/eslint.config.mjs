@@ -21,6 +21,11 @@ const eslintConfig = [
       // sống, xem AGENTS.md) tạo ra một cây build thứ hai có cả file `.ts` sinh tự
       // động — 184 MB. Không ignore thì `eslint .` quét luôn nó và mất hàng phút.
       '.next-uicheck/',
+      // Các cây build thứ hai sinh ra cho lượt đo QA — cùng lý do với
+      // `.next-uicheck`: `eslint .` quét cả chúng sẽ mất hàng phút.
+      '.next-mobilqa/',
+      '.next-prod/',
+      '.next-qa-*/',
       'out/',
       'public/',
       'next-env.d.ts',

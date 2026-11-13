@@ -29,7 +29,7 @@ const VIKKI_BANNER = {
 export default function LargePromoBanners() {
   return (
     <section className="border-y border-[var(--border)] bg-[var(--surface)] py-10 sm:py-14 overflow-hidden">
-      <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10 sm:mb-12">
           <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[var(--primary)] mb-2">
             Khuyến mãi nổi bật
@@ -52,7 +52,7 @@ export default function LargePromoBanners() {
                 alt={banner.title}
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[var(--vj-wine)]/80 via-[var(--vj-wine)]/25 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[rgb(var(--vj-wine-rgb))]/80 via-[rgb(var(--vj-wine-rgb))]/25 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8 text-white">
                 <p className="text-xs2 sm:text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--accent)] mb-2">
                   {banner.title}
@@ -75,9 +75,9 @@ export default function LargePromoBanners() {
             alt={VIKKI_BANNER.title}
             className="absolute inset-0 w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[var(--vj-wine)]/85 via-[var(--vj-wine)]/55 to-[var(--vj-wine-deep)]/70" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[rgb(var(--vj-wine-rgb))]/85 via-[rgb(var(--vj-wine-rgb))]/55 to-[rgb(var(--vj-wine-deep-rgb))]/70" />
           <div className="relative z-10 p-6 sm:p-8 lg:p-12 text-white">
-            <div className="inline-flex items-center gap-2 rounded-full bg-yellow-200/20 px-3 py-1 text-xs2 sm:text-xs font-bold text-[var(--accent)] border border-[var(--accent)]/40 mb-4">
+            <div className="inline-flex items-center gap-2 rounded-full bg-yellow-200/20 px-3 py-1 text-xs2 sm:text-xs font-bold text-[var(--accent)] border border-[rgb(var(--accent-rgb))]/40 mb-4">
               {VIKKI_BANNER.title}
             </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-black italic leading-tight mb-3 max-w-[34rem]">
@@ -85,7 +85,7 @@ export default function LargePromoBanners() {
             </h2>
             <Link
               href={VIKKI_BANNER.href}
-              className="inline-flex items-center justify-center rounded-xl border-2 border-[var(--accent)] bg-[var(--accent)] px-5 py-2.5 text-sm font-black text-[var(--foreground)] transition-colors hover:bg-white hover:text-[var(--vj-wine)] active:scale-95"
+              className="inline-flex items-center justify-center rounded-vj border-2 border-[var(--accent)] bg-[var(--accent)] px-5 py-2.5 text-sm font-black text-[var(--foreground)] transition-colors hover:bg-white hover:text-[var(--vj-wine)] active:scale-95"
             >
               {VIKKI_BANNER.action}
             </Link>

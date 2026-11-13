@@ -11,7 +11,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[var(--vj-navy)] via-[#1e325a] to-[rgb(var(--primary-rgb))]/20 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[var(--vj-navy)] via-vj-navy-mid to-[rgb(var(--primary-rgb))]/20 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 text-center space-y-6 animate-fade-in">
         {/* Error Icon */}
         <div className="flex justify-center">
@@ -55,7 +55,7 @@ export default function GlobalError({
 
           <Link
             href="/"
-            className="inline-flex items-center justify-center gap-2 bg-[var(--vj-navy)] hover:bg-[#14203a] text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg active:scale-95 font-koho"
+            className="inline-flex items-center justify-center gap-2 bg-[var(--vj-navy)] hover:bg-vj-navy-deep text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg active:scale-95 font-koho"
           >
             <Icon name="HomeIcon" variant="outline" size={20} />
             Về trang chủ

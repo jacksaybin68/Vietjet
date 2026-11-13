@@ -189,7 +189,7 @@ export default function OpenClawAssistant() {
             <div className="flex-1">
               <div className="text-white font-heading font-bold text-lg flex items-center gap-2">
                 OpenClaw Assistant
-                <span className="text-[10px] bg-accent/20 text-accent px-1.5 py-0.5 rounded border border-accent/30 font-medium">
+                <span className="text-2xs bg-accent/20 text-accent px-1.5 py-0.5 rounded border border-accent/30 font-medium">
                   BETA AI
                 </span>
               </div>
@@ -208,7 +208,7 @@ export default function OpenClawAssistant() {
           </div>
 
           {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto px-5 py-6 space-y-6 bg-[#F8F9FB] custom-scrollbar">
+          <div className="flex-1 overflow-y-auto px-5 py-6 space-y-6 bg-vj-surface-cool custom-scrollbar">
             {messages.map((msg) => {
               const IsAi = msg.sender === 'ai';
               return (
@@ -227,13 +227,11 @@ export default function OpenClawAssistant() {
                     <div
                       className={`mt-1.5 flex items-center gap-2 opacity-60 ${IsAi ? 'justify-start' : 'justify-end'}`}
                     >
-                      <span className="text-[10px] font-medium tracking-wider uppercase text-gray-400">
+                      <span className="text-2xs font-medium tracking-wider uppercase text-gray-400">
                         {IsAi ? 'OpenClaw v1.2' : 'You'}
                       </span>
-                      <span className="text-[10px] text-gray-400">•</span>
-                      <span className="text-[10px] text-gray-400">
-                        {formatTime(msg.created_at)}
-                      </span>
+                      <span className="text-2xs text-gray-400">•</span>
+                      <span className="text-2xs text-gray-400">{formatTime(msg.created_at)}</span>
                     </div>
                   </div>
                 </div>
@@ -286,7 +284,7 @@ export default function OpenClawAssistant() {
                 </button>
               </div>
             </div>
-            <p className="mt-3 text-[10px] text-center text-gray-400">
+            <p className="mt-3 text-2xs text-center text-gray-400">
               Cung cấp bởi công nghệ <span className="text-navy font-bold">OpenClaw Engine</span> •
               Dữ liệu cập nhật 2026
             </p>

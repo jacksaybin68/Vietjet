@@ -34,6 +34,30 @@ export const HERO_BANNERS = [
     title: 'Trải nghiệm phong cách Người dẫn đầu',
     focusClass: 'object-cover object-center',
   },
+  {
+    id: 'banner-artwork-beach',
+    image: '/images/hero/hero-artwork-beach-sunset.jpg',
+    title: 'Kỳ nghỉ cùng Vietjet Air - Vietjet Air',
+    focusClass: 'object-cover object-center',
+  },
+  {
+    id: 'banner-bali',
+    image: '/images/hero/hero-bali-terraces.jpg',
+    title: 'Bali trong tầm tay - Vietjet Air',
+    focusClass: 'object-cover object-center',
+  },
+  {
+    id: 'banner-bangkok',
+    image: '/images/hero/hero-bangkok-temple.jpg',
+    title: 'Khám phá Bangkok - Vietjet Air',
+    focusClass: 'object-cover object-center',
+  },
+  {
+    id: 'banner-hongkong',
+    image: '/images/hero/hero-hongkong-skyline.jpg',
+    title: 'Hong Kong đêm rực rỡ - Vietjet Air',
+    focusClass: 'object-cover object-center',
+  },
 ];
 
 export default function HeroSection() {
@@ -48,82 +72,79 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section className="relative w-full overflow-hidden bg-sky-100 lg:-mt-[128px]">
+    // Số đo site thật (13/11/2026, viewport 1440×900):
+    //   - Hero cao 725px, nằm ngay dưới thanh thông báo 50px (y=50..775).
+    //   - Ảnh slider 1440×720, bo tròn không, canh trên.
+    //   - Dải đặt vé rộng 380px nằm ở mép phải container 1200px, đỉnh ở
+    //     y=214 (164px tính từ đỉnh hero).
+    //   - Chấm điều hướng slider: `ul` absolute tại top 589.016px (hero-relative),
+    //     canh giữa toàn bề ngang, mỗi chấm 20×20px.
+    //
+    // MOBILE (390×844, đo trực tiếp site thật):
+    //   - Ảnh slider cao 422px, bắt đầu ngay dưới thanh thông báo 35px
+    //     (y=35..457) — hàng header 56px PHỦ lên trên ảnh.
+    //   - Chấm điều hướng: `ul` absolute tại top 297px (hero-relative) →
+    //     y=332 tuyệt đối, mỗi chấm 20×20px nằm ở y=338.
+    //   - Dải đặt vé PHỦ xuống banner: hàng tab bắt đầu ở y=368, thân panel
+    //     ở y=420 (cao 305px) → tổng khối đặt vé tràn xuống dưới banner.
+    // Lưu ý: `section` KHÔNG dùng `overflow-hidden` — popover lịch 630px mở ra
+    // ngoài khung panel và sẽ bị cắt mất nếu khối cha cắt tràn. Ảnh nền vẫn
+    // được cắt riêng trong lớp bọc của nó.
+    <section className="relative w-full bg-sky-100 pb-[268px] lg:pb-0">
       <h1 className="sr-only">Vietjet Air - Thông báo quan trọng Nhà ga T3 Jakarta</h1>
-      {/* Background Hero Banner Slider */}
-      <div className="absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
-        {HERO_BANNERS.map((banner, idx) => (
-          <div
-            key={banner.id}
-            className={`absolute inset-0 transition-opacity duration-700 ${
-              idx === currentBannerIndex ? 'opacity-100 z-0' : 'opacity-0 pointer-events-none'
-            }`}
-          >
-            <img
-              src={banner.image}
-              alt={banner.title}
-              className={`w-full h-full object-cover object-top ${banner.focusClass}`}
-            />
-          </div>
-        ))}
-      </div>
 
-      {/* Nội dung Hero: 2 cột desktop (Trái: Artwork trống / Phải: Form đặt vé) */}
-      <div className="relative z-10 mx-auto w-full max-w-[1320px] px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 lg:pt-[152px] pb-6">
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_356px] gap-8 items-start">
-          {/* Cột trái: Vùng quảng cáo (ảnh banner đã in sẵn chữ và artwork) */}
-          <div className="hidden lg:block min-h-[460px] pointer-events-none" />
-
-          {/* Cột phải: Form đặt vé Vietjet */}
-          <div className="relative w-full max-w-[356px] mx-auto lg:mr-0 lg:ml-auto">
-            <HeroBookingWidget />
-
-            {/* Mascot Amy + Bong bóng lời chào "Xin chào!" theo ảnh tham chiếu */}
-            <div className="hidden xl:flex items-end absolute -bottom-10 -right-28 pointer-events-none z-20">
-              <div className="mb-8 mr-1 rounded-xl bg-white/95 px-3 py-1 shadow-md border border-gray-100/80">
-                <span className="text-xs2 font-black text-[var(--foreground)]">Xin chào!</span>
-              </div>
+      <div className="relative h-[422px] sm:h-[560px] lg:h-[725px]">
+        {/* Ảnh nền hero — slider các banner. */}
+        <div className="absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+          {HERO_BANNERS.map((banner, idx) => (
+            <div
+              key={banner.id}
+              className={`absolute inset-0 transition-opacity duration-700 ${
+                idx === currentBannerIndex ? 'opacity-100 z-0' : 'opacity-0 pointer-events-none'
+              }`}
+            >
               <img
-                src="/images/hero/amy-mascot.png"
-                alt="Mascot Amy"
-                className="h-28 w-auto object-contain drop-shadow-md"
+                src={banner.image}
+                alt={banner.title}
+                className={`w-full h-full object-cover object-top ${banner.focusClass}`}
               />
             </div>
-          </div>
-        </div>
-
-        {/* Chấm điều hướng slider căn giữa phía dưới banner */}
-        <div className="relative z-20 flex justify-center items-center gap-2 mt-8 mb-2">
-          {HERO_BANNERS.map((_, idx) => (
-            <button
-              key={idx}
-              type="button"
-              aria-label={`Chuyển sang banner ${idx + 1}`}
-              onClick={() => setCurrentBannerIndex(idx)}
-              className={`rounded-full transition-all duration-300 cursor-pointer ${
-                idx === currentBannerIndex
-                  ? 'w-2.5 h-2.5 bg-vjred scale-110 shadow-xs'
-                  : 'w-2 h-2 bg-white/80 hover:bg-white'
-              }`}
-            />
           ))}
         </div>
+
+        {/* Chấm điều hướng slider — site thật: absolute tại top 589.016px tính từ
+            đỉnh hero (desktop) / top 297px (mobile 390×844), `text-align:center`,
+            mỗi chấm là nút 20×20px với nội dung "•" 12px (trắng khi không active,
+            đỏ #EC2029 khi active). */}
+        <ul
+          data-testid="hero-slider-dots"
+          className="pointer-events-none absolute inset-x-0 top-[297px] z-20 flex justify-center pt-[6px] lg:top-[589px] lg:pt-0"
+        >
+          {HERO_BANNERS.map((_, idx) => (
+            <li key={idx} className="relative inline-block h-5 w-5">
+              <button
+                type="button"
+                aria-label={`Chuyển sang banner ${idx + 1}`}
+                aria-current={idx === currentBannerIndex ? 'true' : undefined}
+                onClick={() => setCurrentBannerIndex(idx)}
+                className="pointer-events-auto block h-5 w-5 cursor-pointer p-[5px] text-xs leading-none transition-colors before:block before:h-auto before:w-auto before:content-['•']"
+                style={{ color: idx === currentBannerIndex ? '#EC2029' : '#FFFFFF' }}
+              />
+            </li>
+          ))}
+        </ul>
       </div>
 
-      {/* Dải mây chân trời chuyển tiếp mềm mại vào phần dưới */}
-      <div className="relative z-10 w-full overflow-hidden leading-none -mb-1">
-        <svg
-          viewBox="0 0 1440 98"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="none"
-          className="w-full h-12 sm:h-16 lg:h-20"
-        >
-          <path
-            d="M0,45 C120,85 240,10 360,40 C480,70 600,15 720,42 C840,68 960,18 1080,45 C1200,72 1320,20 1440,40 L1440,98 L0,98 Z"
-            fill="var(--background, #ffffff)"
-          />
-        </svg>
+      {/* Dải đặt vé — chỉ render MỘT bản.
+          Trên desktop nó neo ở mép phải container 1200px, đỉnh tại y=214
+          (164px tính từ đỉnh hero ở y=50). Trên mobile nó trôi xuống ngay
+          dưới banner. Nếu render hai bản (một cho desktop, một cho mobile)
+          thì form bị trùng `id` và mọi test truy vấn theo vai trò đều gặp
+          "nhiều phần tử khớp" — nên chỉ có một bản, đổi cách đặt theo breakpoint. */}
+      <div className="absolute inset-x-0 top-[333px] z-20 mx-auto w-full max-w-[1200px] lg:inset-x-auto lg:left-1/2 lg:top-[164px] lg:-translate-x-1/2 lg:flex lg:justify-end lg:px-0">
+        <div className="w-full lg:w-[380px] lg:max-w-[380px]">
+          <HeroBookingWidget />
+        </div>
       </div>
     </section>
   );

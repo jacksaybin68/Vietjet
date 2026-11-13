@@ -37,15 +37,15 @@ export default function ContactPage() {
       />
 
       {/* Main Content */}
-      <main id="main-content" className="max-w-6xl mx-auto px-4 py-16 -mt-10 relative z-20">
+      <main id="main-content" className="max-w-[1200px] mx-auto px-4 py-16 -mt-10 relative z-20">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Contact Form */}
-          <div className="lg:col-span-2 bg-white rounded-2xl shadow-vj-lg p-8">
+          <div className="lg:col-span-2 bg-white rounded-vj shadow-vj-lg p-8">
             <h2 className="text-2xl font-bold text-[var(--vj-navy)] mb-6 font-heading-800">
               Gửi tin nhắn cho chúng tôi
             </h2>
             {submitted ? (
-              <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
+              <div className="bg-green-50 border border-green-200 rounded-vj p-6 text-center">
                 <Icon name="CheckCircleIcon" size={48} />
                 <p className="text-green-700 font-bold text-lg mt-2">Gửi thành công!</p>
                 <p className="text-green-600">
@@ -65,7 +65,7 @@ export default function ContactPage() {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[var(--primary)] focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/20 outline-none transition-all"
+                      className="w-full px-4 py-3 rounded-vj border border-gray-300 focus:border-[var(--primary)] focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/20 outline-none transition-all"
                       placeholder="Nhập họ và tên"
                     />
                   </div>
@@ -79,7 +79,7 @@ export default function ContactPage() {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[var(--primary)] focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/20 outline-none transition-all"
+                      className="w-full px-4 py-3 rounded-vj border border-gray-300 focus:border-[var(--primary)] focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/20 outline-none transition-all"
                       placeholder="example@email.com"
                     />
                   </div>
@@ -94,7 +94,7 @@ export default function ContactPage() {
                     value={formData.subject}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[var(--primary)] focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/20 outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-vj border border-gray-300 focus:border-[var(--primary)] focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/20 outline-none transition-all"
                     placeholder="Vấn đề bạn cần hỗ trợ"
                   />
                 </div>
@@ -108,13 +108,13 @@ export default function ContactPage() {
                     onChange={handleChange}
                     required
                     rows={5}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[var(--primary)] focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/20 outline-none transition-all resize-none"
+                    className="w-full px-4 py-3 rounded-vj border border-gray-300 focus:border-[var(--primary)] focus:ring-2 focus:ring-[rgb(var(--primary-rgb))]/20 outline-none transition-all resize-none"
                     placeholder="Mô tả chi tiết yêu cầu của bạn..."
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full md:w-auto px-8 py-3 rounded-lg bg-[var(--primary)] text-white font-bold hover:bg-primary-dark transition-all duration-300 shadow-vj-btn hover:shadow-vj-btn-hover flex items-center justify-center gap-2"
+                  className="w-full md:w-auto px-8 py-3 rounded-vj bg-[var(--primary)] text-white font-bold hover:bg-primary-dark transition-all duration-300 shadow-vj-btn hover:shadow-vj-btn-hover flex items-center justify-center gap-2"
                 >
                   <Icon name="PaperAirplaneIcon" size={18} />
                   Gửi tin nhắn
@@ -126,18 +126,18 @@ export default function ContactPage() {
           {/* Contact Info & Map */}
           <div className="space-y-8">
             {/* Contact Details */}
-            <div className="bg-white rounded-2xl shadow-vj-sm p-6">
+            <div className="bg-white rounded-vj shadow-vj-sm p-6">
               <h3 className="text-lg font-bold text-[var(--vj-navy)] mb-4 flex items-center gap-2">
                 <Icon name="PhoneIcon" size={20} />
                 Thông tin liên hệ
               </h3>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0 text-[var(--primary)]">
+                  <div className="w-10 h-10 rounded-vj bg-red-50 flex items-center justify-center flex-shrink-0 text-[var(--primary)]">
                     <Icon name="EnvelopeIcon" size={20} />
                   </div>
                   <div>
-                    <p className="text-xs text-[#6D6E71] font-medium uppercase tracking-wide">
+                    <p className="text-xs text-vj-gray font-medium uppercase tracking-wide">
                       Email
                     </p>
                     <a
@@ -149,11 +149,11 @@ export default function ContactPage() {
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0 text-[var(--primary)]">
+                  <div className="w-10 h-10 rounded-vj bg-red-50 flex items-center justify-center flex-shrink-0 text-[var(--primary)]">
                     <Icon name="PhoneIcon" size={20} />
                   </div>
                   <div>
-                    <p className="text-xs text-[#6D6E71] font-medium uppercase tracking-wide">
+                    <p className="text-xs text-vj-gray font-medium uppercase tracking-wide">
                       Hotline
                     </p>
                     <a
@@ -165,11 +165,11 @@ export default function ContactPage() {
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0 text-[var(--primary)]">
+                  <div className="w-10 h-10 rounded-vj bg-red-50 flex items-center justify-center flex-shrink-0 text-[var(--primary)]">
                     <Icon name="MapPinIcon" size={20} />
                   </div>
                   <div>
-                    <p className="text-xs text-[#6D6E71] font-medium uppercase tracking-wide">
+                    <p className="text-xs text-vj-gray font-medium uppercase tracking-wide">
                       Địa chỉ
                     </p>
                     <p className="text-[var(--vj-navy)] font-medium">
@@ -182,7 +182,7 @@ export default function ContactPage() {
             </div>
 
             {/* Working Hours */}
-            <div className="bg-white rounded-2xl shadow-vj-sm p-6">
+            <div className="bg-white rounded-vj shadow-vj-sm p-6">
               <h3 className="text-lg font-bold text-[var(--vj-navy)] mb-4 flex items-center gap-2">
                 <Icon name="ClockIcon" size={20} />
                 Giờ làm việc
@@ -205,7 +205,7 @@ export default function ContactPage() {
             </div>
 
             {/* Mock Map */}
-            <div className="bg-white rounded-2xl shadow-vj-sm overflow-hidden">
+            <div className="bg-white rounded-vj shadow-vj-sm overflow-hidden">
               <div className="h-48 bg-gradient-to-br from-blue-100 to-gray-200 flex items-center justify-center relative">
                 <div
                   className="absolute inset-0 opacity-30"
@@ -217,7 +217,7 @@ export default function ContactPage() {
                 <div className="text-center z-10">
                   <Icon name="MapPinIcon" size={32} />
                   <p className="text-sm font-bold text-[var(--vj-navy)] mt-2">Bản đồ Vietjet Air</p>
-                  <p className="text-xs text-[#6D6E71]">Tân Bình, TP. Hồ Chí Minh</p>
+                  <p className="text-xs text-vj-gray">Tân Bình, TP. Hồ Chí Minh</p>
                 </div>
               </div>
             </div>

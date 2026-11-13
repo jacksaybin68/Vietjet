@@ -284,6 +284,10 @@ describe('AirportPicker', () => {
     expect(panel.style.top).toBe('124px');
   });
 
+  // The `flush` variant draws no border and no rounding of its own — the group
+  // box around it already draws the outline, and a second one would double
+  // the line. It renders a `<button>` (not a `<label>`), because the whole
+  // control is the click target that opens the list.
   it('drops its own border in the flush variant so the group box stays single', () => {
     const onChange = vi.fn();
     const { container } = render(
@@ -297,9 +301,9 @@ describe('AirportPicker', () => {
         className="sm:col-span-2"
       />
     );
-    const label = container.querySelector('label')!;
-    expect(label.className).not.toContain('rounded');
-    expect(label.className).not.toContain('border-[#e4e4e4]');
+    const button = container.querySelector('button')!;
+    expect(button.className).not.toContain('rounded');
+    expect(button.className).not.toContain('border-vj-border');
     expect(container.firstElementChild).toHaveClass('sm:col-span-2');
   });
 });

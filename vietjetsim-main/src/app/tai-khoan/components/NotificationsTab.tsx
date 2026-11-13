@@ -222,7 +222,7 @@ function MetadataBadge({ type, metadata }: { type: string; metadata?: Record<str
   }
   if (type === 'booking' && metadata.booking_id) {
     return (
-      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-50/10 text-green-700border border-green-100">
+      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-50/10 text-green-700 border border-green-100">
         #{metadata.booking_id}
       </span>
     );
@@ -367,7 +367,7 @@ function NotifCard({ notif, onMarkRead, onDismiss, onArchive, onSnooze }: NotifC
             </span>
             <MetadataBadge type={notif.type} metadata={notif.metadata} />
             {isSnoozed && (
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50/10 text-amber-600flex items-center gap-1">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50/10 text-amber-600 flex items-center gap-1">
                 <Icon name="ClockIcon" size={11} />
                 Đã nhắc lại
               </span>

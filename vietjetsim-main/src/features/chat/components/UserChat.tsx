@@ -737,7 +737,7 @@ export default function UserChat() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed inset-x-0 bottom-[calc(60px+env(safe-area-inset-bottom))] z-50 flex h-[min(580px,calc(100dvh-72px))] flex-col overflow-hidden rounded-t-[24px] border border-gray-200 bg-white shadow-2xl sm:inset-x-auto sm:bottom-24 sm:right-6 sm:h-[620px] sm:w-[400px] sm:rounded-[24px]">
+        <div className="fixed inset-x-0 bottom-[calc(62px+env(safe-area-inset-bottom))] z-50 flex h-[min(580px,calc(100dvh-72px))] flex-col overflow-hidden rounded-t-[24px] border border-gray-200 bg-white shadow-2xl sm:inset-x-auto sm:bottom-24 sm:right-6 sm:h-[620px] sm:w-[400px] sm:rounded-[24px]">
           {/* Header chuẩn Trợ lý ảo Amy */}
           <div className="relative flex flex-shrink-0 items-center justify-between border-b border-gray-100 bg-white px-4 py-3 shadow-xs">
             <div className="flex items-center gap-2.5">
@@ -1037,12 +1037,21 @@ export default function UserChat() {
           {(!isGuest || isGuestChatStarted) && (
             <div className="relative px-3 pt-2 pb-2 bg-white border-t border-gray-100 flex-shrink-0">
               {/* Quick AI Policy Suggestions */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 mb-1 no-scrollbar scrollbar-none">
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 mb-1 no-scrollbar no-scrollbar">
                 {[
-                  { label: '🧳 Hành lý', q: '[Trợ lý AI] Quy định hành lý xách tay và ký gửi như thế nào?' },
-                  { label: '📋 Giấy tờ bay', q: '[Trợ lý AI] Thủ tục giấy tờ bay và thời gian check-in?' },
+                  {
+                    label: '🧳 Hành lý',
+                    q: '[Trợ lý AI] Quy định hành lý xách tay và ký gửi như thế nào?',
+                  },
+                  {
+                    label: '📋 Giấy tờ bay',
+                    q: '[Trợ lý AI] Thủ tục giấy tờ bay và thời gian check-in?',
+                  },
                   { label: '🔄 Hoàn/Hủy vé', q: '[Trợ lý AI] Chính sách hoàn vé và đổi ngày bay?' },
-                  { label: '⭐ SkyJoy', q: '[Trợ lý AI] Hệ thống tích điểm SkyJoy và Cash + Points?' },
+                  {
+                    label: '⭐ SkyJoy',
+                    q: '[Trợ lý AI] Hệ thống tích điểm SkyJoy và Cash + Points?',
+                  },
                 ].map((item) => (
                   <button
                     key={item.label}

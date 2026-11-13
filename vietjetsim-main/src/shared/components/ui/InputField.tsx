@@ -35,7 +35,7 @@ export default function InputField({
       {label && (
         <label
           htmlFor={fieldId}
-          className={`block text-[10px] font-bold uppercase leading-none tracking-[0.06em] transition-colors ${
+          className={`block text-2xs font-bold uppercase leading-none tracking-[0.06em] transition-colors ${
             hasError ? 'text-[var(--primary-dark)]' : 'text-[var(--vj-text-gray)]'
           } ${required ? 'font-extrabold' : ''}`}
         >
@@ -48,10 +48,12 @@ export default function InputField({
         id={fieldId}
         aria-invalid={hasError || undefined}
         aria-errormessage={hasError ? `${fieldId}-error` : undefined}
-        className={`w-full rounded-lg border px-3.5 py-2.5 text-base font-extrabold text-[#222222] bg-transparent outline-none transition-colors focus-within:border-[var(--primary)] focus-within:ring-1 focus-within:ring-[var(--primary)] focus-within:bg-[#fffdf3] ${
+        // Bo góc 10px là chuẩn site thật; cỡ chữ 17px cho các field sân bay
+        // (đo được trên vietjetair.com), 16px cho field thường.
+        className={`w-full rounded-vj border px-3.5 py-2.5 text-base font-medium text-[var(--foreground)] bg-transparent outline-none transition-colors focus-within:border-[var(--primary)] focus-within:ring-1 focus-within:ring-[var(--primary)] focus-within:bg-vj-surface-cream ${
           hasError
             ? 'border-[var(--primary-dark)] focus-within:border-[var(--primary-dark)]'
-            : 'border-[#e4e4e4]'
+            : 'border-vj-border'
         } ${className}`}
         {...props}
       />
@@ -59,7 +61,7 @@ export default function InputField({
       {hasError && (
         <p
           id={`${fieldId}-error`}
-          className="text-[11px] font-bold text-[var(--primary-dark)]"
+          className="text-xs2 font-bold text-[var(--primary-dark)]"
           role="alert"
         >
           {error}
@@ -67,7 +69,7 @@ export default function InputField({
       )}
 
       {helperText && !hasError && (
-        <p className="text-[11px] font-medium text-[var(--vj-text-gray)]">{helperText}</p>
+        <p className="text-xs2 font-medium text-[var(--vj-text-gray)]">{helperText}</p>
       )}
     </div>
   );

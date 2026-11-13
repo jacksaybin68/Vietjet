@@ -10,11 +10,18 @@ export interface Airport {
 }
 
 // 16px below `sm` so iOS Safari does not zoom the page when the field is tapped.
-const inputClass =
-  'w-full min-w-0 border-0 bg-transparent px-0 text-base font-extrabold text-[var(--foreground)] outline-none sm:text-sm';
+// Từ `sm` trở lên dùng 17px — đúng số đo "Input sân bay" của site thật.
 const labelClass =
-  'block text-[10px] font-bold uppercase leading-none tracking-[0.06em] text-[#8c8c8c]';
-const iconClass = 'shrink-0 text-lg text-[#4a4a4a]';
+  'block text-2xs font-bold uppercase leading-none tracking-[0.06em] text-vj-text-soft';
+const iconClass = 'shrink-0 text-lg text-vj-text-strong';
+
+/**
+ * Biến thể "field" — ô nhập trong dải đặt vé của trang chủ.
+ * Site thật (đo 13/11/2026): nhãn 12px màu #6B7580, giá trị 16px/500 #333,
+ * ô cao 56px, bo góc 10px, viền #ECECEC.
+ */
+const fieldLabelClass = 'vj-field-label';
+const fieldValueClass = 'vj-field-value truncate';
 /** Airports visible at once when the screen is tall enough to show them all. */
 const LIST_CAP = 448;
 /** Gap left under the panel so it never sits flush against the bottom edge. */
@@ -42,6 +49,11 @@ function fold(text: string): string {
 
 interface Props {
   label: string;
+  /**
+   * Tên truy cập của nút. Mặc định bằng `label`; ở dải đặt vé nhãn nhìn thấy là
+   * "Từ"/"Đến" nhưng tên truy cập phải nói rõ đầu ra và đầu vào.
+   */
+  ariaLabel?: string;
   icon: 'takeoff' | 'land';
   value: string;
   airports: readonly Airport[];
@@ -49,10 +61,19 @@ interface Props {
   /**
    * `flush` drops the field's own border and padding so the control can sit
    * inside a grouped box that already draws the outline and its dividers.
+   * `field` is the standalone single-line field of the homepage booking bar:
+   * 56px tall, 10px radius, 12px label + 16px value.
    */
-  variant?: 'bordered' | 'flush';
+  variant?: 'bordered' | 'flush' | 'field';
   /** Extra classes on the outer wrapper, e.g. to span a grid track. */
   className?: string;
+  /**
+   * Class cho nhãn hiển thị. Panel đặt vé của trang chủ dùng nhãn 18px/600
+   * (đo được trên site thật) thay vì nhãn 12px/600 mặc định.
+   */
+  headingClass?: string;
+  /** Class cho giá trị sân bay. Mặc định 16px/500. */
+  valueClass?: string;
 }
 
 /**
@@ -65,12 +86,15 @@ interface Props {
  */
 export default function AirportPicker({
   label,
+  ariaLabel,
   icon,
   value,
   airports,
   onChange,
   variant = 'bordered',
   className = '',
+  headingClass = '',
+  valueClass = '',
 }: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -195,25 +219,27 @@ export default function AirportPicker({
 
   return (
     <div ref={containerRef} className={`relative min-w-0 h-full ${className}`}>
-      <label
-        className={
-          variant === 'flush'
-            ? 'flex h-full min-h-[48px] items-center gap-2 bg-white px-3 py-1.5 focus-within:bg-[#fffdf3]'
-            : 'flex min-h-[48px] items-center gap-2 rounded-xl border border-[#e4e4e4] bg-white px-3 py-1.5 focus-within:border-[var(--accent)]'
-        }
-      >
-        <Icon className={iconClass} />
-        <span className="min-w-0 flex-1">
-          <span className={labelClass}>{label}</span>
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-haspopup="listbox"
-            aria-expanded={open}
-            aria-label={label}
-            className={`${inputClass} flex cursor-pointer items-center justify-between gap-1 text-left`}
-          >
-            <span className="truncate">
+      {variant === 'flush' ? (
+        // Biến thể "flush" — nằm trong hộp trắng đã có sẵn viền/bo góc.
+        // Số đo site thật (13/11/2026):
+        //   - Icon sân bay 20×19px nằm ở x = mép hộp + 14px, canh giữa dọc.
+        //   - Nhãn 18px/600 nằm ở x = mép hộp + 48px (dòng trên).
+        //   - Giá trị sân bay 17px/600 nằm dưới nhãn, cùng cột trái.
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-label={ariaLabel ?? label}
+          className="relative flex h-full w-full min-w-0 cursor-pointer flex-col items-start justify-center gap-0.5 bg-transparent pl-[48px] text-left"
+        >
+          <Icon
+            aria-hidden="true"
+            className="absolute left-[14px] top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--foreground)]"
+          />
+          <span className={`block truncate ${headingClass || labelClass}`}>{label}</span>
+          <span className="flex w-full min-w-0 items-center justify-between gap-1">
+            <span className={`truncate ${valueClass || 'text-base font-medium'}`}>
               {selected.city} ( {selected.code} )
             </span>
             <svg
@@ -221,7 +247,7 @@ export default function AirportPicker({
               fill="currentColor"
               strokeWidth="0"
               viewBox="0 0 24 24"
-              className={iconClass}
+              className="shrink-0 text-lg text-[var(--foreground)]"
               height="1em"
               width="1em"
               xmlns="http://www.w3.org/2000/svg"
@@ -230,19 +256,60 @@ export default function AirportPicker({
               <path fill="none" d="M0 0h24v24H0z" />
               <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z" />
             </svg>
-          </button>
-        </span>
-      </label>
+          </span>
+        </button>
+      ) : (
+        <label
+          className={
+            variant === 'field'
+              ? 'flex h-[56px] w-full min-w-0 items-center gap-2 rounded-vj border border-[var(--border)] bg-white px-3 transition-colors hover:border-[var(--accent)] focus-within:border-[var(--accent)]'
+              : 'flex min-h-[48px] items-center gap-2 rounded-vj border border-vj-border bg-white px-3 py-1.5 focus-within:border-[var(--accent)]'
+          }
+        >
+          <Icon className={iconClass} />
+          <span className="min-w-0 flex-1">
+            <span className={variant === 'field' ? fieldLabelClass : labelClass}>{label}</span>
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-haspopup="listbox"
+              aria-expanded={open}
+              aria-label={ariaLabel ?? label}
+              className={`w-full min-w-0 border-0 bg-transparent px-0 text-base font-medium text-[var(--foreground)] outline-none ${
+                variant === 'field' ? '' : 'sm:text-lg2'
+              } flex cursor-pointer items-center justify-between gap-1 text-left`}
+            >
+              <span className={variant === 'field' ? fieldValueClass : 'truncate'}>
+                {selected.city} ( {selected.code} )
+              </span>
+              <svg
+                stroke="currentColor"
+                fill="currentColor"
+                strokeWidth="0"
+                viewBox="0 0 24 24"
+                className={iconClass}
+                height="1em"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path fill="none" d="M0 0h24v24H0z" />
+                <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z" />
+              </svg>
+            </button>
+          </span>
+        </label>
+      )}
 
       {open &&
         createPortal(
           <div
             ref={panelRef}
             role="listbox"
-            aria-label={label}
+            aria-label={ariaLabel ?? label}
             // `z-50` clears the sticky header (z-40); a fixed panel portalled to
             // the body is a sibling of the whole page, not of the hero.
-            className="fixed z-50 overflow-hidden rounded-lg border border-[#e4e4e4] bg-white shadow-lg"
+            className="fixed z-50 overflow-hidden rounded-vj border border-vj-border bg-white shadow-lg"
             style={{
               left: anchor?.left ?? 0,
               top: anchor?.top ?? 0,
@@ -252,21 +319,21 @@ export default function AirportPicker({
               visibility: anchor ? 'visible' : 'hidden',
             }}
           >
-            <div className="flex items-center gap-2 border-b border-[#eee] px-3 py-2">
-              <MdSearch className="shrink-0 text-[#8c8c8c]" />
+            <div className="flex items-center gap-2 border-b border-vj-border-light px-3 py-2">
+              <MdSearch className="shrink-0 text-vj-text-soft" />
               <input
                 autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Tìm sân bay..."
-                aria-label={`Tìm ${label.toLowerCase()}`}
-                className="min-w-0 flex-1 bg-transparent text-sm text-[var(--foreground)] outline-none placeholder:text-[#b0b0b0]"
+                aria-label={`Tìm ${(ariaLabel ?? label).toLowerCase()}`}
+                className="min-w-0 flex-1 bg-transparent text-sm text-[var(--foreground)] outline-none placeholder:text-vj-placeholder"
               />
               {/* How many are left, so the list does not have to be scrolled to the
                 end to find out it is not the whole list. Sits in the search row
                 rather than in a footer of its own: on a short screen every row
                 the panel gives back is another airport the customer can see. */}
-              <span className="shrink-0 text-[11px] tabular-nums text-[#8c8c8c]">
+              <span className="shrink-0 text-xs2 tabular-nums text-vj-text-soft">
                 {query.trim()
                   ? `${results.length} / ${airports.length}`
                   : `${airports.length} sân bay`}
@@ -278,7 +345,7 @@ export default function AirportPicker({
               style={{ maxHeight: listMaxHeight ?? LIST_CAP }}
             >
               {results.length === 0 && (
-                <li className="px-3 py-3 text-sm text-[#8c8c8c]">Không tìm thấy sân bay</li>
+                <li className="px-3 py-3 text-sm text-vj-text-soft">Không tìm thấy sân bay</li>
               )}
               {results.map((airport) => (
                 <li key={airport.code}>
@@ -288,7 +355,7 @@ export default function AirportPicker({
                     aria-selected={airport.code === value}
                     onClick={() => choose(airport.code)}
                     className={`flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-[var(--vj-sky)] ${
-                      airport.code === value ? 'bg-[#fff3f3]' : ''
+                      airport.code === value ? 'bg-vj-surface-rose' : ''
                     }`}
                   >
                     <span className="w-4 shrink-0 text-[var(--accent)]">
@@ -298,7 +365,7 @@ export default function AirportPicker({
                       <span className="block truncate text-sm font-bold text-[var(--foreground)]">
                         {airport.city} ( {airport.code} )
                       </span>
-                      <span className="block truncate text-[11px] leading-tight text-[#8c8c8c]">
+                      <span className="block truncate text-xs2 leading-tight text-vj-text-soft">
                         {airport.airport}
                       </span>
                     </span>

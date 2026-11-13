@@ -127,7 +127,7 @@ export function SiteOverlays() {
           aria-label="Thông báo cookie"
           className="fixed inset-x-0 bottom-0 z-[55] border-t border-gray-200 bg-white shadow-[0_-8px_32px_rgba(0,0,0,0.15)] animate-fade-in-up"
         >
-          <div className="mx-auto flex max-w-[1240px] flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center">
+          <div className="mx-auto flex max-w-[1200px] flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center">
             <div className="shrink-0 flex items-center justify-center">
               <Mascot greeting="Xin chào!" className="h-16 w-auto sm:h-20" />
             </div>

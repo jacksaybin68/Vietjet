@@ -72,7 +72,7 @@ export default function Pagination({
           disabled={!canPrev}
           aria-label="Trang đầu"
           className={`
-            w-9 h-9 flex items-center justify-center rounded-lg text-sm font-semibold
+            w-9 h-9 flex items-center justify-center rounded-vj text-sm font-semibold
             transition-all duration-200
             ${
               !canPrev
@@ -100,7 +100,7 @@ export default function Pagination({
         disabled={!canPrev}
         aria-label="Trang trước"
         className={`
-          w-9 h-9 flex items-center justify-center rounded-lg text-sm font-semibold
+          w-9 h-9 flex items-center justify-center rounded-vj text-sm font-semibold
           transition-all duration-200
           ${
             !canPrev
@@ -136,7 +136,7 @@ export default function Pagination({
             aria-label={`Trang ${page}`}
             aria-current={currentPage === page ? 'page' : undefined}
             className={`
-              w-9 h-9 flex items-center justify-center rounded-lg text-sm font-bold
+              w-9 h-9 flex items-center justify-center rounded-vj text-sm font-bold
               transition-all duration-200
               ${
                 currentPage === page
@@ -156,7 +156,7 @@ export default function Pagination({
         disabled={!canNext}
         aria-label="Trang sau"
         className={`
-          w-9 h-9 flex items-center justify-center rounded-lg text-sm font-semibold
+          w-9 h-9 flex items-center justify-center rounded-vj text-sm font-semibold
           transition-all duration-200
           ${
             !canNext
@@ -183,7 +183,7 @@ export default function Pagination({
           disabled={!canNext}
           aria-label="Trang cuối"
           className={`
-            w-9 h-9 flex items-center justify-center rounded-lg text-sm font-semibold
+            w-9 h-9 flex items-center justify-center rounded-vj text-sm font-semibold
             transition-all duration-200
             ${
               !canNext

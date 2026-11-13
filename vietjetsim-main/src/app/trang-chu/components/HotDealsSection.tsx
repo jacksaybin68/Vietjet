@@ -94,7 +94,7 @@ function formatVND(n: number) {
 export default function HotDealsSection() {
   return (
     <section className="bg-white py-12 sm:py-16">
-      <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-10">
           <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-primary mb-2">
             Ưu đãi hấp dẫn
@@ -111,9 +111,9 @@ export default function HotDealsSection() {
           {HOT_DEALS.map((deal, i) => (
             <div
               key={i}
-              className="group flex items-center gap-4 bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.1)] transition-all duration-250"
+              className="group flex items-center gap-4 bg-white rounded-vj p-4 border border-gray-100 shadow-sm hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.1)] transition-all duration-250"
             >
-              <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-xl overflow-hidden">
+              <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-vj overflow-hidden">
                 <img
                   src={deal.image}
                   alt={`${deal.from} - ${deal.to}`}

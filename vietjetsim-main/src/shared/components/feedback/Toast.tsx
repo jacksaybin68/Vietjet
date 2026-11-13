@@ -234,7 +234,7 @@ function ToastNotification({ toast, onDismiss }: ToastProps) {
                   className={`text-xs font-semibold px-3 py-1.5 rounded-md transition-all duration-150 active:scale-95 font-['KoHo',sans-serif]
                     ${
                       action.variant === 'accent'
-                        ? 'bg-[var(--accent)] text-[var(--vj-navy)] hover:bg-[#E6BF00] shadow-sm'
+                        ? 'bg-[var(--accent)] text-[var(--vj-navy)] hover:bg-vj-gold-ink-6 shadow-sm'
                         : action.variant === 'ghost'
                           ? 'text-[var(--foreground-muted)] hover:text-[var(--vj-navy)] hover:bg-[var(--vj-sky)]'
                           : 'bg-[var(--primary)] text-white hover:bg-primary-dark shadow-sm'

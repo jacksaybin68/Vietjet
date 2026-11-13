@@ -144,7 +144,7 @@ export default function PassengerInfoStep({
         </h2>
 
         {/* SkyJoy Banner Card matching screenshot */}
-        <div className="bg-white rounded-lg border border-gray-200/90 p-3.5 sm:p-4 flex items-center justify-between mb-4 shadow-sm">
+        <div className="bg-white rounded-vj border border-gray-200/90 p-3.5 sm:p-4 flex items-center justify-between mb-4 shadow-sm">
           <div className="flex items-center gap-3.5">
             <div className="w-11 h-11 rounded-full bg-amber-50 flex items-center justify-center shrink-0 border border-amber-200 p-1.5 shadow-2xs">
               <SkyJoyStarIcon size={26} />
@@ -168,7 +168,7 @@ export default function PassengerInfoStep({
         </div>
 
         {/* Passenger Summary & Steppers: Chọn số lượng hành khách */}
-        <div className="bg-white rounded-lg border border-gray-200/90 p-4 mb-4 shadow-sm">
+        <div className="bg-white rounded-vj border border-gray-200/90 p-4 mb-4 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-gray-100 gap-2">
             <div>
               <div className="text-sm font-bold text-gray-900 font-koho flex items-center gap-2">
@@ -191,7 +191,7 @@ export default function PassengerInfoStep({
           {/* Steppers: Người lớn, Trẻ em, Em bé */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3">
             {/* Người lớn */}
-            <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-gray-50/50 hover:bg-gray-50 transition-colors">
+            <div className="flex items-center justify-between p-3 rounded-vj border border-gray-200 bg-gray-50/50 hover:bg-gray-50 transition-colors">
               <div>
                 <div className="text-xs font-bold text-gray-900">Người lớn :</div>
                 <div className="text-2xs text-gray-500">12 tuổi trở lên</div>
@@ -222,7 +222,7 @@ export default function PassengerInfoStep({
             </div>
 
             {/* Trẻ em */}
-            <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-gray-50/50 hover:bg-gray-50 transition-colors">
+            <div className="flex items-center justify-between p-3 rounded-vj border border-gray-200 bg-gray-50/50 hover:bg-gray-50 transition-colors">
               <div>
                 <div className="text-xs font-bold text-gray-900">Trẻ em :</div>
                 <div className="text-2xs text-gray-500">2 - 11 tuổi (75% giá vé)</div>
@@ -253,7 +253,7 @@ export default function PassengerInfoStep({
             </div>
 
             {/* Em bé */}
-            <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-gray-50/50 hover:bg-gray-50 transition-colors">
+            <div className="flex items-center justify-between p-3 rounded-vj border border-gray-200 bg-gray-50/50 hover:bg-gray-50 transition-colors">
               <div>
                 <div className="text-xs font-bold text-gray-900">Em bé :</div>
                 <div className="text-2xs text-gray-500">Dưới 2 tuổi (Miễn phí vé)</div>
@@ -297,7 +297,7 @@ export default function PassengerInfoStep({
             return (
               <div
                 key={i}
-                className="bg-white rounded-lg border border-gray-200/90 overflow-hidden shadow-sm"
+                className="bg-white rounded-vj border border-gray-200/90 overflow-hidden shadow-sm"
               >
                 {/* Passenger Accordion Header */}
                 <div className="bg-gray-100 px-4 py-2.5 border-b border-gray-200/80 flex items-center justify-between cursor-pointer">
@@ -382,7 +382,7 @@ export default function PassengerInfoStep({
                           placeholder="Theo giấy tờ tuỳ thân"
                           value={p.name}
                           onChange={(e) => updatePassenger(i, 'name', e.target.value)}
-                          className="w-full border-0 border-b-2 border-primary bg-transparent py-2 sm:py-1 text-sm sm:text-xs text-gray-900 focus:outline-none focus:border-primary placeholder:text-gray-400 placeholder:italic placeholder:font-normal placeholder:text-xs sm:placeholder:text-2xs"
+                          className="w-full border-0 border-b-2 border-primary bg-transparent py-2 sm:py-1 text-base text-gray-900 focus:outline-none focus:border-primary placeholder:text-gray-400 placeholder:italic placeholder:font-normal placeholder:text-xs sm:placeholder:text-2xs"
                           required
                         />
                       </div>
@@ -398,7 +398,7 @@ export default function PassengerInfoStep({
                           placeholder="Tên đệm và tên theo giấy tờ tuỳ thân"
                           value={p.firstName || ''}
                           onChange={(e) => updatePassenger(i, 'firstName', e.target.value)}
-                          className="w-full border-0 border-b-2 border-primary bg-transparent py-2 sm:py-1 text-sm sm:text-xs text-gray-900 focus:outline-none focus:border-primary placeholder:text-gray-400 placeholder:italic placeholder:font-normal placeholder:text-xs sm:placeholder:text-2xs"
+                          className="w-full border-0 border-b-2 border-primary bg-transparent py-2 sm:py-1 text-base text-gray-900 focus:outline-none focus:border-primary placeholder:text-gray-400 placeholder:italic placeholder:font-normal placeholder:text-xs sm:placeholder:text-2xs"
                           required
                         />
                       </div>
@@ -638,7 +638,7 @@ export default function PassengerInfoStep({
           })}
 
           {/* Card: Lưu thông tin hành khách */}
-          <div className="bg-white rounded-lg border border-gray-200/90 p-3.5 shadow-sm">
+          <div className="bg-white rounded-vj border border-gray-200/90 p-3.5 shadow-sm">
             <label className="flex items-center gap-2.5 cursor-pointer text-xs text-gray-800 select-none">
               <input
                 type="checkbox"
@@ -653,7 +653,7 @@ export default function PassengerInfoStep({
           </div>
 
           {/* Card: Điều khoản và điều kiện */}
-          <div className="bg-white rounded-lg border border-gray-200/90 p-3.5 shadow-sm">
+          <div className="bg-white rounded-vj border border-gray-200/90 p-3.5 shadow-sm">
             <label className="flex items-start gap-2.5 cursor-pointer text-xs text-gray-800 leading-relaxed select-none">
               <input
                 type="checkbox"

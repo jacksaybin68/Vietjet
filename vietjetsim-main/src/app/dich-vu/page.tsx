@@ -224,14 +224,14 @@ export default function ServicesPage() {
         description="Nâng cao trải nghiệm bay với các dịch vụ bổ trợ đa dạng và tiện ích"
       />
 
-      <main id="main-content" className="max-w-7xl mx-auto px-4 py-10">
+      <main id="main-content" className="max-w-[1200px] mx-auto px-4 py-10">
         {/* Services Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
           {SERVICES.map((service) => (
             <button
               key={service.id}
               onClick={() => setSelectedService(service.id)}
-              className={`text-left bg-[var(--surface)] rounded-2xl border-2 border-[var(--border)] overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 ${
+              className={`text-left bg-[var(--surface)] rounded-vj border-2 border-[var(--border)] overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 ${
                 selectedService === service.id
                   ? 'ring-2 ring-[var(--vj-yellow)] border-[var(--vj-yellow)]'
                   : ''
@@ -239,7 +239,7 @@ export default function ServicesPage() {
             >
               <div className="p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-white border border-gray-100 shadow-2xs p-1.5 shrink-0">
+                  <div className="w-12 h-12 rounded-vj flex items-center justify-center bg-white border border-gray-100 shadow-2xs p-1.5 shrink-0">
                     {renderServiceIcon(service.id, 28)}
                   </div>
                   <span className="text-xs font-black px-2.5 py-1 rounded-full bg-[rgb(var(--vj-yellow-rgb))]/25 text-[var(--vj-red)]">
@@ -260,11 +260,11 @@ export default function ServicesPage() {
 
         {/* Selected Service Detail */}
         {selected && (
-          <div className="bg-[var(--surface)] rounded-2xl border-2 border-[rgb(var(--vj-yellow-rgb))]/40 overflow-hidden shadow-sm mb-10">
+          <div className="bg-[var(--surface)] rounded-vj border-2 border-[rgb(var(--vj-yellow-rgb))]/40 overflow-hidden shadow-sm mb-10">
             {/* Detail Header */}
             <div className="p-6 sm:p-8 bg-[rgb(var(--vj-red-rgb))]/5">
               <div className="flex items-start gap-4">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 bg-white border border-gray-100 shadow-sm p-2">
+                <div className="w-14 h-14 rounded-vj flex items-center justify-center flex-shrink-0 bg-white border border-gray-100 shadow-sm p-2">
                   {renderServiceIcon(selected.id, 36)}
                 </div>
                 <div className="flex-1">
@@ -305,7 +305,7 @@ export default function ServicesPage() {
                 <h3 className="text-sm font-bold text-[var(--foreground-subtle)] uppercase tracking-wider mb-3">
                   Giá & Số lượng
                 </h3>
-                <div className="bg-[var(--vj-sky)] rounded-xl p-4 border border-[var(--border)]">
+                <div className="bg-[var(--vj-sky)] rounded-vj p-4 border border-[var(--border)]">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-[var(--foreground-muted)] text-sm">Đơn giá</span>
                     <div>
@@ -322,7 +322,7 @@ export default function ServicesPage() {
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => handleQuantityChange(selected.id, -1)}
-                        className="w-8 h-8 rounded-lg bg-white border border-[var(--border)] flex items-center justify-center text-[var(--foreground-muted)] hover:border-primary hover:text-primary transition-colors"
+                        className="w-8 h-8 rounded-vj bg-white border border-[var(--border)] flex items-center justify-center text-[var(--foreground-muted)] hover:border-primary hover:text-primary transition-colors"
                       >
                         <Icon name="MinusIcon" size={14} />
                       </button>
@@ -331,7 +331,7 @@ export default function ServicesPage() {
                       </span>
                       <button
                         onClick={() => handleQuantityChange(selected.id, 1)}
-                        className="w-8 h-8 rounded-lg bg-white border border-[var(--border)] flex items-center justify-center text-[var(--foreground-muted)] hover:border-primary hover:text-primary transition-colors"
+                        className="w-8 h-8 rounded-vj bg-white border border-[var(--border)] flex items-center justify-center text-[var(--foreground-muted)] hover:border-primary hover:text-primary transition-colors"
                       >
                         <Icon name="PlusIcon" size={14} />
                       </button>
@@ -343,13 +343,13 @@ export default function ServicesPage() {
                 <div className="mt-4 flex gap-3">
                   <Link
                     href="/tim-ve"
-                    className="flex-1 py-3 text-center font-black text-[var(--vj-red)] bg-[var(--vj-yellow)] rounded-xl transition-all hover:bg-[var(--vj-yellow-2)]"
+                    className="flex-1 py-3 text-center font-black text-[var(--vj-red)] bg-[var(--vj-yellow)] rounded-vj transition-all hover:bg-[var(--vj-yellow-2)]"
                   >
                     Đặt ngay
                   </Link>
                   <button
                     onClick={() => setSelectedService(null)}
-                    className="px-4 py-3 bg-white border border-[var(--border)] text-[var(--foreground-muted)] font-semibold rounded-xl hover:border-[var(--foreground-subtle)] transition-colors"
+                    className="px-4 py-3 bg-white border border-[var(--border)] text-[var(--foreground-muted)] font-semibold rounded-vj hover:border-[var(--foreground-subtle)] transition-colors"
                   >
                     Đóng
                   </button>
@@ -360,7 +360,7 @@ export default function ServicesPage() {
         )}
 
         {/* Why Choose Section */}
-        <div className="bg-white rounded-2xl border border-[var(--border)] p-6 sm:p-8 mb-10">
+        <div className="bg-white rounded-vj border border-[var(--border)] p-6 sm:p-8 mb-10">
           <h2 className="text-xl font-black text-center text-[var(--foreground)] mb-6 font-heading-sm">
             Tại sao nên đặt dịch vụ trước?
           </h2>
@@ -388,7 +388,7 @@ export default function ServicesPage() {
               },
             ].map((item, i) => (
               <div key={i} className="text-center">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 bg-[rgb(var(--vj-yellow-rgb))]/15">
+                <div className="w-12 h-12 rounded-vj flex items-center justify-center mx-auto mb-3 bg-[rgb(var(--vj-yellow-rgb))]/15">
                   <Icon name={item.icon} size={24} className="text-[var(--vj-red)]" />
                 </div>
                 <h3 className="font-bold text-[var(--foreground)] text-sm mb-1">{item.title}</h3>
@@ -399,7 +399,7 @@ export default function ServicesPage() {
         </div>
 
         {/* CTA */}
-        <div className="bg-gradient-to-r from-[var(--vj-red)] to-[var(--vj-red-dark)] rounded-2xl p-6 sm:p-8 text-center text-white">
+        <div className="bg-gradient-to-r from-[var(--vj-red)] to-[var(--vj-red-dark)] rounded-vj p-6 sm:p-8 text-center text-white">
           <h2 className="text-xl sm:text-2xl font-black mb-2">Bạn cần hỗ trợ thêm?</h2>
           <p className="text-white/80 text-sm mb-4">
             Liên hệ tổng đài 1900-6886 để được tư vấn dịch vụ phù hợp nhất
@@ -407,14 +407,14 @@ export default function ServicesPage() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/lien-he"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-[var(--vj-red)] font-bold rounded-xl hover:bg-[var(--surface-2)] transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-[var(--vj-red)] font-bold rounded-vj hover:bg-[var(--surface-2)] transition-colors"
             >
               <Icon name="ChatBubbleLeftRightIcon" size={18} />
               Liên hệ hỗ trợ
             </Link>
             <Link
               href="/hoi-dap"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white/10 text-white font-bold rounded-xl border border-white/30 hover:bg-white/20 transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white/10 text-white font-bold rounded-vj border border-white/30 hover:bg-white/20 transition-colors"
             >
               <Icon name="QuestionMarkCircleIcon" size={18} />
               Câu hỏi thường gặp

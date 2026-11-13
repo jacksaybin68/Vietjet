@@ -512,7 +512,7 @@ export default function SeatSelectionStep({
               {/* Hold Timeout Counter - responsive */}
               {holdTimer !== null && (
                 <div
-                  className={`rounded-xl px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between border ${
+                  className={`rounded-vj px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between border ${
                     timerUrgent
                       ? 'bg-[rgb(var(--primary-rgb))]/10 border-[rgb(var(--primary-rgb))]/40 text-primary'
                       : timerWarning
@@ -545,7 +545,7 @@ export default function SeatSelectionStep({
               )}
 
               {/* Extra Services - responsive */}
-              <div className="bg-[var(--surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] overflow-hidden mb-4 sm:mb-6 shadow-vj-md">
+              <div className="bg-[var(--surface)] rounded-vj sm:rounded-vj border border-[var(--border)] overflow-hidden mb-4 sm:mb-6 shadow-vj-md">
                 <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
                 <div className="p-4 sm:p-5">
                   <h2 className="font-black text-[var(--foreground)] flex items-center gap-1.5 sm:gap-2 font-koho mb-3 sm:mb-4">
@@ -561,7 +561,7 @@ export default function SeatSelectionStep({
                           type="button"
                           onClick={() => toggleAncillary(svc.id)}
                           aria-pressed={isOn}
-                          className={`border rounded-xl p-2.5 sm:p-3 flex flex-col justify-between text-left transition-all ${
+                          className={`border rounded-vj p-2.5 sm:p-3 flex flex-col justify-between text-left transition-all ${
                             isOn
                               ? 'border-primary bg-primary/5 ring-1 ring-primary'
                               : 'border-[var(--border)] hover:border-primary/40'
@@ -569,7 +569,7 @@ export default function SeatSelectionStep({
                         >
                           <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                             <div
-                              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center p-0.5 shrink-0 ${
+                              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-vj flex items-center justify-center p-0.5 shrink-0 ${
                                 isOn ? 'bg-amber-50 ring-1 ring-amber-400' : 'bg-[var(--surface-2)]'
                               }`}
                             >
@@ -625,7 +625,7 @@ export default function SeatSelectionStep({
                 </div>
               </div>
 
-              <div className="bg-[var(--surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] overflow-hidden shadow-vj-md">
+              <div className="bg-[var(--surface)] rounded-vj sm:rounded-vj border border-[var(--border)] overflow-hidden shadow-vj-md">
                 {/* Red accent top bar */}
                 <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
                 <div className="p-4 sm:p-5">
@@ -729,7 +729,7 @@ export default function SeatSelectionStep({
                     {/* Seat grid + tooltip. Rows are capped in height so the sidebar
                       summary stays reachable on a 30-row cabin. */}
                     <div className="overflow-x-auto no-scrollbar">
-                      <div className="seat-map-container relative mx-auto w-full min-w-[340px] sm:min-w-[330px] max-w-[400px]">
+                      <div className="relative mx-auto w-full min-w-[340px] sm:min-w-[330px] max-w-[400px]">
                         {/* Column letters, aligned to the grid via the same
                           spacer widths the rows use for the aisle. */}
                         <div className="flex items-center mb-2">
@@ -825,7 +825,7 @@ export default function SeatSelectionStep({
                                   top: flipBelow ? tooltip.y + 22 : tooltip.y - TIP_H,
                                 }}
                               >
-                                <div className="bg-[var(--vj-navy)] text-white rounded-xl shadow-xl p-2.5 sm:p-3 w-44 text-2xs sm:text-xs">
+                                <div className="bg-[var(--vj-navy)] text-white rounded-vj shadow-xl p-2.5 sm:p-3 w-44 text-2xs sm:text-xs">
                                   <div className="flex items-center justify-between mb-1.5 sm:mb-2">
                                     <span className="font-black text-sm sm:text-base font-koho">
                                       Ghế {tooltip.seatId}
@@ -980,7 +980,7 @@ export default function SeatSelectionStep({
 
             {/* Summary - responsive */}
             <div className="lg:col-span-1">
-              <div className="bg-[var(--surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] overflow-hidden sticky top-[180px] sm:top-[200px] lg:top-[230px] shadow-vj-md">
+              <div className="bg-[var(--surface)] rounded-vj sm:rounded-vj border border-[var(--border)] overflow-hidden sticky top-[180px] sm:top-[200px] lg:top-[230px] shadow-vj-md">
                 {/* Yellow accent top bar */}
                 <div className="h-1 w-full bg-gradient-to-r from-accent/60 via-accent to-accent/60" />
                 <div className="p-4 sm:p-5">
@@ -1005,7 +1005,7 @@ export default function SeatSelectionStep({
                         return (
                           <div
                             key={seat}
-                            className="flex items-center justify-between rounded-xl border border-[rgb(var(--primary-rgb))]/10 bg-[rgb(var(--primary-rgb))]/5 px-2.5 py-2 sm:px-3 sm:py-2.5"
+                            className="flex items-center justify-between rounded-vj border border-[rgb(var(--primary-rgb))]/10 bg-[rgb(var(--primary-rgb))]/5 px-2.5 py-2 sm:px-3 sm:py-2.5"
                           >
                             <div className="flex items-center gap-1.5 sm:gap-2">
                               <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-red rounded text-white text-2xs sm:text-xs font-black flex items-center justify-center shadow-sm">
@@ -1027,7 +1027,7 @@ export default function SeatSelectionStep({
                             </div>
                             <button
                               onClick={() => setSelected((prev) => prev.filter((s) => s !== seat))}
-                              className="grid h-8 w-8 place-items-center rounded-lg text-[var(--foreground-subtle)] hover:bg-[rgb(var(--primary-rgb))/5] hover:text-primary transition-colors"
+                              className="grid h-8 w-8 place-items-center rounded-vj text-[var(--foreground-subtle)] hover:bg-[rgb(var(--primary-rgb))/5] hover:text-primary transition-colors"
                             >
                               <Icon name="XMarkIcon" size={14} />
                             </button>
@@ -1076,7 +1076,7 @@ export default function SeatSelectionStep({
                   {/* Compact hold timer in sidebar - responsive */}
                   {holdTimer !== null && (
                     <div
-                      className={`rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 mb-2.5 sm:mb-3 flex items-center justify-between text-2xs sm:text-xs ${
+                      className={`rounded-vj px-2.5 sm:px-3 py-1.5 sm:py-2 mb-2.5 sm:mb-3 flex items-center justify-between text-2xs sm:text-xs ${
                         timerUrgent
                           ? 'bg-[rgb(var(--primary-rgb))]/10 text-primary border border-[rgb(var(--primary-rgb))]/30'
                           : timerWarning
@@ -1096,7 +1096,7 @@ export default function SeatSelectionStep({
                     <button
                       onClick={handleConfirm}
                       disabled={selected.length < passengerCount || isConfirming}
-                      className="w-full vj-btn vj-btn-md vj-btn-accent rounded-xl font-black disabled:opacity-50 disabled:cursor-not-allowed font-koho"
+                      className="w-full vj-btn vj-btn-md vj-btn-accent rounded-vj font-black disabled:opacity-50 disabled:cursor-not-allowed font-koho"
                     >
                       {isConfirming ? (
                         <>
@@ -1127,7 +1127,7 @@ export default function SeatSelectionStep({
                     <button
                       onClick={onBack}
                       disabled={isConfirming}
-                      className="w-full vj-btn vj-btn-md vj-btn-outline rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full vj-btn vj-btn-md vj-btn-outline rounded-vj disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Icon name="ArrowLeftIcon" size={14} />
                       Quay lại
@@ -1154,7 +1154,7 @@ export default function SeatSelectionStep({
       {/* Exit Row Safety Confirmation Modal */}
       {exitRowCandidate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl animate-fadeIn">
+          <div className="bg-white rounded-vj max-w-md w-full overflow-hidden shadow-2xl animate-fadeIn">
             <div className="bg-vjred p-4 text-white flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Icon name="ShieldCheckIcon" size={20} className="text-vjyellow" />
@@ -1192,14 +1192,14 @@ export default function SeatSelectionStep({
               <button
                 type="button"
                 onClick={() => setExitRowCandidate(null)}
-                className="vj-btn vj-btn-sm vj-btn-outline rounded-xl px-4 py-2 text-xs font-bold"
+                className="vj-btn vj-btn-sm vj-btn-outline rounded-vj px-4 py-2 text-xs font-bold"
               >
                 Chọn ghế khác
               </button>
               <button
                 type="button"
                 onClick={confirmExitRowSeat}
-                className="vj-btn vj-btn-sm vj-btn-primary rounded-xl px-4 py-2 text-xs font-bold"
+                className="vj-btn vj-btn-sm vj-btn-primary rounded-vj px-4 py-2 text-xs font-bold"
               >
                 Tôi đồng ý & Chọn ghế
               </button>

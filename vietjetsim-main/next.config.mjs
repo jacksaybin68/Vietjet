@@ -25,6 +25,15 @@ const nextConfig = {
   // error overlay still appears when a route actually fails.
   devIndicators: false,
 
+  // Next.js blocks its dev resources (HMR client, chunk reloading) for
+  // cross-origin hosts. Opening the app via `http://127.0.0.1:4028` used to hit
+  // that block, and the symptom was silent and very misleading: the page
+  // rendered from SSR but never hydrated, so every client-side effect was
+  // dead — the flight-results list stayed on its skeleton forever and showed
+  // "0 chuyến bay phù hợp" even though `/api/chuyen-bay` returned rows.
+  // Both loopback spellings are whitelisted so the two URLs behave the same.
+  allowedDevOrigins: ['127.0.0.1', 'localhost'],
+
   // Type errors now FAIL the build (CI gate); previously they were ignored.
   // Lint is enforced by `npm run lint` in CI, not by the build — Next 15/16
   // removed the `eslint` config key and warns if it is still present.

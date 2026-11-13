@@ -10,10 +10,12 @@ import {
   HiOutlineMenu,
   HiOutlineUserCircle,
 } from 'react-icons/hi';
-import { RiCalendarEventLine, RiHeadphoneLine } from 'react-icons/ri';
+import { RiHeadphoneLine } from 'react-icons/ri';
 import AnnouncementBar from './AnnouncementBar';
+import SubpageHeader from './SubpageHeader';
 import VietjetMobileDrawer from './VietjetMobileDrawer';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAuthModal } from '@/features/auth/components';
 
 // Nav theo đúng bốn mục của vietjetair.com (site thật render uppercase qua CSS);
 // "Trang chủ" đi qua logo; thao tác đặt vé luôn dẫn về form booking trên trang chủ.
@@ -155,19 +157,35 @@ export default function Header({
   variant = 'default',
   mobileTitle,
   hideMobileLogo = false,
+  mobileRed = false,
 }: {
-  variant?: 'default' | 'compact';
+  variant?: 'default' | 'compact' | 'subpage';
   mobileTitle?: string;
   hideMobileLogo?: boolean;
+  /** Băng đỏ ở mobile (biến thể `subpage`). */
+  mobileRed?: boolean;
 }) {
   const { user, signOut } = useAuth();
   const pathname = usePathname();
+  const { openAuthModal } = useAuthModal();
   const isHomepage = pathname === '/trang-chu';
   // The booking-lookup page mirrors vietjetair.com's single 94px red band:
   // logo + utility row on top, right-aligned primary nav underneath. It shares
   // every dropdown and auth behaviour with the default header, so this is a
   // presentation variant rather than a second component.
   const compactMode = variant === 'compact';
+
+  // `?redirect=` được đọc lúc bấm chứ không qua `useSearchParams`: hook đó bắt
+  // buộc toàn bộ cây phía trên phải nằm trong Suspense khi render tĩnh.
+  const readRedirect = () => {
+    if (typeof window === 'undefined') return undefined;
+    const value = new URLSearchParams(window.location.search).get('redirect');
+    return value && value.startsWith('/') ? value : undefined;
+  };
+
+  const openLogin = () => openAuthModal('login', { redirectTo: readRedirect() });
+  const openRegister = () => openAuthModal('register', { redirectTo: readRedirect() });
+
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState('Tiếng Việt');
@@ -180,11 +198,12 @@ export default function Header({
   }, [mobileTitle]);
 
   useEffect(() => {
-    const handleStepTitle = (e: CustomEvent<string>) => {
-      if (e.detail) setDynamicTitle(e.detail);
+    const handleStepTitle = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      if (customEvent.detail) setDynamicTitle(customEvent.detail);
     };
-    window.addEventListener('vj-booking-step-title' as any, handleStepTitle);
-    return () => window.removeEventListener('vj-booking-step-title' as any, handleStepTitle);
+    window.addEventListener('vj-booking-step-title', handleStepTitle);
+    return () => window.removeEventListener('vj-booking-step-title', handleStepTitle);
   }, []);
   const [megaMenu, setMegaMenu] = useState<'flight' | 'other' | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
@@ -236,23 +255,156 @@ export default function Header({
   // utility controls share one white treatment.
   const lightChrome = transparentMode || compactMode;
 
+  // Biến thể "subpage": header TRẮNG 74px của các trang con (tra cứu
+  // chuyến bay, check-in) — nền #FFFFFF, viền dưới 2px đỏ, bo góc dưới
+  // 16px. Khác hẳn header 4 tầng của trang chủ (lớp phủ hero) và thanh
+  // đỏ của luồng đặt vé.
+  // Hooks đã được gọi hết ở trên nên nhánh sớm này vẫn hợp lệ với rules-of-hooks.
+  if (variant === 'subpage') {
+    return <SubpageHeader title={mobileTitle} mobileRed={mobileRed} />;
+  }
+
   return (
     <>
       {/* Tầng 1: Thanh thông báo tin tức */}
       {!compactMode && <AnnouncementBar />}
 
       <header
-        className={`sticky top-0 z-40 transition-all duration-200 ${
+        className={`transition-all duration-200 ${
           compactMode
-            ? 'bg-[#D71920] text-white shadow-[0_2px_10px_rgba(0,0,0,0.18)]'
-            : transparentMode
-              ? 'bg-gradient-to-b from-slate-400/40 via-slate-400/15 to-transparent text-white shadow-none'
-              : 'bg-white/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.08)]'
+            ? 'sticky top-0 z-40 bg-primary-dark text-white shadow-[0_2px_10px_rgba(0,0,0,0.18)]'
+            : isHomepage
+              ? // Trang chủ: header là lớp PHỦ (absolute) nằm trên ảnh hero —
+                // đúng như site thật, nơi `jss120` có `position:absolute;
+                // top:50px; height:118px; z-index:1300` — tức lớp phủ bắt đầu
+                // NGAY DƯỚI thanh thông báo 50px. Hero cũng bắt đầu ở y=50,
+                // nên header neo ở `top:50px` để cả hai trùng khớp.
+                //
+                // MOBILE: site thật đặt một hàng điều hướng 56px PHỦ lên ảnh
+                // hero (header `position:relative`, y=35..91) — logo trắng 84×15px
+                // tại (13, 51), "Hỗ trợ", "Đăng ký | Đăng nhập", nút "vi" 38×20px
+                // và nút menu. Hàng này neo ngay dưới thanh thông báo nên dùng
+                // biến `--vj-announce-h` (35px, 0px khi đóng thanh).
+                'absolute inset-x-0 top-[var(--vj-announce-h,35px)] z-40 h-[56px] lg:inset-x-0 lg:top-[50px] lg:z-[1300] lg:h-0 lg:shadow-none'
+              : 'sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.08)]'
         }`}
       >
+        {/* Hàng điều hướng MOBILE của trang chủ — lớp phủ 56px trên ảnh hero.
+            Số đo site thật (390×844, đo 13/11/2026):
+              - Hàng nằm ở y=35..91 (ngay dưới thanh thông báo 35px).
+              - Nội dung cao 20px, top ở y=48 → padding trên 13px.
+              - Logo trắng 84×15px tại x=13.
+              - "Hỗ trợ": icon tai nghe 12×12px + chữ 10px/700 trắng.
+              - Icon quả địa 14×14px, "Đăng ký | Đăng nhập" 10px/700 trắng.
+              - Nút "vi" 38×20px, viền trắng 1px, bo góc 3px, chữ 14px/500.
+              - Nút menu 12×14px sát mép phải (x=365). */}
+        {!compactMode && isHomepage && (
+          <div className="flex h-full items-start px-[13px] pt-[13px] lg:hidden">
+            {/* Hàng nội dung cao 20px — logo (15px) canh giữa trong hàng nên
+                nằm ở y=51, đúng như site thật. */}
+            <div className="flex h-[20px] w-full items-center">
+              <Link
+                href="/trang-chu"
+                aria-label="Vietjet Air - Trang chủ"
+                className="flex shrink-0 items-center transition hover:opacity-90"
+              >
+                <img
+                  src="/images/vj-logo.svg"
+                  alt="Vietjet Air"
+                  className="h-[15px] w-[84px] object-contain brightness-0 invert"
+                />
+              </Link>
+
+              <div className="ml-auto flex items-center text-white">
+                <a
+                  href="tel:19001166"
+                  aria-label="Gọi hỗ trợ 1900 1166"
+                  className="flex items-center gap-1 text-2xs font-bold text-white transition hover:text-vjgold"
+                >
+                  <RiHeadphoneLine aria-hidden="true" className="h-[12px] w-[12px] shrink-0" />
+                  <span>Hỗ trợ</span>
+                </a>
+
+                <HiOutlineGlobeAlt aria-hidden="true" className="ml-1 h-[14px] w-[14px] shrink-0" />
+
+                <span className="ml-1 text-2xs font-bold text-white">
+                  {user ? (
+                    <span className="max-w-[90px] truncate">
+                      {(user.fullName || user.email)?.replace(/\s*\(CCCD:.*?\)/gi, '')}
+                    </span>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => openRegister()}
+                        className="transition hover:text-vjgold"
+                      >
+                        Đăng ký
+                      </button>
+                      <span className="px-1 text-white/40">|</span>
+                      <button
+                        type="button"
+                        onClick={() => openLogin()}
+                        className="transition hover:text-vjgold"
+                      >
+                        Đăng nhập
+                      </button>
+                    </>
+                  )}
+                </span>
+
+                {/* Nút ngôn ngữ "vi" — 38×20px, viền trắng 1px, bo góc 3px. */}
+                <div ref={langMenuRef} className="relative ml-1">
+                  <button
+                    type="button"
+                    onClick={() => setLangMenuOpen((open) => !open)}
+                    aria-expanded={langMenuOpen}
+                    aria-label="Đổi ngôn ngữ"
+                    className="flex h-[20px] w-[38px] items-center justify-center rounded-[3px] border border-white bg-transparent text-sm font-medium text-white transition hover:bg-white/15"
+                  >
+                    vi
+                  </button>
+
+                  {langMenuOpen && (
+                    <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-36 overflow-hidden rounded-xl border border-gray-200 bg-white py-1 text-gray-800 shadow-lg">
+                      {['Tiếng Việt', 'English'].map((lang) => (
+                        <button
+                          key={lang}
+                          type="button"
+                          onClick={() => {
+                            setCurrentLang(lang);
+                            setLangMenuOpen(false);
+                          }}
+                          className={`flex w-full items-center justify-between px-3 py-2 text-left text-xs font-semibold ${
+                            currentLang === lang
+                              ? 'bg-red-50 font-bold text-vjred'
+                              : 'text-gray-700'
+                          }`}
+                        >
+                          <span>{lang}</span>
+                          {currentLang === lang ? '✓' : null}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(true)}
+                  aria-label="Mở menu"
+                  className="ml-2 flex h-[14px] w-[12px] items-center justify-center text-white transition hover:opacity-80"
+                >
+                  <HiOutlineMenu aria-hidden="true" className="h-[14px] w-[12px]" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Mobile Header for compactMode (< lg) matching Screenshot 3 & 4 */}
         {compactMode && (
-          <div className="flex lg:hidden h-14 items-center justify-between px-4 bg-[#D71920] text-white shadow-md">
+          <div className="flex lg:hidden h-14 items-center justify-between px-4 bg-primary-dark text-white shadow-md">
             {hideMobileLogo ? (
               <div className="w-8 shrink-0" aria-hidden="true" />
             ) : (
@@ -268,7 +420,7 @@ export default function Header({
                 />
               </Link>
             )}
-            <h1 className="font-koho font-black italic tracking-wide text-[15px] sm:text-xl uppercase text-white text-center truncate">
+            <h1 className="font-koho font-black italic tracking-wide text-base2 sm:text-xl uppercase text-white text-center truncate">
               {dynamicTitle || mobileTitle || 'LỰA CHỌN CHUYẾN BAY'}
             </h1>
             <button
@@ -282,412 +434,691 @@ export default function Header({
           </div>
         )}
 
-        {/* Tầng 2: Hàng tiện ích (Utility) — Logo Vietjet + Hỗ trợ + Đăng ký/Đăng nhập + Tiếng Việt */}
-        <div
-          className={`transition-colors ${lightChrome ? 'bg-transparent' : 'border-b border-gray-100 bg-white'}`}
-        >
+        {/* Tầng 2 — Trang chủ: header 4 tầng đúng số đo site thật.
+            Site thật (đo 13/11/2026, viewport 1440×900):
+              - Tầng 2 = lớp phủ tối `absolute` cao 118px, đặt trên hero:
+                gradient linear-gradient(rgba(0,0,0,.5) 0%, rgba(0,0,0,.094) 100%),
+                padding-top 10px, z-index 1300.
+              - Hàng logo + tiện ích: cao 68px. Logo 265×46 tại x=120 (căn giữa
+                trong 68px → y=71). Cột phải x=385, rộng 935px.
+              - Hàng tiện ích (20px, sát mép phải): "Hỗ trợ" (icon 20px + chữ
+                16px/700 trắng), "Đăng ký | Đăng nhập" 16px/700, nút ngôn ngữ
+                "Tiếng Việt" (viền trắng 1px, bo 3px, cao 20px).
+              - Hàng menu chính (33px, sát mép phải, gap 5px): chữ 16px/600
+                uppercase, mục active có gạch dưới #F7C61A.
+              - Tầng 3 = dải dịch vụ phụ cao 35px, nền gradient đen → trong suốt,
+                icon 25×25 + chữ 16px/700, gap 24px, active #F7C61A. */}
+        {!compactMode && (
+          <div className="hidden lg:block">
+            {/* Lớp phủ tối phủ lên ảnh hero. */}
+            <div className="vj-header-scrim">
+              {/* Hàng logo + cột phải (tiện ích + menu chính). */}
+              <div className="mx-auto flex h-[68px] max-w-[1200px] items-center">
+                {/* Logo Vietjet — 265×46px (đo được trên site thật). */}
+                <Link
+                  href="/trang-chu"
+                  aria-label="Vietjet Air - Trang chủ"
+                  className="flex w-[265px] shrink-0 items-center transition hover:opacity-95"
+                >
+                  <img
+                    src="/images/vj-logo.svg"
+                    alt="Vietjet Air"
+                    className="h-[46px] w-[265px] object-contain brightness-0 invert"
+                  />
+                </Link>
+
+                {/* Cột phải — rộng 935px (1200 − 265), hai hàng dồn xuống mép phải.
+                    Site thật: hàng tiện ích BẮT ĐẦU ngay dưới padding-top 10px
+                    của lớp phủ (y=60 tuyệt đối), cách hàng menu 15px. */}
+                <div className="ml-auto flex w-[935px] flex-col items-end self-start gap-[15px]">
+                  {/* Hàng tiện ích — cao 20px. */}
+                  <div className="flex h-[20px] items-center justify-end gap-3 pr-2.5 text-white">
+                    {/* 🎧 Hỗ trợ */}
+                    <a
+                      href="tel:19001166"
+                      className="flex items-center gap-1.5 text-base font-bold text-white transition hover:text-vjgold"
+                    >
+                      <RiHeadphoneLine aria-hidden="true" className="h-5 w-5 shrink-0" />
+                      <span>Hỗ trợ</span>
+                    </a>
+
+                    {/* Globe + Đăng ký | Đăng nhập */}
+                    <HiOutlineGlobeAlt aria-hidden="true" className="h-5 w-5 shrink-0" />
+                    <span className="text-base font-bold text-white">
+                      <button
+                        type="button"
+                        onClick={() => openRegister()}
+                        className="transition hover:text-vjgold"
+                      >
+                        Đăng ký
+                      </button>
+                      <span className="px-1.5 text-white">|</span>
+                      <button
+                        type="button"
+                        onClick={() => openLogin()}
+                        className="transition hover:text-vjgold"
+                      >
+                        Đăng nhập
+                      </button>
+                    </span>
+
+                    {/* Nút ngôn ngữ — viền trắng 1px, bo góc 3px, cao 20px. */}
+                    <div ref={langMenuRef} className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setLangMenuOpen((open) => !open)}
+                        aria-expanded={langMenuOpen}
+                        className="flex h-[20px] items-center gap-1 rounded-[3px] border border-white bg-transparent px-[5px] text-sm font-medium text-white transition hover:bg-white/15"
+                      >
+                        <span className="pl-[5px] text-base font-bold">{currentLang}</span>
+                        <HiOutlineChevronDown aria-hidden="true" className="text-xs" />
+                      </button>
+
+                      {langMenuOpen && (
+                        <div className="absolute right-0 top-[calc(100%+8px)] w-36 overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-lg text-gray-800">
+                          {['Tiếng Việt', 'English'].map((lang) => (
+                            <button
+                              key={lang}
+                              type="button"
+                              onClick={() => {
+                                setCurrentLang(lang);
+                                setLangMenuOpen(false);
+                              }}
+                              className={`flex w-full items-center justify-between px-3 py-2 text-left text-xs font-semibold ${
+                                currentLang === lang
+                                  ? 'bg-red-50 font-bold text-vjred'
+                                  : 'text-gray-700 hover:bg-gray-50'
+                              }`}
+                            >
+                              <span>{lang}</span>
+                              {currentLang === lang ? '✓' : null}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Hàng menu chính — cao 33px, sát mép phải, gap 5px. */}
+                  <div
+                    ref={megaMenuRef}
+                    className="relative"
+                    onMouseLeave={() => setMegaMenu(null)}
+                  >
+                    <nav aria-label="Điều hướng chính" className="vj-nav-bar">
+                      {NAV_LINKS.map((link) => {
+                        const active = isActivePath(pathname, link.href);
+                        const isMega =
+                          'mega' in link && (link.mega === 'flight' || link.mega === 'other');
+                        const isCurrentMega = isMega && megaMenu === link.mega;
+
+                        return (
+                          <div
+                            key={link.href}
+                            className="relative"
+                            onMouseEnter={() => {
+                              if (isMega) setMegaMenu(link.mega as 'flight' | 'other');
+                              else setMegaMenu(null);
+                            }}
+                          >
+                            <Link
+                              href={link.href}
+                              aria-current={active ? 'page' : undefined}
+                              onClick={() => {
+                                if (isMega)
+                                  setMegaMenu((prev) =>
+                                    prev === link.mega ? null : (link.mega as 'flight' | 'other')
+                                  );
+                              }}
+                              className={`vj-nav-bar-item ${
+                                active || isCurrentMega ? 'vj-nav-bar-item--active' : ''
+                              }`}
+                            >
+                              <span>{link.label}</span>
+                              {isMega && (
+                                <HiOutlineChevronDown
+                                  className={`ml-1 text-xs transition-transform duration-200 ${
+                                    isCurrentMega ? 'rotate-180' : ''
+                                  }`}
+                                />
+                              )}
+                            </Link>
+                          </div>
+                        );
+                      })}
+                    </nav>
+
+                    {/* Mega Menu Dropdown */}
+                    {megaMenu && (
+                      <div
+                        className="absolute right-0 top-full mt-1.5 w-[640px] rounded-2xl bg-white p-5 shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-gray-100 z-50 text-gray-800 animate-fadeIn"
+                        onMouseEnter={() => {}}
+                      >
+                        <div className="grid grid-cols-2 gap-5 divide-x divide-gray-100">
+                          {/* Cột 1: Hành lý, suất ăn & dịch vụ bổ trợ */}
+                          <div className="pr-3">
+                            <h4 className="text-xs font-black uppercase tracking-wider text-primary-dark pb-2 mb-2 border-b border-gray-100 font-koho">
+                              Hành lý, suất ăn &amp; dịch vụ bổ trợ
+                            </h4>
+                            <div className="space-y-1.5">
+                              {FLIGHT_SERVICES_ITEMS.slice(0, 3).map((item) => (
+                                <Link
+                                  key={item.title}
+                                  href={item.href}
+                                  onClick={() => setMegaMenu(null)}
+                                  className="group block rounded-xl p-2 transition-all hover:bg-red-50/70 border border-transparent hover:border-red-100"
+                                >
+                                  <div className="flex items-center gap-1.5 mb-0.5">
+                                    <span className="text-xs font-bold text-gray-900 group-hover:text-vjred transition-colors leading-tight">
+                                      {item.title}
+                                    </span>
+                                    {item.isHot && (
+                                      <span className="text-3xs bg-red-600 text-white font-black px-1.5 py-0.2 rounded uppercase shrink-0 italic">
+                                        HOT
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-xs2 text-gray-500 line-clamp-2 leading-snug">
+                                    {item.desc}
+                                  </p>
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Cột 2: Dịch vụ khác */}
+                          <div className="pl-4">
+                            <h4 className="text-xs font-black uppercase tracking-wider text-primary-dark pb-2 mb-2 border-b border-gray-100 font-koho">
+                              Dịch vụ khác
+                            </h4>
+                            <div className="space-y-1.5">
+                              {OTHER_SERVICES_ITEMS.slice(0, 3).map((item) => (
+                                <Link
+                                  key={item.title}
+                                  href={item.href}
+                                  onClick={() => setMegaMenu(null)}
+                                  className="group block rounded-xl p-2 transition-all hover:bg-red-50/70 border border-transparent hover:border-red-100"
+                                >
+                                  <div className="flex items-center gap-1.5 mb-0.5">
+                                    <span className="text-xs font-bold text-gray-900 group-hover:text-vjred transition-colors leading-tight">
+                                      {item.title}
+                                    </span>
+                                    {item.isHot && (
+                                      <span className="text-3xs bg-red-600 text-white font-black px-1.5 py-0.2 rounded uppercase shrink-0 italic">
+                                        HOT
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-xs2 text-gray-500 line-clamp-2 leading-snug">
+                                    {item.desc}
+                                  </p>
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Tầng 3 — Dải dịch vụ phụ, cao 35px, nền gradient đen → trong suốt.
+                  Site thật: dải bắt đầu 5px dưới hàng menu (y=133 tuyệt đối)
+                  và căn PHẢI trong container 1200px (mục cuối kết thúc ở x=1320). */}
+              <div className="vj-quick-rail-wrap mt-[5px]">
+                <ul className="vj-quick-rail mx-auto max-w-[1200px]">
+                  {QUICK_SERVICES.map((item) => (
+                    <li key={item.label} className={item.highlight ? 'active' : undefined}>
+                      <Link href={item.href}>
+                        <img
+                          src={item.iconSrc}
+                          alt=""
+                          aria-hidden="true"
+                          width={25}
+                          height={25}
+                          className="h-[25px] w-[25px] shrink-0"
+                        />
+                        <span>{item.label}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tầng 2 (biến thể compact): Logo + tiện ích + menu đỏ như cũ. */}
+        {compactMode && (
           <div
-            className={`mx-auto ${compactMode ? 'hidden lg:flex' : 'flex'} items-center justify-between px-4 sm:px-6 ${
-              compactMode
-                ? 'h-14 max-w-[1368px] min-[1368px]:px-0 lg:h-[48px]'
-                : 'h-14 max-w-[1240px] sm:h-16 lg:px-0'
+            className={`transition-colors ${
+              lightChrome ? 'bg-transparent' : 'border-b border-gray-100 bg-white'
             }`}
           >
-            {/* Logo Vietjet */}
-            <Link
-              href="/trang-chu"
-              aria-label="Vietjet Air - Trang chủ"
-              className="flex shrink-0 items-center transition hover:opacity-95"
-            >
-              <img
-                src="/images/vj-logo.svg"
-                alt="Vietjet Air"
-                className="h-[24px] w-auto brightness-0 invert lg:h-[32px]"
-              />
-            </Link>
-
-            {/* Cụm tiện ích bên phải trên desktop */}
             <div
-              className={`hidden lg:flex items-center font-semibold ${
-                compactMode ? 'gap-5 text-xs' : 'gap-6 text-sm2'
-              } ${lightChrome ? 'text-white' : 'text-gray-700'}`}
+              className={`mx-auto ${compactMode ? 'hidden lg:flex' : 'flex'} items-center justify-between px-4 sm:px-6 ${
+                compactMode
+                  ? 'h-14 max-w-[1200px] min-[1200px]:px-0 lg:h-[48px]'
+                  : // Site thật: container 1200px, hàng utility cao 60px.
+                    'h-[60px] max-w-[1200px] lg:px-0'
+              }`}
             >
-              {/* 🎧 Hỗ trợ */}
-              <a
-                href="tel:19001166"
-                className={`flex items-center gap-1.5 font-bold transition ${
-                  lightChrome ? 'text-white hover:text-vjgold' : 'text-gray-700 hover:text-vjred'
-                }`}
+              {/* Logo Vietjet — 265×46px trên desktop (đo được trên site thật). */}
+              <Link
+                href="/trang-chu"
+                aria-label="Vietjet Air - Trang chủ"
+                className="flex shrink-0 items-center transition hover:opacity-95"
               >
-                <RiHeadphoneLine
-                  aria-hidden="true"
-                  className={
-                    compactMode
-                      ? 'text-sm'
-                      : `text-base ${lightChrome ? 'text-white' : 'text-vjred'}`
-                  }
+                <img
+                  src="/images/vj-logo.svg"
+                  alt="Vietjet Air"
+                  className="h-[15px] w-auto brightness-0 invert sm:h-[46px] lg:h-[46px] lg:w-[265px]"
                 />
-                <span>{compactMode ? 'Hỗ trợ' : 'Hỗ trợ 1900 1166'}</span>
-              </a>
+              </Link>
 
-              <span
-                className={`w-px ${compactMode ? 'h-3.5' : 'h-4'} ${
-                  lightChrome ? 'bg-white/30' : 'bg-gray-200'
-                }`}
-                aria-hidden="true"
-              />
+              {/* Cụm tiện ích bên phải trên desktop */}
+              <div
+                className={`hidden lg:flex items-center font-medium ${
+                  compactMode ? 'gap-5 text-xs' : 'gap-6 text-sm'
+                } ${lightChrome ? 'text-white' : 'text-gray-700'}`}
+              >
+                {/* 🎧 Hỗ trợ */}
+                <a
+                  href="tel:19001166"
+                  className={`flex items-center gap-1.5 font-medium transition ${
+                    lightChrome ? 'text-white hover:text-vjgold' : 'text-gray-700 hover:text-vjred'
+                  }`}
+                >
+                  <RiHeadphoneLine
+                    aria-hidden="true"
+                    className={
+                      compactMode
+                        ? 'text-sm'
+                        : `text-base ${lightChrome ? 'text-white' : 'text-vjred'}`
+                    }
+                  />
+                  <span className={compactMode ? '' : 'text-sm'}>
+                    {compactMode ? 'Hỗ trợ' : 'Hỗ trợ 1900 1166'}
+                  </span>
+                </a>
 
-              {/* 👤 Đăng ký | Đăng nhập hoặc Menu Tài khoản */}
-              {user ? (
-                <div ref={accountMenuRef} className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setAccountMenuOpen((open) => !open)}
-                    aria-expanded={accountMenuOpen}
-                    className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-bold transition ${
+                <span
+                  className={`w-px ${compactMode ? 'h-3.5' : 'h-4'} ${
+                    lightChrome ? 'bg-white/30' : 'bg-gray-200'
+                  }`}
+                  aria-hidden="true"
+                />
+
+                {/* 👤 Đăng ký | Đăng nhập hoặc Menu Tài khoản */}
+                {user ? (
+                  <div ref={accountMenuRef} className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setAccountMenuOpen((open) => !open)}
+                      aria-expanded={accountMenuOpen}
+                      className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-bold transition ${
+                        lightChrome
+                          ? 'border-white/30 bg-black/20 text-white hover:bg-black/30'
+                          : 'border-gray-200 bg-gray-50 text-gray-800 hover:bg-gray-100'
+                      }`}
+                    >
+                      <HiOutlineUserCircle
+                        aria-hidden="true"
+                        className={`text-base ${lightChrome ? 'text-white' : 'text-vjred'}`}
+                      />
+                      <span className="max-w-[120px] truncate">
+                        {(user.fullName || user.email)?.replace(/\s*\(CCCD:.*?\)/gi, '')}
+                      </span>
+                      <HiOutlineChevronDown className="text-xs text-gray-400" />
+                    </button>
+
+                    {accountMenuOpen && (
+                      <div className="absolute right-0 top-[calc(100%+8px)] w-60 overflow-hidden rounded-xl border border-gray-200 bg-white py-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
+                        <div className="border-b border-gray-100 px-4 py-2.5 bg-gray-50/50">
+                          <p className="truncate text-xs font-bold text-gray-900">
+                            {(user.fullName || user.email)?.replace(/\s*\(CCCD:.*?\)/gi, '')}
+                          </p>
+                          <p className="truncate text-xs2 text-gray-500">{user.email}</p>
+                        </div>
+                        {accountLinks.map(([label, href]) => (
+                          <Link
+                            key={href}
+                            href={href}
+                            onClick={() => setAccountMenuOpen(false)}
+                            className="block px-4 py-2 text-xs font-semibold text-gray-700 transition hover:bg-red-50 hover:text-vjred"
+                          >
+                            {label}
+                          </Link>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => void signOut()}
+                          className="flex w-full items-center gap-2 border-t border-gray-100 px-4 py-2.5 text-left text-xs font-bold text-vjred transition hover:bg-red-50"
+                        >
+                          <HiOutlineLogout aria-hidden="true" />
+                          Đăng xuất
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div
+                    className={`flex items-center gap-1.5 font-bold ${
+                      compactMode ? 'text-xs px-2.5 py-1' : 'text-base px-3.5 py-1.5'
+                    } rounded-full border transition-all ${
                       lightChrome
-                        ? 'border-white/30 bg-black/20 text-white hover:bg-black/30'
-                        : 'border-gray-200 bg-gray-50 text-gray-800 hover:bg-gray-100'
+                        ? 'border-white/35 bg-black/25 hover:bg-black/35 text-white backdrop-blur-sm shadow-sm'
+                        : 'border-gray-200 bg-gray-100 hover:bg-gray-200/80 text-gray-800 shadow-sm'
                     }`}
                   >
                     <HiOutlineUserCircle
                       aria-hidden="true"
-                      className={`text-base ${lightChrome ? 'text-white' : 'text-vjred'}`}
+                      className={`${compactMode ? 'text-sm' : 'text-2xl3'} ${
+                        lightChrome ? 'text-white' : 'text-vjred'
+                      }`}
                     />
-                    <span className="max-w-[120px] truncate">
-                      {(user.fullName || user.email)?.replace(/\s*\(CCCD:.*?\)/gi, '')}
-                    </span>
-                    <HiOutlineChevronDown className="text-xs text-gray-400" />
+                    <button
+                      type="button"
+                      onClick={() => openRegister()}
+                      className={`transition hover:underline ${
+                        lightChrome ? 'hover:text-vjgold' : 'hover:text-vjred'
+                      }`}
+                    >
+                      Đăng ký
+                    </button>
+                    <span className={lightChrome ? 'text-white/40' : 'text-gray-400'}>|</span>
+                    <button
+                      type="button"
+                      onClick={() => openLogin()}
+                      className={`transition hover:underline ${
+                        lightChrome ? 'hover:text-vjgold' : 'hover:text-vjred'
+                      }`}
+                    >
+                      Đăng nhập
+                    </button>
+                  </div>
+                )}
+
+                <span
+                  className={`h-3.5 w-px ${lightChrome ? 'bg-white/30' : 'bg-gray-200'}`}
+                  aria-hidden="true"
+                />
+
+                {/* Dropdown Tiếng Việt ▾ */}
+                <div ref={langMenuRef} className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setLangMenuOpen((open) => !open)}
+                    aria-expanded={langMenuOpen}
+                    className={`flex items-center gap-1 rounded-full px-2 py-0.5 font-bold transition text-xs ${
+                      lightChrome
+                        ? 'border border-white/50 bg-black/10 backdrop-blur-sm text-white hover:border-white'
+                        : 'border border-gray-200 bg-gray-50 text-gray-700 hover:text-vjred'
+                    }`}
+                  >
+                    <HiOutlineGlobeAlt aria-hidden="true" className="text-sm" />
+                    <span>{currentLang}</span>
+                    <HiOutlineChevronDown className="text-2xs" />
                   </button>
 
-                  {accountMenuOpen && (
-                    <div className="absolute right-0 top-[calc(100%+8px)] w-60 overflow-hidden rounded-xl border border-gray-200 bg-white py-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
-                      <div className="border-b border-gray-100 px-4 py-2.5 bg-gray-50/50">
-                        <p className="truncate text-xs font-bold text-gray-900">
-                          {(user.fullName || user.email)?.replace(/\s*\(CCCD:.*?\)/gi, '')}
-                        </p>
-                        <p className="truncate text-xs2 text-gray-500">{user.email}</p>
-                      </div>
-                      {accountLinks.map(([label, href]) => (
-                        <Link
-                          key={href}
-                          href={href}
-                          onClick={() => setAccountMenuOpen(false)}
-                          className="block px-4 py-2 text-xs font-semibold text-gray-700 transition hover:bg-red-50 hover:text-vjred"
+                  {langMenuOpen && (
+                    <div className="absolute right-0 top-[calc(100%+8px)] w-36 overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-lg text-gray-800">
+                      {['Tiếng Việt', 'English'].map((lang) => (
+                        <button
+                          key={lang}
+                          type="button"
+                          onClick={() => {
+                            setCurrentLang(lang);
+                            setLangMenuOpen(false);
+                          }}
+                          className={`flex w-full items-center justify-between px-3 py-2 text-left text-xs font-semibold ${
+                            currentLang === lang
+                              ? 'bg-red-50 font-bold text-vjred'
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
                         >
-                          {label}
-                        </Link>
+                          <span>{lang}</span>
+                          {currentLang === lang ? '✓' : null}
+                        </button>
                       ))}
-                      <button
-                        type="button"
-                        onClick={() => void signOut()}
-                        className="flex w-full items-center gap-2 border-t border-gray-100 px-4 py-2.5 text-left text-xs font-bold text-vjred transition hover:bg-red-50"
-                      >
-                        <HiOutlineLogout aria-hidden="true" />
-                        Đăng xuất
-                      </button>
                     </div>
                   )}
                 </div>
-              ) : (
-                <div
-                  className={`flex items-center gap-1.5 font-bold ${
-                    compactMode ? 'text-xs px-2.5 py-1' : 'text-sm px-3.5 py-1.5'
-                  } rounded-full border transition-all ${
+              </div>
+
+              {/* Mobile controls for default mode (Screenshot 2) */}
+              <div className="flex items-center gap-1.5 sm:gap-2 lg:hidden text-xs font-semibold">
+                <a
+                  href="tel:19001166"
+                  aria-label="Gọi hỗ trợ"
+                  className={`flex items-center gap-1 px-1.5 py-1 ${
                     lightChrome
-                      ? 'border-white/35 bg-black/25 hover:bg-black/35 text-white backdrop-blur-sm shadow-sm'
-                      : 'border-gray-200 bg-gray-100 hover:bg-gray-200/80 text-gray-800 shadow-sm'
+                      ? 'text-white hover:text-vjyellow'
+                      : 'text-gray-700 hover:text-vjred'
                   }`}
                 >
-                  <HiOutlineUserCircle
-                    aria-hidden="true"
-                    className={`${compactMode ? 'text-sm' : 'text-base'} ${
-                      lightChrome ? 'text-white' : 'text-vjred'
-                    }`}
-                  />
-                  <Link
-                    href="/dang-ky"
-                    className={`transition hover:underline ${
-                      lightChrome ? 'hover:text-vjgold' : 'hover:text-vjred'
+                  <RiHeadphoneLine className="text-base" />
+                  <span className="hidden min-[380px]:inline text-3xs sm:text-xs">Hỗ trợ</span>
+                </a>
+
+                {user ? (
+                  <span
+                    className={`max-w-[75px] truncate text-3xs sm:text-xs font-bold ${
+                      lightChrome ? 'text-white' : 'text-gray-800'
                     }`}
                   >
-                    Đăng ký
-                  </Link>
-                  <span className={lightChrome ? 'text-white/40' : 'text-gray-400'}>|</span>
-                  <Link
-                    href="/dang-nhap"
-                    className={`transition hover:underline ${
-                      lightChrome ? 'hover:text-vjgold' : 'hover:text-vjred'
+                    {(user.fullName || user.email)?.replace(/\s*\(CCCD:.*?\)/gi, '')}
+                  </span>
+                ) : (
+                  <div
+                    className={`flex items-center gap-1 text-3xs sm:text-xs font-bold px-2.5 py-1 rounded-full border transition-all ${
+                      lightChrome
+                        ? 'border-white/35 bg-black/25 text-white backdrop-blur-sm'
+                        : 'border-gray-200 bg-gray-100 text-gray-800'
                     }`}
                   >
-                    Đăng nhập
-                  </Link>
-                </div>
-              )}
+                    <button
+                      type="button"
+                      onClick={() => openRegister()}
+                      className="hover:text-vjyellow transition hover:underline"
+                    >
+                      Đăng ký
+                    </button>
+                    <span className={lightChrome ? 'text-white/40' : 'text-gray-400'}>|</span>
+                    <button
+                      type="button"
+                      onClick={() => openLogin()}
+                      className="hover:text-vjyellow transition hover:underline"
+                    >
+                      Đăng nhập
+                    </button>
+                  </div>
+                )}
 
-              <span
-                className={`h-3.5 w-px ${lightChrome ? 'bg-white/30' : 'bg-gray-200'}`}
-                aria-hidden="true"
-              />
-
-              {/* Dropdown Tiếng Việt ▾ */}
-              <div ref={langMenuRef} className="relative">
+                {/* Dropdown VI */}
                 <button
                   type="button"
                   onClick={() => setLangMenuOpen((open) => !open)}
-                  aria-expanded={langMenuOpen}
-                  className={`flex items-center gap-1 rounded-full px-2 py-0.5 font-bold transition text-xs ${
+                  className={`flex items-center gap-0.5 rounded px-1.5 py-0.5 text-3xs sm:text-xs font-bold border ${
                     lightChrome
-                      ? 'border border-white/50 bg-black/10 backdrop-blur-sm text-white hover:border-white'
-                      : 'border border-gray-200 bg-gray-50 text-gray-700 hover:text-vjred'
+                      ? 'border-white/50 bg-black/10 text-white'
+                      : 'border-gray-200 bg-gray-50 text-gray-700'
                   }`}
                 >
-                  <HiOutlineGlobeAlt aria-hidden="true" className="text-sm" />
-                  <span>{currentLang}</span>
-                  <HiOutlineChevronDown className="text-[10px]" />
+                  <span>VI</span>
+                  <span className="text-3xs">▾</span>
                 </button>
 
-                {langMenuOpen && (
-                  <div className="absolute right-0 top-[calc(100%+8px)] w-36 overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-lg text-gray-800">
-                    {['Tiếng Việt', 'English'].map((lang) => (
-                      <button
-                        key={lang}
-                        type="button"
-                        onClick={() => {
-                          setCurrentLang(lang);
-                          setLangMenuOpen(false);
+                {/* Hamburger button */}
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(true)}
+                  aria-label="Mở menu"
+                  className={`flex h-8 w-8 items-center justify-center ${
+                    lightChrome ? 'text-white' : 'text-gray-700'
+                  }`}
+                >
+                  <HiOutlineMenu className="text-2xl" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tầng 3: Primary Nav Bar — CHỈ dùng cho biến thể compact.
+            Trang chủ dùng một hàng 72px duy nhất (xem Tầng 2 ở trên). */}
+        {compactMode && (
+          <div
+            className={`hidden lg:block ${
+              lightChrome
+                ? 'bg-transparent text-white'
+                : 'bg-gradient-to-r from-vjred-dark via-vjred to-vjred-dark text-white shadow-inner'
+            }`}
+          >
+            <div
+              className={`mx-auto flex items-center justify-end px-4 sm:px-6 ${
+                compactMode
+                  ? 'h-[38px] max-w-[1200px] min-[1200px]:px-0'
+                  : // Site thật: hàng menu chính cao 33px, container 1200px.
+                    'h-[33px] max-w-[1200px] lg:px-0'
+              }`}
+            >
+              <div ref={megaMenuRef} className="relative" onMouseLeave={() => setMegaMenu(null)}>
+                <nav
+                  aria-label="Điều hướng chính"
+                  className={`flex items-center ${compactMode ? 'gap-7' : 'gap-6'}`}
+                >
+                  {NAV_LINKS.map((link) => {
+                    const active = isActivePath(pathname, link.href);
+                    const isMega =
+                      'mega' in link && (link.mega === 'flight' || link.mega === 'other');
+                    const isCurrentMega = isMega && megaMenu === link.mega;
+
+                    return (
+                      <div
+                        key={link.href}
+                        className="relative"
+                        onMouseEnter={() => {
+                          if (isMega) setMegaMenu(link.mega as 'flight' | 'other');
+                          else setMegaMenu(null);
                         }}
-                        className={`flex w-full items-center justify-between px-3 py-2 text-left text-xs font-semibold ${
-                          currentLang === lang
-                            ? 'bg-red-50 font-bold text-vjred'
-                            : 'text-gray-700 hover:bg-gray-50'
-                        }`}
                       >
-                        <span>{lang}</span>
-                        {currentLang === lang ? '✓' : null}
-                      </button>
-                    ))}
+                        <Link
+                          href={link.href}
+                          aria-current={active ? 'page' : undefined}
+                          onClick={() => {
+                            if (isMega)
+                              setMegaMenu((prev) =>
+                                prev === link.mega ? null : (link.mega as 'flight' | 'other')
+                              );
+                          }}
+                          className={`relative whitespace-nowrap py-1.5 font-semibold uppercase tracking-normal transition-colors duration-200 flex items-center gap-1 ${
+                            compactMode ? 'text-xs' : 'text-sm'
+                          } ${
+                            compactMode
+                              ? active || isCurrentMega
+                                ? 'font-extrabold text-white'
+                                : 'text-white/80 hover:text-white'
+                              : active || isCurrentMega
+                                ? // Vàng active của site thật: #F7C61A.
+                                  'text-vj-nav-active'
+                                : 'text-white hover:text-vj-nav-active'
+                          }`}
+                        >
+                          <span>{link.label}</span>
+                          {isMega && (
+                            <HiOutlineChevronDown
+                              className={`text-xs transition-transform duration-200 ${isCurrentMega ? 'rotate-180' : ''}`}
+                            />
+                          )}
+                        </Link>
+                      </div>
+                    );
+                  })}
+                </nav>
+
+                {/* Mega Menu Dropdown */}
+                {megaMenu && (
+                  <div
+                    className="absolute right-0 top-full mt-1.5 w-[640px] rounded-2xl bg-white p-5 shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-gray-100 z-50 text-gray-800 animate-fadeIn"
+                    onMouseEnter={() => {}}
+                  >
+                    <div className="grid grid-cols-2 gap-5 divide-x divide-gray-100">
+                      {/* Cột 1: Hành lý, suất ăn & dịch vụ bổ trợ */}
+                      <div className="pr-3">
+                        <h4 className="text-xs font-black uppercase tracking-wider text-primary-dark pb-2 mb-2 border-b border-gray-100 font-koho">
+                          Hành lý, suất ăn &amp; dịch vụ bổ trợ
+                        </h4>
+                        <div className="space-y-1.5">
+                          {FLIGHT_SERVICES_ITEMS.slice(0, 3).map((item) => (
+                            <Link
+                              key={item.title}
+                              href={item.href}
+                              onClick={() => setMegaMenu(null)}
+                              className="group block rounded-xl p-2 transition-all hover:bg-red-50/70 border border-transparent hover:border-red-100"
+                            >
+                              <div className="flex items-center gap-1.5 mb-0.5">
+                                <span className="text-xs font-bold text-gray-900 group-hover:text-vjred transition-colors leading-tight">
+                                  {item.title}
+                                </span>
+                                {item.isHot && (
+                                  <span className="text-3xs bg-red-600 text-white font-black px-1.5 py-0.2 rounded uppercase shrink-0 italic">
+                                    HOT
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs2 text-gray-500 line-clamp-2 leading-snug">
+                                {item.desc}
+                              </p>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Cột 2: Dịch vụ khác */}
+                      <div className="pl-4">
+                        <h4 className="text-xs font-black uppercase tracking-wider text-primary-dark pb-2 mb-2 border-b border-gray-100 font-koho">
+                          Dịch vụ khác
+                        </h4>
+                        <div className="space-y-1.5">
+                          {OTHER_SERVICES_ITEMS.slice(0, 3).map((item) => (
+                            <Link
+                              key={item.title}
+                              href={item.href}
+                              onClick={() => setMegaMenu(null)}
+                              className="group block rounded-xl p-2 transition-all hover:bg-red-50/70 border border-transparent hover:border-red-100"
+                            >
+                              <div className="flex items-center gap-1.5 mb-0.5">
+                                <span className="text-xs font-bold text-gray-900 group-hover:text-vjred transition-colors leading-tight">
+                                  {item.title}
+                                </span>
+                                {item.isHot && (
+                                  <span className="text-3xs bg-red-600 text-white font-black px-1.5 py-0.2 rounded uppercase shrink-0 italic">
+                                    HOT
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs2 text-gray-500 line-clamp-2 leading-snug">
+                                {item.desc}
+                              </p>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
             </div>
-
-            {/* Mobile controls for default mode (Screenshot 2) */}
-            <div className="flex items-center gap-1.5 sm:gap-2 lg:hidden text-xs font-semibold">
-              <a
-                href="tel:19001166"
-                aria-label="Gọi hỗ trợ"
-                className={`flex items-center gap-1 px-1.5 py-1 ${
-                  lightChrome ? 'text-white hover:text-vjyellow' : 'text-gray-700 hover:text-vjred'
-                }`}
-              >
-                <RiHeadphoneLine className="text-base" />
-                <span className="hidden min-[380px]:inline text-3xs sm:text-xs">Hỗ trợ</span>
-              </a>
-
-              {user ? (
-                <span
-                  className={`max-w-[75px] truncate text-3xs sm:text-xs font-bold ${
-                    lightChrome ? 'text-white' : 'text-gray-800'
-                  }`}
-                >
-                  {(user.fullName || user.email)?.replace(/\s*\(CCCD:.*?\)/gi, '')}
-                </span>
-              ) : (
-                <div
-                  className={`flex items-center gap-1 text-3xs sm:text-xs font-bold px-2.5 py-1 rounded-full border transition-all ${
-                    lightChrome
-                      ? 'border-white/35 bg-black/25 text-white backdrop-blur-sm'
-                      : 'border-gray-200 bg-gray-100 text-gray-800'
-                  }`}
-                >
-                  <Link href="/dang-ky" className="hover:text-vjyellow transition hover:underline">
-                    Đăng ký
-                  </Link>
-                  <span className={lightChrome ? 'text-white/40' : 'text-gray-400'}>|</span>
-                  <Link
-                    href="/dang-nhap"
-                    className="hover:text-vjyellow transition hover:underline"
-                  >
-                    Đăng nhập
-                  </Link>
-                </div>
-              )}
-
-              {/* Dropdown VI */}
-              <button
-                type="button"
-                onClick={() => setLangMenuOpen((open) => !open)}
-                className={`flex items-center gap-0.5 rounded px-1.5 py-0.5 text-3xs sm:text-xs font-bold border ${
-                  lightChrome
-                    ? 'border-white/50 bg-black/10 text-white'
-                    : 'border-gray-200 bg-gray-50 text-gray-700'
-                }`}
-              >
-                <span>VI</span>
-                <span className="text-3xs">▾</span>
-              </button>
-
-              {/* Hamburger button */}
-              <button
-                type="button"
-                onClick={() => setMobileMenuOpen(true)}
-                aria-label="Mở menu"
-                className={`flex h-8 w-8 items-center justify-center ${
-                  lightChrome ? 'text-white' : 'text-gray-700'
-                }`}
-              >
-                <HiOutlineMenu className="text-2xl" />
-              </button>
-            </div>
           </div>
-        </div>
+        )}
 
-        {/* Tầng 3: Primary Nav Bar (Đỏ chuẩn Vietjet hoặc trong suốt trên banner) */}
-        <div
-          className={`hidden lg:block ${
-            lightChrome
-              ? 'bg-transparent text-white'
-              : 'bg-gradient-to-r from-vjred-dark via-vjred to-vjred-dark text-white shadow-inner'
-          }`}
-        >
-          <div
-            className={`mx-auto flex items-center justify-end px-4 sm:px-6 ${
-              compactMode
-                ? 'h-[38px] max-w-[1368px] min-[1368px]:px-0'
-                : 'h-9 max-w-[1240px] lg:px-0'
-            }`}
-          >
-            <div ref={megaMenuRef} className="relative" onMouseLeave={() => setMegaMenu(null)}>
-              <nav
-                aria-label="Điều hướng chính"
-                className={`flex items-center ${compactMode ? 'gap-7' : 'gap-6'}`}
-              >
-                {NAV_LINKS.map((link) => {
-                  const active = isActivePath(pathname, link.href);
-                  const isMega =
-                    'mega' in link && (link.mega === 'flight' || link.mega === 'other');
-                  const isCurrentMega = isMega && megaMenu === link.mega;
-
-                  return (
-                    <div
-                      key={link.href}
-                      className="relative"
-                      onMouseEnter={() => {
-                        if (isMega) setMegaMenu(link.mega as 'flight' | 'other');
-                        else setMegaMenu(null);
-                      }}
-                    >
-                      <Link
-                        href={link.href}
-                        aria-current={active ? 'page' : undefined}
-                        onClick={() => {
-                          if (isMega)
-                            setMegaMenu((prev) =>
-                              prev === link.mega ? null : (link.mega as 'flight' | 'other')
-                            );
-                        }}
-                        className={`relative whitespace-nowrap py-1.5 font-bold uppercase tracking-wider transition-colors duration-200 flex items-center gap-1 ${
-                          compactMode ? 'text-xs' : 'text-sm'
-                        } ${
-                          compactMode
-                            ? active || isCurrentMega
-                              ? 'font-extrabold text-white'
-                              : 'text-white/80 hover:text-white'
-                            : active || isCurrentMega
-                              ? 'text-vjgold'
-                              : 'text-white hover:text-vjgold'
-                        }`}
-                      >
-                        <span>{link.label}</span>
-                        {isMega && (
-                          <HiOutlineChevronDown
-                            className={`text-xs transition-transform duration-200 ${isCurrentMega ? 'rotate-180' : ''}`}
-                          />
-                        )}
-                      </Link>
-                    </div>
-                  );
-                })}
-              </nav>
-
-              {/* Mega Menu Dropdown */}
-              {megaMenu && (
-                <div
-                  className="absolute right-0 top-full mt-1.5 w-[640px] rounded-2xl bg-white p-5 shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-gray-100 z-50 text-gray-800 animate-fadeIn"
-                  onMouseEnter={() => {}}
-                >
-                  <div className="grid grid-cols-2 gap-5 divide-x divide-gray-100">
-                    {/* Cột 1: Hành lý, suất ăn & dịch vụ bổ trợ */}
-                    <div className="pr-3">
-                      <h4 className="text-xs font-black uppercase tracking-wider text-primary-dark pb-2 mb-2 border-b border-gray-100 font-koho">
-                        Hành lý, suất ăn &amp; dịch vụ bổ trợ
-                      </h4>
-                      <div className="space-y-1.5">
-                        {FLIGHT_SERVICES_ITEMS.slice(0, 3).map((item) => (
-                          <Link
-                            key={item.title}
-                            href={item.href}
-                            onClick={() => setMegaMenu(null)}
-                            className="group block rounded-xl p-2 transition-all hover:bg-red-50/70 border border-transparent hover:border-red-100"
-                          >
-                            <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className="text-xs font-bold text-gray-900 group-hover:text-vjred transition-colors leading-tight">
-                                {item.title}
-                              </span>
-                              {item.isHot && (
-                                <span className="text-3xs bg-red-600 text-white font-black px-1.5 py-0.2 rounded uppercase shrink-0 italic">
-                                  HOT
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs2 text-gray-500 line-clamp-2 leading-snug">
-                              {item.desc}
-                            </p>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Cột 2: Dịch vụ khác */}
-                    <div className="pl-4">
-                      <h4 className="text-xs font-black uppercase tracking-wider text-primary-dark pb-2 mb-2 border-b border-gray-100 font-koho">
-                        Dịch vụ khác
-                      </h4>
-                      <div className="space-y-1.5">
-                        {OTHER_SERVICES_ITEMS.slice(0, 3).map((item) => (
-                          <Link
-                            key={item.title}
-                            href={item.href}
-                            onClick={() => setMegaMenu(null)}
-                            className="group block rounded-xl p-2 transition-all hover:bg-red-50/70 border border-transparent hover:border-red-100"
-                          >
-                            <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className="text-xs font-bold text-gray-900 group-hover:text-vjred transition-colors leading-tight">
-                                {item.title}
-                              </span>
-                              {item.isHot && (
-                                <span className="text-3xs bg-red-600 text-white font-black px-1.5 py-0.2 rounded uppercase shrink-0 italic">
-                                  HOT
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs2 text-gray-500 line-clamp-2 leading-snug">
-                              {item.desc}
-                            </p>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Tầng 4: Quick-rail — Dải icon dịch vụ phụ */}
-        {!compactMode && (
+        {/* Tầng 4: Quick-rail — Dải icon dịch vụ phụ.
+            Site thật: cao 35px, cách logo 40px, chữ 16px/500, icon 25×25,
+            mục active màu #F7C61A. Chỉ dùng cho biến thể compact — header
+            trang chủ chỉ có một hàng 72px. */}
+        {compactMode && (
           <div
             className={`hidden lg:block ${
               transparentMode
@@ -695,60 +1126,25 @@ export default function Header({
                 : 'border-t border-black/15 bg-vjwine text-white'
             }`}
           >
-            <div className="mx-auto flex h-9 max-w-[1240px] items-center justify-start gap-6 px-4 sm:px-6 text-sm2 font-semibold">
+            <div className="mx-auto flex h-[35px] max-w-[1200px] items-center justify-start gap-6 pl-10 pr-4 text-base font-medium">
               {QUICK_SERVICES.map((s) => (
                 <Link
                   key={s.label}
                   href={s.href}
                   className={`flex items-center gap-1.5 transition-colors duration-200 ${
-                    s.highlight ? 'font-bold text-vjgold' : 'text-white hover:text-vjgold'
+                    s.highlight
+                      ? 'font-medium text-vj-nav-active'
+                      : 'text-white hover:text-vj-nav-active'
                   }`}
                 >
-                  <img src={s.iconSrc} alt="" className="w-4 h-4 object-contain shrink-0" />
+                  <img
+                    src={s.iconSrc}
+                    alt=""
+                    className="h-[25px] w-[25px] object-contain shrink-0"
+                  />
                   <span>{s.label}</span>
                 </Link>
               ))}
-            </div>
-          </div>
-        )}
-
-        {/* Sticky Search Bar khi cuộn trang (scrollY > 600px) */}
-        {isScrolled && pathname === '/trang-chu' && (
-          <div className="hidden border-b border-gray-200 bg-white py-2.5 shadow-md animate-fade-in-up lg:block">
-            <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-4 px-4 sm:px-6">
-              {/* Trip type */}
-              <div className="flex items-center gap-2 text-xs font-bold text-gray-700 shrink-0">
-                <span className="rounded-md bg-red-50 px-2.5 py-1 text-vjred font-extrabold">
-                  Khứ hồi
-                </span>
-                <span className="text-gray-300">|</span>
-                <span className="text-gray-500 font-bold">VND</span>
-              </div>
-
-              {/* Origin - Destination - Dates */}
-              <div className="flex flex-1 items-center gap-2 max-w-2xl">
-                <div className="flex flex-1 items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs text-gray-800">
-                  <span className="font-semibold text-gray-400 mr-1.5">Từ:</span>
-                  <span className="font-bold truncate">TP. Hồ Chí Minh (SGN)</span>
-                </div>
-                <div className="text-gray-400 text-sm font-bold">⇄</div>
-                <div className="flex flex-1 items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs text-gray-800">
-                  <span className="font-semibold text-gray-400 mr-1.5">Đến:</span>
-                  <span className="font-bold truncate">Hà Nội (HAN)</span>
-                </div>
-                <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs text-gray-800 shrink-0">
-                  <RiCalendarEventLine className="text-vjred mr-1.5 text-sm" />
-                  <span className="font-bold">20/10/2026 - 25/10/2026</span>
-                </div>
-              </div>
-
-              {/* CTA button */}
-              <Link
-                href="/tim-ve?from=SGN&to=HAN"
-                className="flex h-9 items-center justify-center rounded-lg bg-vjyellow px-5 text-xs font-black uppercase text-black shadow transition hover:brightness-95 shrink-0"
-              >
-                Tìm chuyến bay
-              </Link>
             </div>
           </div>
         )}

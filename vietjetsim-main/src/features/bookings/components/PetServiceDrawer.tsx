@@ -38,7 +38,7 @@ export default function PetServiceDrawer({
       {/* Drawer content */}
       <div className="relative w-full max-w-lg bg-white h-full shadow-2xl flex flex-col z-10 animate-slideInRight">
         {/* Header - Red bar with Vietjet curve top-right (Screenshot 2) */}
-        <div className="relative bg-[#C4161C] text-white px-4 py-3 flex items-center justify-between shadow-md overflow-hidden">
+        <div className="relative bg-primary-dark text-white px-4 py-3 flex items-center justify-between shadow-md overflow-hidden">
           <div className="w-8 shrink-0" />
           <h2 className="font-sans font-black italic tracking-wide text-base sm:text-lg uppercase text-white text-center">
             MANG THEO THÚ CƯNG
@@ -72,7 +72,7 @@ export default function PetServiceDrawer({
             onClick={() => setActiveLeg('outbound')}
             className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${
               activeLeg === 'outbound'
-                ? 'border-[#C4161C] text-[#C4161C]'
+                ? 'border-primary-dark text-primary-dark'
                 : 'border-transparent text-gray-500 hover:text-gray-800'
             }`}
           >
@@ -84,7 +84,7 @@ export default function PetServiceDrawer({
               onClick={() => setActiveLeg('inbound')}
               className={`flex-1 py-2.5 text-center text-xs font-bold transition-all border-b-2 ${
                 activeLeg === 'inbound'
-                  ? 'border-[#C4161C] text-[#C4161C]'
+                  ? 'border-primary-dark text-primary-dark'
                   : 'border-transparent text-gray-500 hover:text-gray-800'
               }`}
             >
@@ -95,8 +95,8 @@ export default function PetServiceDrawer({
 
         {/* Passenger card matching Screenshot 2 */}
         <div className="p-4 bg-gray-50 border-b border-gray-200">
-          <div className="max-w-xs mx-auto overflow-hidden rounded-xl border border-red-200 shadow-sm bg-white text-center">
-            <div className="bg-[#C4161C] py-2 px-4 text-white">
+          <div className="max-w-xs mx-auto overflow-hidden rounded-vj border border-red-200 shadow-sm bg-white text-center">
+            <div className="bg-primary-dark py-2 px-4 text-white">
               <div className="text-3xs uppercase tracking-wider text-white/80">Người lớn</div>
               <div className="text-sm font-black uppercase tracking-tight">{passengerName}</div>
             </div>
@@ -111,7 +111,7 @@ export default function PetServiceDrawer({
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs text-gray-700 leading-relaxed bg-slate-50">
           {/* Banner "THÚ CƯNG ƠI, BAY THÔI!" matching Screenshot 2 */}
-          <div className="rounded-xl overflow-hidden bg-gradient-to-r from-amber-100 via-orange-100 to-sky-100 border border-amber-300 p-4 text-center shadow-sm relative">
+          <div className="rounded-vj overflow-hidden bg-gradient-to-r from-amber-100 via-orange-100 to-sky-100 border border-amber-300 p-4 text-center shadow-sm relative">
             <div className="relative z-10">
               <h3 className="text-base font-black text-red-600 tracking-wide mb-2 uppercase flex items-center justify-center gap-1.5 font-sans drop-shadow-2xs">
                 <span>THÚ CƯNG ƠI, BAY THÔI!</span>
@@ -136,7 +136,7 @@ export default function PetServiceDrawer({
             </div>
           </div>
 
-          <p className="text-gray-700 text-xs leading-relaxed bg-white p-3 rounded-xl border border-gray-100 shadow-2xs">
+          <p className="text-gray-700 text-xs leading-relaxed bg-white p-3 rounded-vj border border-gray-100 shadow-2xs">
             Vietjet cung cấp dịch vụ vận chuyển thú cưng (động vật cảnh) dành cho hành khách có nhu
             cầu đi du lịch cùng thú cưng (chó, mèo), cho phép bạn mang thú cưng lên khoang hành
             khách; mang đến sự an toàn; thoải mái cho bạn và thú cưng suốt trọn hành trình.{' '}
@@ -158,14 +158,14 @@ export default function PetServiceDrawer({
             {/* Service Package Card */}
             <div
               onClick={() => setIsSelected((prev) => !prev)}
-              className={`p-3.5 rounded-xl border bg-white shadow-2xs flex items-center justify-between cursor-pointer transition-all ${
+              className={`p-3.5 rounded-vj border bg-white shadow-2xs flex items-center justify-between cursor-pointer transition-all ${
                 isSelected
                   ? 'border-green-600 ring-1 ring-green-600'
                   : 'border-gray-200 hover:border-red-300'
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-[#FFCC00] flex items-center justify-center shrink-0 shadow-xs p-1">
+                <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center shrink-0 shadow-xs p-1">
                   <PetTravelIcon size={28} />
                 </div>
                 <div>
@@ -197,9 +197,9 @@ export default function PetServiceDrawer({
         </div>
 
         {/* Footer Red Bar matching Screenshot 2 */}
-        <div className="bg-[#C4161C] text-white p-3 flex items-center justify-between shadow-lg">
+        <div className="bg-primary-dark text-white p-3 flex items-center justify-between shadow-lg">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#FFCC00] flex items-center justify-center shrink-0 shadow-xs p-1">
+            <div className="w-9 h-9 rounded-vj bg-accent flex items-center justify-center shrink-0 shadow-xs p-1">
               <PetTravelIcon size={24} />
             </div>
             <div className="text-xs leading-tight">
@@ -215,7 +215,7 @@ export default function PetServiceDrawer({
             aria-label="Đóng"
             type="button"
             onClick={onClose}
-            className="bg-[#FFCC00] hover:bg-[#FFD200] text-gray-950 font-black px-6 py-2.5 rounded-xl text-xs sm:text-sm shadow transition-all active:scale-95 cursor-pointer italic"
+            className="vj-cta font-black px-6 py-2.5 rounded-vj text-xs sm:text-sm shadow transition-all active:scale-95 cursor-pointer italic"
           >
             Xác nhận
           </button>

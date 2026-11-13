@@ -98,8 +98,8 @@ const SERVICES = [
 
 export default function ServiceIconsSection() {
   return (
-    <section className="bg-[var(--surface)] py-10 sm:py-14 border-y border-[#ececec]">
-      <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="bg-[var(--surface)] py-10 sm:py-14 border-y border-vj-border">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-12">
           <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[var(--primary)] mb-2">
             Dịch vụ hàng không thực tế
@@ -124,7 +124,7 @@ export default function ServiceIconsSection() {
               >
                 {/* Badge if present */}
                 {'badge' in service && service.badge && (
-                  <span className="absolute top-2.5 right-2.5 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200">
+                  <span className="absolute top-2.5 right-2.5 text-3xs font-extrabold px-1.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200">
                     {service.badge}
                   </span>
                 )}
@@ -142,7 +142,7 @@ export default function ServiceIconsSection() {
                   <span className="block font-black text-[var(--foreground)] text-xs sm:text-sm leading-tight line-clamp-1">
                     {service.label}
                   </span>
-                  <span className="block mt-0.5 text-[10px] sm:text-xs text-[var(--foreground-muted)] font-medium truncate">
+                  <span className="block mt-0.5 text-2xs sm:text-xs text-[var(--foreground-muted)] font-medium truncate">
                     {service.sub}
                   </span>
                 </div>

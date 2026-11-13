@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
             </p>
 
             {directResetUrl && (
-              <div className="rounded-xl border border-[rgb(var(--accent-rgb))]/40 bg-[rgb(var(--accent-rgb))]/10 px-4 py-3 text-xs text-[var(--foreground)]">
+              <div className="rounded-vj border border-[rgb(var(--accent-rgb))]/40 bg-[rgb(var(--accent-rgb))]/10 px-4 py-3 text-xs text-[var(--foreground)]">
                 <p className="font-semibold">Môi trường phát triển — mở trực tiếp:</p>
                 <Link
                   href={directResetUrl}
@@ -97,7 +97,7 @@ export default function ForgotPasswordPage() {
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 placeholder=" "
-                className="form-input font-body-vj w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] py-3 pl-10 pr-4 text-base transition-all sm:text-sm focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20"
+                className="form-input font-body-vj w-full rounded-vj border border-[var(--border)] bg-[var(--surface-2)] py-3 pl-10 pr-4 text-base transition-all sm:text-sm focus:border-primary focus:bg-[var(--background)] focus:ring-2 focus:ring-primary/20"
                 required
               />
               <label className="form-label-float has-icon">Email hoặc Số điện thoại</label>

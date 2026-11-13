@@ -18,7 +18,7 @@ const TrophyIcon = ({ className, style }: { className?: string; style?: React.CS
 export default function AwardsSection() {
   return (
     <section className="bg-gray-50 border-y border-gray-200 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-6">
           <p className="text-xs font-bold uppercase tracking-[0.15em] text-vj-muted">
             Giải thưởng &amp; Công nhận
@@ -36,7 +36,7 @@ export default function AwardsSection() {
               >
                 <TrophyIcon className="w-7 h-7" style={{ color: '#E6BF00' }} />
               </div>
-              <p className="text-[10px] leading-tight font-medium text-vj-gray">{award?.text}</p>
+              <p className="text-2xs leading-tight font-medium text-vj-gray">{award?.text}</p>
             </div>
           ))}
         </div>

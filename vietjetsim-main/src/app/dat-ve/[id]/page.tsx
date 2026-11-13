@@ -156,7 +156,7 @@ export default function BookingDetailPage() {
           className="flex-1 flex items-center justify-center p-8 skeleton-pulse"
         >
           <div className="text-center">
-            <div className="w-12 h-12 border-4 border-[#ED1B24]/20 border-t-[#ED1B24] rounded-full animate-spin mx-auto mb-3" />
+            <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-3" />
             <h1 className="text-gray-600 font-bold text-sm font-koho">
               Đang tải thông tin hành trình...
             </h1>
@@ -173,7 +173,7 @@ export default function BookingDetailPage() {
         <Header />
         <main id="main-content" className="flex-1 flex items-center justify-center p-8">
           <div className="text-center max-w-md bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
-            <div className="w-14 h-14 bg-red-50 text-[#ED1B24] rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
+            <div className="w-14 h-14 bg-red-50 text-primary rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
               <Icon name="ExclamationCircleIcon" size={32} />
             </div>
             <h1 className="text-lg font-black text-gray-900 mb-2 font-koho">
@@ -182,7 +182,7 @@ export default function BookingDetailPage() {
             <p className="text-gray-500 mb-6 text-xs">{error || 'Mã đặt chỗ không tồn tại.'}</p>
             <Link
               href="/tim-ve"
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#ED1B24] text-white font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-[#c81018] transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-primary-dark transition-colors"
             >
               <Icon name="ArrowLeftIcon" size={16} />
               Tìm chuyến bay khác
@@ -195,24 +195,24 @@ export default function BookingDetailPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-[#e8f1fc] via-[#f1e6ee] to-[#fbebee] flex flex-col font-sans overflow-x-hidden">
+    <div className="relative min-h-screen bg-gradient-to-b from-vj-blue-tint-6 via-vj-rose-tint-1 to-vj-rose-tint-2 flex flex-col font-sans overflow-x-hidden">
       <Header />
 
       <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} position="top-right" />
 
       {/* Dải băng vàng thông báo trên cùng - chuẩn Screenshot 1 */}
-      <div className="w-full bg-[#FFD100] text-gray-950 border-b border-[#ECC000] shadow-xs py-2 px-3 sm:px-6 z-10">
+      <div className="w-full bg-vj-gold-deep text-gray-950 border-b border-vj-gold-ink-3 shadow-xs py-2 px-3 sm:px-6 z-10">
         <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-y-1 text-2xs sm:text-xs">
           <div className="flex items-center gap-1.5">
             <span className="font-semibold text-gray-800">Mã đặt chỗ :</span>
-            <span className="font-black text-[#ED1B24] tracking-wider text-xs sm:text-sm">
+            <span className="font-black text-primary tracking-wider text-xs sm:text-sm">
               {bookingCode}
             </span>
           </div>
 
           <div className="flex items-center gap-1.5">
             <span className="font-semibold text-gray-800">Trạng thái thanh toán :</span>
-            <span className={`font-black ${isPaid ? 'text-emerald-700' : 'text-[#ED1B24]'}`}>
+            <span className={`font-black ${isPaid ? 'text-emerald-700' : 'text-primary'}`}>
               {isPaid ? 'Đã thanh toán' : 'Chưa thanh toán'}
             </span>
           </div>
@@ -220,7 +220,7 @@ export default function BookingDetailPage() {
           <div className="flex flex-col sm:items-end w-full sm:w-auto text-left sm:text-right">
             <div className="flex items-center gap-1">
               <span className="font-semibold text-gray-800">Yêu cầu thanh toán :</span>
-              <span className="font-black text-[#ED1B24] text-xs sm:text-sm">
+              <span className="font-black text-primary text-xs sm:text-sm">
                 {totalPriceNumber.toLocaleString('vi-VN')} VND
               </span>
             </div>
@@ -253,11 +253,11 @@ export default function BookingDetailPage() {
         <div className="bg-white rounded-2xl border border-gray-200/90 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
           <div className="px-4 sm:px-5 py-3 bg-gradient-to-r from-gray-50 via-gray-50/80 to-white border-b border-gray-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-4 bg-[#ED1B24] rounded-full" />
+              <span className="w-1.5 h-4 bg-primary rounded-full" />
               <span className="text-xs sm:text-sm font-black text-gray-900 uppercase tracking-wider font-koho">
                 Thông tin hành khách
               </span>
-              <span className="px-2 py-0.5 rounded-full bg-red-50 text-[#ED1B24] text-3xs font-extrabold border border-red-200">
+              <span className="px-2 py-0.5 rounded-full bg-red-50 text-primary text-3xs font-extrabold border border-red-200">
                 {paxCount} khách
               </span>
             </div>
@@ -274,7 +274,7 @@ export default function BookingDetailPage() {
           {showPaxCard && (
             <div className="p-4 sm:p-5 space-y-4">
               {/* Banner tích điểm SkyJoy chuẩn Screenshot 1 */}
-              <div className="bg-gradient-to-r from-[#ED1B24] via-[#D8161F] to-[#990D13] text-white rounded-xl p-4 sm:p-4.5 relative overflow-hidden shadow-sm border border-red-400/30">
+              <div className="bg-gradient-to-r from-primary via-primary-dark to-primary-deep text-white rounded-xl p-4 sm:p-4.5 relative overflow-hidden shadow-sm border border-red-400/30">
                 <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 mb-2 pb-2 border-b border-white/20">
                   <div className="flex items-center gap-2">
                     <span className="text-base sm:text-lg">⭐</span>
@@ -285,13 +285,13 @@ export default function BookingDetailPage() {
                   <button
                     type="button"
                     onClick={() => setShowSkyJoyPrompt(true)}
-                    className="bg-[#FFCC00] hover:bg-[#E6B800] text-gray-950 font-black px-3.5 py-1.5 rounded-md text-2xs uppercase tracking-wider shadow-sm hover:shadow-amber-400/40 active:scale-95 transition-all cursor-pointer"
+                    className="bg-accent hover:bg-accent-light text-gray-950 font-black px-3.5 py-1.5 rounded-md text-2xs uppercase tracking-wider shadow-sm hover:shadow-amber-400/40 active:scale-95 transition-all cursor-pointer"
                   >
                     Bổ sung ngay
                   </button>
                 </div>
                 <div className="relative z-10 text-2xs text-white/95 space-y-1">
-                  <p className="font-extrabold text-[#FFCC00]">
+                  <p className="font-extrabold text-accent">
                     Đăng ký Hội viên Vietjet SkyJoy - Tận hưởng X3 ưu đãi độc quyền:
                   </p>
                   <p className="flex items-center gap-1.5">
@@ -305,7 +305,7 @@ export default function BookingDetailPage() {
                   </p>
                   <Link
                     href="/dang-ky"
-                    className="inline-flex items-center gap-1 mt-1 text-[#FFCC00] hover:underline font-extrabold hover:brightness-110 transition-colors"
+                    className="inline-flex items-center gap-1 mt-1 text-accent hover:underline font-extrabold hover:brightness-110 transition-colors"
                   >
                     <span>Đăng ký tham gia ngay</span>
                     <span>→</span>
@@ -331,7 +331,7 @@ export default function BookingDetailPage() {
                         toast.success('Đã lưu mã hội viên SkyJoy!');
                         setShowSkyJoyPrompt(false);
                       }}
-                      className="px-4 py-1.5 bg-[#ED1B24] hover:bg-[#c81018] text-white text-xs font-bold rounded-lg shadow-xs active:scale-95 transition-all cursor-pointer"
+                      className="px-4 py-1.5 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-lg shadow-xs active:scale-95 transition-all cursor-pointer"
                     >
                       Lưu mã
                     </button>
@@ -360,7 +360,7 @@ export default function BookingDetailPage() {
                     >
                       <div className="flex items-center justify-between border-b border-gray-100 pb-2">
                         <div className="flex items-center gap-2 font-black text-gray-900">
-                          <span className="w-5 h-5 rounded-full bg-red-50 text-[#ED1B24] flex items-center justify-center text-xs font-bold">
+                          <span className="w-5 h-5 rounded-full bg-red-50 text-primary flex items-center justify-center text-xs font-bold">
                             👤
                           </span>
                           <span className="text-xs tracking-tight">
@@ -375,7 +375,7 @@ export default function BookingDetailPage() {
                       <div className="space-y-1.5 text-gray-700">
                         <div className="font-extrabold text-gray-900 flex items-center gap-1.5">
                           <span className="font-mono text-xs">{flight?.from_code || 'SGN'}</span>
-                          <span className="text-[#ED1B24]">➔</span>
+                          <span className="text-primary">➔</span>
                           <span className="font-mono text-xs">{flight?.to_code || 'WSI'}</span>
                         </div>
                         <div className="flex items-center justify-between">
@@ -391,7 +391,7 @@ export default function BookingDetailPage() {
                           <span
                             className={`font-black px-2 py-0.5 rounded text-3xs ${
                               seatCode === 'Chưa chọn'
-                                ? 'bg-red-50 text-[#ED1B24] border border-red-200'
+                                ? 'bg-red-50 text-primary border border-red-200'
                                 : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                             }`}
                           >
@@ -415,7 +415,7 @@ export default function BookingDetailPage() {
         <div className="bg-white rounded-2xl border border-gray-200/90 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
           <div className="px-4 sm:px-5 py-3 bg-gradient-to-r from-gray-50 via-gray-50/80 to-white border-b border-gray-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-4 bg-[#ED1B24] rounded-full" />
+              <span className="w-1.5 h-4 bg-primary rounded-full" />
               <span className="text-xs sm:text-sm font-black text-gray-900 uppercase tracking-wider font-koho">
                 Chi tiết giá vé
               </span>
@@ -476,7 +476,7 @@ export default function BookingDetailPage() {
                       </div>
                       <div className="flex justify-between pt-2 border-t border-gray-200 font-black text-gray-900 text-xs">
                         <span>Tổng tiền vé:</span>
-                        <span className="text-[#ED1B24] text-sm tabular-nums">
+                        <span className="text-primary text-sm tabular-nums">
                           {paxShare.toLocaleString('vi-VN')} VND
                         </span>
                       </div>
@@ -496,7 +496,7 @@ export default function BookingDetailPage() {
               <button
                 type="button"
                 onClick={() => router.push(`/thanh-toan?bookingId=${booking.id}`)}
-                className="py-3 px-3 bg-gradient-to-r from-[#FFA800] to-[#FF9000] hover:from-[#E69500] hover:to-[#D88000] text-gray-950 font-black rounded-xl text-2xs uppercase tracking-wider shadow-sm hover:shadow-md active:scale-95 transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer"
+                className="py-3 px-3 bg-gradient-to-r from-vj-amber to-vj-amber-deep hover:from-vj-amber-hover hover:to-vj-amber-dark text-gray-950 font-black rounded-xl text-2xs uppercase tracking-wider shadow-sm hover:shadow-md active:scale-95 transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <span>💳</span>
                 <span>Thanh toán ngay</span>
@@ -515,7 +515,7 @@ export default function BookingDetailPage() {
             <button
               type="button"
               onClick={() => router.push('/dich-vu')}
-              className="py-3 px-3 bg-[#FFCC00] hover:bg-[#E6B800] text-gray-950 font-bold rounded-xl text-2xs uppercase tracking-wider shadow-xs hover:shadow-sm active:scale-95 transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer"
+              className="py-3 px-3 bg-accent hover:bg-accent-light text-gray-950 font-bold rounded-xl text-2xs uppercase tracking-wider shadow-xs hover:shadow-sm active:scale-95 transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <span>Mua hành lý, chỗ ngồi...</span>
             </button>
@@ -524,7 +524,7 @@ export default function BookingDetailPage() {
               type="button"
               onClick={handleSendItineraryEmail}
               disabled={isSendingMail}
-              className="py-3 px-3 bg-[#FFCC00] hover:bg-[#E6B800] text-gray-950 font-bold rounded-xl text-2xs uppercase tracking-wider shadow-xs hover:shadow-sm active:scale-95 transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="py-3 px-3 bg-accent hover:bg-accent-light text-gray-950 font-bold rounded-xl text-2xs uppercase tracking-wider shadow-xs hover:shadow-sm active:scale-95 transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               <span>{isSendingMail ? 'Đang gửi mail...' : 'Gửi mail hành trình'}</span>
             </button>
@@ -532,7 +532,7 @@ export default function BookingDetailPage() {
             <button
               type="button"
               onClick={() => router.push('/tim-ve')}
-              className="py-3 px-3 bg-[#FFCC00] hover:bg-[#E6B800] text-gray-950 font-bold rounded-xl text-2xs uppercase tracking-wider shadow-xs hover:shadow-sm active:scale-95 transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer"
+              className="py-3 px-3 bg-accent hover:bg-accent-light text-gray-950 font-bold rounded-xl text-2xs uppercase tracking-wider shadow-xs hover:shadow-sm active:scale-95 transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <span>Tìm đặt chỗ khác</span>
             </button>
@@ -543,7 +543,7 @@ export default function BookingDetailPage() {
             <button
               type="button"
               onClick={() => setShowItineraryModal(true)}
-              className="w-full sm:w-auto px-8 py-3.5 bg-[#FFCC00] hover:bg-[#E6B800] text-gray-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-sm hover:shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full sm:w-auto px-8 py-3.5 bg-accent hover:bg-accent-light text-gray-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-sm hover:shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>📄</span>
               <span>Tải thông tin hành trình</span>
@@ -557,7 +557,7 @@ export default function BookingDetailPage() {
                   'Quý khách có thể đổi ngoại tệ tại quầy giao dịch sân bay trước giờ khởi hành.'
                 )
               }
-              className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-[#FF5E5E] to-[#ED1B24] hover:from-[#ED1B24] hover:to-[#c81018] text-white font-black rounded-xl text-xs uppercase tracking-wider shadow-sm hover:shadow-red-500/25 hover:shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-primary-light to-primary hover:from-primary hover:to-primary-dark text-white font-black rounded-xl text-xs uppercase tracking-wider shadow-sm hover:shadow-red-500/25 hover:shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>💱</span>
               <span>Đăng ký mua ngoại tệ</span>

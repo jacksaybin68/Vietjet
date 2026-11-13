@@ -16,9 +16,9 @@ export default function AboutPage() {
       />
 
       {/* Main Content */}
-      <main id="main-content" className="max-w-6xl mx-auto px-4 py-16 -mt-10 relative z-20">
+      <main id="main-content" className="max-w-[1200px] mx-auto px-4 py-16 -mt-10 relative z-20">
         {/* About Card */}
-        <div className="bg-white rounded-2xl shadow-vj-lg p-8 md:p-12 mb-12">
+        <div className="bg-white rounded-vj shadow-vj-lg p-8 md:p-12 mb-12">
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div>
               <h2 className="text-2xl font-bold text-[var(--vj-navy)] mb-4 font-heading-800">
@@ -29,13 +29,13 @@ export default function AboutPage() {
                 nội địa và quốc tế. Chúng tôi giúp người dùng thực hiện các bước đặt vé, chọn ghế,
                 thanh toán và quản lý hành trình một cách trực quan nhất.
               </p>
-              <p className="text-[#6D6E71] leading-relaxed">
+              <p className="text-vj-gray leading-relaxed">
                 Dù bạn là hành khách lần đầu đặt vé hay chuyên gia du lịch, Vietjet Air cung cấp
                 công cụ mạnh mẽ để trải nghiệm quy trình booking chuyên nghiệp, nhanh chóng và an
                 toàn.
               </p>
             </div>
-            <div className="bg-gradient-to-br from-red-50 to-yellow-50 rounded-xl p-6 border border-red-100">
+            <div className="bg-gradient-to-br from-red-50 to-yellow-50 rounded-vj p-6 border border-red-100">
               <div className="grid grid-cols-2 gap-4">
                 {[
                   { label: 'Chuyến bay', value: '150+', icon: 'PaperAirplaneIcon' },
@@ -43,14 +43,14 @@ export default function AboutPage() {
                   { label: 'Người dùng', value: '10K+', icon: 'UsersIcon' },
                   { label: 'Hài lòng', value: '99%', icon: 'StarIcon' },
                 ].map((stat, i) => (
-                  <div key={i} className="bg-white rounded-lg p-4 text-center shadow-sm">
+                  <div key={i} className="bg-white rounded-vj p-4 text-center shadow-sm">
                     <div className="text-[var(--primary)] mb-2 flex justify-center">
                       <Icon name={stat.icon} size={24} />
                     </div>
                     <div className="text-2xl font-extrabold text-[var(--vj-navy)]">
                       {stat.value}
                     </div>
-                    <div className="text-xs text-[#6D6E71] font-medium">{stat.label}</div>
+                    <div className="text-xs text-vj-gray font-medium">{stat.label}</div>
                   </div>
                 ))}
               </div>
@@ -73,10 +73,10 @@ export default function AboutPage() {
             ].map((tech, i) => (
               <div
                 key={i}
-                className="bg-white rounded-xl p-5 shadow-vj-sm hover:shadow-vj-md transition-all duration-300 border border-gray-100 group"
+                className="bg-white rounded-vj p-5 shadow-vj-sm hover:shadow-vj-md transition-all duration-300 border border-gray-100 group"
               >
                 <div
-                  className="w-12 h-12 rounded-lg flex items-center justify-center mb-3 mx-auto group-hover:scale-110 transition-transform"
+                  className="w-12 h-12 rounded-vj flex items-center justify-center mb-3 mx-auto group-hover:scale-110 transition-transform"
                   style={{ backgroundColor: `${tech.color}15` }}
                 >
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: tech.color }} />
@@ -84,14 +84,14 @@ export default function AboutPage() {
                 <h3 className="text-sm font-bold text-[var(--vj-navy)] text-center mb-1">
                   {tech.name}
                 </h3>
-                <p className="text-xs text-[#6D6E71] text-center">{tech.desc}</p>
+                <p className="text-xs text-vj-gray text-center">{tech.desc}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* Team & Acknowledgments */}
-        <div className="bg-[var(--vj-navy)] rounded-2xl p-8 md:p-12 text-white">
+        <div className="bg-[var(--vj-navy)] rounded-vj p-8 md:p-12 text-white">
           <div className="text-center mb-10">
             <h2 className="text-2xl font-bold mb-3 font-heading-800">Đội ngũ phát triển</h2>
             <p className="text-white/70 max-w-xl mx-auto">
@@ -107,7 +107,7 @@ export default function AboutPage() {
             ].map((member, i) => (
               <div
                 key={i}
-                className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/15 transition-colors"
+                className="bg-white/10 backdrop-blur-sm rounded-vj p-6 border border-white/10 hover:bg-white/15 transition-colors"
               >
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] mx-auto mb-4 flex items-center justify-center text-xl font-bold">
                   {member.name.charAt(0)}

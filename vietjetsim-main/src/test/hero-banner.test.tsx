@@ -67,47 +67,40 @@ describe('HeroSection Banner', () => {
     expect(screen.getByText('Một chiều')).toBeInTheDocument();
   });
 
-  // Field copy follows vietjetair.com ("Điểm khởi hành" / "Điểm đến") now that
-  // the hero card mirrors the production booking widget.
+  // Site thật đặt nhãn sân bay là "Điểm khởi hành" / "Điểm đến" (18px/600),
+  // không phải "Từ" / "Đến" — xem số đo ngày 13/11/2026.
   it('renders airport selectors', () => {
     render(<HeroSection />);
     expect(screen.getByText('Điểm khởi hành')).toBeInTheDocument();
     expect(screen.getByText('Điểm đến')).toBeInTheDocument();
   });
 
-  it('renders the right-hand booking widget chrome', () => {
+  // Ba tab dịch vụ phía trên panel, rộng 201 / 103 / 76px, cao 52px.
+  it('renders the booking bar chrome of the production site', () => {
     render(<HeroSection />);
-    expect(screen.getByText('Đổi thưởng & Mua SkyPoint')).toBeInTheDocument();
+    expect(
+      screen.getByText('Mua hành lý, suất ăn chọn chỗ ngồi và hơn thế nữa...')
+    ).toBeInTheDocument();
+    expect(screen.getByText('Đổi thưởng & Mua Skypoint')).toBeInTheDocument();
+    expect(screen.getByText('Gửi hàng nhanh')).toBeInTheDocument();
     expect(screen.getByText('Hành khách')).toBeInTheDocument();
     expect(screen.getByText('Tìm vé rẻ nhất')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Đổi điểm khởi hành/i })).toBeInTheDocument();
   });
 
-  // Airport and date sit in one bordered box split 2:1 by a `|` hairline, so the
-  // group owns the border and each half is only a segment of it.
-  it('pairs each airport with its date inside a single bordered box', () => {
+  // Ô nhập của panel là các hộp 48px xếp dọc trong thân form 410px, mỗi hộp có
+  // nhãn và giá trị riêng — không phải một hàng ngang 4 cột như bố cục cũ.
+  it('stacks the booking fields vertically inside the panel body', () => {
     const { container } = render(<HeroSection />);
-    const groups = container.querySelectorAll('[class*="sm:grid-cols-[2fr_1fr]"]');
-    expect(groups).toHaveLength(2);
-    expect(groups[0]).toHaveClass('sm:divide-x');
-    expect(groups[0].className).toMatch(/divide-(?:\[#e4e4e4\]|\[var\(--border\)\]|#e4e4e4)/);
-    expect(groups[0].querySelectorAll('label')).toHaveLength(2);
-    expect(groups[1].querySelectorAll('label')).toHaveLength(2);
+    const field = container.querySelector('.vj-booking-panel .h-\\[48px\\]');
+    expect(field).not.toBeNull();
   });
 
-  it('lets the destination fill the whole box on a one-way trip', () => {
+  it('lets the customer pick one-way and round-trip trips', () => {
     render(<HeroSection />);
-    fireEvent.click(screen.getByLabelText('Một chiều'));
-    // The airport picker owns its own <label>, so the grid span lives on the
-    // element that is the actual grid child.
-    const destination = screen.getByLabelText('Điểm đến').closest('div.relative');
-    expect(destination).toHaveClass('sm:col-span-2');
-  });
-
-  it('keeps the compact "Gửi hàng nhanh" frame from stretching like a tab', () => {
-    render(<HeroSection />);
-    const cargo = screen.getByText('Gửi hàng nhanh');
-    expect(cargo).toHaveClass('w-[72px]', 'shrink-0');
-    expect(cargo).not.toHaveClass('flex-1');
+    const oneWay = screen.getByRole('radio', { name: 'Một chiều' });
+    expect(oneWay).not.toBeChecked();
+    fireEvent.click(oneWay);
+    expect(oneWay).toBeChecked();
   });
 });

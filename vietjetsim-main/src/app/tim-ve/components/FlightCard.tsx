@@ -68,10 +68,10 @@ export default function FlightCard({
   const { data: liveStatus } = useFlightStatusSSE(flight.id ?? null);
 
   return (
-    <div className="rounded-xl border border-black/10 bg-white overflow-hidden shadow-xs transition-all mb-3">
+    <div className="rounded-vj border border-black/10 bg-white overflow-hidden shadow-xs transition-all mb-3">
       <article className="flex flex-row items-stretch">
         {/* Cột 1: Giờ bay & Số hiệu — Khung vàng chuẩn Screenshot 3 */}
-        <div className="w-[100px] sm:w-[130px] shrink-0 bg-[#FFD100] p-2 flex flex-col justify-between items-center text-center">
+        <div className="w-[100px] sm:w-[130px] shrink-0 bg-vj-gold-deep p-2 flex flex-col justify-between items-center text-center">
           <span className="text-3xs font-bold text-gray-700">{flight.no}</span>
           <div className="py-1">
             <div className="text-xs sm:text-sm font-black text-gray-950 leading-tight">

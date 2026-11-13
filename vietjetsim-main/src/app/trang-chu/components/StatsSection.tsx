@@ -132,11 +132,11 @@ export default function StatsSection() {
         }}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
         {/* Header */}
         <div className="text-center mb-8 reveal-up">
           <p
-            className="text-[11px] font-bold uppercase tracking-[0.15em] mb-2"
+            className="text-xs2 font-bold uppercase tracking-[0.15em] mb-2"
             style={{
               color: 'rgba(255,255,255,0.6)',
               fontWeight: 700,
@@ -165,14 +165,14 @@ export default function StatsSection() {
                 background: 'rgba(255,255,255,0.10)',
                 backdropFilter: 'blur(8px)',
               }}
-              className="group text-center rounded-2xl p-5 border border-white/15 hover:border-white/30 hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,0,0,0.28)] transition-all duration-300 cursor-default reveal-up"
+              className="group text-center rounded-vj p-5 border border-white/15 hover:border-white/30 hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,0,0,0.28)] transition-all duration-300 cursor-default reveal-up"
               onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.18)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.10)')}
             >
               {/* Icon */}
               <div className="flex justify-center mb-3">
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110"
+                  className="w-10 h-10 rounded-vj flex items-center justify-center transition-all duration-300 group-hover:scale-110"
                   style={{ background: 'rgba(255,255,255,0.15)' }}
                 >
                   <stat.Icon className="w-5 h-5 text-white" />
@@ -194,7 +194,7 @@ export default function StatsSection() {
               </div>
               {/* Sub-desc */}
               <div
-                className="text-[10px] font-medium font-koho"
+                className="text-2xs font-medium font-koho"
                 style={{ color: 'rgba(255,212,0,0.7)' }}
               >
                 {stat.desc}

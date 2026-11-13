@@ -31,7 +31,7 @@ export default function AlertBanner({ message, variant }: AlertBannerProps) {
   return (
     <div
       role={variant === 'error' ? 'alert' : 'status'}
-      className="mb-4 flex items-center gap-2.5 rounded-xl border-2 px-4 py-3 text-sm font-bold shadow-sm"
+      className="mb-4 flex items-center gap-2.5 rounded-vj border-2 px-4 py-3 text-sm font-bold shadow-sm"
       style={{ background: style.background, borderColor: style.borderColor, color: style.color }}
     >
       <Icon name={style.icon} size={18} />
