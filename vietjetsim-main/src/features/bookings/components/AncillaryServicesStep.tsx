@@ -73,7 +73,7 @@ export default function AncillaryServicesStep({
     <div className="space-y-4 pb-28">
       {/* Tiêu đề khối — site thật: 18px/600 (đo 13/11/2026) */}
       <div className="mb-2">
-        <h2 className="text-lg font-semibold text-vj-text tracking-tight">
+        <h2 className="text-xl3 font-semibold text-vj-text tracking-tight">
           Đừng quên mua hành lý, suất ăn, chọn chỗ ngồi và hơn thế nữa...
         </h2>
       </div>

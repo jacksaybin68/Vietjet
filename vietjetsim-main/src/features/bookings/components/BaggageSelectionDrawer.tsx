@@ -116,7 +116,7 @@ export default function BaggageSelectionDrawer({
         {/* Header with Vietjet curve top-right (Screenshot 10) */}
         <div className="relative bg-primary-dark text-white px-4 py-3 flex items-center justify-between shadow-md overflow-hidden">
           <div className="w-8 shrink-0" />
-          <h2 className="font-jambono font-medium text-base2 uppercase text-white text-center">
+          <h2 className="font-jambono font-medium text-[15px] uppercase text-white text-center">
             CHỌN HÀNH LÝ/DỊCH VỤ NỐI CHUYẾN
           </h2>
           <div className="relative z-10">
@@ -373,7 +373,7 @@ export default function BaggageSelectionDrawer({
           <button
             type="button"
             onClick={handleConfirm}
-            className="bg-vjgold hover:bg-yellow-400 text-black text-sm font-medium px-6 py-2 rounded-vj shadow transition-colors"
+            className="vj-cta disabled:opacity-50 disabled:cursor-not-allowed h-[39px] px-6 rounded-vj font-koho text-sm font-medium uppercase tracking-normal transition-all shadow-sm active:scale-95 cursor-pointer"
           >
             Xác nhận
           </button>
