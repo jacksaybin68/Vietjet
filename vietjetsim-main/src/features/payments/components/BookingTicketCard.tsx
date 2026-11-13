@@ -103,7 +103,7 @@ export default function BookingTicketCard({
               <span className="text-lg sm:text-xl font-bold font-koho text-[var(--foreground)] block leading-tight">
                 {from}
               </span>
-              <span className="text-[11px] font-medium text-[var(--foreground-muted)] mt-0.5 block truncate">
+              <span className="text-xs2 font-medium text-[var(--foreground-muted)] mt-0.5 block truncate">
                 {fromCity}
               </span>
               <span className="text-xs sm:text-sm font-semibold text-primary mt-0.5 block">{departTime}</span>
@@ -131,7 +131,7 @@ export default function BookingTicketCard({
               <span className="text-lg sm:text-xl font-bold font-koho text-[var(--foreground)] block leading-tight">
                 {to}
               </span>
-              <span className="text-[11px] font-medium text-[var(--foreground-muted)] mt-0.5 block truncate">
+              <span className="text-xs2 font-medium text-[var(--foreground-muted)] mt-0.5 block truncate">
                 {toCity}
               </span>
               <span className="text-xs sm:text-sm font-semibold text-primary mt-0.5 block">{arriveTime}</span>

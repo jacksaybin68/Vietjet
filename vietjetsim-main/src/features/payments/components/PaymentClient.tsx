@@ -1665,7 +1665,7 @@ export default function PaymentClient() {
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div className="absolute top-0 right-0 bg-[#ED1C24] text-white text-[8px] font-black px-1.5 py-0.5 rounded-bl-md uppercase tracking-wider">
+                      <div className="absolute top-0 right-0 bg-[#ED1C24] text-white text-4xs font-black px-1.5 py-0.5 rounded-bl-md uppercase tracking-wider">
                         Khuyên dùng
                       </div>
                       <div className="flex items-center h-8">
@@ -2089,7 +2089,7 @@ export default function PaymentClient() {
                                     <p className="text-base font-black text-primary leading-none tracking-widest font-sans">
                                       {transferNote}
                                     </p>
-                                    <span className="inline-block mt-1 text-[11px] font-semibold text-amber-800 bg-amber-100/90 border border-amber-300 rounded px-1.5 py-0.5">
+                                    <span className="inline-block mt-1 text-xs2 font-semibold text-amber-800 bg-amber-100/90 border border-amber-300 rounded px-1.5 py-0.5">
                                       (Lưu ý: ký tự &quot;O&quot; là chữ O in hoa, không phải số 0)
                                     </span>
                                   </div>
