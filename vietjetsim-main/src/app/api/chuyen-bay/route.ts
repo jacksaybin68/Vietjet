@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAvailableDepartDates, searchFlights } from '@/lib/db';
+import { getFareForClass } from '@/features/bookings/pricing';
 
 export async function GET(request: NextRequest) {
   try {
@@ -38,7 +39,43 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ flights: [], availableDates });
     }
 
-    return NextResponse.json({ flights });
+    // Bổ sung đầy đủ 4 hạng vé (Eco, Deluxe, SkyBoss, Business) theo công thức chuẩn
+    // Single Source of Truth từ `getFareForClass`. Đồng thời giữ nguyên các trường gốc
+    // để đảm bảo tương thích ngược hoàn toàn.
+    const enrichedFlights = flights.map((flight) => {
+      const faresSource = {
+        economyPrice: flight.economy_price ?? flight.price,
+        businessPrice: flight.business_price ?? Math.round(Number(flight.price || 0) * 2.5),
+      };
+      const ecoPrice = getFareForClass('eco', faresSource);
+      const deluxePrice = getFareForClass('deluxe', faresSource);
+      const skybossPrice = getFareForClass('skyboss', faresSource);
+      const businessPrice = getFareForClass('business', faresSource);
+
+      return {
+        ...flight,
+        // Tiện ích alias camelCase cho các client bên ngoài
+        flightNo: flight.flight_no,
+        from: flight.from_code,
+        to: flight.to_code,
+        departTime: flight.depart_time,
+        arriveTime: flight.arrive_time,
+        // Giá 4 hạng vé chi tiết
+        economyPrice: ecoPrice,
+        ecoPrice,
+        deluxePrice,
+        skybossPrice,
+        businessPrice,
+        fares: {
+          eco: ecoPrice,
+          deluxe: deluxePrice,
+          skyboss: skybossPrice,
+          business: businessPrice,
+        },
+      };
+    });
+
+    return NextResponse.json({ flights: enrichedFlights });
   } catch (error) {
     console.error('Flights API Error:', error);
     return NextResponse.json({ error: 'Không thể tìm kiếm chuyến bay' }, { status: 500 });
