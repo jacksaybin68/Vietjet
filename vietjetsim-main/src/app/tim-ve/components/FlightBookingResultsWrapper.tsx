@@ -223,11 +223,15 @@ export default function FlightBookingResultsWrapper({
 
   return (
     <>
-      {/* Trip strip under header */}
-      <div className="bg-accent text-gray-950 shadow-sm" data-testid="trip-board">
-        <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-x-3 px-3 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-sm lg:px-8">
+      {/* Băng thông tin chuyến (trip strip) — số đo site thật 14/11/2026:
+          khối `1200×82px`, bo góc `16px`, gradient vàng `28.91deg`
+          (`#F9A51A 2.24% → #FBB612 31.03% → #FBF300 97.21%`), tiêu đề
+          `18px/700` uppercase. KHÔNG full-bleed: khối nằm trong container
+          `1200px` (x=120 ở viewport 1440), nền trang bên ngoài là trắng. */}
+      <div className="bg-white px-4 pt-4 lg:px-0" data-testid="trip-board">
+        <div className="vj-booking-strip mx-auto flex max-w-[1200px] items-center justify-between gap-x-3 px-4 py-2 text-gray-950">
           <div className="flex items-center gap-1">
-            <span className="font-black uppercase tracking-wide">{tripLabel}</span>
+            <span className="vj-booking-strip-title">{tripLabel}</span>
             <span className="opacity-50">|</span>
             <div className="relative inline-block" ref={paxRef}>
               <button
@@ -527,24 +531,36 @@ export default function FlightBookingResultsWrapper({
       {/* Bottom bars for Step 1 (Flight Selection) */}
       {bookingStep === 1 && (
         <>
-          {/* Desktop Sticky Bottom Bar */}
-          <div className="hidden sm:block fixed bottom-0 left-0 right-0 z-[60] bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] py-3 px-4 sm:px-8">
-            <div className="mx-auto max-w-[1200px] flex items-center justify-between">
-              <div className="flex-1 flex flex-col items-center">
-                {/* "Tổng tiền" 20px/600, giá 22px/700 Jambono (đo 13/11/2026) */}
-                <span className="text-2xl3 font-semibold text-gray-800 font-koho">Tổng tiền</span>
-                <span className="text-xl4 font-bold font-jambono text-primary leading-none">
-                  {totalBookingAmount.toLocaleString('vi-VN')} VND
-                </span>
+          {/* Desktop Sticky Bottom Bar — số đo site thật 14/11/2026 (1440×900):
+              khối ngoài `1440×80` nền trắng padding-top `18px`; nội dung
+              `1200×59` trong container 1200px (x=120). "Tổng tiền" `16px/500`,
+              giá `20px/400` (KHÔNG phải 22px/700 như bên trong panel), có
+              nút phụ "Chi tiết", nút "Đi tiếp" `127×39`. */}
+          <div className="vj-total-bar hidden sm:block fixed bottom-0 left-0 right-0 z-[60] border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+            <div className="vj-total-bar-inner mx-auto max-w-[1200px] pl-[10px]">
+              <div className="ml-auto flex items-center gap-4">
+                <div className="flex flex-col items-end">
+                  <span className="vj-total-bar-label">Tổng tiền</span>
+                  <span className="vj-total-bar-amount">
+                    {totalBookingAmount.toLocaleString('vi-VN')} VND
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowSummaryModal(true)}
+                  className="text-sm font-medium text-primary underline-offset-2 hover:underline cursor-pointer"
+                >
+                  Chi tiết
+                </button>
+                <button
+                  type="button"
+                  onClick={handleContinue}
+                  disabled={!bookings.outbound}
+                  className="vj-cta vj-cta--booking disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 cursor-pointer"
+                >
+                  Đi tiếp
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={handleContinue}
-                disabled={!bookings.outbound}
-                className="vj-cta disabled:opacity-50 disabled:cursor-not-allowed h-[39px] min-h-[39px] px-6 rounded-vj font-koho text-sm font-medium uppercase tracking-normal transition-all shadow-sm active:scale-95 cursor-pointer"
-              >
-                Đi tiếp
-              </button>
             </div>
           </div>
 

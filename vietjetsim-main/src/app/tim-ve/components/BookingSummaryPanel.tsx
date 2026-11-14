@@ -130,7 +130,7 @@ export default function BookingSummaryPanel({
           gradient đỏ `359.2deg` cao `56px` với `h3` 20px/700 trắng, các thanh
           mục cao `52px` nền `#F1F1F1` tiêu đề `18px/600`, thanh tổng nền trắng
           "Tổng tiền" `20px/600` + giá `22px/700`, nút "Đi tiếp" `127×39`. */}
-      <aside className="hidden lg:flex lg:w-[380px] lg:flex-none flex-col rounded-[5px] overflow-hidden shadow-sm border border-gray-200 bg-white h-fit sticky top-4">
+      <aside className="hidden lg:flex lg:w-[380px] lg:flex-none flex-col rounded-[6px] overflow-hidden shadow-sm border border-gray-200 bg-white h-fit sticky top-4">
         {/* Panel header — gradient đỏ 359.2deg, cao 56px */}
         <div className="vj-summary-head px-4 flex items-center justify-center">
           <h3 className="font-koho text-2xl3 font-bold uppercase text-white tracking-normal">
@@ -153,7 +153,7 @@ export default function BookingSummaryPanel({
             </div>
           </div>
           {showPaxDetail && (
-            <div className="px-4 py-2 space-y-1 text-xs2 text-gray-600 bg-gray-50/70 border-t border-gray-100">
+            <div className="px-4 py-2 space-y-1 text-xs2 text-gray-600 bg-[var(--vj-bar-gray)] border-t border-[var(--vj-bar-gray)]">
               <div className="flex justify-between">
                 <span>Người lớn</span>
                 <span className="font-bold text-gray-900">{adultCount}</span>
@@ -217,7 +217,7 @@ export default function BookingSummaryPanel({
           </div>
 
           {showFareDetail && data.fare && data.fare > 0 && (
-            <div className="px-4 py-2 space-y-1 text-xs2 text-gray-500 bg-gray-50/70 border-t border-gray-100">
+            <div className="px-4 py-2 space-y-1 text-xs2 text-gray-500 bg-[var(--vj-bar-gray)] border-t border-[var(--vj-bar-gray)]">
               <div className="flex justify-between">
                 <span>Người lớn x {adultCount}</span>
                 <span>{(singleAdultFare * adultCount).toLocaleString('vi-VN')} VND</span>
@@ -256,7 +256,7 @@ export default function BookingSummaryPanel({
           </div>
 
           {showTaxDetail && (
-            <div className="px-4 py-2 space-y-1 text-xs2 text-gray-500 bg-gray-50/70 border-t border-gray-100">
+            <div className="px-4 py-2 space-y-1 text-xs2 text-gray-500 bg-[var(--vj-bar-gray)] border-t border-[var(--vj-bar-gray)]">
               <div className="flex justify-between">
                 <span>Phí an ninh soi chiếu</span>
                 <span>{feeSecurity.toLocaleString('vi-VN')} VND</span>
@@ -343,7 +343,7 @@ export default function BookingSummaryPanel({
               </div>
 
               {showReturnFareDetail && data.returnLeg?.fare && data.returnLeg.fare > 0 && (
-                <div className="px-4 py-2 space-y-1 text-xs2 text-gray-500 bg-gray-50/70 border-t border-gray-100">
+                <div className="px-4 py-2 space-y-1 text-xs2 text-gray-500 bg-[var(--vj-bar-gray)] border-t border-[var(--vj-bar-gray)]">
                   <div className="flex justify-between">
                     <span>Người lớn x {adultCount}</span>
                     <span>{(returnSingleAdultFare * adultCount).toLocaleString('vi-VN')} VND</span>
@@ -411,10 +411,13 @@ export default function BookingSummaryPanel({
           </div>
         )}
 
-        {/* Thanh tổng — nền trắng: "Tổng tiền" 20px/600, giá 22px/700 Jambono. */}
-        <div className="bg-white px-4 py-3 flex items-center justify-between mt-auto border-t border-gray-200/80">
-          <span className="font-koho text-2xl3 font-semibold text-vj-text">Tổng tiền</span>
-          <span className="font-jambono text-xl4 font-bold text-vj-text">
+        {/* Thanh tổng — site thật (đo 14/11/2026): nền gradient đỏ
+            `359.2deg` (`#D91A21 53.08% → #6F0000 206.46%`), cao `50px`,
+            padding `15px 20px`, "Tổng tiền" `20px/600` trắng, giá `22px/700`
+            JambonoMedium trắng. */}
+        <div className="vj-summary-total mt-auto flex items-center justify-between">
+          <span className="font-koho text-2xl3 font-semibold text-white">Tổng tiền</span>
+          <span className="font-jambono text-xl4 font-bold text-white">
             {(
               outboundTotal +
               (data.isRoundTrip && data.returnLeg

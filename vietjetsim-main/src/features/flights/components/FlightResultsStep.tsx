@@ -271,21 +271,22 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
           if (isSelected) {
             // Ô ngày active trên site thật là pill vàng #FFDD32, chữ nâu
             // rgb(115 62 10) — không phải cloud scalloped. Đo 13/11/2026.
+            // Kích thước: `156×95px`, chữ `16px/500` (đo 14/11/2026).
             return (
               <button
                 key={iso}
                 type="button"
                 onClick={() => onSelect?.(iso)}
                 aria-current="date"
-                className="flex flex-col items-center justify-center text-center px-2 sm:px-4 py-1.5 sm:py-2 rounded-vj bg-[var(--vj-yellow-tab)] text-[var(--vj-tab-ink)] transition-transform hover:scale-105 active:scale-95 cursor-pointer min-w-[95px] sm:min-w-[130px] max-w-[120px] focus:outline-none focus:ring-0"
+                className="flex h-[95px] w-[156px] shrink-0 flex-col items-center justify-center text-center rounded-vj bg-[var(--vj-yellow-tab)] text-[var(--vj-tab-ink)] transition-transform hover:scale-105 active:scale-95 cursor-pointer focus:outline-none focus:ring-0"
               >
-                <span className="block text-sm2 font-medium leading-tight">
+                <span className="block text-base font-medium leading-tight">
                   {WEEKDAY_LABELS[day.getDay()]}
                 </span>
-                <span className="block text-sm2 font-bold leading-tight my-0.5">
+                <span className="block text-base font-medium leading-tight my-0.5">
                   {day.getDate()} tháng {day.getMonth() + 1}
                 </span>
-                <span className="block text-sm2 font-bold leading-tight">
+                <span className="block text-base font-medium leading-tight">
                   Từ <span className="font-bold">{price}</span> VND
                 </span>
               </button>
@@ -297,15 +298,15 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
               key={iso}
               type="button"
               onClick={() => onSelect?.(iso)}
-              className={`${isOuterDay ? 'hidden sm:flex' : 'flex'} flex-col items-center justify-center text-center px-1 sm:px-3 py-1.5 sm:py-2 transition-transform hover:scale-105 cursor-pointer min-w-[75px] sm:min-w-[110px] max-w-[90px] focus:outline-none focus:ring-0`}
+              className={`${isOuterDay ? 'hidden sm:flex' : 'flex'} h-[95px] w-[156px] shrink-0 flex-col items-center justify-center text-center transition-transform hover:scale-105 cursor-pointer focus:outline-none focus:ring-0`}
             >
-              <span className="text-sm2 font-medium text-vj-text leading-tight">
+              <span className="text-base font-medium text-vj-text leading-tight">
                 {WEEKDAY_LABELS[day.getDay()]}
               </span>
-              <span className="text-sm2 font-bold text-vj-text leading-tight my-0.5">
+              <span className="text-base font-medium text-vj-text leading-tight my-0.5">
                 {day.getDate()} tháng {day.getMonth() + 1}
               </span>
-              <span className="text-sm2 font-bold text-vj-text leading-tight">
+              <span className="text-base font-medium text-vj-text leading-tight">
                 Từ <span className="font-bold">{price}</span> VND
               </span>
             </button>
@@ -1034,7 +1035,6 @@ export default function FlightResultsStep({
         <div className="hidden">
           <h2>{filtered.length} chuyến bay phù hợp</h2>
         </div>
-
 
         {/* 4 Fare Class Headers — hiển thị 4 cột thẳng hàng trên cả mobile và desktop.
             Quy ước "một bảng màu": nền ô hạng #F8F8F8, chữ #333333 (đo 13/11/2026).

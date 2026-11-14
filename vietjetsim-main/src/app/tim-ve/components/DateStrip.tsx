@@ -49,17 +49,17 @@ export default function DateStrip({ items, selectedValue, onSelect }: DateStripP
               <button
                 key={item.value}
                 onClick={() => onSelect(item.value)}
-                className={`relative flex flex-col items-center justify-center shrink-0 min-w-[130px] px-3 py-2 rounded-vj transition-all shadow-sm ${
+                className={`relative flex h-[95px] w-[156px] shrink-0 flex-col items-center justify-center rounded-vj transition-all shadow-sm ${
                   active
                     ? 'bg-[var(--vj-yellow-tab)] text-[var(--vj-tab-ink)] font-bold border border-transparent'
                     : 'border border-gray-200/90 bg-white text-gray-700 font-medium hover:border-amber-300 hover:bg-amber-50/30'
                 }`}
               >
-                <span className="text-sm2 font-medium leading-tight">{dayOfWeek}</span>
-                <span className="text-sm2 font-medium leading-tight">{dayMonth}</span>
+                <span className="text-base font-medium leading-tight">{dayOfWeek}</span>
+                <span className="text-base font-medium leading-tight">{dayMonth}</span>
                 {item.price && (
                   <span
-                    className={`text-sm2 font-bold mt-0.5 ${
+                    className={`mt-0.5 text-base font-bold ${
                       active ? 'text-[var(--vj-tab-ink)]' : 'text-gray-500'
                     }`}
                   >

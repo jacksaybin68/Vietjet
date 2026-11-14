@@ -529,6 +529,37 @@ h6 {
     justify-content: center;
   }
 
+  /* ─── Biến thể nút trong luồng đặt vé (đo 14/11/2026) ─────────────────
+   * Site thật (1440×900): nút "Đi tiếp" / "Tiếp tục" đo được `127×39px`,
+   * bo góc `10px`, chữ `14px/500` KHÔNG uppercase (site dùng sentence case),
+   * font KoHo, gradient vàng 26.73deg.
+   *
+   * `.vj-cta` đặt `min-height: 44px` cho nút hero — vì `.vj-cta` nằm ngoài
+   * `@layer` nên nó thắng mọi utility `min-h-*` của Tailwind (cascade layer),
+   * khiến nút bị cao 44px thay vì 39px. Modifier này ghi đè lại đúng số đo. */
+  .vj-cta--booking {
+    min-height: 39px;
+    height: 39px;
+    padding-left: 0;
+    padding-right: 0;
+    font-family: var(--vj-font-body, 'KoHo');
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    text-transform: none;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+
+  /* Ở desktop nút giữ đúng `127px`; ở mobile tràn chiều rộng (như site thật). */
+  @media (min-width: 1024px) {
+    .vj-cta--booking {
+      width: 127px;
+      min-width: 127px;
+      max-width: 127px;
+    }
+  }
+
   /* Nút "Tìm chuyến bay" trong hero: 174×44px, bo góc 10px — đúng số đo
    * trên vietjetair.com (MUI button rộng 174px, cao 44px, font 16px/500). */
   .vj-cta--hero {
@@ -948,7 +979,11 @@ h6 {
   display: flex;
   align-items: center;
   gap: 30px;
-  height: 74px;
+  /* Site thật (đo 14/11/2026, 1440×900): header TRẮNG cao `74px` TỔNG CẢ
+   * (tính cả viền dưới 2px). Vì `box-sizing: border-box` không áp cho
+   * phần tử con, `74px` ở đây cộng thêm viền 2px của `.vj-subheader` ra
+   * `76px` — lệch 2px so với site. Đặt `72px` để tổng cộng lại đúng 74px. */
+  height: 72px;
 }
 
 .vj-subheader-nav a {
@@ -1021,12 +1056,93 @@ h6 {
  *   - Thanh tổng nền trắng: "Tổng tiền" 20px/600, giá 22px/700. */
 .vj-summary-head {
   height: 56px;
-  background-image: linear-gradient(359.2deg, var(--vj-red) 0%, var(--vj-red-deep) 100%);
+  /* Đo 14/11/2026 từ DOM sống site thật: `359.2deg` với điểm dừng 53.08%
+   * và 206.46% — KHÁC với bản cũ dùng 0%/100% (gradient bị dốc hơn, đỏ chuyển
+   * sang wine sớm hơn so với site). */
+  background-image: linear-gradient(
+    359.2deg,
+    var(--vj-red-dark) 53.08%,
+    var(--vj-red-deep) 206.46%
+  );
 }
 
 .vj-summary-bar {
   min-height: 52px;
   background-color: var(--vj-bar-gray, #f1f1f1);
+}
+
+/* Thanh tổng cuối panel — site thật (đo 14/11/2026): gradient đỏ
+ * `359.2deg` (`#D91A21 53.08% → #6F0000 206.46%`), cao `50px`,
+ * padding `15px 20px`. */
+.vj-summary-total {
+  min-height: 50px;
+  padding: 15px 20px;
+  background-image: linear-gradient(
+    359.2deg,
+    var(--vj-red-dark) 53.08%,
+    var(--vj-red-deep) 206.46%
+  );
+}
+
+/* ─── Băng tổng dưới (sticky bottom bar) của trang chọn chuyến bay ─────────
+ * Site thật (đo 14/11/2026, 1440×900):
+ *   - Container ngoài `1440×80`, nền trắng, padding-top `18px`.
+ *   - Nội dung `1200×59` nằm trong container 1200px (x=120), KHÔNG full-bleed.
+ *   - "Tổng tiền" `16px/500` `#000000`, giá `20px/400`.
+ *   - Nút "Đi tiếp" `127×39`, bo góc 10px, gradient vàng 26.73deg.
+ */
+.vj-total-bar {
+  background-color: #ffffff;
+  padding-top: 18px;
+}
+
+.vj-total-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 59px;
+}
+
+.vj-total-bar-label {
+  font-family: var(--vj-font-body, 'KoHo');
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 22px;
+  color: #000000;
+}
+
+.vj-total-bar-amount {
+  font-family: var(--vj-font-body, 'KoHo');
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 22px;
+  color: #000000;
+}
+
+/* ─── Băng tìm chuyến bay (booking search strip) ──────────────────────────
+ * Site thật (đo 14/11/2026, 1440×900): khối `1200×82px`, bo góc `16px`,
+ * gradient vàng `28.91deg` (`#F9A51A 2.24% → #FBB612 31.03% → #FBF300 97.21%`),
+ * nằm trên nền trắng (KHÔNG full-bleed như bản cũ).
+ */
+.vj-booking-strip {
+  width: 100%;
+  max-width: 1200px;
+  min-height: 82px;
+  border-radius: 16px;
+  background-image: linear-gradient(
+    28.91deg,
+    var(--vj-grad-gold-from) 2.24%,
+    var(--vj-grad-gold-mid) 31.03%,
+    #fbf300 97.21%
+  );
+}
+
+.vj-booking-strip-title {
+  font-family: var(--vj-font-body, 'KoHo');
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+  text-transform: uppercase;
 }
 
 /* ─── Ô nhập gạch chân (MUI Input-underline) ────────────────────────────
