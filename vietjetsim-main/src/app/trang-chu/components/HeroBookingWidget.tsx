@@ -12,6 +12,7 @@ import {
 } from 'react-icons/md';
 import AirportPicker, { type Airport } from './AirportPicker';
 import { ALL_AIRPORTS } from './airports';
+import PassengerPicker, { type PaxCounts } from './PassengerPicker';
 import { FlightDatePickerPopover, formatDisplayDate, toInputDate } from './DatePicker';
 
 /**
@@ -95,7 +96,7 @@ export default function HeroBookingWidget() {
   const [airports, setAirports] = useState<Airport[]>(ALL_AIRPORTS);
   const [promoCode, setPromoCode] = useState('');
   const [cheapestOnly, setCheapestOnly] = useState(false);
-  const [adults, setAdults] = useState(1);
+  const [pax, setPax] = useState<PaxCounts>({ adult: 1, child: 0, infant: 0 });
   const [searchError, setSearchError] = useState<string | null>(null);
   const [openCalendar, setOpenCalendar] = useState<'depart' | 'return' | null>(null);
 
@@ -166,8 +167,9 @@ export default function HeroBookingWidget() {
     params.set('depart', departDate);
     if (roundTrip && returnDate) params.set('return', returnDate);
     params.set('currency', currency);
-    params.set('pax', String(adults));
-    params.set('adult', String(adults));
+    params.set('adult', String(pax.adult));
+    if (pax.child > 0) params.set('child', String(pax.child));
+    if (pax.infant > 0) params.set('infant', String(pax.infant));
     if (promoCode.trim()) params.set('promo', promoCode.trim());
     if (cheapestOnly) params.set('cheapest', '1');
     router.push(`/tim-ve?${params.toString()}`);
@@ -341,31 +343,12 @@ export default function HeroBookingWidget() {
                 quá thấp và lệch về phía trong so với các ô còn lại.
                 MOBILE (390×844): site thật KHÔNG hiện hàng này (thân panel chỉ
                 có 2 ô sân bay/ngày) → ẩn hoàn toàn ở dưới `lg`. */}
-            <div className="relative mt-[11px] hidden h-[48px] items-center gap-2 rounded-vj bg-white pl-[48px] pr-1 lg:flex">
-              <MdOutlinePerson
-                aria-hidden="true"
-                className="absolute left-[19px] top-1/2 -translate-y-1/2 text-lg2 text-[var(--foreground)]"
-              />
-              <span className="min-w-0 flex-1">
-                <span className="vj-field-label">Hành khách</span>
-                <select
-                  value={String(adults)}
-                  onChange={(event) => setAdults(Number(event.target.value))}
-                  aria-label="Số hành khách"
-                  className="w-full min-w-0 cursor-pointer appearance-none border-0 bg-transparent p-0 text-base font-semibold leading-[19px] text-[var(--foreground)] outline-none"
-                >
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
-                    <option key={n} value={String(n)}>
-                      {n} người lớn
-                    </option>
-                  ))}
-                </select>
-              </span>
-              <MdExpandMore
-                aria-hidden="true"
-                className="shrink-0 text-2xl text-[var(--foreground)]"
-              />
-            </div>
+            <PassengerPicker
+              value={pax}
+              onChange={setPax}
+              variant="hero"
+              className="mt-[11px] hidden h-[48px] w-full lg:block"
+            />
 
             {/* Ô 4: Mã khuyến mại — hộp trắng 342×48px, bo góc 10px.
                 MOBILE: site thật không hiện → ẩn ở dưới `lg`. */}

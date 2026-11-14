@@ -1035,65 +1035,6 @@ export default function FlightResultsStep({
           <h2>{filtered.length} chuyến bay phù hợp</h2>
         </div>
 
-        {/* Quick Sorting Bar */}
-        {!isLoading && filtered.length > 0 && (
-          <div className="bg-white border border-gray-200/90 rounded-vj p-2 sm:p-2.5 my-2.5 shadow-2xs flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded-vj bg-red-50 text-primary flex items-center justify-center shrink-0">
-                <RiArrowUpDownLine size={13} />
-              </span>
-              <span className="text-xs font-black text-gray-900 font-koho">
-                {filtered.length} chuyến bay
-              </span>
-              <span className="text-gray-300 hidden sm:inline">|</span>
-              <span className="text-2xs font-bold text-gray-500 uppercase tracking-wide hidden sm:inline font-koho">
-                Sắp xếp:
-              </span>
-            </div>
-
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-full pb-0.5">
-              {[
-                {
-                  value: 'time_asc',
-                  label: 'Giờ cất cánh (Sớm nhất)',
-                  icon: <RiTimeLine size={13} className="shrink-0" />,
-                },
-                {
-                  value: 'time_desc',
-                  label: 'Giờ cất cánh (Muộn nhất)',
-                  icon: <RiTimeLine size={13} className="shrink-0" />,
-                },
-                {
-                  value: 'price_asc',
-                  label: 'Giá vé (Thấp nhất)',
-                  icon: <RiMoneyDollarCircleLine size={13} className="shrink-0" />,
-                },
-                {
-                  value: 'duration_asc',
-                  label: 'Bay nhanh nhất',
-                  icon: <RiSpeedUpLine size={13} className="shrink-0" />,
-                },
-              ].map((opt) => {
-                const isActive = sortBy === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setSortBy(opt.value)}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-vj text-xs font-bold whitespace-nowrap transition-all font-koho border ${
-                      isActive
-                        ? 'bg-primary text-white border-primary shadow-xs'
-                        : 'bg-stone-50 text-gray-700 border-gray-200 hover:bg-stone-100 hover:text-gray-900'
-                    }`}
-                  >
-                    {opt.icon}
-                    <span>{opt.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {/* 4 Fare Class Headers — hiển thị 4 cột thẳng hàng trên cả mobile và desktop.
             Quy ước "một bảng màu": nền ô hạng #F8F8F8, chữ #333333 (đo 13/11/2026).
