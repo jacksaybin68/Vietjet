@@ -196,7 +196,7 @@ export async function PATCH(request: NextRequest) {
         WHERE id = ${targetBooking.id} AND status = 'pending'
         RETURNING id
       `;
-      if ((claimed as any[]).length === 0) {
+      if ((claimed as { id: string }[]).length === 0) {
         return NextResponse.json({ status: 'completed', idempotent: true });
       }
 
@@ -305,7 +305,7 @@ export async function PATCH(request: NextRequest) {
         WHERE id = ${targetBooking.id} AND status = 'pending'
         RETURNING id
       `;
-      if ((rejected as any[]).length === 0) {
+      if ((rejected as { id: string }[]).length === 0) {
         return NextResponse.json({
           success: true,
           message: 'Giao dịch đã được xử lý trước đó.',

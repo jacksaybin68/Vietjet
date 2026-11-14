@@ -320,9 +320,7 @@ describe('Guest Checkout & Payment without Login', () => {
     const { GET: getVietQr } = await import('@/app/api/thanh-toan/vietqr/route');
     const { GET: getStatus } = await import('@/app/api/thanh-toan/trang-thai/route');
 
-    const qrReq = new NextRequest(
-      'http://localhost:4028/api/thanh-toan/vietqr?bookingId=VJ9999'
-    );
+    const qrReq = new NextRequest('http://localhost:4028/api/thanh-toan/vietqr?bookingId=VJ9999');
     expect((await getVietQr(qrReq)).status).toBe(200);
 
     const statusReq = new NextRequest(

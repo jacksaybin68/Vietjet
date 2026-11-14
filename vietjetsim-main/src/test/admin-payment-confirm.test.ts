@@ -51,7 +51,7 @@ vi.mock('@/lib/neon', () => {
     .mockImplementation(async (strings: TemplateStringsArray, ..._values: any[]) => {
       const query = strings.join(' ');
 
-      if (query.includes("UPDATE bookings") && query.includes('RETURNING id')) {
+      if (query.includes('UPDATE bookings') && query.includes('RETURNING id')) {
         const target = query.includes("status = 'confirmed'") ? 'confirmed' : 'cancelled';
         if (bookingState.status !== 'pending') return [];
         bookingState.status = target;
