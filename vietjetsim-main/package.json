@@ -45,6 +45,7 @@
     "date-fns": "^4.4.0",
     "dotenv": "^17.4.2",
     "grapesjs": "^0.23.6",
+    "iconv-lite": "^0.7.3",
     "jsonwebtoken": "^9.0.3",
     "next": "16.4.6",
     "nextjs-toploader": "^3.9.17",
