@@ -331,32 +331,43 @@ export function FlightDatePickerPopover({
       ref={popoverRef}
       className={`absolute right-0 top-[112px] z-50 w-[630px] max-w-[calc(100vw-28px)] bg-white rounded-vj shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-gray-100 p-3 sm:p-5 select-none text-gray-800 animate-fadeIn ${className}`}
     >
-      {/* Loại hành trình — dải pill bo tròn 999px, đúng site thật:
-          track nền #F3F1F1 padding 3px, item active nền trắng + bóng nhẹ,
-          chữ 14px, padding ngang 12.5px (đo 14/11/2026: `jss297`).
-          Trên trang chủ dải pill này nằm TRONG popover lịch, không nằm trên
-          thanh đặt vé — khớp 100% site thật. */}
-      <div className="mb-4 flex justify-end px-2">
-        <div className="vj-pill-track" role="group" aria-label="Loại hành trình">
-          <button
-            type="button"
-            className="vj-pill-item"
-            data-active={!roundTrip}
-            aria-pressed={!roundTrip}
-            onClick={() => onTripTypeChange(false)}
+      {/* Top Header: Radio Buttons Khứ hồi / Một chiều */}
+      <div className="flex items-center justify-end gap-6 mb-4 px-2">
+        <label className="flex items-center gap-2 cursor-pointer text-xs sm:text-sm font-semibold text-gray-800 hover:text-black transition-colors">
+          <span
+            className={`w-4 h-4 rounded-full border-2 flex items-center justify-center p-[2px] transition-colors ${
+              roundTrip ? 'border-red-600' : 'border-gray-800'
+            }`}
           >
-            Một chiều
-          </button>
-          <button
-            type="button"
-            className="vj-pill-item"
-            data-active={roundTrip}
-            aria-pressed={roundTrip}
-            onClick={() => onTripTypeChange(true)}
+            {roundTrip && <span className="w-2 h-2 rounded-full bg-red-600" />}
+          </span>
+          <input
+            type="radio"
+            name="flight-cal-trip-type"
+            checked={roundTrip}
+            onChange={() => onTripTypeChange(true)}
+            className="sr-only"
+          />
+          <span>Khứ hồi</span>
+        </label>
+
+        <label className="flex items-center gap-2 cursor-pointer text-xs sm:text-sm font-semibold text-gray-800 hover:text-black transition-colors">
+          <span
+            className={`w-4 h-4 rounded-full border-2 flex items-center justify-center p-[2px] transition-colors ${
+              !roundTrip ? 'border-red-600' : 'border-gray-800'
+            }`}
           >
-            Khứ hồi
-          </button>
-        </div>
+            {!roundTrip && <span className="w-2 h-2 rounded-full bg-red-600" />}
+          </span>
+          <input
+            type="radio"
+            name="flight-cal-trip-type"
+            checked={!roundTrip}
+            onChange={() => onTripTypeChange(false)}
+            className="sr-only"
+          />
+          <span>Một chiều</span>
+        </label>
       </div>
 
       {/* Two months side by side */}

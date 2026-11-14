@@ -94,20 +94,12 @@ interface Props {
   airports: readonly Airport[];
   onChange: (code: string) => void;
   /**
-   * Gọi khi người dùng bấm vào ô sân bay, TRƯỚC khi danh sách sân bay mở.
-   * Trên mobile, thẻ đặt vé thu gọn chỉ có hai ô sân bay — bấm vào đó bung
-   * thẻ ra (đúng site thật), nên component cha cần biết để bung.
-   */
-  onActivate?: () => void;
-  /**
    * `flush` drops the field's own border and padding so the control can sit
    * inside a grouped box that already draws the outline and its dividers.
    * `field` is the standalone single-line field of the homepage booking bar:
    * 56px tall, 10px radius, 12px label + 16px value.
-   * `bar` is the compact two-line field of the 1200px horizontal booking bar:
-   * 12px/400 label above a 16px/500 value, 20px left padding, no icon.
    */
-  variant?: 'bordered' | 'flush' | 'field' | 'bar';
+  variant?: 'bordered' | 'flush' | 'field';
   /** Extra classes on the outer wrapper, e.g. to span a grid track. */
   className?: string;
   /**
@@ -134,7 +126,6 @@ export default function AirportPicker({
   value,
   airports,
   onChange,
-  onActivate,
   variant = 'bordered',
   className = '',
   headingClass = '',
@@ -290,31 +281,7 @@ export default function AirportPicker({
 
   return (
     <div ref={containerRef} className={`relative min-w-0 h-full ${className}`}>
-      {variant === 'bar' ? (
-        // Biến thể "bar" — ô nhập trong dải đặt vé NGANG 1200px.
-        // Số đo site thật (14/11/2026, viewport 1440×900):
-        //   - Nút cao 64px, padding `0 10px 0 20px`.
-        //   - Nhãn "Từ" / "Đến": 12px/400 #6B7580, cách mép trên 12px.
-        //   - Giá trị sân bay: 16px/500, cùng cột trái, cách mép trên 32px.
-        //   - KHÔNG có icon máy bay cạnh nhãn (site thật chỉ có icon trong
-        //     bản mobile, đặt ở giữa nhãn).
-        <button
-          type="button"
-          onClick={() => {
-            onActivate?.();
-            setOpen((v) => !v);
-          }}
-          aria-haspopup="listbox"
-          aria-expanded={open}
-          aria-label={ariaLabel ?? label}
-          className="vj-booking-field"
-        >
-          <span className="vj-booking-field__label">{label}</span>
-          <span className="vj-booking-field__value truncate">
-            {selected.city} ( {selected.code} )
-          </span>
-        </button>
-      ) : variant === 'flush' ? (
+      {variant === 'flush' ? (
         // Biến thể "flush" — nằm trong hộp trắng đã có sẵn viền/bo góc.
         // Số đo site thật (13/11/2026):
         //   - Icon sân bay 20×19px nằm ở x = mép hộp + 14px, canh giữa dọc.

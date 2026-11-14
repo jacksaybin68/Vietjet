@@ -596,42 +596,17 @@ h6 {
   }
 
   /* Nút "Tìm chuyến bay" trong hero: 174×44px, bo góc 10px — đúng số đo
-   * trên newweb.vietjetair.com (MUI button rộng 174px, cao 44px, font 16px/500).
-   *
-   * Đo live 14/11/2026:
-   *   - Button gốc: `font-family: KoHo`, `text-transform: none`, padding `0 15px`.
-   *   - Bên trong có một `<span>` label `display:flex; gap:10px` chứa chữ
-   *     (JambonoMedium 16px/500) + mũi tên `arrow_forward` 18×18.
-   *   - Nền trong suốt + gradient vàng 26.73deg, radius 10px. */
+   * trên vietjetair.com (MUI button rộng 174px, cao 44px, font 16px/500). */
   .vj-cta--hero {
     min-height: 44px;
     height: 44px;
     width: 174px;
     max-width: 174px;
     border-radius: 10px;
-    text-transform: none;
-    font-family: var(--vj-font-body, 'KoHo');
+    text-transform: uppercase;
     font-size: 16px;
     font-weight: 500;
-    padding: 0 15px;
-  }
-
-  /* Label bên trong nút CTA hero — chữ + mũi tên, gap 10px (đúng site thật). */
-  .vj-cta--hero .vj-cta__label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-family: var(--vj-font-cta);
-    font-size: 16px;
-    font-weight: 500;
-    text-transform: none;
-  }
-
-  /* Mũi tên trong nút CTA hero — 18×18, dùng đúng path của site thật. */
-  .vj-cta--hero .vj-cta__icon {
-    flex: 0 0 18px;
-    width: 18px;
-    height: 18px;
+    padding: 6px 15px;
   }
 
   .vj-cta:hover {
@@ -735,448 +710,6 @@ h6 {
   color: #1f2a33;
   font-weight: 600;
   box-shadow: 0 1px 3px rgba(31, 42, 51, 0.12);
-}
-
-/* ────────────────────────────────────────────────────────────────────────────
- * Dải đặt vé NGANG 1200px (site thật, đo 14/11/2026, viewport 1440×900).
- *
- * Trước đây panel đặt vé là một HỘP DỌC 380×409px neo ở mép phải. Site thật
- * dùng hai tầng ngang, căn giữa trong container 1200px:
- *
- *   Tầng 1 — RAIL ĐỎ (`.vj-booking-rail`)
- *     - rộng 1200px, cao 40px, nền #EC2029, bo góc 16px 16px 0 0.
- *     - 4 nút dịch vụ: Đặt vé (251px, 17px/700, active) / Khách sạn (279px,
- *       17px/500) / Skyshop (266px) / Đổi thưởng vé máy bay (374px).
- *     - Mỗi nút: `gap: 6px`, padding 0 10px, icon 24×24 trước chữ.
- *
- *   Tầng 2 — HÀNG TÌM KIẾM (`.vj-booking-bar`)
- *     - rộng 1200px, cao 69px, nền rgba(255,255,255,0.9), bo góc 0 0 16px 16px.
- *     - Đổ bóng `0 24px 56px rgba(31,42,51,0.28)`.
- *     - Padding trong 5px; ô nhập cao 64px.
- *
- * Tổng chiều cao khối đặt vé = 40 + 69 = 109px, khớp số đo `jss260` (109px).
- * ──────────────────────────────────────────────────────────────────────────── */
-/* Vỏ ngoài của khối đặt vé.
-   DESKTOP: trong suốt — hai tầng nằm ngang, chạm mép nhau.
-   MOBILE: thẻ đỏ bo góc 20px, padding 6px, bọc rail + hộp trắng. */
-.vj-booking-shell {
-  position: relative;
-}
-
-.vj-booking-rail {
-  display: flex;
-  align-items: stretch;
-  height: 40px;
-  background-color: var(--primary);
-  border-radius: 16px 16px 0 0;
-  padding: 0 15px;
-  overflow: hidden;
-}
-
-/* Nút dịch vụ trên rail.
-   Site thật dùng `flex: 1 1 auto`: cơ sở của mỗi nút là bề rộng nội dung
-   (icon 24 + gap 6 + chữ + padding 20), phần dư trong 1170px được chia đều
-   cho cả 4 nút (+152px mỗi nút) → 251 / 279 / 266 / 374px, đúng số đo. */
-.vj-booking-rail__tab {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  flex: 1 1 auto;
-  min-width: 0;
-  padding: 0 10px;
-  font-family: var(--vj-font-body, 'KoHo');
-  font-size: 17px;
-  line-height: 19.55px;
-  font-weight: 500;
-  color: #ffffff;
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-  transition: opacity 160ms ease;
-}
-
-.vj-booking-rail__tab:hover {
-  opacity: 0.86;
-}
-
-/* Tab active (Đặt vé) — đậm hơn, đúng số đo site thật (17px/700). */
-.vj-booking-rail__tab[aria-pressed='true'] {
-  font-weight: 700;
-}
-
-.vj-booking-rail__icon {
-  display: flex;
-  flex: 0 0 24px;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-}
-
-/* Tầng 2 — hàng tìm kiếm trắng.
-   Site thật (đo 14/11/2026): khung này có VIỀN ĐỎ 5px ở trái/phải/dưới
-   (`jss266`: border-left/right/bottom 5px solid #EC2029, border-top 0) —
-   đó là lý do nội dung bắt đầu ở x=125 chứ không phải x=120, và chiều cao
-   nội dung là 69-5 = 64px (ô nhập cao đúng 64px, CTA 44px canh giữa). */
-.vj-booking-bar {
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-  height: 69px;
-  padding: 0;
-  background-color: var(--vj-hero-panel);
-  border: 5px solid var(--primary);
-  border-top: 0;
-  border-radius: 0 0 16px 16px;
-  box-shadow: 0 24px 56px rgba(31, 42, 51, 0.28);
-}
-
-/* Ô nhập bên trái: lưới 4 cột (Từ / hoán đổi / Đến / Ngày bay).
-   Site thật đo `jss335` rộng 721px: Từ 235px (x=125) → nút hoán đổi 24px
-   (x=363) → Đến 235px (x=389) → ô ngày 222px (x=624..846).
-   Cột thứ hai rộng 29px để nút 24px nằm giữa, khớp đúng x=363 của site thật. */
-.vj-booking-fields {
-  display: grid;
-  grid-template-columns: 235px 29px 235px 222px;
-  align-items: center;
-  flex: 0 0 auto;
-}
-
-/* Ô nhập sân bay: nhãn 12px/400 #6B7580, giá trị 16px/500.
-   `width: 100%` là bắt buộc: nút `<button>` mặc định co theo nội dung, nên
-   không có nó thì ô chỉ rộng ~134px thay vì tràn hết track 235px. */
-.vj-booking-field {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
-  width: 100%;
-  height: 64px;
-  padding: 0 10px 0 20px;
-  background: transparent;
-  border: 0;
-  text-align: left;
-  cursor: pointer;
-}
-
-.vj-booking-field__label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--vj-font-body, 'KoHo');
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 400;
-  color: var(--vj-muted);
-}
-
-.vj-booking-field__value {
-  display: block;
-  font-family: var(--vj-font-body, 'KoHo');
-  font-size: 16px;
-  line-height: 22px;
-  font-weight: 500;
-  color: var(--foreground);
-}
-
-/* Nút hoán đổi sân bay: vòng tròn 24×24, nền #F3F1F1, icon 14×14 #5E6974. */
-.vj-booking-swap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* Cột 29px giữ nút 24px: `justify-self: center` đẩy nút vào giữa track
-     (x=362.5), đúng vị trí vòng tròn trên site thật. */
-  justify-self: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: var(--vj-pill);
-  color: var(--vj-text-strong);
-  border: 0;
-  cursor: pointer;
-  transition: filter 160ms ease;
-}
-
-.vj-booking-swap:hover {
-  filter: brightness(0.96);
-}
-
-/* Cột ngày bay: ô 222px (viền trái 1px #EFECEB) chứa nút 171px + nút mũi tên
-   24px, cách nhau 8px — đúng số đo site thật (nút ngày ở x=625..796, mũi tên
-   ở x=804..828). */
-.vj-booking-date {
-  display: grid;
-  grid-template-columns: 171px 24px;
-  column-gap: 8px;
-  align-items: center;
-  box-sizing: border-box;
-  width: 222px;
-  border-left: 1px solid #efeceb;
-}
-
-/* Nút mũi tên mở lịch: 24×24, bo góc 4px, màu #6B7580. */
-.vj-booking-chevron {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border: 0;
-  border-radius: 4px;
-  background-color: transparent;
-  color: var(--vj-muted);
-  cursor: pointer;
-  transition: background-color 160ms ease;
-}
-
-.vj-booking-chevron:hover {
-  background-color: var(--vj-pill);
-}
-
-/* Ô hành khách: nhãn 12px/400, giá trị 16px/500, padding 0 25px 0 20px. */
-.vj-booking-pax {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
-  height: 64px;
-  width: 259px;
-  padding: 0 25px 0 20px;
-  background: transparent;
-  border: 0;
-  text-align: left;
-  cursor: pointer;
-}
-
-/* Vị trí của ô hành khách trong lưới ô nhập. */
-.vj-booking-pax-slot {
-  display: contents;
-}
-
-/* Cụm phải của hàng tìm kiếm: ô hành khách (259px) + vùng CTA (210px).
-   Site thật đo tổng 469px (`jss290`, x=846..1315). */
-.vj-booking-right {
-  display: flex;
-  align-items: center;
-  margin-left: auto;
-  box-sizing: border-box;
-  width: 469px;
-  height: 64px;
-}
-
-/* Vùng chứa nút CTA: 210px, padding 0 15px 0 20px, viền trái 1px #EFECEB
-   (khớp số đo `jss310`). */
-.vj-booking-cta {
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-  width: 210px;
-  height: 44px;
-  padding: 0 15px 0 20px;
-  border-left: 1px solid #efeceb;
-}
-
-/* Hàng phụ (mã khuyến mại + tìm vé rẻ nhất): nền #F3F1F1, bo góc 14px,
-   padding 0 20px — đúng số đo site thật (`jss295`).
-   Trên DESKTOP site thật ẩn hàng này (khối đặt vé chỉ cao 109px = rail 40 +
-   hàng tìm kiếm 69), nên ở đây cũng ẩn; hàng này chỉ hiện khi thẻ đặt vé
-   được bung ra (trạng thái mở rộng trên mobile). */
-.vj-booking-extra {
-  display: none;
-  margin: 0;
-  border-radius: 14px;
-  background-color: var(--vj-pill);
-  padding: 12px 20px;
-}
-
-/* Trạng thái mở rộng (mobile): hàng phụ hiện ra. */
-.vj-booking-shell[data-expanded='true'] .vj-booking-extra {
-  display: block;
-}
-
-/* MOBILE (390×844): dải đặt vé của site thật là MỘT thẻ đỏ bo góc 20px
-   (366×130px, padding 6px) chứa rail 4 nút (cao 46px) + hộp trắng 354×72px.
-   Trong hộp trắng chỉ có hai ô sân bay (161px mỗi ô) và nút hoán đổi 32px;
-   ô ngày bay và ô hành khách bị ẩn (`display:none`) — người dùng chọn sau
-   ở các bước tiếp theo. */
-@media (max-width: 1023px) {
-  /* MOBILE (390×844): site thật bọc rail + hộp trắng trong MỘT thẻ đỏ
-     bo góc 20px, rộng 366px (cách mép 12px), cao 130px, padding 6px.
-     → Thẻ đỏ ở x=12..378, rail ở x=18 (cao 46px), hộp trắng 354×72px ở
-     x=18, y=529. */
-  .vj-booking-shell {
-    margin: 0 12px;
-    width: auto;
-    background-color: var(--primary);
-    border-radius: 20px;
-    padding: 6px;
-  }
-
-  .vj-booking-rail {
-    height: 46px;
-    background: transparent;
-    border-radius: 0;
-    /* Site thật (đo 14/11/2026, 390×844): rail trong `jss288` rộng 354px,
-       `overflow-x: auto`; bên trong là `jss289` rộng 567px, padding 0 5px,
-       gap 4px. Các nút cao 42px, canh trên (rail cao 46px). */
-    align-items: flex-start;
-    gap: 4px;
-    padding: 0 5px;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  .vj-booking-rail::-webkit-scrollbar {
-    display: none;
-  }
-
-  .vj-booking-rail__tab {
-    flex: 0 0 auto;
-    height: 42px;
-    font-size: 17px;
-    line-height: 19.55px;
-  }
-
-  /* Icon trên rail MOBILE là 20×20 (desktop là 24×24) — đo 14/11/2026. */
-  .vj-booking-rail__icon {
-    flex: 0 0 20px;
-    width: 20px;
-    height: 20px;
-  }
-
-  .vj-booking-rail__icon svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  /* Hộp trắng 354×72px: KHÔNG viền đỏ (viền 5px chỉ có ở desktop). */
-  .vj-booking-bar {
-    height: 72px;
-    padding: 0;
-    background-color: #ffffff;
-    border: 0;
-    border-radius: 16px;
-    box-shadow: none;
-  }
-
-  /* Lưới 3 cột: Từ 161px → hoán đổi 32px → Đến 161px (tổng 354px). */
-  .vj-booking-fields {
-    grid-template-columns: 161px 32px 161px;
-    width: 354px;
-  }
-
-  /* Ô hành khách, cột ngày bay và nút CTA bị ẩn trên mobile — đúng site thật:
-     bản thu gọn chỉ có hai ô sân bay, phần còn lại hiện khi bung thẻ. */
-  .vj-booking-date,
-  .vj-booking-pax-slot,
-  .vj-booking-right {
-    display: none;
-  }
-
-  /* ── Trạng thái MỞ RỘNG (bấm vào ô "Từ"/"Đến") ──────────────────────────
-     Site thật (đo 14/11/2026): thẻ đỏ cao 507px, hộp trắng 354×449px với
-     lưới `270px 84px` × `51px 138px 64px 109px 87px`:
-       - Hàng 1 (51px): dải pill loại hành trình.
-       - Hàng 2 (138px): hai ô sân bay (161px) + nút hoán đổi (32px).
-       - Hàng 3 (64px): ô ngày đi (354px).
-       - Hàng 4 (109px): hàng phụ mã khuyến mại / tìm vé rẻ nhất.
-       - Hàng 5 (87px): ô hành khách + nút CTA (314×52px). */
-  .vj-booking-shell[data-expanded='true'] .vj-booking-bar {
-    height: 449px;
-    display: block;
-    overflow: visible;
-  }
-
-  .vj-booking-shell[data-expanded='true'] .vj-booking-fields {
-    display: grid;
-    grid-template-columns: 161px 32px 161px;
-    grid-template-rows: 72px 65px;
-    width: 354px;
-    height: 138px;
-  }
-
-  /* Ô ngày đi chiếm hàng riêng, rộng 354px. */
-  .vj-booking-shell[data-expanded='true'] .vj-booking-date {
-    display: grid;
-    grid-column: 1 / -1;
-    grid-template-columns: 1fr 24px;
-    column-gap: 8px;
-    width: 354px;
-    height: 64px;
-    border-left: 0;
-  }
-
-  /* Ô hành khách + nút CTA nằm ở hàng cuối, dọc. */
-  .vj-booking-shell[data-expanded='true'] .vj-booking-right {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    width: 354px;
-    height: 196px;
-    margin-left: 0;
-    padding: 0 20px;
-  }
-
-  .vj-booking-shell[data-expanded='true'] .vj-booking-pax-slot {
-    display: block;
-  }
-
-  .vj-booking-shell[data-expanded='true'] .vj-booking-pax {
-    width: 100%;
-    height: 56px;
-    padding: 8px 14px;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    background: #ffffff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    margin-bottom: 8px;
-  }
-
-  .vj-booking-shell[data-expanded='true'] .vj-booking-extra {
-    display: block;
-    margin: 0;
-    padding: 12px 20px;
-  }
-
-  .vj-booking-shell[data-expanded='true'] .vj-booking-cta {
-    display: flex;
-    width: 100%;
-    height: 52px;
-    padding: 0;
-    border-left: 0;
-  }
-
-  .vj-booking-shell[data-expanded='true'] .vj-booking-cta .vj-cta--hero {
-    width: 100%;
-    max-width: 100%;
-    height: 52px;
-  }
-
-  /* Nút hoán đổi: 32px, bo tròn, nằm giữa hai ô sân bay. */
-  .vj-booking-swap {
-    width: 32px;
-    height: 32px;
-  }
-
-  /* Trên mobile nhãn ô sân bay có icon 20px đứng giữa (khác desktop). */
-  .vj-booking-field {
-    height: 72px;
-    padding: 0 10px;
-    align-items: center;
-    text-align: center;
-    gap: 6px;
-  }
-
-  .vj-booking-field__label {
-    font-size: 13px;
-  }
-
-  .vj-booking-field__value {
-    font-size: 15px;
-    line-height: 20px;
-  }
 }
 
 /* Panel đặt vé (site thật, đo 13/11/2026):
@@ -1829,17 +1362,6 @@ h6 {
   text-decoration: underline;
 }
 
-/* Dòng "Bạn đã biết về Vietjet SkyJoy? Đăng ký ngay" — phần chữ dẫn dùng
-   `16px/500` (site thật: tiền tố rộng `238px` ở `/vi/checkin` và `233px` ở
-   `/vi/my/search-booking`), link `14px/400`. */
-.vj-skyjoy-line {
-  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 500;
-  color: var(--vj-text);
-}
-
 /* Khối "Đăng nhập" dưới form tra cứu của `/chuyen-bay-cua-toi`.
  * Số đo site thật: cao `48px`, bo góc `12px`, nền trắng, viền
  * `1px rgba(236,32,41,0.1)`, chữ `#D6231E` `16px`, icon `20×20`. */
@@ -1848,7 +1370,7 @@ h6 {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  width: 137px;
+  width: 100%;
   height: 48px;
   border: 1px solid rgba(236, 32, 41, 0.1);
   border-radius: var(--vj-radius-card);
@@ -3396,21 +2918,20 @@ h6 {
 
 /* ─── Pill tab (đo 13/11/2026) ────────────────────────────────────────────
  * Dải tab "Dịch vụ tra cứu" của site thật dùng pill bo góc `18px`, cao
- * `36px`, rộng `164px`, padding ngang `12px`, chữ `14px/500`; tab đang chọn
- * nền `#FFDD32`, chữ `rgb(115 62 10)`. */
+ * `36px`; tab đang chọn nền `#FFDD32`, chữ `rgb(115 62 10)`. */
 .vj-pill-tab {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   height: 36px;
-  padding: 0 12px;
+  padding: 0 20px;
   border-radius: 18px;
   background-color: transparent;
   font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
   font-size: 14px;
-  line-height: 22px;
-  font-weight: 500;
+  line-height: 20px;
+  font-weight: 700;
   color: var(--vj-text-gray);
   transition:
     background-color 160ms ease,
