@@ -62,9 +62,6 @@ export default function VisualEditorCanvas({
       width: 'auto',
       storageManager: false,
       autoCss: false,
-      canvas: {
-        autoplay: false,
-      },
       styleManager: {
         appendTo: containerRef.current.parentElement ?? undefined,
         sectors: [
@@ -279,7 +276,7 @@ function readOrder(editor: Editor): string[] {
   if (!wrapper) return [];
 
   return wrapper
-    .getComponents()
+    .components()
     .map((component) => readSectionId(component))
     .filter((id): id is string => Boolean(id));
 }
@@ -290,7 +287,7 @@ function findComponent(editor: Editor, sectionId: string): Component | undefined
   if (!wrapper) return undefined;
 
   return wrapper
-    .getComponents()
+    .components()
     .find((component) => readSectionId(component) === sectionId);
 }
 

@@ -30,11 +30,6 @@ export default function VisualEditorPanel({ pagePath, initialLayout }: VisualEdi
     setIsDirty(false);
   }, [initialLayout]);
 
-  const selectedSection = useMemo(
-    () => layout.sections.find((section) => section.id === selectedId) ?? null,
-    [layout, selectedId]
-  );
-
   const updateLayout = (updater: (current: PageLayout) => PageLayout) => {
     setLayout((current) => updater(current));
     setIsDirty(true);
