@@ -99,7 +99,8 @@ function FlightBookingClientInner({
   };
 
   const isRoundTrip = Boolean(params.return);
-  const [currentLeg, setCurrentLeg] = useState<'outbound' | 'inbound'>('outbound');
+  // The inbound leg is never reached while round-trip checkout is blocked.
+  const currentLeg = 'outbound' as const;
   const [step, setStep] = useState(1);
   const paxCounts: Record<PassengerType, number> = {
     adult: params.pax ? parseInt(params.pax, 10) || 1 : 1,
@@ -155,20 +156,28 @@ function FlightBookingClientInner({
     return: undefined,
   };
 
+  /**
+   * Round-trip bookings are not supported end to end yet.
+   *
+   * `POST /api/dat-ve` takes one `flight_id` and prices that leg; the return
+   * flight collected by this screen was never sent, so a "khứ hồi" booking
+   * was silently created as a one-way ticket while the customer believed they
+   * had bought both legs. Block the flow where the mistake would happen
+   * instead of confirming a booking the system cannot honour.
+   */
+  const ROUND_TRIP_UNSUPPORTED_MESSAGE =
+    'Hệ thống hiện chỉ hỗ trợ đặt vé một chiều trực tuyến. Vui lòng đặt riêng vé chiều đi và chiều về (mỗi chiều một vé).';
+
   // Signal từ nút "Đi tiếp" ở panel bên ngoài → chuyển sang bước 2.
   const stateRef = useRef({
     step,
     selected: booking.selectedFlight,
-    returnFlight: booking.returnFlight,
     isRoundTrip,
-    currentLeg,
   });
   stateRef.current = {
     step,
     selected: booking.selectedFlight,
-    returnFlight: booking.returnFlight,
     isRoundTrip,
-    currentLeg,
   };
 
   const goStepRef = useRef(goStep);
@@ -177,20 +186,15 @@ function FlightBookingClientInner({
   useEffect(() => {
     if (continueSignal && continueSignal > 0) {
       if (stateRef.current.step === 1) {
+        if (stateRef.current.isRoundTrip) {
+          toast.error('Chưa hỗ trợ đặt vé khứ hồi', ROUND_TRIP_UNSUPPORTED_MESSAGE);
+          return;
+        }
         if (!stateRef.current.selected) {
           toast.error(
             'Chưa chọn chuyến bay đi',
             'Vui lòng chọn chuyến bay đi trước khi bấm Đi tiếp.'
           );
-          return;
-        }
-        if (stateRef.current.isRoundTrip && !stateRef.current.returnFlight) {
-          if (stateRef.current.currentLeg === 'outbound') {
-            setCurrentLeg('inbound');
-            toast.info('Chọn chuyến bay về', 'Vui lòng chọn chuyến bay cho chiều về.');
-            return;
-          }
-          toast.error('Chưa chọn chuyến bay về', 'Vui lòng chọn chuyến bay cho chiều về.');
           return;
         }
         goStepRef.current(2);
@@ -205,6 +209,12 @@ function FlightBookingClientInner({
     leg: 'outbound' | 'inbound' = currentLeg,
     isUserAction: boolean = true
   ) => {
+    if (leg === 'outbound' && isRoundTrip) {
+      // See ROUND_TRIP_UNSUPPORTED_MESSAGE: do not even mark a flight as
+      // selected for a checkout that would only record the outbound leg.
+      toast.error('Chưa hỗ trợ đặt vé khứ hồi', ROUND_TRIP_UNSUPPORTED_MESSAGE);
+      return;
+    }
     if (leg === 'outbound') {
       setBooking((b) => ({
         ...b,
@@ -220,21 +230,13 @@ function FlightBookingClientInner({
         'outbound'
       );
       if (isUserAction) {
-        if (isRoundTrip) {
-          setCurrentLeg('inbound');
-          toast.success(
-            'Đã chọn chuyến bay đi!',
-            `${flight.flightNo}: ${flight.fromCity} → ${flight.toCity}. Tiếp tục chọn chuyến về.`
-          );
-        } else {
-          if (continueSignal === undefined) {
-            goStep(2);
-          }
-          toast.success(
-            'Chuyến bay đã được chọn!',
-            `${flight.flightNo}: ${flight.fromCity} → ${flight.toCity} lúc ${flight.departTime}`
-          );
+        if (continueSignal === undefined) {
+          goStep(2);
         }
+        toast.success(
+          'Chuyến bay đã được chọn!',
+          `${flight.flightNo}: ${flight.fromCity} → ${flight.toCity} lúc ${flight.departTime}`
+        );
       }
     } else {
       setBooking((b) => ({
@@ -376,6 +378,10 @@ function FlightBookingClientInner({
 
   const handleFinalBookingSubmit = async () => {
     try {
+      if (isRoundTrip) {
+        toast.error('Chưa hỗ trợ đặt vé khứ hồi', ROUND_TRIP_UNSUPPORTED_MESSAGE);
+        return;
+      }
       setIsSubmitting(true);
       const selectedFlight = booking.selectedFlight;
       const flightId = selectedFlight?.id;
