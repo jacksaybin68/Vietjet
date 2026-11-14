@@ -204,7 +204,12 @@ function FlightBookingClientInner({
         }
         goStepRef.current(2);
       } else if (stateRef.current.step === 2) {
-        goStepRef.current(3);
+        const form = document.getElementById('passenger-info-form') as HTMLFormElement | null;
+        if (form) {
+          form.requestSubmit();
+        } else {
+          goStepRef.current(3);
+        }
       }
     }
   }, [continueSignal, toast]);

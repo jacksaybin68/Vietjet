@@ -36,9 +36,7 @@ function ruleValue(selector: string, property: string): string {
   while ((match = ruleRe.exec(CSS_RULES)) !== null) {
     const selectors = match[1].split(',').map((part) => part.trim());
     if (!selectors.includes(selector)) continue;
-    const propertyMatch = match[2].match(
-      new RegExp(`(?:^|;)\\s*${property}:\\s*([^;]+)`)
-    );
+    const propertyMatch = match[2].match(new RegExp(`(?:^|;)\\s*${property}:\\s*([^;]+)`));
     if (!propertyMatch) {
       throw new Error(`Rule ${selector} không khai báo ${property}`);
     }
@@ -71,9 +69,7 @@ describe('Token popup SkyID (622×664) — đo 14/11/2026', () => {
 
   it('gradient băng đỏ khớp site thật', () => {
     const gradient = token('vj-popup-header-gradient').replace(/\s+/g, '');
-    expect(gradient).toBe(
-      'linear-gradient(rgb(217,26,33)34.8%,rgb(171,3,3)182.34%)'
-    );
+    expect(gradient).toBe('linear-gradient(rgb(217,26,33)34.8%,rgb(171,3,3)182.34%)');
   });
 });
 
@@ -109,7 +105,9 @@ describe('Ô nhập tra cứu (underline MUI 40px) — đo 14/11/2026', () => {
   });
 
   it('focus đổi gạch chân thành 2px đỏ thương hiệu', () => {
-    expect(ruleValue('.vj-lookup-field .vj-lookup-input:focus', 'border-bottom')).toContain('2px solid');
+    expect(ruleValue('.vj-lookup-field .vj-lookup-input:focus', 'border-bottom')).toContain(
+      '2px solid'
+    );
   });
 });
 

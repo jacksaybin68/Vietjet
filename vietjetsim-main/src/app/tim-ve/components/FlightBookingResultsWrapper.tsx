@@ -187,7 +187,6 @@ export default function FlightBookingResultsWrapper({
 
   const handleContinue = useCallback(() => {
     setContinueSignal((n) => n + 1);
-    setBookingStep((prev) => prev + 1);
   }, []);
 
   const [outboundFrom, outboundTo] = trip.split('→').map((part) => part.trim());
@@ -546,7 +545,9 @@ export default function FlightBookingResultsWrapper({
               khối giữa — tức nó thẳng hàng với dòng "Tổng tiền", lệch
               phải ~73px, KHÔNG nằm giữa hai khối. */}
           <div className="vj-total-bar hidden sm:block fixed bottom-0 left-0 right-0 z-[60] border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
-            <div className="vj-total-bar-inner mx-auto max-w-[1200px] pl-[10px]">
+            {/* Site thật: container 1200px (x=120), padding trong `10px`, lề phải
+                `20px` → cụm "Tổng tiền" tại x=769, nút "Đi tiếp" 127×39 tại x=1173. */}
+            <div className="vj-total-bar-inner mx-auto max-w-[1200px] pl-[10px] pr-[20px]">
               {/* Thanh trống giữ layout 3 cột như site thật */}
               <div aria-hidden="true" className="flex-1" />
               <div className="relative w-[405px] shrink-0">

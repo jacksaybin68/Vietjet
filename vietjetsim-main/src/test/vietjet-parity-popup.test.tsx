@@ -49,12 +49,9 @@ describe('PopupFrame', () => {
 
     const nav = screen.getByRole('navigation', { name: 'Dịch vụ nhanh' });
     expect(nav).toBeInTheDocument();
-    [
-      'Đặt chuyến bay',
-      'Chuyến bay của tôi',
-      'Mua hành lý, chỗ ngồi...',
-      'Check-in',
-    ].forEach((label) => expect(screen.getByText(label)).toBeInTheDocument());
+    ['Đặt chuyến bay', 'Chuyến bay của tôi', 'Mua hành lý, chỗ ngồi...', 'Check-in'].forEach(
+      (label) => expect(screen.getByText(label)).toBeInTheDocument()
+    );
   });
 });
 

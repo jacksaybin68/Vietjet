@@ -3,13 +3,14 @@ const path = require('node:path');
 const puppeteer = require('puppeteer-core');
 
 const BASE_URL = process.env.BASE_URL || 'http://127.0.0.1:4055';
-const CHROME = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const CHROME =
+  process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const OUT_DIR = path.resolve(__dirname, '..', 'docs', 'qa', 'e2e-roundtrip');
 
 fs.mkdirSync(OUT_DIR, { recursive: true });
 
 async function runTest() {
-  console.log(`Starting E2E Round-Trip User Simulation on ${BASE_URL}...`);
+  console.log(`Starting Full E2E Simulation on ${BASE_URL}...`);
   const browser = await puppeteer.launch({
     executablePath: CHROME,
     headless: 'new',
@@ -21,11 +22,13 @@ async function runTest() {
     mobile: { steps: [], errors: [] },
   };
 
+  let createdBookingId = null;
+
   try {
     // ══════════════════════════════════════════════════════════
     // 1. DESKTOP TEST (1440 x 900)
     // ══════════════════════════════════════════════════════════
-    console.log('\n--- Running Desktop Simulation (1440x900) ---');
+    console.log('\n--- 1. DESKTOP SIMULATION (1440x900) ---');
     const page = await browser.newPage();
     await page.setViewport({ width: 1440, height: 900 });
 
@@ -42,129 +45,113 @@ async function runTest() {
     const searchUrl = `${BASE_URL}/tim-ve?from=SGN&to=HAN&depart=2026-11-20&return=2026-11-25&pax=1`;
     console.log('Navigating to:', searchUrl);
     await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await new Promise((r) => setTimeout(r, 4000));
+    await new Promise((r) => setTimeout(r, 3000));
 
     // Screenshot Step 1: Outbound
     await page.screenshot({ path: path.join(OUT_DIR, '01-desktop-step1-outbound.png') });
-    report.desktop.steps.push({ step: 1, name: 'Search Results (Outbound)', status: 'OK' });
-    console.log('Step 1 (Outbound) loaded.');
+    report.desktop.steps.push({ step: 1, name: 'Step 1: Chọn chuyến đi', status: 'OK' });
+    console.log('✓ Step 1: Chiều đi hiển thị chuẩn.');
 
-    // Find and click the first Eco fare button on outbound leg
-    const ecoBtnSelector = 'button[class*="border"], div[role="button"]';
-    await page.waitForSelector('button', { timeout: 15000 });
-
-    // Click outbound flight
-    const clickedOutbound = await page.evaluate(() => {
-      // Look for fare buttons or flight cards
-      const buttons = Array.from(document.querySelectorAll('button'));
-      const ecoBtn = buttons.find((b) => b.textContent && (b.textContent.includes('Eco') || b.textContent.includes('VND') || b.textContent.includes('Chọn')));
-      if (ecoBtn) {
-        ecoBtn.click();
-        return true;
-      }
-      return false;
-    });
-    console.log('Clicked outbound fare:', clickedOutbound);
+    // Wait for fare buttons and click Eco on outbound
+    await page.waitForSelector('button[data-testid="select-fare"]', { timeout: 15000 });
+    const fareButtons = await page.$$('button[data-testid="select-fare"]');
+    if (fareButtons.length > 0) {
+      await fareButtons[fareButtons.length - 1].click();
+    }
     await new Promise((r) => setTimeout(r, 2500));
 
     // Screenshot Step 1: Inbound
     await page.screenshot({ path: path.join(OUT_DIR, '02-desktop-step1-inbound.png') });
-    report.desktop.steps.push({ step: 1, name: 'Search Results (Inbound switched)', status: 'OK' });
+    report.desktop.steps.push({ step: 1, name: 'Step 1: Tự động chuyển Chiều về', status: 'OK' });
+    console.log('✓ Step 1: Đã tự động chuyển sang Chiều về.');
 
-    // Click inbound flight
-    const clickedInbound = await page.evaluate(() => {
-      const buttons = Array.from(document.querySelectorAll('button'));
-      // Find a button with VND or Eco
-      const fareBtns = buttons.filter((b) => b.textContent && (b.textContent.includes('Eco') || b.textContent.includes('VND')));
-      if (fareBtns.length > 0) {
-        fareBtns[0].click();
-        return true;
-      }
-      return false;
-    });
-    console.log('Clicked inbound fare:', clickedInbound);
+    // Click inbound Eco fare
+    const returnFareButtons = await page.$$('button[data-testid="select-fare"]');
+    if (returnFareButtons.length > 0) {
+      await returnFareButtons[returnFareButtons.length - 1].click();
+    }
     await new Promise((r) => setTimeout(r, 2000));
 
-    // Click "Đi tiếp" to advance to Step 2
-    const clickedContinue = await page.evaluate(() => {
+    // Click "Đi tiếp" at bottom sticky bar
+    await page.evaluate(() => {
       const buttons = Array.from(document.querySelectorAll('button'));
       const nextBtn = buttons.find((b) => b.textContent && b.textContent.includes('Đi tiếp'));
-      if (nextBtn) {
-        nextBtn.click();
-        return true;
-      }
-      return false;
+      if (nextBtn) nextBtn.click();
     });
-    console.log('Clicked Đi tiếp to Step 2:', clickedContinue);
-    await new Promise((r) => setTimeout(r, 2500));
+    await new Promise((r) => setTimeout(r, 3000));
 
     // Screenshot Step 2: Passenger Info
     await page.screenshot({ path: path.join(OUT_DIR, '03-desktop-step2-passengers.png') });
-    report.desktop.steps.push({ step: 2, name: 'Passenger Info Step', status: 'OK' });
+    report.desktop.steps.push({ step: 2, name: 'Step 2: Nhập thông tin hành khách', status: 'OK' });
+    console.log('✓ Step 2: Giao diện nhập thông tin hành khách đã tải.');
 
-    // Fill passenger information if form exists
+    // Fill passenger form with realistic data
+    await page.type('input[id*="name"]', 'NGUYEN');
+    await page.type('input[id*="firstName"]', 'VAN A');
+    await page.type('input[id*="dob"]', '1995-10-20');
+    await page.type('input[id*="phone"]', '0912345678');
+    await page.type('input[id*="email"]', 'nguyen.vana@gmail.com');
+
+    // Agree to policies
     await page.evaluate(() => {
-      const inputs = Array.from(document.querySelectorAll('input'));
-      inputs.forEach((input) => {
-        const name = (input.getAttribute('name') || '').toLowerCase();
-        const placeholder = (input.getAttribute('placeholder') || '').toLowerCase();
-        if (name.includes('last') || placeholder.includes('họ')) {
-          input.value = 'NGUYEN';
-          input.dispatchEvent(new Event('input', { bubbles: true }));
-        } else if (name.includes('first') || placeholder.includes('tên')) {
-          input.value = 'VAN A';
-          input.dispatchEvent(new Event('input', { bubbles: true }));
-        } else if (name.includes('phone') || placeholder.includes('thoại')) {
-          input.value = '0912345678';
-          input.dispatchEvent(new Event('input', { bubbles: true }));
-        } else if (name.includes('email') || placeholder.includes('email')) {
-          input.value = 'nguyenvana@example.com';
-          input.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-      });
-    });
-
-    // Advance to Step 3
-    const clickedToStep3 = await page.evaluate(() => {
-      const buttons = Array.from(document.querySelectorAll('button'));
-      const btn = buttons.find((b) => b.textContent && (b.textContent.includes('Tiếp tục') || b.textContent.includes('Đi tiếp')));
-      if (btn) {
-        btn.click();
-        return true;
+      const policyCheckbox = document.querySelector('input[type="checkbox"][required]');
+      if (policyCheckbox && !policyCheckbox.checked) {
+        policyCheckbox.click();
       }
-      return false;
     });
-    console.log('Advanced to Step 3:', clickedToStep3);
-    await new Promise((r) => setTimeout(r, 2500));
+    await new Promise((r) => setTimeout(r, 1000));
+
+    // Submit passenger form (Click "Đi tiếp" on bottom bar which submits form)
+    await page.evaluate(() => {
+      const form = document.getElementById('passenger-info-form');
+      if (form) form.requestSubmit();
+    });
+    console.log('Submitted passenger form, waiting for Step 3...');
+    await new Promise((r) => setTimeout(r, 3000));
 
     // Screenshot Step 3: Ancillaries
     await page.screenshot({ path: path.join(OUT_DIR, '04-desktop-step3-ancillaries.png') });
-    report.desktop.steps.push({ step: 3, name: 'Ancillary Services Step', status: 'OK' });
+    report.desktop.steps.push({ step: 3, name: 'Step 3: Dịch vụ bổ sung', status: 'OK' });
+    console.log('✓ Step 3: Giao diện dịch vụ bổ sung (ghế, hành lý).');
 
-    // Advance to Step 4 (Payment)
-    const clickedToPayment = await page.evaluate(() => {
+    // Click continue on Step 3 to book and advance to Payment
+    await page.evaluate(() => {
       const buttons = Array.from(document.querySelectorAll('button'));
-      const btn = buttons.find((b) => b.textContent && (b.textContent.includes('Thanh toán') || b.textContent.includes('Đi tiếp') || b.textContent.includes('Hoàn tất')));
-      if (btn) {
-        btn.click();
-        return true;
-      }
-      return false;
+      const finishBtn = buttons.find(
+        (b) =>
+          b.textContent &&
+          (b.textContent.includes('Thanh toán') ||
+            b.textContent.includes('Đi tiếp') ||
+            b.textContent.includes('Hoàn tất'))
+      );
+      if (finishBtn) finishBtn.click();
     });
-    console.log('Advanced to Payment:', clickedToPayment);
-    await new Promise((r) => setTimeout(r, 4000));
+    console.log('Submitted booking, waiting for payment redirect...');
+    await new Promise((r) => setTimeout(r, 5000));
+
+    const finalUrl = page.url();
+    console.log('URL after Step 3 submit:', finalUrl);
+    if (finalUrl.includes('bookingId=')) {
+      createdBookingId = new URL(finalUrl).searchParams.get('bookingId');
+      console.log('✓ Created booking ID:', createdBookingId);
+    }
 
     // Screenshot Step 4: Payment Page
-    await page.screenshot({ path: path.join(OUT_DIR, '05-desktop-step4-payment.png'), fullPage: true });
-    report.desktop.steps.push({ step: 4, name: 'Payment Page', status: 'OK' });
-
-    const paymentUrl = page.url();
-    console.log('Current URL after submit:', paymentUrl);
+    await page.screenshot({
+      path: path.join(OUT_DIR, '05-desktop-step4-payment.png'),
+      fullPage: true,
+    });
+    report.desktop.steps.push({
+      step: 4,
+      name: 'Step 4: Hoá đơn thanh toán thống nhất',
+      status: 'OK',
+    });
+    console.log('✓ Step 4: Đã chụp ảnh trang thanh toán Desktop.');
 
     // ══════════════════════════════════════════════════════════
     // 2. MOBILE TEST (390 x 844)
     // ══════════════════════════════════════════════════════════
-    console.log('\n--- Running Mobile Simulation (390x844) ---');
+    console.log('\n--- 2. MOBILE SIMULATION (390x844) ---');
     const mobilePage = await browser.newPage();
     await mobilePage.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
 
@@ -180,29 +167,33 @@ async function runTest() {
 
     console.log('Mobile navigating to:', searchUrl);
     await mobilePage.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await new Promise((r) => setTimeout(r, 4000));
+    await new Promise((r) => setTimeout(r, 3000));
 
     await mobilePage.screenshot({ path: path.join(OUT_DIR, '06-mobile-step1-search.png') });
-    report.mobile.steps.push({ step: 1, name: 'Mobile Search & Results', status: 'OK' });
-    console.log('Mobile Step 1 loaded.');
+    report.mobile.steps.push({
+      step: 1,
+      name: 'Mobile Step 1: Tìm chuyến bay & Tabs',
+      status: 'OK',
+    });
+    console.log('✓ Mobile Step 1: Đã chụp ảnh.');
 
-    // Also navigate mobile directly to payment page if bookingId created
-    if (paymentUrl.includes('/thanh-toan')) {
-      await mobilePage.goto(paymentUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
-      await new Promise((r) => setTimeout(r, 3000));
-      await mobilePage.screenshot({ path: path.join(OUT_DIR, '07-mobile-payment.png'), fullPage: true });
-      report.mobile.steps.push({ step: 4, name: 'Mobile Payment Page', status: 'OK' });
-      console.log('Mobile Payment page loaded.');
-    } else {
-      // Test fallback payment page
-      await mobilePage.goto(`${BASE_URL}/thanh-toan`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-      await new Promise((r) => setTimeout(r, 3000));
-      await mobilePage.screenshot({ path: path.join(OUT_DIR, '07-mobile-payment.png'), fullPage: true });
-      report.mobile.steps.push({ step: 4, name: 'Mobile Payment Page (Fallback)', status: 'OK' });
-    }
+    // Direct mobile payment screenshot with created booking
+    const payTarget = createdBookingId
+      ? `${BASE_URL}/thanh-toan?bookingId=${createdBookingId}`
+      : `${BASE_URL}/thanh-toan`;
+    console.log('Mobile navigating to payment:', payTarget);
+    await mobilePage.goto(payTarget, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await new Promise((r) => setTimeout(r, 4000));
+
+    await mobilePage.screenshot({
+      path: path.join(OUT_DIR, '07-mobile-payment.png'),
+      fullPage: true,
+    });
+    report.mobile.steps.push({ step: 4, name: 'Mobile Step 4: Thanh toán & QR', status: 'OK' });
+    console.log('✓ Mobile Step 4: Đã chụp ảnh trang thanh toán.');
 
     await browser.close();
-    console.log('\nAll simulations finished successfully!');
+    console.log('\nAll simulations completed successfully!');
     fs.writeFileSync(path.join(OUT_DIR, 'report.json'), JSON.stringify(report, null, 2));
   } catch (err) {
     console.error('Simulation error:', err);

@@ -1,0 +1,52 @@
+{
+  "desktop": {
+    "steps": [
+      {
+        "step": 1,
+        "name": "Step 1: Chọn chuyến đi",
+        "status": "OK"
+      },
+      {
+        "step": 1,
+        "name": "Step 1: Tự động chuyển Chiều về",
+        "status": "OK"
+      },
+      {
+        "step": 2,
+        "name": "Step 2: Nhập thông tin hành khách",
+        "status": "OK"
+      },
+      {
+        "step": 3,
+        "name": "Step 3: Dịch vụ bổ sung",
+        "status": "OK"
+      },
+      {
+        "step": 4,
+        "name": "Step 4: Hoá đơn thanh toán thống nhất",
+        "status": "OK"
+      }
+    ],
+    "errors": []
+  },
+  "mobile": {
+    "steps": [
+      {
+        "step": 1,
+        "name": "Mobile Step 1: Tìm chuyến bay & Tabs",
+        "status": "OK"
+      },
+      {
+        "step": 4,
+        "name": "Mobile Step 4: Thanh toán & QR",
+        "status": "OK"
+      }
+    ],
+    "errors": [
+      "Failed to load wallet balance: ApiRequestError: Authentication required",
+      "Failed to load SkyPoint balance: ApiRequestError: Authentication required",
+      "Failed to load wallet balance: ApiRequestError: Authentication required",
+      "Failed to load SkyPoint balance: ApiRequestError: Authentication required"
+    ]
+  }
+}

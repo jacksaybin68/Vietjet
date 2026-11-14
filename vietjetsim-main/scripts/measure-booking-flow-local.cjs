@@ -79,6 +79,20 @@ const PROBE = () => {
   out.dateStrip = box(strip);
   out.dateCell = box(strip && strip.querySelector('button:not([aria-label])'));
   out.dateCellText = out.dateCell ? out.dateCell.text : null;
+  // Cỡ chữ ô ngày: đo trên dòng NGÀY ("14 tháng 11") — site thật `16px/500`.
+  // Ô active có 2 loại cỡ: weekday `13px/500`, ngày `16px/500`.
+  const dateSpan =
+    strip &&
+    [...strip.querySelectorAll('span')].find((s) =>
+      /^\d{1,2}\s+tháng\s+\d{1,2}$/.test((s.textContent || '').trim())
+    );
+  out.dateCellFont = box(dateSpan);
+  const weekdaySpan =
+    strip &&
+    [...strip.querySelectorAll('span')].find(
+      (s) => s.children.length === 0 && /thứ|chủ nhật/i.test((s.textContent || '').trim())
+    );
+  out.dateCellWeekday = box(weekdaySpan);
 
   // H1 cột trái + cột trái
   const h1 = byText('h1', 'Lựa chọn chuyến bay');
@@ -135,6 +149,7 @@ const OFFICIAL = {
   'date cell width': { site: 156, key: 'w', tol: 2 },
   'date cell height': { site: 95, key: 'h', tol: 2 },
   'date cell font-size': { site: '16px', key: 'fs' },
+  'date weekday font-size': { site: '13px', key: 'fs' },
   'cta width': { site: 127, key: 'w', tol: 2 },
   'cta height': { site: 39, key: 'h', tol: 2 },
   'cta radius': { site: '10px', key: 'radius' },
@@ -168,7 +183,8 @@ const LOCAL_KEY = {
   'panel total amount font-size': 'panelTotalAmount',
   'date cell width': 'dateCell',
   'date cell height': 'dateCell',
-  'date cell font-size': 'dateCell',
+  'date cell font-size': 'dateCellFont',
+  'date weekday font-size': 'dateCellWeekday',
   'cta width': 'cta',
   'cta height': 'cta',
   'cta radius': 'cta',

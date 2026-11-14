@@ -1400,14 +1400,14 @@ export default function FlightResultsStep({
                             {/* Giá vé: số tiền 26px/400 JambonoMedium #333333,
                                 mã tiền tệ 16px/500 #6D6E71 (đo 13/11/2026). */}
                             <span
-                              className={`text-xl5 font-jambono font-normal leading-none whitespace-nowrap transition-colors ${
+                              className={`text-xs sm:text-base lg:text-xl5 font-jambono font-normal leading-none whitespace-nowrap transition-colors ${
                                 isSelected
                                   ? 'text-primary'
                                   : 'text-vj-text group-hover:text-primary'
                               }`}
                             >
                               {fc.price.toLocaleString('vi-VN')}
-                              <span className="text-base font-medium text-vj-currency-gray ml-1">
+                              <span className="hidden sm:inline text-xs sm:text-base font-medium text-vj-currency-gray ml-0.5 sm:ml-1">
                                 VND
                               </span>
                             </span>

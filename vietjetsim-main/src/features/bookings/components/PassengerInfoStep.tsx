@@ -117,11 +117,9 @@ export default function PassengerInfoStep({
   });
 
   const updatePassenger = (i: number, field: keyof Passenger, value: string) => {
-    setPassengers((prev) => {
-      const next = prev.map((p, idx) => (idx === i ? { ...p, [field]: value } : p));
-      onPassengersChange?.(next);
-      return next;
-    });
+    const next = passengers.map((p, idx) => (idx === i ? { ...p, [field]: value } : p));
+    setPassengers(next);
+    onPassengersChange?.(next);
   };
 
   const addPassenger = (type: PassengerType) => {
@@ -405,7 +403,7 @@ export default function PassengerInfoStep({
                       <div>
                         <UnderlineField
                           id={`passenger-${i}-name`}
-                          label="Họ và tên"
+                          label="Họ (Theo giấy tờ tuỳ thân)"
                           filled={!!p.name}
                         >
                           <input
@@ -414,7 +412,6 @@ export default function PassengerInfoStep({
                             type="text"
                             value={p.name}
                             onChange={(e) => updatePassenger(i, 'name', e.target.value)}
-                            placeholder="Họ (Theo giấy tờ tuỳ thân)"
                             required
                           />
                         </UnderlineField>
@@ -450,7 +447,7 @@ export default function PassengerInfoStep({
                       <UnderlineField
                         id={`passenger-${i}-dob`}
                         label="Ngày sinh (DD/MM/YYYY)"
-                        filled={!!p.dob}
+                        filled
                       >
                         <input
                           id={`passenger-${i}-dob`}
@@ -622,7 +619,6 @@ export default function PassengerInfoStep({
                               event.target.value.toUpperCase().replace(/\s/g, '')
                             )
                           }
-                          placeholder="SJxxxxxxxxxx"
                           pattern="SJ[0-9]{8,10}"
                           title="Mã SkyJoy gồm SJ và 8–10 chữ số"
                         />

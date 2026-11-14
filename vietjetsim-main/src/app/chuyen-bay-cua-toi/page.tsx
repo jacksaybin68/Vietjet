@@ -498,10 +498,7 @@ export default function MyFlightsPage() {
                             </button>
                             <p className="text-sm leading-[20px] text-[var(--vj-text)]">
                               Bạn đã biết về Vietjet SkyJoy?{' '}
-                              <Link
-                                href="/dang-ky"
-                                className="vj-skyjoy-register-link"
-                              >
+                              <Link href="/dang-ky" className="vj-skyjoy-register-link">
                                 Đăng ký ngay
                               </Link>
                             </p>
@@ -606,10 +603,7 @@ export default function MyFlightsPage() {
                             </button>
                             <p className="text-sm leading-[20px] text-[var(--vj-text)]">
                               Bạn đã biết về Vietjet SkyJoy?{' '}
-                              <Link
-                                href="/dang-ky"
-                                className="vj-skyjoy-register-link"
-                              >
+                              <Link href="/dang-ky" className="vj-skyjoy-register-link">
                                 Đăng ký ngay
                               </Link>
                             </p>
