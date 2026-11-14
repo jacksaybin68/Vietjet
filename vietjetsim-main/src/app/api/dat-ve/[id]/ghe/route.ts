@@ -14,10 +14,7 @@ import { isGuestBookingOwner } from '@/lib/guest-booking';
  * hơn và ghế đắng hơn — đều phải đi qua cùng một công thức, nếu không một
  * chiều sẽ bị tính sai.
  */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const limited = rateLimit(request, { windowMs: 60_000, maxRequests: 20 });
     if (limited) return limited;
@@ -56,7 +53,9 @@ export async function PATCH(
 
     const body = await request.json();
     const passengerId = String(body.passenger_id ?? '').trim();
-    const newSeat = String(body.seat_number ?? '').trim().toUpperCase();
+    const newSeat = String(body.seat_number ?? '')
+      .trim()
+      .toUpperCase();
 
     if (!passengerId || !newSeat) {
       return NextResponse.json(

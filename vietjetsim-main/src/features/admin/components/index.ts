@@ -22,3 +22,12 @@ export { default as UserMenuDropdown } from './UserMenuDropdown';
 export { default as GlobalSearch } from './GlobalSearch';
 export { default as BulkPriceAdjustmentModal } from './BulkPriceAdjustmentModal';
 export { default as SendBookingEmailModal } from './SendBookingEmailModal';
+
+// Phase 1 Dashboard Recharts & KPI Components
+export { KPIWidget } from './KPIWidget';
+export { default as RevenueChart } from './RevenueChart';
+export { default as SeatClassPieChart } from './SeatClassPieChart';
+export { default as TopRoutesBarChart } from './TopRoutesBarChart';
+export { default as CancellationDonutChart } from './CancellationDonutChart';
+export { default as RecentBookingsTable } from './RecentBookingsTable';
+export { default as UpcomingFlightsTable } from './UpcomingFlightsTable';

@@ -252,3 +252,5 @@ export interface AdminRbacAuditRow {
   status: 'success' | 'error' | 'denied';
   created_at: string;
 }
+
+export * from './dashboard';

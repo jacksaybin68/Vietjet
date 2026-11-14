@@ -25,10 +25,7 @@ const BAGGAGE_CATALOG = [...BAGGAGE_PACKAGES, ...OVERSIZED_BAGGAGE];
  * Giá luôn do SERVER tính lại từ `pricing.ts`: client chỉ gửi `package_id`.
  * Nếu tin giá của client, một request đã sửa giá sẽ bán hành lý với giá 1₫.
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const limited = rateLimit(request, { windowMs: 60_000, maxRequests: 20 });
     if (limited) return limited;
@@ -113,10 +110,7 @@ export async function POST(
 }
 
 /** Danh sách dịch vụ khách đã mua thêm. */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const booking = await getBookingByCodeOrId(id);

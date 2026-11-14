@@ -161,8 +161,20 @@ export default function PassengerPicker({
           aria-label="Số hành khách"
           className="vj-booking-pax"
         >
-          <span className="vj-booking-field__label">Hành khách</span>
-          <span className="vj-booking-field__value truncate">{describePax(value)}</span>
+          <div className="flex items-center gap-2.5 w-full">
+            <span className="lg:hidden shrink-0 text-[var(--vj-red)]">
+              <MdOutlinePerson className="h-5 w-5" />
+            </span>
+            <div className="flex-1 min-w-0 flex flex-col text-left">
+              <span className="vj-booking-field__label">Hành khách</span>
+              <span className="vj-booking-field__value truncate">{describePax(value)}</span>
+            </div>
+            <MdExpandMore
+              className={`shrink-0 text-gray-500 text-xl transition-transform duration-200 ${
+                open ? 'rotate-180' : ''
+              }`}
+            />
+          </div>
         </button>
       ) : isHero ? (
         <button

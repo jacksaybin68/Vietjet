@@ -8,6 +8,7 @@ import { getAirportCity } from '@/features/flights';
 import { FareBenefitsModal } from '@/features/flights';
 import type { FareClassId } from '@/features/bookings/pricing';
 import { Icon } from '@/shared/components/ui';
+import { MdOutlinePerson } from 'react-icons/md';
 import BookingSummaryPanel from './BookingSummaryPanel';
 import PassengerDetailModal from './PassengerDetailModal';
 
@@ -236,10 +237,11 @@ export default function FlightBookingResultsWrapper({
               <button
                 type="button"
                 onClick={() => setIsPaxDropdownOpen((v) => !v)}
-                className="inline-flex items-center gap-1 hover:underline cursor-pointer bg-black/10 hover:bg-black/15 px-2 py-0.5 rounded transition-colors focus:outline-none focus:ring-0"
+                className="inline-flex items-center gap-1.5 cursor-pointer bg-white/80 hover:bg-white border border-amber-300/80 hover:border-amber-400 px-2.5 py-1 rounded-lg shadow-2xs transition-all focus:outline-none focus:ring-1 focus:ring-amber-400 text-xs font-semibold text-gray-900"
                 title="Thay đổi số lượng hành khách"
               >
-                <span>{describePax(paxCounts)}</span>
+                <MdOutlinePerson className="h-4 w-4 text-[var(--vj-red)] shrink-0" />
+                <span className="font-bold">{describePax(paxCounts)}</span>
                 <span className="text-2xs opacity-70">▼</span>
               </button>
 

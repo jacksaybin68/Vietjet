@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { MdLuggage, MdAdd, MdCheckCircle } from 'react-icons/md';
+import { MdLuggage, MdAdd, MdCheckCircle, MdPayment } from 'react-icons/md';
 import { apiRequest, ApiRequestError } from '@/shared/services';
 import type { BaggagePackage } from '../pricing';
 
@@ -44,6 +44,7 @@ export default function BaggagePurchaseModal({
   const [owned, setOwned] = useState<BaggageRecord[]>([]);
   const [pendingAmount, setPendingAmount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -100,6 +101,31 @@ export default function BaggagePurchaseModal({
       setLoading(false);
     }
   }, [selected, quantity, bookingId, packages, onPurchased]);
+
+  /**
+   * Thanh toán ngay phần hành lý đang chờ.
+   *
+   * Số tiền KHÔNG gửi lên — server tự tính từ `booking_baggage`. Gửi số tiền
+   * của client là cách bán hành lý 20kg với giá 1₫.
+   */
+  const handlePay = useCallback(async () => {
+    setPaying(true);
+    setError(null);
+    try {
+      await apiRequest<{ amount: number; message: string }>(
+        `/api/dat-ve/${encodeURIComponent(bookingId)}/dich-vu/thanh-toan`,
+        { method: 'POST', body: { method: 'wallet' } }
+      );
+      setPendingAmount(0);
+      setOwned((prev) => prev.map((record) => ({ ...record, status: 'paid' })));
+      onPurchased(0);
+    } catch (err) {
+      const message = err instanceof ApiRequestError ? err.message : 'Không thanh toán được.';
+      setError(message);
+    } finally {
+      setPaying(false);
+    }
+  }, [bookingId, onPurchased]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
@@ -202,15 +228,32 @@ export default function BaggagePurchaseModal({
           )}
 
           {pendingAmount > 0 && (
-            <p className="rounded-vj border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">
-              Cần thanh toán bổ sung: {pendingAmount.toLocaleString('vi-VN')}₫
-            </p>
+            <div className="space-y-2">
+              <p className="rounded-vj border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">
+                Cần thanh toán bổ sung: {pendingAmount.toLocaleString('vi-VN')}₫
+              </p>
+              <button
+                type="button"
+                disabled={paying}
+                onClick={() => void handlePay()}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-vj bg-[var(--vj-red)] px-4 py-2.5 text-xs font-black text-white shadow-md transition-all hover:bg-vj-red-dark disabled:opacity-50"
+              >
+                <MdPayment className="h-4 w-4" />
+                {paying
+                  ? 'Đang thanh toán...'
+                  : `Thanh toán ngay ${pendingAmount.toLocaleString('vi-VN')}₫`}
+              </button>
+              <p className="text-2xs text-[var(--foreground-muted)]">
+                Thanh toán bằng ví Vietjet hoặc thẻ. Số tiền do hệ thống xác nhận.
+              </p>
+            </div>
           )}
         </div>
 
         <div className="flex items-center justify-between gap-3 border-t border-gray-200 bg-white px-5 py-4">
           <p className="text-2xs text-gray-500">
-            Giá do hệ thống xác nhận. Thanh toán bổ sung tại quầy sân bay.
+            Giá do hệ thống xác nhận. Hành lý chưa thanh toán sẽ được tính tiền khi làm thủ tục tại
+            sân bay.
           </p>
           <div className="flex gap-2">
             <button

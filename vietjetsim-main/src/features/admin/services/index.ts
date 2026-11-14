@@ -647,3 +647,5 @@ export function adjustAdminFlightPrices(input: BulkPriceAdjustPayload) {
     body: input,
   });
 }
+
+export * from './dashboard.service';

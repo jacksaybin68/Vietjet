@@ -270,6 +270,7 @@ const OPERATING_TABLES_SQL = `
   UNION ALL SELECT 'booking_baggage=' || count(*) FROM booking_baggage
   UNION ALL SELECT 'booking_seat_changes=' || count(*) FROM booking_seat_changes
   UNION ALL SELECT 'email_log=' || count(*) FROM email_log
+  UNION ALL SELECT 'payments=' || count(*) FROM payments
   ORDER BY 1
 `;
 
@@ -402,6 +403,40 @@ function seedOperatingRows() {
     FROM bookings b JOIN user_profiles u ON u.id = b.user_id
     WHERE u.email = 'migration-canary@vietjetsim.invalid'
       AND NOT EXISTS (SELECT 1 FROM booking_consents c WHERE c.booking_id = b.id);
+
+    -- Migration 047: các cột payments.receipt_image / payments.transfer_note
+    -- và bookings.receipt_image / bookings.transfer_note là các cột mà
+    -- createPayment đã INSERT nhưng không migration nào tạo. Canary này
+    -- chính là lần INSERT đầu tiên đi qua những cột đó — nếu migration thiếu
+    -- hoặc sai, lỗi "column does not exist" lộ ra ngay ở harness thay vì ở
+    -- production lúc thanh toán.
+    INSERT INTO payments (booking_id, method, status, amount, receipt_image, transfer_note)
+    SELECT b.id, 'card', 'completed', 1000, 'data:image/png;base64,AA==', 'CANARYI98O'
+    FROM bookings b JOIN user_profiles u ON u.id = b.user_id
+    WHERE u.email = 'migration-canary@vietjetsim.invalid'
+      AND NOT EXISTS (SELECT 1 FROM payments p WHERE p.booking_id = b.id);
+
+    UPDATE bookings b
+    SET receipt_image = 'data:image/png;base64,AA==', transfer_note = 'CANARYI98O'
+    FROM user_profiles u
+    WHERE u.id = b.user_id
+      AND u.email = 'migration-canary@vietjetsim.invalid'
+      AND b.receipt_image IS NULL;
+
+    -- booking_baggage.payment_id (migration 047) — cột FK tới payments. Gắn
+    -- gói hành lý canary vào giao dịch canary để cả FK lẫn cột đều được
+    -- kiểm tra bởi harness, không chỉ tồn tại trên giấy.
+    UPDATE booking_baggage g
+    SET payment_id = (
+      SELECT p.id FROM payments p
+      JOIN bookings b ON b.id = p.booking_id
+      JOIN user_profiles u ON u.id = b.user_id
+      WHERE u.email = 'migration-canary@vietjetsim.invalid'
+      LIMIT 1
+    )
+    WHERE g.payment_id IS NULL
+      AND g.booking_id IN (SELECT b.id FROM bookings b JOIN user_profiles u ON u.id = b.user_id
+                             WHERE u.email = 'migration-canary@vietjetsim.invalid');
   `);
 }
 /** The canary must survive every re-apply: an empty table means a file dropped it. */
