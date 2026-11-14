@@ -59,6 +59,10 @@ export const PUBLIC_API_ROUTES = [
   // marketing notices read by anonymous visitors, so it must answer before a
   // session exists; `/api/quan-tri/thong-bao` (admin) stays private.
   '/api/cong-khai/thong-bao',
+  // Bố cục trang mà trình soạn thảo trực quan đã lưu. Nó chỉ trả về đúng
+  // thứ khách đã nhìn thấy trên trang (thứ tự section + style), nên trang
+  // chủ phải đọc được nó không cần phiên — cùng lý do như bank config ở trên.
+  '/api/cong-khai/boc-trang',
   // CSRF bootstrap: anonymous GET minting the double-submit cookie that
   // every mutation route echoes back. Blocking it in the middleware would
   // make the cookie bootstrap unreachable on production builds, and every

@@ -4985,3 +4985,63 @@ export async function getActiveAnnouncements(limit = 10): Promise<PublicAnnounce
 
   return asRows<PublicAnnouncementRecord>(rows);
 }
+
+// ─── Bố cục trang (trình soạn thảo trực quan) ─────────────────────────────────
+
+/**
+ * Bố cục trang do trình soạn thảo trực quan (`/editor`) lưu.
+ *
+ * `layout` là JSONB do `normalizeLayout` (`features/visual-editor/utils/layout`)
+ * tạo ra: danh sách section đã định danh kèm thứ tự, trạng thái hiển thị và
+ * style đã allow-list. Không có HTML tùy ý trong bảng — cột `html` bị ràng
+ * buộc CHECK luôn NULL.
+ */
+export interface PageLayoutRecord {
+  id: string;
+  page_path: string;
+  layout: unknown;
+  html: string | null;
+  updated_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Đọc bố cục của một trang.
+ *
+ * Trả `null` khi trang chưa có bố cục nào được lưu — đây là trạng thái bình
+ * thường, không phải lỗi: phía render dùng thứ tự mặc định của trang.
+ */
+export async function getPageLayout(pagePath: string): Promise<PageLayoutRecord | null> {
+  const rows = await sql`
+    SELECT id, page_path, layout, html, updated_by, created_at, updated_at
+    FROM page_layouts
+    WHERE page_path = ${pagePath}
+  `;
+
+  return asFirstRow<PageLayoutRecord>(rows) ?? null;
+}
+
+/**
+ * Ghi bố cục của một trang (upsert theo `page_path`).
+ *
+ * `page_path` có ràng buộc UNIQUE nên `ON CONFLICT (page_path)` xử lý cả
+ * hai trường hợp: tạo mới và cập nhật bản ghi đang có.
+ */
+export async function upsertPageLayout(params: {
+  pagePath: string;
+  layout: unknown;
+  updatedBy: string | null;
+}): Promise<PageLayoutRecord> {
+  const rows = await sql`
+    INSERT INTO page_layouts (page_path, layout, updated_by)
+    VALUES (${params.pagePath}, ${JSON.stringify(params.layout)}::jsonb, ${params.updatedBy})
+    ON CONFLICT (page_path) DO UPDATE
+      SET layout = EXCLUDED.layout,
+          updated_by = EXCLUDED.updated_by,
+          updated_at = NOW()
+    RETURNING id, page_path, layout, html, updated_by, created_at, updated_at
+  `;
+
+  return asFirstRow<PageLayoutRecord>(rows)!;
+}
