@@ -9,6 +9,17 @@ import { streamCodingPi } from '@/features/coding-pi';
 // Dynamically import Monaco Editor to avoid SSR window issues
 const Editor = dynamic(() => import('@monaco-editor/react'), { ssr: false });
 
+// GrapesJS chạy trong DOM và tự quản lý canvas nên phải nạp ở client.
+const VisualEditorView = dynamic(
+  () => import('@/features/visual-editor/components/VisualEditorView'),
+  { ssr: false }
+);
+
+/** Trang mà trình soạn thảo trực quan đang áp dụng bố cục. */
+const VISUAL_EDITOR_PAGE_PATH = '/trang-chu';
+
+type EditorMode = 'code' | 'visual';
+
 interface FileItem {
   name: string;
   path: string;
@@ -49,6 +60,9 @@ export default function VSCodeWebEditorPage() {
   const [piInput, setPiInput] = useState('');
   const [piMessages, setPiMessages] = useState<CodingPiMessage[]>([]);
   const [isPiSending, setIsPiSending] = useState(false);
+  // Chế độ làm việc của studio: sửa mã nguồn, hoặc sắp xếp bố cục trang
+  // bằng giao diện kéo-thả.
+  const [editorMode, setEditorMode] = useState<EditorMode>('code');
   // GrapesJS editor instance (external library with no local type surface).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const editorRef = useRef<any>(null);
@@ -389,6 +403,49 @@ export default function VSCodeWebEditorPage() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Chuyển chế độ: sửa mã ↔ sắp xếp bố cục trực quan */}
+          <div
+            role="tablist"
+            aria-label="Chế độ soạn thảo"
+            style={{
+              display: 'flex',
+              gap: '2px',
+              backgroundColor: '#1E1E1E',
+              border: '1px solid #454545',
+              borderRadius: '4px',
+              padding: '2px',
+            }}
+          >
+            {(
+              [
+                { id: 'code', label: '⌨️ Code' },
+                { id: 'visual', label: '🎨 Trực quan' },
+              ] as const
+            ).map((tab) => {
+              const isActive = editorMode === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => setEditorMode(tab.id)}
+                  style={{
+                    background: isActive ? '#EC2029' : 'transparent',
+                    color: isActive ? '#FFF' : '#969696',
+                    border: 'none',
+                    padding: '3px 10px',
+                    borderRadius: '3px',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+
           <button
             onClick={() => setShowLivePreview(!showLivePreview)}
             style={{
@@ -468,6 +525,14 @@ export default function VSCodeWebEditorPage() {
 
       {/* Main Studio Body */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        {editorMode === 'visual' ? (
+          /* Chế độ trực quan: canvas kéo-thả + bảng điều khiển section.
+             Thay thế toàn bộ vùng làm việc của VS Code (explorer, editor,
+             live preview) vì trình soạn thảo có sẵn canvas và inspector
+             riêng. Xem trang thật qua nút "Mở Tab Riêng" ở thanh trên. */
+          <VisualEditorView pagePath={VISUAL_EDITOR_PAGE_PATH} />
+        ) : (
+          <>
         {/* Activity Bar (Icons) */}
         <div
           style={{
@@ -924,6 +989,8 @@ export default function VSCodeWebEditorPage() {
               title="Live Preview"
             />
           </div>
+        )}
+          </>
         )}
       </div>
 

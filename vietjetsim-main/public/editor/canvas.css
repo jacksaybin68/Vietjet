@@ -1,0 +1,125 @@
+/*
+ * CSS riêng cho khung canvas của GrapesJS.
+ *
+ * Nạp bằng thẻ <link> trong `VisualEditorCanvas` (không phải global CSS của
+ * app) để hai thế giới không lẫn vào nhau: các class ở đây chỉ tồn tại
+ * trong iframe canvas của GrapesJS, không rò sang trang chủ thật.
+ */
+
+/* ── Canvas ─────────────────────────────────────────────────────────────── */
+
+.gjs-cv-canvas {
+  background: #f4f5f7;
+}
+
+/* Wrapper của GrapesJS mặc định có width cố định — ép chiếm hết chiều rộng
+   để section trông giống trang thật. */
+.gjs-cv-canvas .gjs-cv-wrapper {
+  width: 100% !important;
+  max-width: none !important;
+  padding: 0 !important;
+}
+
+/* ── Section ────────────────────────────────────────────────────────────── */
+
+.vjs-section {
+  position: relative;
+  margin: 0 0 12px;
+  padding: 28px 20px;
+  border: 2px dashed #c3c8d4;
+  border-radius: 10px;
+  background: #ffffff;
+  font-family: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.vjs-section:hover {
+  border-color: #f9a51a;
+}
+
+.vjs-section.vjs-section--selected {
+  border-style: solid;
+  border-color: #f9a51a;
+  box-shadow: 0 0 0 3px rgba(249, 165, 26, 0.22);
+}
+
+/* Section đang ẩn trên trang thật — hiển thị mờ để người vận hành vẫn thấy
+   và biết nó tồn tại, chỉ là không hiển thị. */
+.vjs-section.vjs-section--hidden {
+  opacity: 0.55;
+  border-style: dotted;
+  background: repeating-linear-gradient(
+    45deg,
+    #f7f8fa,
+    #f7f8fa 10px,
+    #eef0f4 10px,
+    #eef0f4 20px
+  );
+}
+
+/* Nhãn của section. */
+.vjs-section__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.vjs-section__id {
+  font-family: 'SF Mono', Menlo, Monaco, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+  background: #eef0f4;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.vjs-section__desc {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Badge "đang ẩn". */
+.vjs-section__badge {
+  margin-left: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+/* ── Drag handle ────────────────────────────────────────────────────────── */
+
+.vjs-section__handle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 11px;
+  color: #9ca3af;
+  cursor: grab;
+  user-select: none;
+}
+
+/* Ẩn handle khi section đang được chọn — lúc đó khung viền đã đủ tín hiệu. */
+.vjs-section.vjs-section--selected .vjs-section__handle {
+  opacity: 0.4;
+}
+
+/* ── Style Manager ──────────────────────────────────────────────────────── */
+
+.gjs-sm-properties {
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+}
+
+/* ── Block Manager ──────────────────────────────────────────────────────── */
+
+.gjs-blocks-c {
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+}
