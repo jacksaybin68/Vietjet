@@ -20,10 +20,10 @@ vi.mock('next/link', () => ({
 import MobileBottomNav, { BOTTOM_NAV_HEIGHT } from '@/shared/components/navigation/MobileBottomNav';
 
 const TABS = [
-  ['Đặt chuyến bay', '/trang-chu#hero-booking-form'],
-  ['Chuyến bay của tôi', '/chuyen-bay-cua-toi'],
-  ['Mua hành lý, chỗ ngồi...', '/dich-vu?service=baggage'],
-  ['Check-in', '/lam-thu-tuc'],
+  ['Trang chủ', '/trang-chu'],
+  ['Vé của tôi', '/chuyen-bay-cua-toi'],
+  ['Mua vé', '/trang-chu#hero-booking-form'],
+  ['Làm thủ tục', '/lam-thu-tuc'],
 ] as const;
 
 describe('MobileBottomNav', () => {
@@ -45,21 +45,20 @@ describe('MobileBottomNav', () => {
       .getAllByRole('link')
       .filter((a) => a.getAttribute('aria-current') === 'page');
     expect(current).toHaveLength(1);
-    expect(current[0]).toHaveTextContent('Check-in');
+    expect(current[0]).toHaveTextContent('Làm thủ tục');
+    expect(current[0].className).toContain('text-[#EC2029]');
   });
 
-  // A query string must not break the active state: the baggage tab lives at
-  // `/dich-vu?service=baggage`, so matching on the href verbatim would leave it
-  // unhighlighted on its own page.
-  it('keeps the baggage tab active on its own service page', () => {
-    pathnameMock.value = '/dich-vu';
+  it('keeps the "Vé của tôi" tab active on flights lookup page', () => {
+    pathnameMock.value = '/chuyen-bay-cua-toi';
     render(<MobileBottomNav />);
 
     const current = screen
       .getAllByRole('link')
       .filter((a) => a.getAttribute('aria-current') === 'page');
     expect(current).toHaveLength(1);
-    expect(current[0]).toHaveTextContent('Mua hành lý, chỗ ngồi...');
+    expect(current[0]).toHaveTextContent('Vé của tôi');
+    expect(current[0].className).toContain('text-[#EC2029]');
   });
 
   // The sign-in and admin screens have their own fixed furniture, and a

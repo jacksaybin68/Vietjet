@@ -378,46 +378,10 @@ export default function MyFlightsPage() {
         />
 
         {/* Header TRẮNG 74px giống site thật (`/vi/my/search-booking`), ở mobile
-            dùng băng đỏ với H1 trắng `16px/700` uppercase. */}
-        <SubpageHeader title="CHUYẾN BAY CỦA TÔI" mobileRed />
-
-        {/* Thanh Tab Mobile: "Tìm kiếm mã đặt chỗ" | "Chuyến bay của tôi" khớp 100% Ảnh tham chiếu */}
-        <div className="xl:hidden w-full bg-white border-b border-gray-200 shadow-xs relative z-20">
-          <div className="flex">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={view === 'search'}
-              onClick={() => {
-                viewPinned.current = true;
-                setView('search');
-              }}
-              className={`flex-1 py-3 text-center text-sm font-bold transition-all border-b-2 cursor-pointer ${
-                view === 'search'
-                  ? 'text-primary border-primary'
-                  : 'text-gray-600 border-transparent hover:text-gray-900'
-              }`}
-            >
-              Tìm kiếm mã đặt chỗ
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={view === 'list'}
-              onClick={() => {
-                viewPinned.current = true;
-                setView('list');
-              }}
-              className={`flex-1 py-3 text-center text-sm font-bold transition-all border-b-2 cursor-pointer ${
-                view === 'list'
-                  ? 'text-primary border-primary'
-                  : 'text-gray-600 border-transparent hover:text-gray-900'
-              }`}
-            >
-              Chuyến bay của tôi
-            </button>
-          </div>
-        </div>
+            dùng băng đỏ 48px với H1 trắng `16px/700` uppercase.
+            Tiêu đề ở mobile của site thật là "ĐẶT CHỖ CỦA TÔI" (đo được ở
+            `/vi/my/search-booking` 390×844), KHÔNG phải "CHUYẾN BAY CỦA TÔI". */}
+        <SubpageHeader title="ĐẶT CHỖ CỦA TÔI" mobileRed />
 
         <main id="main-content" className="relative z-10 flex flex-1 flex-col">
           {/* ===== Khung tra cứu =====
@@ -434,10 +398,13 @@ export default function MyFlightsPage() {
               - Cột phải `x=720` rộng `600`, banner `570×496` bo `5px`. */}
           <section className="relative flex-1">
             {/* Dải "Dịch vụ tra cứu" rộng đúng `1200px` ở desktop (không padding
-                ngang — site thật: `x=120`, `w=1200`), chỉ chừa padding ở mobile. */}
-            <div className="mx-auto w-full max-w-[1200px] px-4 sm:px-0">
-              <div className="pt-4">
-                {/* Dải pill "Dịch vụ tra cứu" — 2 pill 164×36 bo 18px. */}
+                ngang — site thật: `x=120`, `w=1200`). Ở MOBILE site thật dải rộng
+                `360px` tại `x=15` (padding ngang 15px của trang), cao `61px`,
+                bo góc `12px`, margin-bottom `16px`. */}
+            <div className="mx-auto w-full max-w-[1200px] px-[15px] sm:px-0">
+              <div className="pt-[10px] sm:pt-4">
+                {/* Dải pill "Dịch vụ tra cứu" — 2 pill 164×36 bo 18px
+                    (ở mobile: 160×36, padding 0 10px, dải bo góc 12px). */}
                 <nav aria-label="Dịch vụ tra cứu" className="vj-pill-tabs">
                   <button
                     type="button"

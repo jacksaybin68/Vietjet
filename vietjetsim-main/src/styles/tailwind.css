@@ -1106,6 +1106,12 @@ h6 {
   background-color: var(--vj-bar-gray, #f1f1f1);
 }
 
+/* Nền ô hạng vé chuẩn vietjetair.com: #F8F8F8 */
+.vj-fare-box,
+.bg-vj-fare-bg {
+  background-color: var(--vj-fare-bg, #f8f8f8);
+}
+
 /* Thanh tổng cuối panel — site thật (đo 14/11/2026): gradient đỏ
  * `359.2deg` (`#D91A21 53.08% → #6F0000 206.46%`), cao `50px`,
  * padding `15px 20px`.
@@ -1363,14 +1369,18 @@ h6 {
 }
 
 /* Khối "Đăng nhập" dưới form tra cứu của `/chuyen-bay-cua-toi`.
- * Số đo site thật: cao `48px`, bo góc `12px`, nền trắng, viền
- * `1px rgba(236,32,41,0.1)`, chữ `#D6231E` `16px`, icon `20×20`. */
+ * Số đo site thật (14/11/2026): `137×48px`, bo góc `12px`, nền trắng, viền
+ * `1px rgba(236,32,41,0.1)`, chữ `#D6231E` `16px/500`.
+ *
+ * Bề rộng CỐ ĐỊNH `137px` — không phải `100%`: site thật luôn dùng nút cùng
+ * kích thước ở cả desktop lẫn mobile, và nút nằm CĂN GIỮA theo cột ô nhập
+ * (`x=307` ở check-in, `x=352` ở chuyến bay của tôi). */
 .vj-skyjoy-login-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  width: 100%;
+  width: 137px;
   height: 48px;
   border: 1px solid rgba(236, 32, 41, 0.1);
   border-radius: var(--vj-radius-card);
@@ -1388,6 +1398,25 @@ h6 {
 .vj-skyjoy-login-btn:hover {
   background-color: rgba(236, 32, 41, 0.04);
   border-color: rgba(236, 32, 41, 0.24);
+}
+
+/* Dòng "Bạn đã biết về Vietjet SkyJoy? Đăng ký ngay" — đo lại 14/11/2026 trên
+ * DOM sống (`/vi/checkin` và `/vi/my/search-booking`):
+ *   - `<p>`: `14px/400`, màu `rgb(51,51,51)`, `text-align: center`,
+ *     rộng `273px` = span `186px` + khoảng trắng `4px` + nút `84px`.
+ *   - Span "Bạn đã biết về Vietjet SkyJoy?": `14px/400` `rgb(51,51,51)`.
+ *   - Nút "Đăng ký ngay": `84×20px`, `14px/400`, màu `rgb(0,136,255)`,
+ *     `display:inline-block`, không gạch chân.
+ *
+ * Trước đây dòng này là `16px/500` lề trái — lệch cả cỡ chữ lẫn căn lề, khiến
+ * link "Đăng ký ngay" nằm ở `x=407` thay vì `x=428` (site thật). */
+.vj-skyjoy-line {
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: var(--vj-text);
+  text-align: center;
 }
 
 /* ─── SkyID (đo 13/11/2026 từ DOM sống của skyjoy-id.vietjetair.com) ────────
@@ -2916,22 +2945,27 @@ h6 {
   }
 }
 
-/* ─── Pill tab (đo 13/11/2026) ────────────────────────────────────────────
+/* ─── Pill tab (đo lại 14/11/2026) ───────────────────────────────────────
  * Dải tab "Dịch vụ tra cứu" của site thật dùng pill bo góc `18px`, cao
- * `36px`; tab đang chọn nền `#FFDD32`, chữ `rgb(115 62 10)`. */
+ * `36px`; tab đang chọn nền `#FFDD32`, chữ `rgb(115 62 10)`.
+ *
+ * Số đo site thật:
+ *   - Desktop: pill `164×36` tại `x=136`, chữ `14px/500`, padding `0 12px`.
+ *   - Mobile: pill `160×36` tại `x=27`, chữ `14px/500`, padding `0 10px`.
+ * Chữ KHÔNG phải `700` — site thật dùng `500` cho cả hai pill. */
 .vj-pill-tab {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   height: 36px;
-  padding: 0 20px;
+  padding: 0 12px;
   border-radius: 18px;
   background-color: transparent;
   font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
   font-size: 14px;
   line-height: 20px;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--vj-text-gray);
   transition:
     background-color 160ms ease,
@@ -2949,8 +2983,9 @@ h6 {
   color: var(--vj-tab-ink);
 }
 
-/* Dải chứa các pill tab — bo góc 12px, nền trắng, padding 16px (đo 13/11/2026:
-   dải rộng 1200px, cao 69px, bên trong là pill cao 36px, bo góc 18px, gap 8px). */
+/* Dải chứa các pill tab — bo góc 16px, nền trắng, padding 16px (đo 14/11/2026:
+   dải rộng 1200px, cao 69px, bên trong là pill cao 36px, bo góc 18px, gap 8px).
+   Ở MOBILE site thật dải rộng `360px` cao `61px` (padding 12px, bo góc 12px). */
 .vj-pill-tabs {
   display: flex;
   align-items: center;
@@ -2963,6 +2998,18 @@ h6 {
 
 .vj-pill-tabs .vj-pill-tab {
   min-width: 164px;
+}
+
+@media (max-width: 639px) {
+  .vj-pill-tabs {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .vj-pill-tabs .vj-pill-tab {
+    min-width: 160px;
+    padding: 0 10px;
+  }
 }
 
 /* Form focus styles */

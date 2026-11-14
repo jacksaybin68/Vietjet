@@ -217,31 +217,31 @@ export default function SubpageHeader({
           </div>
         </div>
 
-        {/* Mobile: logo — tiêu đề — menu. Băng đỏ khi `mobileRed` (đo ở site thật). */}
+        {/* Mobile: băng đỏ 48px — tiêu đề CĂN GIỮA + nút menu.
+            Số đo site thật (14/11/2026, 390×844 — `/vi/checkin`,
+            `/vi/my/search-booking`, `/vi/signin`):
+              - Thanh cao `48px`, nền gradient đỏ
+                `linear-gradient(rgb(217,26,33) 34.8%, rgb(171,3,3) 182.34%)`,
+                padding ngang `17px`, `align-items: center`.
+              - KHÔNG có logo — chỉ có `H1` (rộng 320px, `x=17`, `y=15`) và nút
+                menu 36×36 ở `x=337`.
+              - `H1`: `16px/700` JambonoMedium, TRẮNG, `text-transform: uppercase`,
+                `text-align: center`, `line-height: 18.72px`.
+            Trước đây thanh cao 56px (`h-14`) và có logo bên trái — lệch với
+            site thật ở cả chiều cao lẫn bố cục. */}
         <div
-          className={`flex h-14 items-center justify-between px-4 lg:hidden ${
-            mobileRed ? 'bg-[var(--vj-red)] text-white' : ''
+          className={`flex h-12 items-center justify-between px-[17px] lg:hidden ${
+            mobileRed
+              ? 'bg-[linear-gradient(rgb(217,26,33)_34.8%,rgb(171,3,3)_182.34%)] text-white'
+              : ''
           }`}
         >
-          <Link
-            href="/trang-chu"
-            aria-label="Vietjet Air - Trang chủ"
-            className="flex shrink-0 items-center transition hover:opacity-90"
-          >
-            <img
-              src="/images/vj-logo.svg"
-              alt="Vietjet Air"
-              className={`h-[22px] w-auto ${mobileRed ? 'brightness-0 invert' : ''}`}
-            />
-          </Link>
           {showMobileTitle ? (
-            /* H1 của băng đỏ ở mobile: 16px/700 JambonoMedium, TRẮNG (đo được
-               ở site thật — `/vi/my/search-booking` và `/vi/checkin` ở 390×844
-               cho `h1` 16px/700, màu `rgb(255,255,255)` trên nền đỏ). Trước đây
-               là `text-base2` (15px) `font-black` (800) `tracking-wide` — lệch
-               cả cỡ chữ lẫn độ đậm so với số đo. */
+            /* H1 của băng đỏ ở mobile: 16px/700 JambonoMedium, TRẮNG, CĂN GIỮA
+               (đo được ở site thật — `/vi/my/search-booking` và `/vi/checkin` ở
+               390×844 cho `h1` 16px/700, màu `rgb(255,255,255)` trên nền đỏ). */
             <h1
-              className={`truncate text-center text-base font-bold font-jambono uppercase ${
+              className={`truncate text-center text-base font-bold leading-[18.72px] font-jambono uppercase ${
                 mobileRed ? 'text-white' : 'text-[var(--vj-nav-ink)]'
               }`}
             >
@@ -254,7 +254,7 @@ export default function SubpageHeader({
             type="button"
             onClick={() => setMobileOpen(true)}
             aria-label="Mở menu"
-            className={`-mr-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition-colors active:bg-black/5 ${
+            className={`-mr-1 flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors active:bg-black/5 ${
               mobileRed ? 'text-white' : 'text-[var(--vj-nav-ink)]'
             }`}
           >

@@ -131,6 +131,7 @@ module.exports = {
         semibold: '600',
       },
       colors: {
+        'vj-fare-bg': '#F8F8F8',
         brand: {
           wine: '#780000',
           wineDark: '#5e0000',
@@ -185,6 +186,7 @@ module.exports = {
           // "Hết chỗ" #939598, mã tiền tệ #6D6E71, viền header trang con
           // #E31E24, gạch chân ô nhập MUI #D9D9D9.
           'surface-fare': '#F8F8F8',
+          'fare-bg': '#F8F8F8',
           'bar-gray': '#F1F1F1',
           'sold-out': '#939598',
           'currency-gray': '#6D6E71',

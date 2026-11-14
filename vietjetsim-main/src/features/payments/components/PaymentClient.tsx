@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 import { createPayment, getWalletOverview } from '@/features/payments/services';
 import { getMembership } from '@/features/loyalty/services';
+import { useAuth } from '@/contexts/AuthContext';
 import { getAirportCity } from '@/features/flights';
 import { TAX_AND_FEE_RATE, ANCILLARY_OPTIONS, type AncillaryId } from '@/features/bookings/pricing';
 
@@ -329,6 +330,7 @@ function formatBookingDay(day: string): string {
 
 export default function PaymentClient() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [hasPromoChecked, setHasPromoChecked] = useState(false);
   const [selectedMethodGroup, setSelectedMethodGroup] = useState<string>(() => {
@@ -586,6 +588,7 @@ export default function PaymentClient() {
     return Math.max(0, total - pointsValue);
   }, [paymentMethod, payableTotal, useCashPlusPoints, cashPlusPointsRedeem, skypointInfo, total]);
 
+  // Tải cấu hình ngân hàng công khai (không yêu cầu đăng nhập)
   useEffect(() => {
     apiRequest<{
       accounts?: BankAccount[];
@@ -597,6 +600,11 @@ export default function PaymentClient() {
         }
       })
       .catch((err) => console.error('Failed to load bank config:', err));
+  }, []);
+
+  // Chỉ tải số dư ví & SkyPoint khi người dùng đã đăng nhập (tránh lỗi 401 console khi là guest)
+  useEffect(() => {
+    if (authLoading || !user) return;
 
     // Fetch wallet balance (fail-soft: khách chưa đăng nhập thì im lặng, không ghi lỗi console)
     getWalletOverview()
@@ -624,7 +632,7 @@ export default function PaymentClient() {
           console.error('Failed to load SkyPoint balance:', err);
         }
       });
-  }, []);
+  }, [user, authLoading]);
 
   useEffect(() => {
     const timer = setTimeout(() => setPageLoading(false), 50);
@@ -1703,7 +1711,7 @@ export default function PaymentClient() {
 
           {/* H1 — site thật (đo 14/11/2026): tiêu đề cấp 1 của trang con dùng
               `20px/600` uppercase (KoHo), KHÔNG phải `24px/900`. */}
-          <h1 className="hidden sm:block text-2xl3 font-semibold font-koho uppercase text-[var(--foreground)] tracking-normal mb-4">
+          <h1 className="text-2xl3 font-semibold font-koho uppercase text-[var(--foreground)] tracking-normal mb-4">
             Thanh toán vé máy bay
           </h1>
 
@@ -1757,7 +1765,7 @@ export default function PaymentClient() {
               <div className="bg-white rounded-2xl border border-[var(--border)] p-4 sm:p-5 shadow-sm">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <h2 className="font-extrabold font-koho text-base text-gray-900">
+                    <h2 className="text-2xl3 font-semibold font-koho uppercase text-gray-900 tracking-normal">
                       Phương thức thanh toán
                     </h2>
                     <p className="text-xs text-gray-500 mt-0.5">
@@ -1772,7 +1780,7 @@ export default function PaymentClient() {
 
                 {/* 1. Thẻ và tài khoản ngân hàng (Screenshot 3) */}
                 <div className="mb-5">
-                  <h3 className="text-xs sm:text-sm font-extrabold font-koho text-gray-900 mb-2.5">
+                  <h3 className="text-2xl3 font-semibold font-koho uppercase text-gray-900 tracking-normal mb-2.5">
                     Thẻ và tài khoản ngân hàng
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -2850,13 +2858,13 @@ export default function PaymentClient() {
                   Chi tiết giá & thanh toán
                 </h3>
 
-                {/* Promo code */}
+                {/* Promo code — chuẩn underline MUI 40px Vietjet live */}
                 <div className="mt-4">
                   <label className="block text-xs font-semibold text-[var(--foreground-subtle)] uppercase tracking-wider mb-1.5">
                     Mã khuyến mãi
                   </label>
-                  <div className="flex gap-2">
-                    <div className={`form-field-float flex-1 ${promoCode ? 'has-value' : ''}`}>
+                  <div className="flex items-center gap-2">
+                    <div className="vj-lookup-field flex-1 mt-2">
                       <input
                         id="promo-code-input"
                         name="promoCode"
@@ -2868,14 +2876,16 @@ export default function PaymentClient() {
                         }}
                         placeholder=" "
                         disabled={promoApplied}
-                        className={`w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-base form-input font-mono sm:text-sm disabled:opacity-50 ${promoApplied ? 'form-input-valid' : ''}`}
+                        className={`vj-lookup-input font-mono uppercase disabled:opacity-50 ${promoApplied ? 'form-input-valid' : ''}`}
                       />
-                      <label className="form-label-float">VJ2026</label>
+                      <label htmlFor="promo-code-input" className="vj-lookup-label">
+                        VJ2026
+                      </label>
                     </div>
                     <button
                       onClick={applyPromo}
                       disabled={promoApplied || !promoCode || isApplyingPromo}
-                      className="px-3 py-2 bg-accent text-[var(--foreground)] font-bold rounded-lg text-xs hover:bg-accent-dark transition-colors disabled:opacity-50 min-w-[80px] flex items-center justify-center"
+                      className="h-[40px] px-3 bg-accent text-[var(--foreground)] font-bold rounded-lg text-xs hover:bg-accent-dark transition-colors disabled:opacity-50 min-w-[80px] flex items-center justify-center shrink-0"
                     >
                       {isApplyingPromo ? (
                         <div className="w-4 h-4 border-2 border-[rgb(var(--foreground-rgb))]/20 border-t-[var(--foreground)] rounded-full animate-spin" />

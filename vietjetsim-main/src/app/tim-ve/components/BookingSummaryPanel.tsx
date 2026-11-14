@@ -193,10 +193,19 @@ export default function BookingSummaryPanel({
               <SummaryPlaneIcon />
               <span>{destination}</span>
             </div>
-            <div className="text-sm font-medium text-gray-600">
-              {data.flightNo
-                ? `${formatViSummaryDate(data.date)} | ${data.departTime || '04:40'} - ${data.arriveTime || '06:50'} | ${data.flightNo} | ${formatFareClassName(data.fareClass)}`
-                : '--- | --- | --- | ---'}
+            <div className="text-sm font-medium text-gray-600 flex items-center flex-wrap gap-1">
+              <span>
+                {data.flightNo
+                  ? `${formatViSummaryDate(data.date)} | ${data.departTime || '04:40'} - ${data.arriveTime || '06:50'} | ${data.flightNo} | `
+                  : '--- | --- | --- | '}
+              </span>
+              {data.flightNo ? (
+                <span className="inline-block px-1.5 py-0.5 rounded text-xs font-semibold bg-vj-fare-bg text-vj-text border border-gray-200">
+                  {formatFareClassName(data.fareClass)}
+                </span>
+              ) : (
+                <span>---</span>
+              )}
             </div>
           </div>
         </div>
@@ -316,10 +325,19 @@ export default function BookingSummaryPanel({
                 <SummaryPlaneIcon />
                 <span>{origin}</span>
               </div>
-              <div className="text-sm font-medium text-gray-600">
-                {data.returnLeg?.flightNo
-                  ? `${formatViSummaryDate(data.returnLeg.date ?? data.date)} | ${data.returnLeg.departTime || '---'} - ${data.returnLeg.arriveTime || '---'} | ${data.returnLeg.flightNo} | ${formatFareClassName(data.returnLeg.fareClass)}`
-                  : '--- | --- | --- | ---'}
+              <div className="text-sm font-medium text-gray-600 flex items-center flex-wrap gap-1">
+                <span>
+                  {data.returnLeg?.flightNo
+                    ? `${formatViSummaryDate(data.returnLeg.date ?? data.date)} | ${data.returnLeg.departTime || '---'} - ${data.returnLeg.arriveTime || '---'} | ${data.returnLeg.flightNo} | `
+                    : '--- | --- | --- | '}
+                </span>
+                {data.returnLeg?.flightNo ? (
+                  <span className="inline-block px-1.5 py-0.5 rounded text-xs font-semibold bg-vj-fare-bg text-vj-text border border-gray-200">
+                    {formatFareClassName(data.returnLeg.fareClass)}
+                  </span>
+                ) : (
+                  <span>---</span>
+                )}
               </div>
             </div>
 
