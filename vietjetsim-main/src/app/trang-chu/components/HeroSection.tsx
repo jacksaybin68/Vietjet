@@ -90,10 +90,10 @@ export default function HeroSection() {
     // Lưu ý: `section` KHÔNG dùng `overflow-hidden` — popover lịch 630px mở ra
     // ngoài khung panel và sẽ bị cắt mất nếu khối cha cắt tràn. Ảnh nền vẫn
     // được cắt riêng trong lớp bọc của nó.
-    <section className="relative w-full bg-white pb-[268px] lg:pb-36">
+    <section className="relative w-full bg-white pb-[268px] lg:pb-0">
       <h1 className="sr-only">Vietjet Air - Thông báo quan trọng Nhà ga T3 Jakarta</h1>
 
-      <div className="relative h-[422px] sm:h-[560px] lg:h-[725px]">
+      <div className="relative h-[422px] sm:h-[560px] lg:h-[850px]">
         {/* Ảnh nền hero — slider các banner.
 
             `data-visual-mask="hero"`: banner này TỰ CHẠY (đổi slide mỗi vài
@@ -129,7 +129,7 @@ export default function HeroSection() {
             đỏ #EC2029 khi active). */}
         <ul
           data-testid="hero-slider-dots"
-          className="pointer-events-none absolute inset-x-0 top-[297px] z-20 flex justify-center pt-[6px] lg:top-[589px] lg:pt-0"
+          className="pointer-events-none absolute inset-x-0 top-[297px] z-20 flex justify-center pt-[6px] lg:top-[668px] lg:pt-0"
         >
           {HERO_BANNERS.map((_, idx) => (
             <li key={idx} className="relative inline-block h-5 w-5">

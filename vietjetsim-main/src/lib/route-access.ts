@@ -9,6 +9,7 @@
 // anonymous endpoints — anything else leaks data to unauthenticated callers.
 export const PUBLIC_ROUTES = [
   '/',
+  '/vi',
   '/dang-nhap',
   '/dang-ky',
   // Password recovery must be reachable without a session.

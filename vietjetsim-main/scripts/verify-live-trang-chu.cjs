@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const CHROME_PATH = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const TARGET_URL = 'https://vietjet.shop/trang-chu';
+const TARGET_URL = 'https://vietjet.shop/vi';
 const OUT_DIR = path.resolve(__dirname, '../docs/qa/screenshots');
 
 async function verify() {

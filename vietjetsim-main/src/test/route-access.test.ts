@@ -5,6 +5,8 @@ describe('route access classification', () => {
   describe('isPublicRoute', () => {
     it('allows the anonymous search and lookup pages', () => {
       expect(isPublicRoute('/')).toBe(true);
+      expect(isPublicRoute('/vi')).toBe(true);
+      expect(isPublicRoute('/trang-chu')).toBe(true);
       expect(isPublicRoute('/tim-ve')).toBe(true);
       expect(isPublicRoute('/chuyen-bay-cua-toi')).toBe(true);
       expect(isPublicRoute('/lam-thu-tuc')).toBe(true);
