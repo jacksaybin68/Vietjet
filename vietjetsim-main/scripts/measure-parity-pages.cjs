@@ -24,7 +24,11 @@ const ROUTES = [
   { slug: 'home', local: '/trang-chu', official: '/vi/' },
   { slug: 'my-search-booking', local: '/chuyen-bay-cua-toi', official: '/vi/my/search-booking' },
   { slug: 'checkin', local: '/lam-thu-tuc', official: '/vi/checkin' },
-  { slug: 'booking-search', local: '/tim-ve?from=HAN&to=SGN&depart=2026-11-20&adult=1', official: '/vi/pages/booking-search' },
+  {
+    slug: 'booking-search',
+    local: '/tim-ve?from=HAN&to=SGN&depart=2026-11-20&adult=1',
+    official: '/vi/pages/booking-search',
+  },
 ];
 
 const VIEWPORTS = [

@@ -103,7 +103,7 @@ export default function FlightCard({
                 onClick={() => onSelect(flight.no, col.id, priceVal)}
                 className={`flex flex-col items-center justify-between h-24 min-w-[141px] rounded-md border transition-all overflow-hidden focus:outline-none focus:ring-0 ${
                   active
-                    ? 'border-primary ring-2 ring-primary/40 bg-[rgb(var(--vj-red-rgb))]/10'
+                    ? 'border-2 border-primary bg-[rgb(var(--vj-red-rgb))]/10'
                     : isZero
                       ? 'border-gray-100 bg-gray-50/70 opacity-60 cursor-not-allowed'
                       : 'border-gray-200 bg-white hover:border-gray-300'

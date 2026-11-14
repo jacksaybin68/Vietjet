@@ -33,7 +33,7 @@ export default function FareClassTabs({ activeClass, onSelect, onCompare }: Fare
             key={cls.id}
             className={`flex shrink-0 items-stretch overflow-hidden rounded-vj border transition-colors duration-200 ${
               active
-                ? 'border-primary bg-[rgb(var(--vj-red-rgb))]/10'
+                ? 'border-2 border-primary bg-[rgb(var(--vj-red-rgb))]/10'
                 : 'border-[var(--border)] bg-white hover:border-primary/40'
             }`}
           >
