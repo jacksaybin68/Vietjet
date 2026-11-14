@@ -72,19 +72,25 @@ export async function POST(request: NextRequest) {
     // are re-priced below, so the client says what it chose, never what it costs.
     const {
       flight_id,
+      return_flight_id,
       total_price: clientTotalPrice,
       passengers,
       seats,
-      ancillaries,
+      return_seats,
       fareClass: requestedFareClass,
+      returnFareClass: requestedReturnFareClass,
+      ancillaries,
       consents,
     } = (await request.json()) as {
       flight_id?: string;
+      return_flight_id?: string;
       total_price?: number;
       passengers?: Record<string, unknown>[];
       seats?: string[];
-      ancillaries?: AncillaryId[];
+      return_seats?: string[];
       fareClass?: FareClassId;
+      returnFareClass?: FareClassId;
+      ancillaries?: AncillaryId[];
       consents?: {
         marketing?: boolean;
         survey?: boolean;
@@ -98,6 +104,12 @@ export async function POST(request: NextRequest) {
     // cheapest one would under-quote the booking instead of failing it.
     if (requestedFareClass !== undefined && !FARE_CLASSES.includes(requestedFareClass)) {
       return NextResponse.json({ error: 'Unknown fare class' }, { status: 400 });
+    }
+    if (
+      requestedReturnFareClass !== undefined &&
+      !FARE_CLASSES.includes(requestedReturnFareClass)
+    ) {
+      return NextResponse.json({ error: 'Unknown return fare class' }, { status: 400 });
     }
 
     if (!flight_id || !passengers || !Array.isArray(passengers) || passengers.length === 0) {
@@ -214,7 +226,46 @@ export async function POST(request: NextRequest) {
     }));
     const ancillaryFee = ancillaryRows.reduce((sum, row) => sum + row.unit_price * row.quantity, 0);
 
-    const serverCalculated = Math.round(
+    // Return flight validation & pricing for round-trip bookings
+    let returnFlight = null;
+    let returnTaxableFare = 0;
+    let returnFarePerPassenger = 0;
+    let returnSeatFee = 0;
+    let sanitizedReturnSeats: string[] = [];
+    let returnSeatRows: { seat_number: string; price: number }[] = [];
+
+    if (return_flight_id) {
+      returnFlight = await getFlightById(return_flight_id);
+      if (!returnFlight) {
+        return NextResponse.json({ error: 'Return flight not found' }, { status: 404 });
+      }
+      if (returnFlight.available < seatedCount) {
+        return NextResponse.json(
+          { error: 'Return flight fully booked', message: 'Chuyến bay chiều về đã hết ghế trống.' },
+          { status: 409 }
+        );
+      }
+      const returnFareClass = FARE_CLASSES.includes(requestedReturnFareClass as FareClassId)
+        ? (requestedReturnFareClass as FareClassId)
+        : 'eco';
+      returnFarePerPassenger = getFareForClass(returnFareClass, {
+        economyPrice: returnFlight.economy_price,
+        businessPrice: returnFlight.business_price,
+      });
+      returnTaxableFare =
+        returnFarePerPassenger * (counts.adult + counts.child * FARE_RATE_BY_TYPE.child);
+
+      sanitizedReturnSeats = Array.isArray(return_seats)
+        ? return_seats.filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
+        : [];
+      returnSeatRows = sanitizedReturnSeats.map((seat) => ({
+        seat_number: seat,
+        price: getSeatCharge(seat),
+      }));
+      returnSeatFee = returnSeatRows.reduce((sum, seat) => sum + seat.price, 0);
+    }
+
+    const outboundCalculated = Math.round(
       taxableFare +
         farePerPassenger * counts.infant * FARE_RATE_BY_TYPE.infant +
         taxableFare * TAX_AND_FEE_RATE +
@@ -222,26 +273,23 @@ export async function POST(request: NextRequest) {
         ancillaryFee
     );
 
+    const returnCalculated = returnFlight
+      ? Math.round(
+          returnTaxableFare +
+            returnFarePerPassenger * counts.infant * FARE_RATE_BY_TYPE.infant +
+            returnTaxableFare * TAX_AND_FEE_RATE +
+            returnSeatFee
+        )
+      : 0;
+
+    const serverCalculated = outboundCalculated + returnCalculated;
+
     const _clientTotal =
       typeof clientTotalPrice === 'number' && Number.isFinite(clientTotalPrice)
         ? Math.round(clientTotalPrice)
         : 0;
 
     // The booked total is the server's number.
-    //
-    // The route used to take `clientTotal` whenever it was *higher* than the
-    // server's own calculation ("round-trip legs and extra services"), which
-    // made the browser the authority on what a flight costs: a crafted request
-    // with `total_price: 99_000_000` booked a real seat for a sum that no
-    // fare card ever showed, and the `min_booking_amount` gate on discount
-    // codes was computed against the inflated figure.
-    //
-    // Everything the total is made of is now priced here, from the catalogue:
-    // the fare (ladder on the flight row), the seats (per-seat band price),
-    // the ancillaries (per-passenger catalogue price) and the round-trip leg
-    // (the second flight's own fare, read from the database). A client total
-    // that disagrees is reported so the caller can see the authoritative
-    // number, but it is never charged.
     const totalPrice = serverCalculated;
 
     // Prevent overbooking: refuse the booking when the flight has no seats left
@@ -324,6 +372,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    let returnBooking = null;
+    if (return_flight_id) {
+      returnBooking = await createBooking(
+        { user_id: bookingUserId, flight_id: return_flight_id, total_price: 0, seatedCount },
+        normalizedPassengers,
+        returnSeatRows,
+        [],
+        {
+          marketing: consents?.marketing ?? false,
+          survey: consents?.survey ?? false,
+          retainForFutureBooking: consents?.retainForFutureBooking ?? false,
+          policyAccepted: consents?.policyAccepted ?? false,
+        }
+      );
+    }
+
     // Gửi email thông báo đặt chỗ và hướng dẫn thanh toán cho khách hàng
     const customerEmail =
       user?.email ||
@@ -343,7 +407,9 @@ export async function POST(request: NextRequest) {
           })
         : undefined;
 
-      const routeStr = `${flight.from_code} → ${flight.to_code}`;
+      const routeStr = returnFlight
+        ? `${flight.from_code} ⇄ ${flight.to_code} (Khứ hồi)`
+        : `${flight.from_code} → ${flight.to_code}`;
 
       let bankName: string | undefined;
       let accountNumber: string | undefined;
@@ -375,7 +441,9 @@ export async function POST(request: NextRequest) {
         bookingId: booking.id,
         amount: totalPrice,
         transferNote,
-        flightNumber: flight.flight_no,
+        flightNumber: returnFlight
+          ? `${flight.flight_no} / ${returnFlight.flight_no}`
+          : flight.flight_no,
         route: routeStr,
         departureTime: departureFormatted,
         passengers: normalizedPassengers.map((p, idx) => ({
@@ -391,12 +459,21 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const response = NextResponse.json({ booking }, { status: 201 });
+    const bookingPayload = {
+      ...booking,
+      return_booking_id: returnBooking?.id,
+      return_booking_code: returnBooking?.booking_code,
+    };
+
+    const response = NextResponse.json({ booking: bookingPayload }, { status: 201 });
 
     // Remember that this browser created the booking, so the payment endpoint
     // can tell "the guest who booked it" from "someone who guessed the id".
     if (!user) {
       setGuestBookingCookie(response, request, booking.id);
+      if (returnBooking?.id) {
+        setGuestBookingCookie(response, request, returnBooking.id);
+      }
     }
 
     return response;

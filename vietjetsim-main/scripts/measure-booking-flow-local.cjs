@@ -229,7 +229,7 @@ const LOCAL_KEY = {
       'hạng mục': name,
       'site thật': spec.site,
       'app local': got === undefined ? '—' : got,
-      'ngưỡng': spec.tol ? `±${spec.tol}px` : 'tuyệt đối',
+      ngưỡng: spec.tol ? `±${spec.tol}px` : 'tuyệt đối',
       'kết quả': status,
     });
   }

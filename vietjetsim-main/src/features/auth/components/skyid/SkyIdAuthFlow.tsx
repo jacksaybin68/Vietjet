@@ -36,8 +36,9 @@ import { useResendCountdown } from './useResendCountdown';
 export type SkyIdMode = 'login' | 'register';
 
 export interface SkyIdAuthFlowProps {
-  /** `overlay` = lớp phủ fixed; `page` = nhúng thẳng trong `<main>`. */
-  variant?: 'overlay' | 'page';
+  /** `overlay` = lớp phủ fixed; `page` = nhúng thẳng trong `<main>`;
+   *  `popup` = chỉ phần form, để `<PopupFrame>` bọc ngoài (622×664). */
+  variant?: 'overlay' | 'page' | 'popup';
   mode?: SkyIdMode;
   /** Đường dẫn quay lại sau khi đăng nhập/đăng ký thành công. */
   redirectTo?: string;
@@ -621,6 +622,20 @@ export default function SkyIdAuthFlow({
       <SkyIdShell title={title} subtitle={subtitle}>
         {body}
       </SkyIdShell>
+    );
+  }
+
+  /**
+   * Bản POPUP — nằm trong khung 500×208 của `PopupFrame` (khung 622×664 của
+   * site thật). Khối form trắng bo góc dưới 16px, nội dung cuộn dọc.
+   */
+  if (variant === 'popup') {
+    return (
+      <div className="vj-skyid-popup-card">
+        <h1 className="vj-skyid-title">{title}</h1>
+        {subtitle ? <p className="vj-skyid-subtitle mt-1">{subtitle}</p> : null}
+        <div className="mt-4 text-left">{body}</div>
+      </div>
     );
   }
 

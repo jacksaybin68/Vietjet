@@ -1,5 +1,7 @@
 export { default as ProtectedRoute } from './ProtectedRoute';
 export { default as SkyIdShell } from './SkyIdShell';
+export { default as PopupFrame } from './PopupFrame';
+export { default as SignInPopup, ForgotPasswordPopup } from './SignInPopup';
 export { default as SkyIdAuthFlow } from './skyid/SkyIdAuthFlow';
 export { default as SkyIdForgotPassword } from './skyid/steps/ForgotPasswordStep';
 export { default as SkyIdResetPassword } from './skyid/steps/ResetPasswordStep';

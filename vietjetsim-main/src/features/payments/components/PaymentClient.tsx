@@ -385,17 +385,22 @@ export default function PaymentClient() {
   // Read booking data from sessionStorage (set by FlightBookingClient)
   const [booking, setBooking] = useState<{
     bookingId?: string;
+    returnBookingId?: string;
     contactEmail?: string;
     contactPhone?: string;
     flightNo: string;
+    returnFlightNo?: string;
     from: string;
     to: string;
     fromCity: string;
     toCity: string;
     departTime: string;
     arriveTime: string;
+    returnDepartTime?: string;
+    returnArriveTime?: string;
     date: string;
-    passengers: { name: string; seat: string }[];
+    returnDate?: string;
+    passengers: { name: string; seat: string; returnSeat?: string }[];
     /** Air fare across all passengers (written by FlightBookingClient). */
     fareSubtotal: number;
     tax: number;
@@ -490,6 +495,7 @@ export default function PaymentClient() {
           }));
 
           setBooking((prev) => ({
+            ...prev,
             bookingId: b.id,
             flightNo: dbFlight?.flight_no || prev?.flightNo || 'VJ141',
             from: fromCode,
@@ -501,7 +507,10 @@ export default function PaymentClient() {
             date: dateStr,
             passengers:
               paxList.length > 0
-                ? paxList
+                ? paxList.map((p, idx) => ({
+                    ...p,
+                    returnSeat: prev?.passengers?.[idx]?.returnSeat,
+                  }))
                 : prev?.passengers || [{ name: 'HÀNH KHÁCH', seat: 'Chưa chọn' }],
             fareSubtotal: Math.round(dbTotal * 0.65),
             tax: Math.round(dbTotal * 0.25),
@@ -509,6 +518,11 @@ export default function PaymentClient() {
             ancillaryFee: Math.round(dbTotal * 0.1),
             ancillaries: prev?.ancillaries || [],
             total: dbTotal > 0 ? dbTotal : (prev?.total ?? 0),
+            returnBookingId: prev?.returnBookingId,
+            returnFlightNo: prev?.returnFlightNo,
+            returnDepartTime: prev?.returnDepartTime,
+            returnArriveTime: prev?.returnArriveTime,
+            returnDate: prev?.returnDate,
           }));
         }
       })
@@ -817,6 +831,7 @@ export default function PaymentClient() {
 
       await createPayment({
         booking_id: booking.bookingId,
+        return_booking_id: booking.returnBookingId || undefined,
         method: paymentMethod,
         amount: cashDue,
         discount_code_id: promoData?.id ?? undefined,
@@ -1329,35 +1344,86 @@ export default function PaymentClient() {
                           </div>
                         </div>
                       </div>
+
+                      {booking.returnFlightNo && (
+                        <div className="mt-4 pt-4 border-t border-[var(--border)]">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="text-xs font-bold text-[var(--foreground-subtle)]">
+                              {booking.returnFlightNo} (Chiều về)
+                            </div>
+                            <div className="text-xs text-[var(--foreground-subtle)]">
+                              {booking.returnDate ? formatBookingDay(booking.returnDate) : ''}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div>
+                              <div className="text-2xl font-black text-[var(--foreground)]">
+                                {booking.returnDepartTime || '14:00'}
+                              </div>
+                              <div className="text-xs font-semibold text-[var(--foreground-muted)]">
+                                {booking.to}
+                              </div>
+                              <div className="text-xs text-[var(--foreground-subtle)]">
+                                {booking.toCity}
+                              </div>
+                            </div>
+                            <div className="flex-1 flex flex-col items-center">
+                              <Icon
+                                name="PaperAirplaneIcon"
+                                size={20}
+                                className="text-primary rotate-180"
+                              />
+                              <div className="text-xs text-[var(--foreground-subtle)] mt-1">
+                                Bay thẳng
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-2xl font-black text-[var(--foreground)]">
+                                {booking.returnArriveTime || '16:10'}
+                              </div>
+                              <div className="text-xs font-semibold text-[var(--foreground-muted)]">
+                                {booking.from}
+                              </div>
+                              <div className="text-xs text-[var(--foreground-subtle)]">
+                                {booking.fromCity}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </>
                   )}
                 </div>
 
                 {/* Passenger */}
-                {booking?.passengers.map((p: { name: string; seat: string }, i: number) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between py-3 border-b border-[var(--border)] "
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-primary-50 rounded-full flex items-center justify-center">
-                        <Icon name="UserIcon" size={14} className="text-primary" />
+                {booking?.passengers.map(
+                  (p: { name: string; seat: string; returnSeat?: string }, i: number) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between py-3 border-b border-[var(--border)] "
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-primary-50 rounded-full flex items-center justify-center">
+                          <Icon name="UserIcon" size={14} className="text-primary" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-[var(--foreground)] text-sm">
+                            {p.name}
+                          </div>
+                          <div className="text-xs text-[var(--foreground-subtle)]">
+                            Hành khách {i + 1}
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="font-semibold text-[var(--foreground)] text-sm">
-                          {p.name}
+                      <div className="text-right">
+                        <div className="font-bold text-[var(--foreground)]">
+                          {p.returnSeat ? `Đi: ${p.seat} | Về: ${p.returnSeat}` : `Ghế ${p.seat}`}
                         </div>
-                        <div className="text-xs text-[var(--foreground-subtle)]">
-                          Hành khách {i + 1}
-                        </div>
+                        <div className="text-xs text-[var(--foreground-subtle)]">Phổ thông</div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-bold text-[var(--foreground)]">Ghế {p.seat}</div>
-                      <div className="text-xs text-[var(--foreground-subtle)]">Phổ thông</div>
-                    </div>
-                  </div>
-                ))}
+                  )
+                )}
 
                 {/* Bank Payment Info — the receiving account, since the customer
                     no longer enters an account of their own. */}

@@ -25,16 +25,19 @@ export type PassengerInput = Passenger;
 
 export interface CreateBookingInput {
   flight_id: string;
+  return_flight_id?: string;
   /** Ignored by the API, which prices the booking itself; kept for the local quote. */
   total_price: number;
   passengers: PassengerInput[];
   seats?: string[];
+  return_seats?: string[];
   /**
    * The fare card the traveller tapped. The API re-derives the amount from
    * `flights` through the same `getFareForClass` ladder the card was drawn
    * with, so this names a bucket rather than quoting a price.
    */
   fareClass?: FareClassId;
+  returnFareClass?: FareClassId;
   ancillaries?: string[];
   consents: BookingConsents;
 }
@@ -52,7 +55,7 @@ export interface BookingListResponse {
 }
 
 export interface CreateBookingResponse {
-  booking: BookingRecord;
+  booking: BookingRecord & { return_booking_id?: string; return_booking_code?: string };
   message?: string;
 }
 

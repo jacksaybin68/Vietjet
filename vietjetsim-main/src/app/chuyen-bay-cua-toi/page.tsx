@@ -7,7 +7,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { Header, Footer } from '@/shared/components/navigation';
+import { Footer, SubpageHeader } from '@/shared/components/navigation';
 import {
   MdFlight as FlightIcon,
   MdLogin,
@@ -20,6 +20,7 @@ import {
   MdPayment,
 } from 'react-icons/md';
 import { useToast } from '@/hooks/useToast';
+import { useAuthModal } from '@/features/auth/components';
 import { ToastContainer } from '@/shared/components/feedback';
 import { AppImage } from '@/shared/components/ui';
 import { MyFlightsStats } from '@/features/bookings';
@@ -106,6 +107,7 @@ const STATUS_LABELS: Record<RecentBooking['status'], { label: string; color: str
 
 export default function MyFlightsPage() {
   const toast = useToast();
+  const { openAuthModal } = useAuthModal();
   const [tab, setTab] = useState<'booking' | 'eticket'>('booking');
   // Chip đầu trang "Tìm kiếm mã đặt chỗ" / "Chuyến bay của tôi" — bố cục của
   // vietjetair.com/vi/my/search-booking (khối nào hiện do chip quyết định).
@@ -331,7 +333,9 @@ export default function MyFlightsPage() {
           className="pointer-events-none absolute bottom-0 right-0 z-0 w-[min(720px,58vw)] select-none opacity-90"
         />
 
-        <Header variant="compact" mobileTitle="CHUYẾN BAY CỦA TÔI" hideMobileLogo />
+        {/* Header TRẮNG 74px giống site thật (`/vi/my/search-booking`), ở mobile
+            dùng băng đỏ với H1 trắng `16px/700` uppercase. */}
+        <SubpageHeader title="CHUYẾN BAY CỦA TÔI" mobileRed />
 
         {/* Thanh Tab Mobile: "Tìm kiếm mã đặt chỗ" | "Chuyến bay của tôi" khớp 100% Ảnh tham chiếu */}
         <div className="xl:hidden w-full bg-white border-b border-gray-200 shadow-xs relative z-20">
@@ -372,64 +376,62 @@ export default function MyFlightsPage() {
         </div>
 
         <main id="main-content" className="relative z-10 flex flex-1 flex-col">
-          {/* ===== Khung tra cứu: hai tab nằm trên thẻ, thẻ rộng 1368px ở
-              màn hình tham chiếu 2048 (viền trái 340px). ===== */}
+          {/* ===== Khung tra cứu =====
+              Bố cục đo được ở `newweb.vietjetair.com/vi/my/search-booking`
+              (1440×900):
+              - Dải "Dịch vụ tra cứu": `x=120`, `y=82`, `1200×69`, bo `16px`,
+                padding `16px`; bên trong là 2 pill `164×36` bo `18px` —
+                "Chuyến bay của tôi" (active, nền `#FFDD32`, chữ
+                `rgb(115,62,10)`) và "Đơn hàng SkyShop" (nền trong suốt).
+              - Cột trái `x=120` rộng `600`, khối form `x=220` rộng `400`.
+              - H2 `x=225`, `20px/600` uppercase; mô tả `16px/500`.
+              - 3 ô nhập `x=240`, rộng `360`, cao `40`.
+              - Nút "Tìm kiếm" `127×39`; "Đăng nhập" `137×48` bo `12px`.
+              - Cột phải `x=720` rộng `600`, banner `570×496` bo `5px`. */}
           <section className="relative flex-1">
-            <div className="mx-auto w-full max-w-[1368px] px-4 sm:px-6 min-[1368px]:px-0">
-              <div className="pt-4 xl:pt-[65px]">
-                <div
-                  role="tablist"
-                  aria-label="Chuyến bay của tôi"
-                  className="hidden xl:flex items-end overflow-hidden rounded-t-[10px] xl:overflow-visible gap-2"
-                >
-                  {(
-                    [
-                      {
-                        id: 'search',
-                        label: 'Tìm kiếm mã đặt chỗ',
-                        TabIcon: MdConfirmationNumber,
-                      },
-                      { id: 'list', label: 'Chuyến bay của tôi', TabIcon: FlightIcon },
-                    ] as const
-                  ).map((chip) => {
-                    const active = view === chip.id;
-                    const TabIcon = chip.TabIcon;
-                    return (
-                      <button
-                        key={chip.id}
-                        type="button"
-                        role="tab"
-                        aria-selected={active}
-                        onClick={() => {
-                          viewPinned.current = true;
-                          setView(chip.id);
-                        }}
-                        className={`relative flex h-11 items-center gap-2 rounded-t-[10px] px-5 text-xs font-black uppercase tracking-wider transition-all sm:text-sm ${
-                          active
-                            ? 'bg-white text-primary shadow-[0_-4px_16px_rgba(36,73,120,0.08)] border-t-2 border-primary'
-                            : 'bg-white/60 text-gray-500 hover:bg-white/80 hover:text-primary backdrop-blur-sm'
-                        }`}
-                      >
-                        <TabIcon aria-hidden="true" className="text-base" />
-                        {chip.label}
-                      </button>
-                    );
-                  })}
-                </div>
+            <div className="mx-auto w-full max-w-[1200px] px-4 sm:px-6">
+              <div className="pt-4">
+                {/* Dải pill "Dịch vụ tra cứu" — 2 pill 164×36 bo 18px. */}
+                <nav aria-label="Dịch vụ tra cứu" className="vj-pill-tabs">
+                  <button
+                    type="button"
+                    className="vj-pill-tab"
+                    role="tab"
+                    aria-selected={view === 'search'}
+                    onClick={() => {
+                      viewPinned.current = true;
+                      setView('search');
+                    }}
+                  >
+                    Chuyến bay của tôi
+                  </button>
+                  <button
+                    type="button"
+                    className="vj-pill-tab"
+                    role="tab"
+                    aria-selected={view === 'list'}
+                    onClick={() => {
+                      viewPinned.current = true;
+                      setView('list');
+                    }}
+                  >
+                    Đơn hàng SkyShop
+                  </button>
+                </nav>
 
                 {/* Tab 1: Form tra cứu đặt chỗ */}
                 {view === 'search' && (
                   <>
                     {/* Giao diện Mobile khớp 100% Ảnh mẫu tham chiếu */}
                     <div className="xl:hidden w-full max-w-[540px] mx-auto pt-2 pb-16">
-                      <p className="text-sm2 sm:text-sm font-bold text-gray-800 leading-snug mb-4">
+                      <p className="mb-4 font-koho text-base font-medium leading-[24px] text-[var(--vj-text)]">
                         Bạn muốn xem chuyến bay đã đặt, đổi lịch trình bay hay mua thêm dịch vụ hành
                         lý, chỗ ngồi, suất ăn..., vui lòng điền thông tin bên dưới:
                       </p>
 
                       <form onSubmit={handleSearchBooking} noValidate>
-                        <div className="space-y-3">
-                          <div className="relative">
+                        <div className="w-[290px] space-y-[20px]">
+                          <div className="vj-lookup-field">
                             <input
                               id="mobi-booking-code"
                               type="text"
@@ -438,16 +440,15 @@ export default function MyFlightsPage() {
                               autoCapitalize="characters"
                               value={bookingCode}
                               onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
-                              className="w-full h-12 rounded-lg bg-white px-4 text-sm font-bold text-gray-900 shadow-sm border border-gray-100 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                              placeholder=" "
+                              className="vj-lookup-input font-heading-800 uppercase tracking-wide"
                             />
-                            {!bookingCode && (
-                              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-700 select-none">
-                                Mã đặt chỗ<span className="text-primary font-bold">*</span>
-                              </span>
-                            )}
+                            <label htmlFor="mobi-booking-code" className="vj-lookup-label">
+                              Mã đặt chỗ <span className="text-[var(--vj-red)]">*</span>
+                            </label>
                           </div>
 
-                          <div className="relative">
+                          <div className="vj-lookup-field">
                             <input
                               id="mobi-surname"
                               type="text"
@@ -455,16 +456,15 @@ export default function MyFlightsPage() {
                               autoComplete="family-name"
                               value={surname}
                               onChange={(e) => setSurname(e.target.value)}
-                              className="w-full h-12 rounded-lg bg-white px-4 text-sm font-bold text-gray-900 shadow-sm border border-gray-100 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                              placeholder=" "
+                              className="vj-lookup-input"
                             />
-                            {!surname && (
-                              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-700 select-none">
-                                Họ<span className="text-primary font-bold">*</span>
-                              </span>
-                            )}
+                            <label htmlFor="mobi-surname" className="vj-lookup-label">
+                              Họ <span className="text-[var(--vj-red)]">*</span>
+                            </label>
                           </div>
 
-                          <div className="relative">
+                          <div className="vj-lookup-field">
                             <input
                               id="mobi-given-name"
                               type="text"
@@ -472,24 +472,40 @@ export default function MyFlightsPage() {
                               autoComplete="given-name"
                               value={givenName}
                               onChange={(e) => setGivenName(e.target.value)}
-                              className="w-full h-12 rounded-lg bg-white px-4 text-sm font-bold text-gray-900 shadow-sm border border-gray-100 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                              placeholder=" "
+                              className="vj-lookup-input"
                             />
-                            {!givenName && (
-                              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-700 select-none">
-                                Tên đệm và tên<span className="text-primary font-bold">*</span>
-                              </span>
-                            )}
+                            <label htmlFor="mobi-given-name" className="vj-lookup-label">
+                              Tên đệm & Tên <span className="text-[var(--vj-red)]">*</span>
+                            </label>
                           </div>
                         </div>
 
-                        <div className="flex justify-center my-6">
-                          <button
-                            type="submit"
-                            disabled={loading}
-                            className="inline-flex h-11 w-36 sm:w-40 items-center justify-center rounded-xl bg-vj-gold-button hover:bg-vj-gold-button-2 text-base font-black italic font-koho text-black shadow-md transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
-                          >
+                        <div className="mt-[30px] flex flex-col items-center">
+                          <button type="submit" disabled={loading} className="vj-lookup-btn">
                             {loading ? 'Đang tìm…' : 'Tìm kiếm'}
                           </button>
+
+                          <div className="mt-[26px] flex flex-col items-center gap-4">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                openAuthModal('login', { redirectTo: '/chuyen-bay-cua-toi' })
+                              }
+                              className="vj-skyjoy-login-btn w-[137px]"
+                            >
+                              Đăng nhập
+                            </button>
+                            <p className="text-sm leading-[20px] text-[var(--vj-text)]">
+                              Bạn đã biết về Vietjet SkyJoy?{' '}
+                              <Link
+                                href="/dang-ky"
+                                className="vj-skyjoy-register-link"
+                              >
+                                Đăng ký ngay
+                              </Link>
+                            </p>
+                          </div>
                         </div>
                       </form>
 
@@ -503,99 +519,115 @@ export default function MyFlightsPage() {
                       </div>
                     </div>
 
-                    {/* Giao diện Desktop */}
+                    {/* Giao diện Desktop — bám bố cục đo được ở
+                        `newweb.vietjetair.com/vi/my/search-booking` (1440×900):
+                        cột trái rộng 600 (khối form x=220 rộng 400), cột phải
+                        rộng 600 (banner 570×496 bo 5px). */}
                     <form
                       onSubmit={handleSearchBooking}
-                      className="hidden xl:block rounded-[12px] bg-[rgba(248,251,255,0.95)] px-4 pb-8 pt-6 shadow-[0_18px_50px_rgba(36,73,120,0.14)] ring-1 ring-white/70 backdrop-blur-[2px] sm:px-6 xl:rounded-l-[12px] xl:pb-[39px] xl:pl-[46px] xl:pr-[3px] xl:pt-[34px] animate-fadeIn"
+                      className="hidden xl:grid xl:grid-cols-[600px_600px] xl:gap-0 animate-fadeIn"
                     >
-                      <div className="grid grid-cols-1 gap-8 xl:grid-cols-[458px_minmax(0,1fr)] xl:gap-[60px]">
-                        {/* Cột trái: tiêu đề + mô tả + ba trường nhập. */}
-                        <div className="flex flex-col">
-                          <h1 className="text-lg font-black uppercase tracking-tight text-gray-900">
-                            CHUYẾN BAY CỦA TÔI
-                          </h1>
-                          <p className="mt-2 text-xs leading-relaxed text-gray-600">
-                            Bạn muốn xem chuyến bay đã đặt, đổi lịch trình bay hay mua thêm dịch vụ
-                            hành lý, chỗ ngồi, suất ăn..., vui lòng điền thông tin bên dưới:
-                          </p>
+                      {/* Cột trái: tiêu đề + mô tả + ba trường nhập. */}
+                      <div className="flex flex-col px-[100px] pt-[42px]">
+                        <h2 className="text-xl font-semibold uppercase tracking-tight text-gray-900">
+                          CHUYẾN BAY CỦA TÔI
+                        </h2>
+                        <p className="mt-3 font-koho text-base font-medium leading-[24px] text-[var(--vj-text)]">
+                          Bạn muốn xem chuyến bay đã đặt, đổi lịch trình bay hay mua thêm dịch vụ
+                          hành lý, chỗ ngồi, suất ăn..., vui lòng điền thông tin bên dưới:
+                        </p>
 
-                          <div className="mt-[22px] space-y-[18px]">
-                            <div className="vj-lookup-field">
-                              <input
-                                id="booking-code"
-                                type="text"
-                                required
-                                autoComplete="off"
-                                autoCapitalize="characters"
-                                value={bookingCode}
-                                onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
-                                placeholder=" "
-                                className="vj-lookup-input font-heading-800 uppercase tracking-wide"
-                              />
-                              <label htmlFor="booking-code" className="vj-lookup-label">
-                                Mã đặt chỗ <span className="text-[var(--vj-red)]">*</span>
-                              </label>
-                            </div>
-
-                            <div className="vj-lookup-field">
-                              <input
-                                id="surname"
-                                type="text"
-                                required
-                                autoComplete="family-name"
-                                value={surname}
-                                onChange={(e) => setSurname(e.target.value)}
-                                placeholder=" "
-                                className="vj-lookup-input"
-                              />
-                              <label htmlFor="surname" className="vj-lookup-label">
-                                Họ <span className="text-[var(--vj-red)]">*</span>
-                              </label>
-                            </div>
-
-                            <div className="vj-lookup-field">
-                              <input
-                                id="given-name"
-                                type="text"
-                                required
-                                autoComplete="given-name"
-                                value={givenName}
-                                onChange={(e) => setGivenName(e.target.value)}
-                                placeholder=" "
-                                className="vj-lookup-input"
-                              />
-                              <label htmlFor="given-name" className="vj-lookup-label">
-                                Tên đệm & Tên <span className="text-[var(--vj-red)]">*</span>
-                              </label>
-                            </div>
+                        <div className="mt-[28px] w-[360px] space-y-[20px]">
+                          <div className="vj-lookup-field">
+                            <input
+                              id="booking-code"
+                              type="text"
+                              required
+                              autoComplete="off"
+                              autoCapitalize="characters"
+                              value={bookingCode}
+                              onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
+                              placeholder=" "
+                              className="vj-lookup-input font-heading-800 uppercase tracking-wide"
+                            />
+                            <label htmlFor="booking-code" className="vj-lookup-label">
+                              Mã đặt chỗ <span className="text-[var(--vj-red)]">*</span>
+                            </label>
                           </div>
 
-                          <div className="mt-6 flex justify-center">
-                            <button
-                              type="submit"
-                              disabled={loading}
-                              className="inline-flex h-10 px-8 items-center justify-center rounded-xl bg-vjyellow hover:bg-vjamber text-sm font-black text-gray-900 shadow-md transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
-                            >
-                              {loading ? 'Đang tìm…' : 'Tìm kiếm'}
-                            </button>
+                          <div className="vj-lookup-field">
+                            <input
+                              id="surname"
+                              type="text"
+                              required
+                              autoComplete="family-name"
+                              value={surname}
+                              onChange={(e) => setSurname(e.target.value)}
+                              placeholder=" "
+                              className="vj-lookup-input"
+                            />
+                            <label htmlFor="surname" className="vj-lookup-label">
+                              Họ <span className="text-[var(--vj-red)]">*</span>
+                            </label>
+                          </div>
+
+                          <div className="vj-lookup-field">
+                            <input
+                              id="given-name"
+                              type="text"
+                              required
+                              autoComplete="given-name"
+                              value={givenName}
+                              onChange={(e) => setGivenName(e.target.value)}
+                              placeholder=" "
+                              className="vj-lookup-input"
+                            />
+                            <label htmlFor="given-name" className="vj-lookup-label">
+                              Tên đệm & Tên <span className="text-[var(--vj-red)]">*</span>
+                            </label>
                           </div>
                         </div>
 
-                        {/* Cột phải: banner ngoại tệ thực tế theo Ảnh 1 & Ảnh 2.
-                            Ảnh gốc là poster dọc 480×648 nên khung phải giữ đúng tỉ lệ,
-                            nếu ép vào khung ngang 750/650 thì object-cover sẽ cắt mất
-                            logo, máy bay và phần minh hoạ phía dưới. */}
-                        <div className="flex items-center justify-center">
-                          <div className="relative aspect-[480/648] w-full max-w-[420px] overflow-hidden rounded-[6px] shadow-[0_12px_32px_rgba(36,73,120,0.16)] sm:max-w-[460px] xl:max-w-[505px]">
-                            <AppImage
-                              src="/images/hero/banner-chuyenbay-ngoai-te.jpg"
-                              alt="Mua ngoại tệ dễ dàng khi đặt vé"
-                              fill
-                              priority
-                              quality={95}
-                              sizes="(min-width: 1280px) 505px, (min-width: 640px) 460px, 420px"
-                            />
+                        <div className="mt-[30px] flex flex-col items-center">
+                          <button type="submit" disabled={loading} className="vj-lookup-btn">
+                            {loading ? 'Đang tìm…' : 'Tìm kiếm'}
+                          </button>
+
+                          {/* "Đăng nhập" 137×48 bo 12px + "Đăng ký ngay" 84×20 */}
+                          <div className="mt-[26px] flex flex-col items-center gap-4">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                openAuthModal('login', { redirectTo: '/chuyen-bay-cua-toi' })
+                              }
+                              className="vj-skyjoy-login-btn w-[137px]"
+                            >
+                              Đăng nhập
+                            </button>
+                            <p className="text-sm leading-[20px] text-[var(--vj-text)]">
+                              Bạn đã biết về Vietjet SkyJoy?{' '}
+                              <Link
+                                href="/dang-ky"
+                                className="vj-skyjoy-register-link"
+                              >
+                                Đăng ký ngay
+                              </Link>
+                            </p>
                           </div>
+                        </div>
+                      </div>
+
+                      {/* Cột phải: banner `570×496` bo `5px` — đo được ở site thật. */}
+                      <div className="flex items-start justify-center pt-[42px]">
+                        <div className="relative h-[496px] w-[570px] overflow-hidden rounded-[5px] shadow-[0_12px_32px_rgba(36,73,120,0.16)]">
+                          <AppImage
+                            src="/images/hero/banner-chuyenbay-ngoai-te.jpg"
+                            alt="Mua ngoại tệ dễ dàng khi đặt vé"
+                            fill
+                            priority
+                            quality={95}
+                            sizes="570px"
+                          />
                         </div>
                       </div>
                     </form>

@@ -99,8 +99,7 @@ function FlightBookingClientInner({
   };
 
   const isRoundTrip = Boolean(params.return);
-  // The inbound leg is never reached while round-trip checkout is blocked.
-  const currentLeg = 'outbound' as const;
+  const [currentLeg, setCurrentLeg] = useState<'outbound' | 'inbound'>('outbound');
   const [step, setStep] = useState(1);
   const paxCounts: Record<PassengerType, number> = {
     adult: params.pax ? parseInt(params.pax, 10) || 1 : 1,
@@ -156,27 +155,17 @@ function FlightBookingClientInner({
     return: undefined,
   };
 
-  /**
-   * Round-trip bookings are not supported end to end yet.
-   *
-   * `POST /api/dat-ve` takes one `flight_id` and prices that leg; the return
-   * flight collected by this screen was never sent, so a "khứ hồi" booking
-   * was silently created as a one-way ticket while the customer believed they
-   * had bought both legs. Block the flow where the mistake would happen
-   * instead of confirming a booking the system cannot honour.
-   */
-  const ROUND_TRIP_UNSUPPORTED_MESSAGE =
-    'Hệ thống hiện chỉ hỗ trợ đặt vé một chiều trực tuyến. Vui lòng đặt riêng vé chiều đi và chiều về (mỗi chiều một vé).';
-
   // Signal từ nút "Đi tiếp" ở panel bên ngoài → chuyển sang bước 2.
   const stateRef = useRef({
     step,
     selected: booking.selectedFlight,
+    returnFlight: booking.returnFlight,
     isRoundTrip,
   });
   stateRef.current = {
     step,
     selected: booking.selectedFlight,
+    returnFlight: booking.returnFlight,
     isRoundTrip,
   };
 
@@ -187,7 +176,23 @@ function FlightBookingClientInner({
     if (continueSignal && continueSignal > 0) {
       if (stateRef.current.step === 1) {
         if (stateRef.current.isRoundTrip) {
-          toast.error('Chưa hỗ trợ đặt vé khứ hồi', ROUND_TRIP_UNSUPPORTED_MESSAGE);
+          if (!stateRef.current.selected) {
+            toast.error(
+              'Chưa chọn chuyến bay đi',
+              'Vui lòng chọn chuyến bay đi trước khi bấm Đi tiếp.'
+            );
+            setCurrentLeg('outbound');
+            return;
+          }
+          if (!stateRef.current.returnFlight) {
+            toast.info(
+              'Chưa chọn chuyến bay về',
+              'Vui lòng chọn chuyến bay về trước khi bấm Đi tiếp.'
+            );
+            setCurrentLeg('inbound');
+            return;
+          }
+          goStepRef.current(2);
           return;
         }
         if (!stateRef.current.selected) {
@@ -209,12 +214,6 @@ function FlightBookingClientInner({
     leg: 'outbound' | 'inbound' = currentLeg,
     isUserAction: boolean = true
   ) => {
-    if (leg === 'outbound' && isRoundTrip) {
-      // See ROUND_TRIP_UNSUPPORTED_MESSAGE: do not even mark a flight as
-      // selected for a checkout that would only record the outbound leg.
-      toast.error('Chưa hỗ trợ đặt vé khứ hồi', ROUND_TRIP_UNSUPPORTED_MESSAGE);
-      return;
-    }
     if (leg === 'outbound') {
       setBooking((b) => ({
         ...b,
@@ -230,13 +229,21 @@ function FlightBookingClientInner({
         'outbound'
       );
       if (isUserAction) {
-        if (continueSignal === undefined) {
-          goStep(2);
+        if (isRoundTrip) {
+          setCurrentLeg('inbound');
+          toast.success(
+            'Đã chọn chuyến bay đi!',
+            `${flight.flightNo}: ${flight.fromCity} → ${flight.toCity} lúc ${flight.departTime}. Vui lòng chọn chuyến bay về.`
+          );
+        } else {
+          if (continueSignal === undefined) {
+            goStep(2);
+          }
+          toast.success(
+            'Chuyến bay đã được chọn!',
+            `${flight.flightNo}: ${flight.fromCity} → ${flight.toCity} lúc ${flight.departTime}`
+          );
         }
-        toast.success(
-          'Chuyến bay đã được chọn!',
-          `${flight.flightNo}: ${flight.fromCity} → ${flight.toCity} lúc ${flight.departTime}`
-        );
       }
     } else {
       setBooking((b) => ({
@@ -378,8 +385,8 @@ function FlightBookingClientInner({
 
   const handleFinalBookingSubmit = async () => {
     try {
-      if (isRoundTrip) {
-        toast.error('Chưa hỗ trợ đặt vé khứ hồi', ROUND_TRIP_UNSUPPORTED_MESSAGE);
+      if (isRoundTrip && !returnFlight?.id) {
+        toast.error('Lỗi đặt chỗ', 'Vui lòng chọn chuyến bay về trước khi tiếp tục.');
         return;
       }
       setIsSubmitting(true);
@@ -392,6 +399,11 @@ function FlightBookingClientInner({
 
       const seats = Array.isArray(booking.selectedSeats)
         ? booking.selectedSeats.filter(
+            (s): s is string => typeof s === 'string' && s.trim().length > 0
+          )
+        : [];
+      const returnSeats = Array.isArray(booking.returnSeats)
+        ? booking.returnSeats.filter(
             (s): s is string => typeof s === 'string' && s.trim().length > 0
           )
         : [];
@@ -409,10 +421,13 @@ function FlightBookingClientInner({
 
       const data = await createBooking({
         flight_id: flightId,
+        return_flight_id: returnFlight?.id,
         total_price: finalTotal,
         passengers,
         seats,
+        return_seats: returnSeats,
         fareClass: selectedFlight.fareClass ?? 'eco',
+        returnFareClass: returnFlight?.fareClass ?? 'eco',
         ancillaries,
         consents,
       });
@@ -421,11 +436,16 @@ function FlightBookingClientInner({
       // (`bookings.booking_code`) — mã đó mới là thứ in trên vé và khách
       // đọc cho bộ phận hỗ trợ. Chỉ fallback về id cho row cũ chưa có PNR.
       const bookingCode = data.booking.booking_code || bookingId;
+      const returnBookingId = data.booking.return_booking_id;
+      const returnBookingCode = data.booking.return_booking_code;
 
       sessionStorage.setItem(
         'vjsim_booking',
         JSON.stringify({
           bookingId,
+          bookingCode,
+          returnBookingId,
+          returnBookingCode,
           flightNo: selectedFlight.flightNo,
           returnFlightNo: returnFlight?.flightNo,
           from: selectedFlight.from,
@@ -441,7 +461,7 @@ function FlightBookingClientInner({
           passengers: passengers.map((passenger, index) => ({
             name: passenger.name,
             seat: seats[index],
-            returnSeat: booking.returnSeats?.[index],
+            returnSeat: returnSeats[index],
           })),
           fareSubtotal,
           tax: taxAndFee,
@@ -571,6 +591,65 @@ function FlightBookingClientInner({
       <div className="mx-auto max-w-full">
         {step === 1 && (
           <ErrorBoundary inline variant="api" retryLabel="Tìm lại chuyến bay">
+            {isRoundTrip && (
+              <div
+                role="tablist"
+                aria-label="Chọn chặng bay"
+                className="mb-4 grid grid-cols-2 gap-2 rounded-xl bg-[var(--surface-2)] p-1.5 border border-[var(--border)]"
+              >
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={currentLeg === 'outbound'}
+                  onClick={() => setCurrentLeg('outbound')}
+                  className={`flex flex-col items-start px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg text-left transition-all ${
+                    currentLeg === 'outbound'
+                      ? 'bg-white shadow-sm border border-[rgb(var(--vj-red-rgb))]/30 text-gray-900 font-bold'
+                      : 'text-gray-600 hover:text-gray-900 font-medium'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 text-xs sm:text-sm">
+                    <span className="inline-block w-2 h-2 rounded-full bg-primary" />
+                    <span>Chiều đi</span>
+                    {booking.selectedFlight && (
+                      <span className="ml-1 inline-flex items-center gap-0.5 rounded bg-emerald-50 px-1.5 py-0.5 text-2xs font-bold text-emerald-700">
+                        <Icon name="CheckIcon" size={10} />
+                        {booking.selectedFlight.flightNo}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-2xs sm:text-xs text-gray-500 truncate mt-0.5">
+                    {params.from || 'SGN'} → {params.to || 'HAN'} ({params.depart || 'Ngày đi'})
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={currentLeg === 'inbound'}
+                  onClick={() => setCurrentLeg('inbound')}
+                  className={`flex flex-col items-start px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg text-left transition-all ${
+                    currentLeg === 'inbound'
+                      ? 'bg-white shadow-sm border border-[rgb(var(--vj-red-rgb))]/30 text-gray-900 font-bold'
+                      : 'text-gray-600 hover:text-gray-900 font-medium'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 text-xs sm:text-sm">
+                    <span className="inline-block w-2 h-2 rounded-full bg-primary" />
+                    <span>Chiều về</span>
+                    {booking.returnFlight && (
+                      <span className="ml-1 inline-flex items-center gap-0.5 rounded bg-emerald-50 px-1.5 py-0.5 text-2xs font-bold text-emerald-700">
+                        <Icon name="CheckIcon" size={10} />
+                        {booking.returnFlight.flightNo}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-2xs sm:text-xs text-gray-500 truncate mt-0.5">
+                    {params.to || 'HAN'} → {params.from || 'SGN'} ({params.return || 'Ngày về'})
+                  </div>
+                </button>
+              </div>
+            )}
             {currentLeg === 'outbound' ? (
               <FlightResultsStep
                 key="outbound-step"

@@ -1,18 +1,21 @@
 'use client';
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import SkyIdAuthFlow, { type SkyIdMode } from './skyid/SkyIdAuthFlow';
+import SignInPopup from './SignInPopup';
+import { type SkyIdMode } from './skyid/SkyIdAuthFlow';
 
 /**
- * Điều phối modal SkyJoy ID cho toàn site.
+ * Điều phối popup SkyJoy ID cho toàn site.
  *
  * Header (mọi biến thể) gọi `openAuthModal('login' | 'register')` để mở đúng
- * modal 2 cột của site thật, thay vì nhảy sang trang full-page. Route
+ * popup 622×664 của site thật, thay vì nhảy sang trang full-page. Route
  * `/dang-nhap` và `/dang-ky` vẫn tồn tại (public, deep-link được) và render
  * cùng component ở chế độ `page`.
  *
  * `redirectTo` cho phép quay lại trang gốc sau khi đăng nhập — header tự đọc
  * `?redirect=` trên URL và truyền xuống.
+ *
+ * Số đo popup: `docs/qa/2026-11-15-vietjet-measure/README.md` §1.
  */
 
 export interface OpenAuthModalOptions {
@@ -52,14 +55,7 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthModalContext.Provider value={value}>
       {children}
-      {isOpen ? (
-        <SkyIdAuthFlow
-          variant="overlay"
-          mode={mode}
-          redirectTo={redirectTo}
-          onClose={closeAuthModal}
-        />
-      ) : null}
+      {isOpen ? <SignInPopup mode={mode} redirectTo={redirectTo} onClose={closeAuthModal} /> : null}
     </AuthModalContext.Provider>
   );
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
   createPaymentAndConfirmBooking,
+  updateBookingStatus,
   getBookingByCodeOrId,
   getActiveBankAccounts,
   getUserLoyaltyWithProgram,
@@ -64,6 +65,8 @@ export async function POST(request: NextRequest) {
     // PNR, so the value is normalised to a string before it is compared or
     // compared case-insensitively.
     const booking_id = typeof body.booking_id === 'string' ? body.booking_id.trim() : '';
+    const return_booking_id =
+      typeof body.return_booking_id === 'string' ? body.return_booking_id.trim() : null;
 
     // Validation
     if (!booking_id || !method || amount === undefined) {
@@ -464,6 +467,17 @@ export async function POST(request: NextRequest) {
 
       throw paymentError;
     });
+
+    if (return_booking_id) {
+      try {
+        await updateBookingStatus(
+          return_booking_id,
+          initialStatus === 'completed' ? 'confirmed' : 'pending'
+        );
+      } catch (retConfirmErr) {
+        console.error('[PAYMENT] Failed to update return booking status:', retConfirmErr);
+      }
+    }
 
     if (initialStatus === 'completed') {
       // Tự động tích lũy điểm thưởng SkyJoy theo hệ số hạng thẻ: Red (x1.0), Silver (x1.2), Gold (x1.5), Diamond (x2.0)

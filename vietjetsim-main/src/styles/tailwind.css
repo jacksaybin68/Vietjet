@@ -266,6 +266,10 @@ input[type='date'].vj-no-native-icon::-moz-calendar-picker-indicator {
   --vj-link-blue-rgb: 0 136 255;
   --vj-radius-field: 5px;
   --vj-radius-card: 12px;
+  /* Gạch chân ô nhập tra cứu (MUI underline) — đo 14/11/2026: 1px #D9D9D9. */
+  --vj-underline-border: #d9d9d9;
+  /* Bo góc dải pill "Dịch vụ tra cứu" — đo 14/11/2026: 16px. */
+  --vj-pill-strip-radius: 16px;
   --vj-radius-modal: 8px;
   --vj-radius-btn: 10px;
   --vj-field-border: #d9dee5;
@@ -310,6 +314,36 @@ input[type='date'].vj-no-native-icon::-moz-calendar-picker-indicator {
   /* Trạng thái disabled của CTA SkyID — `.btn-primary:disabled`. */
   --vj-skyid-disabled-bg: #f5f5f5;
   --vj-skyid-disabled-ink: #c4c4c4;
+
+  /* ─── Token popup SkyID 622×664 (đo 14/11/2026 trên DOM sống) ───────────
+   * Popup đăng nhập/đăng ký của site thật nằm trong khung 622×664 bo 10px:
+   * băng đỏ 48px ở đỉnh, khung form SkyID 500×208, bottom nav 62px bo 15px. */
+  --vj-popup-width: 622px;
+  --vj-popup-height: 664px;
+  --vj-popup-radius: 10px;
+  --vj-popup-header-height: 48px;
+  --vj-popup-header-padding: 17px;
+  --vj-popup-viewport-width: 500px;
+  --vj-popup-viewport-height: 208px;
+  --vj-popup-nav-height: 62px;
+  --vj-popup-nav-radius: 15px;
+  /* Băng đỏ: `linear-gradient(rgb(217,26,33) 34.8%, rgb(171,3,3) 182.34%)`. */
+  --vj-popup-header-gradient: linear-gradient(
+    rgb(217, 26, 33) 34.8%,
+    rgb(171, 3, 3) 182.34%
+  );
+  --vj-popup-shadow: 0 2px 6px rgba(0, 0, 0, 0.21);
+  /* Overlay ảnh của thân popup. */
+  --vj-popup-body-overlay: linear-gradient(
+    rgba(0, 0, 0, 0.5) 0%,
+    rgba(0, 0, 0, 0.094) 100%
+  );
+  /* Bottom nav: nền gradient đen mờ dần. */
+  --vj-popup-nav-gradient: linear-gradient(
+    rgba(0, 0, 0, 0.8) 4.03%,
+    rgba(0, 0, 0, 0.153) 216.13%
+  );
+  --vj-popup-nav-active: #f7c61a;
 
   /* ─── Token dọn nợ hex (ratchet scripts/css-debt.cjs) ───
    * Các giá trị dưới đây từng nằm rải rác dưới dạng `bg-[#rrggbb]` trong
@@ -1312,6 +1346,22 @@ h6 {
   opacity: 0.6;
 }
 
+/* Link "Đăng ký ngay" của dòng SkyJoy — đo được ở site thật (14/11/2026):
+   `84×20px`, chữ `14px/400`, màu `rgb(0,136,255)`. */
+.vj-skyjoy-register-link {
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: rgb(0, 136, 255);
+  text-decoration: none;
+  transition: text-decoration-color 160ms ease;
+}
+
+.vj-skyjoy-register-link:hover {
+  text-decoration: underline;
+}
+
 /* Khối "Đăng nhập" dưới form tra cứu của `/chuyen-bay-cua-toi`.
  * Số đo site thật: cao `48px`, bo góc `12px`, nền trắng, viền
  * `1px rgba(236,32,41,0.1)`, chữ `#D6231E` `16px`, icon `20×20`. */
@@ -1508,6 +1558,24 @@ h6 {
   max-width: 420px;
   box-sizing: border-box;
   padding: 24px 34px 0;
+  border-radius: 0 0 var(--vj-skyid-radius-panel) var(--vj-skyid-radius-panel);
+  background-color: #ffffff;
+  text-align: center;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+
+/* Khối form TRONG popup 622×664 — nằm trong khung 500×208 của site thật.
+ * Form SkyID vốn rộng 420px, nên trong khung 500px nó được đặt lệch trái
+ * (căn giữa theo trục dọc là chưa đủ — iframe thật có form rộng 420px nằm
+ * giữa khung 500px, tức lệch trái 40px). */
+.vj-skyid-popup-card {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 420px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 16px 24px 12px;
   border-radius: 0 0 var(--vj-skyid-radius-panel) var(--vj-skyid-radius-panel);
   background-color: #ffffff;
   text-align: center;
@@ -2666,12 +2734,12 @@ h6 {
 
 .vj-lookup-field .vj-lookup-input {
   width: 100%;
-  height: 40px;
+  height: 32px;
   border: 0;
-  border-bottom: 1px solid var(--vj-field-border);
+  border-bottom: 1px solid var(--vj-underline-border);
   border-radius: 0;
   background: transparent;
-  padding: 4px 0 6px;
+  padding: 6px 0 7px;
   font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
   font-size: 16px;
   line-height: 21.28px;
@@ -2718,6 +2786,136 @@ h6 {
   color: var(--vj-text-gray);
 }
 
+/* ─── Popup SkyID 622×664 (đo 14/11/2026) ──────────────────────────────────
+ * Khung popup đăng nhập/đăng ký của site thật: `622×664px` bo `10px`,
+ * băng đỏ `48px` ở đỉnh, khung form SkyID `500×208px` ở giữa, bottom nav
+ * `62px` bo góc trên `15px`. */
+.vj-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background-color: var(--vj-skyid-overlay);
+  overflow-y: auto;
+}
+
+.vj-popup-frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: var(--vj-popup-width);
+  max-width: 100%;
+  height: var(--vj-popup-height);
+  max-height: 90vh;
+  border-radius: var(--vj-popup-radius);
+  background-color: #1a1a1a;
+  box-shadow: var(--vj-popup-shadow);
+  overflow: hidden;
+}
+
+/* Băng đỏ trên cùng — 48px, padding ngang 17px. */
+.vj-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex: 0 0 auto;
+  height: var(--vj-popup-header-height);
+  padding: 0 var(--vj-popup-header-padding);
+  background-image: var(--vj-popup-header-gradient);
+  box-shadow: var(--vj-popup-shadow);
+}
+
+.vj-popup-header-title {
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.vj-popup-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 999px;
+  background-color: transparent;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+.vj-popup-close:hover {
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+/* Thân popup — overlay ảnh tối dần từ trên xuống. */
+.vj-popup-body {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 0;
+  padding-top: 52px;
+  background-image: var(--vj-popup-body-overlay);
+}
+
+/* Khung form SkyID 500×208 — tương ứng iframe của site thật. */
+.vj-popup-viewport {
+  width: var(--vj-popup-viewport-width);
+  max-width: calc(100% - 32px);
+  height: var(--vj-popup-viewport-height);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Bottom nav 62px — bo góc trên 15px, nền gradient đen mờ dần. */
+.vj-popup-nav {
+  display: flex;
+  align-items: stretch;
+  flex: 0 0 auto;
+  height: var(--vj-popup-nav-height);
+  border-radius: var(--vj-popup-nav-radius) var(--vj-popup-nav-radius) 0 0;
+  background-image: var(--vj-popup-nav-gradient);
+}
+
+.vj-popup-nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0 4px;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.vj-popup-nav-label {
+  font-family: 'KoHo', ui-sans-serif, system-ui, sans-serif;
+  font-size: 10px;
+  line-height: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.vj-popup-nav-item.is-active {
+  color: var(--vj-popup-nav-active);
+}
+
+@media (max-width: 640px) {
+  .vj-popup-frame {
+    width: calc(100vw - 24px);
+    height: min(var(--vj-popup-height), 90vh);
+  }
+}
+
 /* ─── Pill tab (đo 13/11/2026) ────────────────────────────────────────────
  * Dải tab "Dịch vụ tra cứu" của site thật dùng pill bo góc `18px`, cao
  * `36px`; tab đang chọn nền `#FFDD32`, chữ `rgb(115 62 10)`. */
@@ -2758,13 +2956,13 @@ h6 {
   align-items: center;
   gap: 8px;
   padding: 16px;
-  border-radius: var(--vj-radius-card);
+  border-radius: var(--vj-pill-strip-radius);
   background-color: #ffffff;
   box-shadow: 0 3px 12px rgba(0, 31, 62, 0.08);
 }
 
 .vj-pill-tabs .vj-pill-tab {
-  min-width: 160px;
+  min-width: 164px;
 }
 
 /* Form focus styles */

@@ -33,17 +33,20 @@ describe('RootLayout skip link (Phase 1 a11y)', () => {
   // Màn SkyID (13/11/2026) đã bỏ `AuthShell.tsx`: `/dang-nhap`, `/dang-ky`,
   // `/quen-mat-khau` và `/dat-lai-mat-khau` giờ dùng `SkyIdShell` — trang đứng
   // riêng, không có `<Header />`. Danh sách nên dừng ở 11 route render chrome.
+  //
+  // Từ 14/11/2026 `/chuyen-bay-cua-toi` dùng `SubpageHeader` (header TRẮNG
+  // 74px của site thật) thay cho `Header` 4 tầng, nên danh sách quét cả hai.
   const chromeRenderingFiles = [
     ...fs
       .readdirSync(appDir, { recursive: true, encoding: 'utf-8' })
       .filter((e) => e.endsWith('page.tsx')),
-  ].filter((entry) => /<Header[\s/>]/.test(sourceOf(entry)));
+  ].filter((entry) => /<(Header|SubpageHeader)[\s/>]/.test(sourceOf(entry)));
 
   it('scans every surface that renders the shared header', () => {
     expect(chromeRenderingFiles.length).toBeGreaterThanOrEqual(11);
   });
 
-  it.each(chromeRenderingFiles)('%s: main#main-content follows <Header />', (entry) => {
+  it.each(chromeRenderingFiles)('%s: main#main-content follows the shared header', (entry) => {
     expect(sourceOf(entry)).toMatch(/<main[^>]*id="main-content"/);
   });
 });

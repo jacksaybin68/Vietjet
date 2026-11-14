@@ -4,6 +4,7 @@ export type { PaymentRecord };
 
 export interface CreatePaymentInput {
   booking_id: string;
+  return_booking_id?: string;
   method: PaymentMethod;
   amount: number;
   discount_code_id?: string;

@@ -298,7 +298,7 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
               <span className="text-sm2 font-medium text-vj-text leading-tight">
                 {WEEKDAY_LABELS[day.getDay()]}
               </span>
-              <span className="text-sm2 font-medium text-vj-text leading-tight my-0.5">
+              <span className="text-base font-medium text-vj-text leading-tight my-0.5">
                 {day.getDate()} tháng {day.getMonth() + 1}
               </span>
               <span className="text-sm2 font-medium text-vj-text leading-tight">

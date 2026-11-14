@@ -49,17 +49,20 @@ beforeEach(() => {
   mockAuth.getSocialProviders.mockResolvedValue([]);
 });
 
-describe('LoginPage — form SkyID 1 cột', () => {
-  it('render khối form trắng, tiêu đề và chân trang logo SkyJoy ID', () => {
-    render(<LoginPage />);
+describe('LoginPage — form SkyID trong popup 622×664', () => {
+  it('render popup của site thật: khung form, tiêu đề và nút bấm', () => {
+    const { container } = render(<LoginPage />);
 
-    // Bản SkyID 1 cột: KHÔNG còn header đỏ `CheckInHeader` (site thật không có
+    // Bản popup: KHÔNG còn header đỏ `CheckInHeader` (site thật không có
     // subheader ở màn này) và KHÔNG còn modal 2 cột + hero ảnh 600×600.
     expect(screen.queryByTestId('checkin-header')).not.toBeInTheDocument();
     expect(screen.queryByAltText('Khoang cabin Vietjet Air')).not.toBeInTheDocument();
 
+    // Khung popup 622×664 + khung form SkyID 500×208.
+    expect(container.querySelector('.vj-popup-frame')).toBeInTheDocument();
+    expect(container.querySelector('.vj-popup-viewport')).toBeInTheDocument();
+
     expect(screen.getByRole('heading', { name: 'Đăng nhập' })).toBeInTheDocument();
-    expect(screen.getByText('Được cung cấp và xác thực bởi SkyJoy ID')).toBeInTheDocument();
 
     // Ô điện thoại có nhãn "Số điện thoại" và placeholder đúng site thật.
     expect(screen.getByLabelText('Số điện thoại')).toBeInTheDocument();

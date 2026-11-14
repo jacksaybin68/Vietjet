@@ -1,0 +1,19 @@
+{
+  "route": "signin-popup",
+  "viewport": "mobile-390",
+  "clicked": true,
+  "data": {
+    "url": "https://auth.vietjetair.com/realms/skyjoy/protocol/openid-connect/auth?client_id=vja-web&redirect_uri=https%3A%2F%2Fnewweb.vietjetair.com%2Fvi%2F%3Fui_locales%3Dvi&state=dab1d2af-e16e-4475-8941-cf6355dac730&response_mode=query&response_type=code&scope=openid%20profile%20phone%20email&code_challenge=i38fguhDft9lGx0JHC0H9e979Bssmh12Otb6BxIQs18&code_challenge_method=S256",
+    "viewport": {
+      "w": 980,
+      "h": 2121
+    },
+    "candidates": [],
+    "redBands": [],
+    "iframes": [],
+    "navs": [],
+    "bottomBars": [],
+    "buttons": [],
+    "bodyText": "403 Forbidden"
+  }
+}

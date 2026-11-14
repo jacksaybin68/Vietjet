@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckInHeader } from '@/shared/components/navigation';
 import { Footer } from '@/shared/components/navigation';
+import { useAuthModal } from '@/features/auth/components';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/shared/components/feedback';
 import {
@@ -12,7 +13,6 @@ import {
   MdCheckCircle,
   MdQrCode2,
   MdAccessTime,
-  MdConfirmationNumber,
   MdChair,
 } from 'react-icons/md';
 import { apiRequest, ApiRequestError } from '@/shared/services';
@@ -54,6 +54,7 @@ interface CheckInData {
 function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
   const router = useRouter();
   const toast = useToast();
+  const { openAuthModal } = useAuthModal();
 
   // The URL only carries the booking code; the surname is still required by the
   // lookup API, so we prefill the code and stay on the search step.
@@ -274,30 +275,20 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
               className="relative mx-auto max-w-full px-2 sm:px-0"
               style={{ width: 'min(1200px, calc(100vw - 24px))' }}
             >
-              {/* Dải pill tra cứu — dùng chung style `.vj-pill-tabs` với trang
-                  "Chuyến bay của tôi": pill cao 36px, bo góc 18px, active nền
-                  #FFDD32 chữ rgb(115,62,10), inactive nền trong suốt. */}
-              <div className="vj-pill-tabs" role="tablist" aria-label="Dịch vụ tra cứu">
-                <span className="vj-pill-tab" data-active="true">
-                  <MdConfirmationNumber className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span className="truncate">Tìm kiếm mã đặt chỗ</span>
-                </span>
-                <Link
-                  href="/chuyen-bay-cua-toi"
-                  className="vj-pill-tab"
-                  role="tab"
-                  aria-selected={false}
-                >
-                  <FlightIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span className="truncate">Chuyến bay của tôi</span>
-                </Link>
-              </div>
-
               {/* ============ BƯỚC 1: TRA CỨU ============
                 Số đo lấy từ newweb.vietjetair.com (/vi/checkin, 1440×900):
-                container 1200px; cột trái 410px (form rộng 370px); cột phải 649px;
-                H1 "LÀM THỦ TỤC" 20px/600 uppercase; input cao 40px bo góc 5px;
-                nút "Tìm kiếm" 127×39px gradient 26.73deg bo góc 10px. */}
+                container `x=145`, `w=1150`; cột trái `x=170`, `w=410` (ô nhập
+                rộng 370px); cột phải `x=626`, `w=649`;
+                H1 "LÀM THỦ TỤC" 20px/600 uppercase `lh 26px`;
+                mô tả 16px/500 `lh 20.8px`;
+                ô nhập cao 40px (wrapper), input 32px, gạch chân 1px;
+                nút "Tìm kiếm" 127×39px gradient 26.73deg bo góc 10px;
+                nút "Đăng nhập" 137×48px bo góc 12px, viền 1px rgba(236,32,41,.1);
+                link "Đăng ký ngay" 14px/400 màu rgb(0,136,255).
+
+                Trang check-in của site thật KHÔNG có dải pill "Dịch vụ tra cứu"
+                (đo: không tồn tại `nav[aria-label="Dịch vụ tra cứu"]`) — nên
+                dải pill đã bị bỏ khỏi trang này. */}
               {step === 'search' && (
                 <div className="vj-lookup-card mt-4 grid w-full grid-cols-1 overflow-hidden lg:grid-cols-[410px_649px]">
                   {/* Cột trái: CHECK-IN form */}
@@ -314,7 +305,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
 
                     <form onSubmit={handleSearch} className="mt-5 flex flex-col items-center">
                       <div className="flex w-full flex-col items-center gap-[17px]">
-                        {/* Ô nhập 1: Mã đặt chỗ — cao 40px, bo góc 5px, rộng 370px
+                        {/* Ô nhập 1: Mã đặt chỗ — cao 40px, rộng 370px
                           (320px ở mobile, đo được trên site thật). */}
                         <div className="vj-lookup-field w-full max-w-[320px] lg:max-w-[370px]">
                           <input
@@ -355,6 +346,29 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                         {loading ? 'Đang tìm…' : 'Tìm kiếm'}
                       </button>
                     </form>
+
+                    {/* Nút "Đăng nhập" (137×48px, bo góc 12px, viền
+                        1px rgba(236,32,41,.1), chữ #D6231E 16px/500) + dòng
+                        "Bạn đã biết về Vietjet SkyJoy? Đăng ký ngay" — đo được ở
+                        site thật (nút ở `x=307,y=471`, link ở `x=428,y=535`). */}
+                    <div className="mt-[30px] flex flex-col items-center gap-4">
+                      <button
+                        type="button"
+                        onClick={() => openAuthModal('login', { redirectTo: '/lam-thu-tuc' })}
+                        className="vj-skyjoy-login-btn w-[137px]"
+                      >
+                        Đăng nhập
+                      </button>
+                      <p className="text-sm leading-[20px] text-[var(--vj-text)]">
+                        Bạn đã biết về Vietjet SkyJoy?{' '}
+                        <Link
+                          href="/dang-ky"
+                          className="vj-skyjoy-register-link"
+                        >
+                          Đăng ký ngay
+                        </Link>
+                      </p>
+                    </div>
                   </div>
 
                   {/* Cột phải: Toàn bộ 16px/500 KoHo, line-height 24px, nhấn mạnh 16px/700 */}

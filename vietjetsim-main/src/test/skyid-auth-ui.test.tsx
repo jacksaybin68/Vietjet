@@ -43,20 +43,22 @@ beforeEach(() => {
 });
 
 describe('SkyID — vỏ giao diện xác thực thật của Vietjet', () => {
-  it('trang đăng nhập có nền ảnh, khối form trắng và chân trang SkyJoy ID', () => {
+  // Từ 14/11/2026 site thật KHÔNG có trang đăng nhập riêng: mọi thao tác đều
+  // mở popup 622×664 (băng đỏ 48px, khung form 500×208, bottom nav 62px).
+  // `/dang-nhap` và `/dang-ky` render đúng popup đó để deep-link vẫn dùng được.
+  it('trang đăng nhập mở popup 622×664 của site thật', () => {
     const { container } = render(<LoginPage />);
 
-    // Vỏ `.vj-skyid-layout` — nền `bg.jpg` toàn trang, khối form `.vj-skyid-card`.
-    expect(container.querySelector('.vj-skyid-layout')).toBeInTheDocument();
-    expect(container.querySelector('.vj-skyid-card')).toBeInTheDocument();
+    // Khung popup + băng đỏ + khung form SkyID 500×208 + bottom nav 62px.
+    expect(container.querySelector('.vj-popup-overlay')).toBeInTheDocument();
+    expect(container.querySelector('.vj-popup-frame')).toBeInTheDocument();
+    expect(container.querySelector('.vj-popup-header')).toBeInTheDocument();
+    expect(container.querySelector('.vj-popup-viewport')).toBeInTheDocument();
+    expect(container.querySelector('.vj-popup-nav')).toBeInTheDocument();
+    expect(container.querySelector('.vj-skyid-popup-card')).toBeInTheDocument();
 
-    // Logo chính thức: đỏ góc trên, trắng góc dưới, 3 logo ở chân trang.
-    expect(container.querySelector('img[src="/images/skyid/logo-red.svg"]')).toBeInTheDocument();
-    expect(container.querySelector('img[src="/images/skyid/logo-white.svg"]')).toBeInTheDocument();
-    expect(container.querySelector('img[src="/images/skyid/sky-loy.svg"]')).toBeInTheDocument();
-    expect(container.querySelector('img[src="/images/skyid/vietjet-air.svg"]')).toBeInTheDocument();
-    expect(container.querySelector('img[src="/images/skyid/galaxy-pay.svg"]')).toBeInTheDocument();
-    expect(screen.getByText('Được cung cấp và xác thực bởi SkyJoy ID')).toBeInTheDocument();
+    // Tiêu đề băng đỏ đúng chữ của site thật.
+    expect(screen.getByText('Đăng nhập SkyJoy')).toBeInTheDocument();
 
     // Landmark: đúng một `<main id="main-content">`, không có `<header>`.
     expect(container.querySelectorAll('main#main-content')).toHaveLength(1);

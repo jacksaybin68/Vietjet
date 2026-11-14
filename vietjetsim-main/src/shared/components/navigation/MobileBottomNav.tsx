@@ -51,14 +51,7 @@ const TABS: readonly Tab[] = [
 const ACTIVE_CLASS = 'text-vj-nav-active font-bold';
 
 /** Paths where a bottom bar would fight the page's own sticky footer. */
-const HIDDEN_ON = [
-  '/quan-tri',
-  '/dang-nhap',
-  '/dat-lai-mat-khau',
-  '/quen-mat-khau',
-  '/tim-ve',
-  '/chuyen-bay-cua-toi',
-];
+const HIDDEN_ON = ['/quan-tri', '/dang-nhap', '/dat-lai-mat-khau', '/quen-mat-khau', '/tim-ve'];
 
 /**
  * Height the bar occupies, exported so pages that already pad for a sticky

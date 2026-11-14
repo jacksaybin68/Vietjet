@@ -4,14 +4,17 @@ export const dynamic = 'force-dynamic';
 
 import React from 'react';
 import { useSearchParams } from 'next/navigation';
-import SkyIdAuthFlow from '@/features/auth/components/skyid/SkyIdAuthFlow';
+import SignInPopup from '@/features/auth/components/SignInPopup';
 
 /**
  * Trang "Đăng nhập".
  *
- * Từ đợt sao chép giao diện 13/11/2026, đăng nhập của site thật là **form 1 cột
- * SkyID** trên nền ảnh toàn trang (`skyjoy-id.vietjetair.com`), thay cho modal 2
- * cột trước đây. Xem `docs/qa/so-do-skyid-2026-11-13.md`.
+ * Site thật không có trang đăng nhập riêng — mọi thao tác đăng nhập đều mở
+ * **popup 622×664** (băng đỏ 48px, khung SkyID 500×208, bottom nav 62px).
+ * Route này render đúng popup đó trên nền tối `rgba(0,0,0,.4)`, để deep-link
+ * `/dang-nhap` vẫn dùng được.
+ *
+ * Số đo: `docs/qa/2026-11-15-vietjet-measure/README.md` §1.
  *
  * Route vẫn public (`src/lib/route-access.ts`) và vẫn nhận `?redirect=` để quay
  * lại trang gốc sau khi đăng nhập. `?tab=register` vẫn deep-link sang đăng ký.
@@ -23,7 +26,7 @@ function LoginPageInner() {
 
   return (
     <main id="main-content" className="min-h-screen">
-      <SkyIdAuthFlow variant="page" mode={mode} redirectTo={redirect} />
+      <SignInPopup mode={mode} redirectTo={redirect} />
     </main>
   );
 }
