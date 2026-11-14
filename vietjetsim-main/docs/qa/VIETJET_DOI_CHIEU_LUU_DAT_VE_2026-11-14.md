@@ -174,6 +174,28 @@
 | 17 | Thiếu hàng "Chi tiết" trong băng tổng dưới | P1 | `FlightBookingResultsWrapper.tsx` |
 | 18 | Băng tổng dưới: "Tổng tiền" 600 thay vì 400 | P2 | `FlightBookingResultsWrapper.tsx` |
 
+### 6.1. Trạng thái sau khi thực thi plan (đo lại 14/11/2026, 1440×900)
+
+`scripts/measure-booking-flow-local.cjs` chạy trên production build → **32/32 mục trong ngưỡng**
+(31 mục gốc + 1 mục bổ sung `date weekday font-size`).
+
+| # | Vấn đề | Trạng thái | Ghi chú |
+|---|---|---|---|
+| 2 | Băng "Chuyến bay một chiều" | ✅ | `1200×82`, bo `16px`, gradient `28.91deg`, x=120 y=90 |
+| 3 | Nút "Đi tiếp" | ✅ | `127×39`, bo `10px`, `14px/500` KoHo, gradient `26.73deg` |
+| 4 | Băng tổng dưới | ✅ | `1200×59` x=120, padding trong `10px`/`20px` |
+| 5 | Dải ngày ô | ✅ | `156×95`; weekday `13px/500`, ngày `16px/500` |
+| 6 | Header subpage | ✅ | `74px` |
+| 7 | Gradient panel header | ✅ | `359.2deg, #D91A21 53.08%, #6F0000 206.46%` |
+| 9 | Nền thanh mục panel | ✅ | `rgb(241, 241, 241)` |
+| 10 | Bo góc panel | ✅ | `6px` |
+| 17 | Hàng "Chi tiết" | ✅ | có trong khối `405px`, lệch phải `73px` từ "Tổng tiền" |
+| 18 | "Tổng tiền" băng dưới | ✅ | `16px/500`, giá `20px/400` |
+| — | Vị trí "Tổng tiền" băng dưới | ✅ | x=768 (site 769, lệch 1px) |
+| — | Panel x | ✅ | x=940 (khớp tuyệt đối) |
+
+Các mục `#1`, `#11`–`#16` thuộc `/thanh-toan` — ngoài phạm vi plan §7, chưa xử lý.
+
 ---
 
 ## 7. Những gì **không đo được** (giới hạn kỹ thuật)

@@ -1,0 +1,815 @@
+{
+  "card": {
+    "tag": "DIV",
+    "cls": "jss293",
+    "text": "Từ Điểm khởi hành Đến Điểm đến",
+    "x": 18,
+    "y": 529,
+    "w": 354,
+    "h": 72,
+    "display": "grid",
+    "fs": "14px",
+    "fw": "500",
+    "color": "rgb(38, 50, 56)",
+    "bg": "rgb(255, 255, 255)",
+    "radius": "16px",
+    "padding": "0px",
+    "border": "0px none rgb(38, 50, 56)"
+  },
+  "cardKids": [
+    {
+      "tag": "DIV",
+      "cls": "jss294",
+      "text": "",
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "contents",
+      "fs": "14px",
+      "fw": "500",
+      "color": "rgb(38, 50, 56)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "padding": "0px 25px",
+      "border": "0px none rgb(38, 50, 56)"
+    },
+    {
+      "tag": "DIV",
+      "cls": "jss362",
+      "text": "Từ Điểm khởi hành Đến Điểm đến",
+      "x": 18,
+      "y": 529,
+      "w": 354,
+      "h": 72,
+      "display": "grid",
+      "fs": "14px",
+      "fw": "500",
+      "color": "rgb(38, 50, 56)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "padding": "0px",
+      "border": "0px none rgb(38, 50, 56)"
+    },
+    {
+      "tag": "DIV",
+      "cls": "jss317",
+      "text": "",
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "contents",
+      "fs": "14px",
+      "fw": "500",
+      "color": "rgb(38, 50, 56)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "padding": "0px",
+      "border": "0px none rgb(38, 50, 56)"
+    },
+    {
+      "tag": "DIV",
+      "cls": "jss442",
+      "text": "Tìm chuyến bay tốt nhất nhanh hơn",
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "fs": "14px",
+      "fw": "500",
+      "color": "rgb(38, 50, 56)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "padding": "0px",
+      "border": "0px none rgb(38, 50, 56)"
+    }
+  ],
+  "cardGrid": {
+    "self": {
+      "tag": "DIV",
+      "cls": "jss293",
+      "text": "Từ Điểm khởi hành Đến Điểm đến",
+      "x": 18,
+      "y": 529,
+      "w": 354,
+      "h": 72,
+      "display": "grid",
+      "fs": "14px",
+      "fw": "500",
+      "color": "rgb(38, 50, 56)",
+      "bg": "rgb(255, 255, 255)",
+      "radius": "16px",
+      "padding": "0px",
+      "border": "0px none rgb(38, 50, 56)"
+    },
+    "kids": [
+      {
+        "self": {
+          "tag": "DIV",
+          "cls": "jss294",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "display": "contents",
+          "fs": "14px",
+          "fw": "500",
+          "color": "rgb(38, 50, 56)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "radius": "0px",
+          "padding": "0px 25px",
+          "border": "0px none rgb(38, 50, 56)"
+        },
+        "kids": [
+          {
+            "self": {
+              "tag": "DIV",
+              "cls": "jss296",
+              "text": "Một chiềuKhứ hồiNhiều chặng",
+              "x": 0,
+              "y": 0,
+              "w": 0,
+              "h": 0,
+              "display": "none",
+              "fs": "14px",
+              "fw": "500",
+              "color": "rgb(38, 50, 56)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "radius": "0px",
+              "padding": "10px 10px 5px",
+              "border": "0px none rgb(38, 50, 56)"
+            },
+            "kids": [
+              {
+                "self": {
+                  "tag": "DIV",
+                  "cls": "jss297",
+                  "text": "Một chiềuKhứ hồiNhiều chặng",
+                  "x": 0,
+                  "y": 0,
+                  "w": 0,
+                  "h": 0,
+                  "display": "grid",
+                  "fs": "14px",
+                  "fw": "500",
+                  "color": "rgb(38, 50, 56)",
+                  "bg": "rgb(233, 230, 229)",
+                  "radius": "999px",
+                  "padding": "3px",
+                  "border": "0px none rgb(38, 50, 56)"
+                },
+                "kids": [
+                  null,
+                  null,
+                  null
+                ]
+              }
+            ]
+          },
+          {
+            "self": {
+              "tag": "DIV",
+              "cls": "jss295",
+              "text": "Mã khuyến mãiTìm chuyến bay rẻ nhất",
+              "x": 0,
+              "y": 0,
+              "w": 0,
+              "h": 0,
+              "display": "none",
+              "fs": "14px",
+              "fw": "500",
+              "color": "rgb(38, 50, 56)",
+              "bg": "rgb(243, 241, 241)",
+              "radius": "14px",
+              "padding": "0px 20px",
+              "border": "0px none rgb(38, 50, 56)"
+            },
+            "kids": [
+              {
+                "self": {
+                  "tag": "DIV",
+                  "cls": "jss329",
+                  "text": "Mã khuyến mãi",
+                  "x": 0,
+                  "y": 0,
+                  "w": 0,
+                  "h": 0,
+                  "display": "flex",
+                  "fs": "14px",
+                  "fw": "500",
+                  "color": "rgb(38, 50, 56)",
+                  "bg": "rgba(0, 0, 0, 0)",
+                  "radius": "0px",
+                  "padding": "0px",
+                  "border": "0px none rgb(38, 50, 56)"
+                },
+                "kids": [
+                  null
+                ]
+              },
+              {
+                "self": {
+                  "tag": "LABEL",
+                  "cls": "jss330",
+                  "text": "Tìm chuyến bay rẻ nhất",
+                  "x": 0,
+                  "y": 0,
+                  "w": 0,
+                  "h": 0,
+                  "display": "flex",
+                  "fs": "14px",
+                  "fw": "500",
+                  "color": "rgb(38, 50, 56)",
+                  "bg": "rgba(0, 0, 0, 0)",
+                  "radius": "0px",
+                  "padding": "0px",
+                  "border": ""
+                },
+                "kids": [
+                  null,
+                  null,
+                  null
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "self": {
+          "tag": "DIV",
+          "cls": "jss362",
+          "text": "Từ Điểm khởi hành Đến Điểm đến",
+          "x": 18,
+          "y": 529,
+          "w": 354,
+          "h": 72,
+          "display": "grid",
+          "fs": "14px",
+          "fw": "500",
+          "color": "rgb(38, 50, 56)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "radius": "0px",
+          "padding": "0px",
+          "border": "0px none rgb(38, 50, 56)"
+        },
+        "kids": [
+          {
+            "self": {
+              "tag": "DIV",
+              "cls": "jss365 jss366",
+              "text": "Từ Điểm khởi hành Đến Điểm đến",
+              "x": 18,
+              "y": 529,
+              "w": 354,
+              "h": 72,
+              "display": "grid",
+              "fs": "14px",
+              "fw": "500",
+              "color": "rgb(38, 50, 56)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "radius": "0px",
+              "padding": "0px",
+              "border": "0px none rgb(38, 50, 56)"
+            },
+            "kids": [
+              {
+                "self": {
+                  "tag": "DIV",
+                  "cls": "jss372",
+                  "text": "Từ Điểm khởi hành",
+                  "x": 18,
+                  "y": 529,
+                  "w": 161,
+                  "h": 72,
+                  "display": "block",
+                  "fs": "14px",
+                  "fw": "500",
+                  "color": "rgb(38, 50, 56)",
+                  "bg": "rgba(0, 0, 0, 0)",
+                  "radius": "0px",
+                  "padding": "0px",
+                  "border": "0px none rgb(38, 50, 56)"
+                },
+                "kids": [
+                  null
+                ]
+              },
+              {
+                "self": {
+                  "tag": "BUTTON",
+                  "cls": "jss384",
+                  "text": "",
+                  "x": 179,
+                  "y": 530,
+                  "w": 32,
+                  "h": 71,
+                  "display": "flex",
+                  "fs": "14px",
+                  "fw": "400",
+                  "color": "rgb(94, 105, 116)",
+                  "bg": "rgba(0, 0, 0, 0)",
+                  "radius": "999px",
+                  "padding": "0px",
+                  "border": "0px none rgb(94, 105, 116)"
+                },
+                "kids": [
+                  null,
+                  null
+                ]
+              },
+              {
+                "self": {
+                  "tag": "DIV",
+                  "cls": "jss372",
+                  "text": "Đến Điểm đến",
+                  "x": 211,
+                  "y": 529,
+                  "w": 161,
+                  "h": 72,
+                  "display": "block",
+                  "fs": "14px",
+                  "fw": "500",
+                  "color": "rgb(38, 50, 56)",
+                  "bg": "rgba(0, 0, 0, 0)",
+                  "radius": "0px",
+                  "padding": "0px",
+                  "border": "0px none rgb(38, 50, 56)"
+                },
+                "kids": [
+                  null
+                ]
+              },
+              {
+                "self": {
+                  "tag": "DIV",
+                  "cls": "jss386",
+                  "text": "Ngày điDD/MM/YYYY",
+                  "x": 0,
+                  "y": 0,
+                  "w": 0,
+                  "h": 0,
+                  "display": "none",
+                  "fs": "14px",
+                  "fw": "500",
+                  "color": "rgb(38, 50, 56)",
+                  "bg": "rgba(0, 0, 0, 0)",
+                  "radius": "0px",
+                  "padding": "0px",
+                  "border": ""
+                },
+                "kids": [
+                  null
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "self": {
+          "tag": "DIV",
+          "cls": "jss317",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "display": "contents",
+          "fs": "14px",
+          "fw": "500",
+          "color": "rgb(38, 50, 56)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "radius": "0px",
+          "padding": "0px",
+          "border": "0px none rgb(38, 50, 56)"
+        },
+        "kids": [
+          {
+            "self": {
+              "tag": "DIV",
+              "cls": "jss321",
+              "text": "Hành khách1 Người lớn, 0 Trẻ em, 0 Em bé",
+              "x": 0,
+              "y": 0,
+              "w": 0,
+              "h": 0,
+              "display": "none",
+              "fs": "14px",
+              "fw": "500",
+              "color": "rgb(38, 50, 56)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "radius": "0px",
+              "padding": "0px",
+              "border": "0px none rgb(38, 50, 56)"
+            },
+            "kids": [
+              {
+                "self": {
+                  "tag": "BUTTON",
+                  "cls": "jss318 jss320",
+                  "text": "Hành khách1 Người lớn, 0 Trẻ em, 0 Em bé",
+                  "x": 0,
+                  "y": 0,
+                  "w": 0,
+                  "h": 0,
+                  "display": "flex",
+                  "fs": "16px",
+                  "fw": "500",
+                  "color": "rgb(23, 25, 28)",
+                  "bg": "rgba(0, 0, 0, 0)",
+                  "radius": "0px",
+                  "padding": "10px 20px",
+                  "border": "0px none rgb(23, 25, 28)"
+                },
+                "kids": [
+                  null,
+                  null
+                ]
+              }
+            ]
+          },
+          {
+            "self": {
+              "tag": "DIV",
+              "cls": "jss322",
+              "text": "",
+              "x": 0,
+              "y": 0,
+              "w": 0,
+              "h": 0,
+              "display": "none",
+              "fs": "14px",
+              "fw": "500",
+              "color": "rgb(38, 50, 56)",
+              "bg": "rgb(243, 241, 241)",
+              "radius": "8px",
+              "padding": "0px",
+              "border": "0px none rgb(38, 50, 56)"
+            },
+            "kids": [
+              {
+                "self": {
+                  "tag": "BUTTON",
+                  "cls": "jss323",
+                  "text": "",
+                  "x": 0,
+                  "y": 0,
+                  "w": 0,
+                  "h": 0,
+                  "display": "inline-flex",
+                  "fs": "14px",
+                  "fw": "400",
+                  "color": "rgb(191, 197, 203)",
+                  "bg": "rgba(0, 0, 0, 0)",
+                  "radius": "8px",
+                  "padding": "0px",
+                  "border": "0px none rgb(191, 197, 203)"
+                },
+                "kids": [
+                  null
+                ]
+              },
+              {
+                "self": {
+                  "tag": "BUTTON",
+                  "cls": "jss323",
+                  "text": "",
+                  "x": 0,
+                  "y": 0,
+                  "w": 0,
+                  "h": 0,
+                  "display": "inline-flex",
+                  "fs": "14px",
+                  "fw": "400",
+                  "color": "rgb(94, 105, 116)",
+                  "bg": "rgba(0, 0, 0, 0)",
+                  "radius": "8px",
+                  "padding": "0px",
+                  "border": "0px none rgb(94, 105, 116)"
+                },
+                "kids": [
+                  null
+                ]
+              }
+            ]
+          },
+          {
+            "self": {
+              "tag": "DIV",
+              "cls": "jss337",
+              "text": "Tìm chuyến bay",
+              "x": 0,
+              "y": 0,
+              "w": 0,
+              "h": 0,
+              "display": "none",
+              "fs": "14px",
+              "fw": "500",
+              "color": "rgb(38, 50, 56)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "radius": "0px",
+              "padding": "15px 20px 20px",
+              "border": "0px none rgb(38, 50, 56)"
+            },
+            "kids": [
+              {
+                "self": {
+                  "tag": "BUTTON",
+                  "cls": "MuiButtonBase-root MuiButton-r",
+                  "text": "Tìm chuyến bay",
+                  "x": 0,
+                  "y": 0,
+                  "w": 0,
+                  "h": 0,
+                  "display": "inline-flex",
+                  "fs": "18px",
+                  "fw": "500",
+                  "color": "rgb(51, 51, 51)",
+                  "bg": "rgb(255, 213, 48)",
+                  "radius": "10px",
+                  "padding": "0px 15px",
+                  "border": "0px none rgb(51, 51, 51)"
+                },
+                "kids": [
+                  null,
+                  null
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "self": {
+          "tag": "DIV",
+          "cls": "jss442",
+          "text": "Tìm chuyến bay tốt nhất nhanh hơn",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "display": "none",
+          "fs": "14px",
+          "fw": "500",
+          "color": "rgb(38, 50, 56)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "radius": "0px",
+          "padding": "0px",
+          "border": "0px none rgb(38, 50, 56)"
+        },
+        "kids": [
+          {
+            "self": {
+              "tag": "BUTTON",
+              "cls": "jss443",
+              "text": "Tìm chuyến bay tốt nhất nhanh hơn",
+              "x": 0,
+              "y": 0,
+              "w": 0,
+              "h": 0,
+              "display": "inline-flex",
+              "fs": "12px",
+              "fw": "700",
+              "color": "rgb(236, 32, 41)",
+              "bg": "rgba(0, 0, 0, 0)",
+              "radius": "0px",
+              "padding": "8px 10px",
+              "border": "0px none rgb(236, 32, 41)"
+            },
+            "kids": [
+              {
+                "self": {
+                  "tag": "svg",
+                  "cls": "[object SVGAnimatedString]",
+                  "text": "",
+                  "x": 0,
+                  "y": 0,
+                  "w": 0,
+                  "h": 0,
+                  "display": "block",
+                  "fs": "24px",
+                  "fw": "700",
+                  "color": "rgb(236, 32, 41)",
+                  "bg": "rgba(0, 0, 0, 0)",
+                  "radius": "0px",
+                  "padding": "0px",
+                  "border": "0px none rgb(236, 32, 41)"
+                },
+                "kids": [
+                  null
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "fields": [
+    {
+      "label": "Từ",
+      "info": {
+        "tag": "BUTTON",
+        "cls": "jss371 jss374",
+        "text": "Từ Điểm khởi hành",
+        "x": 18,
+        "y": 529,
+        "w": 161,
+        "h": 72,
+        "display": "flex",
+        "fs": "14px",
+        "fw": "400",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "10px",
+        "border": "0px none rgb(0, 0, 0)"
+      }
+    },
+    {
+      "label": "Đến",
+      "info": {
+        "tag": "BUTTON",
+        "cls": "jss371 jss374",
+        "text": "Đến Điểm đến",
+        "x": 211,
+        "y": 529,
+        "w": 161,
+        "h": 72,
+        "display": "flex",
+        "fs": "14px",
+        "fw": "400",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "10px",
+        "border": "0px none rgb(0, 0, 0)"
+      }
+    },
+    {
+      "label": "Ngày đi",
+      "info": {
+        "tag": "BUTTON",
+        "cls": "jss388 jss391 jss392",
+        "text": "Ngày điDD/MM/YYYY",
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "display": "block",
+        "fs": "14px",
+        "fw": "400",
+        "color": "rgb(0, 0, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "10px 0px 10px 20px",
+        "border": "0px none rgb(0, 0, 0)"
+      }
+    },
+    {
+      "label": "Hành khách",
+      "info": {
+        "tag": "BUTTON",
+        "cls": "jss318 jss320",
+        "text": "Hành khách1 Người lớn, 0 Trẻ em, 0 Em bé",
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "display": "flex",
+        "fs": "16px",
+        "fw": "500",
+        "color": "rgb(23, 25, 28)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "radius": "0px",
+        "padding": "10px 20px",
+        "border": "0px none rgb(23, 25, 28)"
+      }
+    }
+  ],
+  "cta": {
+    "tag": "BUTTON",
+    "cls": "MuiButtonBase-root MuiButton-r",
+    "text": "Tìm chuyến bay",
+    "x": 0,
+    "y": 0,
+    "w": 0,
+    "h": 0,
+    "display": "inline-flex",
+    "fs": "18px",
+    "fw": "500",
+    "color": "rgb(51, 51, 51)",
+    "bg": "rgb(255, 213, 48)",
+    "radius": "10px",
+    "padding": "0px 15px",
+    "border": "0px none rgb(51, 51, 51)"
+  },
+  "ctaParent": {
+    "tag": "DIV",
+    "cls": "jss337",
+    "text": "Tìm chuyến bay",
+    "x": 0,
+    "y": 0,
+    "w": 0,
+    "h": 0,
+    "display": "none",
+    "fs": "14px",
+    "fw": "500",
+    "color": "rgb(38, 50, 56)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "padding": "15px 20px 20px",
+    "border": "0px none rgb(38, 50, 56)"
+  },
+  "ctaParentParent": {
+    "tag": "DIV",
+    "cls": "jss317",
+    "text": "",
+    "x": 0,
+    "y": 0,
+    "w": 0,
+    "h": 0,
+    "display": "contents",
+    "fs": "14px",
+    "fw": "500",
+    "color": "rgb(38, 50, 56)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(38, 50, 56)"
+  },
+  "red": {
+    "tag": "DIV",
+    "cls": "jss287 jss500",
+    "text": "Đặt vé Khách sạn Skyshop Đổi thưởng vé m",
+    "x": 12,
+    "y": 477,
+    "w": 366,
+    "h": 130,
+    "display": "block",
+    "fs": "14px",
+    "fw": "500",
+    "color": "rgb(38, 50, 56)",
+    "bg": "rgb(236, 32, 41)",
+    "radius": "20px",
+    "padding": "6px",
+    "border": "0px none rgb(38, 50, 56)"
+  },
+  "redKids": [
+    {
+      "tag": "BUTTON",
+      "cls": "jss476",
+      "text": "Amy sẵn sàng giúp đỡ",
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "fs": "14px",
+      "fw": "400",
+      "color": "rgb(0, 0, 0)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "padding": "0px",
+      "border": "0px none rgb(0, 0, 0)"
+    },
+    {
+      "tag": "DIV",
+      "cls": "jss288",
+      "text": "Đặt vé Khách sạn Skyshop Đổi thưởng vé m",
+      "x": 18,
+      "y": 483,
+      "w": 354,
+      "h": 46,
+      "display": "flex",
+      "fs": "14px",
+      "fw": "500",
+      "color": "rgb(38, 50, 56)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "radius": "0px",
+      "padding": "0px",
+      "border": "0px none rgb(38, 50, 56)"
+    },
+    {
+      "tag": "DIV",
+      "cls": "jss293",
+      "text": "Từ Điểm khởi hành Đến Điểm đến",
+      "x": 18,
+      "y": 529,
+      "w": 354,
+      "h": 72,
+      "display": "grid",
+      "fs": "14px",
+      "fw": "500",
+      "color": "rgb(38, 50, 56)",
+      "bg": "rgb(255, 255, 255)",
+      "radius": "16px",
+      "padding": "0px",
+      "border": "0px none rgb(38, 50, 56)"
+    }
+  ]
+}

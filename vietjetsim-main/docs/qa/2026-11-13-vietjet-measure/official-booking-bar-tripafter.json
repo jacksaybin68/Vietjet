@@ -1,0 +1,422 @@
+{
+  "before": [
+    {
+      "text": "Một chiều",
+      "w": 0,
+      "chain": [
+        {
+          "cls": "jss271 jss272",
+          "display": "block",
+          "w": 0,
+          "h": 0
+        },
+        {
+          "cls": "jss270",
+          "display": "flex",
+          "w": 0,
+          "h": 0
+        },
+        {
+          "cls": "jss269",
+          "display": "inline-flex",
+          "w": 0,
+          "h": 0
+        },
+        {
+          "cls": "jss267",
+          "display": "none",
+          "w": 0,
+          "h": 0
+        }
+      ]
+    },
+    {
+      "text": "Khứ hồi",
+      "w": 0,
+      "chain": [
+        {
+          "cls": "jss271",
+          "display": "block",
+          "w": 0,
+          "h": 0
+        },
+        {
+          "cls": "jss270",
+          "display": "flex",
+          "w": 0,
+          "h": 0
+        },
+        {
+          "cls": "jss269",
+          "display": "inline-flex",
+          "w": 0,
+          "h": 0
+        },
+        {
+          "cls": "jss267",
+          "display": "none",
+          "w": 0,
+          "h": 0
+        }
+      ]
+    },
+    {
+      "text": "Nhiều chặng",
+      "w": 0,
+      "chain": [
+        {
+          "cls": "jss271",
+          "display": "block",
+          "w": 0,
+          "h": 0
+        },
+        {
+          "cls": "jss270",
+          "display": "flex",
+          "w": 0,
+          "h": 0
+        },
+        {
+          "cls": "jss269",
+          "display": "inline-flex",
+          "w": 0,
+          "h": 0
+        },
+        {
+          "cls": "jss267",
+          "display": "none",
+          "w": 0,
+          "h": 0
+        }
+      ]
+    }
+  ],
+  "after": {
+    "trip": [
+      [
+        {
+          "tag": "BUTTON",
+          "cls": "jss271 jss272",
+          "text": "Một chiều",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "display": "block",
+          "fs": "14px",
+          "fw": "600",
+          "color": "rgb(31, 42, 51)",
+          "bg": "rgb(255, 255, 255)",
+          "radius": "999px",
+          "padding": "0px 12.5px"
+        },
+        {
+          "tag": "DIV",
+          "cls": "jss270",
+          "text": "Một chiềuKhứ hồiNhiều chặng",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "display": "flex",
+          "fs": "14px",
+          "fw": "500",
+          "color": "rgb(38, 50, 56)",
+          "bg": "rgb(243, 241, 241)",
+          "radius": "999px",
+          "padding": "3px"
+        },
+        {
+          "tag": "DIV",
+          "cls": "jss269",
+          "text": "Một chiềuKhứ hồiNhiều chặng",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "display": "inline-flex",
+          "fs": "14px",
+          "fw": "500",
+          "color": "rgb(38, 50, 56)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "radius": "0px",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "cls": "jss267",
+          "text": "Một chiềuKhứ hồiNhiều chặngMã khuyến mãi",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "display": "none",
+          "fs": "14px",
+          "fw": "500",
+          "color": "rgb(38, 50, 56)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "radius": "0px",
+          "padding": "0px 20px"
+        }
+      ],
+      [
+        {
+          "tag": "BUTTON",
+          "cls": "jss271",
+          "text": "Khứ hồi",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "display": "block",
+          "fs": "14px",
+          "fw": "500",
+          "color": "rgb(94, 105, 116)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "radius": "999px",
+          "padding": "0px 12.5px"
+        },
+        {
+          "tag": "DIV",
+          "cls": "jss270",
+          "text": "Một chiềuKhứ hồiNhiều chặng",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "display": "flex",
+          "fs": "14px",
+          "fw": "500",
+          "color": "rgb(38, 50, 56)",
+          "bg": "rgb(243, 241, 241)",
+          "radius": "999px",
+          "padding": "3px"
+        },
+        {
+          "tag": "DIV",
+          "cls": "jss269",
+          "text": "Một chiềuKhứ hồiNhiều chặng",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "display": "inline-flex",
+          "fs": "14px",
+          "fw": "500",
+          "color": "rgb(38, 50, 56)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "radius": "0px",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "cls": "jss267",
+          "text": "Một chiềuKhứ hồiNhiều chặngMã khuyến mãi",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "display": "none",
+          "fs": "14px",
+          "fw": "500",
+          "color": "rgb(38, 50, 56)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "radius": "0px",
+          "padding": "0px 20px"
+        }
+      ],
+      [
+        {
+          "tag": "BUTTON",
+          "cls": "jss271",
+          "text": "Nhiều chặng",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "display": "block",
+          "fs": "14px",
+          "fw": "500",
+          "color": "rgb(94, 105, 116)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "radius": "999px",
+          "padding": "0px 12.5px"
+        },
+        {
+          "tag": "DIV",
+          "cls": "jss270",
+          "text": "Một chiềuKhứ hồiNhiều chặng",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "display": "flex",
+          "fs": "14px",
+          "fw": "500",
+          "color": "rgb(38, 50, 56)",
+          "bg": "rgb(243, 241, 241)",
+          "radius": "999px",
+          "padding": "3px"
+        },
+        {
+          "tag": "DIV",
+          "cls": "jss269",
+          "text": "Một chiềuKhứ hồiNhiều chặng",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "display": "inline-flex",
+          "fs": "14px",
+          "fw": "500",
+          "color": "rgb(38, 50, 56)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "radius": "0px",
+          "padding": "0px"
+        },
+        {
+          "tag": "DIV",
+          "cls": "jss267",
+          "text": "Một chiềuKhứ hồiNhiều chặngMã khuyến mãi",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "display": "none",
+          "fs": "14px",
+          "fw": "500",
+          "color": "rgb(38, 50, 56)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "radius": "0px",
+          "padding": "0px 20px"
+        }
+      ]
+    ],
+    "poppers": [
+      {
+        "self": {
+          "tag": "DIV",
+          "cls": "jss81 jss85 jss86",
+          "text": "[THÔNG BÁO] Hành khách mang hộ chiếu nướ",
+          "x": 0,
+          "y": -653,
+          "w": 1440,
+          "h": 0,
+          "display": "block",
+          "fs": "14px",
+          "fw": "500",
+          "color": "rgb(51, 51, 51)",
+          "bg": "rgba(0, 0, 0, 0)",
+          "radius": "0px",
+          "padding": "0px"
+        },
+        "kids": [
+          {
+            "tag": "HEADER",
+            "cls": "jss136 jss168 jss169",
+            "text": "[THÔNG BÁO] Hành khách mang hộ chiếu nướ",
+            "x": 16,
+            "y": 0,
+            "w": 1408,
+            "h": 118,
+            "display": "block",
+            "fs": "14px",
+            "fw": "500",
+            "color": "rgb(31, 31, 31)",
+            "bg": "rgb(255, 255, 255)",
+            "radius": "0px 0px 16px 16px",
+            "padding": "0px"
+          }
+        ]
+      },
+      {
+        "self": {
+          "tag": "DIV",
+          "cls": "jss943",
+          "text": "Tháng 11 2026 T2 T3 T4 T5 T6 T7 CN 01 02",
+          "x": 206,
+          "y": -302,
+          "w": 640,
+          "h": 412,
+          "display": "block",
+          "fs": "14px",
+          "fw": "500",
+          "color": "rgb(8, 32, 60)",
+          "bg": "rgb(255, 255, 255)",
+          "radius": "16px",
+          "padding": "0px"
+        },
+        "kids": [
+          {
+            "tag": "DIV",
+            "cls": "jss947",
+            "text": "Tháng 11 2026 T2 T3 T4 T5 T6 T7 CN 01 02",
+            "x": 206,
+            "y": -302,
+            "w": 640,
+            "h": 352,
+            "display": "grid",
+            "fs": "14px",
+            "fw": "500",
+            "color": "rgb(8, 32, 60)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "radius": "0px",
+            "padding": "12px 16px 6px"
+          },
+          {
+            "tag": "DIV",
+            "cls": "jss970",
+            "text": "Hiển thị lịch âm",
+            "x": 206,
+            "y": 50,
+            "w": 640,
+            "h": 60,
+            "display": "flex",
+            "fs": "14px",
+            "fw": "500",
+            "color": "rgb(8, 32, 60)",
+            "bg": "rgb(255, 255, 255)",
+            "radius": "0px",
+            "padding": "0px 16px"
+          }
+        ]
+      },
+      {
+        "self": {
+          "tag": "DIV",
+          "cls": "",
+          "text": "Chúng tôi sử dụng cookie! Nhằm tối ưu hó",
+          "x": 0,
+          "y": 688,
+          "w": 1440,
+          "h": 212,
+          "display": "block",
+          "fs": "14px",
+          "fw": "500",
+          "color": "rgb(51, 51, 51)",
+          "bg": "rgb(255, 255, 255)",
+          "radius": "0px",
+          "padding": "18px 32px"
+        },
+        "kids": [
+          {
+            "tag": "DIV",
+            "cls": "",
+            "text": "Chúng tôi sử dụng cookie! Nhằm tối ưu hó",
+            "x": 32,
+            "y": 707,
+            "w": 1376,
+            "h": 175,
+            "display": "flex",
+            "fs": "14px",
+            "fw": "500",
+            "color": "rgb(51, 51, 51)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "radius": "0px",
+            "padding": "0px"
+          }
+        ]
+      }
+    ]
+  }
+}
