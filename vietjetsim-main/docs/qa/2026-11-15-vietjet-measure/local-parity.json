@@ -491,15 +491,15 @@
     "pillTab": null,
     "bottomNav": {
       "x": 0,
-      "y": 782,
+      "y": 756,
       "w": 390,
-      "h": 62,
+      "h": 88,
       "fontSize": "14px",
       "fontWeight": "500",
       "lineHeight": "20.02px",
-      "color": "rgb(255, 255, 255)",
-      "background": "rgba(0, 0, 0, 0)",
-      "borderRadius": "15px 15px 0px 0px",
+      "color": "rgb(51, 51, 51)",
+      "background": "rgb(255, 255, 255)",
+      "borderRadius": "0px",
       "borderBottom": "0px solid rgb(229, 231, 235)"
     }
   },
@@ -792,11 +792,11 @@
       "color": "rgb(51, 51, 51)",
       "background": "rgba(0, 0, 0, 0)",
       "borderRadius": "0px",
-      "borderBottom": "0px solid rgb(229, 231, 235)"
+      "borderBottom": "1px solid rgb(217, 217, 217)"
     },
     "lookupInput": {
       "x": 240,
-      "y": 316,
+      "y": 320,
       "w": 360,
       "h": 32,
       "fontSize": "16px",
@@ -805,11 +805,11 @@
       "color": "rgb(51, 51, 51)",
       "background": "rgba(0, 0, 0, 0)",
       "borderRadius": "0px",
-      "borderBottom": "1px solid rgb(217, 217, 217)"
+      "borderBottom": "0px none rgb(51, 51, 51)"
     },
     "lookupLabel": {
       "x": 240,
-      "y": 327,
+      "y": 325,
       "w": 90,
       "h": 21,
       "fontSize": "16px",
@@ -847,8 +847,8 @@
       "borderBottom": "1px solid rgba(236, 32, 41, 0.1)"
     },
     "registerLink": {
-      "x": 457,
-      "y": 632,
+      "x": 472,
+      "y": 629,
       "w": 84,
       "h": 19,
       "fontSize": "14px",
@@ -879,7 +879,7 @@
       "h": 36,
       "fontSize": "14px",
       "fontWeight": "500",
-      "lineHeight": "22px",
+      "lineHeight": "20px",
       "color": "rgb(115, 62, 10)",
       "background": "rgb(255, 221, 50)",
       "borderRadius": "18px",
@@ -897,7 +897,7 @@
       "x": 0,
       "y": 0,
       "w": 390,
-      "h": 130,
+      "h": 122,
       "fontSize": "14px",
       "fontWeight": "500",
       "lineHeight": "20.02px",
@@ -920,8 +920,8 @@
       "borderBottom": "0px solid rgb(229, 231, 235)"
     },
     "lookupField": {
-      "x": 16,
-      "y": 357,
+      "x": 50,
+      "y": 288,
       "w": 290,
       "h": 40,
       "fontSize": "14px",
@@ -930,29 +930,29 @@
       "color": "rgb(51, 51, 51)",
       "background": "rgba(0, 0, 0, 0)",
       "borderRadius": "0px",
-      "borderBottom": "0px solid rgb(229, 231, 235)"
+      "borderBottom": "1px solid rgb(217, 217, 217)"
     },
     "lookupInput": {
-      "x": 16,
-      "y": 357,
+      "x": 50,
+      "y": 293,
       "w": 290,
-      "h": 32,
-      "fontSize": "16px",
+      "h": 30,
+      "fontSize": "14px",
       "fontWeight": "500",
-      "lineHeight": "21.28px",
+      "lineHeight": "18.62px",
       "color": "rgb(51, 51, 51)",
       "background": "rgba(0, 0, 0, 0)",
       "borderRadius": "0px",
-      "borderBottom": "1px solid rgb(217, 217, 217)"
+      "borderBottom": "0px none rgb(51, 51, 51)"
     },
     "lookupLabel": {
-      "x": 16,
-      "y": 368,
-      "w": 90,
-      "h": 21,
-      "fontSize": "16px",
+      "x": 50,
+      "y": 298,
+      "w": 79,
+      "h": 19,
+      "fontSize": "14px",
       "fontWeight": "600",
-      "lineHeight": "21.28px",
+      "lineHeight": "18.62px",
       "color": "rgb(51, 51, 51)",
       "background": "rgba(0, 0, 0, 0)",
       "borderRadius": "0px",
@@ -960,7 +960,7 @@
     },
     "lookupBtn": {
       "x": 132,
-      "y": 547,
+      "y": 478,
       "w": 127,
       "h": 39,
       "fontSize": "14px",
@@ -973,7 +973,7 @@
     },
     "skyjoyLoginBtn": {
       "x": 127,
-      "y": 612,
+      "y": 543,
       "w": 137,
       "h": 48,
       "fontSize": "16px",
@@ -985,8 +985,8 @@
       "borderBottom": "1px solid rgba(236, 32, 41, 0.1)"
     },
     "registerLink": {
-      "x": 233,
-      "y": 679,
+      "x": 247,
+      "y": 607,
       "w": 84,
       "h": 19,
       "fontSize": "14px",
@@ -998,26 +998,26 @@
       "borderBottom": "0px solid rgb(229, 231, 235)"
     },
     "pillTabs": {
-      "x": 16,
-      "y": 193,
-      "w": 358,
-      "h": 68,
+      "x": 15,
+      "y": 132,
+      "w": 360,
+      "h": 60,
       "fontSize": "14px",
       "fontWeight": "500",
       "lineHeight": "20.02px",
       "color": "rgb(51, 51, 51)",
       "background": "rgb(255, 255, 255)",
-      "borderRadius": "16px",
+      "borderRadius": "12px",
       "borderBottom": "0px solid rgb(229, 231, 235)"
     },
     "pillTab": {
-      "x": 32,
-      "y": 209,
-      "w": 164,
+      "x": 27,
+      "y": 144,
+      "w": 160,
       "h": 36,
       "fontSize": "14px",
       "fontWeight": "500",
-      "lineHeight": "22px",
+      "lineHeight": "20px",
       "color": "rgb(115, 62, 10)",
       "background": "rgb(255, 221, 50)",
       "borderRadius": "18px",
@@ -1025,15 +1025,15 @@
     },
     "bottomNav": {
       "x": 0,
-      "y": 782,
+      "y": 756,
       "w": 390,
-      "h": 62,
+      "h": 88,
       "fontSize": "14px",
       "fontWeight": "500",
       "lineHeight": "20.02px",
-      "color": "rgb(255, 255, 255)",
-      "background": "rgba(0, 0, 0, 0)",
-      "borderRadius": "15px 15px 0px 0px",
+      "color": "rgb(51, 51, 51)",
+      "background": "rgb(255, 255, 255)",
+      "borderRadius": "0px",
       "borderBottom": "0px solid rgb(229, 231, 235)"
     }
   },
@@ -1072,7 +1072,7 @@
     "lookupField": {
       "x": 190,
       "y": 231,
-      "w": 370,
+      "w": 369,
       "h": 40,
       "fontSize": "14px",
       "fontWeight": "500",
@@ -1080,12 +1080,12 @@
       "color": "rgb(51, 51, 51)",
       "background": "rgba(0, 0, 0, 0)",
       "borderRadius": "0px",
-      "borderBottom": "0px solid rgb(229, 231, 235)"
+      "borderBottom": "1px solid rgb(217, 217, 217)"
     },
     "lookupInput": {
       "x": 190,
-      "y": 231,
-      "w": 370,
+      "y": 234,
+      "w": 369,
       "h": 32,
       "fontSize": "16px",
       "fontWeight": "500",
@@ -1093,11 +1093,11 @@
       "color": "rgb(51, 51, 51)",
       "background": "rgba(0, 0, 0, 0)",
       "borderRadius": "0px",
-      "borderBottom": "1px solid rgb(217, 217, 217)"
+      "borderBottom": "0px none rgb(51, 51, 51)"
     },
     "lookupLabel": {
       "x": 190,
-      "y": 242,
+      "y": 240,
       "w": 90,
       "h": 21,
       "fontSize": "16px",
@@ -1109,7 +1109,7 @@
       "borderBottom": "0px solid rgb(229, 231, 235)"
     },
     "lookupBtn": {
-      "x": 312,
+      "x": 311,
       "y": 331,
       "w": 127,
       "h": 39,
@@ -1122,7 +1122,7 @@
       "borderBottom": "0px none rgb(51, 51, 51)"
     },
     "skyjoyLoginBtn": {
-      "x": 307,
+      "x": 306,
       "y": 410,
       "w": 137,
       "h": 48,
@@ -1135,8 +1135,8 @@
       "borderBottom": "1px solid rgba(236, 32, 41, 0.1)"
     },
     "registerLink": {
-      "x": 407,
-      "y": 477,
+      "x": 426,
+      "y": 474,
       "w": 84,
       "h": 19,
       "fontSize": "14px",
@@ -1161,7 +1161,7 @@
       "x": 0,
       "y": 0,
       "w": 390,
-      "h": 130,
+      "h": 122,
       "fontSize": "14px",
       "fontWeight": "500",
       "lineHeight": "20.02px",
@@ -1184,9 +1184,9 @@
       "borderBottom": "0px solid rgb(229, 231, 235)"
     },
     "lookupField": {
-      "x": 40,
-      "y": 258,
-      "w": 310,
+      "x": 35,
+      "y": 246,
+      "w": 320,
       "h": 40,
       "fontSize": "14px",
       "fontWeight": "500",
@@ -1194,29 +1194,29 @@
       "color": "rgb(51, 51, 51)",
       "background": "rgba(0, 0, 0, 0)",
       "borderRadius": "0px",
-      "borderBottom": "0px solid rgb(229, 231, 235)"
+      "borderBottom": "1px solid rgb(217, 217, 217)"
     },
     "lookupInput": {
-      "x": 40,
-      "y": 258,
-      "w": 310,
-      "h": 32,
-      "fontSize": "16px",
+      "x": 35,
+      "y": 251,
+      "w": 320,
+      "h": 30,
+      "fontSize": "14px",
       "fontWeight": "500",
-      "lineHeight": "21.28px",
+      "lineHeight": "18.62px",
       "color": "rgb(51, 51, 51)",
       "background": "rgba(0, 0, 0, 0)",
       "borderRadius": "0px",
-      "borderBottom": "1px solid rgb(217, 217, 217)"
+      "borderBottom": "0px none rgb(51, 51, 51)"
     },
     "lookupLabel": {
-      "x": 40,
-      "y": 269,
-      "w": 90,
-      "h": 21,
-      "fontSize": "16px",
+      "x": 35,
+      "y": 257,
+      "w": 79,
+      "h": 19,
+      "fontSize": "14px",
       "fontWeight": "600",
-      "lineHeight": "21.28px",
+      "lineHeight": "18.62px",
       "color": "rgb(51, 51, 51)",
       "background": "rgba(0, 0, 0, 0)",
       "borderRadius": "0px",
@@ -1224,7 +1224,7 @@
     },
     "lookupBtn": {
       "x": 132,
-      "y": 358,
+      "y": 346,
       "w": 127,
       "h": 39,
       "fontSize": "14px",
@@ -1237,7 +1237,7 @@
     },
     "skyjoyLoginBtn": {
       "x": 127,
-      "y": 437,
+      "y": 425,
       "w": 137,
       "h": 48,
       "fontSize": "16px",
@@ -1249,8 +1249,8 @@
       "borderBottom": "1px solid rgba(236, 32, 41, 0.1)"
     },
     "registerLink": {
-      "x": 257,
-      "y": 504,
+      "x": 247,
+      "y": 489,
       "w": 84,
       "h": 19,
       "fontSize": "14px",
@@ -1265,15 +1265,15 @@
     "pillTab": null,
     "bottomNav": {
       "x": 0,
-      "y": 782,
+      "y": 756,
       "w": 390,
-      "h": 62,
+      "h": 88,
       "fontSize": "14px",
       "fontWeight": "500",
       "lineHeight": "20.02px",
-      "color": "rgb(255, 255, 255)",
-      "background": "rgba(0, 0, 0, 0)",
-      "borderRadius": "15px 15px 0px 0px",
+      "color": "rgb(51, 51, 51)",
+      "background": "rgb(255, 255, 255)",
+      "borderRadius": "0px",
       "borderBottom": "0px solid rgb(229, 231, 235)"
     }
   }

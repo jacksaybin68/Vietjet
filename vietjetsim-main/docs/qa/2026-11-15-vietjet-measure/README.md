@@ -70,6 +70,41 @@ trắng `16px/700` `JambonoMedium` uppercase ("LÀM THỦ TỤC" ở `/vi/checki
 | Nhãn | `16px/600` `#333`, nâng lên caption `12px/500` khi focus/đã có giá trị |
 | Khung chứa ô (check-in) | nền trắng, `border-radius:5px`, `padding 0 20px` |
 
+### 3.1. Chi tiết đo lại 14/11/2026 (probe `scripts/probe-official-field-*.cjs`)
+
+Site thật dùng MUI `TextField variant="standard"` với `padding: 0 20px` ở
+wrapper (`MuiFormControl-root`) → **mọi ô nhập lệch `+20px` so với mép cột**,
+độc lập với breakpoint:
+
+| Trang | Viewport | Wrapper (`MuiFormControl-root`) | `<input>` | Nhãn hiển thị |
+|---|---|---|---|---|
+| `/vi/checkin` | 1440×900 | `x=170`, `w=410`, `h=40` | `x=190`, `y=296`, `370×32`, `16px/500`, `lh 21.28` | `x=190`, `y=368`, `86×21`, `16px/600`, `lh 21.28`, `#333` |
+| `/vi/checkin` | 390×844 | `x=15`, `w=360`, `h=40` | `x=35`, `y=171`, `320×30`, `14px/500`, `lh 18.62` | `x=35`, `y=251`, `75×19`, `14px/600`, `lh 18.62`, `#333` |
+| `/vi/my/search-booking` | 1440×900 | `x=220`, `w=400`, `h=40` | `x=240`, `y=363`, `360×32`, `16px/500` | `x=240`, `y=368`, `86×21`, `16px/600` |
+| `/vi/my/search-booking` | 390×844 | `x=30`, `w=330`, `h=40` | `x=50`, `y=246`, `290×30`, `14px/500` | `x=50`, `y=251`, `75×19`, `14px/600` |
+
+Gạch chân (đo ở `MuiInput-underline`):
+- `::before` = `1px solid rgba(0, 0, 0, 0.42)` (nền).
+- `::after` = `2px solid rgb(236, 32, 41)` (focus, vẽ overlay **không** đẩy layout).
+
+Dấu `*` trong nhãn: `rgb(236, 32, 41)`.
+
+> **Lưu ý (khác biệt có chủ đích).** Site thật dùng MUI `InputLabel` với
+> `data-shrink="false"` → nhãn **không** nổi lên khi focus hay khi đã nhập, và
+> vì vậy chữ đã nhập sẽ **chồng lên nhãn**. App giữ hành vi nổi nhãn (caption
+> `12px/500`) để tránh lỗi chồng chữ, còn **trạng thái rảnh (empty & blur)**
+> khớp tuyệt đối với site thật (nhãn nằm giữa ô, `16px/600` / `14px/600`).
+
+### 3.2. Quy tắc bám theo (đã cài trong `src/styles/tailwind.css`)
+
+| Token / class | Giá trị |
+|---|---|
+| `.vj-lookup-field` | `position:relative; display:flex; align-items:center; height:40px; border-bottom:1px solid var(--vj-underline-border)` |
+| `.vj-lookup-field::after` | overlay focus `2px` `--primary` (không đổi layout) |
+| `.vj-lookup-input` | desktop `32px`, `16px/500`; mobile (`≤639px`) `30px`, `14px/500` |
+| `.vj-lookup-label` | canh giữa theo chiều dọc trong ô; desktop `16px/600`, mobile `14px/600` |
+| `--vj-underline-border` | `#d9d9d9` |
+
 ---
 
 ## 4. `/vi/checkin` (1440×900)
@@ -141,6 +176,40 @@ sai). Việc cần làm là **thêm** khối "Đăng nhập / Đăng ký ngay / 
 Khác hẳn 4 mục hiện tại của dự án ("Đặt chuyến bay / Chuyến bay của tôi /
 Mua hành lý, chỗ ngồi... / Check-in") — 4 mục đó là bottom nav **trong popup**
 SkyID, không phải bottom nav của trang.
+
+### 6.1. Đo lại 14/11/2026 (đo trực tiếp thanh ở đáy trang)
+
+| Thuộc tính | Số đo |
+|---|---|
+| Vị trí | `position: fixed`, `bottom: 0`, `inset-x: 0` |
+| Chiều cao | **`88px`** (padding `8px 12px 10px`) |
+| Nền | trắng `#FFFFFF`, **không** bo góc, **không** đổ bóng |
+| Icon | `26×26px`, cách nhãn `6px` |
+| Nhãn | `13px/500`, `line-height: 16px` |
+| Màu | inactive `rgb(31, 42, 51)`, active `rgb(236, 32, 41)` |
+| Mục | "Trang chủ" (x=21) / "Vé của tôi" (x=108) / "Mua vé" (x=195) / "Làm thủ tục" (x=282) |
+
+> ⚠️ **Dễ nhầm:** thanh `62px` bo góc `15px 15px 0 0` là bottom nav **BÊN TRONG
+> popup SkyID** (`src/features/auth/components/PopupFrame.tsx`), KHÔNG phải
+> thanh đáy trang. `MobileBottomNav` của trang là thanh `88px` ở §6.1.
+
+---
+
+## 6.2. Header trang con ở MOBILE (đo lại 14/11/2026)
+
+Đo ở `/vi/checkin` và `/vi/my/search-booking` (390×844):
+
+| Phần tử | Số đo |
+|---|---|
+| Thanh | cao **`48px`** (KHÔNG phải 56px), `padding 0 17px` |
+| Nền | `linear-gradient(rgb(217,26,33) 34.8%, rgb(171,3,3) 182.34%)` |
+| Số phần tử con | **2** — `<h1>` + nút hamburger. **KHÔNG có logo** (`imgs: 0`) |
+| `<h1>` | `x=17`, `y=15`, `w=320`, `h=19`, `16px/700` `JambonoMedium`, trắng, uppercase, căn giữa |
+| Nút menu | `x=337`, `y=6`, `36×36` |
+| Tiêu đề | "LÀM THỦ TỤC" (`/vi/checkin`), "ĐẶT CHỖ CỦA TÔI" (`/vi/my/search-booking`) |
+
+Lưu ý: tiêu đề mobile của `/vi/my/search-booking` là **"ĐẶT CHỖ CỦA TÔI"**,
+khác tiêu đề desktop `H2` "CHUYẾN BAY CỦA TÔI".
 
 ---
 

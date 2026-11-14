@@ -1468,8 +1468,22 @@ h6 {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
+/* Ở MOBILE site thật đổi sang băng ĐỎ toàn chiều rộng cao `48px`, KHÔNG có
+ * viền dưới, KHÔNG bo góc, shadow `rgba(0,0,0,0.21) 0 2px 6px`
+ * (đo 14/11/2026, 390×844). */
+@media (max-width: 1023px) {
+  .vj-subheader {
+    border-bottom: 0;
+    border-radius: 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.21);
+  }
+}
+
 .vj-subheader-nav {
-  display: flex;
+  /* Ẩn ở mobile: nếu để `display:flex` ở mọi breakpoint thì hàng nav desktop
+   * (cao 72px) vẫn chiếm chỗ và đẩy băng đỏ xuống dưới — header cao 122px
+   * thay vì 48px như site thật. */
+  display: none;
   align-items: center;
   gap: 30px;
   /* Site thật (đo 14/11/2026, 1440×900): header TRẮNG cao `74px` TỔNG CẢ
@@ -1477,6 +1491,12 @@ h6 {
    * phần tử con, `74px` ở đây cộng thêm viền 2px của `.vj-subheader` ra
    * `76px` — lệch 2px so với site. Đặt `72px` để tổng cộng lại đúng 74px. */
   height: 72px;
+}
+
+@media (min-width: 1024px) {
+  .vj-subheader-nav {
+    display: flex;
+  }
 }
 
 .vj-subheader-nav a {

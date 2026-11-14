@@ -1041,59 +1041,59 @@ export default function FlightResultsStep({
           <div className="flex flex-row items-stretch gap-0 mt-3 mb-1">
             {/* Khoảng trống khớp với ô thông tin chuyến bay bên trái (226px). */}
             <div className="w-[100px] sm:w-[28%] lg:w-[226px] shrink-0" />
-            {/* 4 Fare Headers aligned with flight card columns */}
+            {/* 4 Fare Headers aligned with flight card columns — màu chuẩn theo site thật vietjetair.com */}
             <div className="flex-1 min-w-0 grid grid-cols-4 gap-0 lg:grid-cols-[repeat(4,minmax(0,1fr))]">
               <div
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('business')}
-                className="bg-vj-surface-fare text-vj-text py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer hover:bg-[var(--vj-bar-gray)] shadow-xs min-h-[30px]"
+                className="bg-[#8E7022] hover:bg-[#7a5f1a] text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer shadow-xs min-h-[30px] transition-colors"
               >
                 <img
                   src="/images/fare-classes/business-logo.png"
                   alt="BUSINESS"
-                  className="h-3.5 sm:h-4 w-auto object-contain max-w-[35%] brightness-0 opacity-80"
+                  className="h-3.5 sm:h-4 w-auto object-contain max-w-[35%]"
                 />
-                <span className="text-3xs sm:text-xs font-bold font-koho uppercase tracking-wider text-vj-text">BUSINESS</span>
+                <span className="text-3xs sm:text-xs font-bold font-koho uppercase tracking-wider text-white">BUSINESS</span>
               </div>
               <div
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('skyboss')}
-                className="bg-vj-surface-fare text-vj-text py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer hover:bg-[var(--vj-bar-gray)] shadow-xs min-h-[30px]"
+                className="bg-[#D71920] hover:bg-[#bf151b] text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer shadow-xs min-h-[30px] transition-colors"
               >
                 <img
                   src="/images/fare-classes/skyboss-logo.png"
                   alt="skyBOSS"
-                  className="h-3.5 sm:h-4 w-auto object-contain max-w-[35%] brightness-0 opacity-80"
+                  className="h-3.5 sm:h-4 w-auto object-contain max-w-[35%]"
                 />
-                <span className="text-3xs sm:text-xs font-bold font-koho uppercase tracking-wider text-vj-text">skyBOSS</span>
+                <span className="text-3xs sm:text-xs font-bold font-koho uppercase tracking-wider text-white">skyBOSS</span>
               </div>
               <div
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('deluxe')}
-                className="bg-vj-surface-fare text-vj-text py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer hover:bg-[var(--vj-bar-gray)] shadow-xs min-h-[30px]"
+                className="bg-[#FF8800] hover:bg-[#e67a00] text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer shadow-xs min-h-[30px] transition-colors"
               >
                 <img
                   src="/images/fare-classes/deluxe-logo.png"
                   alt="Deluxe"
-                  className="h-3.5 sm:h-4 w-auto object-contain max-w-[35%] brightness-0 opacity-80"
+                  className="h-3.5 sm:h-4 w-auto object-contain max-w-[35%]"
                 />
-                <span className="text-3xs sm:text-xs font-bold font-koho uppercase tracking-wider text-vj-text">Deluxe</span>
+                <span className="text-3xs sm:text-xs font-bold font-koho uppercase tracking-wider text-white">Deluxe</span>
               </div>
               <div
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('eco')}
-                className="bg-vj-surface-fare text-vj-text py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer hover:bg-[var(--vj-bar-gray)] shadow-xs min-h-[30px]"
+                className="bg-[#EC2029] hover:bg-[#d91a21] text-white py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer shadow-xs min-h-[30px] transition-colors"
               >
                 <img
                   src="/images/fare-classes/eco-logo.png"
                   alt="Eco"
-                  className="h-3.5 sm:h-4 w-auto object-contain max-w-[35%] brightness-0 opacity-80"
+                  className="h-3.5 sm:h-4 w-auto object-contain max-w-[35%]"
                 />
-                <span className="text-3xs sm:text-xs font-bold font-koho uppercase tracking-wider text-vj-text">Eco</span>
+                <span className="text-3xs sm:text-xs font-bold font-koho uppercase tracking-wider text-white">Eco</span>
               </div>
             </div>
           </div>
@@ -1297,7 +1297,13 @@ export default function FlightResultsStep({
                           isSoldOut
                             ? 'bg-gray-100/80 text-gray-400'
                             : isSelected
-                              ? 'bg-[rgb(var(--vj-red-rgb))]/10 ring-2 ring-inset ring-primary shadow-xs'
+                              ? fc.id === 'business'
+                                ? 'bg-amber-50/90 ring-2 ring-inset ring-[#8E7022] shadow-xs'
+                                : fc.id === 'skyboss'
+                                ? 'bg-red-50/90 ring-2 ring-inset ring-[#D71920] shadow-xs'
+                                : fc.id === 'deluxe'
+                                ? 'bg-orange-50/90 ring-2 ring-inset ring-[#FF8800] shadow-xs'
+                                : 'bg-red-50/90 ring-2 ring-inset ring-primary shadow-xs'
                               : 'bg-vj-surface-fare hover:bg-vj-surface-fare/70'
                         }`}
                       >
@@ -1306,7 +1312,17 @@ export default function FlightResultsStep({
 
                         {isSelected && !isSoldOut && (
                           <div className="absolute top-1 inset-x-0 flex justify-center pointer-events-none z-10">
-                            <span className="inline-flex items-center gap-0.5 text-5xs sm:text-4xs font-bold text-primary bg-[rgb(var(--vj-red-rgb))]/10 px-1 sm:px-1.5 py-0.5 rounded-full shadow-2xs leading-none uppercase tracking-wider">
+                            <span
+                              className={`inline-flex items-center gap-0.5 text-5xs sm:text-4xs font-bold text-white px-1 sm:px-1.5 py-0.5 rounded-full shadow-2xs leading-none uppercase tracking-wider ${
+                                fc.id === 'business'
+                                  ? 'bg-[#8E7022]'
+                                  : fc.id === 'skyboss'
+                                  ? 'bg-[#D71920]'
+                                  : fc.id === 'deluxe'
+                                  ? 'bg-[#FF8800]'
+                                  : 'bg-[#EC2029]'
+                              }`}
+                            >
                               <svg
                                 className="w-1.5 h-1.5 sm:w-2 sm:h-2"
                                 viewBox="0 0 12 12"
@@ -1389,14 +1405,14 @@ export default function FlightResultsStep({
                           >
                             {/* Mobile: nhãn hạng vé */}
                             <span
-                              className={`sm:hidden mb-1 inline-flex items-center rounded-full px-1.5 py-0.5 text-3xs font-bold uppercase tracking-wider leading-none border ${
+                              className={`sm:hidden mb-1 inline-flex items-center rounded-full px-1.5 py-0.5 text-3xs font-bold uppercase tracking-wider leading-none text-white shadow-2xs ${
                                 fc.id === 'business'
-                                  ? 'bg-amber-50 text-amber-900 border-amber-300'
+                                  ? 'bg-[#8E7022]'
                                   : fc.id === 'skyboss'
-                                  ? 'bg-red-50 text-red-900 border-red-300'
+                                  ? 'bg-[#D71920]'
                                   : fc.id === 'deluxe'
-                                  ? 'bg-orange-50 text-orange-900 border-orange-300'
-                                  : 'bg-emerald-50 text-emerald-900 border-emerald-300'
+                                  ? 'bg-[#FF8800]'
+                                  : 'bg-[#EC2029]'
                               }`}
                             >
                               {fc.name}
@@ -1405,7 +1421,13 @@ export default function FlightResultsStep({
                             <span
                               className={`text-sm sm:text-base lg:text-xl font-bold font-koho leading-none whitespace-nowrap transition-colors ${
                                 isSelected
-                                  ? 'text-primary'
+                                  ? fc.id === 'business'
+                                    ? 'text-[#8E7022]'
+                                    : fc.id === 'skyboss'
+                                    ? 'text-[#D71920]'
+                                    : fc.id === 'deluxe'
+                                    ? 'text-[#FF8800]'
+                                    : 'text-primary'
                                   : 'text-gray-900 group-hover:text-primary'
                               }`}
                             >
