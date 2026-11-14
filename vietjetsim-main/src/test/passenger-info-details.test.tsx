@@ -48,10 +48,9 @@ describe('PassengerInfoStep extended contact and consent fields', () => {
     expect(screen.getByLabelText(/Email/)).toHaveAttribute('type', 'email');
     expect(screen.getByLabelText(/CCCD \/ Hộ chiếu/)).toBeRequired();
     expect(screen.getByLabelText(/Địa chỉ/)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Mã hội viên SkyJoy/)).toHaveAttribute(
-      'placeholder',
-      'SJxxxxxxxxxx'
-    );
+    // Nhãn floating MUI ghi rõ định dạng mã SkyJoy (không còn placeholder).
+    expect(screen.getByLabelText(/Mã hội viên SkyJoy/)).toHaveAttribute('pattern', 'SJ[0-9]{8,10}');
+    expect(screen.getByText(/Mã hội viên SkyJoy \(SJxxxxxxxx\)/)).toBeInTheDocument();
     expect(screen.getByText(/Gửi thông tin khuyến mãi/)).toBeInTheDocument();
     expect(screen.getByText(/Thực hiện khảo sát/)).toBeInTheDocument();
     expect(screen.getByText(/Lưu thông tin hành khách/)).toBeInTheDocument();
@@ -83,7 +82,7 @@ describe('PassengerInfoStep extended contact and consent fields', () => {
       expect(screen.getAllByLabelText(label)).toHaveLength(1)
     );
     // Everyone is identified by name, birth date, address and travel document.
-    expect(screen.getAllByLabelText(/Họ và tên/)).toHaveLength(3);
+    expect(screen.getAllByLabelText(/^Họ/)).toHaveLength(3);
     expect(screen.getAllByLabelText(/Ngày sinh/)).toHaveLength(3);
     expect(screen.getAllByLabelText(/Địa chỉ/)).toHaveLength(3);
     expect(screen.getAllByLabelText(/CCCD \/ Hộ chiếu/)).toHaveLength(3);
@@ -99,7 +98,7 @@ describe('PassengerInfoStep extended contact and consent fields', () => {
     );
 
     const floating = [
-      /Họ và tên/,
+      /^Họ/,
       /Tên đệm & tên/,
       /Quốc gia/,
       /Ngày sinh/,
@@ -143,7 +142,7 @@ describe('PassengerInfoStep extended contact and consent fields', () => {
     expect(screen.getByText('Vui lòng nhập số điện thoại.')).toBeInTheDocument();
     expect(screen.getByText('Vui lòng nhập địa chỉ email của bạn.')).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText(/Họ và tên/), { target: { value: 'NGUYEN' } });
+    fireEvent.change(screen.getByLabelText(/^Họ/), { target: { value: 'NGUYEN' } });
     fireEvent.change(screen.getByLabelText(/Tên đệm & tên/), { target: { value: 'VAN A' } });
     fireEvent.change(screen.getByLabelText(/Ngày sinh/), { target: { value: '1990-01-01' } });
     fireEvent.change(screen.getByLabelText(/CCCD \/ Hộ chiếu/), {
