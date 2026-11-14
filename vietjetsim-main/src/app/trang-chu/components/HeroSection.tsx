@@ -147,15 +147,15 @@ export default function HeroSection() {
       </div>
 
       {/* Dải đặt vé — chỉ render MỘT bản.
-          Trên desktop nó neo ở mép phải container 1200px, đỉnh tại y=214
-          (164px tính từ đỉnh hero ở y=50). Trên mobile nó trôi xuống ngay
-          dưới banner. Nếu render hai bản (một cho desktop, một cho mobile)
-          thì form bị trùng `id` và mọi test truy vấn theo vai trò đều gặp
-          "nhiều phần tử khớp" — nên chỉ có một bản, đổi cách đặt theo breakpoint. */}
-      <div className="absolute inset-x-0 top-[333px] z-20 mx-auto w-full max-w-[1200px] lg:inset-x-auto lg:left-1/2 lg:top-[164px] lg:-translate-x-1/2 lg:flex lg:justify-end lg:px-0">
-        <div className="w-full lg:w-[380px] lg:max-w-[380px]">
-          <HeroBookingWidget />
-        </div>
+          Trên desktop nó là thanh NGANG 1200px, căn giữa, neo ở đáy khối
+          ảnh hero (đỉnh tầng 1 ở y=783 tuyệt đối = 733px tính từ đỉnh hero
+          ở y=50). Trên mobile nó là thẻ đỏ 366×130px ở y=477 tuyệt đối
+          (= 442px tính từ đỉnh hero ở y=35). Nếu render hai bản (một cho
+          desktop, một cho mobile) thì form bị trùng `id` và mọi test truy vấn
+          theo vai trò đều gặp "nhiều phần tử khớp" — nên chỉ có một bản, đổi
+          cách đặt theo breakpoint. */}
+      <div className="absolute inset-x-0 top-[442px] z-20 mx-auto w-full max-w-[1200px] lg:inset-x-auto lg:left-1/2 lg:top-[733px] lg:-translate-x-1/2 lg:px-0">
+        <HeroBookingWidget />
       </div>
     </section>
   );

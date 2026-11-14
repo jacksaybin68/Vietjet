@@ -32,8 +32,7 @@ function chromePath() {
 
   const data = await page.evaluate(() => {
     const cta = Array.from(document.querySelectorAll('button')).find(
-      (b) =>
-        (b.textContent || '').includes('Tìm chuyến bay') && b.getBoundingClientRect().width > 0
+      (b) => (b.textContent || '').includes('Tìm chuyến bay') && b.getBoundingClientRect().width > 0
     );
     if (!cta) return null;
     const r = cta.getBoundingClientRect();
@@ -41,14 +40,28 @@ function chromePath() {
     const sr = svg ? svg.getBoundingClientRect() : null;
     const s = getComputedStyle(cta);
     return {
-      cta: { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) },
+      cta: {
+        x: Math.round(r.x),
+        y: Math.round(r.y),
+        w: Math.round(r.width),
+        h: Math.round(r.height),
+      },
       padding: s.padding,
       gap: s.gap,
       display: s.display,
       justify: s.justifyContent,
-      svg: sr ? { x: Math.round(sr.x), y: Math.round(sr.y), w: Math.round(sr.width), h: Math.round(sr.height) } : null,
+      svg: sr
+        ? {
+            x: Math.round(sr.x),
+            y: Math.round(sr.y),
+            w: Math.round(sr.width),
+            h: Math.round(sr.height),
+          }
+        : null,
       svgHtml: svg ? svg.outerHTML.slice(0, 400) : null,
-      labelHtml: cta.querySelector('span span') ? cta.querySelector('span span').outerHTML.slice(0, 300) : null,
+      labelHtml: cta.querySelector('span span')
+        ? cta.querySelector('span span').outerHTML.slice(0, 300)
+        : null,
     };
   });
 
@@ -57,8 +70,7 @@ function chromePath() {
   // Chụp riêng nút CTA để soi bằng mắt.
   const box = await page.evaluate(() => {
     const cta = Array.from(document.querySelectorAll('button')).find(
-      (b) =>
-        (b.textContent || '').includes('Tìm chuyến bay') && b.getBoundingClientRect().width > 0
+      (b) => (b.textContent || '').includes('Tìm chuyến bay') && b.getBoundingClientRect().width > 0
     );
     if (!cta) return null;
     const r = cta.getBoundingClientRect();

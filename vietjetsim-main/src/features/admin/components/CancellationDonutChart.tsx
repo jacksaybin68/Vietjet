@@ -152,7 +152,7 @@ export default function CancellationDonutChart({
           <div className="absolute inset-0 top-[-20px] flex flex-col items-center justify-center pointer-events-none">
             <span className="text-xs text-slate-400 font-medium">Tổng</span>
             <span className="text-xl font-black text-white">{total.toLocaleString('vi-VN')}</span>
-            <span className="text-[10px] text-slate-500">đặt chỗ</span>
+            <span className="text-2xs text-slate-500">đặt chỗ</span>
           </div>
         </div>
       )}

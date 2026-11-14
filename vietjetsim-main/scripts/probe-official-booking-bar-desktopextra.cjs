@@ -35,12 +35,10 @@ function chromePath() {
   await new Promise((r) => setTimeout(r, 9000));
 
   const data = await page.evaluate(() => {
-    document
-      .querySelectorAll('div,section')
-      .forEach((el) => {
-        const t = (el.innerText || '').toLowerCase();
-        if (t.includes('cookie') && el.getBoundingClientRect().width > 200) el.remove();
-      });
+    document.querySelectorAll('div,section').forEach((el) => {
+      const t = (el.innerText || '').toLowerCase();
+      if (t.includes('cookie') && el.getBoundingClientRect().width > 200) el.remove();
+    });
 
     const info = (el) => {
       if (!el) return null;
@@ -92,7 +90,9 @@ function chromePath() {
     out.promo = Array.from(document.querySelectorAll('*'))
       .filter((el) => {
         const t = (el.innerText || '').trim();
-        return el.children.length === 0 && /khuyến mại|vé rẻ nhất|tìm vé rẻ/i.test(t) && t.length < 60;
+        return (
+          el.children.length === 0 && /khuyến mại|vé rẻ nhất|tìm vé rẻ/i.test(t) && t.length < 60
+        );
       })
       .map(info);
 

@@ -81,7 +81,7 @@ interface Props {
   value: PaxCounts;
   onChange: (next: PaxCounts) => void;
   className?: string;
-  variant?: 'default' | 'hero';
+  variant?: 'default' | 'hero' | 'bar';
   promoCode?: string;
   onPromoCodeChange?: (val: string) => void;
   cheapestOnly?: boolean;
@@ -132,18 +132,51 @@ export default function PassengerPicker({
   };
 
   const isHero = variant === 'hero';
+  const isBar = variant === 'bar';
 
   return (
     <div
       ref={containerRef}
       className={`relative ${
-        isHero
-          ? (className ?? 'mt-[11px] hidden h-[48px] w-full lg:block')
-          : (className ?? 'mt-2.5')
+        isBar
+          ? (className ?? '')
+          : isHero
+            ? (className ?? 'mt-[11px] hidden h-[48px] w-full lg:block')
+            : (className ?? 'mt-2.5')
       }`}
     >
       {/* Trigger Button inside Hero Widget */}
-      {isHero ? (
+      {isBar ? (
+        // Biến thể "bar" — ô hành khách trong dải đặt vé NGANG 1200px.
+        // Số đo site thật (14/11/2026): nút 259×64px, padding 0 25px 0 20px,
+        // nhãn 12px/400 #6B7580, giá trị 16px/500 #17191C.
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen((v) => !v);
+          }}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          aria-label="Số hành khách"
+          className="vj-booking-pax"
+        >
+          <div className="flex items-center gap-2.5 w-full">
+            <span className="lg:hidden shrink-0 text-[var(--vj-red)]">
+              <MdOutlinePerson className="h-5 w-5" />
+            </span>
+            <div className="flex-1 min-w-0 flex flex-col text-left">
+              <span className="vj-booking-field__label">Hành khách</span>
+              <span className="vj-booking-field__value truncate">{describePax(value)}</span>
+            </div>
+            <MdExpandMore
+              className={`shrink-0 text-gray-500 text-xl transition-transform duration-200 ${
+                open ? 'rotate-180' : ''
+              }`}
+            />
+          </div>
+        </button>
+      ) : isHero ? (
         <button
           type="button"
           onClick={(e) => {
@@ -265,7 +298,7 @@ export default function PassengerPicker({
             })}
           </div>
 
-          {isHero ? (
+          {isHero || isBar ? (
             <div className="mt-3.5 pt-2.5 border-t border-vj-border-light flex justify-end">
               <button
                 type="button"

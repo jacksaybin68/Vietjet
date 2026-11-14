@@ -102,17 +102,13 @@ const PROBE = () => {
     panelH3: box(byText('aside h3', 'THÔNG TIN ĐẶT CHỗ')),
     panelBars: all('.vj-summary-bar').map((b) => box(b)),
     panelTotal: box(firstVisible('.vj-summary-total')),
-    ctaMobile: box(
-      all('button').find((b) => (b.textContent || '').trim() === 'Đi tiếp' && vis(b))
-    ),
+    ctaMobile: box(all('button').find((b) => (b.textContent || '').trim() === 'Đi tiếp' && vis(b))),
     totalBarDesktop: box(firstVisible('.vj-total-bar')),
     bottomNav: box(firstVisible('[data-testid="mobile-bottom-nav"]')),
     fixedBars: all('div')
       .filter(
         (d) =>
-          vis(d) &&
-          getComputedStyle(d).position === 'fixed' &&
-          d.getBoundingClientRect().height > 0
+          vis(d) && getComputedStyle(d).position === 'fixed' && d.getBoundingClientRect().height > 0
       )
       .map((d) => ({
         cls: (d.className || '').toString().slice(0, 80),

@@ -241,7 +241,7 @@ export default function SubpageHeader({
                (đo được ở site thật — `/vi/my/search-booking` và `/vi/checkin` ở
                390×844 cho `h1` 16px/700, màu `rgb(255,255,255)` trên nền đỏ). */
             <h1
-              className={`truncate text-center text-base font-bold leading-[18.72px] font-jambono uppercase ${
+              className={`flex-1 truncate text-center text-base font-bold leading-[18.72px] font-jambono uppercase ${
                 mobileRed ? 'text-white' : 'text-[var(--vj-nav-ink)]'
               }`}
             >
@@ -254,7 +254,7 @@ export default function SubpageHeader({
             type="button"
             onClick={() => setMobileOpen(true)}
             aria-label="Mở menu"
-            className={`-mr-1 flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors active:bg-black/5 ${
+            className={`flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors active:bg-black/5 ${
               mobileRed ? 'text-white' : 'text-[var(--vj-nav-ink)]'
             }`}
           >

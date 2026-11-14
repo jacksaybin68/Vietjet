@@ -19,8 +19,7 @@ const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
   const data = await page.evaluate(() => {
     const cta = Array.from(document.querySelectorAll('button')).find(
-      (b) =>
-        (b.textContent || '').includes('Tìm chuyến bay') && b.getBoundingClientRect().width > 0
+      (b) => (b.textContent || '').includes('Tìm chuyến bay') && b.getBoundingClientRect().width > 0
     );
     if (!cta) return null;
     const label = cta.querySelector('span span');
@@ -33,11 +32,22 @@ const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
     return {
       cta: { x: cr.x, right: cr.right, w: cr.width },
       label: lr ? { x: lr.x, right: lr.right, w: lr.width } : null,
-      labelStyle: ls ? { ff: ls.fontFamily, fs: ls.fontSize, display: ls.display, gap: ls.gap } : null,
+      labelStyle: ls
+        ? { ff: ls.fontFamily, fs: ls.fontSize, display: ls.display, gap: ls.gap }
+        : null,
       svg: sr ? { x: sr.x, right: sr.right, w: sr.width } : null,
-      svgStyle: ss ? { marginLeft: ss.marginLeft, marginRight: ss.marginRight, verticalAlign: ss.verticalAlign } : null,
+      svgStyle: ss
+        ? {
+            marginLeft: ss.marginLeft,
+            marginRight: ss.marginRight,
+            verticalAlign: ss.verticalAlign,
+          }
+        : null,
     };
   });
   console.log(JSON.stringify(data, null, 2));
   await browser.close();
-})().catch((e) => { console.error(e); process.exit(1); });
+})().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

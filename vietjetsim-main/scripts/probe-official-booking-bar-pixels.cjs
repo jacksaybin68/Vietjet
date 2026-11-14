@@ -52,11 +52,9 @@ const SAMPLES = [
 
   // Ẩn lớp cookie để không che mất dải đặt vé.
   await page.evaluate(() => {
-    document
-      .querySelectorAll('[class*="cookie"], .custom-modal')
-      .forEach((el) => {
-        el.style.display = 'none';
-      });
+    document.querySelectorAll('[class*="cookie"], .custom-modal').forEach((el) => {
+      el.style.display = 'none';
+    });
   });
 
   const bar = await page.evaluate(() => {

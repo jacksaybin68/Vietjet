@@ -34,12 +34,10 @@ function chromePath() {
   await new Promise((r) => setTimeout(r, 9000));
 
   const data = await page.evaluate(() => {
-    document
-      .querySelectorAll('div,section')
-      .forEach((el) => {
-        const t = (el.innerText || '').toLowerCase();
-        if (t.includes('cookie') && el.getBoundingClientRect().width > 200) el.remove();
-      });
+    document.querySelectorAll('div,section').forEach((el) => {
+      const t = (el.innerText || '').toLowerCase();
+      if (t.includes('cookie') && el.getBoundingClientRect().width > 200) el.remove();
+    });
 
     const info = (el) => {
       if (!el) return null;

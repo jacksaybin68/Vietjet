@@ -67,46 +67,54 @@ describe('HeroSection Banner', () => {
     });
   });
 
-  it('renders round-trip and one-way options', () => {
+  // Loại hành trình chỉ nằm TRONG popover lịch (đúng site thật: trang chủ
+  // không có dải pill), nên phải mở lịch trước khi kiểm tra.
+  it('renders round-trip and one-way options inside the calendar popover', () => {
     render(<HeroSection />);
+    fireEvent.click(screen.getByRole('button', { name: 'Ngày đi' }));
     expect(screen.getByText('Khứ hồi')).toBeInTheDocument();
     expect(screen.getByText('Một chiều')).toBeInTheDocument();
   });
 
-  // Site thật đặt nhãn sân bay là "Điểm khởi hành" / "Điểm đến" (18px/600),
-  // không phải "Từ" / "Đến" — xem số đo ngày 13/11/2026.
+  // Site thật đặt nhãn sân bay là "Từ" / "Đến" khi nhìn, còn tên truy cập là
+  // "Điểm khởi hành" / "Điểm đến" (đo ngày 13/11/2026).
   it('renders airport selectors', () => {
     render(<HeroSection />);
-    expect(screen.getByText('Điểm khởi hành')).toBeInTheDocument();
-    expect(screen.getByText('Điểm đến')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Điểm khởi hành' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Điểm đến' })).toBeInTheDocument();
+    expect(screen.getByText('Từ')).toBeInTheDocument();
+    expect(screen.getByText('Đến')).toBeInTheDocument();
   });
 
-  // Ba tab dịch vụ phía trên panel, rộng 201 / 103 / 76px, cao 52px.
+  // Rail dịch vụ 4 nút, đúng site thật (đo 14/11/2026): Đặt vé / Khách sạn /
+  // Skyshop / Đổi thưởng vé máy bay.
   it('renders the booking bar chrome of the production site', () => {
     render(<HeroSection />);
-    expect(
-      screen.getByText('Mua hành lý, suất ăn chọn chỗ ngồi và hơn thế nữa...')
-    ).toBeInTheDocument();
-    expect(screen.getByText('Đổi thưởng & Mua Skypoint')).toBeInTheDocument();
-    expect(screen.getByText('Gửi hàng nhanh')).toBeInTheDocument();
+    expect(screen.getByText('Đặt vé')).toBeInTheDocument();
+    expect(screen.getByText('Khách sạn')).toBeInTheDocument();
+    expect(screen.getByText('Skyshop')).toBeInTheDocument();
+    expect(screen.getByText('Đổi thưởng vé máy bay')).toBeInTheDocument();
     expect(screen.getByText('Hành khách')).toBeInTheDocument();
-    expect(screen.getByText('Tìm vé rẻ nhất')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Đổi điểm khởi hành/i })).toBeInTheDocument();
   });
 
-  // Ô nhập của panel là các hộp 48px xếp dọc trong thân form 410px, mỗi hộp có
-  // nhãn và giá trị riêng — không phải một hàng ngang 4 cột như bố cục cũ.
-  it('stacks the booking fields vertically inside the panel body', () => {
+  // Dải đặt vé là thanh NGANG 1200px gồm rail 4 tab + hàng tìm kiếm 1 hàng,
+  // không phải panel dọc 380×409px như bố cục cũ.
+  it('lays the booking fields out in one horizontal row', () => {
     const { container } = render(<HeroSection />);
-    const field = container.querySelector('.vj-booking-panel .h-\\[48px\\]');
-    expect(field).not.toBeNull();
+    expect(container.querySelector('.vj-booking-rail')).not.toBeNull();
+    expect(container.querySelector('.vj-booking-bar')).not.toBeNull();
+    expect(container.querySelector('.vj-booking-fields')).not.toBeNull();
+    // Ô nhập nằm ngang trong một lưới, không xếp dọc.
+    expect(container.querySelector('.vj-booking-panel .h-\\[48px\\]')).toBeNull();
   });
 
   it('lets the customer pick one-way and round-trip trips', () => {
     render(<HeroSection />);
-    const oneWay = screen.getByRole('radio', { name: 'Một chiều' });
-    expect(oneWay).not.toBeChecked();
+    fireEvent.click(screen.getByRole('button', { name: 'Ngày đi' }));
+    const oneWay = screen.getByRole('button', { name: 'Một chiều' });
+    expect(oneWay).toHaveAttribute('aria-pressed', 'false');
     fireEvent.click(oneWay);
-    expect(oneWay).toBeChecked();
+    expect(oneWay).toHaveAttribute('aria-pressed', 'true');
   });
 });

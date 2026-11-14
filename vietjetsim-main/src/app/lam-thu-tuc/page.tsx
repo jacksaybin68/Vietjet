@@ -292,10 +292,7 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
             nội dung chính của trang. */}
         <main id="main-content" className="flex flex-1 flex-col">
           <section className="relative overflow-hidden py-4 sm:py-10">
-            <div
-              className="relative mx-auto max-w-full px-2 sm:px-0"
-              style={{ width: 'min(1150px, calc(100vw - 24px))' }}
-            >
+            <div className="relative mx-auto w-full max-w-[1150px]">
               {/* ============ BƯỚC 1: TRA CỨU ============
                 Số đo lấy từ newweb.vietjetair.com (/vi/checkin, 1440×900):
                 container `x=145`, `w=1150`; cột trái `x=170`, `w=410` (ô nhập
@@ -316,22 +313,29 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                       Site thật: cột trái `x=170` rộng `410`; ô nhập `x=190` rộng
                       `370`; nút "Tìm kiếm" `x=312` và "Đăng nhập" `x=307` đều
                       CANH GIỮA theo cột ô nhập; dòng "Bạn đã biết về Vietjet
-                      SkyJoy? Đăng ký ngay" LỀ TRÁI tại `x=190` (link `x=428`). */}
-                  <div className="flex flex-col justify-start px-[20px] pb-8 pt-[13.4px] lg:border-r lg:border-[var(--vj-field-border)] lg:px-0">
+                      SkyJoy? Đăng ký ngay" CĂN GIỮA trong khối 370px (link
+                      `x=428`).
+
+                      Ở MOBILE (390×844) site thật: mô tả `x=15` rộng `360`
+                      (`16px/500`), ô nhập `x=35` rộng `320` (lệch `+20px` so với
+                      mép cột `x=15`), nhãn `14px/600`. */}
+                  <div className="flex flex-col justify-start px-[15px] pb-8 pt-[13.4px] lg:border-r lg:border-[var(--vj-field-border)] lg:px-0">
                     <div>
                       <h1 className="hidden text-xl font-semibold uppercase leading-[26px] text-[var(--vj-text)] lg:block">
                         LÀM THỦ TỤC
                       </h1>
-                      <p className="mt-0 text-sm font-medium leading-[21px] text-[var(--vj-text)] lg:text-base lg:leading-[20.8px]">
+                      <p className="mt-0 text-base font-medium leading-[21px] text-[var(--vj-text)] lg:leading-[20.8px]">
                         Sẵn sàng cho chuyến bay vui vẻ, thoải mái, bạn có thể làm thủ tục chuyến bay
                         trực tuyến nhanh chóng và đơn giản.
                       </p>
                     </div>
 
                     {/* Khung ô nhập: lệch `+20px` so với mép cột trái (site thật
-                        `x=190` so với H1 `x=170`), rộng `370px` để nút "Tìm kiếm"
-                        căn giữa đúng `x=312`. */}
-                    <form onSubmit={handleSearch} className="mt-5 lg:ml-5 lg:max-w-[370px]">
+                        `x=190` so với H1 `x=170` ở desktop, `x=35` so với `x=15` ở
+                        mobile), rộng `370px` ở desktop / `320px` ở mobile để nút
+                        "Tìm kiếm" căn giữa đúng `x=312` (desktop) và `x=132`
+                        (mobile). */}
+                    <form onSubmit={handleSearch} className="mx-5 mt-4 lg:mt-5 lg:max-w-[370px]">
                       {/* Hai ô nhập, cách nhau `10px` (site thật: `y=292` → `y=342`). */}
                       <div className="flex w-full flex-col gap-[10px]">
                         {/* Ô nhập 1: Mã đặt chỗ — cao 40px, rộng 370px
@@ -383,8 +387,10 @@ function CheckInContent({ prefillBookingId }: { prefillBookingId: string }) {
                         1px rgba(236,32,41,.1), chữ #D6231E 16px/500) + dòng
                         "Bạn đã biết về Vietjet SkyJoy? Đăng ký ngay" — đo được ở
                         site thật (nút ở `x=307,y=471`, link ở `x=428,y=535`).
-                        Nút CĂN GIỮA theo cột ô nhập 370px; dòng SkyJoy lề trái. */}
-                    <div className="mt-[40px] flex flex-col lg:ml-5 lg:max-w-[370px]">
+                        Cả hai CĂN GIỮA theo CỘT (410px ở desktop, 360px ở
+                        mobile) — KHÔNG theo cột ô nhập: nút desktop `x=307`
+                        (= 170 + (410-137)/2), mobile `x=127` (= 15 + (360-137)/2). */}
+                    <div className="mt-[40px] flex flex-col">
                       <button
                         type="button"
                         onClick={() => openAuthModal('login', { redirectTo: '/lam-thu-tuc' })}

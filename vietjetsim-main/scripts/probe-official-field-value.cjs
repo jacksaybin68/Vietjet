@@ -43,4 +43,7 @@ const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
   });
   console.log(JSON.stringify(data, null, 2));
   await browser.close();
-})().catch((e) => { console.error(e); process.exit(1); });
+})().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

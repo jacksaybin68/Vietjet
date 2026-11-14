@@ -78,19 +78,19 @@ export default function UpcomingFlightsTable({
         <table className="w-full">
           <thead>
             <tr className="bg-white/5 border-b border-white/5">
-              <th className="text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
+              <th className="text-left text-2xs font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
                 Chuyến bay
               </th>
-              <th className="text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
+              <th className="text-left text-2xs font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
                 Tuyến bay
               </th>
-              <th className="text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
+              <th className="text-left text-2xs font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
                 Khởi hành
               </th>
-              <th className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
+              <th className="text-center text-2xs font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
                 Ghế trống
               </th>
-              <th className="text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
+              <th className="text-right text-2xs font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
                 Trạng thái
               </th>
             </tr>
@@ -150,7 +150,7 @@ export default function UpcomingFlightsTable({
                     </td>
                     <td className="px-5 py-3.5 whitespace-nowrap text-right">
                       <span
-                        className={`inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border ${statusMeta.cls}`}
+                        className={`inline-block text-2xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border ${statusMeta.cls}`}
                       >
                         {statusMeta.label}
                       </span>

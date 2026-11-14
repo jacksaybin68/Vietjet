@@ -46,7 +46,7 @@ export function KPIWidget({
       {change !== undefined && (
         <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-1.5 text-xs font-medium">
           <span
-            className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ${
+            className={`inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-bold ${
               trend === 'up' || (trend === undefined && isPositive)
                 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                 : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
@@ -55,7 +55,7 @@ export function KPIWidget({
             {isPositive ? '↑ +' : '↓ '}
             {Math.abs(change)}%
           </span>
-          <span className="text-slate-400 text-[11px]">so với hôm qua</span>
+          <span className="text-slate-400 text-xs2">so với hôm qua</span>
         </div>
       )}
     </div>

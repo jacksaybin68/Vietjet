@@ -443,7 +443,7 @@ export default function MyFlightsPage() {
                       </p>
 
                       <form onSubmit={handleSearchBooking} noValidate>
-                        <div className="w-[290px] space-y-[20px]">
+                        <div className="mx-auto w-[290px] space-y-[20px]">
                           <div className="vj-lookup-field">
                             <input
                               id="mobi-booking-code"
@@ -489,7 +489,7 @@ export default function MyFlightsPage() {
                               className="vj-lookup-input"
                             />
                             <label htmlFor="mobi-given-name" className="vj-lookup-label">
-                              Tên đệm & Tên <span className="text-[var(--vj-red)]">*</span>
+                              Tên đệm và tên <span className="text-[var(--vj-red)]">*</span>
                             </label>
                           </div>
                         </div>
@@ -605,7 +605,7 @@ export default function MyFlightsPage() {
                               className="vj-lookup-input"
                             />
                             <label htmlFor="given-name" className="vj-lookup-label">
-                              Tên đệm & Tên <span className="text-[var(--vj-red)]">*</span>
+                              Tên đệm và tên <span className="text-[var(--vj-red)]">*</span>
                             </label>
                           </div>
                         </div>

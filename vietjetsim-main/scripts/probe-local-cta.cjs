@@ -37,7 +37,14 @@ const CHROME =
       radius: s.borderRadius,
       bgImage: s.backgroundImage,
       text: (cta.innerText || '').trim(),
-      svg: sr ? { x: Math.round(sr.x), y: Math.round(sr.y), w: Math.round(sr.width), h: Math.round(sr.height) } : null,
+      svg: sr
+        ? {
+            x: Math.round(sr.x),
+            y: Math.round(sr.y),
+            w: Math.round(sr.width),
+            h: Math.round(sr.height),
+          }
+        : null,
       html: cta.innerHTML.slice(0, 300),
     };
   });

@@ -14,8 +14,7 @@ const puppeteer = require('puppeteer-core');
 const BASE = (process.env.LOCAL_BASE_URL || 'http://127.0.0.1:4041').replace(/\/$/, '');
 const OUT_DIR = path.join(__dirname, '..', 'docs', 'qa', '2026-11-15-vietjet-measure');
 const CHROME =
-  process.env.CHROME_PATH ||
-  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+  process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 const VIEWPORTS = [
   { name: 'desktop-1440', width: 1440, height: 900 },

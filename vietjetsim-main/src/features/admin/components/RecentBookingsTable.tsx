@@ -82,22 +82,22 @@ export default function RecentBookingsTable({
         <table className="w-full">
           <thead>
             <tr className="bg-white/5 border-b border-white/5">
-              <th className="text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
+              <th className="text-left text-2xs font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
                 Mã đặt chỗ
               </th>
-              <th className="text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
+              <th className="text-left text-2xs font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
                 Khách hàng
               </th>
-              <th className="text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
+              <th className="text-left text-2xs font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
                 Chặng bay
               </th>
-              <th className="text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
+              <th className="text-right text-2xs font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
                 Tổng tiền
               </th>
-              <th className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
+              <th className="text-center text-2xs font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
                 Trạng thái
               </th>
-              <th className="text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
+              <th className="text-right text-2xs font-bold text-slate-400 uppercase tracking-widest px-5 py-3.5">
                 Thời gian
               </th>
             </tr>
@@ -145,7 +145,7 @@ export default function RecentBookingsTable({
                     </td>
                     <td className="px-5 py-3.5 whitespace-nowrap text-center">
                       <span
-                        className={`inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border ${statusMeta.cls}`}
+                        className={`inline-block text-2xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border ${statusMeta.cls}`}
                       >
                         {statusMeta.label}
                       </span>

@@ -667,12 +667,13 @@ export default function FlightResultsStep({
       });
   }, [filters, sortBy, searchQuery, flights]);
 
-  // Auto-expand and select first available flight by default so "Đi tiếp" is ready immediately
+  // Pre-select first available flight silently if needed for flow, but do NOT auto-expand details accordion
+  const [initialPreselected, setInitialPreselected] = useState(false);
   useEffect(() => {
-    if (filtered.length > 0 && !expandedFlightNo) {
+    if (filtered.length > 0 && !initialPreselected) {
+      setInitialPreselected(true);
       const firstFlight = filtered[0];
       if (firstFlight) {
-        setExpandedFlightNo(firstFlight.flightNo);
         setSelectedFareClassMap((prev) => ({
           ...prev,
           [firstFlight.flightNo]: 'eco',
@@ -695,7 +696,7 @@ export default function FlightResultsStep({
         onFlightSelect?.(firstFlight.flightNo, 'eco', firstFlight.price, fares, firstFlight);
       }
     }
-  }, [filtered, search?.cheapest, expandedFlightNo, onSelect, onFlightSelect]);
+  }, [filtered, initialPreselected, onSelect, onFlightSelect]);
 
   return (
     <div className="w-full relative items-start pb-16 sm:pb-14">
@@ -1046,53 +1047,53 @@ export default function FlightResultsStep({
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('business')}
-                className="bg-vj-surface-fare text-vj-text py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:bg-[var(--vj-bar-gray)] shadow-xs min-h-[28px]"
+                className="bg-vj-surface-fare text-vj-text py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer hover:bg-[var(--vj-bar-gray)] shadow-xs min-h-[30px]"
               >
                 <img
                   src="/images/fare-classes/business-logo.png"
                   alt="BUSINESS"
-                  className="h-3.5 sm:h-4.5 w-auto object-contain max-w-[85%] brightness-0 invert"
+                  className="h-3.5 sm:h-4 w-auto object-contain max-w-[35%] brightness-0 opacity-80"
                 />
-                <span className="sr-only">BUSINESS</span>
+                <span className="text-3xs sm:text-xs font-bold font-koho uppercase tracking-wider text-vj-text">BUSINESS</span>
               </div>
               <div
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('skyboss')}
-                className="bg-vj-surface-fare text-vj-text py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:bg-[var(--vj-bar-gray)] shadow-xs min-h-[28px]"
+                className="bg-vj-surface-fare text-vj-text py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer hover:bg-[var(--vj-bar-gray)] shadow-xs min-h-[30px]"
               >
                 <img
                   src="/images/fare-classes/skyboss-logo.png"
                   alt="skyBOSS"
-                  className="h-3.5 sm:h-4.5 w-auto object-contain max-w-[85%] brightness-0 invert"
+                  className="h-3.5 sm:h-4 w-auto object-contain max-w-[35%] brightness-0 opacity-80"
                 />
-                <span className="sr-only">skyBOSS</span>
+                <span className="text-3xs sm:text-xs font-bold font-koho uppercase tracking-wider text-vj-text">skyBOSS</span>
               </div>
               <div
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('deluxe')}
-                className="bg-vj-surface-fare text-vj-text py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:bg-[var(--vj-bar-gray)] shadow-xs min-h-[28px]"
+                className="bg-vj-surface-fare text-vj-text py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer hover:bg-[var(--vj-bar-gray)] shadow-xs min-h-[30px]"
               >
                 <img
                   src="/images/fare-classes/deluxe-logo.png"
                   alt="Deluxe"
-                  className="h-3.5 sm:h-4.5 w-auto object-contain max-w-[85%] brightness-0 invert"
+                  className="h-3.5 sm:h-4 w-auto object-contain max-w-[35%] brightness-0 opacity-80"
                 />
-                <span className="sr-only">Deluxe</span>
+                <span className="text-3xs sm:text-xs font-bold font-koho uppercase tracking-wider text-vj-text">Deluxe</span>
               </div>
               <div
                 role="button"
                 tabIndex={0}
                 onClick={() => setCompareFare('eco')}
-                className="bg-vj-surface-fare text-vj-text py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center cursor-pointer hover:bg-[var(--vj-bar-gray)] shadow-xs min-h-[28px]"
+                className="bg-vj-surface-fare text-vj-text py-1.5 sm:py-2 px-1 text-center rounded-t-sm flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer hover:bg-[var(--vj-bar-gray)] shadow-xs min-h-[30px]"
               >
                 <img
                   src="/images/fare-classes/eco-logo.png"
                   alt="Eco"
-                  className="h-3.5 sm:h-4.5 w-auto object-contain max-w-[85%] brightness-0 invert"
+                  className="h-3.5 sm:h-4 w-auto object-contain max-w-[35%] brightness-0 opacity-80"
                 />
-                <span className="sr-only">Eco</span>
+                <span className="text-3xs sm:text-xs font-bold font-koho uppercase tracking-wider text-vj-text">Eco</span>
               </div>
             </div>
           </div>
@@ -1186,8 +1187,7 @@ export default function FlightResultsStep({
                 ? (selection.fareClass as FareClassId)
                 : selectedFareClassMap[flight.flightNo]) ?? 'eco';
             const benefits = FARE_BENEFITS[activeFareClass] ?? FARE_BENEFITS.eco;
-            const isCardExpanded =
-              selection?.flightNo === flight.flightNo || expandedFlightNo === flight.flightNo;
+            const isCardExpanded = expandedFlightNo === flight.flightNo;
 
             return (
               <div
@@ -1201,7 +1201,7 @@ export default function FlightResultsStep({
                   role="button"
                   tabIndex={0}
                   onClick={() => {
-                    setExpandedFlightNo(flight.flightNo);
+                    setExpandedFlightNo((prev) => (prev === flight.flightNo ? null : flight.flightNo));
                     setSelectedFareClassMap((prev) => ({
                       ...prev,
                       [flight.flightNo]: activeFareClass,
@@ -1283,9 +1283,7 @@ export default function FlightResultsStep({
                     const fares = Object.fromEntries(
                       fareClasses.map((item) => [item.id, item.price])
                     ) as Partial<Record<FareClassId, number>>;
-                    const isSelected =
-                      (selection?.flightNo === flight.flightNo && selection?.fareClass === fc.id) ||
-                      (isCardExpanded && activeFareClass === fc.id);
+                    const isSelected = isCardExpanded && activeFareClass === fc.id;
                     const isSoldOut =
                       fc.id === 'business' &&
                       flight.from === 'HAN' &&
@@ -1391,28 +1389,33 @@ export default function FlightResultsStep({
                           >
                             {/* Mobile: nhãn hạng vé */}
                             <span
-                              className={`sm:hidden mb-0.5 inline-flex items-center rounded-full px-1 py-0.5 text-5xs font-bold uppercase tracking-wider leading-none ${
-                                FARE_BADGE_CLASS[fc.id] ?? 'bg-gray-500'
+                              className={`sm:hidden mb-1 inline-flex items-center rounded-full px-1.5 py-0.5 text-3xs font-bold uppercase tracking-wider leading-none border ${
+                                fc.id === 'business'
+                                  ? 'bg-amber-50 text-amber-900 border-amber-300'
+                                  : fc.id === 'skyboss'
+                                  ? 'bg-red-50 text-red-900 border-red-300'
+                                  : fc.id === 'deluxe'
+                                  ? 'bg-orange-50 text-orange-900 border-orange-300'
+                                  : 'bg-emerald-50 text-emerald-900 border-emerald-300'
                               }`}
                             >
                               {fc.name}
                             </span>
-                            {/* Giá vé: số tiền 26px/400 JambonoMedium #333333,
-                                mã tiền tệ 16px/500 #6D6E71 (đo 13/11/2026). */}
+                            {/* Giá vé: số tiền rõ ràng, font KoHo đậm, tương phản cao */}
                             <span
-                              className={`text-xs sm:text-base lg:text-xl5 font-jambono font-normal leading-none whitespace-nowrap transition-colors ${
+                              className={`text-sm sm:text-base lg:text-xl font-bold font-koho leading-none whitespace-nowrap transition-colors ${
                                 isSelected
                                   ? 'text-primary'
-                                  : 'text-vj-text group-hover:text-primary'
+                                  : 'text-gray-900 group-hover:text-primary'
                               }`}
                             >
                               {fc.price.toLocaleString('vi-VN')}
-                              <span className="hidden sm:inline text-xs sm:text-base font-medium text-vj-currency-gray ml-0.5 sm:ml-1">
+                              <span className="hidden sm:inline text-2xs sm:text-xs font-semibold text-gray-500 ml-0.5 sm:ml-1">
                                 VND
                               </span>
                             </span>
                             <svg
-                              className={`w-2 h-2 sm:w-3 sm:h-3 text-gray-400 mt-0.5 sm:mt-1 transition-transform duration-200 ${
+                              className={`w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-gray-400 mt-1 transition-transform duration-200 ${
                                 isSelected ? 'rotate-180 text-primary' : 'group-hover:text-gray-600'
                               }`}
                               viewBox="0 0 20 20"

@@ -29,7 +29,10 @@ function chromePath() {
   await page.setViewport({ width: 1440, height: 900 });
   await page.goto(`${BASE}/trang-chu`, { waitUntil: 'networkidle2', timeout: 60000 });
   await new Promise((r) => setTimeout(r, 2000));
-  await page.screenshot({ path: '/tmp/local-bar-desktop.png', clip: { x: 110, y: 775, width: 1220, height: 130 } });
+  await page.screenshot({
+    path: '/tmp/local-bar-desktop.png',
+    clip: { x: 110, y: 775, width: 1220, height: 130 },
+  });
   await page.screenshot({ path: '/tmp/local-home-desktop.png' });
   await page.close();
 
@@ -38,7 +41,10 @@ function chromePath() {
   await m.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
   await m.goto(`${BASE}/trang-chu`, { waitUntil: 'networkidle2', timeout: 60000 });
   await new Promise((r) => setTimeout(r, 2000));
-  await m.screenshot({ path: '/tmp/local-bar-mobile.png', clip: { x: 0, y: 460, width: 390, height: 170 } });
+  await m.screenshot({
+    path: '/tmp/local-bar-mobile.png',
+    clip: { x: 0, y: 460, width: 390, height: 170 },
+  });
   await m.close();
 
   await browser.close();

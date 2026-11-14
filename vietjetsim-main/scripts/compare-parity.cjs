@@ -275,9 +275,7 @@ const PROBES = [
         const c = getComputedStyle(e);
         const r = e.getBoundingClientRect();
         return (
-          c.backgroundColor === 'rgb(236, 32, 41)' &&
-          Math.round(r.height) === 40 &&
-          r.width > 1000
+          c.backgroundColor === 'rgb(236, 32, 41)' && Math.round(r.height) === 40 && r.width > 1000
         );
       });
       if (!el) return null;
@@ -356,7 +354,8 @@ const PROBES = [
     questions: ['x', 'y', 'size', 'border-radius', 'background-image', 'font-size', 'font-family'],
     official: () => {
       const el = Array.from(document.querySelectorAll('button')).find(
-        (b) => (b.textContent || '').includes('Tìm chuyến bay') && b.getBoundingClientRect().width > 0
+        (b) =>
+          (b.textContent || '').includes('Tìm chuyến bay') && b.getBoundingClientRect().width > 0
       );
       if (!el) return null;
       const s = getComputedStyle(el);
@@ -373,7 +372,8 @@ const PROBES = [
     },
     sim: () => {
       const el = [...document.querySelectorAll('button')].find(
-        (b) => (b.textContent || '').includes('Tìm chuyến bay') && b.getBoundingClientRect().width > 0
+        (b) =>
+          (b.textContent || '').includes('Tìm chuyến bay') && b.getBoundingClientRect().width > 0
       );
       if (!el) return null;
       const s = getComputedStyle(el);

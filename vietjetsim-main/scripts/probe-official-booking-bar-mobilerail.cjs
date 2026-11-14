@@ -43,12 +43,10 @@ function chromePath() {
 
   const data = await page.evaluate(() => {
     // Dọn overlay cookie để không che khối đo.
-    document
-      .querySelectorAll('div,section')
-      .forEach((el) => {
-        const t = (el.innerText || '').toLowerCase();
-        if (t.includes('cookie') && el.getBoundingClientRect().width > 200) el.remove();
-      });
+    document.querySelectorAll('div,section').forEach((el) => {
+      const t = (el.innerText || '').toLowerCase();
+      if (t.includes('cookie') && el.getBoundingClientRect().width > 200) el.remove();
+    });
 
     const info = (el) => {
       if (!el) return null;

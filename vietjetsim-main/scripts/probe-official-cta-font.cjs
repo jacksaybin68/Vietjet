@@ -32,8 +32,7 @@ function chromePath() {
 
   const data = await page.evaluate(() => {
     const cta = Array.from(document.querySelectorAll('button')).find(
-      (b) =>
-        (b.textContent || '').includes('Tìm chuyến bay') && b.getBoundingClientRect().width > 0
+      (b) => (b.textContent || '').includes('Tìm chuyến bay') && b.getBoundingClientRect().width > 0
     );
     if (!cta) return null;
     const out = [];

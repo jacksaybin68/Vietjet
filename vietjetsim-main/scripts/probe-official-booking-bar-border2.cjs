@@ -97,13 +97,7 @@ function chromePath() {
 
   // Đọc pixel trực tiếp từ file ảnh vừa chụp (không qua overlay).
   const png = fs.readFileSync(OUT);
-  console.log(
-    JSON.stringify(
-      { cleaned, bar, pngBytes: png.length, shot: OUT },
-      null,
-      2
-    )
-  );
+  console.log(JSON.stringify({ cleaned, bar, pngBytes: png.length, shot: OUT }, null, 2));
   await browser.close();
 })().catch((e) => {
   console.error('probe lỗi:', e);
