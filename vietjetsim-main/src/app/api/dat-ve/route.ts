@@ -352,8 +352,21 @@ export async function POST(request: NextRequest) {
       bookingUserId = userRecord.id;
     }
 
+    // A round trip is one "trip" in the database (migration 045): both legs
+    // share one `trip_id`, so a single PNR resolves to the whole journey.
+    // Each leg still keeps its own PNR of its own `bookings` row — the plan
+    // kept them separate — but the trip id is what links them.
+    const tripId = randomUUID();
+
     const booking = await createBooking(
-      { user_id: bookingUserId, flight_id, total_price: totalPrice, seatedCount },
+      {
+        user_id: bookingUserId,
+        flight_id,
+        total_price: totalPrice,
+        seatedCount,
+        trip_id: tripId,
+        leg_role: 'outbound',
+      },
       normalizedPassengers,
       seatRows,
       ancillaryRows,
@@ -375,7 +388,14 @@ export async function POST(request: NextRequest) {
     let returnBooking = null;
     if (return_flight_id) {
       returnBooking = await createBooking(
-        { user_id: bookingUserId, flight_id: return_flight_id, total_price: 0, seatedCount },
+        {
+          user_id: bookingUserId,
+          flight_id: return_flight_id,
+          total_price: 0,
+          seatedCount,
+          trip_id: tripId,
+          leg_role: 'inbound',
+        },
         normalizedPassengers,
         returnSeatRows,
         [],
@@ -461,8 +481,12 @@ export async function POST(request: NextRequest) {
 
     const bookingPayload = {
       ...booking,
+      trip_id: tripId,
+      leg_role: 'outbound' as const,
       return_booking_id: returnBooking?.id,
       return_booking_code: returnBooking?.booking_code,
+      return_trip_id: returnBooking ? tripId : undefined,
+      return_leg_role: returnBooking ? ('inbound' as const) : undefined,
     };
 
     const response = NextResponse.json({ booking: bookingPayload }, { status: 201 });

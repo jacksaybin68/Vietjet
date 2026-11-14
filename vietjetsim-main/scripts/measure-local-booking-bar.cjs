@@ -3,6 +3,12 @@
  * Đo hình học dải đặt vé của app LOCAL (dùng để đối chiếu với site thật).
  *
  * Dùng: MEASURE_BASE_URL=http://127.0.0.1:4028 node scripts/measure-local-booking-bar.cjs
+ *
+ * Cấu trúc đo bám theo site thật (đo 14/11/2026, viewport 1440×900):
+ *   - Tầng 1: rail đỏ 1200×40px, 4 nút dịch vụ.
+ *   - Tầng 2: hàng tìm kiếm trắng 1200×69px.
+ *   - Ô nhập: Từ (235) → hoán đổi (24) → Đến (235) → Ngày đi (222) →
+ *     Hành khách (259) → CTA (174×44).
  */
 const fs = require('node:fs');
 const puppeteer = require('puppeteer-core');
@@ -47,15 +53,22 @@ const PROBE = () => {
   const out = {};
   out.header = info(document.querySelector('header'));
   out.hero = info(document.querySelector('section'));
-  out.tabs = info(document.querySelector('.vj-booking-tabs'));
-  out.panel = info(document.querySelector('.vj-booking-panel'));
-  out.tabItems = Array.from(document.querySelectorAll('.vj-booking-tab')).map(info);
+  out.shell = info(document.querySelector('.vj-booking-shell'));
+  out.rail = info(document.querySelector('.vj-booking-rail'));
+  out.bar = info(document.querySelector('.vj-booking-bar'));
+  out.railTabs = Array.from(document.querySelectorAll('.vj-booking-rail__tab')).map(info);
+  out.fields = info(document.querySelector('.vj-booking-fields'));
   out.cta = info(
     Array.from(document.querySelectorAll('button')).find((b) =>
       /Tìm chuyến bay/i.test(b.innerText || '')
     )
   );
-  for (const label of ['Điểm khởi hành', 'Điểm đến', 'Ngày đi', 'Hành khách']) {
+  out.swap = info(
+    Array.from(document.querySelectorAll('button')).find((b) =>
+      /Đổi điểm khởi hành/i.test(b.getAttribute('aria-label') || '')
+    )
+  );
+  for (const label of ['Điểm khởi hành', 'Điểm đến', 'Ngày đi', 'Số hành khách']) {
     out[label] = info(document.querySelector(`[aria-label="${label}"]`));
   }
   out.docScrollWidth = document.documentElement.scrollWidth;

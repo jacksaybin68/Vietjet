@@ -263,6 +263,13 @@ const OPERATING_TABLES_SQL = `
   UNION ALL SELECT 'phone_otp=' || count(*) FROM phone_otp
   UNION ALL SELECT 'referral_events=' || count(*) FROM referral_events
   UNION ALL SELECT 'bank_accounts=' || count(*) FROM bank_accounts
+  UNION ALL SELECT 'bookings=' || count(*) FROM bookings
+  UNION ALL SELECT 'passengers=' || count(*) FROM passengers
+  UNION ALL SELECT 'seats=' || count(*) FROM seats
+  UNION ALL SELECT 'booking_consents=' || count(*) FROM booking_consents
+  UNION ALL SELECT 'booking_baggage=' || count(*) FROM booking_baggage
+  UNION ALL SELECT 'booking_seat_changes=' || count(*) FROM booking_seat_changes
+  UNION ALL SELECT 'email_log=' || count(*) FROM email_log
   ORDER BY 1
 `;
 
@@ -335,6 +342,66 @@ function seedOperatingRows() {
     FROM user_profiles u
     WHERE u.email = 'migration-canary@vietjetsim.invalid'
       AND NOT EXISTS (SELECT 1 FROM referral_events r WHERE r.referee_user_id = u.id);
+
+    -- Migration 045: một trip khứ hồi = 2 dòng bookings cùng trip_id.
+    -- Canary này kiểm tra backfill trip_id/leg_role không làm hỏng dữ liệu
+    -- cũ và rằng leg_role chỉ nhận hai giá trị hợp lệ.
+    INSERT INTO bookings (user_id, flight_id, status, total_price, trip_id, leg_role)
+    SELECT u.id, f.id, 'confirmed', f.price,
+           (SELECT b2.trip_id FROM bookings b2
+             JOIN user_profiles u2 ON u2.id = b2.user_id
+            WHERE u2.email = 'migration-canary@vietjetsim.invalid' LIMIT 1),
+           'inbound'
+    FROM user_profiles u, flights f
+    WHERE u.email = 'migration-canary@vietjetsim.invalid'
+      AND f.id = (SELECT id FROM flights WHERE id <> (SELECT id FROM flights ORDER BY id LIMIT 1)
+                    ORDER BY id LIMIT 1)
+      AND NOT EXISTS (
+        SELECT 1 FROM bookings b JOIN user_profiles u2 ON u2.id = b.user_id
+        WHERE u2.email = 'migration-canary@vietjetsim.invalid' AND b.leg_role = 'inbound'
+      );
+
+    -- Migration 046: ghế theo hành khách + dịch vụ mua thêm + nhật ký đổi ghế
+    -- + nhật ký email. Cả bốn bảng mang dữ liệu khách hàng, nên phải được đo.
+    UPDATE passengers SET seat_number = '1A'
+    WHERE seat_number IS NULL
+      AND booking_id IN (SELECT b.id FROM bookings b JOIN user_profiles u ON u.id = b.user_id
+                          WHERE u.email = 'migration-canary@vietjetsim.invalid');
+
+    INSERT INTO booking_baggage (booking_id, package_id, weight_kg, unit_price, quantity, status)
+    SELECT b.id, 'bg-20', 20, 200000, 1, 'paid'
+    FROM bookings b JOIN user_profiles u ON u.id = b.user_id
+    WHERE u.email = 'migration-canary@vietjetsim.invalid'
+      AND NOT EXISTS (SELECT 1 FROM booking_baggage g WHERE g.booking_id = b.id);
+
+    INSERT INTO booking_seat_changes (booking_id, passenger_id, old_seat, new_seat, price_delta)
+    SELECT b.id, p.id, '1A', '2A', 0
+    FROM bookings b JOIN user_profiles u ON u.id = b.user_id
+    JOIN passengers p ON p.booking_id = b.id
+    WHERE u.email = 'migration-canary@vietjetsim.invalid'
+      AND NOT EXISTS (SELECT 1 FROM booking_seat_changes sc WHERE sc.booking_id = b.id);
+
+    INSERT INTO email_log (booking_id, payment_id, template, recipient_email, status)
+    SELECT b.id, NULL, 'payment_invoice', 'migration-canary@vietjetsim.invalid', 'sent'
+    FROM bookings b JOIN user_profiles u ON u.id = b.user_id
+    WHERE u.email = 'migration-canary@vietjetsim.invalid'
+      AND NOT EXISTS (SELECT 1 FROM email_log e WHERE e.booking_id = b.id);
+
+    -- seats và booking_consents cũng được đo ở OPERATING_TABLES_SQL, nên
+    -- canary phải có dòng trong cả hai — một bảng luôn rỗng thì phép đo không
+    -- đo được gì.
+    INSERT INTO seats (booking_id, flight_id, seat_number, status, price)
+    SELECT b.id, b.flight_id, 'CANARY-A', 'reserved', 0
+    FROM bookings b JOIN user_profiles u ON u.id = b.user_id
+    WHERE u.email = 'migration-canary@vietjetsim.invalid'
+      AND NOT EXISTS (SELECT 1 FROM seats s WHERE s.booking_id = b.id);
+
+    INSERT INTO booking_consents (booking_id, marketing, survey, retain_for_future_booking,
+                                  policy_accepted)
+    SELECT b.id, false, false, false, true
+    FROM bookings b JOIN user_profiles u ON u.id = b.user_id
+    WHERE u.email = 'migration-canary@vietjetsim.invalid'
+      AND NOT EXISTS (SELECT 1 FROM booking_consents c WHERE c.booking_id = b.id);
   `);
 }
 /** The canary must survive every re-apply: an empty table means a file dropped it. */

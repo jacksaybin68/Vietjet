@@ -520,6 +520,125 @@ function createMockSql() {
 
   const mockSeatLocks: MockResult[] = [];
 
+  // ─── Bookings (mô hình trip/chặng) ──────────────────────────────────────────
+  // `bookings` là bảng trung tâm của luồng đặt vé và của mô hình trip/chặng
+  // (migration 045): một trip khứ hồi = 2 dòng `bookings` cùng `trip_id`, mỗi
+  // dòng có `leg_role` ('outbound' | 'inbound').
+  //
+  // Không có store này thì mọi truy vấn `bookings` trả `[]` — nên trong dev/CI
+  // (không DATABASE_URL) check-in theo trip, tra cứu chuyến bay của tôi và
+  // trang đặt vé đều rỗng, dù code chạy đúng.
+  const mockBookings: MockResult[] = [];
+  const mockPassengers: MockResult[] = [];
+  const mockCheckIns: MockResult[] = [];
+
+  /** Sinh id giả cho dòng mock — đủ duy nhất trong phạm vi một phiên test. */
+  let mockSeq = 0;
+  const nextMockId = (prefix: string) => `${prefix}-mock-${++mockSeq}`;
+  const mockUuid = () => '00000000-0000-4000-8000-' + String(++mockSeq).padStart(12, '0');
+
+  const runBookingQuery = (query: string, values: unknown[]): MockResult[] | null => {
+    const q = query.toLowerCase();
+
+    // ── Tra cứu trip theo PNR: `SELECT b.trip_id FROM bookings b WHERE ...` ──
+    if (q.includes('from bookings') && q.includes('select b.trip_id')) {
+      const codeOrId = String(values[0] ?? '');
+      const upper = codeOrId.toUpperCase();
+      const match = mockBookings.find(
+        (b) => String(b.id) === codeOrId || String(b.booking_code ?? '').toUpperCase() === upper
+      );
+      return match ? [{ trip_id: match.trip_id ?? null }] : [];
+    }
+
+    // ── Tra cứu trip theo `trip_id` (2 chặng của cùng một trip) ──
+    if (q.includes('from bookings') && q.includes('b.trip_id =')) {
+      const tripId = values[0];
+      const legs = mockBookings.filter((b) => b.trip_id === tripId);
+      return legs.map((b) => {
+        const flight = mockFlights.find((f) => f.id === b.flight_id);
+        return {
+          id: b.id,
+          booking_code: b.booking_code ?? null,
+          leg_role: b.leg_role ?? 'outbound',
+          status: b.status,
+          total_price: b.total_price,
+          flight_id: b.flight_id,
+          flight_no: flight?.flight_no ?? null,
+          from_code: flight?.from_code ?? null,
+          to_code: flight?.to_code ?? null,
+          depart_time: flight?.depart_time ?? null,
+          arrive_time: flight?.arrive_time ?? null,
+          flight_status: flight?.status ?? null,
+          gate: flight?.gate ?? null,
+          terminal: flight?.terminal ?? null,
+          from_city: null,
+          to_city: null,
+        };
+      });
+    }
+
+    // ── Đọc booking theo id / PNR ──
+    if (q.includes('from bookings')) {
+      if (q.includes('upper(b.booking_code) = upper(') || q.includes('booking_code =')) {
+        const code = String(values[0] ?? '').toUpperCase();
+        return mockBookings.filter((b) => String(b.booking_code ?? '').toUpperCase() === code);
+      }
+      if (q.includes('where b.id =') || q.includes('where id =')) {
+        const id = values[0];
+        const match = mockBookings.find((b) => b.id === id);
+        return match ? [match] : [];
+      }
+      if (q.includes('where b.user_id =')) {
+        const userId = values[0];
+        return mockBookings.filter((b) => b.user_id === userId);
+      }
+      return mockBookings;
+    }
+
+    // ── Tạo booking (CTE `new_booking`) ──
+    if (q.includes('insert into bookings')) {
+      // `createBooking` chèn qua một CTE, nên mock chỉ cần trả về dòng vừa
+      // tạo với đủ trường mà các mapper đọc.
+      const row: MockResult = {
+        id: nextMockId('booking'),
+        booking_code: `MK${String(mockSeq).padStart(4, '0')}`,
+        trip_id: mockUuid(),
+        leg_role: 'outbound',
+        status: 'pending',
+        total_price: 0,
+        created_at: nowIso(),
+        updated_at: nowIso(),
+      };
+      mockBookings.push(row);
+      return [row];
+    }
+
+    // ── Hành khách của booking ──
+    if (q.includes('from passengers')) {
+      if (q.includes('where booking_id =')) {
+        const bookingId = values[0];
+        return mockPassengers.filter((p) => p.booking_id === bookingId);
+      }
+      if (q.includes('where id =')) {
+        const id = values[0];
+        const match = mockPassengers.find((p) => p.id === id);
+        return match ? [match] : [];
+      }
+      return mockPassengers;
+    }
+
+    // ── Check-in ──
+    if (q.includes('from check_in')) {
+      if (q.includes('where booking_id =')) {
+        const bookingId = values[0];
+        return mockCheckIns.filter((c) => c.booking_id === bookingId);
+      }
+      return mockCheckIns;
+    }
+
+    return null;
+  };
+
   const runFlightAndSeatQuery = (query: string, values: unknown[]): MockResult[] | null => {
     const q = query.toLowerCase();
 
@@ -638,6 +757,9 @@ function createMockSql() {
 
       const flightSeatResult = runFlightAndSeatQuery(query, values);
       if (flightSeatResult) return flightSeatResult;
+
+      const bookingResult = runBookingQuery(query, values);
+      if (bookingResult) return bookingResult;
 
       // Find matching mock data
       for (const [key, data] of Object.entries(mockData)) {

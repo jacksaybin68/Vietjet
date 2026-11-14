@@ -14,7 +14,7 @@
 const fs = require('node:fs');
 const puppeteer = require('puppeteer-core');
 
-const OFFICIAL = process.env.PARITY_OFFICIAL_URL || 'https://www.vietjetair.com/vi/';
+const OFFICIAL = process.env.PARITY_OFFICIAL_URL || 'https://newweb.vietjetair.com/vi/';
 const SIM = process.env.PARITY_SIM_URL || 'http://127.0.0.1:4028/trang-chu';
 const WIDTH = 1440;
 const HEIGHT = 900;
@@ -197,58 +197,6 @@ const PROBES = [
     },
   },
   {
-    key: 'rail',
-    label: 'Tầng 3 — dải dịch vụ phụ',
-    questions: [
-      'y',
-      'height',
-      'gap',
-      'item-font-size',
-      'item-font-weight',
-      'left-edge',
-      'right-edge',
-    ],
-    official: () => {
-      const li = Array.from(document.querySelectorAll('li')).find(
-        (e) => (e.textContent || '').trim() === 'Đặt vé' && e.getBoundingClientRect().y < 200
-      );
-      if (!li) return null;
-      const rail = li.parentElement;
-      const s = getComputedStyle(rail);
-      const a = li.querySelector('a');
-      const as = getComputedStyle(a);
-      const items = Array.from(rail.querySelectorAll('li'));
-      const last = items[items.length - 1];
-      return {
-        y: Math.round(li.getBoundingClientRect().y + window.scrollY),
-        height: `${Math.round(li.getBoundingClientRect().height)}px`,
-        gap: s.gap,
-        'item-font-size': as.fontSize,
-        'item-font-weight': as.fontWeight,
-        'left-edge': Math.round(li.getBoundingClientRect().x),
-        'right-edge': Math.round(last.getBoundingClientRect().right),
-      };
-    },
-    sim: () => {
-      const rail = document.querySelector('.vj-quick-rail');
-      if (!rail) return null;
-      const s = getComputedStyle(rail);
-      const a = rail.querySelector('a');
-      const as = a ? getComputedStyle(a) : null;
-      const items = rail.querySelectorAll('li');
-      const last = items[items.length - 1];
-      return {
-        y: Math.round(rail.getBoundingClientRect().y + window.scrollY),
-        height: `${Math.round(rail.getBoundingClientRect().height)}px`,
-        gap: s.gap,
-        'item-font-size': as ? as.fontSize : null,
-        'item-font-weight': as ? as.fontWeight : null,
-        'left-edge': items[0] ? Math.round(items[0].getBoundingClientRect().x) : null,
-        'right-edge': last ? Math.round(last.getBoundingClientRect().right) : null,
-      };
-    },
-  },
-  {
     key: 'hero',
     label: 'Hero — khối ảnh',
     questions: ['top', 'height', 'width'],
@@ -279,13 +227,14 @@ const PROBES = [
     },
   },
   {
-    key: 'panel',
-    label: 'Booking panel — thân form (gradient)',
-    questions: ['x', 'y', 'size', 'border-radius', 'background-image'],
+    key: 'bar',
+    label: 'Dải đặt vé — khung hàng tìm kiếm 1200px',
+    questions: ['x', 'y', 'size', 'border-radius', 'client-width', 'client-height', 'border-left'],
     official: () => {
+      // Hàng tìm kiếm = khối có viền đỏ 5px ở đáy (`jss266`).
       const el = Array.from(document.querySelectorAll('div')).find((e) => {
-        const s = getComputedStyle(e);
-        return s.backgroundImage.includes('rgba(217, 26, 33, 0.73)');
+        const c = getComputedStyle(e);
+        return c.borderBottomWidth === '5px' && c.borderBottomColor === 'rgb(236, 32, 41)';
       });
       if (!el) return null;
       const s = getComputedStyle(el);
@@ -295,11 +244,13 @@ const PROBES = [
         y: Math.round(r.y + window.scrollY),
         size: `${Math.round(r.width)}×${Math.round(r.height)}px`,
         'border-radius': s.borderRadius,
-        'background-image': s.backgroundImage.slice(0, 95),
+        'client-width': `${el.clientWidth}px`,
+        'client-height': `${el.clientHeight}px`,
+        'border-left': s.borderLeft,
       };
     },
     sim: () => {
-      const el = document.querySelector('.vj-booking-panel');
+      const el = document.querySelector('.vj-booking-bar');
       if (!el) return null;
       const s = getComputedStyle(el);
       const r = el.getBoundingClientRect();
@@ -308,77 +259,94 @@ const PROBES = [
         y: Math.round(r.y + window.scrollY),
         size: `${Math.round(r.width)}×${Math.round(r.height)}px`,
         'border-radius': s.borderRadius,
-        'background-image': s.backgroundImage.slice(0, 95),
+        'client-width': `${el.clientWidth}px`,
+        'client-height': `${el.clientHeight}px`,
+        'border-left': s.borderLeft,
       };
     },
   },
   {
-    key: 'tabs',
-    label: 'Booking panel — hàng tab',
-    questions: ['height', 'label-font-size', 'label-font-weight', 'label-font-family'],
+    key: 'bar-rail',
+    label: 'Dải đặt vé — rail dịch vụ 4 tab',
+    questions: ['x', 'y', 'size', 'border-radius', 'background-color', 'item-font-size'],
     official: () => {
-      const body = Array.from(document.querySelectorAll('div')).find((e) =>
-        getComputedStyle(e).backgroundImage.includes('rgba(217, 26, 33, 0.73)')
-      );
-      if (!body) return null;
-      const outer = body.parentElement;
-      const tabH = Math.round(
-        outer.getBoundingClientRect().height - body.getBoundingClientRect().height
-      );
-      const label = Array.from(outer.querySelectorAll('a, span, div, p')).find((n) =>
-        (n.textContent || '').trim().startsWith('Mua hành lý')
-      );
-      const ls = label ? getComputedStyle(label) : null;
+      // Rail đỏ: khối nền #EC2029 cao 40px ngay trên hàng tìm kiếm.
+      const el = Array.from(document.querySelectorAll('div')).find((e) => {
+        const c = getComputedStyle(e);
+        const r = e.getBoundingClientRect();
+        return (
+          c.backgroundColor === 'rgb(236, 32, 41)' &&
+          Math.round(r.height) === 40 &&
+          r.width > 1000
+        );
+      });
+      if (!el) return null;
+      const c = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      const btn = el.querySelector('button');
+      const bs = btn ? getComputedStyle(btn) : null;
       return {
-        height: `${tabH}px`,
-        'label-font-size': ls ? ls.fontSize : null,
-        'label-font-weight': ls ? ls.fontWeight : null,
-        'label-font-family': ls ? ls.fontFamily.split(',')[0] : null,
+        x: Math.round(r.x),
+        y: Math.round(r.y + window.scrollY),
+        size: `${Math.round(r.width)}×${Math.round(r.height)}px`,
+        'border-radius': c.borderRadius,
+        'background-color': c.backgroundColor,
+        'item-font-size': bs ? bs.fontSize : null,
       };
     },
     sim: () => {
-      const el = document.querySelector('.vj-booking-tabs');
+      const el = document.querySelector('.vj-booking-rail');
       if (!el) return null;
-      const label = el.querySelector('a span') || el.querySelector('a');
-      const ls = label ? getComputedStyle(label) : null;
+      const c = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      const btn = el.querySelector('a, button');
+      const bs = btn ? getComputedStyle(btn) : null;
       return {
-        height: `${Math.round(el.getBoundingClientRect().height)}px`,
-        'label-font-size': ls ? ls.fontSize : null,
-        'label-font-weight': ls ? ls.fontWeight : null,
-        'label-font-family': ls ? ls.fontFamily.split(',')[0] : null,
+        x: Math.round(r.x),
+        y: Math.round(r.y + window.scrollY),
+        size: `${Math.round(r.width)}×${Math.round(r.height)}px`,
+        'border-radius': c.borderRadius,
+        'background-color': c.backgroundColor,
+        'item-font-size': bs ? bs.fontSize : null,
       };
     },
   },
   {
     key: 'field',
-    label: 'Booking panel — ô nhập',
-    questions: ['height', 'border-radius', 'background-color'],
+    label: 'Dải đặt vé — ô nhập sân bay',
+    questions: ['x', 'size', 'label-font-size', 'value-font-size'],
     official: () => {
-      const el = Array.from(document.querySelectorAll('div, button')).find((e) => {
-        const r = e.getBoundingClientRect();
-        return (
-          Math.round(r.height) === 48 &&
-          r.width > 250 &&
-          r.width < 380 &&
-          getComputedStyle(e).borderRadius === '10px'
-        );
-      });
+      const el = Array.from(document.querySelectorAll('button')).find((b) =>
+        (b.textContent || '').replace(/\s+/g, ' ').trim().startsWith('Từ')
+      );
       if (!el) return null;
-      const s = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      // Site thật: label nằm trong `div > span` (12px/400), giá trị nằm trong
+      // thẻ `p` (16px/500) — dùng đúng cấu trúc để đo font-size chính xác.
+      const label = el.querySelector('div span') || el.querySelector('span');
+      const value = el.querySelector('p');
+      const ls = label ? getComputedStyle(label) : null;
+      const vs = value ? getComputedStyle(value) : null;
       return {
-        height: `${Math.round(el.getBoundingClientRect().height)}px`,
-        'border-radius': s.borderRadius,
-        'background-color': s.backgroundColor,
+        x: Math.round(r.x),
+        size: `${Math.round(r.width)}×${Math.round(r.height)}px`,
+        'label-font-size': ls ? ls.fontSize : null,
+        'value-font-size': vs ? vs.fontSize : null,
       };
     },
     sim: () => {
-      const el = document.querySelector('.vj-booking-panel .h-\\[48px\\]');
+      const el = document.querySelector('[aria-label="Điểm khởi hành"]');
       if (!el) return null;
-      const s = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      const label = el.querySelector('.vj-booking-field__label');
+      const value = el.querySelector('.vj-booking-field__value');
+      const ls = label ? getComputedStyle(label) : null;
+      const vs = value ? getComputedStyle(value) : null;
       return {
-        height: `${Math.round(el.getBoundingClientRect().height)}px`,
-        'border-radius': s.borderRadius,
-        'background-color': s.backgroundColor,
+        x: Math.round(r.x),
+        size: `${Math.round(r.width)}×${Math.round(r.height)}px`,
+        'label-font-size': ls ? ls.fontSize : null,
+        'value-font-size': vs ? vs.fontSize : null,
       };
     },
   },
@@ -387,8 +355,8 @@ const PROBES = [
     label: 'Nút CTA "Tìm chuyến bay"',
     questions: ['x', 'y', 'size', 'border-radius', 'background-image', 'font-size', 'font-family'],
     official: () => {
-      const el = Array.from(document.querySelectorAll('button')).find((b) =>
-        (b.textContent || '').includes('Tìm chuyến bay')
+      const el = Array.from(document.querySelectorAll('button')).find(
+        (b) => (b.textContent || '').includes('Tìm chuyến bay') && b.getBoundingClientRect().width > 0
       );
       if (!el) return null;
       const s = getComputedStyle(el);
@@ -404,8 +372,8 @@ const PROBES = [
       };
     },
     sim: () => {
-      const el = [...document.querySelectorAll('button')].find((b) =>
-        (b.textContent || '').includes('Tìm chuyến bay')
+      const el = [...document.querySelectorAll('button')].find(
+        (b) => (b.textContent || '').includes('Tìm chuyến bay') && b.getBoundingClientRect().width > 0
       );
       if (!el) return null;
       const s = getComputedStyle(el);
@@ -434,7 +402,7 @@ const PROBES = [
       if (!footer) return null;
       const s = getComputedStyle(footer);
       const h = Array.from(document.querySelectorAll('h1, h2, h3, h4, div, p')).find((e) =>
-        (e.textContent || '').trim().startsWith('Mua hành lý, suất ăn')
+        (e.textContent || '').trim().startsWith('Dịch vụ')
       );
       const hs = h ? getComputedStyle(h) : null;
       return {

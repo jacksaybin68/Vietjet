@@ -9,10 +9,6 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Footer, SubpageHeader } from '@/shared/components/navigation';
 import {
-  MdFlight as FlightIcon,
-  MdLogin,
-  MdCheckCircle,
-  MdAirlineSeatReclineNormal,
   MdPrint,
   MdQrCodeScanner,
   MdLuggage,
@@ -23,7 +19,7 @@ import { useToast } from '@/hooks/useToast';
 import { useAuthModal } from '@/features/auth/components';
 import { ToastContainer } from '@/shared/components/feedback';
 import { AppImage } from '@/shared/components/ui';
-import { MyFlightsStats } from '@/features/bookings';
+import { MyFlightsStats, TripCard, type Trip, type TripLeg } from '@/features/bookings';
 import { listBookings } from '@/features/bookings/services';
 import { apiRequest, getApiErrorMessage } from '@/shared/services';
 import { getAirportCity } from '@/features/flights';
@@ -41,9 +37,17 @@ interface FlightInfo {
   arrive_time?: string;
 }
 
+/**
+ * Một booking trong danh sách, đã gộp sẵn check-in từ query danh sách.
+ *
+ * `trip_id` + `leg_role` (migration 045) là thứ nhóm hai chặng của một chuyến
+ * khứ hồi thành MỘT thẻ trip.
+ */
 interface RecentBooking {
   id: string;
   booking_code?: string | null;
+  trip_id?: string | null;
+  leg_role?: 'outbound' | 'inbound';
   flight_no?: string;
   from_code?: string;
   to_code?: string;
@@ -51,10 +55,25 @@ interface RecentBooking {
   arrive_time?: string;
   flight?: FlightInfo | null;
   flights?: FlightInfo[] | null;
-  passengers?: Array<{ name?: string; seat_number?: string }> | null;
+  passengers?: Array<{ id?: string; name?: string; seat_number?: string | null }> | null;
   total_price: number;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded';
   created_at: string;
+  flight_id?: string;
+  flight_status?: string;
+  gate?: string | null;
+  terminal?: string | null;
+  check_ins?: Array<{
+    id: string;
+    passenger_id: string | null;
+    passenger_name: string;
+    seat_number: string;
+    check_in_number: string;
+    boarding_pass_number: string | null;
+    gate: string | null;
+    terminal: string | null;
+    check_in_time?: string | null;
+  }>;
   has_check_in?: boolean;
   check_in_number?: string | null;
   check_in_status?: string | null;
@@ -130,36 +149,11 @@ export default function MyFlightsPage() {
     try {
       const { bookings: records } = await listBookings({ limit: 100 });
 
-      const bookingsWithCheckIn = await Promise.all(
-        (records || []).map(async (booking) => {
-          try {
-            const checkInData = await apiRequest<{
-              checkInStatus?: {
-                has_check_in?: boolean;
-                check_in_number?: string | null;
-                status?: string | null;
-                boarding_pass_number?: string | null;
-                seat_number?: string | null;
-                check_in_time?: string | null;
-              };
-            }>(`/api/checkin/status/${booking.id}`);
-            return {
-              ...booking,
-              has_check_in: checkInData.checkInStatus?.has_check_in || false,
-              check_in_number: checkInData.checkInStatus?.check_in_number || null,
-              check_in_status: checkInData.checkInStatus?.status || null,
-              boarding_pass_number: checkInData.checkInStatus?.boarding_pass_number || null,
-              seat_number: checkInData.checkInStatus?.seat_number || null,
-              check_in_time: checkInData.checkInStatus?.check_in_time || null,
-            };
-          } catch {
-            return booking;
-          }
-        })
-      );
-
-      setBookings(bookingsWithCheckIn);
-      if (bookingsWithCheckIn.length > 0 && !viewPinned.current) setView('list');
+      // Không còn gọi `/api/checkin/status/<id>` cho TỪNG booking: check-in đã
+      // được gộp vào query danh sách (`getBookingsByUserId` join `check_in`),
+      // nên 100 đặt chỗ vẫn chỉ là 1 request thay vì 101.
+      setBookings((records || []) as unknown as RecentBooking[]);
+      if ((records || []).length > 0 && !viewPinned.current) setView('list');
     } catch {
       setBookings([]);
     } finally {
@@ -201,6 +195,67 @@ export default function MyFlightsPage() {
     return { totalBookings, completedFlights, pendingFlights, totalSpent, frequentDestinations };
   }, [bookings]);
 
+  /**
+   * Gom các booking theo `trip_id` để mỗi hành trình khứ hồi thành MỘT thẻ.
+   *
+   * Booking không có `trip_id` (dữ liệu cũ trước migration 045) thì tự thành
+   * một trip riêng — vẫn hiển thị đầy đủ, chỉ không gộp với chặng kia.
+   */
+  const trips = useMemo<Trip[]>(() => {
+    const byTrip = new Map<string, Trip>();
+    for (const booking of bookings) {
+      const tripId = booking.trip_id || `single-${booking.id}`;
+      const f = getFlight(booking);
+      const leg: TripLeg = {
+        id: booking.id,
+        bookingCode: booking.booking_code ?? null,
+        legRole: booking.leg_role ?? 'outbound',
+        status: booking.status,
+        totalPrice: booking.total_price,
+        createdAt: booking.created_at,
+        flightId: booking.flight_id ?? '',
+        flight: {
+          flight_no: f.flight_no ?? '--',
+          from_code: f.from_code ?? '--',
+          to_code: f.to_code ?? '--',
+          depart_time: f.depart_time ?? '',
+          arrive_time: f.arrive_time ?? '',
+        },
+        flight_status: booking.flight_status,
+        gate: booking.gate ?? null,
+        terminal: booking.terminal ?? null,
+        passengers: (booking.passengers ?? [])
+          .filter((p) => !!p.id)
+          .map((p) => ({ id: p.id!, name: p.name ?? '', seat_number: p.seat_number ?? null })),
+        check_ins: (booking.check_ins ?? []).map((ci) => ({
+          id: ci.id,
+          passenger_id: ci.passenger_id,
+          passenger_name: ci.passenger_name,
+          seat_number: ci.seat_number,
+          check_in_number: ci.check_in_number,
+          boarding_pass_number: ci.boarding_pass_number,
+          gate: ci.gate,
+          terminal: ci.terminal,
+        })),
+      };
+
+      const existing = byTrip.get(tripId);
+      if (existing) {
+        existing.legs.push(leg);
+      } else {
+        byTrip.set(tripId, { tripId, legs: [leg] });
+      }
+    }
+
+    // Chặng đi luôn trước chặng về trong cùng một thẻ.
+    for (const trip of byTrip.values()) {
+      trip.legs.sort((a, b) =>
+        a.legRole === b.legRole ? a.id.localeCompare(b.id) : a.legRole === 'outbound' ? -1 : 1
+      );
+    }
+    return Array.from(byTrip.values());
+  }, [bookings]);
+
   const formatDate = (iso?: string) => {
     try {
       return new Date(iso || '').toLocaleDateString('vi-VN', {
@@ -220,17 +275,6 @@ export default function MyFlightsPage() {
         hour: '2-digit',
         minute: '2-digit',
       });
-    } catch {
-      return '--';
-    }
-  };
-
-  const formatDuration = (d?: string, a?: string) => {
-    try {
-      const diff = new Date(a || '').getTime() - new Date(d || '').getTime();
-      const h = Math.floor(diff / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      return `${h}h ${String(m).padStart(2, '0')}ph`;
     } catch {
       return '--';
     }
@@ -389,7 +433,9 @@ export default function MyFlightsPage() {
               - Nút "Tìm kiếm" `127×39`; "Đăng nhập" `137×48` bo `12px`.
               - Cột phải `x=720` rộng `600`, banner `570×496` bo `5px`. */}
           <section className="relative flex-1">
-            <div className="mx-auto w-full max-w-[1200px] px-4 sm:px-6">
+            {/* Dải "Dịch vụ tra cứu" rộng đúng `1200px` ở desktop (không padding
+                ngang — site thật: `x=120`, `w=1200`), chỉ chừa padding ở mobile. */}
+            <div className="mx-auto w-full max-w-[1200px] px-4 sm:px-0">
               <div className="pt-4">
                 {/* Dải pill "Dịch vụ tra cứu" — 2 pill 164×36 bo 18px. */}
                 <nav aria-label="Dịch vụ tra cứu" className="vj-pill-tabs">
@@ -481,22 +527,26 @@ export default function MyFlightsPage() {
                           </div>
                         </div>
 
-                        <div className="mt-[30px] flex flex-col items-center">
-                          <button type="submit" disabled={loading} className="vj-lookup-btn">
+                        <div className="mt-[30px] flex flex-col">
+                          <button
+                            type="submit"
+                            disabled={loading}
+                            className="vj-lookup-btn self-center"
+                          >
                             {loading ? 'Đang tìm…' : 'Tìm kiếm'}
                           </button>
 
-                          <div className="mt-[26px] flex flex-col items-center gap-4">
+                          <div className="mt-[26px] flex flex-col">
                             <button
                               type="button"
                               onClick={() =>
                                 openAuthModal('login', { redirectTo: '/chuyen-bay-cua-toi' })
                               }
-                              className="vj-skyjoy-login-btn w-[137px]"
+                              className="vj-skyjoy-login-btn self-center"
                             >
                               Đăng nhập
                             </button>
-                            <p className="text-sm leading-[20px] text-[var(--vj-text)]">
+                            <p className="vj-skyjoy-line mt-4">
                               Bạn đã biết về Vietjet SkyJoy?{' '}
                               <Link href="/dang-ky" className="vj-skyjoy-register-link">
                                 Đăng ký ngay
@@ -518,14 +568,22 @@ export default function MyFlightsPage() {
 
                     {/* Giao diện Desktop — bám bố cục đo được ở
                         `newweb.vietjetair.com/vi/my/search-booking` (1440×900):
-                        cột trái rộng 600 (khối form x=220 rộng 400), cột phải
-                        rộng 600 (banner 570×496 bo 5px). */}
+                        container `x=120` rộng `1200`;
+                        - H2 "CHUYẾN BAY CỦA TÔI" `x=225`, `20px/600` uppercase;
+                        - 3 ô nhập `x=240`, rộng `360`, cao `40`, cách nhau `17px`;
+                        - nút "Tìm kiếm" `x=357` (căn giữa cột ô nhập), `127×39`;
+                        - nút "Đăng nhập" `x=352`, `137×48` bo `12px`;
+                        - dòng "Bạn đã biết về Vietjet SkyJoy? Đăng ký ngay" lề trái
+                          tại `x=240`, link `x=473` rộng `84`;
+                        - banner cột phải `x=735`, `570×496` bo `5px`. */}
                     <form
                       onSubmit={handleSearchBooking}
                       className="hidden xl:grid xl:grid-cols-[600px_600px] xl:gap-0 animate-fadeIn"
                     >
-                      {/* Cột trái: tiêu đề + mô tả + ba trường nhập. */}
-                      <div className="flex flex-col px-[100px] pt-[42px]">
+                      {/* Cột trái: tiêu đề + mô tả + ba trường nhập.
+                          Cột bắt đầu tại `x=120`; H2 lệch `+105px`, khối ô nhập
+                          lệch thêm `+15px` (site thật `x=240`). */}
+                      <div className="flex flex-col pt-[42px] xl:pl-[105px]">
                         <h2 className="text-xl font-semibold uppercase tracking-tight text-gray-900">
                           CHUYẾN BAY CỦA TÔI
                         </h2>
@@ -534,7 +592,7 @@ export default function MyFlightsPage() {
                           hành lý, chỗ ngồi, suất ăn..., vui lòng điền thông tin bên dưới:
                         </p>
 
-                        <div className="mt-[28px] w-[360px] space-y-[20px]">
+                        <div className="mt-[28px] w-[360px] space-y-[17px] xl:ml-[15px]">
                           <div className="vj-lookup-field">
                             <input
                               id="booking-code"
@@ -585,23 +643,28 @@ export default function MyFlightsPage() {
                           </div>
                         </div>
 
-                        <div className="mt-[30px] flex flex-col items-center">
-                          <button type="submit" disabled={loading} className="vj-lookup-btn">
+                        <div className="mt-[30px] flex flex-col xl:ml-[15px] xl:w-[360px]">
+                          <button
+                            type="submit"
+                            disabled={loading}
+                            className="vj-lookup-btn self-center"
+                          >
                             {loading ? 'Đang tìm…' : 'Tìm kiếm'}
                           </button>
 
-                          {/* "Đăng nhập" 137×48 bo 12px + "Đăng ký ngay" 84×20 */}
-                          <div className="mt-[26px] flex flex-col items-center gap-4">
+                          {/* "Đăng nhập" 137×48 bo 12px (căn giữa cột ô nhập)
+                              + "Đăng ký ngay" 84×20 lề trái tại `x=240`. */}
+                          <div className="mt-[26px] flex flex-col">
                             <button
                               type="button"
                               onClick={() =>
                                 openAuthModal('login', { redirectTo: '/chuyen-bay-cua-toi' })
                               }
-                              className="vj-skyjoy-login-btn w-[137px]"
+                              className="vj-skyjoy-login-btn self-center"
                             >
                               Đăng nhập
                             </button>
-                            <p className="text-sm leading-[20px] text-[var(--vj-text)]">
+                            <p className="vj-skyjoy-line mt-4">
                               Bạn đã biết về Vietjet SkyJoy?{' '}
                               <Link href="/dang-ky" className="vj-skyjoy-register-link">
                                 Đăng ký ngay
@@ -611,8 +674,9 @@ export default function MyFlightsPage() {
                         </div>
                       </div>
 
-                      {/* Cột phải: banner `570×496` bo `5px` — đo được ở site thật. */}
-                      <div className="flex items-start justify-center pt-[42px]">
+                      {/* Cột phải: banner `570×496` bo `5px` — đo được ở site thật
+                          (`x=735`, tức lệch `+15px` so với mép cột `x=720`). */}
+                      <div className="flex items-start pt-[42px] xl:pl-[15px]">
                         <div className="relative h-[496px] w-[570px] overflow-hidden rounded-[5px] shadow-[0_12px_32px_rgba(36,73,120,0.16)]">
                           <AppImage
                             src="/images/hero/banner-chuyenbay-ngoai-te.jpg"
@@ -795,165 +859,9 @@ export default function MyFlightsPage() {
                   </section>
                 ) : (
                   <div className="space-y-5">
-                    {bookings.map((b) => {
-                      const f = getFlight(b);
-                      const st = STATUS_LABELS[b.status];
-                      return (
-                        <article
-                          key={b.id}
-                          className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] shadow-sm hover:shadow-md transition-shadow"
-                        >
-                          {/* Đầu phiếu: nền đỏ thương hiệu; chip trạng thái đổi sang nền
-                          trắng để vẫn đọc được trên nền đỏ. */}
-                          <div className="flex flex-wrap items-center justify-between gap-3 bg-[var(--vj-red)] px-4 py-3 text-white">
-                            <div className="flex items-center gap-2">
-                              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-white">
-                                <FlightIcon className="h-5 w-5" />
-                              </div>
-                              <div>
-                                <p className="text-sm font-black text-[var(--vj-yellow)]">
-                                  {f.flight_no || '—'}
-                                </p>
-                                <p className="text-xs2 text-white/75">Đặt chỗ: {b.id}</p>
-                              </div>
-                            </div>
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs font-bold text-[var(--vj-red)]">
-                              <span className="h-1.5 w-1.5 rounded-full bg-[var(--vj-red)]" />
-                              {st.label}
-                            </span>
-                          </div>
-
-                          {/* Corps du billet */}
-                          <div className="px-4 py-5">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                              {/* Departure */}
-                              <div className="text-center sm:text-left w-24">
-                                <p className="text-2xl font-black text-[var(--foreground)]">
-                                  {f.from_code || '--'}
-                                </p>
-                                <p className="text-2xs text-[var(--foreground-muted)] mt-0.5">
-                                  {f.from_code ? getAirportCity(f.from_code) : '—'}
-                                </p>
-                                <p className="text-sm font-bold text-[var(--vj-red)] mt-1">
-                                  {formatTime(f.depart_time)}
-                                </p>
-                              </div>
-
-                              {/* Flight line */}
-                              <div className="flex-1 text-center">
-                                <p className="text-2xs text-[var(--foreground-muted)]">
-                                  {formatDate(f.depart_time)}
-                                </p>
-                                <div className="flex items-center gap-1">
-                                  <div className="h-px w-2 h-2 rounded-full bg-[var(--foreground-muted)]" />
-                                  <div className="flex-1 border-t-2 border-dashed border-[var(--foreground-muted)]" />
-                                  <FlightIcon className="h-5 w-5 text-[var(--vj-red)]" />
-                                  <div className="flex-1 border-t-2 border-dashed border-[var(--foreground-muted)]" />
-                                  <div className="h-2 w-2 rounded-full bg-[var(--foreground-muted)]" />
-                                </div>
-                                <p className="text-xs2 font-medium text-[var(--foreground-muted)] mt-1">
-                                  {formatDuration(f.depart_time, f.arrive_time)} · Trực tiếp
-                                </p>
-                              </div>
-
-                              {/* Arrival */}
-                              <div className="text-center sm:text-right w-24">
-                                <p className="text-2xl font-black text-[var(--foreground)]">
-                                  {f.to_code || '--'}
-                                </p>
-                                <p className="text-2xs text-[var(--foreground-muted)] mt-0.5">
-                                  {f.to_code ? getAirportCity(f.to_code) : '—'}
-                                </p>
-                                <p className="text-sm font-bold text-[var(--vj-red)] mt-1">
-                                  {formatTime(f.arrive_time)}
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Check-in / détails */}
-                            <div className="mt-4 flex flex-wrap gap-2">
-                              {b.seat_number ? (
-                                <span className="inline-flex items-center gap-1 text-xs2 px-2 py-1 rounded-lg bg-[rgb(var(--vj-blue-rgb))]/10 text-[var(--vj-blue)]">
-                                  <MdAirlineSeatReclineNormal className="h-3.5 w-3.5" /> Ghế{' '}
-                                  {b.seat_number}
-                                </span>
-                              ) : null}
-                              {b.has_check_in ? (
-                                <span className="inline-flex items-center gap-1 text-xs2 px-2 py-1 rounded-lg bg-[rgb(var(--vj-green-rgb))]/10 text-[var(--vj-green)]">
-                                  <MdCheckCircle className="h-3.5 w-3.5" /> Đã check-in
-                                  {b.check_in_number ? ` · ${b.check_in_number}` : ''}
-                                </span>
-                              ) : null}
-                              {b.passengers && b.passengers.length > 0 && (
-                                <span className="inline-flex items-center gap-1 text-xs2 px-2 py-1 rounded-lg bg-[rgb(var(--vj-yellow-rgb))]/25 text-[var(--vj-red)] font-bold">
-                                  <MdLogin className="h-3.5 w-3.5" /> {b.passengers.length} hành
-                                  khach
-                                </span>
-                              )}
-                            </div>
-
-                            {/* Prix */}
-                            <div className="mt-3 flex items-center justify-between">
-                              <div>
-                                <p className="text-xs text-[var(--foreground-muted)]">
-                                  Đặt: {new Date(b.created_at).toLocaleDateString('vi-VN')}
-                                </p>
-                                {b.status === 'pending' && (
-                                  <span className="inline-block mt-0.5 text-3xs font-black uppercase px-2 py-0.5 rounded bg-red-100 text-[var(--vj-red)] border border-red-200">
-                                    Chưa thanh toán
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xl font-black text-[var(--vj-red)]">
-                                {b.total_price.toLocaleString('vi-VN')}₫
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Perforation footer */}
-                          <div className="flex items-center justify-between gap-2 px-4 py-2 bg-[var(--surface)] border-t border-[var(--border)]">
-                            <div className="flex flex-wrap items-center gap-2">
-                              {b.status === 'pending' && (
-                                <Link
-                                  href={`/thanh-toan?bookingId=${b.booking_code || b.id}`}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl bg-[var(--vj-red)] text-white font-black hover:bg-vj-red-dark shadow-xs transition-all active:scale-95"
-                                >
-                                  <MdPayment className="h-3.5 w-3.5" /> Thanh toán ngay
-                                </Link>
-                              )}
-                              {!b.has_check_in && b.status === 'confirmed' && (
-                                <Link
-                                  href={`/lam-thu-tuc?code=${b.booking_code || b.id}`}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl bg-[var(--vj-yellow)] text-[var(--vj-red)] font-black hover:bg-[var(--vj-yellow-2)] transition-colors"
-                                >
-                                  <MdAirlineSeatReclineNormal className="h-3.5 w-3.5" /> Check-in
-                                </Link>
-                              )}
-                              {b.has_check_in && (
-                                <Link
-                                  href={`/lam-thu-tuc?code=${b.booking_code || b.id}`}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-[rgb(var(--vj-yellow-rgb))]/25 text-[var(--vj-red)] font-bold hover:bg-[rgb(var(--vj-yellow-rgb))]/40 transition-colors"
-                                >
-                                  <MdCheckCircle className="h-3.5 w-3.5" /> Thẻ lên tàu
-                                </Link>
-                              )}
-                              <Link
-                                href={`/dat-ve/${b.booking_code || b.id}`}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-[var(--border)] font-semibold hover:bg-[rgb(var(--vj-yellow-rgb))]/10 transition-colors"
-                              >
-                                <MdPrint className="h-3.5 w-3.5" /> In vé / Đổi
-                              </Link>
-                            </div>
-                            <Link
-                              href={`/dat-ve/${b.booking_code || b.id}`}
-                              className="text-xs text-[var(--vj-red)] font-bold hover:underline shrink-0"
-                            >
-                              Xem chi tiết →
-                            </Link>
-                          </div>
-                        </article>
-                      );
-                    })}
+                    {trips.map((trip) => (
+                      <TripCard key={trip.tripId} trip={trip} />
+                    ))}
                   </div>
                 )}
               </section>

@@ -136,7 +136,7 @@ describe('HeroBookingWidget Date Selection Flow', () => {
   it('opens date picker popover when clicking Ngày đi', () => {
     render(<HeroBookingWidget />);
 
-    const departBtn = screen.getByRole('button', { name: /Ngày đi/i });
+    const departBtn = screen.getByRole('button', { name: 'Ngày đi' });
     expect(departBtn).toBeInTheDocument();
 
     // Popover is not open initially
@@ -148,15 +148,19 @@ describe('HeroBookingWidget Date Selection Flow', () => {
     expect(screen.getByText('Tháng 10 2026')).toBeInTheDocument();
   });
 
-  it('opens date picker popover when clicking Ngày về', () => {
+  // Dải đặt vé ngang 1200px chỉ có MỘT ô ngày ("Ngày đi", 171px + mũi tên
+  // 24px) — đúng site thật (đo 14/11/2026, `jss361` 171px + `jss370` 24px).
+  // Ngày về được chọn bên trong popover lịch, qua bước "return" của lịch.
+  it('opens the calendar popover with the return step available for round trips', () => {
     render(<HeroBookingWidget />);
 
-    const returnBtn = screen.getByRole('button', { name: /Ngày về/i });
-    expect(returnBtn).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Ngày đi' }));
 
-    fireEvent.click(returnBtn);
+    expect(screen.getByLabelText('Tháng trước')).toBeInTheDocument();
     expect(screen.getByLabelText('Tháng sau')).toBeInTheDocument();
-    expect(screen.getByText('Tháng 11 2026')).toBeInTheDocument();
+    // Dải pill loại hành trình nằm trong popover (đúng site thật).
+    expect(screen.getByRole('button', { name: 'Khứ hồi' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Một chiều' })).toBeInTheDocument();
   });
 
   it('swaps origin and destination when clicking swap button', () => {
@@ -176,20 +180,21 @@ describe('HeroBookingWidget Date Selection Flow', () => {
     expect(screen.getByRole('button', { name: 'Điểm đến' })).toHaveTextContent(/HAN/);
   });
 
-  it('hides return date when switching to Một chiều and shows when Khứ hồi', () => {
+  // Site thật dùng dải pill bo tròn 999px (MUI) cho loại hành trình, nằm
+  // TRONG popover lịch — không phải radio button.
+  it('switches between one-way and round-trip from the pill inside the popover', () => {
     render(<HeroBookingWidget />);
 
-    expect(screen.getByRole('button', { name: /Ngày về/i })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Ngày đi' }));
 
-    // Site thật dùng radio cho loại hành trình (18×18px), không phải button.
-    const oneWayButton = screen.getByRole('radio', { name: 'Một chiều' });
+    const oneWayButton = screen.getByRole('button', { name: 'Một chiều' });
+    expect(oneWayButton).toHaveAttribute('aria-pressed', 'false');
     fireEvent.click(oneWayButton);
+    expect(oneWayButton).toHaveAttribute('aria-pressed', 'true');
 
-    expect(screen.queryByRole('button', { name: /Ngày về/i })).not.toBeInTheDocument();
-
-    const roundTripButton = screen.getByRole('radio', { name: 'Khứ hồi' });
+    const roundTripButton = screen.getByRole('button', { name: 'Khứ hồi' });
+    expect(roundTripButton).toHaveAttribute('aria-pressed', 'false');
     fireEvent.click(roundTripButton);
-
-    expect(screen.getByRole('button', { name: /Ngày về/i })).toBeInTheDocument();
+    expect(roundTripButton).toHaveAttribute('aria-pressed', 'true');
   });
 });

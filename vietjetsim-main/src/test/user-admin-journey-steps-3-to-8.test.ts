@@ -11,6 +11,10 @@ const searchCheckInMock = vi.hoisted(() => vi.fn());
 const createCheckInMock = vi.hoisted(() => vi.fn());
 const getBookingsByUserIdMock = vi.hoisted(() => vi.fn());
 const getAllBookingsMock = vi.hoisted(() => vi.fn());
+const getTripByCodeOrIdMock = vi.hoisted(() => vi.fn());
+const getTripByIdMock = vi.hoisted(() => vi.fn());
+const getCheckInStatusByBookingIdMock = vi.hoisted(() => vi.fn());
+const setPassengerSeatNumberMock = vi.hoisted(() => vi.fn());
 
 vi.mock('@/lib/db', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/db')>();
@@ -27,6 +31,12 @@ vi.mock('@/lib/db', async (importOriginal) => {
     createCheckIn: createCheckInMock,
     getBookingsByUserId: getBookingsByUserIdMock,
     getAllBookings: getAllBookingsMock,
+    // Check-in nay tra theo TRIP (tra cua ca hai chang), khong con dung
+    // `searchCheckIn` (chi tra duoc mot booking).
+    getTripByCodeOrId: getTripByCodeOrIdMock,
+    getTripById: getTripByIdMock,
+    getCheckInStatusByBookingId: getCheckInStatusByBookingIdMock,
+    setPassengerSeatNumber: setPassengerSeatNumberMock,
   };
 });
 
@@ -158,6 +168,44 @@ describe('Full Real-world User & Admin Journey (Steps 3 to 8)', () => {
       ],
       total: 1,
     });
+
+    // Trip cua booking VJ8888 — mot chang (chuyen di).
+    const trip = {
+      tripId: 'bk-uuid-001',
+      legs: [
+        {
+          bookingId: 'bk-uuid-001',
+          bookingCode: 'VJ8888',
+          legRole: 'outbound' as const,
+          status: 'confirmed' as const,
+          totalPrice: 3587500,
+          flightId: 'f1',
+          flightNo: 'VJ128',
+          fromCode: 'SGN',
+          toCode: 'HAN',
+          fromCity: 'TP. Hồ Chí Minh',
+          toCity: 'Hà Nội',
+          departTime: '2026-10-25T08:00:00Z',
+          arriveTime: '2026-10-25T10:15:00Z',
+          flightStatus: 'on_time' as const,
+          gate: '04',
+          terminal: 'T1',
+          passengers: [
+            {
+              id: 'pax-uuid-001',
+              name: 'NGUYEN VAN A',
+              dob: '1990-01-01',
+              id_number: 'C1234567',
+              seat_number: null,
+            },
+          ],
+          checkIns: [],
+        },
+      ],
+    };
+    getTripByCodeOrIdMock.mockResolvedValue(trip);
+    getTripByIdMock.mockResolvedValue(trip);
+    getCheckInStatusByBookingIdMock.mockResolvedValue({ has_check_in: false });
   });
 
   // =========================================================================
@@ -325,7 +373,10 @@ describe('Full Real-world User & Admin Journey (Steps 3 to 8)', () => {
       },
       body: JSON.stringify({
         bookingId: 'bk-uuid-001',
-        seatNumber: '1A',
+        leg: 'outbound',
+        // Ghế giờ truyền theo từng hành khách (`seats[]`) thay vì một
+        // `seatNumber` chung cho cả booking.
+        seats: [{ passengerId: 'pax-uuid-001', seatNumber: '1A' }],
         flightNo: 'VJ128',
         fromCode: 'SGN',
         toCode: 'HAN',

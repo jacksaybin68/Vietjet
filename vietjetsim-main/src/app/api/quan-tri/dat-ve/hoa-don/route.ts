@@ -36,6 +36,9 @@ export async function POST(request: NextRequest) {
       await sendAutomaticPaymentInvoiceEmail(booking_id, {
         paymentMethod: method,
         customAmount: amount,
+        // Admin bấm "Gửi hoá đơn" là chủ ý gửi lại ⇒ bỏ qua khoá idempotent.
+        skipIdempotency: true,
+        force: true,
       }).catch((err) => {
         console.error('Failed to auto-send payment invoice email:', err);
       });

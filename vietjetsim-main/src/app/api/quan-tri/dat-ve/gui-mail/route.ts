@@ -64,8 +64,12 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Fetch passengers for rich flight / seat details
+    //
+    // Cột là `seat_number` (thêm ở migration 046), KHÔNG phải `seat_code` —
+    // cột `seat_code` không tồn tại trong schema ⇒ query này ném lỗi Postgres
+    // và route trả 500 cho admin.
     const pRes = await sql`
-      SELECT name, email, seat_code
+      SELECT name, email, seat_number
       FROM passengers
       WHERE booking_id = ${booking.id}
     `;
@@ -147,7 +151,7 @@ export async function POST(request: NextRequest) {
         customNote: customNote ? String(customNote).trim() : undefined,
         passengers: passengersList.map((p) => ({
           name: p.name || 'Hành khách',
-          seat: p.seat_code || undefined,
+          seat: p.seat_number || undefined,
         })),
       });
 

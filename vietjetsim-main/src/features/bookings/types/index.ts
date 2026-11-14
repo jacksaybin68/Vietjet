@@ -1,4 +1,11 @@
-import type { BookingRecord, BookingDetail } from '@/lib/db';
+import type {
+  BookingRecord,
+  BookingDetail,
+  FlightStatus,
+  FlightRecord,
+  PassengerRecord,
+  PaymentRecord,
+} from '@/lib/db';
 import type { BookingConsents, Passenger } from './booking-flow';
 import type { FareClassId } from '../pricing';
 
@@ -50,8 +57,34 @@ export interface BookingPagination {
 }
 
 export interface BookingListResponse {
-  bookings: BookingRecord[];
+  bookings: BookingListItem[];
   pagination: BookingPagination;
+}
+
+/**
+ * Một booking trong danh sách, đã gộp sẵn thông tin cần cho UI.
+ *
+ * Gộp `check_ins` vào query danh sách để `/chuyen-bay-cua-toi` không phải gọi
+ * `/api/checkin/status/<id>` cho từng dòng (N+1 request).
+ */
+export interface BookingListItem extends BookingRecord {
+  flight: Pick<FlightRecord, 'flight_no' | 'from_code' | 'to_code' | 'depart_time' | 'arrive_time'>;
+  passengers: PassengerRecord[];
+  payment: PaymentRecord | null;
+  flight_status?: FlightStatus;
+  gate?: string | null;
+  terminal?: string | null;
+  check_ins: Array<{
+    id: string;
+    passenger_id: string | null;
+    passenger_name: string;
+    seat_number: string;
+    check_in_number: string;
+    boarding_pass_number: string | null;
+    gate: string | null;
+    terminal: string | null;
+    check_in_time: string | null;
+  }>;
 }
 
 export interface CreateBookingResponse {

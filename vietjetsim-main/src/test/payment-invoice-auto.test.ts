@@ -56,7 +56,7 @@ vi.mock('@/lib/neon', () => {
           {
             name: 'Tran Van Khach',
             email: 'customer.real@gmail.com',
-            seat_code: '15B',
+            seat_number: '15B',
           },
         ];
       }

@@ -598,14 +598,18 @@ export default function PaymentClient() {
       })
       .catch((err) => console.error('Failed to load bank config:', err));
 
-    // Fetch wallet balance
+    // Fetch wallet balance (fail-soft: khách chưa đăng nhập thì im lặng, không ghi lỗi console)
     getWalletOverview()
       .then((data) => {
         if (data.wallet) {
           setWalletBalance(parseFloat(String(data.wallet.balance)));
         }
       })
-      .catch((err) => console.error('Failed to load wallet balance:', err));
+      .catch((err) => {
+        if (!String(err).includes('Authentication required') && !String(err).includes('401')) {
+          console.error('Failed to load wallet balance:', err);
+        }
+      });
 
     // SkyPoint balance for the SkyJoy payment tab (fail-soft như ví).
     getMembership()
@@ -615,7 +619,11 @@ export default function PaymentClient() {
           rate: data.program.pointsPerThousandVnd,
         });
       })
-      .catch((err) => console.error('Failed to load SkyPoint balance:', err));
+      .catch((err) => {
+        if (!String(err).includes('Authentication required') && !String(err).includes('401')) {
+          console.error('Failed to load SkyPoint balance:', err);
+        }
+      });
   }, []);
 
   useEffect(() => {

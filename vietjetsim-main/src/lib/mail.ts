@@ -83,12 +83,29 @@ function getTransporter(): Transporter | null {
   return transporter;
 }
 
+/**
+ * Tệp đính kèm mail.
+ *
+ * `content` là Buffer (PDF vé điện tử). Nodemailer tự đóng gói thành
+ * multipart/mixed, nên không cần làm gì thêm ở tầng template.
+ */
+export interface MailAttachment {
+  /** Tên file khách thấy (kèm đuôi đúng, ví dụ `ve-dien-tu-FG7KH9.pdf`). */
+  filename: string;
+  /** MIME type. PDF = `application/pdf`. */
+  contentType: string;
+  /** Nội dung file. */
+  content: Buffer | string;
+}
+
 export interface MailPayload {
   to: string;
   subject: string;
   html: string;
   text: string;
   replyTo?: string;
+  /** Tệp đính kèm (vé điện tử PDF...). */
+  attachments?: MailAttachment[];
 }
 
 /** Gửi một email. Trả false (không throw) khi chưa cấu hình hoặc gửi hỏng. */
@@ -107,6 +124,17 @@ export async function sendMail(payload: MailPayload): Promise<boolean> {
       html: payload.html,
       text: payload.text,
       replyTo: payload.replyTo ?? process.env.MAIL_REPLY_TO,
+      // Chỉ gắn `attachments` khi có — nodemailer xử lý mảng rỗng như multipart
+      // vô hại, nhưng bỏ qua giữ payload gọn.
+      ...(payload.attachments && payload.attachments.length > 0
+        ? {
+            attachments: payload.attachments.map((attachment) => ({
+              filename: attachment.filename,
+              content: attachment.content,
+              contentType: attachment.contentType,
+            })),
+          }
+        : {}),
     });
     console.info(`[MAIL] Đã gửi "${payload.subject}" tới ${payload.to}`);
     return true;
@@ -843,10 +871,10 @@ ${actionButton(`${url}/dang-nhap`, 'Đăng nhập')}`;
 
 /** Gửi email xác nhận thanh toán thành công và vé điện tử chính thức. */
 export async function sendPaymentSuccessEmail(
-  opts: PaymentSuccessInput & { to: string }
+  opts: PaymentSuccessInput & { to: string; attachments?: MailAttachment[] }
 ): Promise<boolean> {
   const { subject, html, text } = buildPaymentSuccessHtml(opts);
-  return sendMail({ to: opts.to, subject, html, text });
+  return sendMail({ to: opts.to, subject, html, text, attachments: opts.attachments });
 }
 
 /** Gửi email thông báo thanh toán / hướng dẫn thanh toán kèm STK Admin và VNPAY-QR. */

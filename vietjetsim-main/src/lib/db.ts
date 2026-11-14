@@ -31,8 +31,22 @@ type BookingListRow = BookingRecord & {
   to_code: string;
   depart_time: string;
   arrive_time: string;
+  flight_status: FlightStatus;
+  gate: string | null;
+  terminal: string | null;
   passengers: PassengerRecord[];
   payments: PaymentRecord[];
+  check_ins: Array<{
+    id: string;
+    passenger_id: string | null;
+    passenger_name: string;
+    seat_number: string;
+    check_in_number: string;
+    boarding_pass_number: string | null;
+    gate: string | null;
+    terminal: string | null;
+    check_in_time: string | null;
+  }>;
 };
 
 /** A value that can be bound as a SQL parameter. */
@@ -124,6 +138,10 @@ export interface BookingRecord {
   flight_id: string;
   /** Short reference the customer is given (PNR). Assigned by the database. */
   booking_code: string | null;
+  /** Shared id of the round trip this row belongs to (migration 045). */
+  trip_id?: string | null;
+  /** Which leg of the trip this row is: 'outbound' (đi) or 'inbound' (về). */
+  leg_role?: 'outbound' | 'inbound';
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded';
   total_price: number;
   discount_code_id?: string | null;
@@ -146,6 +164,8 @@ export interface PassengerRecord {
   email: string | null;
   residence: string | null;
   skyjoy_member_id: string | null;
+  /** Ghế của hành khách (migration 046). */
+  seat_number?: string | null;
   created_at: string;
 }
 
@@ -173,6 +193,10 @@ export interface BookingDetail {
   flight_id: string;
   /** Short reference the customer is given (PNR). Assigned by the database. */
   booking_code: string | null;
+  /** Shared id of the round trip this row belongs to (migration 045). */
+  trip_id?: string | null;
+  /** Which leg of the trip this row is: 'outbound' (đi) or 'inbound' (về). */
+  leg_role?: 'outbound' | 'inbound';
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded';
   total_price: number;
   discount_code_id?: string | null;
@@ -868,6 +892,20 @@ export async function getBookingsByUserId(
       >;
       passengers: PassengerRecord[];
       payment: PaymentRecord | null;
+      flight_status: FlightStatus;
+      gate: string | null;
+      terminal: string | null;
+      check_ins: Array<{
+        id: string;
+        passenger_id: string | null;
+        passenger_name: string;
+        seat_number: string;
+        check_in_number: string;
+        boarding_pass_number: string | null;
+        gate: string | null;
+        terminal: string | null;
+        check_in_time: string | null;
+      }>;
     }
   >;
   total: number;
@@ -902,12 +940,20 @@ export async function getBookingsByUserId(
     `
       SELECT b.*,
              f.flight_no, f.from_code, f.to_code, f.depart_time, f.arrive_time,
+             f.status AS flight_status, f.gate, f.terminal,
              json_agg(DISTINCT p) FILTER (WHERE p.id IS NOT NULL) as passengers,
-             json_agg(DISTINCT pay) FILTER (WHERE pay.id IS NOT NULL) as payments
+             json_agg(DISTINCT pay) FILTER (WHERE pay.id IS NOT NULL) as payments,
+             -- Check-in gộp vào cùng một query: trước đây /chuyen-bay-cua-toi
+             -- gọi /api/checkin/status/<id> cho TỪNG booking (N+1 request).
+             COALESCE(
+               json_agg(DISTINCT ci) FILTER (WHERE ci.id IS NOT NULL),
+               '[]'::json
+             ) AS check_ins
       FROM bookings b
       JOIN flights f ON b.flight_id = f.id
       LEFT JOIN passengers p ON b.id = p.booking_id
       LEFT JOIN payments pay ON b.id = pay.booking_id
+      LEFT JOIN check_in ci ON b.id = ci.booking_id
       WHERE ${whereClause}
       GROUP BY b.id, f.id
       ORDER BY b.created_at DESC
@@ -924,6 +970,11 @@ export async function getBookingsByUserId(
       flight_id: b.flight_id,
       // Selected by `b.*` but previously dropped by this explicit mapping.
       booking_code: b.booking_code ?? null,
+      // Trip/leg (migration 045): nhóm các booking của cùng một hành trình
+      // khứ hồi, để `/chuyen-bay-cua-toi` hiển thị một thẻ trip gồm cả
+      // chặng đi và chặng về.
+      trip_id: b.trip_id ?? null,
+      leg_role: (b.leg_role as 'outbound' | 'inbound') ?? 'outbound',
       status: b.status,
       total_price: parseFloat(String(b.total_price)),
       created_at: b.created_at,
@@ -935,8 +986,14 @@ export async function getBookingsByUserId(
         depart_time: b.depart_time,
         arrive_time: b.arrive_time,
       },
+      // Trạng thái chuyến bay realtime (SSE) — cần cả gate/terminal.
+      flight_status: b.flight_status,
+      gate: b.gate,
+      terminal: b.terminal,
       passengers: Array.isArray(b.passengers) ? b.passengers : [],
       payment: Array.isArray(b.payments) && b.payments.length > 0 ? b.payments[0] : null,
+      // Check-in của booking này — lấy thẳng từ query danh sách.
+      check_ins: Array.isArray(b.check_ins) ? b.check_ins : [],
     })),
   };
 }
@@ -986,6 +1043,8 @@ export async function getBookingById(bookingId: string): Promise<BookingDetail |
     // `b.*` already selects it, but the explicit mapping below would otherwise
     // drop it — and the payment page needs the real PNR, not the booking UUID.
     booking_code: b.booking_code ? String(b.booking_code) : null,
+    trip_id: b.trip_id ? String(b.trip_id) : null,
+    leg_role: (b.leg_role as BookingDetail['leg_role']) ?? 'outbound',
     status: b.status as BookingDetail['status'],
     total_price: parseFloat(String(b.total_price)),
     created_at: String(b.created_at),
@@ -1015,6 +1074,15 @@ export async function createBooking(
     flight_id: string;
     total_price: number;
     seatedCount?: number;
+    /**
+     * Shared id for the two legs of a round trip (migration 045). Both legs
+     * carry the same value, which is what makes one PNR resolve to the whole
+     * trip. Omitted for a single-leg booking — the column default then gives
+     * the row a trip of its own.
+     */
+    trip_id?: string | null;
+    /** Which leg of the trip this row is: 'outbound' (đi) or 'inbound' (về). */
+    leg_role?: 'outbound' | 'inbound';
   },
   passengers: {
     name: string;
@@ -1070,10 +1138,17 @@ export async function createBooking(
       RETURNING id
     ),
     new_booking AS (
-      INSERT INTO bookings (user_id, flight_id, status, total_price)
-      SELECT ${booking.user_id}, ${booking.flight_id}, 'pending', ${booking.total_price}
+      INSERT INTO bookings (user_id, flight_id, status, total_price, trip_id, leg_role)
+      SELECT
+        ${booking.user_id},
+        ${booking.flight_id},
+        'pending',
+        ${booking.total_price},
+        COALESCE(${booking.trip_id ?? null}::uuid, gen_random_uuid()),
+        COALESCE(${booking.leg_role ?? null}::varchar(10), 'outbound')
       FROM reserved_flight
-      RETURNING id, user_id, flight_id, status, total_price, created_at, updated_at, booking_code
+      RETURNING id, user_id, flight_id, status, total_price, created_at, updated_at, booking_code,
+                trip_id, leg_role
     ),
     inserted_passengers AS (
       INSERT INTO passengers (
@@ -1127,6 +1202,42 @@ export async function createBooking(
     )
     SELECT b.* FROM new_booking b
   `) as BookingRecord[];
+
+  // Ghế của từng hành khách (migration 046) — ghi SAU câu trên, vì một
+  // data-modifying CTE không nhìn thấy dòng mà CTE khác vừa ghi (cùng giới
+  // hạn với `sql.transaction` không tham chiếu được kết quả câu trước).
+  //
+  // `passengers.seat_number` là nơi duy nhất ánh xạ được hành khách → ghế:
+  // không có nó thì không sinh được boarding pass theo từng người, và cũng
+  // không có chỗ ghi khi khách đổi ghế sau khi đặt vé.
+  //
+  // `seats` là danh sách ghế đã bán theo thứ tự chọn; mỗi hành khách có ghế
+  // (trừ em bé) chiếm đúng một ghế. Ghép theo thứ tự `created_at` của hành
+  // khách là thứ tự hành khách được ghi vào đặt vé.
+  if (seats && seats.length > 0) {
+    const seatNumbers = seats.map((seat) => seat.seat_number);
+    await sql`
+      WITH seat_rows AS (
+        SELECT st2.seat_number,
+               ROW_NUMBER() OVER (ORDER BY st2.ord) AS rn
+        FROM jsonb_to_recordset(${JSON.stringify(
+          seatNumbers.map((seatNumber) => ({ seat_number: seatNumber }))
+        )}::jsonb) WITH ORDINALITY AS st2(seat_number text, ord)
+      ),
+      passenger_rows AS (
+        SELECT p2.id AS passenger_id,
+               ROW_NUMBER() OVER (ORDER BY p2.created_at, p2.id) AS rn
+        FROM passengers p2
+        WHERE p2.booking_id = ${rows[0].id}
+          AND p2.passenger_type <> 'infant'
+      )
+      UPDATE passengers p
+      SET seat_number = s.seat_number
+      FROM passenger_rows pr
+      JOIN seat_rows s ON s.rn = pr.rn
+      WHERE p.id = pr.passenger_id
+    `;
+  }
 
   return rows[0];
 }
@@ -3639,6 +3750,439 @@ export async function awardBookingLoyaltyPoints(
 
   const updatedLoyalty = await getOrEnrollLoyalty(targetUserId);
   return { pointsEarned, newTier: updatedLoyalty.tier };
+}
+
+// ─── Trip / Leg Queries (migration 045) ───────────────────────────────────────
+
+/**
+ * Một chặng của một trip khứ hồi.
+ *
+ * Trước migration 045, chặng về là một dòng `bookings` hoàn toàn độc lập: liên
+ * kết với chặng đi chỉ tồn tại trong response API và `sessionStorage` của
+ * trình duyệt. Hệ quả: không thể tra cứu "mã đặt chỗ nào cũng ra cả hai
+ * chặng", không thể check-in riêng từng chặng, và không thể hiển thị một thẻ
+ * trip gồm đi + về. `trip_id` + `leg_role` đặt quan hệ đó vào cơ sở dữ liệu.
+ */
+export interface TripLegRecord {
+  /** UUID của dòng `bookings` của chặng này. */
+  bookingId: string;
+  /** PNR của chặng này — mỗi chặng giữ PNR riêng. */
+  bookingCode: string | null;
+  /** 'outbound' (đi) hoặc 'inbound' (về). */
+  legRole: 'outbound' | 'inbound';
+  status: BookingRecord['status'];
+  totalPrice: number;
+  flightId: string;
+  flightNo: string;
+  fromCode: string;
+  toCode: string;
+  fromCity: string;
+  toCity: string;
+  departTime: string;
+  arriveTime: string;
+  /** Trạng thái chuyến bay — nguồn cho SSE realtime. */
+  flightStatus: FlightStatus;
+  gate: string | null;
+  terminal: string | null;
+  passengers: Array<{
+    id: string;
+    name: string;
+    dob: string | null;
+    id_number: string | null;
+    /** Ghế của hành khách này (migration 046). */
+    seat_number: string | null;
+  }>;
+  /** Check-in của chặng này, theo từng hành khách. */
+  checkIns: Array<{
+    id: string;
+    passenger_id: string | null;
+    passenger_name: string;
+    seat_number: string;
+    check_in_number: string;
+    boarding_pass_number: string | null;
+    gate: string | null;
+    terminal: string | null;
+    check_in_time: string | null;
+  }>;
+}
+
+export interface TripRecord {
+  /** `trip_id` chung của hai chặng. */
+  tripId: string;
+  legs: TripLegRecord[];
+}
+
+/**
+ * Tra một trip từ PNR (hoặc UUID) của MỘT trong hai chặng.
+ *
+ * `UPPER()` ở cả hai vế: PNR gồm chữ cái lẫn chữ số (`FG7KH9`), nên khách
+ * gõ `fg7kh9` trên điện thoại (tắt caps-lock) vẫn phải ra kết quả. So khớp
+ * phân biệt hoa thường là lỗi 404, không phải lỗi bảo mật.
+ */
+export async function getTripByCodeOrId(codeOrId: string): Promise<TripRecord | null> {
+  const anchor = await sql`
+    SELECT b.trip_id
+    FROM bookings b
+    WHERE (b.id::text = ${codeOrId} OR UPPER(b.booking_code) = UPPER(${codeOrId}))
+    LIMIT 1
+  `;
+
+  const tripId = asFirstRow<{ trip_id: string | null }>(anchor)?.trip_id;
+  if (!tripId) return null;
+
+  return getTripById(tripId);
+}
+
+/** Tra một trip theo `trip_id`. */
+export async function getTripById(tripId: string): Promise<TripRecord | null> {
+  const legRows = await sql`
+    SELECT b.id, b.booking_code, b.leg_role, b.status, b.total_price, b.flight_id,
+           f.flight_no, f.from_code, f.to_code, f.depart_time, f.arrive_time,
+           f.status AS flight_status, f.gate, f.terminal,
+           af.city AS from_city, at.city AS to_city
+    FROM bookings b
+    JOIN flights f ON b.flight_id = f.id
+    LEFT JOIN airports af ON af.code = f.from_code
+    LEFT JOIN airports at ON at.code = f.to_code
+    WHERE b.trip_id = ${tripId}
+    ORDER BY CASE b.leg_role WHEN 'outbound' THEN 0 ELSE 1 END, b.created_at
+  `;
+
+  const rows = asRows<{
+    id: string;
+    booking_code: string | null;
+    leg_role: 'outbound' | 'inbound';
+    status: BookingRecord['status'];
+    total_price: string | number;
+    flight_id: string;
+    flight_no: string;
+    from_code: string;
+    to_code: string;
+    from_city: string | null;
+    to_city: string | null;
+    depart_time: string;
+    arrive_time: string;
+    flight_status: FlightStatus;
+    gate: string | null;
+    terminal: string | null;
+  }>(legRows);
+
+  if (rows.length === 0) return null;
+
+  const bookingIds = rows.map((r) => r.id);
+
+  // `ANY($1::uuid[])` chứ không phải `= ANY(${ids}::uuid[])`: driver Neon
+  // serialize mảng thành mảng Postgres, nhưng bind kiểu `::uuid[]` qua tagged
+  // template là đường dẫn không được kiểm chứng ở đây. `sql.query` với
+  // placeholder tường minh là cách repo này đã dùng cho mọi truy vấn có
+  // danh sách tham số (`getBookingsByUserId` v.v.).
+  const passengerRows = await sql.query(
+    `SELECT id, booking_id, name, dob, id_number, seat_number
+     FROM passengers
+     WHERE booking_id = ANY($1::uuid[])
+     ORDER BY created_at`,
+    [bookingIds]
+  );
+
+  const checkInRows = await sql.query(
+    `SELECT id, booking_id, passenger_id, passenger_name, seat_number,
+            check_in_number, boarding_pass_number, gate, terminal, check_in_time
+     FROM check_in
+     WHERE booking_id = ANY($1::uuid[])
+     ORDER BY check_in_time`,
+    [bookingIds]
+  );
+
+  const passengersByBooking = new Map<string, TripLegRecord['passengers']>();
+  for (const p of asRows<{
+    id: string;
+    booking_id: string;
+    name: string;
+    dob: string | null;
+    id_number: string | null;
+    seat_number: string | null;
+  }>(passengerRows)) {
+    const list = passengersByBooking.get(p.booking_id) ?? [];
+    list.push({
+      id: p.id,
+      name: p.name,
+      dob: p.dob,
+      id_number: p.id_number,
+      seat_number: p.seat_number,
+    });
+    passengersByBooking.set(p.booking_id, list);
+  }
+
+  const checkInsByBooking = new Map<string, TripLegRecord['checkIns']>();
+  for (const c of asRows<{
+    id: string;
+    booking_id: string;
+    passenger_id: string | null;
+    passenger_name: string;
+    seat_number: string;
+    check_in_number: string;
+    boarding_pass_number: string | null;
+    gate: string | null;
+    terminal: string | null;
+    check_in_time: string | null;
+  }>(checkInRows)) {
+    const list = checkInsByBooking.get(c.booking_id) ?? [];
+    list.push({
+      id: c.id,
+      passenger_id: c.passenger_id,
+      passenger_name: c.passenger_name,
+      seat_number: c.seat_number,
+      check_in_number: c.check_in_number,
+      boarding_pass_number: c.boarding_pass_number,
+      gate: c.gate,
+      terminal: c.terminal,
+      check_in_time: c.check_in_time,
+    });
+    checkInsByBooking.set(c.booking_id, list);
+  }
+
+  return {
+    tripId,
+    legs: rows.map((r) => ({
+      bookingId: r.id,
+      bookingCode: r.booking_code,
+      legRole: r.leg_role,
+      status: r.status,
+      totalPrice: parseFloat(String(r.total_price)),
+      flightId: r.flight_id,
+      flightNo: r.flight_no,
+      fromCode: r.from_code,
+      toCode: r.to_code,
+      fromCity: r.from_city ?? '',
+      toCity: r.to_city ?? '',
+      departTime: r.depart_time,
+      arriveTime: r.arrive_time,
+      flightStatus: r.flight_status,
+      gate: r.gate,
+      terminal: r.terminal,
+      passengers: passengersByBooking.get(r.id) ?? [],
+      checkIns: checkInsByBooking.get(r.id) ?? [],
+    })),
+  };
+}
+
+/**
+ * Ghi ghế của một hành khách vào `passengers.seat_number`.
+ *
+ * Migration 046 thêm cột này vì trước đó ghế chỉ thuộc về `seats` (gắn
+ * booking), nên không ánh xạ được hành khách → ghế: không sinh được boarding
+ * pass theo từng người, và cũng không có chỗ ghi khi khách đổi ghế sau khi
+ * đặt vé.
+ */
+export async function setPassengerSeatNumber(
+  passengerId: string,
+  seatNumber: string | null
+): Promise<void> {
+  await sql`
+    UPDATE passengers
+    SET seat_number = ${seatNumber}
+    WHERE id = ${passengerId}
+  `;
+}
+
+// ─── Dịch vụ mua thêm & đổi ghế sau khi đặt vé (migration 046) ───────────────
+
+export interface BookingBaggageRecord {
+  id: string;
+  booking_id: string;
+  package_id: string;
+  weight_kg: number;
+  unit_price: number;
+  quantity: number;
+  status: 'pending' | 'paid' | 'cancelled';
+  created_at: string;
+}
+
+/** Danh sách dịch vụ đã mua thêm của một đặt chỗ. */
+export async function getBookingBaggage(bookingId: string): Promise<BookingBaggageRecord[]> {
+  const rows = await sql`
+    SELECT id, booking_id, package_id, weight_kg, unit_price, quantity, status, created_at
+    FROM booking_baggage
+    WHERE booking_id = ${bookingId}
+    ORDER BY created_at
+  `;
+
+  return asRows<{
+    id: string;
+    booking_id: string;
+    package_id: string;
+    weight_kg: number;
+    unit_price: string | number;
+    quantity: number;
+    status: 'pending' | 'paid' | 'cancelled';
+    created_at: string;
+  }>(rows).map((row) => ({
+    ...row,
+    unit_price: parseFloat(String(row.unit_price)),
+  }));
+}
+
+/**
+ * Ghi nhận một gói hành lý khách mua thêm sau khi đã đặt vé.
+ *
+ * Giá do SERVER quyết định (`unitPrice`), không phải giá client gửi lên —
+ * `pricing.ts` là nguồn sự thật duy nhất của mọi khoản phí trong một đặt vé,
+ * và một đường ghi tiền mới phải tuân theo đúng quy tắc đó.
+ */
+export async function addBookingBaggage(input: {
+  bookingId: string;
+  packageId: string;
+  weightKg: number;
+  unitPrice: number;
+  quantity: number;
+  status?: 'pending' | 'paid';
+}): Promise<BookingBaggageRecord> {
+  const rows = await sql`
+    INSERT INTO booking_baggage (booking_id, package_id, weight_kg, unit_price, quantity, status)
+    VALUES (
+      ${input.bookingId},
+      ${input.packageId},
+      ${input.weightKg},
+      ${input.unitPrice},
+      ${input.quantity},
+      ${input.status ?? 'pending'}
+    )
+    ON CONFLICT (booking_id, package_id) DO UPDATE
+      SET unit_price = EXCLUDED.unit_price,
+          quantity = EXCLUDED.quantity,
+          status = EXCLUDED.status,
+          updated_at = NOW()
+    RETURNING id, booking_id, package_id, weight_kg, unit_price, quantity, status, created_at
+  `;
+
+  const row = asFirstRow<{
+    id: string;
+    booking_id: string;
+    package_id: string;
+    weight_kg: number;
+    unit_price: string | number;
+    quantity: number;
+    status: 'pending' | 'paid' | 'cancelled';
+    created_at: string;
+  }>(rows)!;
+
+  return { ...row, unit_price: parseFloat(String(row.unit_price)) };
+}
+
+/**
+ * Đánh dấu các gói hành lý của một đặt chỗ đã được thanh toán.
+ *
+ * `WHERE status = 'pending'` giữ cho lệnh này idempotent: chạy hai lần thì
+ * gọi thứ hai không đụng vào dòng đã `paid`, nên không thể cộng tiền hai lần.
+ */
+export async function markBookingBaggagePaid(
+  bookingId: string,
+  paymentId?: string | null
+): Promise<number> {
+  const rows = await sql`
+    UPDATE booking_baggage
+    SET status = 'paid', updated_at = NOW()
+    WHERE booking_id = ${bookingId} AND status = 'pending'
+    RETURNING id
+  `;
+  return asRows<{ id: string }>(rows).length;
+}
+
+/**
+ * Tổng tiền hành lý chưa thanh toán của một đặt chỗ.
+ *
+ * Đây là số tiền khách còn phải trả cho phần mua thêm. Nó được tính ở server
+ * từ `booking_baggage`, không phải từ con số client gửi lên.
+ */
+export async function getPendingBaggageAmount(bookingId: string): Promise<number> {
+  const rows = await sql`
+    SELECT COALESCE(SUM(unit_price * quantity), 0) AS total
+    FROM booking_baggage
+    WHERE booking_id = ${bookingId} AND status = 'pending'
+  `;
+  return parseFloat(String(asFirstRow<{ total: string | number }>(rows)?.total ?? 0));
+}
+
+/**
+ * Đổi ghế của một hành khách sau khi đã đặt vé.
+ *
+ * `price_delta` là chênh lệch do SERVER tính (`getSeatCharge(new) −
+ * getSeatCharge(old)`); client chỉ gửi ghế mới. Ghế cũ bị giải phóng và ghế
+ * mới được chiếm trong cùng một câu lệnh, và `idx_seats_flight_seat_unique`
+ * là cái ghim: khi ghế vừa có người chọn, Postgres báo 23505 và route trả 409.
+ */
+export async function changeBookingSeat(input: {
+  bookingId: string;
+  passengerId: string;
+  oldSeat: string | null;
+  newSeat: string;
+  newSeatPrice: number;
+  priceDelta: number;
+}): Promise<void> {
+  // Ghế cũ được giải phóng (nếu có).
+  await sql`
+    UPDATE seats
+    SET status = 'available', check_in_status = 'not_checked_in', check_in_time = NULL
+    WHERE booking_id = ${input.bookingId} AND seat_number = ${input.oldSeat ?? ''}
+  `;
+
+  const claimed = await sql`
+    UPDATE seats
+    SET status = 'reserved', price = ${input.newSeatPrice}
+    WHERE booking_id = ${input.bookingId} AND flight_id = (
+      SELECT flight_id FROM bookings WHERE id = ${input.bookingId}
+    ) AND seat_number = ${input.newSeat}
+    RETURNING id
+  `;
+
+  if (asRows<{ id: string }>(claimed).length === 0) {
+    // Đặt chỗ KHÔNG chọn ghế khi đặt vé (chọn khi check-in) thì chưa có dòng
+    // `seats` cho booking này — ghế mới phải được TẠO, không phải cập nhật.
+    // `idx_seats_flight_seat_unique` vẫn là cái ghim: nếu ghế vừa có người
+    // chọn, Postgres báo 23505 và route trả 409.
+    try {
+      await sql`
+        INSERT INTO seats (booking_id, flight_id, seat_number, status, price)
+        SELECT b.id, b.flight_id, ${input.newSeat}, 'reserved', ${input.newSeatPrice}
+        FROM bookings b
+        WHERE b.id = ${input.bookingId}
+      `;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '';
+      if (message.includes('23505') || message.includes('idx_seats_flight_seat_unique')) {
+        throw error;
+      }
+      throw new Error('SEAT_NOT_IN_BOOKING');
+    }
+  }
+
+  await sql`
+    INSERT INTO booking_seat_changes (booking_id, passenger_id, old_seat, new_seat, price_delta)
+    VALUES (${input.bookingId}, ${input.passengerId}, ${input.oldSeat ?? null}, ${input.newSeat}, ${input.priceDelta})
+  `;
+
+  await sql`
+    UPDATE passengers
+    SET seat_number = ${input.newSeat}
+    WHERE id = ${input.passengerId}
+  `;
+}
+
+/**
+ * Kiểm tra một ghế còn trống trên chuyến bay hay không.
+ *
+ * Kiểm tra ở tầng ứng dụng là tiện nhưng không phải hàng rào: hai người cùng
+ * bấm một ghế sẽ cùng đi qua đây. Hàng rào thật là
+ * `idx_seats_flight_seat_unique` — nó mới là thứ trả 409 khi ghế vừa bị
+ * chiếm.
+ */
+export async function isSeatAvailable(flightId: string, seatNumber: string): Promise<boolean> {
+  const rows = await sql`
+    SELECT id FROM seats
+    WHERE flight_id = ${flightId} AND seat_number = ${seatNumber} AND booking_id IS NOT NULL
+    LIMIT 1
+  `;
+  return asRows<{ id: string }>(rows).length === 0;
 }
 
 // ─── Check-in Queries ──────────────────────────────────────────────────────────

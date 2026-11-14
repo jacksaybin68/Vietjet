@@ -145,7 +145,15 @@ describe('Booking Database Module', () => {
         [{ seat_number: '12A', price: 63_250 }]
       );
 
-      expect(sql).toHaveBeenCalledTimes(1);
+      // Booking, passengers and seats are written in ONE statement — the
+      // passenger seat write (migration 046) is a SECOND statement, because a
+      // data-modifying CTE cannot see rows another CTE just wrote. So the
+      // booking statement must be the first call, and it must be the only one
+      // that inserts the booking.
+      const bookingStatements = (sql as any).mock.calls.filter((call: any[]) =>
+        call[0].join(' ').includes('INSERT INTO bookings')
+      );
+      expect(bookingStatements).toHaveLength(1);
       expect(result).toEqual(mockBookingRecord);
 
       // Regression guard: the child inserts must take the booking id from the
@@ -164,6 +172,46 @@ describe('Booking Database Module', () => {
       // `POST /api/dat-ve` answering without a `booking_code` — the customer
       // had nothing to quote when asking for a refund.
       expect(strings.join(' ')).toMatch(/RETURNING[^;]*booking_code/);
+
+      // Mô hình trip/chặng (migration 045): một trip khứ hồi = 2 dòng
+      // `bookings` cùng `trip_id`, mỗi dòng có `leg_role`. Cột phải nằm
+      // trong câu INSERT — không có nó thì 2 chặng không liên kết được.
+      expect(strings.join(' ')).toContain('trip_id');
+      expect(strings.join(' ')).toContain('leg_role');
+      expect(strings.join(' ')).toMatch(/RETURNING[^;]*trip_id/);
+    });
+
+    it('writes the shared trip id and the leg role for a round trip', async () => {
+      const mockBookingRecord = {
+        id: 'booking-1',
+        user_id: 'user-1',
+        flight_id: 'flight-1',
+        total_price: 1000,
+        trip_id: 'trip-abc',
+        leg_role: 'inbound',
+      };
+
+      (sql as any).mockResolvedValueOnce([mockBookingRecord]);
+
+      const tripId = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+      const result = await createBooking(
+        {
+          user_id: 'user-1',
+          flight_id: 'flight-1',
+          total_price: 1000,
+          trip_id: tripId,
+          leg_role: 'inbound',
+        },
+        [{ name: 'John Doe', dob: '1990-01-01', id_number: '123', gender: 'male' }]
+      );
+
+      expect(result).toEqual(mockBookingRecord);
+
+      const [strings, ...params] = (sql as any).mock.calls[0];
+      // `trip_id` và `leg_role` phải là tham số bind, không nội suy chuỗi.
+      expect(params).toContain(tripId);
+      expect(params).toContain('inbound');
+      expect(strings.join(' ')).not.toContain(`'${tripId}'`);
     });
   });
 

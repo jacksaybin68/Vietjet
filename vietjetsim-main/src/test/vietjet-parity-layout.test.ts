@@ -120,7 +120,8 @@ describe('Nút hành động — đo 14/11/2026', () => {
     expect(ruleValue('.vj-lookup-btn', 'font-weight')).toBe('500');
   });
 
-  it('"Đăng nhập" cao 48px, bo góc 12px', () => {
+  it('"Đăng nhập" 137×48, bo góc 12px', () => {
+    expect(ruleValue('.vj-skyjoy-login-btn', 'width')).toBe('137px');
     expect(ruleValue('.vj-skyjoy-login-btn', 'height')).toBe('48px');
     expect(ruleValue('.vj-skyjoy-login-btn', 'border-radius')).toBe('var(--vj-radius-card)');
     expect(token('vj-radius-card')).toBe('12px');
@@ -134,10 +135,13 @@ describe('Nút hành động — đo 14/11/2026', () => {
 });
 
 describe('Pill tab "Dịch vụ tra cứu" — đo 14/11/2026', () => {
-  it('pill 164×36 bo góc 18px', () => {
+  it('pill 164×36 bo góc 18px, chữ 14px/500', () => {
     expect(ruleValue('.vj-pill-tabs .vj-pill-tab', 'min-width')).toBe('164px');
     expect(ruleValue('.vj-pill-tab', 'height')).toBe('36px');
     expect(ruleValue('.vj-pill-tab', 'border-radius')).toBe('18px');
+    expect(ruleValue('.vj-pill-tab', 'font-size')).toBe('14px');
+    expect(ruleValue('.vj-pill-tab', 'font-weight')).toBe('500');
+    expect(ruleValue('.vj-pill-tab', 'padding')).toBe('0 12px');
   });
 
   it('tab active nền #FFDD32, chữ rgb(115,62,10)', () => {

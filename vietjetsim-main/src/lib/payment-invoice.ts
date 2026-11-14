@@ -1,16 +1,25 @@
 /**
  * Module xử lý gửi tự động hoá đơn thanh toán & vé điện tử cho khách hàng.
  * Kiểm tra cài đặt hệ thống `auto_send_payment_invoice_email` trước khi gửi.
+ *
+ * Vé điện tử được đính kèm dạng PDF (mỗi chặng một trang A4) ngay trong email
+ * xác nhận, và lần gửi được ghi vào `email_log` để KHÔNG gửi trùng khi nhiều
+ * trigger cùng kích hoạt (webhook VietQR + `/api/thanh-toan` + admin).
  */
 
 import { sql } from '@/lib/neon';
-import { sendBookingConfirmationEmail } from '@/lib/mail';
+import { sendBookingConfirmationEmail, type MailAttachment } from '@/lib/mail';
+import { buildBoardingPassPdf, type BoardingPassPdfLeg } from '@/lib/pdf/boarding-pass';
+import { getTripById } from '@/lib/db';
+import { toVietnamWallClock } from '@/lib/utils';
 
 export interface SendPaymentInvoiceResult {
   sent: boolean;
   reason?: string;
   recipientEmail?: string;
   bookingCode?: string | null;
+  /** PDF vé điện tử có được đính kèm hay không. */
+  attachedPdf?: boolean;
 }
 
 export interface SendPaymentInvoiceOptions {
@@ -19,7 +28,12 @@ export interface SendPaymentInvoiceOptions {
   pointsEarned?: number;
   /** Bỏ qua kiểm tra cấu hình để gửi cưỡng bức (ví dụ admin bấm gửi trực tiếp) */
   force?: boolean;
+  /** Bỏ qua khoá idempotent (admin gửi lại có chủ đích). */
+  skipIdempotency?: boolean;
 }
+
+/** Template name trong `email_log` — dùng làm khoá idempotent. */
+const INVOICE_TEMPLATE = 'payment_invoice';
 
 function resolveBaseUrl(): string {
   return (
@@ -49,6 +63,122 @@ export async function isAutoSendInvoiceEnabled(): Promise<boolean> {
     return true;
   } catch {
     return true;
+  }
+}
+
+/**
+ * Kiểm tra một lần gửi hoá đơn cho (booking, payment) đã diễn ra chưa.
+ *
+ * `email_log` có unique index `(booking_id, payment_id, template) NULLS NOT
+ * DISTINCT` — nên nếu đã có dòng `status = 'sent'` thì lần gửi này là trùng.
+ */
+async function hasAlreadySent(bookingId: string, paymentId: string | null): Promise<boolean> {
+  try {
+    const rows = await sql`
+      SELECT id FROM email_log
+      WHERE booking_id = ${bookingId}
+        AND template = ${INVOICE_TEMPLATE}
+        AND status = 'sent'
+        AND (payment_id IS NOT DISTINCT FROM ${paymentId})
+      LIMIT 1
+    `;
+    return (rows as unknown[]).length > 0;
+  } catch {
+    // `email_log` chưa có (DB cũ chưa chạy migration 046) — không chặn gửi.
+    return false;
+  }
+}
+
+/** Ghi nhật một lần gửi vào `email_log`. */
+async function logEmailSent(input: {
+  bookingId: string;
+  paymentId: string | null;
+  recipientEmail: string;
+  status: 'sent' | 'failed';
+  errorMessage?: string | null;
+}): Promise<void> {
+  try {
+    await sql`
+      INSERT INTO email_log (booking_id, payment_id, template, recipient_email, status, error_message)
+      VALUES (
+        ${input.bookingId},
+        ${input.paymentId},
+        ${INVOICE_TEMPLATE},
+        ${input.recipientEmail},
+        ${input.status},
+        ${input.errorMessage ?? null}
+      )
+      ON CONFLICT (booking_id, payment_id, template) NULLS NOT DISTINCT
+      DO UPDATE SET
+        status = EXCLUDED.status,
+        error_message = EXCLUDED.error_message,
+        created_at = NOW()
+    `;
+  } catch (error) {
+    console.warn('[AUTO-MAIL] Không ghi được email_log:', error);
+  }
+}
+
+/**
+ * Sinh PDF vé điện tử cho cả hai chặng của một trip.
+ *
+ * Trả `null` khi không sinh được — mail vẫn gửi được, chỉ thiếu file đính kèm.
+ */
+async function buildTicketPdf(booking: {
+  id: string;
+  trip_id?: string | null;
+  total_price?: number;
+  booking_code?: string | null;
+}): Promise<{ buffer: Buffer; filename: string } | null> {
+  try {
+    const tripId = booking.trip_id;
+    if (!tripId) return null;
+
+    const trip = await getTripById(String(tripId));
+    if (!trip || trip.legs.length === 0) return null;
+
+    const legs: BoardingPassPdfLeg[] = trip.legs
+      .map((leg) => {
+        const depart = toVietnamWallClock(leg.departTime);
+        const arrive = toVietnamWallClock(leg.arriveTime);
+        return {
+          pnr: leg.bookingCode ?? '',
+          flightNo: leg.flightNo,
+          from: leg.fromCode,
+          to: leg.toCode,
+          fromCity: leg.fromCity,
+          toCity: leg.toCity,
+          date: depart.date,
+          departTime: depart.time,
+          arriveTime: arrive.time,
+          gate: leg.gate,
+          terminal: leg.terminal,
+          legRole: leg.legRole,
+          passengers: leg.passengers.map((passenger) => ({
+            name: passenger.name,
+            seat:
+              passenger.seat_number ||
+              leg.checkIns.find((ci) => ci.passenger_id === passenger.id)?.seat_number ||
+              '',
+          })),
+        };
+      })
+      .filter((leg) => leg.passengers.length > 0);
+
+    if (legs.length === 0) return null;
+
+    const buffer = await buildBoardingPassPdf({
+      legs,
+      amount: Number(booking.total_price ?? 0),
+    });
+
+    return {
+      buffer,
+      filename: `ve-dien-tu-${booking.booking_code ?? booking.id}.pdf`,
+    };
+  } catch (error) {
+    console.warn('[AUTO-MAIL] Không sinh được PDF vé điện tử:', error);
+    return null;
   }
 }
 
@@ -99,7 +229,7 @@ export async function sendAutomaticPaymentInvoiceEmail(
     let passengersList: any[] = [];
     try {
       const pRes = await sql`
-        SELECT name, email, seat_code
+        SELECT name, email, seat_number
         FROM passengers
         WHERE booking_id = ${booking.id}
       `;
@@ -197,7 +327,44 @@ export async function sendAutomaticPaymentInvoiceEmail(
 
     const baseUrl = resolveBaseUrl();
 
-    // 7. Thực hiện gửi email hoá đơn & vé điện tử
+    // 6b. Chống gửi trùng.
+    //
+    // Nhiều trigger có thể cùng kích hoạt cho một giao dịch (webhook VietQR,
+    // `POST /api/thanh-toan`, admin bấm "gửi lại"). `email_log` có unique index
+    // `(booking_id, payment_id, template) NULLS NOT DISTINCT`, nên nếu đã gửi
+    // cho giao dịch này thì lần này bị bỏ qua.
+    const paymentId = payment?.id ?? null;
+    if (!options.skipIdempotency && (await hasAlreadySent(booking.id, paymentId))) {
+      console.info(
+        `[AUTO-MAIL] Bỏ qua gửi trùng hoá đơn cho đơn ${resolvedBookingCode} (đã gửi cho giao dịch này)`
+      );
+      return {
+        sent: false,
+        reason: 'Hoá đơn đã được gửi cho giao dịch này',
+        recipientEmail,
+        bookingCode: resolvedBookingCode,
+      };
+    }
+
+    // 7. Sinh PDF vé điện tử (CẢ HAI chặng nếu là khứ hồi) để đính kèm.
+    const pdf = await buildTicketPdf({
+      id: booking.id,
+      trip_id: booking.trip_id,
+      total_price: booking.total_price,
+      booking_code: booking.booking_code,
+    });
+
+    const attachments: MailAttachment[] = pdf
+      ? [
+          {
+            filename: pdf.filename,
+            contentType: 'application/pdf',
+            content: pdf.buffer,
+          },
+        ]
+      : [];
+
+    // 8. Thực hiện gửi email hoá đơn & vé điện tử
     const sent = await sendBookingConfirmationEmail({
       to: recipientEmail.trim(),
       fullName: recipientName,
@@ -212,13 +379,22 @@ export async function sendAutomaticPaymentInvoiceEmail(
       pointsEarned: options.pointsEarned,
       passengers: passengersList.map((p) => ({
         name: p.name || 'Hành khách',
-        seat: p.seat_code || undefined,
+        seat: p.seat_number || undefined,
       })),
+      attachments,
+    });
+
+    await logEmailSent({
+      bookingId: booking.id,
+      paymentId,
+      recipientEmail: recipientEmail.trim(),
+      status: sent ? 'sent' : 'failed',
     });
 
     if (sent) {
       console.info(
-        `[AUTO-MAIL] Đã tự động gửi hoá đơn thanh toán & vé điện tử đơn ${resolvedBookingCode} tới ${recipientEmail}`
+        `[AUTO-MAIL] Đã tự động gửi hoá đơn thanh toán & vé điện tử đơn ${resolvedBookingCode} tới ${recipientEmail}` +
+          (pdf ? ' (kèm PDF)' : '')
       );
     } else {
       console.error(
@@ -230,6 +406,7 @@ export async function sendAutomaticPaymentInvoiceEmail(
       sent,
       recipientEmail,
       bookingCode: resolvedBookingCode,
+      attachedPdf: !!pdf,
     };
   } catch (error) {
     console.error('Lỗi khi thực hiện tự động gửi hoá đơn thanh toán qua email:', error);
