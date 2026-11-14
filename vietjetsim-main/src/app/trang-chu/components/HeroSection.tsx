@@ -90,7 +90,7 @@ export default function HeroSection() {
     // Lưu ý: `section` KHÔNG dùng `overflow-hidden` — popover lịch 630px mở ra
     // ngoài khung panel và sẽ bị cắt mất nếu khối cha cắt tràn. Ảnh nền vẫn
     // được cắt riêng trong lớp bọc của nó.
-    <section className="relative w-full bg-sky-100 pb-[268px] lg:pb-0">
+    <section className="relative w-full bg-white pb-[268px] lg:pb-36">
       <h1 className="sr-only">Vietjet Air - Thông báo quan trọng Nhà ga T3 Jakarta</h1>
 
       <div className="relative h-[422px] sm:h-[560px] lg:h-[725px]">
