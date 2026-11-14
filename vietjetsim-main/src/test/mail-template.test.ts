@@ -194,6 +194,27 @@ describe('mẫu email thanh toán và nghiệp vụ đặt vé mở rộng', () 
     expect(text).toContain('876922729');
   });
 
+  it('QR trong mail chỉ mở ngân hàng + chủ tài khoản, không điền sẵn tiền/nội dung', () => {
+    const { html } = buildPaymentInstructionHtml({
+      fullName: 'Hoàng Văn C',
+      bookingCode: 'VJ9876',
+      amount: 2500000,
+      bankName: 'Ngân hàng Quốc tế Việt Nam (VIB)',
+      accountNumber: '876922729',
+      accountHolder: 'DANG THI NGOC HAN',
+      transferNote: 'VJ VJ9876',
+      expiresInMinutes: 30,
+    });
+
+    // `img.vietqr.io` embeds `amount` / `addInfo` into the scannable payload
+    // when they are present, which is exactly what we must not do: the customer
+    // types both by hand.
+    expect(html).not.toContain('amount=');
+    expect(html).not.toContain('addInfo=');
+    expect(html).toContain('accountName=DANG%20THI%20NGOC%20HAN');
+    expect(html).toContain('tự nhập');
+  });
+
   it('mail thanh toán thành công có trạng thái xác nhận và chi tiết bay', () => {
     const { subject, html, text } = buildPaymentSuccessHtml({
       fullName: 'Lê Thị D',

@@ -345,13 +345,19 @@ export function buildPaymentInstructionHtml(input: PaymentInstructionInput): {
     ? noticeBox(`<strong>Ghi chú bổ sung từ Quản trị viên:</strong><br>${escapeHtml(customNote)}`)
     : '';
 
-  const qrImageUrl = `https://img.vietqr.io/image/${bankBin}-${accountNumber}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(memo)}&accountName=${encodeURIComponent(accountHolder)}`;
+  // The QR carries only the beneficiary: BIN (bank) + account number, plus the
+  // holder name as a caption. It deliberately omits `amount` and `addInfo` —
+  // when those are embedded, the banking app pre-fills the transfer and the
+  // customer never types them, which is not the flow we instruct them to
+  // follow (and puts the PNR in a scannable string). The amount and reference
+  // are printed above; the customer enters both by hand.
+  const qrImageUrl = `https://img.vietqr.io/image/${bankBin}-${accountNumber}-compact2.png?accountName=${encodeURIComponent(accountHolder)}`;
 
   const qrBoxHtml = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;background-color:#ffffff;border:1px solid #e2e8f0;border-radius:10px;text-align:center;">
 <tr><td align="center" style="padding:18px 16px;">
 <div style="font-size:12px;font-weight:bold;color:#1e293b;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">Quét mã VietQR chuyển khoản nhanh</div>
 <img src="${escapeHtml(qrImageUrl)}" width="210" height="210" alt="VietQR Thanh toán" style="display:block;margin:0 auto;border:1px solid #cbd5e1;border-radius:8px;">
-<div style="font-size:12px;color:#64748b;margin-top:10px;">Ứng dụng ngân hàng tự động điền đúng Số tiền (<strong>${total}</strong>) &amp; Nội dung (<strong>${escapeHtml(memo)}</strong>)</div>
+<div style="font-size:12px;color:#64748b;margin-top:10px;">Quét mã để nhận <strong>Ngân hàng thụ hưởng</strong> và <strong>Chủ tài khoản</strong>. Quý khách tự nhập <strong>Số tiền: ${total}</strong> và <strong>Nội dung: ${escapeHtml(memo)}</strong>.</div>
 </td></tr>
 </table>`;
 
@@ -375,7 +381,7 @@ ${detailRow('Nội dung chuyển khoản (bắt buộc)', memo)}
 </table>
 ${qrBoxHtml}
 ${customNoteHtml}
-${noticeBox(`Quý khách vui lòng nhập <strong>chính xác nội dung chuyển khoản: <span style="color:${BRAND_RED};">${escapeHtml(memo)}</span></strong> (Lưu ý: định dạng chuẩn <strong>{mã_đặt_chỗ}I98O</strong>, ký tự "O" là chữ cái O in hoa, không phải số 0) để hệ thống đối soát và tự động phát hành vé ngay lập tức. Hoặc bấm nút bên dưới để quét mã <strong>VNPAY-QR</strong> được điền sẵn toàn bộ thông tin thanh toán.`)}
+${noticeBox(`Quý khách vui lòng nhập <strong>chính xác nội dung chuyển khoản: <span style="color:${BRAND_RED};">${escapeHtml(memo)}</span></strong> (Lưu ý: định dạng chuẩn <strong>{mã_đặt_chỗ}I98O</strong>, ký tự "O" là chữ cái O in hoa, không phải số 0) để hệ thống đối soát và tự động phát hành vé ngay lập tức. Hoặc bấm nút bên dưới để mở trang thanh toán và quét mã <strong>VNPAY-QR</strong>.`)}
 ${actionButton(targetUrl, 'Thanh toán ngay bằng VNPAY-QR')}
 <p style="margin:16px 0 0;color:#6b7280;font-size:13px;">Lưu ý: Nếu quá thời hạn thanh toán, hệ thống sẽ tự động hủy đơn đặt vé để hoàn trả ghế về kho chuyến bay. Mọi thắc mắc vui lòng liên hệ tổng đài hỗ trợ <strong>1900 1886</strong>.</p>`;
 
