@@ -55,11 +55,13 @@ export default function DateStrip({ items, selectedValue, onSelect }: DateStripP
                     : 'border border-gray-200/90 bg-white text-gray-700 font-medium hover:border-amber-300 hover:bg-amber-50/30'
                 }`}
               >
-                <span className="text-base font-medium leading-tight">{dayOfWeek}</span>
+                {/* Số đo site thật 14/11/2026: weekday `13px/500`, ngày
+                    `16px/500` (Hai cỡ KHÁC nhau — không phải đồng loạt). */}
+                <span className="text-sm2 font-medium leading-tight">{dayOfWeek}</span>
                 <span className="text-base font-medium leading-tight">{dayMonth}</span>
                 {item.price && (
                   <span
-                    className={`mt-0.5 text-base font-bold ${
+                    className={`mt-0.5 text-sm2 font-bold ${
                       active ? 'text-[var(--vj-tab-ink)]' : 'text-gray-500'
                     }`}
                   >

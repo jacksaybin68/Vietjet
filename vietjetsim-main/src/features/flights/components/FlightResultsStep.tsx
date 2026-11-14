@@ -9,12 +9,6 @@ import { getErrorMessage } from '@/lib/utils';
 import { searchFlightsWithDates, getAirportCity } from '@/features/flights/services';
 import { useFlightStatusSSE } from '@/hooks/useFlightStatusSSE';
 import FareBenefitsModal from './FareBenefitsModal';
-import {
-  RiTimeLine,
-  RiMoneyDollarCircleLine,
-  RiSpeedUpLine,
-  RiArrowUpDownLine,
-} from 'react-icons/ri';
 
 /**
  * The fare the summary panel holds for the flight being looked at.
@@ -271,22 +265,23 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
           if (isSelected) {
             // Ô ngày active trên site thật là pill vàng #FFDD32, chữ nâu
             // rgb(115 62 10) — không phải cloud scalloped. Đo 13/11/2026.
-            // Kích thước: `156×95px`, chữ `16px/500` (đo 14/11/2026).
+            // Kích thước: `156×95px`. Cỡ chữ HAI LOẠI (đo site thật 14/11/2026):
+            // weekday `13px/500`, ngày `16px/500` — không đồng loạt 13px.
             return (
               <button
                 key={iso}
                 type="button"
                 onClick={() => onSelect?.(iso)}
                 aria-current="date"
-                className="flex h-[95px] w-[156px] shrink-0 flex-col items-center justify-center text-center rounded-vj bg-[var(--vj-yellow-tab)] text-[var(--vj-tab-ink)] transition-transform hover:scale-105 active:scale-95 cursor-pointer focus:outline-none focus:ring-0"
+                className="flex h-[95px] w-[156px] shrink-0 flex-col items-center justify-center text-center rounded-vj bg-[var(--vj-yellow-tab)] text-[var(--vj-tab-ink)] border border-transparent cursor-pointer focus:outline-none focus:ring-0"
               >
-                <span className="block text-base font-medium leading-tight">
+                <span className="block text-sm2 font-medium leading-tight">
                   {WEEKDAY_LABELS[day.getDay()]}
                 </span>
                 <span className="block text-base font-medium leading-tight my-0.5">
                   {day.getDate()} tháng {day.getMonth() + 1}
                 </span>
-                <span className="block text-base font-medium leading-tight">
+                <span className="block text-sm2 font-bold leading-tight">
                   Từ <span className="font-bold">{price}</span> VND
                 </span>
               </button>
@@ -298,15 +293,15 @@ function DateStrip({ value, onSelect }: { value?: string; onSelect?: (iso: strin
               key={iso}
               type="button"
               onClick={() => onSelect?.(iso)}
-              className={`${isOuterDay ? 'hidden sm:flex' : 'flex'} h-[95px] w-[156px] shrink-0 flex-col items-center justify-center text-center transition-transform hover:scale-105 cursor-pointer focus:outline-none focus:ring-0`}
+              className={`${isOuterDay ? 'hidden sm:flex' : 'flex'} h-[95px] w-[156px] shrink-0 flex-col items-center justify-center text-center border border-gray-200/90 bg-white cursor-pointer focus:outline-none focus:ring-0 rounded-vj`}
             >
-              <span className="text-base font-medium text-vj-text leading-tight">
+              <span className="text-sm2 font-medium text-vj-text leading-tight">
                 {WEEKDAY_LABELS[day.getDay()]}
               </span>
-              <span className="text-base font-medium text-vj-text leading-tight my-0.5">
+              <span className="text-sm2 font-medium text-vj-text leading-tight my-0.5">
                 {day.getDate()} tháng {day.getMonth() + 1}
               </span>
-              <span className="text-base font-medium text-vj-text leading-tight">
+              <span className="text-sm2 font-medium text-vj-text leading-tight">
                 Từ <span className="font-bold">{price}</span> VND
               </span>
             </button>
