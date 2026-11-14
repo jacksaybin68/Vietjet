@@ -147,21 +147,7 @@ export default function HeroSection() {
           aria-hidden="true"
         />
 
-        {/* Amy Mascot với tooltip "Xin chào!" góc dưới bên phải */}
-        <div className="absolute right-4 sm:right-8 bottom-3 sm:bottom-4 z-30 flex items-end pointer-events-none select-none">
-          <div className="relative mb-12 sm:mb-14 -mr-1">
-            <div className="bg-white text-gray-800 text-xs sm:text-sm font-bold px-3 py-1.5 rounded-xl shadow-lg border border-gray-200">
-              Xin chào!
-            </div>
-            <div className="w-2.5 h-2.5 bg-white border-r border-b border-gray-200 rotate-45 ml-auto mr-4 -mt-1 shadow-xs" />
-          </div>
-          <img
-            src="/images/hero/amy-mascot.png"
-            alt="Mascot Amy"
-            className="w-16 sm:w-20 lg:w-24 h-auto drop-shadow-lg"
-            loading="lazy"
-          />
-        </div>
+
       </div>
 
       {/* Dải đặt vé 380px neo mép phải container 1200px chuẩn vietjetair.com */}
