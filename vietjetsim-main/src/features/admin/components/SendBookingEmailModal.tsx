@@ -385,7 +385,7 @@ export default function SendBookingEmailModal({
                   rows={2}
                   value={customNote}
                   onChange={(e) => setCustomNote(e.target.value)}
-                  placeholder="Nhập lời nhắn riêng từ quản trị viên tới khách hàng (sẽ hiển thị nổi bật trong email)..."
+                  placeholder="Nhập lời nhắn riêng từ hệ thống tới khách hàng (sẽ hiển thị nổi bật trong email)..."
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-xs font-medium text-white placeholder-slate-600 focus:outline-none focus:border-primary/60 transition-all focus:bg-white/10 resize-none"
                 />
               </div>

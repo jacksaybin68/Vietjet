@@ -537,9 +537,9 @@ export default function FlightBookingResultsWrapper({
               giá `20px/400` (KHÔNG phải 22px/700 như bên trong panel), có
               nút phụ "Chi tiết", nút "Đi tiếp" `127×39`. */}
           <div className="vj-total-bar hidden sm:block fixed bottom-0 left-0 right-0 z-[60] border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
-            <div className="vj-total-bar-inner mx-auto max-w-[1200px] pl-[10px]">
+            <div className="vj-total-bar-inner mx-auto max-w-[1200px] pl-[10px] pr-[20px]">
               <div className="ml-auto flex items-center gap-4">
-                <div className="flex flex-col items-end">
+                <div className="flex flex-col items-start">
                   <span className="vj-total-bar-label">Tổng tiền</span>
                   <span className="vj-total-bar-amount">
                     {totalBookingAmount.toLocaleString('vi-VN')} VND

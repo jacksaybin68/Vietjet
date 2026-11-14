@@ -12,7 +12,7 @@ export function RoleBadge({ role, size = 'md' }: RoleBadgeProps) {
   if (size === 'sm') {
     return isAdmin ? (
       <span className="px-1.5 py-0.5 text-2xs font-bold bg-primary-100 text-primary rounded-full">
-        Quản trị viên
+        Hệ Thống
       </span>
     ) : (
       <span className="px-1.5 py-0.5 text-2xs font-bold bg-blue-100 text-blue-700 rounded-full">
@@ -23,7 +23,7 @@ export function RoleBadge({ role, size = 'md' }: RoleBadgeProps) {
 
   return isAdmin ? (
     <span className="px-2 py-1 text-xs font-bold bg-primary-100 text-primary rounded-full">
-      Quản trị viên
+      Hệ Thống
     </span>
   ) : (
     <span className="px-2 py-1 text-xs font-bold bg-blue-100 text-blue-700 rounded-full">

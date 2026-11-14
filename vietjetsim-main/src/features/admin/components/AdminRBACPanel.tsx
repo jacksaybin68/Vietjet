@@ -98,7 +98,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
   // ─── Remove role handler ─────────────────────────────────────────────
 
   const handleRemoveRole = async (userId: string, email: string) => {
-    if (!confirm(`Xác nhận xóa quyền admin của "${email}"?`)) return;
+    if (!confirm(`Xác nhận xóa quyền hệ thống của "${email}"?`)) return;
 
     try {
       const data = await removeRbacRole(userId);
@@ -113,7 +113,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
 
   const TABS: { id: TabId; label: string; icon: string }[] = [
     { id: 'matrix', label: 'Ma trận phân quyền', icon: 'Squares2X2Icon' },
-    { id: 'roles', label: 'Quản lý Admin', icon: 'ShieldCheckIcon' },
+    { id: 'roles', label: 'Quản lý Hệ Thống', icon: 'ShieldCheckIcon' },
     { id: 'audit', label: 'Audit Log', icon: 'DocumentTextIcon' },
     { id: 'config', label: 'Cấu hình hệ thống', icon: 'Cog6ToothIcon' },
   ];
@@ -131,14 +131,14 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
             Hệ thống Phân quyền RBAC
           </h2>
           <p className="text-sm mt-1 font-koho">
-            Quản lý chi tiết quyền hạn cho từng admin — Role-Based Access Control
+            Quản lý chi tiết quyền hạn cho từng tài khoản hệ thống — Role-Based Access Control
           </p>
         </div>
         <button
           onClick={() => setShowAssignModal(true)}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-bold transition-all shadow-md hover:shadow-lg bg-primary-solid"
         >
-          <Icon name="UserPlusIcon" size={16} /> Gán quyền Admin
+          <Icon name="UserPlusIcon" size={16} /> Gán quyền Hệ Thống
         </button>
       </div>
 
@@ -311,9 +311,9 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
             style={{ background: 'linear-gradient(135deg, #1A2948 0%, #0F1E3A 100%)' }}
           >
             <span className="text-white font-bold text-sm font-koho">
-              Danh sách Admin & Phân quyền
+              Danh sách Tài khoản Hệ Thống & Phân quyền
             </span>
-            <span className="text-white/60 text-xs">{adminRoles.length} admin</span>
+            <span className="text-white/60 text-xs">{adminRoles.length} tài khoản</span>
           </div>
 
           {loading ? (
@@ -323,7 +323,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
           ) : adminRoles.length === 0 ? (
             <div className="p-12 text-center text-gray-400">
               <Icon name="UsersIcon" size={32} className="mx-auto mb-2 opacity-40" />
-              <p className="text-sm">Chưa có admin nào được gán role chi tiết</p>
+              <p className="text-sm">Chưa có tài khoản hệ thống nào được gán role chi tiết</p>
               <button
                 onClick={() => setShowAssignModal(true)}
                 className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-white px-4 py-2 rounded-lg bg-primary-solid"
@@ -589,7 +589,7 @@ export default function AdminRBACPanel({ onToast }: { onToast?: ToastAPI }) {
               className="px-5 py-4 border-b border-gray-100"
               style={{ background: 'linear-gradient(135deg, #EC2029 0%, #D91A21 100%)' }}
             >
-              <h3 className="text-white font-bold font-heading-sm">Gán quyền cho Admin</h3>
+              <h3 className="text-white font-bold font-heading-sm">Gán quyền cho Hệ Thống</h3>
               <p className="text-white/70 text-xs mt-0.5">Chọn role và nhập thông tin người dùng</p>
             </div>
 

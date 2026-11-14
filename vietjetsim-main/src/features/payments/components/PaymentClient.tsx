@@ -1004,7 +1004,7 @@ export default function PaymentClient() {
         setReceiptFileSize((file.size / 1024).toFixed(0) + ' KB');
         toast.success(
           'Đã tải ảnh biên lai thành công!',
-          'Ảnh chụp biên lai sẽ được gửi tới Admin để đối chiếu xuất vé.'
+          'Ảnh chụp biên lai sẽ được gửi tới Hệ Thống để đối chiếu xuất vé.'
         );
       };
       reader.onerror = () => {
@@ -1239,7 +1239,7 @@ export default function PaymentClient() {
                   </h2>
                   <p className="text-white/90 text-sm font-medium">
                     {receiptImage
-                      ? 'Ảnh biên lai đã được gửi đến Admin đối chiếu. Vé điện tử sẽ được kích hoạt ngay khi kiểm tra.'
+                      ? 'Ảnh biên lai đã được gửi đến Hệ Thống đối chiếu. Vé điện tử sẽ được kích hoạt ngay khi kiểm tra.'
                       : 'Vé điện tử đã được gửi đến email của bạn'}
                   </p>
                 </div>
@@ -1627,7 +1627,9 @@ export default function PaymentClient() {
             bookingCode={bookingCodeLabel !== '—' ? bookingCodeLabel : undefined}
           />
 
-          <h1 className="hidden sm:block text-2xl font-black font-koho text-[var(--foreground)] mb-4">
+          {/* H1 — site thật (đo 14/11/2026): tiêu đề cấp 1 của trang con dùng
+              `20px/600` uppercase (KoHo), KHÔNG phải `24px/900`. */}
+          <h1 className="hidden sm:block text-2xl3 font-semibold font-koho uppercase text-[var(--foreground)] tracking-normal mb-4">
             Thanh toán vé máy bay
           </h1>
 
@@ -1814,7 +1816,7 @@ export default function PaymentClient() {
 
                 {/* 2. Ví điện tử (Screenshot 3) */}
                 <div className="mb-5">
-                  <h3 className="text-xs sm:text-sm font-extrabold text-gray-900 mb-2.5">
+                  <h3 className="text-2xl3 font-semibold font-koho uppercase text-gray-900 tracking-normal mb-2.5">
                     Ví điện tử
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -1917,7 +1919,7 @@ export default function PaymentClient() {
 
                 {/* 3. Giữ mã đặt chỗ & thanh toán sau (Screenshot 4) */}
                 <div className="mb-5">
-                  <h3 className="text-xs sm:text-sm font-extrabold text-gray-900 mb-2.5">
+                  <h3 className="text-2xl3 font-semibold font-koho uppercase text-gray-900 tracking-normal mb-2.5">
                     Giữ mã đặt chỗ & thanh toán sau
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">

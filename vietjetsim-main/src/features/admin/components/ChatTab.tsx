@@ -386,8 +386,8 @@ export default function ChatTab() {
       const headers = ['Thời gian', 'Người gửi', 'Vai trò', 'Nội dung'];
       const rows = messages.map((m) => [
         formatFullDateTime(m.created_at),
-        m.sender_role === 'admin' ? 'Admin' : userName,
-        m.sender_role === 'admin' ? 'Admin' : 'Người dùng',
+        m.sender_role === 'admin' ? 'Hệ Thống' : userName,
+        m.sender_role === 'admin' ? 'Hệ Thống' : 'Người dùng',
         `"${m.content.replace(/"/g, '""')}"`,
       ]);
       const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
@@ -414,7 +414,7 @@ export default function ChatTab() {
       const msgRows = messages
         .map((m) => {
           const isAdmin = m.sender_role === 'admin';
-          const sender = isAdmin ? 'Admin' : userName;
+          const sender = isAdmin ? 'Hệ Thống' : userName;
           const align = isAdmin ? 'right' : 'left';
           const bg = isAdmin ? '#ef4444' : '#f3f4f6';
           const color = isAdmin ? '#ffffff' : '#1e293b';

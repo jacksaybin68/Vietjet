@@ -37,11 +37,31 @@ vi.mock('@/lib/db', () => ({
   writeAuditLog: vi.fn().mockResolvedValue(true),
 }));
 
+// Mutable booking state so a test can drive the same handler twice, and so the
+// atomic `UPDATE … WHERE status = 'pending' RETURNING id` behaves like Postgres
+// (returns a row only for the request that actually moves the status).
+const bookingState = vi.hoisted(() => ({
+  status: 'pending',
+  flightRestores: 0,
+}));
+
 vi.mock('@/lib/neon', () => {
   const sqlMock = vi
     .fn()
     .mockImplementation(async (strings: TemplateStringsArray, ..._values: any[]) => {
       const query = strings.join(' ');
+
+      if (query.includes("UPDATE bookings") && query.includes('RETURNING id')) {
+        const target = query.includes("status = 'confirmed'") ? 'confirmed' : 'cancelled';
+        if (bookingState.status !== 'pending') return [];
+        bookingState.status = target;
+        return [{ id: 'bk-uuid-101' }];
+      }
+
+      if (query.includes('UPDATE flights') && query.includes('available = available +')) {
+        bookingState.flightRestores += 1;
+        return [];
+      }
 
       if (query.includes('FROM bookings b')) {
         return [
@@ -69,7 +89,7 @@ vi.mock('@/lib/neon', () => {
             total_price: 2500000,
             flight_id: 'flight-uuid-1',
             user_id: 'user-uuid-1',
-            status: 'pending',
+            status: bookingState.status,
           },
         ];
       }
@@ -108,6 +128,8 @@ vi.mock('@/lib/neon', () => {
 describe('Admin Payment Confirmation System', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    bookingState.status = 'pending';
+    bookingState.flightRestores = 0;
   });
 
   it('GET /api/quan-tri/giao-dich lists transactions and pending bookings', async () => {

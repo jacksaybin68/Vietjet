@@ -298,7 +298,7 @@ export default function AdminDashboardClient() {
 
   const breadcrumbItems = [
     {
-      label: 'Admin',
+      label: 'Hệ Thống',
       href: '/quan-tri',
       icon: (
         <svg width="13" height="13" viewBox="0 0 20 20" fill="currentColor">
@@ -490,13 +490,13 @@ export default function AdminDashboardClient() {
                   />
                 ) : (
                   <span className="drop-shadow-sm">
-                    {getInitials(profile?.fullName || user?.email || 'Admin')}
+                    {getInitials(profile?.fullName || user?.email || 'Hệ Thống')}
                   </span>
                 )}
               </div>
               <div className="overflow-hidden">
                 <div className="text-xs font-bold text-white truncate max-w-[140px] tracking-tight">
-                  {profile?.fullName || user?.email?.split('@')[0] || 'Admin'}
+                  {profile?.fullName || user?.email?.split('@')[0] || 'Hệ Thống'}
                 </div>
                 <div className="text-[10px] text-indigo-400/90 font-bold flex items-center gap-1.5 mt-0.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse"></span>
@@ -603,12 +603,12 @@ export default function AdminDashboardClient() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    getInitials(profile?.fullName || user?.email || 'Admin')
+                    getInitials(profile?.fullName || user?.email || 'Hệ Thống')
                   )}
                 </div>
                 <div>
                   <div className="text-xs font-semibold text-white truncate max-w-[140px]">
-                    {profile?.fullName || user?.email?.split('@')[0] || 'Admin'}
+                    {profile?.fullName || user?.email?.split('@')[0] || 'Hệ Thống'}
                   </div>
                   <div className="text-[11px] text-indigo-400 flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>

@@ -104,7 +104,7 @@ const INITIAL_USERS: User[] = [
   },
   {
     id: '7',
-    name: 'Admin Vietjet Air',
+    name: 'Hệ Thống Vietjet Air',
     email: 'admin@Vietjet Air.vn',
     phone: '0900 000 000',
     role: 'admin',
@@ -124,7 +124,7 @@ const STATUS_TABS: { value: 'all' | UserStatus; label: string; activeColor: stri
 const ROLE_TABS: { value: 'all' | UserRole; label: string; activeColor: string }[] = [
   { value: 'all', label: 'Tất cả', activeColor: 'text-stone-700 bg-stone-100' },
   { value: 'user', label: 'User', activeColor: 'text-blue-700 bg-blue-100' },
-  { value: 'admin', label: 'Admin', activeColor: 'text-primary bg-primary-100' },
+  { value: 'admin', label: 'Hệ Thống', activeColor: 'text-primary bg-primary-100' },
 ];
 
 /** Row shape returned by GET /api/quan-tri/nguoi-dung. */
@@ -327,7 +327,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
       return;
     }
     const newRole: UserRole = targetUser.role === 'admin' ? 'user' : 'admin';
-    const actionLabel = newRole === 'admin' ? 'nâng cấp lên Admin' : 'hạ cấp về User';
+    const actionLabel = newRole === 'admin' ? 'nâng cấp lên Hệ Thống' : 'hạ cấp về User';
     if (!confirm(`Bạn có chắc muốn ${actionLabel} tài khoản "${targetUser.name}"?`)) return;
     setSwitchingRoleId(targetUser.id);
     try {
@@ -678,7 +678,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
                             : 'bg-slate-500/10 text-slate-400 border border-slate-500/20'
                         }`}
                       >
-                        {user.role === 'admin' ? 'Admin' : 'User'}
+                        {user.role === 'admin' ? 'Hệ Thống' : 'User'}
                       </span>
                     </td>
                     <td className="px-6 py-5 text-right hidden md:table-cell">
@@ -736,7 +736,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
                               ? 'bg-slate-800 hover:bg-amber-500/20 text-slate-400 hover:text-amber-400'
                               : 'bg-slate-800 hover:bg-indigo-500/20 text-slate-400 hover:text-indigo-400'
                           }`}
-                          title={user.role === 'admin' ? 'Hạ cấp về User' : 'Nâng cấp lên Admin'}
+                          title={user.role === 'admin' ? 'Hạ cấp về User' : 'Nâng cấp lên Hệ Thống'}
                         >
                           {switchingRoleId === user.id ? (
                             <Icon name="ArrowPathIcon" size={14} className="animate-spin" />
@@ -948,7 +948,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
                   </label>
                   <textarea
                     className="w-full bg-white/5 border border-white/5 rounded-2xl p-4 text-xs text-slate-300 placeholder-slate-600 focus:outline-none focus:border-indigo-500/30 min-h-[110px] resize-none"
-                    placeholder="Nhập ghi chú cho người dùng này (chỉ admin thấy)..."
+                    placeholder="Nhập ghi chú cho người dùng này (chỉ hệ thống thấy)..."
                   />
                 </section>
               </div>
@@ -1034,7 +1034,7 @@ export default function UsersTab({ onToast }: { onToast?: ToastAPI }) {
                   className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm form-input"
                 >
                   <option value="user">Người dùng</option>
-                  <option value="admin">Quản trị viên</option>
+                  <option value="admin">Hệ Thống</option>
                 </select>
               </div>
               <div className="flex gap-3 pt-2">

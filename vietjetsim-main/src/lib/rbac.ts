@@ -493,8 +493,8 @@ export const SYSTEM_ROLES: Record<
   // Legacy role names preserved for AdminRBACPanel compatibility
   super_admin: {
     name: 'super_admin',
-    label: 'Super Admin',
-    description: 'Quản trị viên cấp cao (legacy)',
+    label: 'Hệ Thống Cấp Cao',
+    description: 'Hệ thống cấp cao (legacy)',
     color: 'text-purple-600',
     bgColor: 'bg-purple-50',
     level: 2,
@@ -502,8 +502,8 @@ export const SYSTEM_ROLES: Record<
   },
   admin_ops: {
     name: 'admin_ops',
-    label: 'Admin Vận hành',
-    description: 'Admin vận hành (legacy)',
+    label: 'Hệ Thống Vận hành',
+    description: 'Hệ thống vận hành (legacy)',
     color: 'text-blue-600',
     bgColor: 'bg-blue-50',
     level: 1,
@@ -511,8 +511,8 @@ export const SYSTEM_ROLES: Record<
   },
   admin_finance: {
     name: 'admin_finance',
-    label: 'Admin Tài chính',
-    description: 'Admin tài chính (legacy)',
+    label: 'Hệ Thống Tài chính',
+    description: 'Hệ thống tài chính (legacy)',
     color: 'text-emerald-600',
     bgColor: 'bg-emerald-50',
     level: 1,
@@ -520,8 +520,8 @@ export const SYSTEM_ROLES: Record<
   },
   admin_support: {
     name: 'admin_support',
-    label: 'Admin Hỗ trợ',
-    description: 'Admin hỗ trợ (legacy)',
+    label: 'Hệ Thống Hỗ trợ',
+    description: 'Hệ thống hỗ trợ (legacy)',
     color: 'text-amber-600',
     bgColor: 'bg-amber-50',
     level: 1,
@@ -529,8 +529,8 @@ export const SYSTEM_ROLES: Record<
   },
   admin_content: {
     name: 'admin_content',
-    label: 'Admin Nội dung',
-    description: 'Admin nội dung (legacy)',
+    label: 'Hệ Thống Nội dung',
+    description: 'Hệ thống nội dung (legacy)',
     color: 'text-orange-600',
     bgColor: 'bg-orange-50',
     level: 1,

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getBookingById, getActiveBankAccounts } from '@/lib/db';
+import { getBookingByCodeOrId, getActiveBankAccounts } from '@/lib/db';
 import { verifyAuthRequest } from '@/lib/auth';
+import { canAccessBooking } from '@/lib/booking-access';
 import { renderTransferNote } from '@/lib/transfer-note';
 import { buildVietQrPayload, lookupBankBin } from '@/lib/vietqr';
 import { getApiErrorMessage } from '@/shared/services';
@@ -24,7 +25,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const booking = await getBookingById(bookingId);
+    // Resolve by UUID *or* PNR, same as `POST /api/thanh-toan`: a guest who
+    // reaches the payment screen from the emailed link holds the PNR, not the
+    // internal id.
+    const booking = await getBookingByCodeOrId(bookingId);
     if (!booking) {
       return NextResponse.json(
         { error: 'Not Found', message: 'Không tìm thấy thông tin đặt chỗ' },
@@ -32,7 +36,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (user && booking.user_id && booking.user_id !== user.userId && user.role !== 'admin') {
+    // This route returns the receiving bank account and the exact amount, so
+    // ownership matters here too. It previously checked only when `user` was
+    // non-null, which let an anonymous caller read it with a booking UUID.
+    if (!canAccessBooking(request, booking, user, bookingId)) {
       return NextResponse.json(
         { error: 'Forbidden', message: 'Đặt chỗ không thuộc về tài khoản này' },
         { status: 403 }

@@ -219,7 +219,7 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
             )}
           </div>
           <h3 className="text-2xl font-black text-amber-300 mt-1 tabular-nums">{pendingCount}</h3>
-          <div className="text-2xs text-amber-400/80 mt-1">Cần Admin đối soát & duyệt</div>
+          <div className="text-2xs text-amber-400/80 mt-1">Cần Hệ Thống đối soát & duyệt</div>
         </div>
 
         <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4 relative overflow-hidden">
@@ -607,7 +607,7 @@ export default function TransactionsTab({ onToast }: { onToast?: ToastAPI }) {
                   <div className="flex items-center gap-2">
                     <Icon name="PhotoIcon" size={18} className="text-amber-400" />
                     <h5 className="text-xs font-black text-white uppercase tracking-wider">
-                      Ảnh biên lai chuyển khoản (Đối chiếu Admin)
+                      Ảnh biên lai chuyển khoản (Đối chiếu Hệ Thống)
                     </h5>
                   </div>
                   {selectedTransaction.receiptImage ? (

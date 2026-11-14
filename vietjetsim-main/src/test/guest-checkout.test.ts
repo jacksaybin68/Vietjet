@@ -205,7 +205,8 @@ describe('Guest Checkout & Payment without Login', () => {
     const { GET: getVietQr } = await import('@/app/api/thanh-toan/vietqr/route');
 
     const req = new NextRequest(
-      'http://localhost:4028/api/thanh-toan/vietqr?bookingId=guest-bk-123'
+      'http://localhost:4028/api/thanh-toan/vietqr?bookingId=guest-bk-123',
+      { headers: guestCookie() }
     );
     const res = await getVietQr(req);
 
@@ -221,7 +222,8 @@ describe('Guest Checkout & Payment without Login', () => {
     const { GET: getStatus } = await import('@/app/api/thanh-toan/trang-thai/route');
 
     const req = new NextRequest(
-      'http://localhost:4028/api/thanh-toan/trang-thai?bookingId=guest-bk-123'
+      'http://localhost:4028/api/thanh-toan/trang-thai?bookingId=guest-bk-123',
+      { headers: guestCookie() }
     );
     const res = await getStatus(req);
 
@@ -288,6 +290,45 @@ describe('Guest Checkout & Payment without Login', () => {
     expect(res.status).toBe(401);
     const data = await res.json();
     expect(data.error).toBe('Unauthorized');
+  });
+
+  it('refuses VietQR for an anonymous caller who only knows the UUID', async () => {
+    const { GET: getVietQr } = await import('@/app/api/thanh-toan/vietqr/route');
+
+    const req = new NextRequest(
+      'http://localhost:4028/api/thanh-toan/vietqr?bookingId=guest-bk-123'
+    );
+    const res = await getVietQr(req);
+
+    // A booking UUID is not a secret: without the guest cookie or the PNR it
+    // must not disclose the receiving bank account and amount.
+    expect(res.status).toBe(403);
+  });
+
+  it('refuses payment status for an anonymous caller who only knows the UUID', async () => {
+    const { GET: getStatus } = await import('@/app/api/thanh-toan/trang-thai/route');
+
+    const req = new NextRequest(
+      'http://localhost:4028/api/thanh-toan/trang-thai?bookingId=guest-bk-123'
+    );
+    const res = await getStatus(req);
+
+    expect(res.status).toBe(403);
+  });
+
+  it('accepts the PNR as the credential for anonymous VietQR and status lookups', async () => {
+    const { GET: getVietQr } = await import('@/app/api/thanh-toan/vietqr/route');
+    const { GET: getStatus } = await import('@/app/api/thanh-toan/trang-thai/route');
+
+    const qrReq = new NextRequest(
+      'http://localhost:4028/api/thanh-toan/vietqr?bookingId=VJ9999'
+    );
+    expect((await getVietQr(qrReq)).status).toBe(200);
+
+    const statusReq = new NextRequest(
+      'http://localhost:4028/api/thanh-toan/trang-thai?bookingId=VJ9999'
+    );
+    expect((await getStatus(statusReq)).status).toBe(200);
   });
 
   it('rejects wallet payment without login with 401', async () => {

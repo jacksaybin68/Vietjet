@@ -792,7 +792,7 @@ export default function RefundRequestsTab({ onToast }: { onToast?: ToastAPI }) {
             <div className="p-8 space-y-6">
               <div>
                 <p className="text-2xs font-black text-slate-500 uppercase tracking-widest opacity-60 mb-2">
-                  Lời nhắn Admin
+                  Lời nhắn Hệ Thống
                 </p>
                 <textarea
                   value={adminNote}

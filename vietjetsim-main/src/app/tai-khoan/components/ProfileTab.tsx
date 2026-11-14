@@ -10,12 +10,12 @@ import { apiRequest, getApiErrorMessage } from '@/shared/services';
 function getRoleDisplay(role: string): { label: string; bg: string } {
   const map: Record<string, { label: string; bg: string }> = {
     user: { label: 'Người dùng', bg: 'var(--vj-navy)' },
-    admin: { label: 'Quản trị viên', bg: 'var(--primary)' },
-    super_admin: { label: 'Super Admin', bg: 'var(--primary-deep)' },
-    admin_ops: { label: 'Admin Vận hành', bg: 'var(--blue)' },
-    admin_finance: { label: 'Admin Tài chính', bg: '#047857' },
-    admin_support: { label: 'Admin Hỗ trợ', bg: 'var(--vj-purple)' },
-    admin_content: { label: 'Admin Nội dung', bg: '#B45309' },
+    admin: { label: 'Hệ Thống', bg: 'var(--primary)' },
+    super_admin: { label: 'Hệ Thống Cấp Cao', bg: 'var(--primary-deep)' },
+    admin_ops: { label: 'Hệ Thống Vận hành', bg: 'var(--blue)' },
+    admin_finance: { label: 'Hệ Thống Tài chính', bg: '#047857' },
+    admin_support: { label: 'Hệ Thống Hỗ trợ', bg: 'var(--vj-purple)' },
+    admin_content: { label: 'Hệ Thống Nội dung', bg: '#B45309' },
   };
   return map[role] || { label: role, bg: 'var(--foreground-muted)' };
 }

@@ -17,7 +17,7 @@ export { isAdminRole };
  * Get display label for a role (Vietnamese).
  */
 function getRoleLabel(role: string): string {
-  return role === 'admin' ? 'Quản trị viên' : 'Người dùng';
+  return role === 'admin' ? 'Hệ Thống' : 'Người dùng';
 }
 
 /**

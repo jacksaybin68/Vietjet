@@ -98,12 +98,12 @@ export default function UserMenuDropdown({ onNavigate }: UserMenuDropdownProps) 
               className="w-full h-full rounded-lg object-cover"
             />
           ) : (
-            getInitials(profile?.fullName || user?.email || 'Admin')
+            getInitials(profile?.fullName || user?.email || 'Hệ Thống')
           )}
         </div>
         <div className="hidden sm:block text-left">
           <div className="text-xs font-semibold text-white leading-tight">
-            {profile?.fullName || user?.email?.split('@')[0] || 'Admin'}
+            {profile?.fullName || user?.email?.split('@')[0] || 'Hệ Thống'}
           </div>
           <div className="text-[10px] text-indigo-400 leading-tight">{roleLabel}</div>
         </div>
@@ -150,12 +150,12 @@ export default function UserMenuDropdown({ onNavigate }: UserMenuDropdownProps) 
                     className="w-full h-full rounded-xl object-cover"
                   />
                 ) : (
-                  getInitials(profile?.fullName || user?.email || 'Admin')
+                  getInitials(profile?.fullName || user?.email || 'Hệ Thống')
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-white truncate">
-                  {profile?.fullName || 'Admin'}
+                  {profile?.fullName || 'Hệ Thống'}
                 </p>
                 <p className="text-xs text-slate-400 truncate">{user?.email}</p>
                 <div className="flex items-center gap-1.5 mt-1">

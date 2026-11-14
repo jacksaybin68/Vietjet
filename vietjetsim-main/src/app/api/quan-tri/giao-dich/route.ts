@@ -161,6 +161,45 @@ export async function PATCH(request: NextRequest) {
     }
 
     if (action === 'confirm') {
+      // Idempotency: a repeated "xác nhận" must not award loyalty points twice
+      // nor resend the invoice. The first request leaves the booking
+      // `confirmed`/`completed`; everything after it is a no-op that only
+      // repairs a payment row left `pending`.
+      const alreadySettled =
+        targetBooking.status === 'confirmed' || targetBooking.status === 'completed';
+      if (alreadySettled) {
+        if (targetPayment && targetPayment.status !== 'completed') {
+          await sql`
+            UPDATE payments
+            SET status = 'completed', updated_at = NOW()
+            WHERE id = ${targetPayment.id}
+          `;
+        }
+        return NextResponse.json({ status: 'completed', idempotent: true });
+      }
+      if (targetBooking.status !== 'pending') {
+        return NextResponse.json(
+          {
+            error: 'Conflict',
+            message: `Đặt vé đang ở trạng thái "${targetBooking.status}" nên không thể xác nhận.`,
+          },
+          { status: 409 }
+        );
+      }
+
+      // Claim the transition atomically. Of two concurrent confirms, only the
+      // one whose UPDATE matches the `pending` row proceeds to the side
+      // effects below.
+      const claimed = await sql`
+        UPDATE bookings
+        SET status = 'confirmed', updated_at = NOW()
+        WHERE id = ${targetBooking.id} AND status = 'pending'
+        RETURNING id
+      `;
+      if ((claimed as any[]).length === 0) {
+        return NextResponse.json({ status: 'completed', idempotent: true });
+      }
+
       // 1. Update or create payment record
       if (targetPayment) {
         await sql`
@@ -186,14 +225,7 @@ export async function PATCH(request: NextRequest) {
         targetPayment = (createdP as any[])[0];
       }
 
-      // 2. Confirm booking
-      await sql`
-        UPDATE bookings 
-        SET status = 'confirmed', updated_at = NOW() 
-        WHERE id = ${targetBooking.id}
-      `;
-
-      // 3. Tích lũy điểm SkyJoy khi admin đối soát thành công. Nếu bỏ qua,
+      // 2. Tích lũy điểm SkyJoy khi admin đối soát thành công. Nếu bỏ qua,
       // một booking xác nhận qua admin sẽ không bao giờ tích điểm, trong khi
       // booking thanh toán trực tiếp thì có — khách bị mất điểm chỉ vì cách
       // họ thanh toán.
@@ -240,6 +272,49 @@ export async function PATCH(request: NextRequest) {
         status: 'completed',
       });
     } else {
+      // Reject action.
+      //
+      // It used to run unconditionally, so pressing "từ chối" a second time
+      // released the same seats and incremented `flights.available` again —
+      // inventing inventory on every click — and a confirmed booking could be
+      // cancelled after the customer had already been ticketed.
+      if (targetBooking.status === 'cancelled' || targetBooking.status === 'refunded') {
+        return NextResponse.json({
+          success: true,
+          message: 'Giao dịch đã được từ chối trước đó.',
+          bookingId: targetBooking.id,
+          status: 'failed',
+          idempotent: true,
+        });
+      }
+      if (targetBooking.status === 'confirmed' || targetBooking.status === 'completed') {
+        return NextResponse.json(
+          {
+            error: 'Conflict',
+            message: 'Đặt vé đã được xác nhận thanh toán nên không thể từ chối.',
+          },
+          { status: 409 }
+        );
+      }
+
+      // Claim the cancellation atomically before touching seats, so two
+      // concurrent rejects cannot both restore inventory.
+      const rejected = await sql`
+        UPDATE bookings
+        SET status = 'cancelled', updated_at = NOW()
+        WHERE id = ${targetBooking.id} AND status = 'pending'
+        RETURNING id
+      `;
+      if ((rejected as any[]).length === 0) {
+        return NextResponse.json({
+          success: true,
+          message: 'Giao dịch đã được xử lý trước đó.',
+          bookingId: targetBooking.id,
+          status: 'failed',
+          idempotent: true,
+        });
+      }
+
       // Reject action
       if (targetPayment) {
         await sql`
@@ -248,13 +323,6 @@ export async function PATCH(request: NextRequest) {
           WHERE id = ${targetPayment.id}
         `;
       }
-
-      // Cancel booking
-      await sql`
-        UPDATE bookings 
-        SET status = 'cancelled', updated_at = NOW() 
-        WHERE id = ${targetBooking.id}
-      `;
 
       // Release the seats this booking was holding.
       //
@@ -329,7 +397,7 @@ export async function PATCH(request: NextRequest) {
         detailsJson: JSON.stringify({
           bookingCode: targetBooking.booking_code,
           paymentId: targetPayment?.id,
-          reason: note || 'Admin rejected payment',
+          reason: note || 'Hệ thống từ chối thanh toán',
         }),
         status: 'success',
       });

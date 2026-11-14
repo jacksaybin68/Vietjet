@@ -2003,7 +2003,7 @@ export default function UserDashboardClient() {
                                   <div
                                     className={`mt-1.5 text-xs px-2.5 py-1.5 rounded-lg ${req.status === 'approved' ? 'bg-green-50/10 text-green-700' : req.status === 'rejected' ? 'bg-red-50/10 text-red-700' : 'bg-amber-50/10 text-amber-700'}`}
                                   >
-                                    <span className="font-semibold">Admin: </span>
+                                    <span className="font-semibold">Hệ Thống: </span>
                                     {req.adminNote}
                                   </div>
                                 )}

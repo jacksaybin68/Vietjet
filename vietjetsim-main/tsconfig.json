@@ -67,7 +67,9 @@
     ".next-devcheck/dev/types/**/*.ts",
     ".next-paritygate/types/**/*.ts",
     ".next-paritygate/dev/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    ".next-uicheck/types/**/*.ts",
+    ".next-uicheck/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

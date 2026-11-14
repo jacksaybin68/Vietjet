@@ -177,8 +177,8 @@ export default function GlobalSearch({ isOpen, onClose, onSelectResult }: Global
       cancelled: { label: 'Đã huỷ', color: 'bg-red-100 text-red-700' },
       delayed: { label: 'Trễ giờ', color: 'bg-orange-100 text-orange-700' },
       locked: { label: 'Khoá', color: 'bg-red-100 text-red-700' },
-      admin: { label: 'Admin', color: 'bg-purple-100 text-purple-700' },
-      super_admin: { label: 'Super Admin', color: 'bg-indigo-100 text-indigo-700' },
+      admin: { label: 'Hệ Thống', color: 'bg-purple-100 text-purple-700' },
+      super_admin: { label: 'Hệ Thống Cấp Cao', color: 'bg-indigo-100 text-indigo-700' },
     };
 
     const config = statusMap[status] || { label: status, color: 'bg-gray-100 text-gray-700' };

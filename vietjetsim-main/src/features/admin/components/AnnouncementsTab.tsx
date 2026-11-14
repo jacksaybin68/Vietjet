@@ -35,7 +35,7 @@ const TYPE_OPTIONS = [
 const ROLE_OPTIONS = [
   { value: 'all', label: 'Tất cả' },
   { value: 'user', label: 'Người dùng' },
-  { value: 'admin', label: 'Quản trị viên' },
+  { value: 'admin', label: 'Hệ Thống' },
 ];
 
 export default function AnnouncementsTab({ onToast }: { onToast?: ToastAPI }) {

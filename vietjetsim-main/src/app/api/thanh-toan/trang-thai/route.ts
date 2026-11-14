@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getBookingById, getPaymentsByBookingId } from '@/lib/db';
+import { getBookingByCodeOrId, getPaymentsByBookingId } from '@/lib/db';
 import { verifyAuthRequest } from '@/lib/auth';
+import { canAccessBooking } from '@/lib/booking-access';
 import { getApiErrorMessage } from '@/shared/services';
 
 /**
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const booking = await getBookingById(bookingId);
+    const booking = await getBookingByCodeOrId(bookingId);
     if (!booking) {
       return NextResponse.json(
         { error: 'Not Found', message: 'Không tìm thấy thông tin đặt chỗ' },
@@ -31,14 +32,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (user && booking.user_id && booking.user_id !== user.userId && user.role !== 'admin') {
+    // Payment state is booking-scoped data. Without this check an anonymous
+    // caller who knew a booking UUID could poll a stranger's history.
+    if (!canAccessBooking(request, booking, user, bookingId)) {
       return NextResponse.json(
         { error: 'Forbidden', message: 'Đặt chỗ không thuộc về tài khoản này' },
         { status: 403 }
       );
     }
 
-    const payments = await getPaymentsByBookingId(bookingId);
+    const payments = await getPaymentsByBookingId(booking.id);
     const latest = payments[0] ?? null;
 
     return NextResponse.json({

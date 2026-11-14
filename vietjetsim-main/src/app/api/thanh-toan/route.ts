@@ -13,7 +13,7 @@ import {
   countUserDiscountUsage,
 } from '@/lib/db';
 import { verifyAuthRequest } from '@/lib/auth';
-import { isAdminRole } from '@/lib/rbac';
+import { canAccessBooking } from '@/lib/booking-access';
 import { renderTransferNote } from '@/lib/transfer-note';
 import { validateBankTransferInput } from '@/lib/bank-transfer';
 import { computeDiscountAmount } from '@/lib/discount';
@@ -25,7 +25,6 @@ import {
 import { sendAutomaticPaymentInvoiceEmail } from '@/lib/payment-invoice';
 import { skypointPointsForAmount, skypointValueOfPoints } from '@/lib/skypoint';
 import { rateLimit } from '@/lib/rate-limit';
-import { isGuestBookingOwner } from '@/lib/guest-booking';
 
 /** Methods the payment page may submit. Anything else is rejected up front. */
 const ALLOWED_METHODS = new Set([
@@ -125,29 +124,12 @@ export async function POST(request: NextRequest) {
 
     // Quyền sở hữu đặt chỗ.
     //
-    // Trước đây kiểm tra này chỉ chạy khi `user` khác null:
-    //
-    //   if (user && booking.user_id !== user.userId && !isAdminRole(user.role)) → 403
-    //
-    // nên một caller *không đăng nhập* bỏ qua hoàn toàn — chỉ cần biết id
-    // (UUID) của đặt chỗ là có thể thanh toán thay, đẩy nó sang `confirmed`
-    // và nhận vé điện tử của người khác. Với phương thức `card` (không cần
-    // đối soát ngân hàng) đường này hoàn toàn không bị chặn.
-    //
-    // Khách vãng lai không có tài khoản, nên "sở hữu" được xác định bằng
-    // cookie `vj_guest_bookings` mà `POST /api/dat-ve` cấp cho đúng trình
-    // duyệt đã tạo đặt chỗ. Khách đã đăng nhập thì so với `user_id`.
-    if (user) {
-      if (booking.user_id && booking.user_id !== user.userId && !isAdminRole(user.role)) {
-        return NextResponse.json(
-          { error: 'Forbidden', message: 'Đặt chỗ không thuộc về tài khoản này' },
-          { status: 403 }
-        );
-      }
-    } else if (
-      !isGuestBookingOwner(request, booking.id) &&
-      booking.booking_code?.toUpperCase() !== booking_id.toUpperCase()
-    ) {
+    // Trước đây kiểm tra này chỉ chạy khi `user` khác null, nên một caller
+    // *không đăng nhập* chỉ cần biết id (UUID) là có thể thanh toán thay và
+    // nhận vé điện tử của người khác. Quy tắc nay nằm ở `canAccessBooking`
+    // để mọi route đọc/thanh toán dùng chung một luật: cookie guest, PNR cho
+    // khách chưa đăng nhập, hoặc đúng `user_id`/admin.
+    if (!canAccessBooking(request, booking, user, booking_id)) {
       return NextResponse.json(
         {
           error: 'Forbidden',
