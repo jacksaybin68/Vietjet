@@ -215,6 +215,74 @@ describe('Admin Payment Confirmation System', () => {
     );
   });
 
+  it('confirming twice does not re-award points or resend the invoice', async () => {
+    const { PATCH: processPayment } = await import('@/app/api/quan-tri/giao-dich/route');
+    const { sendBookingConfirmationEmail } = await import('@/lib/mail');
+    const { writeAuditLog } = await import('@/lib/db');
+
+    const sendConfirm = async () => {
+      const req = new NextRequest('http://localhost:4028/api/quan-tri/giao-dich', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId: 'bk-uuid-101', action: 'confirm' }),
+      });
+      return processPayment(req);
+    };
+
+    const first = await sendConfirm();
+    expect(first.status).toBe(200);
+    expect((await first.json()).status).toBe('completed');
+    const emailsAfterFirst = (sendBookingConfirmationEmail as any).mock.calls.length;
+    const auditsAfterFirst = (writeAuditLog as any).mock.calls.length;
+
+    const second = await sendConfirm();
+    expect(second.status).toBe(200);
+    const secondData = await second.json();
+    expect(secondData.status).toBe('completed');
+    expect(secondData.idempotent).toBe(true);
+
+    expect((sendBookingConfirmationEmail as any).mock.calls.length).toBe(emailsAfterFirst);
+    expect((writeAuditLog as any).mock.calls.length).toBe(auditsAfterFirst);
+  });
+
+  it('rejecting twice releases the seats only once', async () => {
+    const { PATCH: processPayment } = await import('@/app/api/quan-tri/giao-dich/route');
+
+    const sendReject = async () => {
+      const req = new NextRequest('http://localhost:4028/api/quan-tri/giao-dich', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId: 'bk-uuid-101', action: 'reject' }),
+      });
+      return processPayment(req);
+    };
+
+    expect((await sendReject()).status).toBe(200);
+    expect(bookingState.flightRestores).toBe(1);
+
+    const second = await sendReject();
+    expect(second.status).toBe(200);
+    expect((await second.json()).idempotent).toBe(true);
+    // A second reject used to add the passenger count back to
+    // `flights.available` again, inventing seats on every click.
+    expect(bookingState.flightRestores).toBe(1);
+  });
+
+  it('refuses to reject a booking that was already confirmed', async () => {
+    bookingState.status = 'confirmed';
+    const { PATCH: processPayment } = await import('@/app/api/quan-tri/giao-dich/route');
+
+    const req = new NextRequest('http://localhost:4028/api/quan-tri/giao-dich', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bookingId: 'bk-uuid-101', action: 'reject' }),
+    });
+
+    const res = await processPayment(req);
+    expect(res.status).toBe(409);
+    expect(bookingState.flightRestores).toBe(0);
+  });
+
   it('PATCH /api/quan-tri/giao-dich rejects unauthenticated requests with 401', async () => {
     const { PATCH: processPayment } = await import('@/app/api/quan-tri/giao-dich/route');
 
