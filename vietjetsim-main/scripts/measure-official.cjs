@@ -73,13 +73,16 @@ function chromePath() {
     out.loginBtn = box(byText('header button, header a', 'Đăng nhập'));
 
     // Booking bar: tab + panel
-    out.tabFlight = byText('button', 'Đặt vé');
-    out.tabsBar = box(out.tabFlight && out.tabFlight.parentElement);
-    out.tabItem = box(out.tabFlight);
-    out.fromField = byText('button', 'Điểm khởi hành');
-    out.fieldBox = box(out.fromField && out.fromField.closest('div'));
-    out.cta = byText('button', 'Tìm chuyến bay');
-    out.ctaBox = box(out.cta);
+    const tabFlightEl = byText('button, a', 'Đặt vé');
+    out.tabFlight = box(tabFlightEl);
+    out.tabsBar = box(tabFlightEl && tabFlightEl.parentElement);
+    out.tabItem = box(tabFlightEl);
+    const fromFieldEl = byText('button, div', 'Điểm khởi hành');
+    out.fromField = box(fromFieldEl);
+    out.fieldBox = box(fromFieldEl && fromFieldEl.closest('div'));
+    const ctaEl = byText('button', 'Tìm chuyến bay');
+    out.cta = box(ctaEl);
+    out.ctaBox = box(ctaEl);
 
     // H2
     out.h2 = box(byText('h2', 'Ưu đãi giá tốt'));

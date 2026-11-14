@@ -1073,10 +1073,16 @@ h6 {
 
 /* Thanh tổng cuối panel — site thật (đo 14/11/2026): gradient đỏ
  * `359.2deg` (`#D91A21 53.08% → #6F0000 206.46%`), cao `50px`,
- * padding `15px 20px`. */
+ * padding `15px 20px`.
+ *
+ * `height` cố định 50px (đo được trên DOM sống) thay cho `min-height`:
+ * hai dòng con (nhãn 20px + giá 22px) cộng lại 58px nên thanh cao hơn
+ * site 8px. `padding` dọc bằng 0 + `align-items: center` của flex cho
+ * khoảng hở đúng ~13px ở trên/dưới mà tổng chiều cao vẫn là 50px. */
 .vj-summary-total {
+  height: 50px;
   min-height: 50px;
-  padding: 15px 20px;
+  padding: 0 20px;
   background-image: linear-gradient(
     359.2deg,
     var(--vj-red-dark) 53.08%,
