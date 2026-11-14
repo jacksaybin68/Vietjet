@@ -16,7 +16,7 @@ vi.mock('next/link', () => ({
 }));
 
 import PopupFrame from '@/features/auth/components/PopupFrame';
-import MobileBottomNav, { BOTTOM_NAV_HEIGHT } from '@/shared/components/navigation/MobileBottomNav';
+import { BOTTOM_NAV_HEIGHT } from '@/shared/components/navigation/MobileBottomNav';
 
 /**
  * Cấu trúc popup 622×664 của site thật — số đo ở
