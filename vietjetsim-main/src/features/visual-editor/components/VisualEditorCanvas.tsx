@@ -61,7 +61,6 @@ export default function VisualEditorCanvas({
       height: '100%',
       width: 'auto',
       storageManager: false,
-      autoCss: false,
       styleManager: {
         appendTo: containerRef.current.parentElement ?? undefined,
         sectors: [
@@ -275,8 +274,7 @@ function readOrder(editor: Editor): string[] {
   const wrapper = editor.getWrapper();
   if (!wrapper) return [];
 
-  return wrapper
-    .components()
+  return childComponents(wrapper)
     .map((component) => readSectionId(component))
     .filter((id): id is string => Boolean(id));
 }
@@ -286,9 +284,19 @@ function findComponent(editor: Editor, sectionId: string): Component | undefined
   const wrapper = editor.getWrapper();
   if (!wrapper) return undefined;
 
-  return wrapper
-    .components()
-    .find((component) => readSectionId(component) === sectionId);
+  return childComponents(wrapper).find(
+    (component) => readSectionId(component) === sectionId
+  );
+}
+
+/**
+ * Component con trực tiếp của một component.
+ *
+ * `Component.components()` trả về collection của các component con; gọi
+ * không có đối số nên không thay đổi cây component.
+ */
+function childComponents(parent: Component): Component[] {
+  return parent.components().models;
 }
 
 /**

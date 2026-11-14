@@ -1,4 +1,4 @@
-import type { PageLayout, PageSection, SectionStyle } from './types';
+import type { PageLayout, PageSection, SectionStyle } from '../types';
 
 /**
  * Làm sạch style của một section.

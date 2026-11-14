@@ -1,7 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { HOMEPAGE_SECTION_CATALOG, type PageLayout, type SectionStyle } from '../types';
+import {
+  HOMEPAGE_SECTION_CATALOG,
+  type PageLayout,
+  type PageSection,
+  type SectionStyle,
+} from '../types';
 import { savePageLayout } from '../services/visualEditorService';
 import VisualEditorCanvas from './VisualEditorCanvas';
 
@@ -38,7 +43,9 @@ export default function VisualEditorPanel({ pagePath, initialLayout }: VisualEdi
 
   const handleReorder = (orderedIds: string[]) => {
     updateLayout((current) => {
-      const byId = new Map(current.sections.map((section) => [section.id, section]));
+      const byId = new Map<string, PageSection>(
+        current.sections.map((section) => [section.id as string, section])
+      );
       const reordered = orderedIds
         .map((id) => byId.get(id))
         .filter((section): section is NonNullable<typeof section> => Boolean(section));

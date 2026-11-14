@@ -64,7 +64,7 @@ export default function HomepageSections({
     fetchPublicPageLayout(PAGE_PATH)
       .then((response) => {
         if (cancelled) return;
-        setLayout(response?.layout ? normalizeLayout(PAGE_PATH, response.layout) : null);
+        setLayout(response?.layout ? normalizeLayout(response.layout) : null);
       })
       .catch(() => {
         // API lỗi không được làm hỏng trang chủ — dùng thứ tự mặc định.
@@ -85,7 +85,7 @@ export default function HomepageSections({
     shopping,
   };
 
-  const order = visibleSectionIds(PAGE_PATH, layout) ?? [...DEFAULT_ORDER];
+  const order = visibleSectionIds(layout) ?? [...DEFAULT_ORDER];
 
   return (
     <>
@@ -93,7 +93,7 @@ export default function HomepageSections({
         const node = byId[id];
         if (!node) return null;
 
-        const style = sectionStyleFor(PAGE_PATH, layout, id);
+        const style = sectionStyleFor(layout, id);
         return (
           <SectionFrame key={id} style={style}>
             {node}
