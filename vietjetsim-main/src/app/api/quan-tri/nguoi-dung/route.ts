@@ -163,6 +163,19 @@ export async function DELETE(request: NextRequest) {
       userId,
     });
   } catch (error) {
+    // `deleteUser` refuses to orphan booking history and marks that refusal
+    // with `status = 409`. Swallowing it as a 500 told the operator the server
+    // had failed instead of telling them which bookings to handle first.
+    const status = (error as { status?: number } | null)?.status;
+    if (status === 409) {
+      return NextResponse.json(
+        {
+          error: 'Conflict',
+          message: error instanceof Error ? error.message : 'Không thể xóa người dùng này',
+        },
+        { status: 409 }
+      );
+    }
     console.error('Error deleting user:', error);
     return NextResponse.json(
       { error: 'Internal Server Error', message: 'Failed to delete user' },

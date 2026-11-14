@@ -184,6 +184,18 @@ export async function DELETE(request: NextRequest) {
     await deleteFlight(flightId);
     return NextResponse.json({ success: true, message: 'Flight deleted successfully' });
   } catch (error) {
+    // `deleteFlight` answers 409 when the flight still has bookings; keep that
+    // status and its explanation instead of flattening it into a 500.
+    const status = (error as { status?: number } | null)?.status;
+    if (status === 409) {
+      return NextResponse.json(
+        {
+          error: 'Conflict',
+          message: error instanceof Error ? error.message : 'Không thể xóa chuyến bay này',
+        },
+        { status: 409 }
+      );
+    }
     console.error('Error deleting flight:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
