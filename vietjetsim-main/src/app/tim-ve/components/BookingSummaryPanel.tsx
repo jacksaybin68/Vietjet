@@ -130,7 +130,7 @@ export default function BookingSummaryPanel({
           gradient đỏ `359.2deg` cao `56px` với `h3` 20px/700 trắng, các thanh
           mục cao `52px` nền `#F1F1F1` tiêu đề `18px/600`, thanh tổng nền trắng
           "Tổng tiền" `20px/600` + giá `22px/700`, nút "Đi tiếp" `127×39`. */}
-      <aside className="hidden lg:flex lg:w-[380px] lg:flex-none flex-col rounded-[6px] overflow-hidden shadow-sm border border-gray-200 bg-white h-fit sticky top-4">
+      <aside className="hidden lg:flex lg:w-[380px] lg:flex-none flex-col rounded-vj-panel overflow-hidden shadow-sm border border-gray-200 bg-white h-fit sticky top-4">
         {/* Panel header — gradient đỏ 359.2deg, cao 56px */}
         <div className="vj-summary-head px-4 flex items-center justify-center">
           <h3 className="font-koho text-2xl3 font-bold uppercase text-white tracking-normal">

@@ -1711,11 +1711,11 @@ export default function PaymentClient() {
                       }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] relative overflow-hidden ${
                         selectedMethodGroup === 'vnpay_qr'
-                          ? 'border-[#005BAA] ring-2 ring-[#005BAA] bg-blue-50/40 shadow-xs'
+                          ? 'border-2 border-primary bg-[rgb(var(--vj-red-rgb))]/10 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <div className="absolute top-0 right-0 bg-[#ED1C24] text-white text-4xs font-black px-1.5 py-0.5 rounded-bl-md uppercase tracking-wider">
+                      <div className="absolute top-0 right-0 bg-primary text-white text-4xs font-black px-1.5 py-0.5 rounded-bl-md uppercase tracking-wider">
                         Khuyên dùng
                       </div>
                       <div className="flex items-center h-8">
@@ -1735,7 +1735,7 @@ export default function PaymentClient() {
                       }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] relative overflow-hidden ${
                         selectedMethodGroup === 'vietqr'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/30 shadow-xs'
+                          ? 'border-2 border-primary bg-[rgb(var(--vj-red-rgb))]/10 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
@@ -1756,7 +1756,7 @@ export default function PaymentClient() {
                       }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
                         selectedMethodGroup === 'napas'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
+                          ? 'border-2 border-primary bg-[rgb(var(--vj-red-rgb))]/10 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
@@ -1775,7 +1775,7 @@ export default function PaymentClient() {
                       }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
                         selectedMethodGroup === 'card'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
+                          ? 'border-2 border-primary bg-[rgb(var(--vj-red-rgb))]/10 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
@@ -1800,7 +1800,7 @@ export default function PaymentClient() {
                       }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[96px] ${
                         selectedMethodGroup === 'vnpay_dom'
-                          ? 'border-[#005BAA] ring-2 ring-[#005BAA] bg-blue-50/20 shadow-xs'
+                          ? 'border-2 border-primary bg-[rgb(var(--vj-red-rgb))]/10 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
@@ -1829,7 +1829,7 @@ export default function PaymentClient() {
                       }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
                         selectedMethodGroup === 'skypay'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
+                          ? 'border-2 border-primary bg-[rgb(var(--vj-red-rgb))]/10 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
@@ -1848,7 +1848,7 @@ export default function PaymentClient() {
                       }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
                         selectedMethodGroup === 'momo'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
+                          ? 'border-2 border-primary bg-[rgb(var(--vj-red-rgb))]/10 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
@@ -1867,7 +1867,7 @@ export default function PaymentClient() {
                       }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
                         selectedMethodGroup === 'zalopay'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
+                          ? 'border-2 border-primary bg-[rgb(var(--vj-red-rgb))]/10 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
@@ -1886,7 +1886,7 @@ export default function PaymentClient() {
                       }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
                         selectedMethodGroup === 'applepay'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
+                          ? 'border-2 border-primary bg-[rgb(var(--vj-red-rgb))]/10 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
@@ -1905,7 +1905,7 @@ export default function PaymentClient() {
                       }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
                         selectedMethodGroup === 'googlepay'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
+                          ? 'border-2 border-primary bg-[rgb(var(--vj-red-rgb))]/10 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
@@ -1931,7 +1931,7 @@ export default function PaymentClient() {
                       }}
                       className={`p-3 rounded-xl border flex flex-col justify-between text-left transition-all cursor-pointer min-h-[90px] ${
                         selectedMethodGroup === 'movi'
-                          ? 'border-green-600 ring-2 ring-green-600 bg-green-50/20 shadow-xs'
+                          ? 'border-2 border-primary bg-[rgb(var(--vj-red-rgb))]/10 shadow-xs'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >

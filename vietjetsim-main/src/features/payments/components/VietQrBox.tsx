@@ -268,7 +268,7 @@ export default function VietQrBox({
   }
 
   return (
-    <div className="bg-gradient-to-b from-white via-white to-blue-50/20 border-2 border-[#005BAA]/20 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-md">
+    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-lg">
       {/* VietQR Header — Logo VietQR + Napas 247 + Ngân hàng thụ hưởng STK Admin */}
       {showBankHeader && (
         <div className="p-4 sm:p-5 bg-gradient-to-r from-[#005BAA] via-[#004B8D] to-[#ED1C24] text-white shadow-md">
@@ -307,7 +307,7 @@ export default function VietQrBox({
           {/* Ambient Glow */}
           <div className="absolute -inset-2 bg-gradient-to-r from-[#005BAA] to-[#ED1C24] rounded-3xl blur-md opacity-25 group-hover:opacity-40 transition duration-300" />
 
-          <div className="relative p-4 sm:p-5 bg-white rounded-2xl border-2 border-[#005BAA]/30 shadow-xl flex flex-col items-center">
+          <div className="relative p-4 sm:p-5 bg-white rounded-2xl border border-gray-200 shadow-md flex flex-col items-center">
             {/* Tag chuẩn */}
             <div className="flex items-center gap-2 mb-2.5 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200">
               {isVnpay ? (
@@ -352,18 +352,18 @@ export default function VietQrBox({
         </div>
 
         {/* Logo VNPAY / VietQR + NAPAS 247 — đặt dưới mã quét */}
-        <div className="mt-4 flex items-center justify-center gap-3 rounded-xl border border-[#005BAA]/15 bg-white px-4 py-2.5 shadow-sm">
+        <div className="mt-4 flex items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-2.5 shadow-sm">
           {isVnpay ? (
             <VnpayLogo className="h-5 sm:h-6 w-auto" />
           ) : (
             <VietQrLogo className="h-6 sm:h-7 w-auto" />
           )}
-          <span className="h-4 w-px bg-[#005BAA]/20" />
+          <span className="h-4 w-px bg-gray-200" />
           <NapasLogo className="h-5 sm:h-6 w-auto" />
         </div>
 
         {/* Thông tin thanh toán chi tiết (STK Admin, Tên, Số tiền, Nội dung) */}
-        <div className="w-full mt-6 space-y-2.5 bg-gradient-to-b from-slate-50 to-blue-50/30 p-4 sm:p-5 rounded-2xl border border-blue-200/80 shadow-xs">
+        <div className="w-full mt-6 space-y-2.5 bg-slate-50/50 p-4 sm:p-5 rounded-2xl border border-gray-200 shadow-xs">
           <div className="flex items-center justify-between pb-2 border-b border-blue-200/60">
             <span className="text-xs font-black uppercase tracking-wider text-[#005BAA] font-koho flex items-center gap-1.5">
               <Icon name="InformationCircleIcon" size={16} />

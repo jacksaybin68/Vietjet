@@ -385,7 +385,7 @@ module.exports = {
         // mọi bề mặt mới thay vì `rounded-lg` (8px) hay `rounded-xl` (12px).
         vj: '10px',
         // Bo góc riêng của booking panel và tab dịch vụ (đo từ DOM sống).
-        'vj-panel': '5px',
+        'vj-panel': '6px',
         'vj-tab': '5px 5px 0 0',
         'vj-panel-bottom': '0 0 5px 5px',
         // Biến thể theo cạnh của token `vj` — Tailwind không tự sinh

@@ -533,12 +533,23 @@ export default function FlightBookingResultsWrapper({
         <>
           {/* Desktop Sticky Bottom Bar — số đo site thật 14/11/2026 (1440×900):
               khối ngoài `1440×80` nền trắng padding-top `18px`; nội dung
-              `1200×59` trong container 1200px (x=120). "Tổng tiền" `16px/500`,
-              giá `20px/400` (KHÔNG phải 22px/700 như bên trong panel), có
-              nút phụ "Chi tiết", nút "Đi tiếp" `127×39`. */}
+              `1200×59` trong container 1200px (x=120), padding-left `10px`.
+
+              Cấu trúc site thật là 3 flex item:
+                1. thanh trống `639px` (x=130) — giữ cụm tổng ở bên phải,
+                2. khối `405px` (x=769) chứa "Tổng tiền" `16px/500`, giá
+                   `20px/400` và "Chi tiết" `13px/400` màu `#D3D3D3`
+                   (không phải chữ đỏ!) — nằm ngay dưới nhau, cùng x=769,
+                3. nút "Đi tiếp" `127×39` tại x=1173.
+
+              "Chi tiết" nằm ở x=842 nhờ `padding-right: 291.547px` của
+              khối giữa — tức nó thẳng hàng với dòng "Tổng tiền", lệch
+              phải ~73px, KHÔNG nằm giữa hai khối. */}
           <div className="vj-total-bar hidden sm:block fixed bottom-0 left-0 right-0 z-[60] border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
-            <div className="vj-total-bar-inner mx-auto max-w-[1200px] pl-[10px] pr-[20px]">
-              <div className="ml-auto flex items-center gap-4">
+            <div className="vj-total-bar-inner mx-auto max-w-[1200px] pl-[10px]">
+              {/* Thanh trống giữ layout 3 cột như site thật */}
+              <div aria-hidden="true" className="flex-1" />
+              <div className="relative w-[405px] shrink-0">
                 <div className="flex flex-col items-start">
                   <span className="vj-total-bar-label">Tổng tiền</span>
                   <span className="vj-total-bar-amount">
@@ -548,19 +559,19 @@ export default function FlightBookingResultsWrapper({
                 <button
                   type="button"
                   onClick={() => setShowSummaryModal(true)}
-                  className="text-sm font-medium text-primary underline-offset-2 hover:underline cursor-pointer"
+                  className="absolute left-[73px] top-0 text-sm2 font-normal text-[var(--vj-detail-gray)] hover:text-gray-500 transition-colors cursor-pointer"
                 >
                   Chi tiết
                 </button>
-                <button
-                  type="button"
-                  onClick={handleContinue}
-                  disabled={!bookings.outbound}
-                  className="vj-cta vj-cta--booking disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 cursor-pointer"
-                >
-                  Đi tiếp
-                </button>
               </div>
+              <button
+                type="button"
+                onClick={handleContinue}
+                disabled={!bookings.outbound}
+                className="vj-cta vj-cta--booking shrink-0 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 cursor-pointer"
+              >
+                Đi tiếp
+              </button>
             </div>
           </div>
 

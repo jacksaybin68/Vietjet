@@ -156,6 +156,7 @@ input[type='date'].vj-no-native-icon::-moz-calendar-picker-indicator {
   --vj-sold-out: #939598;
   --vj-currency-gray: #6d6e71;
   --vj-field-line: #d9d9d9;
+  --vj-detail-gray: #d3d3d3;
   --vj-border-back: #808080;
   /* Viền dưới header trang con (2px #E31E24) — theo plan §1. */
   --vj-header-border: #e31e24;
@@ -1105,7 +1106,6 @@ h6 {
 .vj-total-bar-inner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   min-height: 59px;
 }
 

@@ -789,7 +789,7 @@ export default function SeatSelectionStep({
                                         disabled={info.status === 'occupied'}
                                         aria-pressed={isSelected}
                                         aria-label={`Ghế ${seatId}, ${SEAT_STATUS_LABELS[info.status]}${isSelected ? ', đã chọn' : ''}, ${info.price.toLocaleString('vi-VN')}₫`}
-                                        className={`w-8 h-8 sm:w-8 sm:h-8 rounded-[3px] text-2xs sm:text-xs2 font-bold seat flex-shrink-0 ${getHeatmapClass(
+                                        className={`w-8 h-8 sm:w-8 sm:h-8 rounded-[6px] text-2xs sm:text-xs2 font-bold seat flex-shrink-0 ${getHeatmapClass(
                                           seatId,
                                           info.status,
                                           info.occupancyLevel,
@@ -937,7 +937,7 @@ export default function SeatSelectionStep({
                       {SEAT_LEGEND.map((item) => (
                         <div key={item.label} className="flex items-center gap-1.5 sm:gap-2">
                           <span
-                            className={`w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-[3px] flex-shrink-0 ${item.swatch}`}
+                            className={`w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-[6px] flex-shrink-0 ${item.swatch}`}
                             aria-hidden="true"
                           />
                           <span className="leading-tight">
