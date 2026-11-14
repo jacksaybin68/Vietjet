@@ -168,7 +168,7 @@ export default function Header({
   const { user, signOut } = useAuth();
   const pathname = usePathname();
   const { openAuthModal } = useAuthModal();
-  const isHomepage = pathname === '/trang-chu';
+  const isHomepage = pathname === '/trang-chu' || pathname === '/vi' || pathname === '/';
   // The booking-lookup page mirrors vietjetair.com's single 94px red band:
   // logo + utility row on top, right-aligned primary nav underneath. It shares
   // every dropdown and auth behaviour with the default header, so this is a

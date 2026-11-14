@@ -5,15 +5,15 @@ import HeroBookingWidget from './HeroBookingWidget';
 
 export const HERO_BANNERS = [
   {
-    id: 'banner-bay-khap-the-gioi',
-    image: '/images/hero/banner-bay-khap-the-gioi.jpg',
-    title: 'Bay khắp thế giới, chạm đỉnh cao mới',
-    focusClass: 'object-cover object-top',
-  },
-  {
     id: 'banner-tet-celebration',
     image: '/images/hero/hero-tet-celebration.jpg',
     title: 'Vé Tết tới, mời bạn bay! - Vietjet Air',
+    focusClass: 'object-cover object-top',
+  },
+  {
+    id: 'banner-bay-khap-the-gioi',
+    image: '/images/hero/banner-bay-khap-the-gioi.jpg',
+    title: 'Bay khắp thế giới, chạm đỉnh cao mới',
     focusClass: 'object-cover object-top',
   },
   {
@@ -90,18 +90,11 @@ export default function HeroSection() {
     // Lưu ý: `section` KHÔNG dùng `overflow-hidden` — popover lịch 630px mở ra
     // ngoài khung panel và sẽ bị cắt mất nếu khối cha cắt tràn. Ảnh nền vẫn
     // được cắt riêng trong lớp bọc của nó.
-    <section className="relative w-full bg-white pb-[268px] lg:pb-0">
+    <section className="relative w-full bg-sky-100 pb-[268px] lg:pb-0">
       <h1 className="sr-only">Vietjet Air - Thông báo quan trọng Nhà ga T3 Jakarta</h1>
 
-      <div className="relative h-[422px] sm:h-[560px] lg:h-[850px]">
-        {/* Ảnh nền hero — slider các banner.
-
-            `data-visual-mask="hero"`: banner này TỰ CHẠY (đổi slide mỗi vài
-            giây), nên ảnh chụp ở hai thời điểm khác nhau sẽ khác nhau dù giao diện
-            không đổi. Cổng diff ảnh (`scripts/visual-diff.cjs`) đọc attribute này
-            để tô xám vùng đó trước khi so — nếu không, mọi lần chạy đều báo lệch
-            và cổng trở nên vô nghĩa. Đây là hợp đồng giữa component và cổng
-            QA, nên nó nằm cạnh markup chứ không giấu trong script. */}
+      <div className="relative h-[422px] sm:h-[560px] lg:h-[725px]">
+        {/* Ảnh nền hero — slider các banner. */}
         <div
           className="absolute inset-0 z-0 overflow-hidden"
           aria-hidden="true"
@@ -123,13 +116,10 @@ export default function HeroSection() {
           ))}
         </div>
 
-        {/* Chấm điều hướng slider — site thật: absolute tại top 589.016px tính từ
-            đỉnh hero (desktop) / top 297px (mobile 390×844), `text-align:center`,
-            mỗi chấm là nút 20×20px với nội dung "•" 12px (trắng khi không active,
-            đỏ #EC2029 khi active). */}
+        {/* Chấm điều hướng slider — site thật: absolute tại top 589px tính từ đỉnh hero */}
         <ul
           data-testid="hero-slider-dots"
-          className="pointer-events-none absolute inset-x-0 top-[297px] z-20 flex justify-center pt-[6px] lg:top-[668px] lg:pt-0"
+          className="pointer-events-none absolute inset-x-0 top-[297px] z-20 flex justify-center pt-[6px] lg:top-[589px] lg:pt-0"
         >
           {HERO_BANNERS.map((_, idx) => (
             <li key={idx} className="relative inline-block h-5 w-5">
@@ -144,18 +134,41 @@ export default function HeroSection() {
             </li>
           ))}
         </ul>
+
+        {/* Dải mây lượn sóng đáy banner đặc trưng Vietjet */}
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-8 sm:h-12 w-full"
+          style={{
+            backgroundImage: `radial-gradient(circle at 50% 100%, #ffffff 65%, rgba(255,255,255,0.7) 70%, transparent 72%)`,
+            backgroundSize: '40px 20px',
+            backgroundRepeat: 'repeat-x',
+            backgroundPosition: 'bottom',
+          }}
+          aria-hidden="true"
+        />
+
+        {/* Amy Mascot với tooltip "Xin chào!" góc dưới bên phải */}
+        <div className="absolute right-4 sm:right-8 bottom-3 sm:bottom-4 z-30 flex items-end pointer-events-none select-none">
+          <div className="relative mb-12 sm:mb-14 -mr-1">
+            <div className="bg-white text-gray-800 text-xs sm:text-sm font-bold px-3 py-1.5 rounded-xl shadow-lg border border-gray-200">
+              Xin chào!
+            </div>
+            <div className="w-2.5 h-2.5 bg-white border-r border-b border-gray-200 rotate-45 ml-auto mr-4 -mt-1 shadow-xs" />
+          </div>
+          <img
+            src="/images/hero/amy-mascot.png"
+            alt="Mascot Amy"
+            className="w-16 sm:w-20 lg:w-24 h-auto drop-shadow-lg"
+            loading="lazy"
+          />
+        </div>
       </div>
 
-      {/* Dải đặt vé — chỉ render MỘT bản.
-          Trên desktop nó là thanh NGANG 1200px, căn giữa, neo ở đáy khối
-          ảnh hero (đỉnh tầng 1 ở y=783 tuyệt đối = 733px tính từ đỉnh hero
-          ở y=50). Trên mobile nó là thẻ đỏ 366×130px ở y=477 tuyệt đối
-          (= 442px tính từ đỉnh hero ở y=35). Nếu render hai bản (một cho
-          desktop, một cho mobile) thì form bị trùng `id` và mọi test truy vấn
-          theo vai trò đều gặp "nhiều phần tử khớp" — nên chỉ có một bản, đổi
-          cách đặt theo breakpoint. */}
-      <div className="absolute inset-x-0 top-[442px] z-20 mx-auto w-full max-w-[1200px] lg:inset-x-auto lg:left-1/2 lg:top-[733px] lg:-translate-x-1/2 lg:px-0">
-        <HeroBookingWidget />
+      {/* Dải đặt vé 380px neo mép phải container 1200px chuẩn vietjetair.com */}
+      <div className="absolute inset-x-0 top-[333px] z-20 mx-auto w-full max-w-[1200px] lg:inset-x-auto lg:left-1/2 lg:top-[164px] lg:-translate-x-1/2 lg:flex lg:justify-end lg:px-0">
+        <div className="w-full lg:w-[380px] lg:max-w-[380px]">
+          <HeroBookingWidget />
+        </div>
       </div>
     </section>
   );
