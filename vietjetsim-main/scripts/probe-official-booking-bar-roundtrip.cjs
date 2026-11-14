@@ -101,8 +101,8 @@ function chromePath() {
     // Đo lại các ô nhập trong thanh.
     const fields = ['Từ', 'Đến', 'Ngày đi', 'Ngày về', 'Hành khách'];
     out.fields = fields.map((label) => {
-      const el = Array.from(document.querySelectorAll('button')).find(
-        (b) => (b.innerText || '').replace(/\s+/g, ' ').trim().startsWith(label)
+      const el = Array.from(document.querySelectorAll('button')).find((b) =>
+        (b.innerText || '').replace(/\s+/g, ' ').trim().startsWith(label)
       );
       return { label, info: info(el) };
     });

@@ -68,8 +68,8 @@ function chromePath() {
     const out = {};
 
     // Khung trắng chứa form ở mobile.
-    const pax = Array.from(document.querySelectorAll('button')).find(
-      (b) => (b.innerText || '').replace(/\s+/g, ' ').trim().startsWith('Hành khách')
+    const pax = Array.from(document.querySelectorAll('button')).find((b) =>
+      (b.innerText || '').replace(/\s+/g, ' ').trim().startsWith('Hành khách')
     );
     let card = pax;
     while (card && getComputedStyle(card).backgroundColor !== 'rgb(255, 255, 255)') {

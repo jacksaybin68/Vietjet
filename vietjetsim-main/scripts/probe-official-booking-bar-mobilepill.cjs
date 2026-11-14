@@ -67,8 +67,8 @@ function chromePath() {
       };
     };
     const out = {};
-    const matches = Array.from(document.querySelectorAll('button,span,div,p,label,a')).filter((el) =>
-      /^(Một chiều|Khứ hồi|Nhiều chặng)$/.test((el.innerText || '').trim())
+    const matches = Array.from(document.querySelectorAll('button,span,div,p,label,a')).filter(
+      (el) => /^(Một chiều|Khứ hồi|Nhiều chặng)$/.test((el.innerText || '').trim())
     );
     out.matches = matches.map((el) => {
       const chain = [];

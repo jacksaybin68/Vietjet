@@ -83,9 +83,7 @@ function chromePath() {
     out.panel = info(panel);
     out.panelKids = Array.from(panel.children).map(info);
     // 2 cấp con
-    out.panelGrandKids = Array.from(panel.children).map((c) =>
-      Array.from(c.children).map(info)
-    );
+    out.panelGrandKids = Array.from(panel.children).map((c) => Array.from(c.children).map(info));
 
     // Rail đỏ: con trực tiếp
     let rail = cta;
@@ -94,13 +92,11 @@ function chromePath() {
     }
     out.rail = info(rail);
     out.railKids = Array.from(rail.children).map(info);
-    out.railGrandKids = Array.from(rail.children).map((c) =>
-      Array.from(c.children).map(info)
-    );
+    out.railGrandKids = Array.from(rail.children).map((c) => Array.from(c.children).map(info));
 
     // Mở popover lịch để xem có pill loại hành trình bên trong không.
-    const dateBtn = Array.from(document.querySelectorAll('button')).find(
-      (b) => (b.innerText || '').replace(/\s+/g, ' ').trim().startsWith('Ngày đi')
+    const dateBtn = Array.from(document.querySelectorAll('button')).find((b) =>
+      (b.innerText || '').replace(/\s+/g, ' ').trim().startsWith('Ngày đi')
     );
     if (dateBtn) {
       dateBtn.click();
