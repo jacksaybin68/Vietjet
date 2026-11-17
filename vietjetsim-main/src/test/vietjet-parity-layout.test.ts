@@ -93,21 +93,28 @@ describe('Header trang con (74px) — đo 14/11/2026', () => {
   });
 });
 
-describe('Ô nhập tra cứu (underline MUI 40px) — đo 14/11/2026', () => {
+describe('Ô nhập tra cứu (khung viền 40px) — đo 14/11/2026', () => {
   it('wrapper cao 40px', () => {
     expect(ruleValue('.vj-lookup-field', 'height')).toBe('40px');
   });
 
-  it('input cao 32px, padding 6px 0 7px, gạch chân 1px', () => {
+  it('input cao 32px, padding 6px 0 7px, không gạch chân (viền do khung)', () => {
     expect(ruleValue('.vj-lookup-field .vj-lookup-input', 'height')).toBe('32px');
     expect(ruleValue('.vj-lookup-field .vj-lookup-input', 'padding')).toBe('6px 0 7px');
-    expect(ruleValue('.vj-lookup-field .vj-lookup-input', 'border-bottom')).toContain('1px solid');
+    // Khung `.vj-lookup-field` đã có viền bao quanh; input bên trong KHÔNG
+    // vẽ gạch chân nữa để tránh hai nét song song.
+    expect(ruleValue('.vj-lookup-field .vj-lookup-input', 'border')).toBe('0');
   });
 
-  it('focus đổi gạch chân thành 2px đỏ thương hiệu', () => {
-    expect(ruleValue('.vj-lookup-field .vj-lookup-input:focus', 'border-bottom')).toContain(
-      '2px solid'
-    );
+  it('khung có viền 1px, bo góc 8px, nền trắng', () => {
+    expect(ruleValue('.vj-lookup-field', 'border')).toBe('1px solid var(--vj-field-border)');
+    expect(ruleValue('.vj-lookup-field', 'border-radius')).toBe('8px');
+    expect(ruleValue('.vj-lookup-field', 'background-color')).toBe('#ffffff');
+  });
+
+  it('focus viền khung đổi sang màu thương hiệu', () => {
+    expect(ruleValue('.vj-lookup-field:focus-within', 'border-color')).toBe('var(--primary)');
+    expect(ruleValue('.vj-lookup-field:focus-within', 'box-shadow')).toBe('0 0 0 1px var(--primary)');
   });
 });
 

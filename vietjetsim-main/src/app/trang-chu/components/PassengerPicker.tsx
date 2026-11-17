@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   MdOutlinePerson,
+  MdPerson,
   MdChildCare,
   MdChildFriendly,
   MdExpandMore,
@@ -38,7 +39,7 @@ const ROWS: ReadonlyArray<RowDef> = [
     ageDisplay: '12 tuổi trở lên',
     testHint: 'Từ 12 tuổi trở lên',
     min: 1,
-    icon: MdOutlinePerson,
+    icon: MdPerson,
   },
   {
     type: 'child',
@@ -258,7 +259,7 @@ export default function PassengerPicker({
                   className="flex items-center justify-between gap-3 py-1 border-b border-vj-border-light last:border-b-0"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <Icon className="text-2xl text-vj-text-soft shrink-0" />
+                    <Icon className="text-2xl text-vj-text-strong shrink-0" />
                     <div className="min-w-0">
                       <span className="block text-sm font-bold text-[var(--foreground)]">
                         {row.title}
@@ -303,7 +304,7 @@ export default function PassengerPicker({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-vj bg-[var(--accent)] px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:brightness-105 active:scale-95 transition-all cursor-pointer"
+                className="rounded-vj bg-[var(--accent)] px-4 py-1.5 text-xs font-bold text-black shadow-sm hover:brightness-105 active:scale-95 transition-all cursor-pointer"
               >
                 Xác nhận
               </button>

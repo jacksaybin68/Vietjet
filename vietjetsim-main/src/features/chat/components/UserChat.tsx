@@ -813,7 +813,7 @@ export default function UserChat() {
                         value={guestName}
                         onChange={(e) => setGuestName(e.target.value)}
                         placeholder="Nguyễn Văn A"
-                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-900 focus:outline-none focus:border-red-500 focus:bg-white transition-all"
+                        className="vj-guest-field w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-900 focus:outline-none focus:border-red-500 focus:bg-white transition-all"
                         required
                       />
                     </div>
@@ -826,7 +826,7 @@ export default function UserChat() {
                         value={guestPhone}
                         onChange={(e) => setGuestPhone(e.target.value.replace(/[^0-9]/g, ''))}
                         placeholder="0912345678"
-                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-900 focus:outline-none focus:border-red-500 focus:bg-white transition-all"
+                        className="vj-guest-field w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-900 focus:outline-none focus:border-red-500 focus:bg-white transition-all"
                         required
                       />
                     </div>
@@ -839,7 +839,7 @@ export default function UserChat() {
                         value={guestIdNumber}
                         onChange={(e) => setGuestIdNumber(e.target.value)}
                         placeholder="001201012345"
-                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-900 focus:outline-none focus:border-red-500 focus:bg-white transition-all"
+                        className="vj-guest-field w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-900 focus:outline-none focus:border-red-500 focus:bg-white transition-all"
                         required
                       />
                     </div>

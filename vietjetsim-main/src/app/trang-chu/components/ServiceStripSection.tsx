@@ -40,7 +40,11 @@ export default function ServiceStripSection() {
   return (
     <section className="bg-white pt-12 pb-12 sm:pt-16 sm:pb-16">
       <div className="vj-section-wide">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+        {/* Bốn thẻ dịch vụ phải nằm trên MỘT hàng ngang — trước đây
+            `sm:grid-cols-2` làm chúng rơi xuống 2 hàng ở tablet (đo 840px),
+            đọc như 4 mục rời rạc thay vì một dải thẻ. `md` (768px) là mốc
+            đủ chỗ cho 4 cột; dưới đó vẫn xếp dọc 1 cột trên mobile. */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 lg:gap-5">
           {SERVICE_CARDS.map((card) => (
             <Link
               key={card.title}

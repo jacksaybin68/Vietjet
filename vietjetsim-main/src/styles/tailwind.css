@@ -586,8 +586,14 @@ h6 {
     white-space: nowrap;
   }
 
-  /* Ở desktop nút giữ đúng `127px`; ở mobile tràn chiều rộng (như site thật). */
-  @media (min-width: 1024px) {
+  /* Ở desktop nút giữ đúng `127px`; ở mobile tràn chiều rộng (như site thật).
+   *
+   * Nhưng ở tablet (`sm`–`lg`) nút co lại còn `42px` — đúng bằng bề rộng chữ
+   * "Đi tiếp", khiến nút bị bóp méo. Số đo site thật (đo 14/11/2026, 1440×900)
+   * là `127×39px`, và site thật KHÔNG co nút ở bất kỳ breakpoint nào — nên
+   * ta giữ `127px` từ `sm` trở lên, chỉ để mobile (dưới `640px`) tràn theo
+   * dải đặt vé. */
+  @media (min-width: 640px) {
     .vj-cta--booking {
       width: 127px;
       min-width: 127px;
@@ -3370,7 +3376,18 @@ h6 {
   display: flex;
   align-items: center;
   height: 40px;
-  border-bottom: 1px solid var(--vj-underline-border);
+  border: 1px solid var(--vj-field-border);
+  border-radius: 8px;
+  background-color: #ffffff;
+  padding: 0 12px;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.vj-lookup-field:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
 }
 
 /* Gạch chân 2px màu thương hiệu khi focus — dùng `::after` để không làm
@@ -3391,11 +3408,12 @@ h6 {
   opacity: 1;
 }
 
+/* Khung đã có viền ở `.vj-lookup-field` nên input bên trong KHÔNG vẽ gạch
+   chân nữa — nếu không sẽ thành hai nét song song (viền khung + gạch chân). */
 .vj-lookup-field .vj-lookup-input {
   width: 100%;
   height: 32px;
   border: 0;
-  border-bottom: 1px solid var(--vj-underline-border);
   border-radius: 0;
   background: transparent;
   padding: 6px 0 7px;
@@ -3408,7 +3426,6 @@ h6 {
 
 .vj-lookup-field .vj-lookup-input:focus {
   outline: none;
-  border-bottom: 2px solid var(--primary);
 }
 
 .vj-lookup-field .vj-lookup-input:focus-visible {
@@ -3417,7 +3434,7 @@ h6 {
 
 .vj-lookup-field .vj-lookup-label {
   position: absolute;
-  left: 0;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 16px;
@@ -3435,12 +3452,15 @@ h6 {
 
 .vj-lookup-field .vj-lookup-input:focus ~ .vj-lookup-label,
 .vj-lookup-field .vj-lookup-input:not(:placeholder-shown) ~ .vj-lookup-label {
-  top: -14px;
+  top: -9px;
+  left: 10px;
   transform: none;
-  font-size: 12px;
-  line-height: 14px;
+  font-size: 11px;
+  line-height: 13px;
   font-weight: 700;
   color: var(--primary);
+  background-color: #ffffff;
+  padding: 0 4px;
 }
 
 /* Trường mã khuyến mãi — Khung viền rõ ràng, mô tả chữ nhạt, text in đậm đen */
@@ -3740,6 +3760,17 @@ textarea::placeholder {
 select option {
   color: #000000;
   font-weight: 700;
+}
+
+/* Ô nhập trong form khách lạ của chat hỗ trợ — placeholder là gợi ý, KHÔNG
+ * phải nội dung: nó phải nhạt để không bị đọc nhầm là dữ liệu đã nhập.
+ *
+ * Rule `input::placeholder` ở trên cố ý đặt chữ đen đậm cho mọi form, nên
+ * form này phải thoát khỏi nó bằng selector riêng có độ ưu tiên cao hơn. */
+.vj-guest-field::placeholder {
+  color: #9ca3af !important;
+  font-weight: 400;
+  opacity: 1;
 }
 
 .form-input:focus {
