@@ -118,6 +118,23 @@ describe('Ô nhập tra cứu (khung viền 40px) — đo 14/11/2026', () => {
   });
 });
 
+describe('Placeholder form khách lạ của chat — phải nhạt, không phải nội dung', () => {
+  it('rule đặc biệt dùng `input.vj-guest-field::placeholder` (thắng rule chung)', () => {
+    // Rule chung `input:not(.vj-skyid-input)::placeholder` có độ ưu tiên (0,1,2)
+    // và đặt chữ đen đậm bằng `!important`. Selector `.vj-guest-field::placeholder`
+    // chỉ có (0,1,1) nên BỊ THUA — placeholder vẫn đen đậm.
+    // Selector `input.vj-guest-field::placeholder` có (0,1,2), bằng độ ưu tiên
+    // và nằm SAU trong file nên mới thắng.
+    expect(CSS).toContain('input.vj-guest-field::placeholder');
+  });
+
+  it('placeholder chữ xám nhạt, không in đậm', () => {
+    const rule = ruleValue('input.vj-guest-field::placeholder', 'color');
+    expect(rule).toContain('#9ca3af');
+    expect(ruleValue('input.vj-guest-field::placeholder', 'font-weight')).toBe('400');
+  });
+});
+
 describe('Nút hành động — đo 14/11/2026', () => {
   it('"Tìm kiếm" 127×39, bo góc 10px, chữ 14px/500', () => {
     expect(ruleValue('.vj-lookup-btn', 'width')).toBe('127px');
